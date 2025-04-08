@@ -10,7 +10,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "AcMarche\\Security\\Providers\\SecurityServiceProvider"
+                "AcMarche\\Security\\Providers\\SecurityServiceProvider",
+                "AcMarche\\Security\\Providers\\SecurityPanelProvider"
             ],
             "aliases": {}
         }

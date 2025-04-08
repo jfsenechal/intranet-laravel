@@ -2,9 +2,12 @@
 
 namespace AcMarche\Support;
 
+use AcMarche\Support\Database\Seeders\DatabaseSeeder;
+
 class SupportServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'ac-support';
+    public static string $viewNamespace = 'ac-support';
 
     public function configureCustomPackage(Package $package): void
     {
@@ -18,6 +21,9 @@ class SupportServiceProvider extends PackageServiceProvider
                 '0001_01_01_000000_create_support_table',
             ])
             ->runsMigrations()
+            ->hasSeeder(
+                DatabaseSeeder::class,
+            )
             ->hasCommands([
 
             ]);

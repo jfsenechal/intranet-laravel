@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use AcMarche\Security\Database\Seeders\DatabaseSeeder as SecurityDatabaseSeeder;
+use AcMarche\Support\Database\Seeders\DatabaseSeeder as SupportDatabaseSeeder;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,10 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'jf@marche.be',
-            'password' => Hash::make('marge'),
+        $this->call([
+            SecurityDatabaseSeeder::class,
+            SupportDatabaseSeeder::class,
         ]);
     }
 }

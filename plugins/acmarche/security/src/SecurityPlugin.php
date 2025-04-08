@@ -23,8 +23,8 @@ class SecurityPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
-            ->when($panel->getId() == 'admin', function (Panel $panel) {
-                $panel->passwordReset()
+            ->when($panel->getId() == 'ac-security-panel', function (Panel $panel) {
+                $panel
                     ->discoverResources(
                         in: $this->getPluginBasePath('/Filament/Resources'),
                         for: 'AcMarche\\Security\\Filament\\Resources'

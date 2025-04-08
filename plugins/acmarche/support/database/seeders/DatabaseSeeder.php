@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run($parameters = [])
     {
         $this->call([
-            CurrencySeeder::class,
+
         ]);
     }
 }
