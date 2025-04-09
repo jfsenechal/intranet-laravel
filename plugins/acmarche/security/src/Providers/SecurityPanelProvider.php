@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Filament;
+namespace AcMarche\Security\Providers;
 
 use AcMarche\Support\PluginManager;
 use App\Filament\Pages\Auth\Login;
@@ -21,17 +21,13 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class SecurityPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->favicon(asset('images/logo_black-192x192.png'))
-            ->brandLogo(asset('/images/logo_black-192x192.png'))
-            ->login(Login::class)
+            ->id('ac-security-panel')
+            ->path('security')
             ->colors([
                 'primary' => Color::Amber,
             ])

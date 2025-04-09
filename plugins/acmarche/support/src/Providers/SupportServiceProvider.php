@@ -1,8 +1,9 @@
 <?php
 
-namespace AcMarche\Support;
+namespace AcMarche\Support\Providers;
 
 use AcMarche\Support\Database\Seeders\DatabaseSeeder;
+use AcMarche\Support\Package;
 
 class SupportServiceProvider extends PackageServiceProvider
 {
@@ -14,7 +15,6 @@ class SupportServiceProvider extends PackageServiceProvider
         $package->name(static::$name)
             ->isCore()
             ->hasViews()
-            ->hasTranslations()
             ->hasMigrations([
                 '2024_11_05_105102_create_plugins_table',
                 '2024_11_05_105112_create_plugin_dependencies_table',

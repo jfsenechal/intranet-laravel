@@ -30,10 +30,11 @@ return [
 ```
 
 **Ajout dans /bootstrap/providers**
+
 ```php
 return [
     //....
-    AcMarche\Support\SupportServiceProvider::class,
+    \AcMarche\Support\Providers\SupportServiceProvider::class,
     AcMarche\Security\SecurityServiceProvider::class,
 ];
 ```

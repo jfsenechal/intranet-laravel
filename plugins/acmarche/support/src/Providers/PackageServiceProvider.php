@@ -1,7 +1,8 @@
 <?php
 
-namespace AcMarche\Support;
+namespace AcMarche\Support\Providers;
 
+use AcMarche\Support\Package;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;

@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Security;
+namespace AcMarche\News\Providers;
 
 use AcMarche\Support\PluginManager;
 use App\Filament\Pages\Auth\Login;
@@ -21,13 +21,13 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class SecurityPanelProvider extends PanelProvider
+class NewsPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('ac-security-panel')
-            ->path('acsecurity')
+            ->id('ac-news-panel')
+            ->path('news')
             ->colors([
                 'primary' => Color::Amber,
             ])

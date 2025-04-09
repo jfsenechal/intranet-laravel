@@ -11,9 +11,12 @@ class Homepage extends Page
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'filament.pages.home';
 
+    protected static ?string $navigationLabel = 'Accueil';
+    protected static ?int $navigationSort = 1;
+
     public function getTitle(): string|Htmlable
     {
-        return ' ';
+        return 'llm ';
     }
 
     public static function canAccess(): bool

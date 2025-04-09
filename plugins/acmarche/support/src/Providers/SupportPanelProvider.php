@@ -1,7 +1,8 @@
 <?php
 
-namespace AcMarche\Support;
+namespace AcMarche\Support\Providers;
 
+use AcMarche\Support\PluginManager;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -24,7 +25,7 @@ class SupportPanelProvider extends PanelProvider
     {
         return $panel
             ->id('ac-support-panel')
-            ->path('acsupport')
+            ->path('support')
             ->colors([
                 'primary' => Color::Amber,
             ])

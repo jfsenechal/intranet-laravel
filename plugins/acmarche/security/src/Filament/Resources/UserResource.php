@@ -6,6 +6,7 @@ use AcMarche\Security\Constant\NavigationGroupEnum;
 use AcMarche\Security\Filament\Resources\UserResource\Pages;
 use AcMarche\Security\Filament\Resources\UserResource\RelationManagers;
 use AcMarche\Security\Form\UserForm;
+use AcMarche\Support\Filament\Clusters\Settings;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,6 +23,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $cluster = Settings::class;
 
     public static function getNavigationGroup(): ?string
     {

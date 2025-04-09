@@ -4,6 +4,7 @@ namespace AcMarche\Support;
 
 use AcMarche\Support\Traits\PluginTrait;
 use Filament\Contracts\Plugin;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\HtmlString;
@@ -42,7 +43,26 @@ class SupportPlugin implements Plugin
                     ->discoverClusters(
                         in: $this->getPluginBasePath('/Filament/Widgets'),
                         for: 'AcMarche\\Support\\Filament\\Widgets'
-                    );
+                    )
+                    ->navigationItems([
+                        NavigationItem::make('gestion')
+                            ->url('/security')
+                            ->icon('tabler-plane')
+                            ->group('Gestion')
+                            ->sort(3),
+                        NavigationItem::make('News')
+                            ->label(fn(): string => 'Quoi de neuf?')
+                            ->icon('tabler-radio')
+                            ->url('/news'),
+                        NavigationItem::make('Documents')
+                            ->label(fn(): string => 'Documents utiles')
+                            ->icon('tabler-briefcase')
+                            ->url('/documents'),
+                        NavigationItem::make('grh')
+                            ->label(fn(): string => 'Resources humaines')
+                            ->icon('tabler-school')
+                            ->url('/grh'),
+                    ]);
             });
     }
 
