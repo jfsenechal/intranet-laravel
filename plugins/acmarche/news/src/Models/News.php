@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class News extends Model
 {
+    protected $connection = 'maria-news';
+
     use HasFactory;
 
     public $timestamps = false;
+
     protected $fillable = ['name', 'content'];
 
     /**

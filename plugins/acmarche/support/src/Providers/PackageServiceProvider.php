@@ -49,6 +49,30 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
     public function boot()
     {
         $this->bootingPackage();
+        $now = Carbon::now();
+
+        foreach ($this->package->settingFileNames as $settingFileName) {
+            $filePath = $this->package->basePath("/../database/settings/{$settingFileName}.php");
+            if (! file_exists($filePath)) {
+                // Support for the .stub file extension
+                $filePath .= '.stub';
+            }
+
+            $this->publishes([
+                $filePath => $this->generateSettingName(
+                    $settingFileName,
+                    $now->addSecond()
+                ),
+            ], "{$this->package->shortName()}-settings");
+
+            if ($this->package->runsSettings) {
+                if ($this->package->isCore) {
+                    $this->loadMigrationsFrom($filePath);
+                } elseif ($this->package->isInstalled()) {
+                    $this->loadMigrationsFrom($filePath);
+                }
+            }
+        }
 
         if ($this->package->hasTranslations) {
             $langPath = 'vendor/'.$this->package->shortName();
@@ -79,7 +103,6 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
                 ], "{$this->packageView($this->package->viewNamespace)}-inertia-components");
             }
 
-            $now = Carbon::now();
             foreach ($this->package->migrationFileNames as $migrationFileName) {
                 $filePath = $this->package->basePath("/../database/migrations/{$migrationFileName}.php");
                 if (! file_exists($filePath)) {
@@ -95,29 +118,6 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
                 ], "{$this->package->shortName()}-migrations");
 
                 if ($this->package->runsMigrations) {
-                    if ($this->package->isCore) {
-                        $this->loadMigrationsFrom($filePath);
-                    } elseif ($this->package->isInstalled()) {
-                        $this->loadMigrationsFrom($filePath);
-                    }
-                }
-            }
-
-            foreach ($this->package->settingFileNames as $settingFileName) {
-                $filePath = $this->package->basePath("/../database/settings/{$settingFileName}.php");
-                if (! file_exists($filePath)) {
-                    // Support for the .stub file extension
-                    $filePath .= '.stub';
-                }
-
-                $this->publishes([
-                    $filePath => $this->generateSettingName(
-                        $settingFileName,
-                        $now->addSecond()
-                    ),
-                ], "{$this->package->shortName()}-settings");
-
-                if ($this->package->runsSettings) {
                     if ($this->package->isCore) {
                         $this->loadMigrationsFrom($filePath);
                     } elseif ($this->package->isInstalled()) {

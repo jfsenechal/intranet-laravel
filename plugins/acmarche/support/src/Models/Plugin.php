@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Plugin extends Model
 {
+    protected $connection = 'mariadb';
+
     protected $fillable = [
         'name',
         'author',

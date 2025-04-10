@@ -12,6 +12,8 @@ class Role extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mariadb';
+
     public $timestamps = false;
     protected $fillable = ['name'];
 
