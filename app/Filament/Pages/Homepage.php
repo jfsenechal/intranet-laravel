@@ -16,7 +16,12 @@ class Homepage extends Page
 
     public function getTitle(): string|Htmlable
     {
-        return 'llm ';
+        return 'Accueil ';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Accueil';
     }
 
     public static function canAccess(): bool
@@ -32,6 +37,11 @@ class Homepage extends Page
     public function getMaxContentWidth(): MaxWidth
     {
         return MaxWidth::Screen;
+    }
+
+    public function getColumns(): int | string | array
+    {
+        return 2;
     }
 
 }

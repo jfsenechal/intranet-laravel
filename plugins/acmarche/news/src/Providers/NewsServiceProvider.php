@@ -4,6 +4,7 @@ namespace AcMarche\News\Providers;
 
 use AcMarche\Support\Package;
 use AcMarche\Support\Providers\PackageServiceProvider;
+use Spatie\LaravelPackageTools\PackageServiceProvider as SpatiePackageServiceProvider;
 
 class NewsServiceProvider extends PackageServiceProvider
 {
@@ -28,5 +29,18 @@ class NewsServiceProvider extends PackageServiceProvider
             ])
             ->hasMigrations(['0001_01_01_000000_create_news_table'])
             ->runsMigrations();
+    }
+
+    public function configurePackage(\Spatie\LaravelPackageTools\Package $package): void
+    {
+        $package
+            ->name(static::$name)
+            ->hasViews()
+            ->hasConfigFile([
+               // 'database',
+            ])
+            ->hasMigrations(['0001_01_01_000000_create_news_table'])
+            ->runsMigrations();
+
     }
 }
