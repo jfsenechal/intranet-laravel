@@ -1,0 +1,52 @@
+---
+title: "Marche 100km Famenne-Ardenne"
+bodyClass: bg-slate-50
+---
+<x-layout>
+  <div class="bg-slate-50 sm:px-4 font-inter">
+    <table align="center" class="m-0 mx-auto">
+      <tr>
+        <td class="w-[752px] max-w-full">
+          <x-spacer height="24px"/>
+
+          <table class="w-full">
+            <tr>
+              <td class="py-6 px-9 sm:p-6 bg-white [border:1px_solid_theme(colors.slate.200)] rounded-lg">
+                <a href="https://marche-famenne-ardenne.marche.be">
+                  <img src="@{{$message->embed($logo)}}" width="70" alt="logo">
+                </a>
+              </td>
+              <td class="py-6 px-9 sm:p-6 bg-white [border:1px_solid_theme(colors.slate.200)] rounded-lg">
+                @{{ config('app.name') }}
+              </td>
+            </tr>
+          </table>
+          <x-spacer height="24px"/>
+
+          <table class="w-full">
+            <tr>
+              <td class="py-6 px-9 sm:p-6 bg-white [border:1px_solid_theme(colors.slate.200)] rounded-lg">
+                <div class="m-0 mb-6 text-base text-slate-600">
+                  @{{$content}}
+                </div>
+
+                <p class="m-0 text-base/6 text-slate-600">
+                  Thanks,
+                  <br>
+                  <span class="font-semibold">Marcheurs de la Famenne</span>
+                </p>
+
+                <x-divider/>
+
+                <p class="m-0 text-xs/5 text-slate-600 mso-break-all">
+                  <a href="https://marcheursdelafamenne.marche.be"
+                     class="text-slate-800 underline">Site web des Marcheurs de la Famenne</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+</x-layout>
