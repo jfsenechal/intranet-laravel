@@ -9,7 +9,7 @@ use Illuminate\Contracts\Support\Htmlable;
 class SecurityPage extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static string $view = 'ac-security::filament.pages.security';
+    protected static string $view = 'acsecurity::filament.pages.security';
 
     public static function getNavigationLabel(): string
     {

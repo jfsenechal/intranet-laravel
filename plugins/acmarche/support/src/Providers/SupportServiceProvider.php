@@ -7,8 +7,7 @@ use AcMarche\Support\Package;
 
 class SupportServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'ac-support';
-    public static string $viewNamespace = 'ac-support';
+    public static string $name = 'acsupport';
 
     public function configureCustomPackage(Package $package): void
     {

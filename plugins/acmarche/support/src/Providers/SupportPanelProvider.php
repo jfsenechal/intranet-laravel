@@ -24,7 +24,7 @@ class SupportPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('ac-support-panel')
+            ->id('support-panel')
             ->path('support')
             ->colors([
                 'primary' => Color::Amber,

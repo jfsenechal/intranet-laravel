@@ -9,7 +9,7 @@ use Illuminate\Contracts\Support\Htmlable;
 class Supportpage extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static string $view = 'ac-support::filament.pages.support';
+    protected static string $view = 'acsupport::filament.pages.support';
     protected static bool $shouldRegisterNavigation = false;
 
     public static function getNavigationLabel(): string

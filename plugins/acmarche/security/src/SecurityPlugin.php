@@ -12,7 +12,7 @@ class SecurityPlugin implements Plugin
 
     public function getId(): string
     {
-        return 'ac-security';
+        return 'acsecurity';
     }
 
     public static function make(): static
@@ -23,7 +23,7 @@ class SecurityPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
-            ->when($panel->getId() == 'ac-security-panel', function (Panel $panel) {
+            ->when($panel->getId() == 'security-panel', function (Panel $panel) {
                 $panel
                     ->discoverResources(
                         in: $this->getPluginBasePath('/Filament/Resources'),

@@ -26,7 +26,7 @@ class SecurityPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('ac-security-panel')
+            ->id('security-panel')
             ->path('security')
             ->colors([
                 'primary' => Color::Amber,

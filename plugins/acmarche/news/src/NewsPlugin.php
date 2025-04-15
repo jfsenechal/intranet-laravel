@@ -9,7 +9,7 @@ class NewsPlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'ac-news';
+        return 'acnews';
     }
 
     public static function make(): static

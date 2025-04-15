@@ -27,7 +27,7 @@ class NewsPanelProvider extends PanelProvider
         $path = $this->getPluginBasePath().'/../';
 
         return $panel
-            ->id('ac-news-panel')
+            ->id('news-panel')
             ->path('news')
             ->colors([
                 'primary' => Color::Pink,

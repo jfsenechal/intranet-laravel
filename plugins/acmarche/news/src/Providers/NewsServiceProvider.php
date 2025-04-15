@@ -8,7 +8,7 @@ use Spatie\LaravelPackageTools\PackageServiceProvider as SpatiePackageServicePro
 
 class NewsServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'ac-news';
+    public static string $name = 'acnews';
 
     protected function mergeConfigFrom22($path, $key)
     {

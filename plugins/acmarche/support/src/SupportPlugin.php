@@ -15,7 +15,7 @@ class SupportPlugin implements Plugin
 
     public function getId(): string
     {
-        return 'ac-support';
+        return 'acsupport';
     }
 
     public static function make(): static

@@ -7,8 +7,7 @@ use AcMarche\Support\Providers\PackageServiceProvider;
 
 class SecurityServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'ac-security';
-    public static string $viewNamespace = 'ac-security';
+    public static string $name = 'acsecurity';
 
     public function configureCustomPackage(Package $package): void
     {
