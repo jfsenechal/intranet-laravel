@@ -2,8 +2,8 @@
 
 namespace AcMarche\Document\Providers;
 
-use AcMarche\Support\Package;
-use AcMarche\Support\Providers\PackageServiceProvider;
+use AcMarche\App\Package;
+use AcMarche\App\Providers\PackageServiceProvider;
 use Spatie\LaravelPackageTools\PackageServiceProvider as SpatiePackageServiceProvider;
 
 class DocumentServiceProvider extends PackageServiceProvider

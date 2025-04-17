@@ -1,0 +1,30 @@
+{
+    "name": "acmarche/app",
+    "description": "",
+    "authors": [
+        {
+            "name": "Jf Sénéchal",
+            "email": "epn@marche.be"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\App\\Providers\\AppServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\App\\": "src/",
+            "AcMarche\\App\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\App\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AcMarche\\App\\Tests\\": "tests/"
+        }
+    }
+}

@@ -2,8 +2,8 @@
 
 namespace AcMarche\Security\Providers;
 
-use AcMarche\Support\Package;
-use AcMarche\Support\Providers\PackageServiceProvider;
+use AcMarche\App\Package;
+use AcMarche\App\Providers\PackageServiceProvider;
 
 class SecurityServiceProvider extends PackageServiceProvider
 {

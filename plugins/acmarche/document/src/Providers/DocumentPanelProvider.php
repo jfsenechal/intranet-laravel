@@ -2,7 +2,7 @@
 
 namespace AcMarche\Document\Providers;
 
-use AcMarche\Support\Traits\PluginTrait;
+use AcMarche\App\Traits\PluginTrait;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;

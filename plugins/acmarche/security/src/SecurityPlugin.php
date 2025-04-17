@@ -2,7 +2,7 @@
 
 namespace AcMarche\Security;
 
-use AcMarche\Support\Traits\PluginTrait;
+use AcMarche\App\Traits\PluginTrait;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 

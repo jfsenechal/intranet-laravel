@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use AcMarche\Support\PluginManager;
+use AcMarche\App\PluginManager;
 use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;

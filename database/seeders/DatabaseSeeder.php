@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use AcMarche\Security\Database\Seeders\DatabaseSeeder as SecurityDatabaseSeeder;
-use AcMarche\Support\Database\Seeders\DatabaseSeeder as SupportDatabaseSeeder;
+use AcMarche\App\Database\Seeders\DatabaseSeeder as AppDatabaseSeeder;
 use Illuminate\Database\Seeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SecurityDatabaseSeeder::class,
-            SupportDatabaseSeeder::class,
+            AppDatabaseSeeder::class,
         ]);
     }
 }

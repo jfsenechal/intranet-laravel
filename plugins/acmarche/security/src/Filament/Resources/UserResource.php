@@ -2,21 +2,16 @@
 
 namespace AcMarche\Security\Filament\Resources;
 
+use AcMarche\App\Filament\Clusters\Settings;
 use AcMarche\Security\Constant\NavigationGroupEnum;
 use AcMarche\Security\Filament\Resources\UserResource\Pages;
-use AcMarche\Security\Filament\Resources\UserResource\RelationManagers;
 use AcMarche\Security\Form\UserForm;
-use AcMarche\Support\Filament\Clusters\Settings;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
