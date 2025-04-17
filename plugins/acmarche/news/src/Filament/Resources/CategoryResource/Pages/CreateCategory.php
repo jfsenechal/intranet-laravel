@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Category\Filament\Resources\CategoryResource\Pages;
+namespace AcMarche\News\Filament\Resources\CategoryResource\Pages;
 
 use AcMarche\News\Filament\Resources\CategoryResource;
 use Filament\Resources\Pages\CreateRecord;

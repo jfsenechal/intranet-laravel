@@ -29,6 +29,7 @@ class NewsPanelProvider extends PanelProvider
         return $panel
             ->id('news-panel')
             ->path('news')
+            ->brandName('Quoi de neuf?')
             ->colors([
                 'primary' => Color::Pink,
             ])

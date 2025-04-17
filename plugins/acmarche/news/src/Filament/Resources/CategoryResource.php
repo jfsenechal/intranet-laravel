@@ -2,10 +2,10 @@
 
 namespace AcMarche\News\Filament\Resources;
 
-use AcMarche\Category\Filament\Resources\CategoryResource\Pages\CreateCategory;
-use AcMarche\Category\Filament\Resources\CategoryResource\Pages\EditCategory;
-use AcMarche\Category\Filament\Resources\CategoryResource\Pages\ListCategory;
-use AcMarche\Category\Filament\Resources\CategoryResource\Pages\ViewCategory;
+use AcMarche\News\Filament\Resources\CategoryResource\Pages\CreateCategory;
+use AcMarche\News\Filament\Resources\CategoryResource\Pages\EditCategory;
+use AcMarche\News\Filament\Resources\CategoryResource\Pages\ListCategory;
+use AcMarche\News\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use AcMarche\News\Form\CategoryForm;
 use AcMarche\News\Models\Category;
 use Filament\Forms\Form;
