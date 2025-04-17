@@ -57,7 +57,7 @@ class SupportPlugin implements Plugin
                         NavigationItem::make('Documents')
                             ->label(fn(): string => 'Documents utiles')
                             ->icon('tabler-briefcase')
-                            ->url('/documents'),
+                            ->url('/document'),
                         NavigationItem::make('grh')
                             ->label(fn(): string => 'Resources humaines')
                             ->icon('tabler-school')
