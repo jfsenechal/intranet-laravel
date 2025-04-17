@@ -1,0 +1,35 @@
+<?php
+
+namespace AcMarche\Document\Providers;
+
+use AcMarche\Support\Package;
+use AcMarche\Support\Providers\PackageServiceProvider;
+use Spatie\LaravelPackageTools\PackageServiceProvider as SpatiePackageServiceProvider;
+
+class DocumentServiceProvider extends PackageServiceProvider
+{
+    public static string $name = 'acdocument';
+
+    public function configureCustomPackage(Package $package): void
+    {
+        $package
+            ->name(static::$name)
+            ->isCore()//do migration
+            ->hasViews()
+            ->hasMigrations(['0001_01_01_000000_create_document_table'])
+            ->runsMigrations();
+    }
+
+    public function configurePackage(\Spatie\LaravelPackageTools\Package $package): void
+    {
+        $package
+            ->name(static::$name)
+            ->hasViews()
+            ->hasConfigFile([
+               // 'database',
+            ])
+            ->hasMigrations(['0001_01_01_000000_create_document_table'])
+            ->runsMigrations();
+
+    }
+}

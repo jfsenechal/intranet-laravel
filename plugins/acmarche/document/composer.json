@@ -1,0 +1,30 @@
+{
+    "name": "acmarche/document",
+    "description": "",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\Document\\Providers\\DocumentServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\Document\\": "src/",
+            "AcMarche\\Document\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\Document\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AcMarche\\Document\\Tests\\": "tests/"
+        }
+    }
+}
