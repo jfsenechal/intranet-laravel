@@ -6,6 +6,7 @@ use AcMarche\News\Filament\Resources\NewsResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class ListNews extends ListRecords
 {
@@ -23,6 +24,16 @@ class ListNews extends ListRecords
                 ->label('Ajouter une actualité')
                 ->icon('tabler-plus'),
         ];
+    }
+
+    public function mount(): void
+    {
+        Pdf::html(view('pdf.test', [
+            'invoiceNumber' => '1234',
+            'customerName' => 'Grumpy Cat',
+
+        ]))
+            ->save('invoice.pdf');
     }
 
 }

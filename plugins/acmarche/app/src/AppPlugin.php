@@ -45,9 +45,9 @@ class AppPlugin implements Plugin
                         for: 'AcMarche\\App\\Filament\\Widgets'
                     )
                     ->navigationItems([
-                        NavigationItem::make('gestion')
+                        NavigationItem::make('Sécurité')
                             ->url('/security')
-                            ->icon('tabler-plane')
+                            ->icon('tabler-users')
                             ->group('Gestion')
                             ->sort(3),
                         NavigationItem::make('News')

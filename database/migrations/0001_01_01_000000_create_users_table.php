@@ -1,6 +1,6 @@
 <?php
 
-use AcMarche\Security\Constant\RoleEnum;
+use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -35,9 +35,23 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('modules', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('url')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('is_external')->default(false);
+            $table->boolean('is_public')->default(false);
+            $table->string('icon')->default(false);
+            $table->string('color')->default(false);
+            $table->timestamps();
+        });
+
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->enum('name', RoleEnum::toArray())->unique()->default(RoleEnum::AGENT->value);
+            $table->string('name')->unique();
+            $table->string('description')->nullable();
+            $table->foreignIdFor(Module::class)->nullable()->constrained('modules')->cascadeOnDelete();
         });
 
         Schema::create('role_user', function (Blueprint $table) {

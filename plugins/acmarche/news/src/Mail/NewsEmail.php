@@ -6,6 +6,7 @@ use AcMarche\News\Models\News;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -49,6 +50,27 @@ class NewsEmail extends Mailable
                 'logo' => $this->logo,
             ],
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function attachments(): array
+    {
+        $attachments = [];
+
+        $attachments[] = Attachment::fromPath($this->logo)
+            ->as('logoMarcheur.jpg')
+            ->withMime('image/jpg');
+
+        foreach ($this->news->medias() as $media) {
+            $attachments[] =
+                Attachment::fromStorageDisk('uploads/news', $media->path)
+                    ->as($media->name)
+                    ->withMime($media->mime);
+        }
+
+        return $attachments;
     }
 
 }

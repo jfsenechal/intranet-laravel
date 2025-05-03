@@ -26,20 +26,6 @@ return new class extends Migration {
             $table->integer('sort')->nullable();
             $table->timestamps();
         });
-
-        Schema::create('modules', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('url')->nullable();
-            $table->text('description')->nullable();
-            $table->boolean('is_external')->default(false);
-            $table->boolean('is_public')->default(false);
-            $table->string('icon')->default(false);
-            $table->string('color')->default(false);
-            $table->timestamps();
-        });
-
-
     }
 
     /**

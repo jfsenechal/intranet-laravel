@@ -4,6 +4,7 @@ namespace AcMarche\News\Observers;
 
 use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\News;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mime\Address;
 
@@ -17,11 +18,14 @@ class NewsObserver
      */
     public function created(News $news): void
     {
-        try {
-            Mail::to(new Address('jf@marche.be'))
-                ->send(new NewsEmail($news));
-        } catch (\Exception $e) {
-            dd($e->getMessage());
+        $users = User::query()->get();
+        foreach ($users as $user) {
+            try {
+                Mail::to(new Address('jf@marche.be'))
+                    ->send(new NewsEmail($news));
+            } catch (\Exception $e) {
+                dd($e->getMessage());
+            }
         }
     }
 

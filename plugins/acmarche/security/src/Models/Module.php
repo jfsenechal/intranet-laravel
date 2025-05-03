@@ -1,9 +1,12 @@
 <?php
 
-namespace AcMarche\App\Models;
+namespace AcMarche\Security\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 //https://github.com/lukas-frey/filament-icon-picker
-class Module
+class Module extends Model
 {
     protected $connection = 'mariadb';
 
@@ -23,4 +26,8 @@ class Module
         'is_external' => 'boolean',
     ];
 
+    public function roles(): HasMany
+    {
+        return $this->hasMany(Role::class);
+    }
 }
