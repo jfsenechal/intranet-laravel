@@ -2,9 +2,14 @@
 
 namespace AcMarche\Security\Tables;
 
+use AcMarche\Security\Handler\ModuleHandler;
+use AcMarche\Security\Models\Module;
+use Filament\Notifications\Notification;
+use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class UserTables
 {
@@ -50,6 +55,53 @@ class UserTables
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function inline(Table $table, Model|Module $owner): Table
+    {
+        return $table
+            ->modifyQueryUsing(
+                fn(Builder $query) => $query->whereHas(
+                    'roles',
+                    fn($roleQuery) => $roleQuery->whereHas(
+                        'module',
+                        fn($moduleQuery) => $moduleQuery->where('modules.id', $owner->id)
+                    )
+                )
+            )
+            ->defaultPaginationPageOption(50)
+            ->defaultSort('last_name')
+            ->columns([
+                Tables\Columns\TextColumn::make('last_name')
+                    ->label('Nom')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('first_name')
+                    ->label('Prénom')
+                    ->sortable()
+                    ->searchable(),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make('create')
+                    ->label('Ajouter un utilisateur')
+                    ->icon('tabler-user-plus')
+                    ->action(function (array $data) use ($owner) {
+                        try {
+                            ModuleHandler::addUser($data);
+                            Notification::make()
+                                ->success()
+                                ->title('Utilisateur ajouté');
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Erreur '.$e->getMessage());
+                        }
+                        //redirect()->route('acmarche.security.users.create')),
+                    }),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
             ]);
     }
 

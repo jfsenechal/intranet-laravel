@@ -14,13 +14,16 @@ class RoleTables
             ->defaultSort('name')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nom')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('module.name')
-                    ->label('Module')
-                    ->sortable()
-                    ->searchable(),
+                    ->label('Nom'),
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Description'),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make('create'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ]);
     }
 }

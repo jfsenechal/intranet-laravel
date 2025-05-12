@@ -78,13 +78,13 @@ class User extends Authenticatable
     {
         return $this->last_name.' '.$this->first_name;
     }
-
+    
     /**
      * The roles that belong to the user.
      */
     public function roles(): BelongsToMany
     {
-        return $this->BelongsToMany(Role::class);
+        return $this->belongsToMany(Role::class);
     }
 
     public function hasRole(string $roleToFind): bool
@@ -100,7 +100,9 @@ class User extends Authenticatable
 
     public function addRole(Role $role): void
     {
-        $this->roles()->attach($role);
+        if (!$this->hasRole($role->name)) {
+            $this->roles()->attach($role);
+        }
     }
 
     public function canAccessPanel(Panel $panel): bool

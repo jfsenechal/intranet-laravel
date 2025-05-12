@@ -2,6 +2,7 @@
 
 namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
 
+use AcMarche\App\Filament\RedirectTrait;
 use AcMarche\Security\Filament\Resources\ModuleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -9,6 +10,8 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class EditModule extends EditRecord
 {
+    use RedirectTrait;
+
     protected static string $resource = ModuleResource::class;
 
     protected function getHeaderActions(): array

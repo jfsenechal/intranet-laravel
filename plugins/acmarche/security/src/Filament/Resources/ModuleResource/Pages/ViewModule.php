@@ -3,9 +3,11 @@
 namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
 
 use AcMarche\Security\Filament\Resources\ModuleResource;
+use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\UserRelationManager;
 use Filament\Actions;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ContentTabPosition;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewModule extends ViewRecord
@@ -37,8 +39,15 @@ class ViewModule extends ViewRecord
                     ->label('Publique?'),
                 TextEntry::make('is_external')
                     ->label('Externe?'),
-                TextEntry::make('roles.name'),
                 TextEntry::make('url'),
             ]);
+    }
+
+    protected function getAllRelationManagers(): array
+    {
+        $relations = $this->getResource()::getRelations();
+        array_unshift($relations, UserRelationManager::class);
+
+        return $relations;
     }
 }

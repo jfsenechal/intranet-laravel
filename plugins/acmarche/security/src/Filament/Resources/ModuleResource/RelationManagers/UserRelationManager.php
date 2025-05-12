@@ -2,20 +2,20 @@
 
 namespace AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers;
 
-use AcMarche\Security\Form\RoleForm;
-use AcMarche\Security\Tables\RoleTables;
+use AcMarche\Security\Form\ModuleForm;
+use AcMarche\Security\Tables\UserTables;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class RoleRelationManager extends RelationManager
+class UserRelationManager extends RelationManager
 {
-    protected static string $relationship = 'roles';
+    protected static string $relationship = 'users';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return ' Rôles';
+        return ' Utilisateurs';
     }
 
     public function isReadOnly(): bool
@@ -25,12 +25,14 @@ class RoleRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return RoleTables::inline($table);
+        return UserTables::inline($table,$this->ownerRecord);
     }
 
     public function form(Form $form): Form
     {
-        return RoleForm::createForm($form);
+        $form->model($this->ownerRecord);
+
+        return ModuleForm::userForm($form,$this->ownerRecord);
     }
 
 }
