@@ -4,11 +4,11 @@ namespace AcMarche\Security\Tables;
 
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
+use App\Models\User;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class UserTables
@@ -61,15 +61,6 @@ class UserTables
     public static function inline(Table $table, Model|Module $owner): Table
     {
         return $table
-            ->modifyQueryUsing(
-                fn(Builder $query) => $query->whereHas(
-                    'roles',
-                    fn($roleQuery) => $roleQuery->whereHas(
-                        'module',
-                        fn($moduleQuery) => $moduleQuery->where('modules.id', $owner->id)
-                    )
-                )
-            )
             ->defaultPaginationPageOption(50)
             ->defaultSort('last_name')
             ->columns([
@@ -81,6 +72,10 @@ class UserTables
                     ->label('Prénom')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Rôles')
+                    ->state(fn(Model|User $record): string => $record->rolesByModule($owner->id)
+                        ->pluck('name')->implode(', ')),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make('create')
@@ -97,11 +92,19 @@ class UserTables
                                 ->danger()
                                 ->title('Erreur '.$e->getMessage());
                         }
+
                         //redirect()->route('acmarche.security.users.create')),
                     }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('revoke')
+                    ->label('Révoquer')
+                    ->icon('tabler-user-minus')
+                    ->color('danger')
+                    ->action(function (array $data) use ($owner) {
+                        dd($data, $owner);
+                    }),
             ]);
     }
 

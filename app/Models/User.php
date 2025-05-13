@@ -6,10 +6,12 @@ namespace App\Models;
 use AcMarche\Security\Constant\RoleEnum;
 use AcMarche\Security\Models\Role;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 
 class User extends Authenticatable
 {
@@ -78,13 +80,20 @@ class User extends Authenticatable
     {
         return $this->last_name.' '.$this->first_name;
     }
-    
+
     /**
      * The roles that belong to the user.
      */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function rolesByModule(int $moduleId): array|Collection
+    {
+        return $this->roles()
+                    ->where('module_id', $moduleId)
+                    ->get();
     }
 
     public function hasRole(string $roleToFind): bool

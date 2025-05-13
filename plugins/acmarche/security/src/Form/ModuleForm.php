@@ -46,6 +46,9 @@ class ModuleForm
         $roles = RoleRepository::getForSelect($owner);
         $rolesName = $roles[0];
         $rolesDescription = $roles[1];
+        if($form->getOperation()=='edit') {
+            dd($owner);
+        }
 
         return $form->schema([
             Forms\Components\Select::make('user')
