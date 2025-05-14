@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        // Add your new disk here
+        'project_output' => [
+            'driver' => 'local',
+            'root' => base_path('output'), // base_path() points to your project root
+            'throw' => false,
+            // You might want to set visibility if needed, though for local non-web-accessible it's less critical
+            // 'visibility' => 'private',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
