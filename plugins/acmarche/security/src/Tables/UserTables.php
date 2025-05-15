@@ -2,9 +2,12 @@
 
 namespace AcMarche\Security\Tables;
 
+use AcMarche\Security\Form\ModuleForm;
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
+use AcMarche\Security\Repository\RoleRepository;
 use App\Models\User;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
@@ -92,18 +95,36 @@ class UserTables
                                 ->danger()
                                 ->title('Erreur '.$e->getMessage());
                         }
-
-                        //redirect()->route('acmarche.security.users.create')),
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->fillForm(function (User $record) use ($owner): array {
+                        $roles = RoleRepository::findByModuleAndUser($owner, $record);
+                        $data['roles'] = $roles->pluck('name')->toArray();
+
+                        return $data;
+                    })
+                    ->form(fn(Form $form) => ModuleForm::userForm($form, $owner))
+                    ->action(function (array $data, Form $form) use ($owner) {
+                        try {
+                            ModuleHandler::syncUserRolesForModule($owner, $form->getRecord(), $data);
+                            Notification::make()
+                                ->success()
+                                ->title('Utilisateur ajouté');
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Erreur '.$e->getMessage());
+                        }
+                    }),
                 Tables\Actions\Action::make('revoke')
                     ->label('Révoquer')
                     ->icon('tabler-user-minus')
                     ->color('danger')
-                    ->action(function (array $data) use ($owner) {
-                        dd($data, $owner);
+                    ->requiresConfirmation()
+                    ->action(function (array $data, Form $form) use ($owner) {
+                        ModuleHandler::revokeUser($owner, $form->getRecord());
                     }),
             ]);
     }

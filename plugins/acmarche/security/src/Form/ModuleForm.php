@@ -43,22 +43,24 @@ class ModuleForm
 
     public static function userForm(Form $form, Model|Module $owner): Form
     {
+        $user = $form->getRecord();
         $roles = RoleRepository::getForSelect($owner);
         $rolesName = $roles[0];
         $rolesDescription = $roles[1];
-        if($form->getOperation()=='edit') {
-            dd($owner);
-        }
+        $schema = [];
 
-        return $form->schema([
-            Forms\Components\Select::make('user')
+        if (!$user) {
+            $schema[] = Forms\Components\Select::make('user')
                 ->label('Utilisateur')
                 ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
-                ->columnSpanFull(),
-            Forms\Components\CheckboxList::make('roles')
-                ->label('Rôles')
-                ->options($rolesName)
-                ->descriptions($rolesDescription),
-        ]);
+                ->columnSpanFull();
+        }
+
+        $schema[] = Forms\Components\CheckboxList::make('roles')
+            ->label('Rôles')
+            ->options($rolesName)
+            ->descriptions($rolesDescription);
+
+        return $form->schema($schema);
     }
 }
