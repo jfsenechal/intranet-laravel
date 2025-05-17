@@ -84,9 +84,9 @@ class UserTables
                 Tables\Actions\CreateAction::make('create')
                     ->label('Ajouter un utilisateur')
                     ->icon('tabler-user-plus')
-                    ->action(function (array $data) use ($owner) {
+                    ->action(function (array $data,Module$module) use ($owner) {
                         try {
-                            ModuleHandler::addUser($data);
+                            ModuleHandler::addUserFromModule($module,$data);
                             Notification::make()
                                 ->success()
                                 ->title('Utilisateur ajouté');
@@ -105,7 +105,7 @@ class UserTables
 
                         return $data;
                     })
-                    ->form(fn(Form $form) => ModuleForm::userForm($form, $owner))
+                    ->form(fn(Form $form) => ModuleForm::addUserFromModule($form, $owner))
                     ->action(function (array $data, Form $form) use ($owner) {
                         try {
                             ModuleHandler::syncUserRolesForModule($owner, $form->getRecord(), $data);

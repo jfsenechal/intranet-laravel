@@ -4,6 +4,7 @@ namespace AcMarche\Security\Filament\Resources;
 
 use AcMarche\Security\Constant\NavigationGroupEnum;
 use AcMarche\Security\Filament\Resources\UserResource\Pages;
+use AcMarche\Security\Filament\Resources\UserResource\RelationManagers\ModuleRelationManager;
 use AcMarche\Security\Form\UserForm;
 use AcMarche\Security\Tables\UserTables;
 use App\Models\User;
@@ -40,7 +41,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ModuleRelationManager::class,
         ];
     }
 

@@ -4,18 +4,21 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use AcMarche\Security\Constant\RoleEnum;
+use AcMarche\Security\Database\Factories\UserFactory;
+use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 
+
+#[UseFactory(UserFactory::class)]
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -76,7 +79,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function name(): string
+    public function fullName(): string
     {
         return $this->last_name.' '.$this->first_name;
     }
@@ -89,11 +92,19 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
+    /**
+     * The modules that belong to the user.
+     */
+    public function modules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class);
+    }
+
     public function rolesByModule(int $moduleId): array|Collection
     {
         return $this->roles()
-                    ->where('module_id', $moduleId)
-                    ->get();
+            ->where('module_id', $moduleId)
+            ->get();
     }
 
     public function hasRole(string $roleToFind): bool
@@ -114,14 +125,31 @@ class User extends Authenticatable
         }
     }
 
-    public function canAccessPanel(Panel $panel): bool
+    public function hasModule(string $moduleToFind): bool
     {
-        if ($panel->getId() === 'admin') {
-            return ($this->hasRole(RoleEnum::ADMIN->value) || $this->hasRole(RoleEnum::AGENT->value));
+        foreach ($this->modules()->get() as $module) {
+            if ($module->name === $moduleToFind) {
+                return true;
+            }
         }
 
         return false;
     }
 
+    public function addModule(Module $module): void
+    {
+        if (!$this->hasModule($module->name)) {
+            $this->modules()->attach($module);
+        }
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return ($this->hasRole(RoleEnum::INTRANET_ADMIN->value));
+        }
+
+        return false;
+    }
 
 }

@@ -31,6 +31,8 @@ class AiPrism extends Command
      */
     protected $description = 'Command description';
 
+    protected array $meals = ['PAIN BLANC', 'PAIN GRIS', 'BLANC SS CROUTE', 'GRIS SS CROUTES', 'BEURRE/BECEL'];
+
     /**
      * Execute the console command.
      */
@@ -81,13 +83,16 @@ class AiPrism extends Command
                     ->withSchema($schema)
                     ->withMessages([
                         new UserMessage(
-                            "Avec le document joint,
-                            extrait le tableau dans un format json
-                            dans la colonne de droite c'est le nom des clients suivit d'un tirer puis du numéro de chambre
-                            met ses 2 valeurs dans 2 champs séparés
-                            dans la première ligne du haut du tableau ce sont le nom des plats
-                            si tu n'arrives pas à avoir le nom du client et sa chambre, ne le met pas dans la réponse json
-                            ne me donne que le json, je n'ai pas besoin d'explication",
+                            "with this attachment,
+                            There is a table
+                            First, turn the page 90 degrees to the right to have the table in the correct orientation
+                            Above the table in the first row, there are the following menus: ".join(',', $this->meals).".
+                            On the left, in the first column, you have the guest names and their room numbers
+                            In the format NAME - ROOM NUMBER.
+                            On each line of the customer, you have the quantity of menus chosen.
+                            Extract the data from this table and give me the response in JSON format,
+                            following the schema I gave you.
+                            If you can't get the guest's name and room number, don't include them in the response.",
                             [
                                 Document::fromPath('/var/www/scripts/ollama/ocr/20250407115630163.pdf'),
                             ]
@@ -103,7 +108,7 @@ class AiPrism extends Command
 
             } catch (\Exception $e) {
                 $this->error('full error '.$e->getMessage());
-                //dump($response);
+                dump($response);
             }
 
             Storage::disk('project_output')->put(

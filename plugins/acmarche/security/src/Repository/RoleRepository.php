@@ -41,4 +41,44 @@ class RoleRepository
             })
             ->get();
     }
+
+    public static function findRolesByModuleAndRolesName(Module $module, array $dataFromForm): array
+    {
+        return Role::where('module_id', $module->id)
+            ->whereIn('name', $dataFromForm['roles'])
+            ->pluck('id')
+            ->all();
+    }
+
+    public static function findRolesByModuleAndRolesId(Module $module, array $roleIdsToProcess): array
+    {
+        return Role::where('module_id', $module->id)
+            ->whereIn('id', $roleIdsToProcess)
+            ->pluck('id')
+            ->all();
+    }
+
+    // 2. Get all current role IDs for the user that are *NOT* from the current module.
+    // These need to be preserved.
+    public static function findRolesByUserAndNotModule(User $user, Module $module): array
+    {
+        return $user->roles()
+            ->where(function ($query) use ($module) {
+                $query->where('roles.module_id', '!=', $module->id)
+                    ->orWhereNull('roles.module_id'); // In case some roles aren't module-specific
+            })
+            ->pluck('roles.id') // Use 'roles.id' to be explicit
+            ->all();
+    }
+
+    public static function findRolesByUserAndModule(User $user, Module $module): array
+    {
+        return $user->roles() // Accesses the roles currently assigned to the user
+        ->where('module_id', $module->id) // Filters these roles to only those belonging to the given module
+        // 'module_id' is a column on your 'roles' table
+        ->pluck('roles.id') // Get only the IDs of these roles.
+        // 'roles.id' is important to specify the 'id' column of the 'roles' table,
+        // not the pivot table's 'id' or another 'id'.
+        ->all();
+    }
 }

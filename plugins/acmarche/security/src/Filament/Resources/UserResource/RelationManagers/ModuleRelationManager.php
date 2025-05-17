@@ -1,21 +1,21 @@
 <?php
 
-namespace AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers;
+namespace AcMarche\Security\Filament\Resources\UserResource\RelationManagers;
 
 use AcMarche\Security\Form\ModuleForm;
-use AcMarche\Security\Tables\UserTables;
+use AcMarche\Security\Tables\ModuleTables;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class UserRelationManager extends RelationManager
+class ModuleRelationManager extends RelationManager
 {
-    protected static string $relationship = 'users';
+    protected static string $relationship = 'modules';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return ' Utilisateurs';
+        return ' Modules';
     }
 
     public function isReadOnly(): bool
@@ -25,14 +25,12 @@ class UserRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return UserTables::inline($table, $this->ownerRecord);
+        return ModuleTables::inline($table, $this->ownerRecord);
     }
 
     public function form(Form $form): Form
     {
-        $form->model($this->ownerRecord);
-
-        return ModuleForm::addUserFromModule($form, $this->ownerRecord);
+        return ModuleForm::addModuleFromUser($form, $this->ownerRecord);
     }
 
 }

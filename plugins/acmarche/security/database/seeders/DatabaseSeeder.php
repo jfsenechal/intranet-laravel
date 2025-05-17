@@ -3,6 +3,7 @@
 namespace AcMarche\Security\Database\Seeders;
 
 use AcMarche\Security\Constant\RoleEnum;
+use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -19,16 +20,9 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $adminRole = Role::factory()->create([
-            'name' => RoleEnum::ADMIN->value,
+            'name' => RoleEnum::INTRANET_ADMIN->value,
+            'module_id' => null,
         ]);
-
-        foreach (RoleEnum::cases() as $role) {
-            if ($role !== RoleEnum::ADMIN) {
-                Role::factory()->create([
-                    'name' => $role->value,
-                ]);
-            }
-        }
 
         User::factory()
             ->hasAttached($adminRole)
@@ -40,5 +34,21 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('marge'),
             ]);
 
+        User::factory()
+            ->create([
+                'password' => Hash::make('marge'),
+            ]);
+
+        $documentModule = Module::factory()
+            ->create([
+                'name' => 'Document',
+            ]);
+
+        $moduleRole = Role::factory()
+            ->create([
+                'name' => 'ROLE_DOCUMENT_ADMIN',
+                'description' => 'Administrateur des documents',
+                'module_id' => $documentModule->id,
+            ]);
     }
 }

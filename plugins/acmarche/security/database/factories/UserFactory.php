@@ -3,6 +3,7 @@
 namespace AcMarche\Security\Database\Factories;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,11 +25,13 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'name' => fake()->name(),
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
+            'username' => fake()->userName(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => static::$password ??= Hash::make('marge'),
             'remember_token' => Str::random(10),
         ];
     }

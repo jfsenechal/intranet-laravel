@@ -7,7 +7,6 @@ use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\UserRel
 use Filament\Actions;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ContentTabPosition;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewModule extends ViewRecord

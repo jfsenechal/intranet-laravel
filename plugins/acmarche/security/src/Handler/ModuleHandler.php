@@ -3,7 +3,7 @@
 namespace AcMarche\Security\Handler;
 
 use AcMarche\Security\Models\Module;
-use AcMarche\Security\Models\Role;
+use AcMarche\Security\Repository\ModuleRepository;
 use AcMarche\Security\Repository\RoleRepository;
 use AcMarche\Security\Repository\UserRepository;
 use App\Models\User;
@@ -16,7 +16,7 @@ class ModuleHandler
      * @return void
      * @throws \Exception
      */
-    public static function addUser(array $data): void
+    public static function addUserFromModule(Module $module, array $data): void
     {
         $userId = $data['user'];
         if (!$user = UserRepository::find($userId)) {
@@ -27,6 +27,20 @@ class ModuleHandler
                 $user->addRole($role);
             }
         }
+        $user->addModule($module);
+    }
+
+    public static function addModuleFromUser(User $user, array $data): void
+    {
+        if (!$module = ModuleRepository::find($data['module'])) {
+            throw new \Exception('Module not found');
+        }
+        foreach ($data['roles'] as $roleName) {
+            if ($role = RoleRepository::findByName($roleName)) {
+                $user->addRole($role);
+            }
+        }
+        $user->addModule($module);
     }
 
     /**
@@ -34,27 +48,15 @@ class ModuleHandler
      */
     public static function syncUserRolesForModule(Module $module, User|Model $user, array $dataFromForm): void
     {
-        $roleIdsToProcess = Role::where('module_id', $module->id)
-            ->whereIn('name', $dataFromForm['roles'])
-            ->pluck('id')
-            ->all();
+        $roleIdsToProcess = RoleRepository::findRolesByModuleAndRolesName($module, $dataFromForm);
 
         // 1. Get the IDs of the roles selected in the form that *actually belong* to the current module.
         // This filters $newRoleIdsFromForm to only include roles valid for $module.
-        $targetRoleIdsForThisModule = Role::where('module_id', $module->id)
-            ->whereIn('id', $roleIdsToProcess)
-            ->pluck('id')
-            ->all();
+        $targetRoleIdsForThisModule = RoleRepository::findRolesByModuleAndRolesId($module, $roleIdsToProcess);
 
         // 2. Get all current role IDs for the user that are *NOT* from the current module.
         // These need to be preserved.
-        $roleIdsFromOtherModules = $user->roles()
-            ->where(function ($query) use ($module) {
-                $query->where('roles.module_id', '!=', $module->id)
-                    ->orWhereNull('roles.module_id'); // In case some roles aren't module-specific
-            })
-            ->pluck('roles.id') // Use 'roles.id' to be explicit
-            ->all();
+        $roleIdsFromOtherModules = RoleRepository::findRolesByUserAndNotModule($user, $module);
 
         // 3. Combine the roles from other modules with the new target roles for *this* module.
         // This forms the complete list of role IDs the user should have.
@@ -70,13 +72,7 @@ class ModuleHandler
 
     public static function revokeUser(Module|Model $module, Model|User $user): void
     {
-        $roleIdsToDetach = $user->roles() // Accesses the roles currently assigned to the user
-        ->where('module_id', $module->id) // Filters these roles to only those belonging to the given module
-        // 'module_id' is a column on your 'roles' table
-        ->pluck('roles.id') // Get only the IDs of these roles.
-        // 'roles.id' is important to specify the 'id' column of the 'roles' table,
-        // not the pivot table's 'id' or another 'id'.
-        ->all();
+        $roleIdsToDetach = RoleRepository::findRolesByUserAndModule($user, $module);
 
         // 2. If there are roles to detach, detach them.
         //    The detach() method removes entries from the 'role_user' pivot table.

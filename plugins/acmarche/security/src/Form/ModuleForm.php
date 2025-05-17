@@ -3,6 +3,7 @@
 namespace AcMarche\Security\Form;
 
 use AcMarche\Security\Models\Module;
+use AcMarche\Security\Repository\ModuleRepository;
 use AcMarche\Security\Repository\RoleRepository;
 use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms;
@@ -41,20 +42,21 @@ class ModuleForm
             ]);
     }
 
-    public static function userForm(Form $form, Model|Module $owner): Form
+    public static function addUserFromModule(Form $form, Model|Module $module): Form
     {
         $user = $form->getRecord();
-        $roles = RoleRepository::getForSelect($owner);
+        //dd($user?->name);
+        $roles = RoleRepository::getForSelect($module);
         $rolesName = $roles[0];
         $rolesDescription = $roles[1];
         $schema = [];
 
-        if (!$user) {
-            $schema[] = Forms\Components\Select::make('user')
-                ->label('Utilisateur')
-                ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
-                ->columnSpanFull();
-        }
+        //   if (!$user?->id) {
+        $schema[] = Forms\Components\Select::make('user')
+            ->label('Utilisateur')
+            ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
+            ->columnSpanFull();
+        // }
 
         $schema[] = Forms\Components\CheckboxList::make('roles')
             ->label('Rôles')
@@ -62,5 +64,44 @@ class ModuleForm
             ->descriptions($rolesDescription);
 
         return $form->schema($schema);
+    }
+
+    public static function addModuleFromUser(Form $form, Model|Module $user): Form
+    {
+        //$user = $form->getRecord();
+        return $form->schema([
+            Forms\Components\Select::make('module')
+                ->label('Module')
+                ->options(fn(ModuleRepository $repository) => $repository->getModulesForSelect())
+                ->reactive()
+                ->afterStateUpdated(function (callable $set, $state, callable $get) {
+                    // Optional: clear roles selection when module changes
+                    $set('roles', []);
+                })
+                ->columnSpanFull(),
+
+            Forms\Components\CheckboxList::make('roles')
+                ->label('Rôles')
+                ->options(function (callable $get) {
+                    $moduleId = $get('module');
+                    if (!$moduleId) {
+                        return [];
+                    }
+                    $module = ModuleRepository::find($moduleId);
+                    [$rolesName, $rolesDescription] = RoleRepository::getForSelect($module);
+
+                    return $rolesName;
+                })
+                ->descriptions(function (callable $get) {
+                    $moduleId = $get('module');
+                    if (!$moduleId) {
+                        return [];
+                    }
+                    $module = ModuleRepository::find($moduleId);
+                    [$rolesName, $rolesDescription] = RoleRepository::getForSelect($module);
+
+                    return $rolesDescription;
+                }),
+        ]);
     }
 }

@@ -2,14 +2,20 @@
 
 namespace AcMarche\Security\Models;
 
+use AcMarche\Security\Database\Factories\ModuleFactory;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 //https://github.com/lukas-frey/filament-icon-picker
+#[UseFactory(ModuleFactory::class)]
 class Module extends Model
 {
+    use HasFactory;
+
     protected $connection = 'mariadb';
 
     protected $fillable = [
@@ -28,21 +34,25 @@ class Module extends Model
         'is_external' => 'boolean',
     ];
 
+    /**
+     * To resolve name
+     * static::resolveFactoryName($modelName);
+     */
+    protected static function newFactory()
+    {
+        return ModuleFactory::new();
+    }
+
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
     }
 
-    public function users(): HasManyThrough
+    /**
+     * The users that belong to the role.
+     */
+    public function users(): BelongsToMany
     {
-        return $this->hasManyThrough(
-            User::class,     // Final model we want to access
-            Role::class,     // Intermediate model
-            'module_id',     // Foreign key on Role table (intermediate table)
-            'id',            // Foreign key on User table (referenced in role_user pivot)
-            'id',            // Local key on Module table
-            'id'             // Local key on Role table
-        );
+        return $this->belongsToMany(User::class);
     }
-
 }

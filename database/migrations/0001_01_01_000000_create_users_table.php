@@ -47,6 +47,13 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('module_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignIdFor(User::class)->constrained('users')->cascadeOnDelete();
+            $table->foreignIdFor(Module::class)->constrained('modules')->cascadeOnDelete();
+            $table->unique(['user_id', 'module_id']);
+        });
+
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -57,8 +64,8 @@ return new class extends Migration {
         Schema::create('role_user', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained('users')->cascadeOnDelete();
-            $table->foreignIdFor(Role::class)->constrained('roles')->cascadeOnDelete();
-            $table->unique(['role_id', 'user_id']);
+            $table->foreignIdFor(Role::class)->nullable()->constrained('roles')->cascadeOnDelete();
+            $table->unique(['user_id', 'role_id']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
