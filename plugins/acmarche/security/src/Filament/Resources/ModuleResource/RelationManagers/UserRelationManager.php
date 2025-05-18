@@ -30,8 +30,6 @@ class UserRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        $form->model($this->ownerRecord);
-
         return ModuleForm::addUserFromModule($form, $this->ownerRecord);
     }
 

@@ -44,19 +44,18 @@ class ModuleForm
 
     public static function addUserFromModule(Form $form, Model|Module $module): Form
     {
-        $user = $form->getRecord();
-        //dd($user?->name);
+        $user = $form->getRecord();//if new null value, if edit user instance
         $roles = RoleRepository::getForSelect($module);
         $rolesName = $roles[0];
         $rolesDescription = $roles[1];
         $schema = [];
 
-        //   if (!$user?->id) {
-        $schema[] = Forms\Components\Select::make('user')
-            ->label('Utilisateur')
-            ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
-            ->columnSpanFull();
-        // }
+        if (!$user?->id > 0) {
+            $schema[] = Forms\Components\Select::make('user')
+                ->label('Utilisateur')
+                ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
+                ->columnSpanFull();
+        }
 
         $schema[] = Forms\Components\CheckboxList::make('roles')
             ->label('Rôles')
