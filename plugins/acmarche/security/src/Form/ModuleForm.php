@@ -6,8 +6,11 @@ use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\ModuleRepository;
 use AcMarche\Security\Repository\RoleRepository;
 use AcMarche\Security\Repository\UserRepository;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Model;
 
 class ModuleForm
@@ -45,9 +48,6 @@ class ModuleForm
     public static function addUserFromModule(Form $form, Model|Module $module): Form
     {
         $user = $form->getRecord();//if new null value, if edit user instance
-        $roles = RoleRepository::getForSelect($module);
-        $rolesName = $roles[0];
-        $rolesDescription = $roles[1];
         $schema = [];
 
         if (!$user?->id > 0) {
@@ -57,50 +57,68 @@ class ModuleForm
                 ->columnSpanFull();
         }
 
-        $schema[] = Forms\Components\CheckboxList::make('roles')
-            ->label('Rôles')
-            ->options($rolesName)
-            ->descriptions($rolesDescription);
+        $schema[] = self::rolesField($module);
 
-        return $form->schema($schema);
+        $form->schema($schema);
+
+        return $form;
     }
 
-    public static function addModuleFromUser(Form $form, Model|Module $user): Form
+    public static function addModuleFromUser(Form $form, User|Model $user): Form
     {
-        //$user = $form->getRecord();
-        return $form->schema([
-            Forms\Components\Select::make('module')
-                ->label('Module')
-                ->options(fn(ModuleRepository $repository) => $repository->getModulesForSelect())
-                ->reactive()
-                ->afterStateUpdated(function (callable $set, $state, callable $get) {
-                    // Optional: clear roles selection when module changes
-                    $set('roles', []);
-                })
-                ->columnSpanFull(),
+        /**
+         * @var Module|null $module
+         */
+        $module = $form->getRecord();//if new null if edit module instance
 
-            Forms\Components\CheckboxList::make('roles')
-                ->label('Rôles')
-                ->options(function (callable $get) {
+        $schema = [];
+        if (!$module?->id > 0) {
+            $schema[] =
+                Forms\Components\Select::make('module')
+                    ->label('Module')
+                    ->options(fn(ModuleRepository $repository) => $repository->getModulesForSelect())
+                    ->reactive()
+                    ->afterStateUpdated(function (Set $set) {
+                        // Optional: clear roles selection when module changes
+                        $set('roles', []);
+                    })
+                    ->columnSpanFull();
+        }
+
+        $schema[] = self::rolesField($module);
+
+        $form->schema($schema);
+
+        return $form;
+    }
+
+    private static function rolesField(?Module $module): CheckboxList
+    {
+        return Forms\Components\CheckboxList::make('roles')
+            ->label('Rôles')
+            ->options(function (callable $get) use ($module) {
+                if (!$module) {
                     $moduleId = $get('module');
                     if (!$moduleId) {
                         return [];
                     }
                     $module = ModuleRepository::find($moduleId);
-                    [$rolesName, $rolesDescription] = RoleRepository::getForSelect($module);
+                }
+                [$rolesName, $rolesDescription] = RoleRepository::getForSelect($module);
 
-                    return $rolesName;
-                })
-                ->descriptions(function (callable $get) {
+                return $rolesName;
+            })
+            ->descriptions(function (callable $get) use ($module) {
+                if (!$module) {
                     $moduleId = $get('module');
                     if (!$moduleId) {
                         return [];
                     }
                     $module = ModuleRepository::find($moduleId);
-                    [$rolesName, $rolesDescription] = RoleRepository::getForSelect($module);
+                }
+                [$rolesName, $rolesDescription] = RoleRepository::getForSelect($module);
 
-                    return $rolesDescription;
-                }),
-        ]);
+                return $rolesDescription;
+            });
     }
 }
