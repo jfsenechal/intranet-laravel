@@ -84,9 +84,9 @@ class UserTables
                 Tables\Actions\CreateAction::make('create')
                     ->label('Ajouter un utilisateur')
                     ->icon('tabler-user-plus')
-                    ->action(function (array $data,Module$module) use ($owner) {
+                    ->action(function (array $data) use ($owner) {
                         try {
-                            ModuleHandler::addUserFromModule($module,$data);
+                            ModuleHandler::addUserFromModule($owner, $data);
                             Notification::make()
                                 ->success()
                                 ->title('Utilisateur ajouté');
