@@ -123,8 +123,8 @@ class UserTables
                     ->icon('tabler-user-minus')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function (array $data, Form $form) use ($owner) {
-                        ModuleHandler::revokeUser($owner, $form->getRecord());
+                    ->action(function (User $user) use ($owner) {
+                        ModuleHandler::revokeUser($owner, $user);
                     }),
             ]);
     }

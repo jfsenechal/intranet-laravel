@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 class ModuleHandler
 {
     /**
+     * @param Module $module
      * @param array $data
      * @return void
      * @throws \Exception
@@ -22,12 +23,7 @@ class ModuleHandler
         if (!$user = UserRepository::find($userId)) {
             throw new \Exception('User not found');
         }
-        foreach ($data['roles'] as $roleName) {
-            if ($role = RoleRepository::findByName($roleName)) {
-                $user->addRole($role);
-            }
-        }
-        $user->addModule($module);
+        self::addModuleAndRoles($module, $user, $data);
     }
 
     public static function addModuleFromUser(User $user, array $data): void
@@ -35,6 +31,11 @@ class ModuleHandler
         if (!$module = ModuleRepository::find($data['module'])) {
             throw new \Exception('Module not found');
         }
+        self::addModuleAndRoles($module, $user, $data);
+    }
+
+    private static function addModuleAndRoles(Module $module, User $user, array $data)
+    {
         foreach ($data['roles'] as $roleName) {
             if ($role = RoleRepository::findByName($roleName)) {
                 $user->addRole($role);
@@ -74,10 +75,10 @@ class ModuleHandler
     {
         $roleIdsToDetach = RoleRepository::findRolesByUserAndModule($user, $module);
 
-        // 2. If there are roles to detach, detach them.
-        //    The detach() method removes entries from the 'role_user' pivot table.
         if (!empty($roleIdsToDetach)) {
             $user->roles()->detach($roleIdsToDetach);
         }
+
+        $user->modules()->detach($module);
     }
 }

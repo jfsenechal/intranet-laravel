@@ -5,6 +5,7 @@ namespace AcMarche\Security\Tables;
 use AcMarche\Security\Filament\Resources\ModuleResource;
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
+use App\Models\User;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -42,7 +43,7 @@ class ModuleTables
             ]);
     }
 
-    public static function inline(Table $table, Model $ownerRecord): Table
+    public static function inline(Table $table, User|Model $ownerRecord): Table
     {
         return $table
             ->defaultSort('name')
@@ -68,6 +69,14 @@ class ModuleTables
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('revoke')
+                    ->label('Révoquer')
+                    ->icon('tabler-user-minus')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (Module $module) use ($ownerRecord) {
+                        ModuleHandler::revokeUser($module, $ownerRecord);
+                    }),
             ]);
     }
 }
