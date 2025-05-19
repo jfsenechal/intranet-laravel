@@ -58,7 +58,7 @@ class NewsForm
                             ->suffixIcon('tabler-calendar-stats'),
 
                     ])->grow(false),
-                ])->from(true),
+                ])->from('md'),
             ]);
     }
 }
