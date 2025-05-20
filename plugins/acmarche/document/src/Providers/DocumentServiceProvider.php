@@ -2,9 +2,8 @@
 
 namespace AcMarche\Document\Providers;
 
-use AcMarche\App\Package;
-use AcMarche\App\Providers\PackageServiceProvider;
-use Spatie\LaravelPackageTools\PackageServiceProvider as SpatiePackageServiceProvider;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class DocumentServiceProvider extends PackageServiceProvider
 {
@@ -20,7 +19,7 @@ class DocumentServiceProvider extends PackageServiceProvider
             ->runsMigrations();
     }
 
-    public function configurePackage(\Spatie\LaravelPackageTools\Package $package): void
+    public function configurePackage(Package $package): void
     {
         $package
             ->name(static::$name)
