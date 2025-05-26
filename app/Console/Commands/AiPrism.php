@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Prism\Prism\Enums\Provider;
-use Prism\Prism\Exceptions\PrismException;
 use Prism\Prism\Prism;
 use Prism\Prism\Schema\ArraySchema;
 use Prism\Prism\Schema\NumberSchema;
@@ -14,7 +13,7 @@ use Prism\Prism\Schema\ObjectSchema;
 use Prism\Prism\Schema\StringSchema;
 use Prism\Prism\ValueObjects\Messages\Support\Document;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
-use Throwable;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class AiPrism extends Command
 {
@@ -51,24 +50,24 @@ class AiPrism extends Command
         }
         $rows = [];
         $data = json_decode($result);
-     /*   foreach ($data->orders as $order) {
-            $meals = [];
-            foreach ($order->meals as $mealName => $quantity) {
-                $meals[] = $mealName.' '.$quantity;
-            }
-            $rows[] = [
-                $order->client,
-                $order->roomNumber,
-                $meals[0] ?? '',
-                $meals[1] ?? '',
-            ];
-        }
-        $this->table(['Client', 'Room', 'Meals 1', 'Meals 2'], $rows);*/
+        /*   foreach ($data->orders as $order) {
+               $meals = [];
+               foreach ($order->meals as $mealName => $quantity) {
+                   $meals[] = $mealName.' '.$quantity;
+               }
+               $rows[] = [
+                   $order->client,
+                   $order->roomNumber,
+                   $meals[0] ?? '',
+                   $meals[1] ?? '',
+               ];
+           }
+           $this->table(['Client', 'Room', 'Meals 1', 'Meals 2'], $rows);*/
     }
 
     private function execIa(): void
     {
-        $schemaMeals = new ObjectSchema('meal', 'A meal', [
+        $mealSchemaObject = new ObjectSchema('mealObject', 'A meal', [
             new StringSchema('name', 'The name of the meal as a string'),
             new StringSchema('day', 'The name of the day as a string'),
             new StringSchema('value', 'The response of the meal as a string'),
@@ -80,20 +79,20 @@ class AiPrism extends Command
             properties: [
                 new StringSchema('client', 'The last name of the client as a string'),
                 new NumberSchema('roomNumber', 'an integer'),
-                new ArraySchema('meals', 'The meals name as a array of object', $schemaMeals),
+                new ArraySchema('meals', 'The meals as an array of object', $mealSchemaObject),
                 new StringSchema('comment', 'The comment as a string or null'),
             ],
             requiredFields: ['client', 'roomNumber', 'meals', 'comment']
         );
-
-        try {
-            $response =
-                Prism::structured()
-                    ->using(Provider::Anthropic, 'claude-4-sonnet-20250514')
-                    ->withSchema($schema)
-                    ->withMessages([
-                        new UserMessage(
-                            "with this attachment,
+        $model = "claude-3-5-sonnet-20241022";
+        //$model = 'claude-4-sonnet-20250514';
+        $response =
+            Prism::structured()
+                ->using(Provider::Anthropic, $model)
+                ->withSchema($schema)
+                ->withMessages([
+                    new UserMessage(
+                        "with this attachment,
                             There is a table
                             The first row is the name of the days: ".join(',', $this->days).".
                             On the left, in the first column, you have the client names and their room numbers
@@ -103,48 +102,33 @@ class AiPrism extends Command
                             The cell is structured like this: name - room number
                             A second column with the name of the dish
                             And for the other 7 columns, the choice made for each day
-
                             On the seconde row, first column is empty
                             The second column is the name of the dish
                             And for the other 7 columns, the choice made for each day
-
                             One the third row, first column is empty
                             The second column is named remarque
                             The cell is merged on the 7 columns of day names
-
                             Extract the data from this table and give me the response in JSON format,
                             following the schema I gave you.
                             If you can't get the guest's name and room number, don't include them in the response.",
-                            [
-                                Document::fromPath('/home/jfsenechal/Desktop/mrs/new-v3-20250522101036324.pdf'),
-                            ]
-                        ),
-                    ])
-                    ->asStructured();
+                        [
+                            Document::fromPath('/home/jfsenechal/Desktop/mrs/final or not 20250526161442422.pdf'),
+                        ]
+                    ),
+                ])
+                ->asStructured();
 
-            try {
-                Storage::disk('project_output')->put(
-                    'resultFull.json',
-                    json_encode($response, flags: JSON_THROW_ON_ERROR)
-                );
-
-            } catch (\Exception $e) {
-                $this->error('full error '.$e->getMessage());
-                dump($response);
-            }
-
+        try {
             Storage::disk('project_output')->put(
                 'resultStructured.json',
-                json_encode($response->text, flags: JSON_THROW_ON_ERROR)
+                $response->text
             );
-
             Cache::set(self::ORDERS, json_encode($response->structured));
-
-        } catch (PrismException|\Exception $e) {
-            $this->error('Text generation failed:'.$e->getMessage());
-        } catch (Throwable $e) {
-            $this->error(('Generic error:'.$e->getMessage()));
+        } catch (InvalidArgumentException|\Exception $e) {
+            dump($e->getMessage());
         }
+
+        $this->info($response->finishReason->name);
     }
 
     private function promptSave(): void
