@@ -10,7 +10,7 @@ class CreateNews extends CreateRecord
 {
     protected static string $resource = NewsResource::class;
 
-    public static function canCreateAnother(): bool
+    public function canCreateAnother(): bool
     {
         return false;
     }

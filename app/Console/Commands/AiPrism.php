@@ -32,7 +32,7 @@ class AiPrism extends Command
      */
     protected $description = 'Command description';
 
-    protected array $meals = ['PAIN BLANC', 'PAIN GRIS', 'BLANC SS CROUTE', 'GRIS SS CROUTES', 'BEURRE/BECEL'];
+    protected array $meals = ['Choix 1/2', 'Sucré/Salé'];
     private array $days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
     /**
@@ -87,43 +87,27 @@ class AiPrism extends Command
         $model = "claude-3-5-sonnet-20241022";
         //$model = 'claude-4-sonnet-20250514';
         $response =
-            Prism::structured()
+            Prism::text()
                 ->using(Provider::Anthropic, $model)
-                ->withSchema($schema)
+                //->withSchema($schema)
                 ->withMessages([
                     new UserMessage(
-                        "with this attachment,
-                            There is a table
-                            The first row is the name of the days: ".join(',', $this->days).".
-                            On the left, in the first column, you have the client names and their room numbers
-                            They are 3 rows by client
-                            One the first line, is structured as follows:
-                            A first column with their name and room number
-                            The cell is structured like this: name - room number
-                            A second column with the name of the dish
-                            And for the other 7 columns, the choice made for each day
-                            On the seconde row, first column is empty
-                            The second column is the name of the dish
-                            And for the other 7 columns, the choice made for each day
-                            One the third row, first column is empty
-                            The second column is named remarque
-                            The cell is merged on the 7 columns of day names
-                            Extract the data from this table and give me the response in JSON format,
-                            following the schema I gave you.
-                            If you can't get the guest's name and room number, don't include them in the response.",
+                        "extract from pdf file the table and return data json format
+                        it's clients with meal order for each day",
                         [
-                            Document::fromPath('/home/jfsenechal/Desktop/mrs/final or not 20250526161442422.pdf'),
+                            Document::fromPath('/home/jfsenechal/Desktop/mrs/final-or-not-20250526161442422.pdf'),
                         ]
                     ),
                 ])
-                ->asStructured();
+                ->asText();
 
+        dump($response);
         try {
             Storage::disk('project_output')->put(
                 'resultStructured.json',
                 $response->text
             );
-            Cache::set(self::ORDERS, json_encode($response->structured));
+            Cache::set(self::ORDERS, json_encode($response->text));
         } catch (InvalidArgumentException|\Exception $e) {
             dump($e->getMessage());
         }

@@ -8,15 +8,15 @@ use AcMarche\Security\Filament\Resources\UserResource\RelationManagers\ModuleRel
 use AcMarche\Security\Form\UserForm;
 use AcMarche\Security\Tables\UserTables;
 use App\Models\User;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-users';
 
     public static function getNavigationGroup(): ?string
     {
@@ -28,7 +28,7 @@ class UserResource extends Resource
         return 'Agents';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return UserForm::createForm($form);
     }

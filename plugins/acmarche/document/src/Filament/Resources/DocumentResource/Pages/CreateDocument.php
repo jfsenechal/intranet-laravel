@@ -9,7 +9,7 @@ class CreateDocument extends CreateRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    public static function canCreateAnother(): bool
+    public function canCreateAnother(): bool
     {
         return false;
     }

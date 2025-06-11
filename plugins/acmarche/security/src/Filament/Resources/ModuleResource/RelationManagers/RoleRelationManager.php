@@ -4,8 +4,8 @@ namespace AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers;
 
 use AcMarche\Security\Form\RoleForm;
 use AcMarche\Security\Tables\RoleTables;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,9 +28,9 @@ class RoleRelationManager extends RelationManager
         return RoleTables::inline($table);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return RoleForm::createForm($form);
+        return RoleForm::createForm($schema);
     }
 
 }

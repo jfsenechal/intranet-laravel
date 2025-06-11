@@ -5,8 +5,8 @@ namespace AcMarche\Security\Filament\Resources\UserResource\Pages;
 use AcMarche\Security\Filament\Resources\UserResource;
 use Filament\Actions;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
 class ViewUser extends ViewRecord
 {
@@ -24,9 +24,9 @@ class ViewUser extends ViewRecord
         return $this->record->fullName() ?? 'Empty name';
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist->schema([
+        return $schema->schema([
             TextEntry::make('first_name')
                 ->label('Prénom'),
             TextEntry::make('last_name')

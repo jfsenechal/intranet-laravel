@@ -9,17 +9,17 @@ use AcMarche\Document\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use AcMarche\Document\Form\CategoryForm;
 use AcMarche\Document\Models\Category;
 use AcMarche\Document\Tables\CategoryTables;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return CategoryForm::createForm($form);
     }

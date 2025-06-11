@@ -3,13 +3,12 @@
 namespace AcMarche\App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 
 class Supportpage extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static string $view = 'acapp::filament.pages.support';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
+    protected string $view = 'acapp::filament.pages.support';
     protected static bool $shouldRegisterNavigation = false;
 
     public static function getNavigationLabel(): string
@@ -26,10 +25,4 @@ class Supportpage extends Page
     {
         return true;
     }
-
-    public function getMaxContentWidth22(): MaxWidth
-    {
-        return MaxWidth::Screen;
-    }
-
 }

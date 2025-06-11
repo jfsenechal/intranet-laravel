@@ -3,13 +3,12 @@
 namespace AcMarche\Security\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 
 class SecurityPage extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static string $view = 'acsecurity::filament.pages.security';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
+    protected string $view = 'acsecurity::filament.pages.security';
 
     public static function getNavigationLabel(): string
     {
@@ -24,11 +23,6 @@ class SecurityPage extends Page
     public static function canAccess(): bool
     {
         return true;
-    }
-
-    public function getMaxContentWidth22(): MaxWidth
-    {
-        return MaxWidth::Screen;
     }
 
 }

@@ -11,22 +11,23 @@ use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\RoleRel
 use AcMarche\Security\Form\ModuleForm;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Tables\ModuleTables;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class ModuleResource extends Resource
 {
     protected static ?string $model = Module::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {
         return NavigationGroupEnum::SETTINGS->getLabel();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return ModuleForm::createForm($form);
     }

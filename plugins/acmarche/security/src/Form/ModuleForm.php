@@ -8,44 +8,47 @@ use AcMarche\Security\Repository\RoleRepository;
 use AcMarche\Security\Repository\UserRepository;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Form;
-use Filament\Forms\Set;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
 class ModuleForm
 {
-    public static function createForm(Form $form): Form
+    public static function createForm(Schema $form): Schema
     {
         return $form
             ->columns(2)
             ->schema([
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
                     ->maxLength(120),
-                Forms\Components\TextInput::make('url')
+                TextInput::make('url')
                     ->label('Url')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Checkbox::make('is_public')
+                Checkbox::make('is_public')
                     ->label('Publique')
                     ->helperText('Accessible à tous'),
-                Forms\Components\Checkbox::make('is_external')
+                Checkbox::make('is_external')
                     ->label('Externe')
                     ->helperText('Url externe'),
-                Forms\Components\ColorPicker::make('color')
+                ColorPicker::make('color')
                     ->label('Couleur')
                     ->required(),
-                Forms\Components\TextInput::make('icon')
+                TextInput::make('icon')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->maxLength(255)
                     ->columnSpanFull(),
             ]);
     }
 
-    public static function addUserFromModule(Form $form, Model|Module $module): Form
+    public static function addUserFromModule(Schema $form, Model|Module $module): Schema
     {
         $user = $form->getRecord();//if new null value, if edit user instance
         $schema = [];
@@ -64,7 +67,7 @@ class ModuleForm
         return $form;
     }
 
-    public static function addModuleFromUser(Form $form, User|Model $user): Form
+    public static function addModuleFromUser(Schema $form, User|Model $user): Schema
     {
         /**
          * @var Module|null $module
@@ -94,7 +97,7 @@ class ModuleForm
 
     private static function rolesField(?Module $module): CheckboxList
     {
-        return Forms\Components\CheckboxList::make('roles')
+        return CheckboxList::make('roles')
             ->label('Rôles')
             ->options(function (callable $get) use ($module) {
                 if (!$module) {

@@ -3,13 +3,11 @@
 
 namespace AcMarche\Security\Form;
 
-use Filament\Forms;
-use Filament\Forms\Form;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Schemas\Schema;
 
 class UserForm
 {
-    public static function createForm(Form $form): Form
+    public static function createForm(Schema $form): Schema
     {
         return $form
             ->schema([]);

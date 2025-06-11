@@ -6,12 +6,12 @@ use AcMarche\News\Constant\DepartmentEnum;
 use AcMarche\News\Filament\Resources\NewsResource;
 use AcMarche\News\Models\News;
 use Filament\Actions;
-use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Schema;
 
 class ViewNews extends ViewRecord
 {
@@ -32,9 +32,9 @@ class ViewNews extends ViewRecord
         return $this->record->name;
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 TextEntry::make('end_date')
                     ->icon('tabler-mail')

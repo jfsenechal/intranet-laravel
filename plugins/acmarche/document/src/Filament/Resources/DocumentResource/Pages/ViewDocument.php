@@ -2,13 +2,12 @@
 
 namespace AcMarche\Document\Filament\Resources\DocumentResource\Pages;
 
-use AcMarche\Document\Constant\DepartmentEnum;
 use AcMarche\Document\Filament\Resources\DocumentResource;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
 class ViewDocument extends ViewRecord
 {
@@ -29,9 +28,9 @@ class ViewDocument extends ViewRecord
         return $this->record->name;
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 TextEntry::make('category')
                     ->label('Catégorie')

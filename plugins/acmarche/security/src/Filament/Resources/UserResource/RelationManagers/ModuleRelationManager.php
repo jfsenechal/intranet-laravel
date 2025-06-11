@@ -4,8 +4,8 @@ namespace AcMarche\Security\Filament\Resources\UserResource\RelationManagers;
 
 use AcMarche\Security\Form\ModuleForm;
 use AcMarche\Security\Tables\ModuleTables;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,9 +28,9 @@ class ModuleRelationManager extends RelationManager
         return ModuleTables::inline($table, $this->ownerRecord);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return ModuleForm::addModuleFromUser($form, $this->ownerRecord);
+        return ModuleForm::addModuleFromUser($schema, $this->ownerRecord);
     }
 
 }

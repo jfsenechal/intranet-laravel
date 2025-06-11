@@ -9,19 +9,19 @@ use AcMarche\News\Filament\Resources\NewsResource\Pages\ViewNews;
 use AcMarche\News\Form\NewsForm;
 use AcMarche\News\Models\News;
 use AcMarche\News\Tables\NewsTables;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class NewsResource extends Resource
 {
     protected static ?string $model = News::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationLabel = 'L\'actualité';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return NewsForm::createForm($form);
     }

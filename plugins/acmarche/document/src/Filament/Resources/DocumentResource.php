@@ -9,17 +9,17 @@ use AcMarche\Document\Filament\Resources\DocumentResource\Pages\ViewDocument;
 use AcMarche\Document\Form\DocumentForm;
 use AcMarche\Document\Models\Document;
 use AcMarche\Document\Tables\DocumentTables;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return DocumentForm::createForm($form);
     }

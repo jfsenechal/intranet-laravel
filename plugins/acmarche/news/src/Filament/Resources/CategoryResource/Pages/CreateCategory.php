@@ -9,7 +9,7 @@ class CreateCategory extends CreateRecord
 {
     protected static string $resource = CategoryResource::class;
 
-    public static function canCreateAnother(): bool
+    public function canCreateAnother(): bool
     {
         return false;
     }

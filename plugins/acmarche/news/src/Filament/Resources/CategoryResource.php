@@ -9,21 +9,21 @@ use AcMarche\News\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use AcMarche\News\Form\CategoryForm;
 use AcMarche\News\Models\Category;
 use AcMarche\News\Tables\CategoryTables;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Paramètres';
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
 
     protected static ?string $navigationLabel = 'Catégories';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return CategoryForm::createForm($form);
     }

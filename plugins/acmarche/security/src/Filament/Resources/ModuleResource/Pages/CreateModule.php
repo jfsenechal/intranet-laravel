@@ -12,7 +12,7 @@ class CreateModule extends CreateRecord
 
     protected static string $resource = ModuleResource::class;
 
-    public static function canCreateAnother(): bool
+    public function canCreateAnother(): bool
     {
         return false;
     }

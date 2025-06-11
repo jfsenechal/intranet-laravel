@@ -8,6 +8,7 @@ use Filament\Actions;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
 class ViewModule extends ViewRecord
 {
@@ -28,9 +29,9 @@ class ViewModule extends ViewRecord
         return 'Module '.$this->record->name;
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 TextEntry::make('description')
                     ->label(false),

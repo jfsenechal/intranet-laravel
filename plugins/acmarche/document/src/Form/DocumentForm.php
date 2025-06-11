@@ -4,18 +4,21 @@ namespace AcMarche\Document\Form;
 
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Form;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Layout\Split;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class DocumentForm
 {
-    public static function createForm(Form $form): Form
+    public static function createForm(Schema $form): Schema
     {
         return $form
             ->columns(1)
-            ->schema([
-                Forms\Components\Split::make([
-                    Forms\Components\Section::make([
+            ->components([
+                Split::make([
+                    Section::make([
                         Forms\Components\TextInput::make('name')
                             ->label('Titre')
                             ->required()
@@ -34,7 +37,7 @@ class DocumentForm
                             ->previewable(false)
                             ->downloadable()
                             ->maxSize(10240)
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state instanceof TemporaryUploadedFile) {
                                     $set('file_name', $state->getFilename());
                                     $set('file_mime', $state->getMimeType());
@@ -42,7 +45,7 @@ class DocumentForm
                                 }
                             }),
                     ]),
-                    Forms\Components\Section::make([
+                    Section::make([
                         Forms\Components\Select::make('category_id')
                             ->label('Catégorie')
                             ->relationship('category', 'name')
