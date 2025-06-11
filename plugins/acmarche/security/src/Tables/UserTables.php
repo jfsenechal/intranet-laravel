@@ -7,8 +7,14 @@ use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\RoleRepository;
 use App\Models\User;
-use Filament\Forms\Form;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -16,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserTables
 {
-    public static function table(Table $table): Table
+    public static function configure(Table $table): Table
     {
         return $table
             ->defaultPaginationPageOption(50)
@@ -50,13 +56,13 @@ class UserTables
                 SelectFilter::make('roles')
                     ->relationship('roles', 'name'),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -81,7 +87,7 @@ class UserTables
                         ->pluck('name')->implode(', ')),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make('create')
+                CreateAction::make('create')
                     ->label('Ajouter un utilisateur')
                     ->icon('tabler-user-plus')
                     ->action(function (array $data) use ($owner) {
@@ -97,18 +103,18 @@ class UserTables
                         }
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                     ->fillForm(function (User $record) use ($owner): array {
                         $roles = RoleRepository::findByModuleAndUser($owner, $record);
                         $data['roles'] = $roles->pluck('name')->toArray();
 
                         return $data;
                     })
-                    ->form(fn(Form $form) => ModuleForm::addUserFromModule($form, $owner))
-                    ->action(function (array $data, Form $form) use ($owner) {
+                    ->schema(fn(Schema $schema) => ModuleForm::addUserFromModule($schema, $owner))
+                    ->action(function (array $data, Schema $schema) use ($owner) {
                         try {
-                            ModuleHandler::syncUserRolesForModule($owner, $form->getRecord(), $data);
+                            ModuleHandler::syncUserRolesForModule($owner, $schema->getRecord(), $data);
                             Notification::make()
                                 ->success()
                                 ->title('Utilisateur ajouté');
@@ -118,7 +124,7 @@ class UserTables
                                 ->title('Erreur '.$e->getMessage());
                         }
                     }),
-                Tables\Actions\Action::make('revoke')
+                Action::make('revoke')
                     ->label('Révoquer')
                     ->icon('tabler-user-minus')
                     ->color('danger')

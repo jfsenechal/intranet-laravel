@@ -4,13 +4,17 @@ namespace AcMarche\News\Tables;
 
 use AcMarche\News\Filament\Resources\CategoryResource;
 use AcMarche\News\Models\Category;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class CategoryTables
 {
-    public static function table(Table $table)
+    public static function configure(Table $table)
     {
         return $table
             ->defaultSort('name')
@@ -36,13 +40,13 @@ class CategoryTables
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

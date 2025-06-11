@@ -27,9 +27,9 @@ class ModuleResource extends Resource
         return NavigationGroupEnum::SETTINGS->getLabel();
     }
 
-    public static function form(Schema $form): Schema
+    public static function form(Schema $schema): Schema
     {
-        return ModuleForm::createForm($form);
+        return ModuleForm::configure($form);
     }
 
     public static function table(Table $table): Table

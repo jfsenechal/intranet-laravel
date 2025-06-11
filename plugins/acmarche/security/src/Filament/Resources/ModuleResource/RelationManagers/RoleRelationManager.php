@@ -30,7 +30,7 @@ class RoleRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return RoleForm::createForm($schema);
+        return RoleForm::configure($schema);
     }
 
 }

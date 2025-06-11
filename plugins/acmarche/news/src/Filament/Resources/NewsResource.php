@@ -21,14 +21,14 @@ class NewsResource extends Resource
 
     protected static ?string $navigationLabel = 'L\'actualité';
 
-    public static function form(Schema $form): Schema
+    public static function form(Schema $schema): Schema
     {
-        return NewsForm::createForm($form);
+        return NewsForm::configure($form);
     }
 
     public static function table(Table $table): Table
     {
-        return NewsTables::table($table);
+        return NewsTables::configure($table);
     }
 
     public static function getRelations(): array

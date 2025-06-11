@@ -7,9 +7,9 @@ use Filament\Schemas\Schema;
 
 class UserForm
 {
-    public static function createForm(Schema $form): Schema
+    public static function configure(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([]);
     }
 

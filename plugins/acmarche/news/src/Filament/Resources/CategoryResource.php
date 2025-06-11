@@ -23,14 +23,14 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Catégories';
 
-    public static function form(Schema $form): Schema
+    public static function form(Schema $schema): Schema
     {
-        return CategoryForm::createForm($form);
+        return CategoryForm::configure($form);
     }
 
     public static function table(Table $table): Table
     {
-        return CategoryTables::table($table);
+        return CategoryTables::configure($table);
     }
 
     public static function getRelations(): array

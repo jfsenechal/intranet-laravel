@@ -6,6 +6,12 @@ use AcMarche\Security\Filament\Resources\ModuleResource;
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
 use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -32,13 +38,13 @@ class ModuleTables
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -60,16 +66,16 @@ class ModuleTables
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make('create')
+                CreateAction::make('create')
                     ->label('Ajouter un new module')
                     ->icon('tabler-plus')
                     ->action(function (array $data) use ($ownerRecord) {
                         ModuleHandler::addModuleFromUser($ownerRecord, $data);
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('revoke')
+            ->recordActions([
+                EditAction::make(),
+                Action::make('revoke')
                     ->label('Révoquer')
                     ->icon('tabler-user-minus')
                     ->color('danger')

@@ -3,17 +3,17 @@
 namespace AcMarche\News\Form;
 
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 
 class CategoryForm
 {
-    public static function createForm(Form $form): Form
+    public static function configure(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->label('Nom')
-                    ->required()
+                    ->required(),
             ]);
     }
 }

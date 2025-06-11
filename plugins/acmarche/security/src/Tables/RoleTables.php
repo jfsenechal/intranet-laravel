@@ -2,12 +2,15 @@
 
 namespace AcMarche\Security\Tables;
 
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class RoleTables
 {
-    public static function inline($table): Table
+    public static function inline(Table $table): Table
     {
         return $table
             ->defaultPaginationPageOption(50)
@@ -19,11 +22,11 @@ class RoleTables
                     ->label('Description'),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make('create'),
+                CreateAction::make('create'),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 }

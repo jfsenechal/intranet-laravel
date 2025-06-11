@@ -18,11 +18,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ModuleForm
 {
-    public static function createForm(Schema $form): Schema
+    public static function configure(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(2)
-            ->schema([
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(120),
@@ -48,35 +48,35 @@ class ModuleForm
             ]);
     }
 
-    public static function addUserFromModule(Schema $form, Model|Module $module): Schema
+    public static function addUserFromModule(Schema $schema, Model|Module $module): Schema
     {
-        $user = $form->getRecord();//if new null value, if edit user instance
-        $schema = [];
+        $user = $schema->getRecord();//if new null value, if edit user instance
+        $components = [];
 
         if (!$user?->id > 0) {
-            $schema[] = Forms\Components\Select::make('user')
+            $components[] = Forms\Components\Select::make('user')
                 ->label('Utilisateur')
                 ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
                 ->columnSpanFull();
         }
 
-        $schema[] = self::rolesField($module);
+        $components[] = self::rolesField($module);
 
-        $form->schema($schema);
+        $schema->components($components);
 
-        return $form;
+        return $schema;
     }
 
-    public static function addModuleFromUser(Schema $form, User|Model $user): Schema
+    public static function addModuleFromUser(Schema $schema, User|Model $user): Schema
     {
         /**
          * @var Module|null $module
          */
-        $module = $form->getRecord();//if new null if edit module instance
+        $module = $schema->getRecord();//if new null if edit module instance
 
-        $schema = [];
+        $components = [];
         if (!$module?->id > 0) {
-            $schema[] =
+            $components[] =
                 Forms\Components\Select::make('module')
                     ->label('Module')
                     ->options(fn(ModuleRepository $repository) => $repository->getModulesForSelect())
@@ -88,11 +88,11 @@ class ModuleForm
                     ->columnSpanFull();
         }
 
-        $schema[] = self::rolesField($module);
+        $components[] = self::rolesField($module);
 
-        $form->schema($schema);
+        $schema->schema($components);
 
-        return $form;
+        return $schema;
     }
 
     private static function rolesField(?Module $module): CheckboxList

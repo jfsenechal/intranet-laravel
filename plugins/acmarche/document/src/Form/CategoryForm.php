@@ -7,9 +7,9 @@ use Filament\Schemas\Schema;
 
 class CategoryForm
 {
-    public static function createForm(Schema $form): Schema
+    public static function configure(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->components([
                 Forms\Components\TextInput::make('name')
                     ->label('Nom')

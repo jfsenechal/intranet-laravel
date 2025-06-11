@@ -12,9 +12,9 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class DocumentForm
 {
-    public static function createForm(Schema $form): Schema
+    public static function configure(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(1)
             ->components([
                 Split::make([

@@ -7,9 +7,9 @@ use Filament\Schemas\Schema;
 
 class RoleForm
 {
-    public static function createForm(Schema $form): Schema
+    public static function configure(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(2)
             ->schema([
                 TextInput::make('name')

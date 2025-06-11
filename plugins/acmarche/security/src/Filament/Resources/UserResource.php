@@ -28,14 +28,14 @@ class UserResource extends Resource
         return 'Agents';
     }
 
-    public static function form(Schema $form): Schema
+    public static function form(Schema $schema): Schema
     {
-        return UserForm::createForm($form);
+        return UserForm::configure($form);
     }
 
     public static function table(Table $table): Table
     {
-        return UserTables::table($table);
+        return UserTables::configure($table);
     }
 
     public static function getRelations(): array

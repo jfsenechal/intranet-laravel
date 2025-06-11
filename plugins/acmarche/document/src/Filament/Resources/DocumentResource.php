@@ -19,9 +19,9 @@ class DocumentResource extends Resource
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Schema $form): Schema
+    public static function form(Schema $schema): Schema
     {
-        return DocumentForm::createForm($form);
+        return DocumentForm::configure($form);
     }
 
     public static function table(Table $table): Table
