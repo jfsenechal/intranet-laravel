@@ -3,12 +3,11 @@
 namespace AcMarche\Publication\Filament\Resources;
 
 use AcMarche\Publication\Filament\Resources\CategoryResource\Pages;
+use AcMarche\Publication\Filament\Resources\CategoryResource\Schema\CategoryForm;
+use AcMarche\Publication\Filament\Resources\CategoryResource\Tables\CategoryTables;
 use AcMarche\Publication\Models\Category;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Table;
 
 final class CategoryResource extends Resource
@@ -25,63 +24,12 @@ final class CategoryResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->schema([
-                Flex::make([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Name')
-                            ->required()
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('url')
-                            ->label('URL')
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('wpCategoryId')
-                            ->label('WP Category ID')
-                            ->required()
-                            ->maxLength(255),
-                    ]),
-            ]);
+        return CategoryForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('url')
-                    ->label('URL')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('wpCategoryId')
-                    ->label('WP Category ID')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('publications_count')
-                    ->label('Publications')
-                    ->counts('publications')
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+        return CategoryTables::configure($table);
     }
 
     public static function getRelations(): array

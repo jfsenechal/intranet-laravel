@@ -1,18 +1,13 @@
 <?php
 
-
-
 namespace AcMarche\Security;
 
-use AcMarche\App\Providers\RegisterDatabaseConnectionTrait;
 use AcMarche\Security\Console\Commands\CreateUserCommand;
 use AcMarche\Security\Console\Commands\SyncUserCommand;
 use Illuminate\Support\ServiceProvider;
 
 class SecurityServiceProvider extends ServiceProvider
 {
-    use RegisterDatabaseConnectionTrait;
-
     /**
      * Register services.
      */
@@ -48,7 +43,7 @@ class SecurityServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CreateUserCommand::class,
-                SyncUserCommand::class
+                SyncUserCommand::class,
             ]);
         }
 
@@ -71,5 +66,17 @@ class SecurityServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/security'),
         ], 'security-views');
+    }
+
+    /**
+     * Register the module's database connection.
+     */
+    protected function registerDatabaseConnection(): void
+    {
+        $connections = require __DIR__.'/../config/database.php';
+
+        foreach ($connections['connections'] ?? [] as $name => $config) {
+            config(['database.connections.'.$name => $config]);
+        }
     }
 }

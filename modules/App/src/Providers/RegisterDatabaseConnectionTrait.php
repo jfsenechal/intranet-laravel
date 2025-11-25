@@ -9,7 +9,7 @@ trait RegisterDatabaseConnectionTrait
      */
     protected function registerDatabaseConnection(): void
     {
-        $connections = require __DIR__.'/../../config/database.php';
+        $connections = require __DIR__.'/../config/database.php';
 
         foreach ($connections['connections'] ?? [] as $name => $config) {
             config(['database.connections.'.$name => $config]);

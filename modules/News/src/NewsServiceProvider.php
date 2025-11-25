@@ -2,13 +2,10 @@
 
 namespace AcMarche\News;
 
-use AcMarche\App\Providers\RegisterDatabaseConnectionTrait;
 use Illuminate\Support\ServiceProvider;
 
 class NewsServiceProvider extends ServiceProvider
 {
-    use RegisterDatabaseConnectionTrait;
-
     /**
      * Register services.
      */
@@ -59,5 +56,17 @@ class NewsServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/news'),
         ], 'news-views');
+    }
+
+    /**
+     * Register the module's database connection.
+     */
+    protected function registerDatabaseConnection(): void
+    {
+        $connections = require __DIR__.'/../config/database.php';
+
+        foreach ($connections['connections'] ?? [] as $name => $config) {
+            config(['database.connections.'.$name => $config]);
+        }
     }
 }
