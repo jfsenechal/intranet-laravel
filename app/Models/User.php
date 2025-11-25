@@ -15,11 +15,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use AcMarche\Security\Ldap\User as UserLdap;
 
 #[UseFactory(UserFactory::class)]
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -163,5 +163,30 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    public static function generateDataFromLdap(UserLdap $userLdap, string $username): array
+    {
+        $email = $userLdap->getFirstAttribute('mail');
+
+        /*   $department = match (true) {
+               str_contains($email, 'cpas.marche') => DepartmentEnum::CPAS->value,
+               str_contains($email, 'ac.marche') => DepartmentEnum::VILLE->value,
+               default => DepartmentEnum::VILLE->value,
+           };*/
+
+        $fullName = $userLdap->getFirstAttribute('givenname').' '.$userLdap->getFirstAttribute('sn');
+
+        return [
+            'name' => $fullName,
+            'first_name' => $userLdap->getFirstAttribute('givenname'),
+            'last_name' => $userLdap->getFirstAttribute('sn'),
+            'email' => $email,
+            // 'departments' => [$department],
+            'mobile' => $userLdap->getFirstAttribute('mobile'),
+            'phone' => $userLdap->getFirstAttribute('telephoneNumber'),
+            'extension' => $userLdap->getFirstAttribute('ipPhone'),
+            'uuid' => Str::uuid(),
+        ];
     }
 }

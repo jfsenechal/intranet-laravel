@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Security\Form;
+namespace AcMarche\Security\Filament\Resources\ModuleResource\Schema;
 
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\ModuleRepository;

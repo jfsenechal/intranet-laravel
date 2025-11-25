@@ -1,7 +1,7 @@
 <?php
 
 
-namespace AcMarche\Security\Form;
+namespace AcMarche\Security\Filament\Resources\UserResource\Schema;
 
 use Filament\Schemas\Schema;
 

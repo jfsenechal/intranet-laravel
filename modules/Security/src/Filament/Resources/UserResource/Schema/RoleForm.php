@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Security\Form;
+namespace AcMarche\Security\Filament\Resources\UserResource\Schema;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;

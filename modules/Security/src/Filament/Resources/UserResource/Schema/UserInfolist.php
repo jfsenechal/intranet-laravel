@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Security\Schemas;
+namespace AcMarche\Security\Filament\Resources\UserResource\Schema;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;

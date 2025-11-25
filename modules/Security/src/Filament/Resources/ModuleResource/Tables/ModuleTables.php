@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Security\Tables;
+namespace AcMarche\Security\Filament\Resources\ModuleResource\Tables;
 
 use AcMarche\Security\Filament\Resources\ModuleResource;
 use AcMarche\Security\Handler\ModuleHandler;

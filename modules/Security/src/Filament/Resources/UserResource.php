@@ -5,8 +5,8 @@ namespace AcMarche\Security\Filament\Resources;
 use AcMarche\Security\Constant\NavigationGroupEnum;
 use AcMarche\Security\Filament\Resources\UserResource\Pages;
 use AcMarche\Security\Filament\Resources\UserResource\RelationManagers\ModuleRelationManager;
-use AcMarche\Security\Form\UserForm;
-use AcMarche\Security\Tables\UserTables;
+use AcMarche\Security\Filament\Resources\UserResource\Schema\UserForm;
+use AcMarche\Security\Filament\Resources\UserResource\Tables\UserTables;
 use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -30,7 +30,7 @@ class UserResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return UserForm::configure($form);
+        return UserForm::configure($schema);
     }
 
     public static function table(Table $table): Table

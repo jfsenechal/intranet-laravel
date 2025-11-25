@@ -1,8 +1,8 @@
 <?php
 
-namespace AcMarche\Security\Tables;
+namespace AcMarche\Security\Filament\Resources\UserResource\Tables;
 
-use AcMarche\Security\Form\ModuleForm;
+use AcMarche\Security\Filament\Resources\ModuleResource\Schema\ModuleForm;
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\RoleRepository;

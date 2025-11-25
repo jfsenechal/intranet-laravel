@@ -8,11 +8,10 @@ use AcMarche\Security\Filament\Resources\ModuleResource\Pages\EditModule;
 use AcMarche\Security\Filament\Resources\ModuleResource\Pages\ListModule;
 use AcMarche\Security\Filament\Resources\ModuleResource\Pages\ViewModule;
 use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\RoleRelationManager;
-use AcMarche\Security\Form\ModuleForm;
+use AcMarche\Security\Filament\Resources\ModuleResource\Schema\ModuleForm;
+use AcMarche\Security\Filament\Resources\ModuleResource\Tables\ModuleTables;
 use AcMarche\Security\Models\Module;
-use AcMarche\Security\Tables\ModuleTables;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
@@ -29,7 +28,7 @@ class ModuleResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return ModuleForm::configure($form);
+        return ModuleForm::configure($schema);
     }
 
     public static function table(Table $table): Table

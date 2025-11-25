@@ -8,7 +8,7 @@ use Illuminate\Contracts\Support\Htmlable;
 class SecurityPage extends Page
 {
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
-    protected string $view = 'acsecurity::filament.pages.security';
+    protected string $view = 'security::filament.pages.security';
 
     public static function getNavigationLabel(): string
     {

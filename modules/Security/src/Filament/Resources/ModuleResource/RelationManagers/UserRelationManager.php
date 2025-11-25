@@ -2,8 +2,8 @@
 
 namespace AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers;
 
-use AcMarche\Security\Form\ModuleForm;
-use AcMarche\Security\Tables\UserTables;
+use AcMarche\Security\Filament\Resources\ModuleResource\Schema\ModuleForm;
+use AcMarche\Security\Filament\Resources\UserResource\Tables\UserTables;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;

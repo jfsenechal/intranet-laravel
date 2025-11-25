@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Console\Commands;
 
-use App\Ldap\User as UserLdap;
+use AcMarche\Security\Ldap\User as UserLdap;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Str;
@@ -42,7 +42,7 @@ final class SyncUserCommand extends Command
             }
             $username = $userLdap->getFirstAttribute('samaccountname');
             if (!$user = User::where('username', $username)->first()) {
-                //  $this->addUser($username, $userLdap);
+                $this->addUser($username, $userLdap);
             } else {
                 $this->updateUser($user, $userLdap);
             }
@@ -55,11 +55,11 @@ final class SyncUserCommand extends Command
 
     private function addUser(string $username, UserLdap $userLdap): void
     {
-        $data = $this->data($userLdap, $username);
+        $data = User::generateDataFromLdap($userLdap, $username);
         $data['username'] = $username;
         $data['password'] = Str::password();
         $user = User::create($data);
-        $user->addRole($this->agentRole);
+       // $user->addRole('ROLE_ADMIN');
         $this->info('Add '.$user->first_name.' '.$user->last_name);
     }
 

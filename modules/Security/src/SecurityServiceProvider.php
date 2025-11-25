@@ -5,6 +5,7 @@
 namespace AcMarche\Security;
 
 use AcMarche\Security\Console\Commands\CreateUserCommand;
+use AcMarche\Security\Console\Commands\SyncUserCommand;
 use Illuminate\Support\ServiceProvider;
 
 class SecurityServiceProvider extends ServiceProvider
@@ -44,6 +45,7 @@ class SecurityServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CreateUserCommand::class,
+                SyncUserCommand::class
             ]);
         }
 

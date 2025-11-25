@@ -6,7 +6,6 @@ use AcMarche\Security\Filament\Resources\ModuleResource;
 use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\UserRelationManager;
 use Filament\Actions;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Security\Tables;
+namespace AcMarche\Security\Filament\Resources\UserResource\Tables;
 
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;

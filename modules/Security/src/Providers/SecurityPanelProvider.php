@@ -2,11 +2,11 @@
 
 namespace AcMarche\Security\Providers;
 
+use AcMarche\App\Traits\PluginTrait;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -21,8 +21,12 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class SecurityPanelProvider extends PanelProvider
 {
+    use PluginTrait;
+
     public function panel(Panel $panel): Panel
     {
+        $path = $this->getPluginBasePath().'/../';
+
         return $panel
             ->id('security-panel')
             ->path('security')
@@ -32,15 +36,14 @@ class SecurityPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(Width::Full)
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Security\\Filament\\Resources')
+            ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Security\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\Security\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+
             ])
             ->middleware([
                 EncryptCookies::class,
