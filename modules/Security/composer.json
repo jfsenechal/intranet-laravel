@@ -24,7 +24,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "AcMarche\\Security\\Providers\\SecurityServiceProvider"
+                "AcMarche\\Security\\SecurityServiceProvider"
             ]
         }
     },

@@ -2,7 +2,7 @@
 
 
 
-namespace AcMarche\Security\Providers;
+namespace AcMarche\Security;
 
 use AcMarche\App\Providers\RegisterDatabaseConnectionTrait;
 use AcMarche\Security\Console\Commands\CreateUserCommand;

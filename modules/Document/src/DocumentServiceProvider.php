@@ -2,7 +2,7 @@
 
 
 
-namespace AcMarche\Document\Providers;
+namespace AcMarche\Document;
 
 use Illuminate\Support\ServiceProvider;
 

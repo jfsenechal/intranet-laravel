@@ -1,8 +1,6 @@
 <?php
 
-
-
-namespace AcMarche\News\Providers;
+namespace AcMarche\News;
 
 use AcMarche\App\Providers\RegisterDatabaseConnectionTrait;
 use Illuminate\Support\ServiceProvider;

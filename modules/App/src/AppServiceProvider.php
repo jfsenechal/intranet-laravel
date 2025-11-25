@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\App\Providers;
+namespace AcMarche\App;
 
 use Illuminate\Support\ServiceProvider;
 

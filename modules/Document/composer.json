@@ -24,7 +24,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "AcMarche\\Document\\Providers\\DocumentServiceProvider"
+                "AcMarche\\Document\\DocumentServiceProvider"
             ]
         }
     },
