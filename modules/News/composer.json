@@ -1,0 +1,33 @@
+{
+    "name": "acmarche/news",
+    "description": "News management module for AcMarche",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "AcMarche",
+            "email": "info@acmarche.be"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^4.0",
+        "illuminate/contracts": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\News\\": "src/",
+            "AcMarche\\News\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\News\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\News\\NewsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

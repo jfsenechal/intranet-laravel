@@ -1,0 +1,30 @@
+{
+    "name": "acmarche/news",
+    "description": "",
+    "authors": [
+        {
+            "name": "Jf Sénéchal",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\News\\Providers\\NewsServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\News\\": "src/",
+            "AcMarche\\News\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\News\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AcMarche\\News\\Tests\\": "tests/"
+        }
+    }
+}

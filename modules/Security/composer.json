@@ -1,0 +1,33 @@
+{
+    "name": "acmarche/security",
+    "description": "Security management module for AcMarche",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "AcMarche",
+            "email": "info@acmarche.be"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^4.0",
+        "illuminate/contracts": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\Security\\": "src/",
+            "AcMarche\\Security\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\Security\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\Security\\SecurityServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
