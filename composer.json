@@ -11,6 +11,7 @@
         "acmarche/app": "*@dev",
         "acmarche/document": "*@dev",
         "acmarche/news": "*@dev",
+        "acmarche/publication": "*@dev",
         "acmarche/security": "*@dev",
         "barryvdh/laravel-debugbar": "^3.16",
         "directorytree/ldaprecord-laravel": "^3.4",
@@ -34,6 +35,10 @@
         {
             "type": "path",
             "url": "./modules/News"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Publication"
         },
         {
             "type": "path",

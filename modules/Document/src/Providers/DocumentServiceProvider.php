@@ -2,21 +2,21 @@
 
 
 
-namespace AcMarche\News;
+namespace AcMarche\Document\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class NewsServiceProvider extends ServiceProvider
+class DocumentServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
     public function register(): void
     {
-        // Merge news config
+        // Merge document config
         $this->mergeConfigFrom(
-            __DIR__.'/../config/news.php',
-            'news'
+            __DIR__.'/../config/document.php',
+            'document'
         );
 
         // Register database connection from module config
@@ -32,7 +32,7 @@ class NewsServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         // Load views
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'news');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'document');
 
         // Load routes
         if (file_exists(__DIR__.'/../routes/web.php')) {
@@ -41,23 +41,23 @@ class NewsServiceProvider extends ServiceProvider
 
         // Publish config
         $this->publishes([
-            __DIR__.'/../config/news.php' => config_path('news.php'),
-        ], 'news-config');
+            __DIR__.'/../config/document.php' => config_path('document.php'),
+        ], 'document-config');
 
         // Publish database config
         $this->publishes([
-            __DIR__.'/../config/database.php' => config_path('news-database.php'),
-        ], 'news-database-config');
+            __DIR__.'/../config/database.php' => config_path('document-database.php'),
+        ], 'document-database-config');
 
         // Publish migrations
         $this->publishes([
             __DIR__.'/../database/migrations' => database_path('migrations'),
-        ], 'news-migrations');
+        ], 'document-migrations');
 
         // Publish views
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/news'),
-        ], 'news-views');
+            __DIR__.'/../resources/views' => resource_path('views/vendor/document'),
+        ], 'document-views');
     }
 
     /**

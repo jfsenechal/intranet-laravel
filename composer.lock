@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "efac28395264cd9d23fc057c6ca0e9a9",
+    "content-hash": "aa204e34f3569c38ca96262d44f56c0e",
     "packages": [
         {
             "name": "acmarche/app",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "./modules/App",
-                "reference": "c73e82700c11baed0e7fac1d3895afb3be7a4d86"
+                "reference": "8b7ef8e9ded5932e908bf1e05b90c64056c69061"
             },
             "require": {
                 "filament/filament": "^4.0",
@@ -23,7 +23,7 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "AcMarche\\App\\AppServiceProvider"
+                        "AcMarche\\App\\Providers\\AppServiceProvider"
                     ]
                 }
             },
@@ -54,7 +54,7 @@
             "dist": {
                 "type": "path",
                 "url": "./modules/Document",
-                "reference": "55bd9bbee21a778213a4eb5ab09a5fea03185e53"
+                "reference": "c1002307c517e1cf39b998bb53b85958ab25798e"
             },
             "require": {
                 "filament/filament": "^4.0",
@@ -65,7 +65,7 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "AcMarche\\Document\\DocumentServiceProvider"
+                        "AcMarche\\Document\\Providers\\DocumentServiceProvider"
                     ]
                 }
             },
@@ -133,12 +133,12 @@
             }
         },
         {
-            "name": "acmarche/security",
+            "name": "acmarche/publication",
             "version": "dev-master",
             "dist": {
                 "type": "path",
-                "url": "./modules/Security",
-                "reference": "f7f65833d26f247f0d1417db50f6c521ca9b2901"
+                "url": "./modules/Publication",
+                "reference": "3a3e82dae6724abb6f106c5854c6a4dbc61b7ad4"
             },
             "require": {
                 "filament/filament": "^4.0",
@@ -149,7 +149,49 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "AcMarche\\Security\\SecurityServiceProvider"
+                        "AcMarche\\Publication\\Providers\\PublicationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\Publication\\": "src/",
+                    "AcMarche\\Publication\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\Publication\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "Publication management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/security",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/Security",
+                "reference": "8073e251269c45f37a43ffd9361b343382a3598e"
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "illuminate/contracts": "^12.0",
+                "php": "^8.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\Security\\Providers\\SecurityServiceProvider"
                     ]
                 }
             },
@@ -10222,41 +10264,41 @@
         },
         {
             "name": "pestphp/pest",
-            "version": "v4.1.4",
+            "version": "v4.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pestphp/pest.git",
-                "reference": "1a39826935b730b0bcad805013d4b2607b83fe3f"
+                "reference": "27aa305897a808894548f1fdb6c7c46763c0fabf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest/zipball/1a39826935b730b0bcad805013d4b2607b83fe3f",
-                "reference": "1a39826935b730b0bcad805013d4b2607b83fe3f",
+                "url": "https://api.github.com/repos/pestphp/pest/zipball/27aa305897a808894548f1fdb6c7c46763c0fabf",
+                "reference": "27aa305897a808894548f1fdb6c7c46763c0fabf",
                 "shasum": ""
             },
             "require": {
-                "brianium/paratest": "^7.14.0",
-                "nunomaduro/collision": "^8.8.2",
-                "nunomaduro/termwind": "^2.3.1",
+                "brianium/paratest": "^7.14.2",
+                "nunomaduro/collision": "^8.8.3",
+                "nunomaduro/termwind": "^2.3.3",
                 "pestphp/pest-plugin": "^4.0.0",
                 "pestphp/pest-plugin-arch": "^4.0.0",
                 "pestphp/pest-plugin-mutate": "^4.0.1",
-                "pestphp/pest-plugin-profanity": "^4.1.0",
+                "pestphp/pest-plugin-profanity": "^4.2.0",
                 "php": "^8.3.0",
-                "phpunit/phpunit": "^12.4.1",
+                "phpunit/phpunit": "^12.4.4",
                 "symfony/process": "^7.3.4"
             },
             "conflict": {
                 "filp/whoops": "<2.18.3",
-                "phpunit/phpunit": ">12.4.1",
+                "phpunit/phpunit": ">12.4.4",
                 "sebastian/exporter": "<7.0.0",
                 "webmozart/assert": "<1.11.0"
             },
             "require-dev": {
                 "pestphp/pest-dev-tools": "^4.0.0",
                 "pestphp/pest-plugin-browser": "^4.1.1",
-                "pestphp/pest-plugin-type-coverage": "^4.0.2",
-                "psy/psysh": "^0.12.12"
+                "pestphp/pest-plugin-type-coverage": "^4.0.3",
+                "psy/psysh": "^0.12.14"
             },
             "bin": [
                 "bin/pest"
@@ -10322,7 +10364,7 @@
             ],
             "support": {
                 "issues": "https://github.com/pestphp/pest/issues",
-                "source": "https://github.com/pestphp/pest/tree/v4.1.4"
+                "source": "https://github.com/pestphp/pest/tree/v4.1.5"
             },
             "funding": [
                 {
@@ -10334,7 +10376,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-11-20T02:59:27+00:00"
+            "time": "2025-11-25T11:18:28+00:00"
         },
         {
             "name": "pestphp/pest-plugin",
@@ -11358,16 +11400,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.4.1",
+            "version": "12.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "fc5413a2e6d240d2f6d9317bdf7f0a24e73de194"
+                "reference": "9253ec75a672e39fcc9d85bdb61448215b8162c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fc5413a2e6d240d2f6d9317bdf7f0a24e73de194",
-                "reference": "fc5413a2e6d240d2f6d9317bdf7f0a24e73de194",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/9253ec75a672e39fcc9d85bdb61448215b8162c7",
+                "reference": "9253ec75a672e39fcc9d85bdb61448215b8162c7",
                 "shasum": ""
             },
             "require": {
@@ -11435,7 +11477,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.4.1"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.4.4"
             },
             "funding": [
                 {
@@ -11459,7 +11501,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-09T14:08:29+00:00"
+            "time": "2025-11-21T07:39:11+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -12660,6 +12702,7 @@
         "acmarche/app": 20,
         "acmarche/document": 20,
         "acmarche/news": 20,
+        "acmarche/publication": 20,
         "acmarche/security": 20
     },
     "prefer-stable": true,

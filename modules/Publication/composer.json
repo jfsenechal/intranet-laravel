@@ -1,6 +1,6 @@
 {
-    "name": "acmarche/security",
-    "description": "Security management module for AcMarche",
+    "name": "acmarche/publication",
+    "description": "Publication management module for AcMarche",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -16,15 +16,15 @@
     },
     "autoload": {
         "psr-4": {
-            "AcMarche\\Security\\": "src/",
-            "AcMarche\\Security\\Database\\Factories\\": "database/factories/",
-            "AcMarche\\Security\\Database\\Seeders\\": "database/seeders/"
+            "AcMarche\\Publication\\": "src/",
+            "AcMarche\\Publication\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\Publication\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "AcMarche\\Security\\Providers\\SecurityServiceProvider"
+                "AcMarche\\Publication\\Providers\\PublicationServiceProvider"
             ]
         }
     },

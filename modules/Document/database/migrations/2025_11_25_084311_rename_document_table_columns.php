@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        Schema::connection('maria-document')->table('document', function (Blueprint $table) {
+            $table->rename('documents');
+        });
+
         Schema::connection('maria-document')->table('documents', function (Blueprint $table) {
             $table->renameColumn('titre', 'name');
             $table->renameColumn('categorie_id', 'category_id');

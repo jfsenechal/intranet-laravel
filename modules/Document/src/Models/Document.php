@@ -21,7 +21,7 @@ class Document extends Model
     protected $connection = 'maria-document';
 
     protected $fillable = [
-        'title',
+        'name',
         'content',
         'file_path',
         'file_name',
@@ -31,7 +31,7 @@ class Document extends Model
         'is_published',
         'published_at',
         'user_add',
-        'categorie_id',
+        'category_id',
     ];
 
     protected function casts(): array
