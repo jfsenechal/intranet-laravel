@@ -15,22 +15,26 @@ modules/ModuleName/
 ├── composer.json                          # Package definition
 ├── src/
 │   ├── ModuleNameServiceProvider.php     # Service provider
+│   ├── Providers/                        # Additional providers
+│   │   └── ModuleNamePanelProvider.php   # Filament panel provider (optional)
 │   ├── Models/                           # Eloquent models
 │   │   └── ModelName.php
 │   └── Filament/
-│       └── Resources/
-│           ├── ModelNameResource.php     # Main resource class (kept minimal)
-│           └── ModelNameResource/
-│               ├── Pages/                # Resource pages
-│               │   ├── ListModelNames.php
-│               │   ├── CreateModelName.php
-│               │   ├── EditModelName.php
-│               │   └── ViewModelName.php
-│               ├── Schema/               # Form and Infolist configurations
-│               │   ├── ModelNameForm.php
-│               │   └── ModelNameInfolist.php
-│               └── Tables/               # Table configurations
-│                   └── ModelNameTables.php
+│       ├── Resources/                    # Filament resources
+│       │   ├── ModelNameResource.php     # Main resource class (kept minimal)
+│       │   └── ModelNameResource/
+│       │       ├── Pages/                # Resource pages
+│       │       │   ├── ListModelNames.php
+│       │       │   ├── CreateModelName.php
+│       │       │   ├── EditModelName.php
+│       │       │   └── ViewModelName.php
+│       │       ├── Schema/               # Form and Infolist configurations
+│       │       │   ├── ModelNameForm.php
+│       │       │   └── ModelNameInfolist.php
+│       │       └── Tables/               # Table configurations
+│       │           └── ModelNameTables.php
+│       ├── Pages/                        # Custom Filament pages (optional)
+│       └── Widgets/                      # Filament widgets (optional)
 ├── database/
 │   └── migrations/                       # Module migrations
 ├── resources/
@@ -236,8 +240,12 @@ class ModelNameInfolist
 ### 1. Create Module Directory Structure
 
 ```bash
+# Basic module structure
 mkdir -p modules/ModuleName/{src,database/migrations,resources/views,config}
 mkdir -p modules/ModuleName/src/{Models,Filament/Resources}
+
+# If creating a Filament panel, also create:
+mkdir -p modules/ModuleName/src/{Providers,Filament/Pages,Filament/Widgets}
 ```
 
 ### 2. Create composer.json
@@ -296,6 +304,143 @@ class ModuleNameServiceProvider extends ServiceProvider
     }
 }
 ```
+
+### 3b. Create Panel Provider (for Filament Panels)
+
+If your module needs its own Filament panel (separate admin area), create a PanelProvider:
+
+**File:** `modules/ModuleName/src/Providers/ModuleNamePanelProvider.php`
+
+```php
+<?php
+
+namespace AcMarche\ModuleName\Providers;
+
+use AcMarche\App\Traits\PluginTrait;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+
+final class ModuleNamePanelProvider extends PanelProvider
+{
+    use PluginTrait;
+
+    public function panel(Panel $panel): Panel
+    {
+        $path = $this->getPluginBasePath().'/../';
+
+        return $panel
+            ->id('module-name-panel')
+            ->path('module-name')
+            ->brandName('Module Display Name')
+            ->colors([
+                'primary' => Color::Blue,  // Choose appropriate color
+            ])
+            ->unsavedChangesAlerts()
+            ->sidebarCollapsibleOnDesktop()
+            ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\ModuleName\\Filament\\Resources')
+            ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\ModuleName\\Filament\\Pages')
+            ->pages([
+                // Manually registered pages can go here
+            ])
+            ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\ModuleName\\Filament\\Widgets')
+            ->widgets([
+                // Manually registered widgets can go here
+            ])
+            ->middleware([
+                EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
+                StartSession::class,
+                AuthenticateSession::class,
+                ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
+            ])
+            ->authMiddleware([
+                Authenticate::class,
+            ]);
+    }
+}
+```
+
+**Important Panel Provider Notes:**
+
+1. **PluginTrait**: Always use the `PluginTrait` to correctly resolve paths within the module
+2. **Panel ID**: Must be unique across all panels (format: `module-name-panel`)
+3. **URL Path**: The URL where the panel will be accessible (e.g., `/module-name`)
+4. **Brand Name**: User-friendly name displayed in the panel
+5. **Colors**: Choose a distinctive primary color using `Filament\Support\Colors\Color`
+6. **Auto-discovery**: The panel will automatically discover Resources, Pages, and Widgets in the specified directories
+7. **Middleware**: Standard middleware stack required for Filament panels
+
+**Register the PanelProvider** in your module's `composer.json`:
+
+```json
+{
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\ModuleName\\ModuleNameServiceProvider",
+                "AcMarche\\ModuleName\\Providers\\ModuleNamePanelProvider"
+            ]
+        }
+    }
+}
+```
+
+**Available Colors for Panels:**
+
+```php
+use Filament\Support\Colors\Color;
+
+// Common color options:
+Color::Amber
+Color::Blue
+Color::Cyan
+Color::Emerald
+Color::Fuchsia
+Color::Gray
+Color::Green
+Color::Indigo
+Color::Lime
+Color::Orange
+Color::Pink
+Color::Purple
+Color::Red
+Color::Rose
+Color::Sky
+Color::Slate
+Color::Stone
+Color::Teal
+Color::Violet
+Color::Yellow
+Color::Zinc
+```
+
+**When to Create a Panel Provider:**
+
+- ✅ Your module needs its own dedicated admin interface
+- ✅ Your module should be accessible at a separate URL (e.g., `/documents`, `/mileage`)
+- ✅ Your module has multiple resources that logically belong together
+- ✅ You want module-specific branding and navigation
+
+**When NOT to Create a Panel Provider:**
+
+- ❌ Your module only has a few resources that fit well in the main admin panel
+- ❌ Your module resources are closely related to core application features
+- ❌ You don't need separate branding or navigation
 
 ### 4. Create Model
 
@@ -545,6 +690,10 @@ class ModelName extends Model
 - **Namespace**: `AcMarche\ModuleName`
 - **Package Name**: `acmarche/module-name` (kebab-case)
 - **View Namespace**: `module-name` (kebab-case)
+- **Service Provider**: `{ModuleName}ServiceProvider` (e.g., `DocumentServiceProvider`)
+- **Panel Provider**: `{ModuleName}PanelProvider` (e.g., `DocumentPanelProvider`)
+- **Panel ID**: `module-name-panel` (kebab-case with `-panel` suffix)
+- **Panel Path**: `module-name` (kebab-case, becomes URL path)
 - **Form Class**: `{ModelName}Form` (e.g., `DocumentForm`)
 - **Table Class**: `{ModelName}Tables` (e.g., `DocumentTables`)
 - **Infolist Class**: `{ModelName}Infolist` (e.g., `DocumentInfolist`)
@@ -552,8 +701,17 @@ class ModelName extends Model
 ## Reference Modules
 
 Use these existing modules as templates:
-- **Document** (`acmarche/document`) - Complete example with forms, tables, and infolists
-- **News** (`acmarche/news`) - News/blog management example
+- **Document** (`acmarche/document`) - Complete example with forms, tables, infolists, and PanelProvider
+- **News** (`acmarche/news`) - News/blog management with PanelProvider
+- **Mileage** (`acmarche/mileage`) - Mileage tracking module with PanelProvider
+- **Publication** (`acmarche/publication`) - Publication management with PanelProvider
+
+All reference modules include:
+- Proper module structure with separated concerns
+- PanelProviders for dedicated admin interfaces
+- Form and Table configuration classes
+- Comprehensive migrations
+- Auto-discovered Resources, Pages, and Widgets
 
 ## Best Practices
 
@@ -567,3 +725,9 @@ Use these existing modules as templates:
 8. **Use relationships** where applicable instead of manual queries
 9. **Test Filament resources** with feature tests for CRUD operations
 10. **Document module-specific configuration** in publishable config files
+11. **Create a PanelProvider** if your module needs its own dedicated admin interface
+12. **Use PluginTrait** in PanelProviders to correctly resolve module paths
+13. **Choose unique panel IDs and paths** to avoid conflicts with other modules
+14. **Follow Laravel table naming conventions** (plural, lowercase, snake_case)
+15. **Use English column names** and create migrations to rename French columns if needed
+16. **Always include down() methods** in migrations for proper rollback support
