@@ -54,18 +54,18 @@ return new class extends Migration {
             $table->rename('trip');
         });
         Schema::connection('maria-mileage')->table('trip', function (Blueprint $table) {
-            $table->renameColumn('distance', '');
-            $table->renameColumn('date_depart', '');
+            $table->renameColumn('distance', 'distance');
+            $table->renameColumn('date_depart', 'departure_date');
             $table->renameColumn('tarif', 'rate');
             $table->renameColumn('user', 'user_add');
             $table->renameColumn('type_deplacement', 'type_movement');
-            $table->renameColumn('lieu_depart', '');
-            $table->renameColumn('lieu_arrive', '');
-            $table->renameColumn('date_arrive', '');
-            $table->renameColumn('repas', '');
-            $table->renameColumn('heure_start', '');
-            $table->renameColumn('heure_end', '');
-            $table->renameColumn('train', '');
+            $table->renameColumn('lieu_depart', 'departure_location');
+            $table->renameColumn('lieu_arrive', 'arrival_location');
+            $table->renameColumn('date_arrive', 'arrival_date');
+            $table->renameColumn('repas', 'meal_expense');
+            $table->renameColumn('heure_start', 'start_time');
+            $table->renameColumn('heure_end', 'end_time');
+            $table->renameColumn('train', 'train_expense');
             $table->renameColumn('utilisateur_id', 'user_id');
             $table->renameColumn('created', 'created_at');
             $table->renameColumn('updated', 'updated_at');
