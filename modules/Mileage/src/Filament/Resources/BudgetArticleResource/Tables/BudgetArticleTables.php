@@ -13,24 +13,24 @@ class BudgetArticleTables
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('nom')
+            ->defaultSort('name')
             ->columns([
-                Tables\Columns\TextColumn::make('nom')
+                Tables\Columns\TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('departement')
+                Tables\Columns\TextColumn::make('department')
                     ->label('Département')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('fonctionnel')
+                Tables\Columns\TextColumn::make('functional_code')
                     ->label('Code fonctionnel')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('economique')
+                Tables\Columns\TextColumn::make('economic_code')
                     ->label('Code économique')
                     ->searchable()
                     ->sortable(),

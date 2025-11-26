@@ -13,9 +13,9 @@ class RateTables
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('date_debut', 'desc')
+            ->defaultSort('start_date', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('montant')
+                Tables\Columns\TextColumn::make('amount')
                     ->label('Montant')
                     ->money('EUR')
                     ->sortable()
@@ -27,12 +27,12 @@ class RateTables
                     ->sortable()
                     ->suffix(' €/km'),
 
-                Tables\Columns\TextColumn::make('date_debut')
+                Tables\Columns\TextColumn::make('start_date')
                     ->label('Date début')
                     ->date()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('date_fin')
+                Tables\Columns\TextColumn::make('end_date')
                     ->label('Date fin')
                     ->date()
                     ->sortable(),

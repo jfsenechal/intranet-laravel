@@ -11,23 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('maria-mileage')->create('deplacement', function (Blueprint $table) {
+        Schema::connection('maria-mileage')->create('trips', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('declaration_id')->nullable()->constrained('declaration')->onDelete('set null');
-            $table->foreignId('utilisateur_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('declaration_id')->nullable()->constrained('declarations')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->integer('distance');
-            $table->dateTime('date_depart');
-            $table->dateTime('date_arrive')->nullable();
-            $table->time('heure_start')->nullable();
-            $table->time('heure_end')->nullable();
+            $table->dateTime('departure_date');
+            $table->dateTime('arrival_date')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->text('content');
-            $table->decimal('tarif', 10, 2)->nullable();
+            $table->decimal('rate', 10, 2)->nullable();
             $table->decimal('omnium', 10, 2)->nullable();
-            $table->decimal('repas', 10, 2)->nullable();
-            $table->decimal('train', 10, 2)->nullable();
-            $table->string('type_deplacement');
-            $table->string('lieu_depart')->nullable();
-            $table->string('lieu_arrive')->nullable();
+            $table->decimal('meal_expense', 10, 2)->nullable();
+            $table->decimal('train_expense', 10, 2)->nullable();
+            $table->string('type_movement');
+            $table->string('departure_location')->nullable();
+            $table->string('arrival_location')->nullable();
             $table->string('user_add');
             $table->timestamps();
         });
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection('maria-mileage')->dropIfExists('deplacement');
+        Schema::connection('maria-mileage')->dropIfExists('trips');
     }
 };

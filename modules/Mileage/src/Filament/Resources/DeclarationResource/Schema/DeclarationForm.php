@@ -15,27 +15,27 @@ class DeclarationForm
             ->schema([
                 Section::make('Informations personnelles')
                     ->schema([
-                        Forms\Components\TextInput::make('nom')
+                        Forms\Components\TextInput::make('last_name')
                             ->label('Nom')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('prenom')
+                        Forms\Components\TextInput::make('first_name')
                             ->label('Prénom')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('rue')
+                        Forms\Components\TextInput::make('street')
                             ->label('Rue')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('code_postal')
+                        Forms\Components\TextInput::make('postal_code')
                             ->label('Code postal')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('localite')
+                        Forms\Components\TextInput::make('locality')
                             ->label('Localité')
                             ->required()
                             ->maxLength(255),
@@ -49,12 +49,12 @@ class DeclarationForm
 
                 Section::make('Véhicule')
                     ->schema([
-                        Forms\Components\TextInput::make('plaque1')
+                        Forms\Components\TextInput::make('car_license_plate1')
                             ->label('Plaque 1')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('plaque2')
+                        Forms\Components\TextInput::make('car_license_plate2')
                             ->label('Plaque 2')
                             ->maxLength(255),
 
@@ -66,36 +66,36 @@ class DeclarationForm
 
                 Section::make('Tarifs et classification')
                     ->schema([
-                        Forms\Components\TextInput::make('tarif')
+                        Forms\Components\TextInput::make('rate')
                             ->label('Tarif (€/km)')
                             ->required()
                             ->numeric()
                             ->step(0.01)
                             ->prefix('€'),
 
-                        Forms\Components\TextInput::make('tarif_omnium')
+                        Forms\Components\TextInput::make('rate_omnium')
                             ->label('Tarif omnium (€/km)')
                             ->required()
                             ->numeric()
                             ->step(0.01)
                             ->prefix('€'),
 
-                        Forms\Components\TextInput::make('type_deplacement')
+                        Forms\Components\TextInput::make('type_movement')
                             ->label('Type de déplacement')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\Select::make('article_budgetaire')
+                        Forms\Components\Select::make('budget_article')
                             ->label('Article budgétaire')
                             ->required()
-                            ->options(BudgetArticle::query()->pluck('nom', 'nom'))
+                            ->options(BudgetArticle::query()->pluck('name', 'name'))
                             ->searchable(),
 
                         Forms\Components\TextInput::make('departments')
                             ->label('Départements')
                             ->maxLength(255),
 
-                        Forms\Components\DatePicker::make('date_college')
+                        Forms\Components\DatePicker::make('college_date')
                             ->label('Date collège'),
                     ])
                     ->columns(2),

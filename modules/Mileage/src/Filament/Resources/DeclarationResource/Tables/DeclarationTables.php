@@ -18,22 +18,22 @@ class DeclarationTables
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('nom')
+                Tables\Columns\TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
                     ->sortable()
                     ->url(fn (Declaration $record) => DeclarationResource::getUrl('view', ['record' => $record->id])),
 
-                Tables\Columns\TextColumn::make('prenom')
+                Tables\Columns\TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('plaque1')
+                Tables\Columns\TextColumn::make('car_license_plate1')
                     ->label('Plaque')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('type_deplacement')
+                Tables\Columns\TextColumn::make('type_movement')
                     ->label('Type')
                     ->searchable()
                     ->sortable(),
@@ -42,7 +42,7 @@ class DeclarationTables
                     ->label('Omnium')
                     ->boolean(),
 
-                Tables\Columns\TextColumn::make('date_college')
+                Tables\Columns\TextColumn::make('college_date')
                     ->label('Date collège')
                     ->date()
                     ->sortable()

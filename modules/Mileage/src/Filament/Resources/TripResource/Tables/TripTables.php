@@ -16,20 +16,20 @@ class TripTables
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('date_depart', 'desc')
+            ->defaultSort('departure_date', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('date_depart')
+                Tables\Columns\TextColumn::make('departure_date')
                     ->label('Date')
                     ->dateTime('d/m/Y')
                     ->sortable()
                     ->url(fn (Trip $record) => TripResource::getUrl('view', ['record' => $record->id])),
 
-                Tables\Columns\TextColumn::make('lieu_depart')
+                Tables\Columns\TextColumn::make('departure_location')
                     ->label('Départ')
                     ->searchable()
                     ->limit(30),
 
-                Tables\Columns\TextColumn::make('lieu_arrive')
+                Tables\Columns\TextColumn::make('arrival_location')
                     ->label('Arrivée')
                     ->searchable()
                     ->limit(30),
@@ -39,17 +39,17 @@ class TripTables
                     ->sortable()
                     ->suffix(' km'),
 
-                Tables\Columns\TextColumn::make('type_deplacement')
+                Tables\Columns\TextColumn::make('type_movement')
                     ->label('Type')
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('declaration.nom')
+                Tables\Columns\TextColumn::make('declaration.last_name')
                     ->label('Déclarant')
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('tarif')
+                Tables\Columns\TextColumn::make('rate')
                     ->label('Tarif')
                     ->money('EUR')
                     ->toggleable(),

@@ -11,32 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::connection('maria-document')->hasTable('declaration')) {
+        if (Schema::connection('maria-mileage')->hasTable('declaration')) {
             return;
         }
-        if (Schema::connection('maria-document')->hasTable('declarations')) {
+        if (Schema::connection('maria-mileage')->hasTable('declarations')) {
             return;
         }
         Schema::connection('maria-mileage')->create('declarations', function (Blueprint $table) {
             $table->id();
             $table->boolean('omnium')->default(false);
             $table->string('iban');
-            $table->string('plaque1');
-            $table->string('plaque2')->nullable();
-            $table->string('nom');
-            $table->string('prenom');
-            $table->string('rue');
-            $table->string('code_postal');
-            $table->string('localite');
-            $table->decimal('tarif', 10, 2);
-            $table->decimal('tarif_omnium', 10, 2);
-            $table->string('user');
-            $table->string('type_deplacement');
-            $table->date('date_college')->nullable();
-            $table->string('article_budgetaire');
+            $table->string('car_license_plate1');
+            $table->string('car_license_plate2')->nullable();
+            $table->string('last_name');
+            $table->string('first_name');
+            $table->string('street');
+            $table->string('postal_code');
+            $table->string('locality');
+            $table->decimal('rate', 10, 2);
+            $table->decimal('rate_omnium', 10, 2);
+            $table->string('type_movement');
+            $table->date('college_date')->nullable();
+            $table->string('budget_article');
             $table->string('departments')->nullable();
             $table->string('user_add');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -45,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection('maria-mileage')->dropIfExists('declaration');
+        Schema::connection('maria-mileage')->dropIfExists('declarations');
     }
 };

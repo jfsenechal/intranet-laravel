@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('maria-mileage')->create('tarif', function (Blueprint $table) {
+        Schema::connection('maria-mileage')->create('rates', function (Blueprint $table) {
             $table->id();
-            $table->decimal('montant', 10, 2);
+            $table->decimal('amount', 10, 2);
             $table->decimal('omnium', 10, 2);
-            $table->date('date_debut')->unique();
-            $table->date('date_fin')->unique();
+            $table->date('start_date')->unique();
+            $table->date('end_date')->unique();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection('maria-mileage')->dropIfExists('tarif');
+        Schema::connection('maria-mileage')->dropIfExists('rates');
     }
 };

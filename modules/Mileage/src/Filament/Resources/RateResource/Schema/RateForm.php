@@ -14,7 +14,7 @@ class RateForm
             ->schema([
                 Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('montant')
+                        Forms\Components\TextInput::make('amount')
                             ->label('Montant (€/km)')
                             ->required()
                             ->numeric()
@@ -28,16 +28,16 @@ class RateForm
                             ->step(0.01)
                             ->prefix('€'),
 
-                        Forms\Components\DatePicker::make('date_debut')
+                        Forms\Components\DatePicker::make('start_date')
                             ->label('Date début')
                             ->required()
                             ->unique(ignoreRecord: true),
 
-                        Forms\Components\DatePicker::make('date_fin')
+                        Forms\Components\DatePicker::make('end_date')
                             ->label('Date fin')
                             ->required()
                             ->unique(ignoreRecord: true)
-                            ->after('date_debut'),
+                            ->after('start_date'),
                     ])
                     ->columns(2),
             ]);

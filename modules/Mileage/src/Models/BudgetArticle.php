@@ -14,11 +14,13 @@ class BudgetArticle extends Model
 
     protected $connection = 'maria-mileage';
 
+    protected $table = 'budget_articles';
+
     protected $fillable = [
-        'nom',
-        'fonctionnel',
-        'economique',
-        'departement',
+        'name',
+        'functional_code',
+        'economic_code',
+        'department',
     ];
 
     protected function casts(): array

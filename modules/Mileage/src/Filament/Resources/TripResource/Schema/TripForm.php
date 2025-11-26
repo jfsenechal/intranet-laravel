@@ -17,11 +17,11 @@ class TripForm
                     ->schema([
                         Forms\Components\Select::make('declaration_id')
                             ->label('Déclaration')
-                            ->relationship('declaration', 'nom')
+                            ->relationship('declaration', 'last_name')
                             ->searchable()
                             ->preload(),
 
-                        Forms\Components\TextInput::make('type_deplacement')
+                        Forms\Components\TextInput::make('type_movement')
                             ->label('Type de déplacement')
                             ->required()
                             ->maxLength(255),
@@ -36,11 +36,11 @@ class TripForm
 
                 Section::make('Trajet')
                     ->schema([
-                        Forms\Components\TextInput::make('lieu_depart')
+                        Forms\Components\TextInput::make('departure_location')
                             ->label('Lieu de départ')
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('lieu_arrive')
+                        Forms\Components\TextInput::make('arrival_location')
                             ->label('Lieu d\'arrivée')
                             ->maxLength(255),
 
@@ -54,24 +54,24 @@ class TripForm
 
                 Section::make('Dates et heures')
                     ->schema([
-                        Forms\Components\DateTimePicker::make('date_depart')
+                        Forms\Components\DateTimePicker::make('departure_date')
                             ->label('Date/heure de départ')
                             ->required(),
 
-                        Forms\Components\DateTimePicker::make('date_arrive')
+                        Forms\Components\DateTimePicker::make('arrival_date')
                             ->label('Date/heure d\'arrivée'),
 
-                        Forms\Components\TimePicker::make('heure_start')
+                        Forms\Components\TimePicker::make('start_time')
                             ->label('Heure de début'),
 
-                        Forms\Components\TimePicker::make('heure_end')
+                        Forms\Components\TimePicker::make('end_time')
                             ->label('Heure de fin'),
                     ])
                     ->columns(2),
 
                 Section::make('Frais')
                     ->schema([
-                        Forms\Components\TextInput::make('tarif')
+                        Forms\Components\TextInput::make('rate')
                             ->label('Tarif kilométrique')
                             ->numeric()
                             ->step(0.01)
@@ -83,13 +83,13 @@ class TripForm
                             ->step(0.01)
                             ->prefix('€'),
 
-                        Forms\Components\TextInput::make('repas')
+                        Forms\Components\TextInput::make('meal_expense')
                             ->label('Frais de repas')
                             ->numeric()
                             ->step(0.01)
                             ->prefix('€'),
 
-                        Forms\Components\TextInput::make('train')
+                        Forms\Components\TextInput::make('train_expense')
                             ->label('Frais de train')
                             ->numeric()
                             ->step(0.01)

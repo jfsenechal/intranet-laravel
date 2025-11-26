@@ -14,22 +14,22 @@ class BudgetArticleForm
             ->schema([
                 Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('nom')
+                        Forms\Components\TextInput::make('name')
                             ->label('Nom')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('departement')
+                        Forms\Components\TextInput::make('department')
                             ->label('Département')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('fonctionnel')
+                        Forms\Components\TextInput::make('functional_code')
                             ->label('Code fonctionnel')
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('economique')
+                        Forms\Components\TextInput::make('economic_code')
                             ->label('Code économique')
                             ->required()
                             ->maxLength(255),

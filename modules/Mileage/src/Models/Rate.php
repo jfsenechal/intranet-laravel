@@ -11,20 +11,22 @@ class Rate extends Model
 
     protected $connection = 'maria-mileage';
 
+    protected $table = 'rates';
+
     protected $fillable = [
-        'montant',
+        'amount',
         'omnium',
-        'date_debut',
-        'date_fin',
+        'start_date',
+        'end_date',
     ];
 
     protected function casts(): array
     {
         return [
-            'montant' => 'decimal:2',
+            'amount' => 'decimal:2',
             'omnium' => 'decimal:2',
-            'date_debut' => 'date',
-            'date_fin' => 'date',
+            'start_date' => 'date',
+            'end_date' => 'date',
         ];
     }
 }

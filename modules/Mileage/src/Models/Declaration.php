@@ -18,22 +18,24 @@ class Declaration extends Model
 
     protected $connection = 'maria-mileage';
 
+    protected $table = 'declarations';
+
     protected $fillable = [
         'omnium',
         'iban',
-        'plaque1',
-        'plaque2',
-        'nom',
-        'prenom',
-        'rue',
-        'code_postal',
-        'localite',
-        'tarif',
-        'tarif_omnium',
+        'car_license_plate1',
+        'car_license_plate2',
+        'last_name',
+        'first_name',
+        'street',
+        'postal_code',
+        'locality',
+        'rate',
+        'rate_omnium',
         'user_add',
-        'type_deplacement',
-        'date_college',
-        'article_budgetaire',
+        'type_movement',
+        'college_date',
+        'budget_article',
         'departments',
     ];
 
@@ -41,21 +43,12 @@ class Declaration extends Model
     {
         return [
             'omnium' => 'boolean',
-            'tarif' => 'decimal:2',
-            'tarif_omnium' => 'decimal:2',
-            'date_college' => 'date',
+            'rate' => 'decimal:2',
+            'rate_omnium' => 'decimal:2',
+            'college_date' => 'date',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::creating(function (self $model) {
-            if (Auth::check()) {
-                $model->user = Auth::user()->username ?? Auth::user()->email;
-            }
-        });
     }
 
     /**
@@ -63,7 +56,7 @@ class Declaration extends Model
      */
     public function budgetArticle(): BelongsTo
     {
-        return $this->belongsTo(BudgetArticle::class, 'article_budgetaire', 'nom');
+        return $this->belongsTo(BudgetArticle::class, 'budget_article', 'name');
     }
 
     /**

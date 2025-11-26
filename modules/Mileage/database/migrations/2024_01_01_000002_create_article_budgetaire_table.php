@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('maria-mileage')->create('budget_article', function (Blueprint $table) {
+        Schema::connection('maria-mileage')->create('budget_articles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('functional_code');
             $table->string('economic_code');
             $table->string('department');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection('maria-mileage')->dropIfExists('budget_article');
+        Schema::connection('maria-mileage')->dropIfExists('budget_articles');
     }
 };

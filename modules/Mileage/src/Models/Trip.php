@@ -16,48 +16,40 @@ class Trip extends Model
 
     protected $connection = 'maria-mileage';
 
+    protected $table = 'trips';
+
     protected $fillable = [
         'declaration_id',
-        'utilisateur_id',
+        'user_id',
         'distance',
-        'date_depart',
-        'date_arrive',
-        'heure_start',
-        'heure_end',
+        'departure_date',
+        'arrival_date',
+        'start_time',
+        'end_time',
         'content',
-        'tarif',
+        'rate',
         'omnium',
         'user_add',
-        'type_deplacement',
-        'lieu_depart',
-        'lieu_arrive',
-        'repas',
-        'train',
+        'type_movement',
+        'departure_location',
+        'arrival_location',
+        'meal_expense',
+        'train_expense',
     ];
 
     protected function casts(): array
     {
         return [
             'distance' => 'integer',
-            'date_depart' => 'datetime',
-            'date_arrive' => 'datetime',
-            'tarif' => 'decimal:2',
+            'departure_date' => 'datetime',
+            'arrival_date' => 'datetime',
+            'rate' => 'decimal:2',
             'omnium' => 'decimal:2',
-            'repas' => 'decimal:2',
-            'train' => 'decimal:2',
+            'meal_expense' => 'decimal:2',
+            'train_expense' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::creating(function (self $model) {
-            if (Auth::check()) {
-                $model->user = Auth::user()->username ?? Auth::user()->email;
-                $model->utilisateur_id = Auth::id();
-            }
-        });
     }
 
     /**
@@ -71,8 +63,8 @@ class Trip extends Model
     /**
      * @return BelongsTo<User, Trip>
      */
-    public function utilisateur(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'utilisateur_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
