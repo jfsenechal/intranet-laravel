@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->renameColumn('title', 'name');
             $table->renameColumn('created', 'created_at');
             $table->renameColumn('updated', 'updated_at');
+            $table->string('user_add');
             $table->softDeletes();
         });
 

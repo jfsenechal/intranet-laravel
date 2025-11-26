@@ -16,7 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class ModuleTables
+final class ModuleTables
 {
     public static function table(Table $table): Table
     {
@@ -27,7 +27,7 @@ class ModuleTables
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->label('Intitulé')
-                    ->url(fn(Module $record) => ModuleResource::getUrl('view', ['record' => $record->id])),
+                    ->url(fn (Module $record) => ModuleResource::getUrl('view', ['record' => $record->id])),
                 Tables\Columns\TextColumn::make('is_public')
                     ->label('Public'),
                 Tables\Columns\TextColumn::make('is_external')
@@ -58,7 +58,7 @@ class ModuleTables
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->label('Intitulé')
-                    ->url(fn(Module $record) => ModuleResource::getUrl('view', ['record' => $record->id])),
+                    ->url(fn (Module $record) => ModuleResource::getUrl('view', ['record' => $record->id])),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Rôles'),
             ])

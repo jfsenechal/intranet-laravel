@@ -10,6 +10,7 @@
         "ext-pdo": "*",
         "acmarche/app": "*@dev",
         "acmarche/document": "*@dev",
+        "acmarche/mileage": "*@dev",
         "acmarche/news": "*@dev",
         "acmarche/publication": "*@dev",
         "acmarche/security": "*@dev",
@@ -31,6 +32,10 @@
         {
             "type": "path",
             "url": "./modules/Document"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Mileage"
         },
         {
             "type": "path",

@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->string('file_path');
             $table->integer('file_size')->nullable();
             $table->string('mime_type')->nullable();
+            $table->string('user_add');
             $table->softDeletes();
         });
 

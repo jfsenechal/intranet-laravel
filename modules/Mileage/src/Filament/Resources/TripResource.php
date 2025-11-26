@@ -1,0 +1,50 @@
+<?php
+
+namespace AcMarche\Mileage\Filament\Resources;
+
+use AcMarche\Mileage\Filament\Resources\TripResource\Pages;
+use AcMarche\Mileage\Filament\Resources\TripResource\Schema\TripForm;
+use AcMarche\Mileage\Filament\Resources\TripResource\Tables\TripTables;
+use AcMarche\Mileage\Models\Trip;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+
+class TripResource extends Resource
+{
+    protected static ?string $model = Trip::class;
+
+    protected static string|null|\UnitEnum $navigationGroup = 'Mileage';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-map';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Déplacements';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return TripForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return TripTables::configure($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListTrips::route('/'),
+            'create' => Pages\CreateTrip::route('/create'),
+            'view' => Pages\ViewTrip::route('/{record}/view'),
+            'edit' => Pages\EditTrip::route('/{record}/edit'),
+        ];
+    }
+}

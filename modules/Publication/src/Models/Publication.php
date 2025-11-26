@@ -2,11 +2,14 @@
 
 namespace AcMarche\Publication\Models;
 
+use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class Publication extends Model
 {
+    use HasUserAdd;
+
     protected $connection = 'maria-publication';
 
     protected $fillable = [

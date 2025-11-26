@@ -5,6 +5,7 @@
 namespace AcMarche\Document\Models;
 
 use AcMarche\Document\Observers\DocumentObserver;
+use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class Document extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use HasUserAdd;
 
     protected $connection = 'maria-document';
 
@@ -41,15 +43,6 @@ class Document extends Model
             'published_at' => 'datetime',
             'file_size' => 'integer',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::creating(function (self $model) {
-            if (Auth::check()) {
-                $model->user_add = Auth::user()->username;
-            }
-        });
     }
 
     /**

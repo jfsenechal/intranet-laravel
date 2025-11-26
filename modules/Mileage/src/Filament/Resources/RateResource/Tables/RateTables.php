@@ -1,0 +1,52 @@
+<?php
+
+namespace AcMarche\Mileage\Filament\Resources\RateResource\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+class RateTables
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->defaultSort('date_debut', 'desc')
+            ->columns([
+                Tables\Columns\TextColumn::make('montant')
+                    ->label('Montant')
+                    ->money('EUR')
+                    ->sortable()
+                    ->suffix(' €/km'),
+
+                Tables\Columns\TextColumn::make('omnium')
+                    ->label('Omnium')
+                    ->money('EUR')
+                    ->sortable()
+                    ->suffix(' €/km'),
+
+                Tables\Columns\TextColumn::make('date_debut')
+                    ->label('Date début')
+                    ->date()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('date_fin')
+                    ->label('Date fin')
+                    ->date()
+                    ->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

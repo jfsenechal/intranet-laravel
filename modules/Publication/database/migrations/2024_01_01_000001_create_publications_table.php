@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('url');
             $table->dateTime('expire_date')->nullable();
+            $table->string('user_add');
             $table->softDeletes();
             $table->timestamps();
         });
