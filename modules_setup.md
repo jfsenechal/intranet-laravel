@@ -369,6 +369,177 @@ php artisan vendor:publish --tag=module-name-config
 php artisan vendor:publish --tag=module-name-views
 ```
 
+## Database Conventions
+
+### Table Naming
+All table names **MUST** follow Laravel conventions:
+- **Plural form**: Use plural nouns (e.g., `users`, `documents`, `news_articles`)
+- **Lowercase**: All lowercase letters (e.g., `categories`, not `Categories`)
+- **Snake_case**: Use underscores for multi-word names (e.g., `blog_posts`, `user_profiles`)
+- **Pivot tables**: Singular model names in alphabetical order (e.g., `document_user`, not `documents_users` or `user_document`)
+
+**Examples:**
+- ✅ `documents`
+- ✅ `news_articles`
+- ✅ `user_profiles`
+- ✅ `document_category` (pivot table)
+- ❌ `document` (not plural)
+- ❌ `NewsArticles` (not lowercase)
+- ❌ `news-articles` (not snake_case)
+
+### Column Naming
+All column names **MUST** be in English and follow these conventions:
+- **Snake_case**: Use underscores for multi-word names (e.g., `created_at`, `file_path`)
+- **Lowercase**: All lowercase letters
+- **Descriptive**: Use clear, descriptive names (e.g., `publication_date`, not `pub_date`)
+- **Foreign keys**: Follow the pattern `{model}_id` (e.g., `user_id`, `category_id`)
+
+**Examples:**
+- ✅ `title`, `description`, `created_at`
+- ✅ `file_path`, `mime_type`, `user_id`
+- ❌ `titre`, `description_fr` (French names)
+- ❌ `filePath`, `mimeType` (camelCase)
+- ❌ `CreatedAt` (not lowercase)
+
+### Migrating French Columns to English
+
+For existing modules or when creating new modules from French database schemas, you **MUST** create a migration to rename French columns to English equivalents.
+
+#### Create Column Renaming Migration
+
+```bash
+# Create a new migration for renaming columns
+php artisan make:migration rename_french_columns_in_table_name_table
+```
+
+#### Migration Template
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('table_name', function (Blueprint $table) {
+            // Rename French columns to English
+            $table->renameColumn('titre', 'title');
+            $table->renameColumn('description', 'description'); // Already English
+            $table->renameColumn('contenu', 'content');
+            $table->renameColumn('date_publication', 'publication_date');
+            $table->renameColumn('auteur_id', 'author_id');
+            $table->renameColumn('categorie_id', 'category_id');
+            $table->renameColumn('fichier', 'file_path');
+            $table->renameColumn('type_mime', 'mime_type');
+            $table->renameColumn('taille', 'file_size');
+            $table->renameColumn('actif', 'is_active');
+            $table->renameColumn('publie', 'is_published');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('table_name', function (Blueprint $table) {
+            // Revert English columns back to French
+            $table->renameColumn('title', 'titre');
+            $table->renameColumn('description', 'description');
+            $table->renameColumn('content', 'contenu');
+            $table->renameColumn('publication_date', 'date_publication');
+            $table->renameColumn('author_id', 'auteur_id');
+            $table->renameColumn('category_id', 'categorie_id');
+            $table->renameColumn('file_path', 'fichier');
+            $table->renameColumn('mime_type', 'type_mime');
+            $table->renameColumn('file_size', 'taille');
+            $table->renameColumn('is_active', 'actif');
+            $table->renameColumn('is_published', 'publie');
+        });
+    }
+};
+```
+
+#### Common French to English Column Mappings
+
+| French | English |
+|--------|---------|
+| `titre` | `title` |
+| `nom` | `name` |
+| `prenom` | `first_name` |
+| `nom_famille` | `last_name` |
+| `description` | `description` (same) |
+| `contenu` | `content` |
+| `texte` | `text` |
+| `date_creation` | `created_at` |
+| `date_modification` | `updated_at` |
+| `date_publication` | `publication_date` |
+| `auteur_id` | `author_id` |
+| `utilisateur_id` | `user_id` |
+| `categorie_id` | `category_id` |
+| `fichier` | `file_path` |
+| `nom_fichier` | `file_name` |
+| `type_mime` | `mime_type` |
+| `taille` | `file_size` |
+| `taille_fichier` | `file_size` |
+| `actif` | `is_active` |
+| `publie` | `is_published` |
+| `visible` | `is_visible` |
+| `archive` | `is_archived` |
+| `ordre` | `sort_order` |
+| `position` | `position` (same) |
+
+#### Important Notes
+
+1. **Always include `down()` method**: This allows rolling back the migration if needed
+2. **Test thoroughly**: Ensure all model relationships and queries are updated after renaming columns
+3. **Update Model properties**: Update `$fillable`, `$casts`, and relationship methods in your models to match new column names
+4. **Update existing queries**: Search for old column names in controllers, resources, and views
+5. **Run migrations in order**: Column rename migrations should run before any migrations that reference the new column names
+
+#### Model Updates After Column Renaming
+
+After renaming columns, update your models:
+
+```php
+<?php
+
+namespace AcMarche\ModuleName\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ModelName extends Model
+{
+    protected $fillable = [
+        'title',        // was 'titre'
+        'content',      // was 'contenu'
+        'author_id',    // was 'auteur_id'
+        'is_published', // was 'publie'
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'publication_date' => 'datetime', // was 'date_publication'
+            'is_published' => 'boolean',      // was 'publie'
+        ];
+    }
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id'); // was 'auteur_id'
+    }
+}
+```
+
 ## Naming Conventions
 
 - **Namespace**: `AcMarche\ModuleName`
