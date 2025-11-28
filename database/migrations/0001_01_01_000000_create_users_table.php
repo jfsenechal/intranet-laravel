@@ -35,6 +35,12 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('headings', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('icon')->nullable();
+        });
+
         Schema::create('modules', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -42,8 +48,8 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->boolean('is_external')->default(false);
             $table->boolean('is_public')->default(false);
-            $table->string('icon')->default(false);
-            $table->string('color')->default(false);
+            $table->string('icon')->default(null);
+            $table->string('color')->default(null);
             $table->timestamps();
         });
 

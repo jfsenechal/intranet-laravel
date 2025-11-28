@@ -39,16 +39,11 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('marge'),
             ]);
 
-        $documentModule = Module::factory()
-            ->create([
-                'name' => 'Document',
+        $modules = [''];
+        foreach ($modules as $module) {
+            Module::factory()->create([
+                'name' => $module,
             ]);
-
-        $moduleRole = Role::factory()
-            ->create([
-                'name' => 'ROLE_DOCUMENT_ADMIN',
-                'description' => 'Administrateur des documents',
-                'module_id' => $documentModule->id,
-            ]);
+        }
     }
 }
