@@ -12,6 +12,9 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (Schema::connection('maria-publication')->hasTable('publication')) {
+            return;
+        }
         Schema::connection('maria-publication')->create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');

@@ -18,8 +18,8 @@ return new class extends Migration {
 
         Schema::connection('maria-publication')->table('publications', function (Blueprint $table) {
             $table->renameColumn('title', 'name');
-            $table->renameColumn('created', 'created_at');
-            $table->renameColumn('updated', 'updated_at');
+            $table->renameColumn('createdAt', 'created_at');
+            $table->renameColumn('updatedAt', 'updated_at');
             $table->string('user_add');
             $table->softDeletes();
         });
