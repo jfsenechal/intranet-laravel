@@ -2,6 +2,7 @@
 
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
+use AcMarche\Security\Models\Tab;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -35,7 +36,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('headings', function (Blueprint $table) {
+        Schema::create('tabs', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('icon')->nullable();
@@ -51,6 +52,7 @@ return new class extends Migration {
             $table->string('icon')->default(null);
             $table->string('color')->default(null);
             $table->timestamps();
+            $table->foreignIdFor(Tab::class);
         });
 
         Schema::create('module_user', function (Blueprint $table) {
