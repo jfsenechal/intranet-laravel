@@ -1,20 +1,24 @@
 <?php
 
+use AcMarche\Mileage\Models\Declaration;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
+        if (Schema::connection('maria-mileage')->hasTable('deplacement')) {
+            return;
+        }
         Schema::connection('maria-mileage')->create('trips', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('declaration_id')->nullable()->constrained('declarations')->onDelete('set null');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignIdFor(Declaration::class)->nullable()->constrained('declarations')->onDelete('set null');
+            $table->foreignIdFor(User::class)->nullable()->constrained('users')->onDelete('set null');
             $table->integer('distance');
             $table->dateTime('departure_date');
             $table->dateTime('arrival_date')->nullable();

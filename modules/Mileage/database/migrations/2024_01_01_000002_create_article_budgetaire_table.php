@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::connection('maria-mileage')->hasTable('article_budgetaire')) {
+            return;
+        }
         Schema::connection('maria-mileage')->create('budget_articles', function (Blueprint $table) {
             $table->id();
             $table->string('name');

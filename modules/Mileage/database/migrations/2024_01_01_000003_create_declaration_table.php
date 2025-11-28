@@ -4,17 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         if (Schema::connection('maria-mileage')->hasTable('declaration')) {
-            return;
-        }
-        if (Schema::connection('maria-mileage')->hasTable('declarations')) {
             return;
         }
         Schema::connection('maria-mileage')->create('declarations', function (Blueprint $table) {
@@ -32,7 +28,7 @@ return new class extends Migration
             $table->decimal('rate_omnium', 10, 2);
             $table->string('type_movement');
             $table->date('college_date')->nullable();
-            $table->string('budget_article');
+            $table->string('article_budgetaire');
             $table->string('departments')->nullable();
             $table->string('user_add');
             $table->timestamps();
