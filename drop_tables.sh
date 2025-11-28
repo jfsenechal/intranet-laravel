@@ -7,7 +7,7 @@ DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
 
 # List of databases to clean
-DATABASES=("actu" "document" "finance" "laravel_intranet","publication")
+DATABASES=("actu" "document" "finance" "laravel_intranet" "publication")
 
 # Function to drop all tables in a database
 drop_all_tables() {
@@ -34,10 +34,26 @@ EOF
   echo "Dropped all tables in database: $db_name"
 }
 
+# Function to import SQL dump
+import_sql_dump() {
+  local db_name=$1
+  local sql_file="data/dumpsql/${db_name}.sql"
+
+  if [ ! -f "$sql_file" ]; then
+    echo "SQL dump file not found: $sql_file"
+    return
+  fi
+
+  echo "Importing SQL dump for database: $db_name"
+  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$db_name" < "$sql_file"
+  echo "SQL dump imported for database: $db_name"
+}
+
 # Loop through each database
 for db in "${DATABASES[@]}"; do
   drop_all_tables "$db"
+  import_sql_dump "$db"
   echo "---"
 done
 
-echo "All tables dropped from specified databases."
+echo "All tables dropped and SQL dumps imported for specified databases."
