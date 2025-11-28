@@ -1,6 +1,5 @@
 <?php
 
-
 use AcMarche\Document\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,7 +13,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (Schema::connection('maria-document')->hasTable('documents')) {
+        if (Schema::connection('maria-document')->hasTable('document')) {
             return;
         }
 

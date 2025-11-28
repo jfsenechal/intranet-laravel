@@ -1,8 +1,5 @@
 ###SQL
 
-rename database actu => news
-rename database document => documents
-
 USE `news`;
 DROP TABLE `categorie`,`categories`, `news`, `news_read`;
 USE `laravel_intranet`;

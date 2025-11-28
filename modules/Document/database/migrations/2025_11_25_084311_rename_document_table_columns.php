@@ -16,6 +16,10 @@ return new class extends Migration {
             $table->rename('documents');
         });
 
+        Schema::connection('maria-document')->table('categorie', function (Blueprint $table) {
+            $table->rename('categories');
+        });
+
         Schema::connection('maria-document')->table('documents', function (Blueprint $table) {
             $table->renameColumn('titre', 'name');
             $table->renameColumn('categorie_id', 'category_id');
@@ -26,13 +30,9 @@ return new class extends Migration {
             $table->string('file_path');
             $table->integer('file_size')->nullable();
             $table->string('mime_type')->nullable();
-            $table->string('user_add');
             $table->softDeletes();
         });
 
-        Schema::connection('maria-document')->table('categorie', function (Blueprint $table) {
-            $table->rename('categories');
-        });
         Schema::connection('maria-document')->table('categories', function (Blueprint $table) {
             $table->renameColumn('nom', 'name');
         });

@@ -7,7 +7,8 @@ DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
 
 # List of databases to clean
-DATABASES=("actu" "document" "finance" "laravel_intranet" "publication")
+#DATABASES=("actu" "document" "finance" "laravel_intranet" "publication")
+DATABASES=("finance")
 
 # Function to drop all tables in a database
 drop_all_tables() {
