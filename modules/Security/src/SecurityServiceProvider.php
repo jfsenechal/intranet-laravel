@@ -4,9 +4,12 @@ namespace AcMarche\Security;
 
 use AcMarche\Security\Console\Commands\CreateUserCommand;
 use AcMarche\Security\Console\Commands\SyncUserCommand;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\ServiceProvider;
 
-class SecurityServiceProvider extends ServiceProvider
+final class SecurityServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -28,6 +31,11 @@ class SecurityServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
+            fn (): View => view('@security/filament.login_form'),
+        );
+
         // Load migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
@@ -66,6 +74,11 @@ class SecurityServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/security'),
         ], 'security-views');
+
+        // Publish assets
+        $this->publishes([
+            __DIR__.'/../resources/assets' => public_path('vendor/security'),
+        ], 'security-assets');
     }
 
     /**

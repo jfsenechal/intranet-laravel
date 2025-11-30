@@ -115,4 +115,17 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Webmaster Email Address
+    |--------------------------------------------------------------------------
+    |
+    | This email address is used for receiving all emails in non-production
+    | environments. This is useful for testing and development to ensure
+    | emails are not sent to real users.
+    |
+    */
+
+    'webmaster_email' => env('WEBMASTER_EMAIL'),
+
 ];
