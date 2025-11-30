@@ -33,7 +33,7 @@ final class SecurityServiceProvider extends ServiceProvider
     {
         FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
-            fn (): View => view('@security/filament.login_form'),
+            fn (): View => view('security::filament._logo'),
         );
 
         // Load migrations
