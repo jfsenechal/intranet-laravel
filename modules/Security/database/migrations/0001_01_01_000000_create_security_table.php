@@ -8,8 +8,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'mariadb';
 
     /**
@@ -17,7 +16,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::connection('mariadb')->hasTable('heading')) {
+        if (!Schema::connection('mariadb')->hasTable('heading')) {
             Schema::create('tabs', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
@@ -25,7 +24,7 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::connection('mariadb')->hasTable('module')) {
+        if (!Schema::connection('mariadb')->hasTable('module')) {
             Schema::create('modules', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
@@ -54,8 +53,8 @@ return new class extends Migration
 
         Schema::create('module_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained('users')->cascadeOnDelete();
-            $table->foreignIdFor(Module::class)->constrained('modules')->cascadeOnDelete();
+            $table->foreignIdFor(User::class);
+            $table->foreignIdFor(Module::class);
             $table->unique(['user_id', 'module_id']);
         });
 
@@ -63,13 +62,13 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('description')->nullable();
-            $table->foreignIdFor(Module::class)->nullable()->constrained('modules')->cascadeOnDelete();
+            $table->foreignIdFor(Module::class)->nullable();
         });
 
         Schema::create('role_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained('users')->cascadeOnDelete();
-            $table->foreignIdFor(Role::class)->nullable()->constrained('roles')->cascadeOnDelete();
+            $table->foreignIdFor(User::class);
+            $table->foreignIdFor(Role::class);
             $table->unique(['user_id', 'role_id']);
         });
     }
