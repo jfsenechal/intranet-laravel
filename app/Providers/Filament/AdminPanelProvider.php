@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->login(Login::class)
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->favicon(asset('images/logo_black-192x192.png'))
             ->brandLogo(asset('/images/logo_black-192x192.png'))
             ->colors([
