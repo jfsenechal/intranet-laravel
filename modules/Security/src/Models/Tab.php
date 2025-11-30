@@ -6,12 +6,11 @@ use AcMarche\Security\Database\Factories\TabFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-
-//https://github.com/lukas-frey/filament-icon-picker
+// https://github.com/lukas-frey/filament-icon-picker
 #[UseFactory(TabFactory::class)]
-class Tab extends Model
+final class Tab extends Model
 {
     use HasFactory;
 
@@ -19,18 +18,17 @@ class Tab extends Model
 
     protected $fillable = [
         'name',
-        'icon'
+        'icon',
     ];
 
     protected $casts = [
     ];
 
     /**
-     * @return BelongsToMany<Module>
+     * @return HasMany<Module>
      */
-    public function documents(): BelongsToMany
+    public function modules(): HasMany
     {
-        return $this->belongsToMany(Module::class);
+        return $this->hasMany(Module::class, 'tab_id');
     }
-
 }

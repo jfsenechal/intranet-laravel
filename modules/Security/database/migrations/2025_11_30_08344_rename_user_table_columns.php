@@ -14,7 +14,7 @@ return new class extends Migration {
     {
         // Rename tables first
         Schema::connection('mariadb')->table('heading', function (Blueprint $table) {
-            $table->rename('headings');
+            $table->rename('tabs');
         });
 
         Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
@@ -28,8 +28,8 @@ return new class extends Migration {
             $table->renameColumn('departement', 'department');
         });
 
-        // Rename columns in headings table
-        Schema::connection('mariadb')->table('headings', function (Blueprint $table) {
+        // Rename columns in tabs table
+        Schema::connection('mariadb')->table('tabs', function (Blueprint $table) {
             $table->renameColumn('nom', 'name');
             $table->renameColumn('icone', 'icon');
         });

@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-//https://github.com/lukas-frey/filament-icon-picker
+// https://github.com/lukas-frey/filament-icon-picker
 #[UseFactory(ModuleFactory::class)]
-class Module extends Model
+final class Module extends Model
 {
     use HasFactory;
 
@@ -35,15 +35,6 @@ class Module extends Model
         'is_external' => 'boolean',
     ];
 
-    /**
-     * To resolve name
-     * static::resolveFactoryName($modelName);
-     */
-    protected static function newFactory()
-    {
-        return ModuleFactory::new();
-    }
-
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
@@ -60,8 +51,17 @@ class Module extends Model
     /**
      * @return BelongsTo<Tab>
      */
-    public function category(): BelongsTo
+    public function tab(): BelongsTo
     {
-        return $this->belongsTo(Tab::class);
+        return $this->belongsTo(Tab::class, 'tab_id');
+    }
+
+    /**
+     * To resolve name
+     * static::resolveFactoryName($modelName);
+     */
+    protected static function newFactory()
+    {
+        return ModuleFactory::new();
     }
 }
