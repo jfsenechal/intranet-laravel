@@ -8,7 +8,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'mariadb';
 
     /**
@@ -16,7 +17,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::connection('mariadb')->hasTable('heading')) {
+        if (! Schema::connection('mariadb')->hasTable('heading')) {
             Schema::create('tabs', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
@@ -24,7 +25,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::connection('mariadb')->hasTable('module')) {
+        if (! Schema::connection('mariadb')->hasTable('module')) {
             Schema::create('modules', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
@@ -47,6 +48,7 @@ return new class extends Migration {
                 $table->renameColumn('exterieur', 'is_external');
                 $table->renameColumn('public', 'is_public');
                 $table->renameColumn('icone', 'icon');
+                $table->renameColumn('heading_id', 'tab_id');
                 $table->string('color')->default(null);
             });
         }

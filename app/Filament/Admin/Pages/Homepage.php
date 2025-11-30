@@ -34,7 +34,7 @@ final class Homepage extends Page
         return 'Accueil ';
     }
 
-    public function getLayout22(): string
+    public function getLayout(): string
     {
         return self::$layout ?? 'filament-panels::components.layout.base';
     }
