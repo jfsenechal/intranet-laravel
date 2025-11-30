@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'maria-db';
 
     /**
@@ -18,9 +17,7 @@ return new class extends Migration
             $table->rename('headings');
         });
 
-        Schema::connection('mariadb')->table('module', function (Blueprint $table) {
-            $table->rename('modules');
-        });
+
 
         Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
             $table->rename('profils');
@@ -36,13 +33,6 @@ return new class extends Migration
         // Rename columns in headings table
         Schema::connection('mariadb')->table('headings', function (Blueprint $table) {
             $table->renameColumn('nom', 'name');
-            $table->renameColumn('icone', 'icon');
-        });
-
-        // Rename columns in modules table
-        Schema::connection('mariadb')->table('modules', function (Blueprint $table) {
-            $table->renameColumn('nom', 'name');
-            $table->renameColumn('exterieur', 'is_external');
             $table->renameColumn('icone', 'icon');
         });
 

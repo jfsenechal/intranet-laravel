@@ -8,8 +8,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-
+return new class extends Migration
+{
     protected $connection = 'mariadb';
 
     /**
@@ -17,24 +17,40 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('tabs', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('icon')->nullable();
-        });
+        if (! Schema::connection('mariadb')->hasTable('heading')) {
+            Schema::create('tabs', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->unique();
+                $table->string('icon')->nullable();
+            });
+        }
 
-        Schema::create('modules', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('url')->nullable();
-            $table->text('description')->nullable();
-            $table->boolean('is_external')->default(false);
-            $table->boolean('is_public')->default(false);
-            $table->string('icon')->default(null);
-            $table->string('color')->default(null);
-            $table->timestamps();
-            $table->foreignIdFor(Tab::class);
-        });
+        if (! Schema::connection('mariadb')->hasTable('module')) {
+            Schema::create('modules', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->unique();
+                $table->string('url')->nullable();
+                $table->text('description')->nullable();
+                $table->boolean('is_external')->default(false);
+                $table->boolean('is_public')->default(false);
+                $table->string('icon')->default(null);
+                $table->string('color')->default(null);
+                $table->timestamps();
+                $table->foreignIdFor(Tab::class);
+            });
+        } else {
+            Schema::connection('mariadb')->table('module', function (Blueprint $table) {
+                $table->rename('modules');
+            });
+            // Rename columns in modules table
+            Schema::connection('mariadb')->table('modules', function (Blueprint $table) {
+                $table->renameColumn('nom', 'name');
+                $table->renameColumn('exterieur', 'is_external');
+                $table->renameColumn('public', 'is_public');
+                $table->renameColumn('icone', 'icon');
+                $table->string('color')->default(null);
+            });
+        }
 
         Schema::create('module_user', function (Blueprint $table) {
             $table->id();
@@ -56,7 +72,6 @@ return new class extends Migration {
             $table->foreignIdFor(Role::class)->nullable()->constrained('roles')->cascadeOnDelete();
             $table->unique(['user_id', 'role_id']);
         });
-
     }
 
     /**
