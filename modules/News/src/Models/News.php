@@ -24,12 +24,8 @@ final class News extends Model
         'slug',
         'excerpt',
         'content',
-        'featured_image',
         'author',
         'category',
-        'is_published',
-        'is_featured',
-        'published_at',
         'name',
         'content',
         'end_date',
@@ -37,6 +33,7 @@ final class News extends Model
         'user_add',
         'department',
         'category_id',
+        'medias',
     ];
 
     /**
@@ -47,13 +44,17 @@ final class News extends Model
         return $this->belongsTo(Category::class);
     }
 
+    protected static function booted(): void
+    {
+        self::bootHasUser();
+    }
+
     protected function casts(): array
     {
         return [
-            'is_published' => 'boolean',
-            'is_featured' => 'boolean',
             'archive' => 'boolean',
             'published_at' => 'datetime',
+            'medias' => 'array',
         ];
     }
 }

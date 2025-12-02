@@ -30,19 +30,20 @@ return new class extends Migration
             $table->boolean('archive')->default(false);
             $table->boolean('sent')->default(false);
             $table->string('user_add');
+            $table->json('medias')->nullable();
             $table->timestamps();
             $table->foreignIdFor(Category::class);
             $table->softDeletes();
 
             /**
              * Attachments
-             */
+             *
             foreach (range(1, 3) as $i) {
                 $table->string('file_path_'.$i);
                 $table->string('file_name_'.$i);
                 $table->integer('file_size_'.$i)->nullable();
                 $table->string('mime_type_'.$i)->nullable();
-            }
+            }*/
         });
 
         Schema::create('categories', function (Blueprint $table) {

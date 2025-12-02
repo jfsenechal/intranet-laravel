@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace AcMarche\Document\Models;
 
 use AcMarche\Document\Observers\DocumentObserver;
@@ -11,14 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 
 #[ObservedBy([DocumentObserver::class])]
-class Document extends Model
+final class Document extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use HasUserAdd;
+    use SoftDeletes;
 
     protected $connection = 'maria-document';
 
@@ -36,6 +33,19 @@ class Document extends Model
         'category_id',
     ];
 
+    /**
+     * @return BelongsTo<Category>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    protected static function booted(): void
+    {
+        self::bootHasUser();
+    }
+
     protected function casts(): array
     {
         return [
@@ -43,13 +53,5 @@ class Document extends Model
             'published_at' => 'datetime',
             'file_size' => 'integer',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Category>
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 }

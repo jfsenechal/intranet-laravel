@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewsEmail extends Mailable
+final class NewsEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -43,7 +43,7 @@ class NewsEmail extends Mailable
         }
 
         return new Content(
-            html: 'acnews::mail.news',
+            html: 'news::mail.news',
             with: [
                 'news' => $this->news,
                 'url' => url('/'),
@@ -53,24 +53,24 @@ class NewsEmail extends Mailable
     }
 
     /**
-     * @return array
+     * @return array<Attachment>
      */
     public function attachments(): array
     {
         $attachments = [];
 
-        $attachments[] = Attachment::fromPath($this->logo)
-            ->as('logoMarcheur.jpg')
-            ->withMime('image/jpg');
-
-        foreach ($this->news->medias() as $media) {
+        if ($this->logo) {
+            $attachments[] = Attachment::fromPath($this->logo)
+                ->as('logoMarcheur.jpg')
+                ->withMime('image/jpg');
+        }
+        foreach ($this->news->medias as $path) {
             $attachments[] =
-                Attachment::fromStorageDisk('uploads/news', $media->path)
-                    ->as($media->name)
-                    ->withMime($media->mime);
+                Attachment::fromStorageDisk('public', $path);
+            // ->as($media->name)
+            //  ->withMime($media->mime);
         }
 
         return $attachments;
     }
-
 }

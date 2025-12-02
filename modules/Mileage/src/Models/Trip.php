@@ -7,16 +7,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Auth;
 
-class Trip extends Model
+final class Trip extends Model
 {
     use HasFactory;
     use HasUserAdd;
 
     protected $connection = 'maria-mileage';
-
-    protected $table = 'trips';
 
     protected $fillable = [
         'declaration_id',
@@ -37,21 +34,6 @@ class Trip extends Model
         'train_expense',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'distance' => 'integer',
-            'departure_date' => 'datetime',
-            'arrival_date' => 'datetime',
-            'rate' => 'decimal:2',
-            'omnium' => 'decimal:2',
-            'meal_expense' => 'decimal:2',
-            'train_expense' => 'decimal:2',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
-
     /**
      * @return BelongsTo<Declaration, Trip>
      */
@@ -66,5 +48,25 @@ class Trip extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    protected static function booted(): void
+    {
+        self::bootHasUser();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'distance' => 'integer',
+            'departure_date' => 'datetime',
+            'arrival_date' => 'datetime',
+            'rate' => 'decimal:2',
+            'omnium' => 'decimal:2',
+            'meal_expense' => 'decimal:2',
+            'train_expense' => 'decimal:2',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

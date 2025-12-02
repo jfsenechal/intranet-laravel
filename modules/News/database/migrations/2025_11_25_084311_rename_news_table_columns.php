@@ -21,21 +21,23 @@ return new class extends Migration
             $table->renameColumn('created', 'created_at');
             $table->renameColumn('updated', 'updated_at');
             $table->renameColumn('date_end', 'end_date');
+            $table->renameColumn('departement', 'department');
             $table->renameColumn('sended', 'sent');
+            $table->boolean('sent')->default(false)->change();
+            $table->json('medias')->nullable();
             $table->string('slug')->unique()->nullable();
             $table->text('excerpt')->nullable();
             $table->softDeletes();
-            foreach (range(1, 3) as $i) {
-                $table->renameColumn('attach'.$i.'Name', 'file_name_'.$i);
-            }
+            /* foreach (range(1, 3) as $i) {
+                 $table->renameColumn('attach'.$i.'Name', 'file_name_'.$i);
+             }*/
             /**
              * Attachments
-             */
             foreach (range(1, 3) as $i) {
                 $table->string('file_path_'.$i);
                 $table->integer('file_size_'.$i)->nullable();
                 $table->string('mime_type_'.$i)->nullable();
-            }
+            }*/
         });
         Schema::connection('maria-news')->table('categorie', function (Blueprint $table) {
             $table->rename('categories');

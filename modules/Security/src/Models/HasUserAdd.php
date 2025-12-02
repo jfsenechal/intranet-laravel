@@ -4,36 +4,27 @@ namespace AcMarche\Security\Models;
 
 use Auth;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait HasUserAdd
 {
     public static function bootHasUser(): void
     {
-        static::creating(function(Model $model) {
-            $model->created_by = Auth::id();
-        });
-
-        static::updating(function(Model $model) {
-            $model->updated_by = Auth::id();
-        });
-
-        static::deleting(function(Model $model) {
-            if (in_array(SoftDeletes::class, class_uses($model))) {
-                $model->updated_by = Auth::id();
-                $model->save();
+        static::creating(function (Model $model) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                $model->user_add = $user->username;
             }
         });
-    }
 
-    public function userAdd(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
+        static::updating(function (Model $model) {
+            //
+        });
 
-    public function userUpdate(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
+        static::deleting(function (Model $model) {
+            if (in_array(SoftDeletes::class, class_uses($model))) {
+                //
+            }
+        });
     }
 }

@@ -8,13 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 
-class Declaration extends Model
+final class Declaration extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use HasUserAdd;
+    use SoftDeletes;
 
     protected $connection = 'maria-mileage';
 
@@ -39,18 +38,6 @@ class Declaration extends Model
         'departments',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'omnium' => 'boolean',
-            'rate' => 'decimal:2',
-            'rate_omnium' => 'decimal:2',
-            'college_date' => 'date',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
-
     /**
      * @return BelongsTo<BudgetArticle, Declaration>
      */
@@ -65,5 +52,22 @@ class Declaration extends Model
     public function trips(): HasMany
     {
         return $this->hasMany(Trip::class);
+    }
+
+    protected static function booted(): void
+    {
+        self::bootHasUser();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'omnium' => 'boolean',
+            'rate' => 'decimal:2',
+            'rate_omnium' => 'decimal:2',
+            'college_date' => 'date',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

@@ -33,7 +33,7 @@ class NewsInfolist
                     ->columnSpanFull()
                     ->prose(),
                 ImageEntry::make('medias')
-                    ->disk('uploads/news'),
+                    ->disk('public'),
                 Fieldset::make('actions')
                     ->label('Actions liés')
                     ->schema([
