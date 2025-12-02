@@ -2,13 +2,9 @@
 
 namespace AcMarche\News\Filament\Resources\NewsResource\Schemas;
 
-use AcMarche\News\Filament\Resources\NewsResource;
-use AcMarche\News\Models\News;
 use AcMarche\Security\Constant\DepartmentEnum;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
 
 class NewsInfolist
@@ -34,24 +30,6 @@ class NewsInfolist
                     ->prose(),
                 ImageEntry::make('medias')
                     ->disk('public'),
-                Fieldset::make('actions')
-                    ->label('Actions liés')
-                    ->schema([
-                        RepeatableEntry::make('actions')
-                            ->label(false)
-                            ->columnSpanFull()
-                            ->schema([
-                                TextEntry::make('name')
-                                    ->label('Nom')
-                                    ->columnSpanFull()
-                                    ->url(
-                                        fn(News $record): string => NewsResource::getUrl(
-                                            'view',
-                                            ['record' => $record]
-                                        )
-                                    ),
-                            ]),
-                    ]),
             ]);
     }
 
