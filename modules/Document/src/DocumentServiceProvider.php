@@ -1,9 +1,11 @@
 <?php
 
 
-
 namespace AcMarche\Document;
 
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\ServiceProvider;
 
 class DocumentServiceProvider extends ServiceProvider
@@ -58,6 +60,11 @@ class DocumentServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/document'),
         ], 'document-views');
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_NAV_START,
+            fn(): View => view('list-modules-button'),
+        );
     }
 
     /**
