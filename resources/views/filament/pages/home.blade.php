@@ -22,7 +22,7 @@
                     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         @foreach ($tab->modules as $module)
                             <a
-                                href="{{ $module->url }}"
+                                href="{{$module->is_external ? $module->url : url($module->url) }}"
                                 @if ($module->is_external) target="_blank" rel="noopener noreferrer" @endif
                                 class="group flex items-start gap-4 rounded-lg border border-gray-200 p-4 transition hover:border-primary-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-primary-500 dark:hover:bg-gray-700/50"
                             >
