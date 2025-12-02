@@ -35,7 +35,6 @@ return new class extends Migration
                 $table->boolean('is_public')->default(false);
                 $table->string('icon')->default(null);
                 $table->string('color')->default(null);
-                $table->timestamps();
                 $table->foreignIdFor(Tab::class);
             });
         } else {

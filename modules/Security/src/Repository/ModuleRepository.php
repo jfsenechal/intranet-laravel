@@ -4,11 +4,18 @@ namespace AcMarche\Security\Repository;
 
 use AcMarche\Security\Models\Module;
 
-class ModuleRepository
+final class ModuleRepository
 {
     public static function find(int $moduleId): ?Module
     {
         return Module::with('roles')->find($moduleId);
+    }
+
+    public static function getModulesWithoutTab(): iterable
+    {
+        return Module::query()
+            ->whereNull('tab_id')
+            ->get();
     }
 
     public function getModulesForSelect(): array

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
-use AcMarche\Security\Models\Tab;
+use AcMarche\Security\Repository\TabRepository;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Width;
@@ -54,10 +54,6 @@ final class Homepage extends Page
      */
     public function getTabsWithModules(): Collection
     {
-        return Tab::with(['modules' => function ($query) {
-            $query->orderBy('name');
-        }])
-            ->orderBy('name')
-            ->get();
+        return TabRepository::getTabsWithModules();
     }
 }
