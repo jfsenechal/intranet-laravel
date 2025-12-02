@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace AcMarche\News\Models;
 
 use AcMarche\News\Observers\NewsObserver;
@@ -13,11 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy([NewsObserver::class])]
-class News extends Model
+final class News extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use HasUserAdd;
+    use SoftDeletes;
 
     protected $connection = 'maria-news';
 
@@ -41,15 +39,6 @@ class News extends Model
         'category_id',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'is_published' => 'boolean',
-            'is_featured' => 'boolean',
-            'published_at' => 'datetime',
-        ];
-    }
-
     /**
      * @return BelongsTo<Category>
      */
@@ -58,4 +47,13 @@ class News extends Model
         return $this->belongsTo(Category::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            'is_published' => 'boolean',
+            'is_featured' => 'boolean',
+            'archive' => 'boolean',
+            'published_at' => 'datetime',
+        ];
+    }
 }

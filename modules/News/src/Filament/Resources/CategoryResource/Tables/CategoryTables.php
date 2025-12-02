@@ -12,7 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class CategoryTables
+final class CategoryTables
 {
     public static function configure(Table $table): Table
     {
@@ -20,22 +20,26 @@ class CategoryTables
             ->defaultSort('name')
             ->defaultPaginationPageOption(50)
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->label('Intitulé')
                     ->limit(120)
-                    ->url(fn(Category $record) => CategoryResource::getUrl('view', ['record' => $record->id]))
+                    ->url(fn (Category $record) => CategoryResource::getUrl('view', ['record' => $record->id]))
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
 
-                        if (strlen($state) <= $column->getCharacterLimit()) {
+                        if (mb_strlen($state) <= $column->getCharacterLimit()) {
                             return null;
                         }
 
                         // Only render the tooltip if the column content exceeds the length limit.
                         return $state;
                     }),
-
+                Tables\Columns\ColorColumn::make('color')
+                    ->searchable()
+                    ->label('Couleur'),
+                TextColumn::make('count_news')
+                    ->label('Actus'),
             ])
             ->filters([
                 //

@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-news';
 
     /**
@@ -41,6 +42,8 @@ return new class extends Migration {
         });
         Schema::connection('maria-news')->table('categories', function (Blueprint $table) {
             $table->renameColumn('nom', 'name');
+            $table->renameColumn('couleur', 'color');
+            $table->renameColumn('icone', 'icon');
         });
     }
 };

@@ -62,6 +62,7 @@ final class AppServiceProvider extends ServiceProvider
 
     private function configureForm(): void
     {
+        return;
         TextInput::configureUsing(function (TextInput $config) {
             $config->inlineLabel();
         });
