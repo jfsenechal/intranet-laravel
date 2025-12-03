@@ -14,8 +14,7 @@ class RateResource extends Resource
 {
     protected static ?string $model = Rate::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Mileage';
-
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
     protected static ?int $navigationSort = 4;
 
     public static function getNavigationIcon(): ?string

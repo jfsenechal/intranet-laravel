@@ -14,8 +14,6 @@ class DeclarationResource extends Resource
 {
     protected static ?string $model = Declaration::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Mileage';
-
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationIcon(): ?string

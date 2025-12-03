@@ -14,7 +14,7 @@ class BudgetArticleResource extends Resource
 {
     protected static ?string $model = BudgetArticle::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Mileage';
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
 
     protected static ?int $navigationSort = 3;
 

@@ -44,6 +44,7 @@ return new class extends Migration {
             $table->renameColumn('type_deplacement', 'type_movement');
             $table->renameColumn('article_budgetaire', 'budget_article');
             $table->renameColumn('date_college', 'college_date');
+            $table->softDeletes();
         });
         Schema::connection('maria-mileage')->table('budget_articles', function (Blueprint $table) {
             $table->renameColumn('nom', 'name');

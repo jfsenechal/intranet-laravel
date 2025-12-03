@@ -17,8 +17,6 @@ final class Declaration extends Model
 
     protected $connection = 'maria-mileage';
 
-    protected $table = 'declarations';
-
     protected $fillable = [
         'omnium',
         'iban',

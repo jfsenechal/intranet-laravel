@@ -14,8 +14,6 @@ class TripResource extends Resource
 {
     protected static ?string $model = Trip::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Mileage';
-
     protected static ?int $navigationSort = 2;
 
     public static function getNavigationIcon(): ?string

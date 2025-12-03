@@ -71,6 +71,7 @@ final class Homepage extends Page
     {
         return match ($module->id) {
             9 => '/document',
+            13 => '/mileage',
             15 => '/news',
             17 => '/security',
             44 => '/publication',
