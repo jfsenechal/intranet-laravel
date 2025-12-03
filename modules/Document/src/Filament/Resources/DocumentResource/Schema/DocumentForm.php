@@ -10,7 +10,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-class DocumentForm
+final class DocumentForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -25,7 +25,7 @@ class DocumentForm
                             ->maxLength(255)
                             ->columnSpanFull(),
                         Forms\Components\RichEditor::make('content')
-                            ->label('Contenu')
+                            ->label('Description')
                             ->columnSpanFull(),
                         Forms\Components\Hidden::make('file_name'),
                         Forms\Components\Hidden::make('file_mime'),
@@ -53,42 +53,6 @@ class DocumentForm
                             ->required(),
                     ])->grow(false),
                 ])->from('md'),
-            ]);
-    }
-
-    public static function configure22(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        Forms\Components\TextInput::make('title')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull(),
-
-                        Forms\Components\Textarea::make('description')
-                            ->rows(3)
-                            ->columnSpanFull(),
-
-                        Forms\Components\FileUpload::make('file_path')
-                            ->label('File')
-                            ->required()
-                            ->disk('public')
-                            ->directory('documents')
-                            ->preserveFilenames()
-                            ->columnSpanFull(),
-
-                        Forms\Components\TextInput::make('category')
-                            ->maxLength(255),
-
-                        Forms\Components\Toggle::make('is_published')
-                            ->label('Published')
-                            ->default(false),
-
-                        Forms\Components\DateTimePicker::make('published_at')
-                            ->label('Publish Date'),
-                    ]),
             ]);
     }
 }
