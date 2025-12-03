@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-document';
 
     /**
@@ -29,7 +30,7 @@ return new class extends Migration {
             $table->renameColumn('fileName', 'file_name');
             $table->string('file_path');
             $table->integer('file_size')->nullable();
-            $table->string('mime_type')->nullable();
+            $table->string('file_mime')->nullable();
             $table->softDeletes();
         });
 

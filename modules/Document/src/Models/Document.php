@@ -25,7 +25,7 @@ final class Document extends Model
         'file_path',
         'file_name',
         'file_size',
-        'mime_type',
+        'file_mime',
         'category',
         'is_published',
         'published_at',

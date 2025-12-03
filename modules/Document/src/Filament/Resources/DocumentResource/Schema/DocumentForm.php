@@ -30,7 +30,7 @@ final class DocumentForm
                         Forms\Components\Hidden::make('file_name'),
                         Forms\Components\Hidden::make('file_mime'),
                         Forms\Components\Hidden::make('file_size'),
-                        FileUpload::make('medias')
+                        FileUpload::make('file_path')
                             ->label('Pièce jointe')
                             ->required()
                             ->disk('public')

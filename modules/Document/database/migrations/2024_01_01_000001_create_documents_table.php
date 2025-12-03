@@ -5,7 +5,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-document';
 
     /**
@@ -24,7 +25,7 @@ return new class extends Migration {
             $table->string('file_path');
             $table->string('file_name');
             $table->integer('file_size')->nullable();
-            $table->string('mime_type')->nullable();
+            $table->string('file_mime')->nullable();
             $table->string('category')->nullable();
             $table->string('user_add');
             $table->foreignIdFor(Category::class);
