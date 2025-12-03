@@ -4,11 +4,11 @@ namespace AcMarche\Document\Filament\Resources\DocumentResource\Schema;
 
 use AcMarche\App\Filament\Schema\Infolists\PdfViewerEntry;
 use AcMarche\Document\Models\Document;
-use Filament\Actions\Action;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 final class DocumentInfolist
 {
@@ -18,6 +18,7 @@ final class DocumentInfolist
             ->schema([
                 TextEntry::make('category.name')
                     ->label('Catégorie')
+                    ->badge()
                     ->columnSpanFull(),
                 TextEntry::make('content')
                     ->label('Description')
@@ -25,19 +26,19 @@ final class DocumentInfolist
                     ->columnSpanFull()
                     ->prose()
                     ->hidden(fn ($state): bool => blank($state)),
-                TextEntry::make('download_link')
-                    ->label('Fichier')
-                    ->columnSpanFull()
-                    ->afterContent(
-                        Action::make('download')
-                            ->label('Télécharger le fichier')
-                            ->icon('heroicon-o-arrow-down-tray')
-                            ->url(fn (Document $record): string => Storage::disk('public')->url($record->file_path))
-                            ->openUrlInNewTab()
-                    ),
+                Flex::make([
+                    TextEntry::make('file_size')
+                        ->label('Taille')
+                        ->formatStateUsing(fn ($state): string => $state ? number_format($state / 1024, 2).' KB' : '-')
+                        ->grow(false),
+                    TextEntry::make('file_mime')
+                        ->label('Type')
+                        ->grow(false),
+                ])
+                    ->columnSpanFull(),
                 PdfViewerEntry::make('file_path')
                     ->label('Aperçu')
-                    ->minHeight('40svh')
+                    ->minHeight('80svh')
                     ->columnSpanFull()
                     ->disk('public'),
             ]);

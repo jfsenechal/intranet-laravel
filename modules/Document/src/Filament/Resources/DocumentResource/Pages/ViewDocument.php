@@ -4,9 +4,12 @@ namespace AcMarche\Document\Filament\Resources\DocumentResource\Pages;
 
 use AcMarche\Document\Filament\Resources\DocumentResource;
 use AcMarche\Document\Filament\Resources\DocumentResource\Schema\DocumentInfolist;
+use AcMarche\Document\Models\Document;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Colors\Color;
+use Illuminate\Support\Facades\Storage;
 
 final class ViewDocument extends ViewRecord
 {
@@ -25,6 +28,11 @@ final class ViewDocument extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('download')
+                ->label('Télécharger le document')
+                ->icon('tabler-download')
+                ->color(Color::Green)
+                ->url(fn (Document $record) => Storage::disk('public')->url($record->file_path)),
             Actions\Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')
