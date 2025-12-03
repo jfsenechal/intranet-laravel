@@ -2,10 +2,12 @@
 
 namespace AcMarche\App;
 
+use AcMarche\App\Traits\HooksTrait;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    use HooksTrait;
     /**
      * Register services.
      */
@@ -43,5 +45,7 @@ class AppServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/app'),
         ], 'app-views');
+
+        $this->buttonListModules();
     }
 }

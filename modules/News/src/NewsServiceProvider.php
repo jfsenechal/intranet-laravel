@@ -4,7 +4,7 @@ namespace AcMarche\News;
 
 use Illuminate\Support\ServiceProvider;
 
-class NewsServiceProvider extends ServiceProvider
+final class NewsServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
