@@ -17,34 +17,23 @@ class PublicationTables
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->sortable(),
-
-                TextColumn::make('title')
+                TextColumn::make('name')
+                    ->label('Nom')
                     ->searchable()
                     ->sortable(),
-
                 TextColumn::make('category.name')
                     ->label('Category')
                     ->sortable()
                     ->searchable(),
-
-                TextColumn::make('url')
-                    ->label('URL')
-                    ->limit(50)
-                    ->searchable(),
-
                 TextColumn::make('expire_date')
-                    ->label('Expire Date')
-                    ->dateTime()
+                    ->label('Date d\'expiration')
+                    ->date()
                     ->sortable(),
-
                 TextColumn::make('createdAt')
                     ->label('Created')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
                 TextColumn::make('updatedAt')
                     ->label('Updated')
                     ->dateTime()
@@ -57,8 +46,6 @@ class PublicationTables
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

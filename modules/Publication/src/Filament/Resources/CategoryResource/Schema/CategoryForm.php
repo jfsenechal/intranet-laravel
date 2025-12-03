@@ -3,7 +3,6 @@
 namespace AcMarche\Publication\Filament\Resources\CategoryResource\Schema;
 
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
 
 class CategoryForm
@@ -12,21 +11,21 @@ class CategoryForm
     {
         return $schema
             ->schema([
-                Flex::make([
-                    TextInput::make('name')
-                        ->label('Name')
-                        ->required()
-                        ->maxLength(255),
-
-                    TextInput::make('url')
-                        ->label('URL')
-                        ->maxLength(255),
-
-                    TextInput::make('wpCategoryId')
-                        ->label('WP Category ID')
-                        ->required()
-                        ->maxLength(255),
-                ]),
+                TextInput::make('name')
+                    ->label('Nom')
+                    ->required()
+                    ->maxLength(255)
+                ->columnSpanFull(),
+                TextInput::make('url')
+                    ->label('Url marche.be')
+                    ->required()
+                    ->url()
+                    ->maxLength(255),
+                TextInput::make('wpCategoryId')
+                    ->label('Numéro de la catégorie wordpress')
+                    ->required()
+                    ->integer()
+                    ->maxLength(10),
             ]);
     }
 }

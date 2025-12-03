@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 final class PublicationResource extends Resource
 {
     protected static ?string $model = Publication::class;
+    protected static ?int $navigationSort = 1;
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-newspaper';
 

@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 final class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
+    protected static ?int $navigationSort = 2;
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-tag';
 

@@ -16,21 +16,10 @@ class CategoryTables
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->sortable(),
-
                 TextColumn::make('name')
+                    ->label('Nom')
                     ->searchable()
                     ->sortable(),
-
-                TextColumn::make('url')
-                    ->label('URL')
-                    ->searchable(),
-
-                TextColumn::make('wpCategoryId')
-                    ->label('WP Category ID')
-                    ->searchable(),
-
                 TextColumn::make('publications_count')
                     ->label('Publications')
                     ->counts('publications')
@@ -41,8 +30,6 @@ class CategoryTables
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
