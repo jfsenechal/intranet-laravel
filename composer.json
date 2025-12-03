@@ -26,7 +26,8 @@
         "meilisearch/meilisearch-php": "^1.16",
         "secondnetwork/blade-tabler-icons": "*",
         "stechstudio/filament-impersonate": "^4.0",
-        "barryvdh/laravel-dompdf": "^v3.1.1"
+        "barryvdh/laravel-dompdf": "^v3.1.1",
+        "spatie/laravel-pdf": "^1.8.0"
     },
     "repositories": [
         {

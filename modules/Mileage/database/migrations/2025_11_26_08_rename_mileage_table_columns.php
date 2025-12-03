@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -53,6 +54,7 @@ return new class extends Migration {
             $table->renameColumn('departement', 'department');
             $table->renameColumn('created', 'created_at');
             $table->renameColumn('updated', 'updated_at');
+            $table->softDeletes();
         });
         Schema::connection('maria-mileage')->table('trips', function (Blueprint $table) {
             $table->renameColumn('distance', 'distance');
@@ -70,6 +72,7 @@ return new class extends Migration {
             $table->renameColumn('utilisateur_id', 'user_id');
             $table->renameColumn('created', 'created_at');
             $table->renameColumn('updated', 'updated_at');
+            $table->softDeletes();
         });
     }
 };

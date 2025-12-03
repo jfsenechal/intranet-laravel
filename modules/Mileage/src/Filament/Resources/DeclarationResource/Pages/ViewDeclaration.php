@@ -2,15 +2,14 @@
 
 namespace AcMarche\Mileage\Filament\Resources\DeclarationResource\Pages;
 
-use AcMarche\Document\Filament\Resources\DocumentResource;
-use AcMarche\Document\Models\Document;
 use AcMarche\Mileage\Filament\Resources\DeclarationResource;
+use AcMarche\Mileage\Models\Declaration;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\Storage;
 
-class ViewDeclaration extends ViewRecord
+final class ViewDeclaration extends ViewRecord
 {
     protected static string $resource = DeclarationResource::class;
 
@@ -20,12 +19,17 @@ class ViewDeclaration extends ViewRecord
             Actions\Action::make('download')
                 ->label('Télécharger le document')
                 ->icon('tabler-download')
-                ->color(Color::Green)
-                ->url(fn (Document $record) => Storage::disk('public')->url($record->file_path)),
+                ->color(Color::Green)->url(fn (Declaration $record) => route('download.action', $record))
+                ->action(function (Declaration $record) {
+                    Notification::make()
+                        ->title('Pdf exporté')
+                        ->success()
+                        ->send();
+                }),
             Actions\Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')
-                ->url(DocumentResource::getUrl('index')),
+                ->url(DeclarationResource::getUrl('index')),
             Actions\EditAction::make()
                 ->icon('tabler-edit'),
             Actions\DeleteAction::make()

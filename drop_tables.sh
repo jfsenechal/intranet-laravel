@@ -58,3 +58,6 @@ for db in "${DATABASES[@]}"; do
 done
 
 echo "All tables dropped and SQL dumps imported for specified databases."
+php artisan migrate
+php artisan db:seed
+echo "Migrate and db seed done."

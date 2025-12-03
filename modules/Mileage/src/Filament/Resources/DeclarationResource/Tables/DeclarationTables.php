@@ -44,7 +44,7 @@ final class DeclarationTables
                     ->sortable(),
                 Tables\Columns\TextColumn::make('rate')
                     ->label('Tarif')
-                    ->money('EUR')
+                    ->money('EUR'),
             ])
             ->filters([
                 //
