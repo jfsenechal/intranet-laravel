@@ -8,9 +8,9 @@ use Filament\Schemas\Schema;
 
 class DocumentInfolist
 {
-public static function configure(Schema $schema): Schema
-{
- return $schema
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
                 TextEntry::make('category')
                     ->label('Catégorie')
@@ -24,5 +24,5 @@ public static function configure(Schema $schema): Schema
                 ImageEntry::make('file_name')
                     ->disk('uploads/document'),
             ]);
-}
+    }
 }

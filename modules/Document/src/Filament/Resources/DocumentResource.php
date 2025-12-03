@@ -1,6 +1,5 @@
 <?php
 
-
 namespace AcMarche\Document\Filament\Resources;
 
 use AcMarche\Document\Filament\Resources\DocumentResource\Pages;
@@ -11,9 +10,10 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
-class DocumentResource extends Resource
+final class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
+
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationIcon(): ?string

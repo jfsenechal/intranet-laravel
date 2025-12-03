@@ -27,8 +27,6 @@ final class Document extends Model
         'file_size',
         'file_mime',
         'category',
-        'is_published',
-        'published_at',
         'user_add',
         'category_id',
     ];
@@ -49,8 +47,6 @@ final class Document extends Model
     protected function casts(): array
     {
         return [
-            'is_published' => 'boolean',
-            'published_at' => 'datetime',
             'file_size' => 'integer',
         ];
     }
