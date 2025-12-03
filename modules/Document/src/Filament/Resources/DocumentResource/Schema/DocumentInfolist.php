@@ -2,6 +2,8 @@
 
 namespace AcMarche\Document\Filament\Resources\DocumentResource\Schema;
 
+use AcMarche\App\Filament\Schema\Infolists\PdfViewerEntry;
+use AcMarche\Document\Models\Document;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -23,11 +25,13 @@ final class DocumentInfolist
                     ->columnSpanFull()
                     ->prose()
                     ->hidden(fn ($state): bool => blank($state)),
-                ImageEntry::make('file_path')
+                ImageEntry::make('file_path2')
                     ->label('Fichier')
                     ->disk('public')
                     ->columnSpanFull()
-                    ->visible(fn ($record): bool => $record->file_path && str_starts_with($record->file_mime ?? '', 'image/'))
+                    ->visible(
+                        fn ($record): bool => $record->file_path && str_starts_with($record->file_mime ?? '', 'image/')
+                    )
                     ->afterContent(
                         Action::make('download')
                             ->label('Télécharger le fichier')
@@ -35,18 +39,22 @@ final class DocumentInfolist
                             ->url(fn ($record): string => Storage::disk('public')->url($record->file_path))
                             ->openUrlInNewTab()
                     ),
-                TextEntry::make('file_name')
+                TextEntry::make('download_link')
                     ->label('Fichier')
                     ->columnSpanFull()
-                    ->icon('heroicon-o-document')
-                    ->visible(fn ($record): bool => $record->file_path && ! str_starts_with($record->file_mime ?? '', 'image/'))
                     ->afterContent(
                         Action::make('download')
                             ->label('Télécharger le fichier')
                             ->icon('heroicon-o-arrow-down-tray')
-                            ->url(fn ($record): string => Storage::disk('public')->url($record->file_path))
+                            ->url(fn (Document $record): string => Storage::disk('public')->url($record->file_path))
                             ->openUrlInNewTab()
                     ),
+                PdfViewerEntry::make('file_path')
+                    ->label('Aperçu')
+                    ->minHeight('40svh')
+                    ->columnSpanFull()
+                    ->disk('public'),
+
             ]);
     }
 }

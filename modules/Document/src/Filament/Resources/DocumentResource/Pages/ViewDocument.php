@@ -25,6 +25,10 @@ final class ViewDocument extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('back')
+                ->label('Retour à la liste')
+                ->icon('tabler-list')
+                ->url(DocumentResource::getUrl('index')),
             Actions\EditAction::make()
                 ->icon('tabler-edit'),
             Actions\DeleteAction::make()
