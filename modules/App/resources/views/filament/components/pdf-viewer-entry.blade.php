@@ -3,12 +3,12 @@
         @if(!empty($getState()))
             <iframe
                 class="fi-growable"
-                src="{{ $getRoute($getState()) }}" style="min-height: {{ $getMinHeight() }};">
+                src="{{ $getRoute($getState()) }}?r=<?php echo mt_rand() ?>" style="min-height: {{ $getMinHeight() }};">
             </iframe>
         @elseif(!empty($getFileUrl()))
             <iframe
                 class="fi-growable"
-                src="{{ $getFileUrl() }}" style="min-height: {{ $getMinHeight() }};">
+                src="{{ $getFileUrl() }}?r=<?php echo mt_rand() ?>" style="min-height: {{ $getMinHeight() }};">
             </iframe>
         @endif
     </div>

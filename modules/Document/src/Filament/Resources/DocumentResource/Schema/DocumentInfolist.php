@@ -25,20 +25,6 @@ final class DocumentInfolist
                     ->columnSpanFull()
                     ->prose()
                     ->hidden(fn ($state): bool => blank($state)),
-                ImageEntry::make('file_path2')
-                    ->label('Fichier')
-                    ->disk('public')
-                    ->columnSpanFull()
-                    ->visible(
-                        fn ($record): bool => $record->file_path && str_starts_with($record->file_mime ?? '', 'image/')
-                    )
-                    ->afterContent(
-                        Action::make('download')
-                            ->label('Télécharger le fichier')
-                            ->icon('heroicon-o-arrow-down-tray')
-                            ->url(fn ($record): string => Storage::disk('public')->url($record->file_path))
-                            ->openUrlInNewTab()
-                    ),
                 TextEntry::make('download_link')
                     ->label('Fichier')
                     ->columnSpanFull()
@@ -54,7 +40,6 @@ final class DocumentInfolist
                     ->minHeight('40svh')
                     ->columnSpanFull()
                     ->disk('public'),
-
             ]);
     }
 }
