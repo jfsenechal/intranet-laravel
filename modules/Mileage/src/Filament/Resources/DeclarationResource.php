@@ -14,7 +14,7 @@ class DeclarationResource extends Resource
 {
     protected static ?string $model = Declaration::class;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationIcon(): ?string
     {
@@ -23,7 +23,7 @@ class DeclarationResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Déclarations';
+        return 'Mes déclarations';
     }
 
     public static function form(Schema $schema): Schema
