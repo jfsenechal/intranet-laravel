@@ -17,6 +17,7 @@ class TripTables
     {
         return $table
             ->defaultSort('departure_date', 'desc')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 Tables\Columns\TextColumn::make('departure_date')
                     ->label('Date')
@@ -28,32 +29,21 @@ class TripTables
                     ->label('Départ')
                     ->searchable()
                     ->limit(30),
-
                 Tables\Columns\TextColumn::make('arrival_location')
                     ->label('Arrivée')
                     ->searchable()
-                    ->limit(30),
-
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('distance')
                     ->label('Distance')
                     ->sortable()
                     ->suffix(' km'),
-
                 Tables\Columns\TextColumn::make('type_movement')
                     ->label('Type')
                     ->searchable()
                     ->toggleable(),
-
                 Tables\Columns\TextColumn::make('declaration.last_name')
-                    ->label('Déclarant')
-                    ->searchable()
-                    ->toggleable(),
-
-                Tables\Columns\TextColumn::make('rate')
-                    ->label('Tarif')
-                    ->money('EUR')
-                    ->toggleable(),
-
+                    ->label('Déclaré ?'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Créé le')
                     ->dateTime()
@@ -65,7 +55,6 @@ class TripTables
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

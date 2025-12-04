@@ -5,6 +5,7 @@ namespace AcMarche\Mileage\Filament\Resources\TripResource\Pages;
 use AcMarche\Mileage\Filament\Resources\TripResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditTrip extends EditRecord
 {
@@ -13,8 +14,13 @@ class EditTrip extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\ViewAction::make()
+                ->icon('tabler-eye'),
         ];
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return "Modification d'un déplacement";
     }
 }
