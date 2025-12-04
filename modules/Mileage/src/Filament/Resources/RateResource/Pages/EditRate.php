@@ -5,6 +5,7 @@ namespace AcMarche\Mileage\Filament\Resources\RateResource\Pages;
 use AcMarche\Mileage\Filament\Resources\RateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditRate extends EditRecord
 {
@@ -13,7 +14,13 @@ class EditRate extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\ViewAction::make()
+                ->icon('tabler-eye'),
         ];
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return "Modification d'un tarif";
     }
 }

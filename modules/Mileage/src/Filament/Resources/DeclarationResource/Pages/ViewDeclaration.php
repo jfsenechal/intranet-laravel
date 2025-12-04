@@ -10,10 +10,16 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Illuminate\Contracts\Support\Htmlable;
 
 final class ViewDeclaration extends ViewRecord
 {
     protected static string $resource = DeclarationResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return "Déclaration num ".$this->record->id.' ('.$this->record->type_movement.')';
+    }
 
     public function infolist(Schema $schema): Schema
     {

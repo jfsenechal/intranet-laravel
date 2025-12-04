@@ -14,6 +14,7 @@ class BudgetArticleTables
     {
         return $table
             ->defaultSort('name')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nom')
@@ -36,10 +37,10 @@ class BudgetArticleTables
                     ->sortable(),
             ])
             ->filters([
-                //
+
             ])
             ->recordActions([
-                EditAction::make(),
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

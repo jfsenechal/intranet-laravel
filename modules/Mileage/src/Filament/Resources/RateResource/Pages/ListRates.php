@@ -5,10 +5,16 @@ namespace AcMarche\Mileage\Filament\Resources\RateResource\Pages;
 use AcMarche\Mileage\Filament\Resources\RateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ListRates extends ListRecords
 {
     protected static string $resource = RateResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return 'Liste des tarifs';
+    }
 
     protected function getHeaderActions(): array
     {

@@ -7,6 +7,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 
 final class DeclarationInfolist
 {
@@ -18,6 +19,7 @@ final class DeclarationInfolist
                     ->schema([
                         Flex::make([
                             TextEntry::make('first_name')
+                                ->weight(FontWeight::Bold)
                                 ->label('Prénom'),
                             TextEntry::make('last_name')
                                 ->label('Nom'),
@@ -47,12 +49,11 @@ final class DeclarationInfolist
                                 ->visible(fn($record): bool => $record->omnium),
                         ])->grow(false),
                         Flex::make([
-                            TextEntry::make('type_movement')
-                                ->label('Type de déplacement'),
-                            TextEntry::make('article_budgetaire')
+                            TextEntry::make('budget_article')
                                 ->label('Article budgétaire'),
                             TextEntry::make('college_date')
-                                ->label('Date de Collège'),
+                                ->label('Date de Collège')
+                                ->date(),
                         ])->grow(false),
                     ]),
                 Section::make('Véhicule')
@@ -64,9 +65,9 @@ final class DeclarationInfolist
                                 ->label('Plaque 2'),
                             TextEntry::make('omnium')
                                 ->label('Omnium')
-                                ->formatStateUsing(fn(bool $state): string => 'oui'??'non'),
+                                ->formatStateUsing(fn(bool $state): string => 'oui' ?? 'non'),
                         ]),
-                    ]),
+                    ])->grow(false),
             ]);
     }
 }
