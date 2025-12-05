@@ -27,7 +27,10 @@ final class PersonalInformationForm
                     ->required(),
                 TextInput::make('iban')
                     ->label('Compte IBAN')
-                    ->required(),
+                    ->required()
+                    ->rule('iban')
+                    ->placeholder('BE00 0000 0000 0000')
+                    ->helperText('Format: BE00 0000 0000 0000'),
             ]);
     }
 }
