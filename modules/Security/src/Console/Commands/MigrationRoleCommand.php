@@ -104,7 +104,7 @@ final class MigrationRoleCommand extends Command
                         ->table('roles')
                         ->insert([
                             'name' => $roleName,
-                            'description' => $fosGroup->description ?? $fosGroup->name,
+                            'description' => $fosGroup->description ?? null,
                             'module_id' => $fosGroup->module_id,
                         ]);
 
@@ -120,13 +120,121 @@ final class MigrationRoleCommand extends Command
         $progressBar->finish();
         $this->newLine(2);
 
-        $this->info('Migration completed!');
-        $this->info("✓ Created: {$created} roles");
+        $this->info('✓ Role migration completed!');
+        $this->info("  Created: {$created} roles");
         if ($skipped > 0) {
-            $this->warn("⊘ Skipped: {$skipped} roles (already exist)");
+            $this->info("  Skipped: {$skipped} roles (already exist)");
+        }
+
+        // Now migrate user-role relationships
+        $this->newLine();
+        $this->info('Starting user-role relationship migration from fos_user_group...');
+
+        $userGroups = DB::connection('mariadb')
+            ->table('fos_user_group')
+            ->get();
+
+        if ($userGroups->isEmpty()) {
+            $this->warn('No user-group relationships found.');
+
+            if (count($errors) > 0) {
+                $this->error('Errors encountered during role migration:');
+                foreach ($errors as $error) {
+                    $this->error("  • {$error}");
+                }
+
+                return SfCommand::FAILURE;
+            }
+
+            return SfCommand::SUCCESS;
+        }
+
+        $this->info("Found {$userGroups->count()} user-group relationships to process.");
+
+        $relationshipsCreated = 0;
+        $relationshipsSkipped = 0;
+
+        $progressBar = $this->output->createProgressBar($userGroups->count());
+        $progressBar->start();
+
+        foreach ($userGroups as $userGroup) {
+            // Get the group and its roles
+            $fosGroup = DB::connection('mariadb')
+                ->table('fos_group')
+                ->where('id', $userGroup->group_id)
+                ->first();
+
+            if (! $fosGroup || empty($fosGroup->roles)) {
+                $progressBar->advance();
+
+                continue;
+            }
+
+            $rolesArray = json_decode($fosGroup->roles, true);
+
+            if (! is_array($rolesArray)) {
+                $errors[] = "Invalid JSON in group ID {$fosGroup->id} for user {$userGroup->user_id}";
+                $progressBar->advance();
+
+                continue;
+            }
+
+            // For each role in the group, create user-role relationship
+            foreach ($rolesArray as $roleName) {
+                try {
+                    // Get the role ID
+                    $role = DB::connection('mariadb')
+                        ->table('roles')
+                        ->where('name', $roleName)
+                        ->first();
+
+                    if (! $role) {
+                        $errors[] = "Role '{$roleName}' not found for user {$userGroup->user_id}";
+
+                        continue;
+                    }
+
+                    // Check if relationship already exists
+                    $existingRelationship = DB::connection('mariadb')
+                        ->table('role_user')
+                        ->where('user_id', $userGroup->user_id)
+                        ->where('role_id', $role->id)
+                        ->first();
+
+                    if ($existingRelationship) {
+                        $relationshipsSkipped++;
+
+                        continue;
+                    }
+
+                    // Create user-role relationship
+                    DB::connection('mariadb')
+                        ->table('role_user')
+                        ->insert([
+                            'user_id' => $userGroup->user_id,
+                            'role_id' => $role->id,
+                        ]);
+
+                    $relationshipsCreated++;
+                } catch (Exception $e) {
+                    $errors[] = "Failed to create relationship for user {$userGroup->user_id} and role '{$roleName}': {$e->getMessage()}";
+                }
+            }
+
+            $progressBar->advance();
+        }
+
+        $progressBar->finish();
+        $this->newLine(2);
+
+        $this->info('✓ User-role migration completed!');
+        $this->info("  Created: {$relationshipsCreated} user-role relationships");
+        if ($relationshipsSkipped > 0) {
+            $this->info("  Skipped: {$relationshipsSkipped} relationships (already exist)");
         }
 
         if (count($errors) > 0) {
+            $this->newLine();
             $this->error('Errors encountered:');
             foreach ($errors as $error) {
                 $this->error("  • {$error}");
@@ -134,6 +242,9 @@ final class MigrationRoleCommand extends Command
 
             return SfCommand::FAILURE;
         }
+
+        $this->newLine();
+        $this->info('✓ All migrations completed successfully!');
 
         return SfCommand::SUCCESS;
     }
