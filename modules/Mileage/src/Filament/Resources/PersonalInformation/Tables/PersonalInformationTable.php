@@ -14,23 +14,26 @@ final class PersonalInformationTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Customer')
+            ->recordTitleAttribute('username')
             ->columns([
-                TextColumn::make('car_license_plate1')
-                    ->label('Plaque d\'immatriculation 1'),
-                TextColumn::make('car_license_plate2')
-                    ->label('Plaque d\'immatriculation 2'),
                 TextColumn::make('street')
                     ->label('Rue'),
                 TextColumn::make('city')
                     ->label('Localité'),
                 TextColumn::make('iban')
                     ->label('Compte IBAN'),
+                TextColumn::make('car_license_plate1')
+                    ->label('Plaque d\'immatriculation 1'),
+                TextColumn::make('car_license_plate2')
+                    ->label('Plaque d\'immatriculation 2')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('omnium')
-                    ->label('Retenue omnium'),
+                    ->label('Retenue omnium')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('college_trip_date')
                     ->label('Date de la décision du Collège')
-                    ->date(),
+                    ->date()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
 

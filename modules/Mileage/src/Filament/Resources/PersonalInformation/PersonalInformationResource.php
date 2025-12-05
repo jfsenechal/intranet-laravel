@@ -22,8 +22,9 @@ final class PersonalInformationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'PersonalInformation';
+    protected static ?string $recordTitleAttribute = 'username';
 
+    protected static ?string $modelLabel = 'Mes informations personnelles';
     protected static ?string $navigationLabel = 'Mes informations personnelles';
 
     public static function form(Schema $schema): Schema
