@@ -3,7 +3,7 @@
 namespace AcMarche\Mileage\Filament\Resources\PersonalInformation\Pages;
 
 use AcMarche\Mileage\Filament\Resources\PersonalInformation\PersonalInformationResource;
-use AcMarche\Mileage\Models\PersonalInformation;
+use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
 
@@ -13,11 +13,11 @@ final class ManagePersonalInformation extends ManageRecords
 
     protected function getHeaderActions(): array
     {
-        $userHasRecord = PersonalInformation::where('username', auth()->user()?->username)->exists();
+        $userHasRecord = PersonalInformationRepository::getByCurrentUser()->exists();
 
         return [
             CreateAction::make()
-                ->visible(! $userHasRecord),
+                ->visible(!$userHasRecord),
         ];
     }
 }
