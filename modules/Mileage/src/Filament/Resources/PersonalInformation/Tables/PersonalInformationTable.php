@@ -6,9 +6,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -19,22 +16,28 @@ final class PersonalInformationTable
         return $table
             ->recordTitleAttribute('Customer')
             ->columns([
-                TextColumn::make('car_license_plate1'),
-                TextColumn::make('car_license_plate2'),
-                TextColumn::make('street'),
-                TextColumn::make('city'),
+                TextColumn::make('car_license_plate1')
+                    ->label('Plaque d\'immatriculation 1'),
+                TextColumn::make('car_license_plate2')
+                    ->label('Plaque d\'immatriculation 2'),
+                TextColumn::make('street')
+                    ->label('Rue'),
+                TextColumn::make('city')
+                    ->label('Localité'),
+                TextColumn::make('iban')
+                    ->label('Compte IBAN'),
+                TextColumn::make('omnium')
+                    ->label('Retenue omnium'),
                 TextColumn::make('college_trip_date')
+                    ->label('Date de la décision du Collège')
                     ->date(),
             ])
             ->filters([
 
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ForceDeleteAction::make(),
-                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

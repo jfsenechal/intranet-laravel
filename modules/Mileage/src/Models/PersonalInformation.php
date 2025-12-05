@@ -23,6 +23,8 @@ final class PersonalInformation extends Model
         'city',
         'college_trip_date',
         'username',
+        'iban',
+        'omnium',
     ];
 
     protected function casts(): array

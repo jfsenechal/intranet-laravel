@@ -14,11 +14,13 @@ return new class extends Migration {
             $table->id();
             $table->string('car_license_plate1');
             $table->string('car_license_plate2')->nullable();
-            $table->string('street');
-            $table->string('postal_code');
-            $table->string('city');
+            $table->string('street')->nullable(false);
+            $table->string('postal_code')->nullable(false);
+            $table->string('city')->nullable(false);
             $table->string('username')->unique()->nullable(false);
-            $table->date('college_trip_date');
+            $table->date('college_trip_date')->nullable();
+            $table->string('iban')->nullable(false);
+            $table->boolean('omnium')->default(false);
         });
     }
 

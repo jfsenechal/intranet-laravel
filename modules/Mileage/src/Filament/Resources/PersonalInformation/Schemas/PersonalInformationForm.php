@@ -2,7 +2,6 @@
 
 namespace AcMarche\Mileage\Filament\Resources\PersonalInformation\Schemas;
 
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -13,10 +12,10 @@ final class PersonalInformationForm
         return $schema
             ->components([
                 TextInput::make('car_license_plate1')
-                    ->label('Numéro de plaque 1')
+                    ->label('Plaque d\'immatriculation 1')
                     ->required(),
                 TextInput::make('car_license_plate2')
-                    ->label('Numéro de plaque 2'),
+                    ->label('Plaque d\'immatriculation 2'),
                 TextInput::make('street')
                     ->label('Rue')
                     ->required(),
@@ -26,8 +25,8 @@ final class PersonalInformationForm
                 TextInput::make('city')
                     ->label('Localité')
                     ->required(),
-                DatePicker::make('college_trip_date')
-                    ->label('Date de collège')
+                TextInput::make('iban')
+                    ->label('Compte IBAN')
                     ->required(),
             ]);
     }
