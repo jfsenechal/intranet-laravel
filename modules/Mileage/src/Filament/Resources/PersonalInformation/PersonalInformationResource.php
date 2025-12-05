@@ -7,6 +7,7 @@ use AcMarche\Mileage\Filament\Resources\PersonalInformation\Schemas\PersonalInfo
 use AcMarche\Mileage\Filament\Resources\PersonalInformation\Schemas\PersonalInformationInfolist;
 use AcMarche\Mileage\Filament\Resources\PersonalInformation\Tables\PersonalInformationTable;
 use AcMarche\Mileage\Models\PersonalInformation;
+use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -44,8 +45,7 @@ final class PersonalInformationResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->where('username', auth()->user()?->username);
+        return PersonalInformationRepository::modifyQueryToGetByCurrentUser(parent::getEloquentQuery());
     }
 
     public static function getPages(): array

@@ -2,12 +2,14 @@
 
 namespace AcMarche\Mileage\Filament\Resources\TripResource\Pages;
 
+use AcMarche\Mileage\Filament\Resources\PersonalInformation\PersonalInformationResource;
 use AcMarche\Mileage\Filament\Resources\TripResource;
+use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListTrips extends ListRecords
+final class ListTrips extends ListRecords
 {
     protected static string $resource = TripResource::class;
 
@@ -18,10 +20,16 @@ class ListTrips extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        $userHasPersonalInfo = PersonalInformationRepository::getByCurrentUser()->exists();
+
         return [
             Actions\CreateAction::make()
                 ->label('Nouveau déplacement')
-                ->icon('tabler-plus'),
+                ->icon('tabler-plus')
+
+                ->disabled(! $userHasPersonalInfo)
+                ->tooltip(! $userHasPersonalInfo ? 'Vous devez d\'abord compléter vos informations personnelles' : null)
+                ->url(! $userHasPersonalInfo ? PersonalInformationResource::getUrl('index') : null),
         ];
     }
 }

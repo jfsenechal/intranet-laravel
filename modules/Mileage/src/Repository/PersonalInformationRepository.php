@@ -9,6 +9,11 @@ class PersonalInformationRepository
 {
     public static function getByCurrentUser(): Builder
     {
-        return PersonalInformation::query()->where('username', auth()->user()?->username);
+        return self::modifyQueryToGetByCurrentUser(PersonalInformation::query());
+    }
+
+    public static function modifyQueryToGetByCurrentUser(Builder $builder): Builder
+    {
+        return $builder->where('username', auth()->user()?->username);
     }
 }
