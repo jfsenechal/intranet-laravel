@@ -3,6 +3,7 @@
 namespace AcMarche\Security;
 
 use AcMarche\Security\Console\Commands\CreateUserCommand;
+use AcMarche\Security\Console\Commands\MigrationRoleCommand;
 use AcMarche\Security\Console\Commands\SyncUserCommand;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
@@ -52,6 +53,7 @@ final class SecurityServiceProvider extends ServiceProvider
             $this->commands([
                 CreateUserCommand::class,
                 SyncUserCommand::class,
+                MigrationRoleCommand::class
             ]);
         }
 

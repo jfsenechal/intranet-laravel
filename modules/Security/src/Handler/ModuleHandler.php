@@ -7,41 +7,29 @@ use AcMarche\Security\Repository\ModuleRepository;
 use AcMarche\Security\Repository\RoleRepository;
 use AcMarche\Security\Repository\UserRepository;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
-class ModuleHandler
+final class ModuleHandler
 {
     /**
-     * @param Module $module
-     * @param array $data
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public static function addUserFromModule(Module $module, array $data): void
     {
         $userId = $data['user'];
-        if (!$user = UserRepository::find($userId)) {
-            throw new \Exception('User not found');
+        if (! $user = UserRepository::find($userId)) {
+            throw new Exception('User not found');
         }
         self::addModuleAndRoles($module, $user, $data);
     }
 
     public static function addModuleFromUser(User $user, array $data): void
     {
-        if (!$module = ModuleRepository::find($data['module'])) {
-            throw new \Exception('Module not found');
+        if (! $module = ModuleRepository::find($data['module'])) {
+            throw new Exception('Module not found');
         }
         self::addModuleAndRoles($module, $user, $data);
-    }
-
-    private static function addModuleAndRoles(Module $module, User $user, array $data)
-    {
-        foreach ($data['roles'] as $roleName) {
-            if ($role = RoleRepository::findByName($roleName)) {
-                $user->addRole($role);
-            }
-        }
-        $user->addModule($module);
     }
 
     /**
@@ -75,10 +63,20 @@ class ModuleHandler
     {
         $roleIdsToDetach = RoleRepository::findRolesByUserAndModule($user, $module);
 
-        if (!empty($roleIdsToDetach)) {
+        if (! empty($roleIdsToDetach)) {
             $user->roles()->detach($roleIdsToDetach);
         }
 
         $user->modules()->detach($module);
+    }
+
+    private static function addModuleAndRoles(Module $module, User $user, array $data)
+    {
+        foreach ($data['roles'] as $roleName) {
+            if ($role = RoleRepository::findByName($roleName)) {
+                $user->addRole($role);
+            }
+        }
+        $user->addModule($module);
     }
 }

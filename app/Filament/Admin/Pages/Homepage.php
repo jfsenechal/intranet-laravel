@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
-use AcMarche\Security\Models\Module;
+use AcMarche\Security\Handler\MigrationHandler;
 use AcMarche\Security\Repository\TabRepository;
 use BackedEnum;
 use Filament\Pages\Page;
@@ -59,23 +59,11 @@ final class Homepage extends Page
         foreach ($tabs as $tab) {
             foreach ($tab->modules as $module) {
                 if (! $module->is_external) {
-                    $module->url = $this->urlModule($module);
+                    $module->url = MigrationHandler::urlModule($module);
                 }
             }
         }
 
         return $tabs;
-    }
-
-    private function urlModule(Module $module): string
-    {
-        return match ($module->id) {
-            9 => '/document',
-            13 => '/mileage',
-            15 => '/news',
-            17 => '/security',
-            44 => '/publication',
-            default => '/admin'
-        };
     }
 }
