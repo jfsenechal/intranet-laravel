@@ -2,12 +2,16 @@
 
 namespace AcMarche\Mileage\Models;
 
+use AcMarche\Mileage\Observers\PersonalInformationObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PersonalInformation extends Model
+#[ObservedBy([PersonalInformationObserver::class])]
+final class PersonalInformation extends Model
 {
     use HasFactory;
+    public $timestamps = false;
 
     protected $connection = 'maria-mileage';
 
@@ -18,6 +22,7 @@ class PersonalInformation extends Model
         'street',
         'city',
         'college_trip_date',
+        'username',
     ];
 
     protected function casts(): array

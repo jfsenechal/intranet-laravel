@@ -2,6 +2,7 @@
 
 namespace AcMarche\Mileage\Models;
 
+use AcMarche\Mileage\Observers\TripObserver;
 use AcMarche\Security\Models\HasUserAdd;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('street');
             $table->string('postal_code');
             $table->string('city');
-            $table->string('username');
+            $table->string('username')->unique()->nullable(false);
             $table->date('college_trip_date');
         });
     }

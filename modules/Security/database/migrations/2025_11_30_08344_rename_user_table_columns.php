@@ -37,6 +37,8 @@ return new class extends Migration {
         // Modify column properties in users table
         Schema::connection('mariadb')->table('users', function (Blueprint $table) {
             $table->string('name', 255)->nullable(false);
+            $table->string('first_name')->nullable(false)->change();
+            $table->string('last_name')->nullable(false)->change();
             $table->string('phone', 50)->nullable();
             $table->string('mobile', 50)->nullable();
             $table->string('extension', 50)->nullable();

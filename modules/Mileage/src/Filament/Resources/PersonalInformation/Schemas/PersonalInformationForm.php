@@ -2,6 +2,7 @@
 
 namespace AcMarche\Mileage\Filament\Resources\PersonalInformation\Schemas;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -25,7 +26,7 @@ final class PersonalInformationForm
                 TextInput::make('city')
                     ->label('Localité')
                     ->required(),
-                TextInput::make('college_trip_date')
+                DatePicker::make('college_trip_date')
                     ->label('Date de collège')
                     ->required(),
             ]);

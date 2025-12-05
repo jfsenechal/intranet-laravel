@@ -13,11 +13,11 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PersonalInformationResource extends Resource
+final class PersonalInformationResource extends Resource
 {
     protected static ?string $model = PersonalInformation::class;
+
     protected static ?int $navigationSort = 4;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -41,18 +41,16 @@ class PersonalInformationResource extends Resource
         return PersonalInformationTable::configure($table);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('username', auth()->user()?->username);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ManagePersonalInformation::route('/'),
         ];
-    }
-
-    public static function getRecordRouteBindingEloquentQuery22(): Builder
-    {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }
