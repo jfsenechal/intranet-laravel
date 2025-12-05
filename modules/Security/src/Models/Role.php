@@ -11,23 +11,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[UseFactory(RoleFactory::class)]
-class Role extends Model
+final class Role extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $connection = 'mariadb';
 
-    public $timestamps = false;
     protected $fillable = ['name', 'description', 'module_id'];
-
-    /**
-     * To resolve name
-     * static::resolveFactoryName($modelName);
-     */
-    protected static function newFactory()
-    {
-        return RoleFactory::new();
-    }
 
     public function module(): BelongsTo
     {
@@ -42,4 +34,12 @@ class Role extends Model
         return $this->belongsToMany(User::class, 'role_user');
     }
 
+    /**
+     * To resolve name
+     * static::resolveFactoryName($modelName);
+     */
+    protected static function newFactory()
+    {
+        return RoleFactory::new();
+    }
 }

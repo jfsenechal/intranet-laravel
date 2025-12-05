@@ -43,46 +43,78 @@ final class MigrationRoleCommand extends Command
             return SfCommand::SUCCESS;
         }
 
-        $this->info("Found {$fosGroups->count()} groups to migrate.");
-
-        $progressBar = $this->output->createProgressBar($fosGroups->count());
-        $progressBar->start();
+        $this->info("Found {$fosGroups->count()} groups to process.");
 
         $created = 0;
         $skipped = 0;
         $errors = [];
+        $totalRoles = 0;
+
+        // Count total roles to migrate
+        foreach ($fosGroups as $fosGroup) {
+            if (! empty($fosGroup->roles)) {
+                $rolesArray = json_decode($fosGroup->roles, true);
+                if (is_array($rolesArray)) {
+                    $totalRoles += count($rolesArray);
+                }
+            }
+        }
+
+        if ($totalRoles === 0) {
+            $this->warn('No roles found in fos_group.roles field.');
+
+            return SfCommand::SUCCESS;
+        }
+
+        $this->info("Found {$totalRoles} roles to migrate.");
+
+        $progressBar = $this->output->createProgressBar($totalRoles);
+        $progressBar->start();
 
         foreach ($fosGroups as $fosGroup) {
-            try {
-                // Check if role already exists
-                $existingRole = DB::connection('mariadb')
-                    ->table('roles')
-                    ->where('name', $fosGroup->name)
-                    ->first();
-
-                if ($existingRole) {
-                    dump("existingRole: {$existingRole->name}");
-                    $skipped++;
-                    $progressBar->advance();
-
-                    continue;
-                }
-
-                // Create new role
-                DB::connection('mariadb')
-                    ->table('roles')
-                    ->insert([
-                        'name' => $fosGroup->name,
-                        'description' => $fosGroup->description ?? $fosGroup->title,
-                        'module_id' => $fosGroup->module_id,
-                    ]);
-
-                $created++;
-            } catch (Exception $e) {
-                $errors[] = "Failed to migrate group '{$fosGroup->name}': {$e->getMessage()}";
+            if (empty($fosGroup->roles)) {
+                continue;
             }
 
-            $progressBar->advance();
+            $rolesArray = json_decode($fosGroup->roles, true);
+
+            if (! is_array($rolesArray)) {
+                $errors[] = "Invalid JSON in group ID {$fosGroup->id}";
+
+                continue;
+            }
+
+            foreach ($rolesArray as $roleName) {
+                try {
+                    // Check if role already exists
+                    $existingRole = DB::connection('mariadb')
+                        ->table('roles')
+                        ->where('name', $roleName)
+                        ->first();
+
+                    if ($existingRole) {
+                        $skipped++;
+                        $progressBar->advance();
+
+                        continue;
+                    }
+
+                    // Create new role
+                    DB::connection('mariadb')
+                        ->table('roles')
+                        ->insert([
+                            'name' => $roleName,
+                            'description' => $fosGroup->description ?? $fosGroup->name,
+                            'module_id' => $fosGroup->module_id,
+                        ]);
+
+                    $created++;
+                } catch (Exception $e) {
+                    $errors[] = "Failed to migrate role '{$roleName}' from group '{$fosGroup->name}': {$e->getMessage()}";
+                }
+
+                $progressBar->advance();
+            }
         }
 
         $progressBar->finish();
