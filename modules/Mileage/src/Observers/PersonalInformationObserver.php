@@ -6,13 +6,21 @@ use AcMarche\Mileage\Models\PersonalInformation;
 
 final class PersonalInformationObserver
 {
-    public function __construct() {}
+    /**
+     * Handle the PersonalInformation "creating" event.
+     */
+    public function creating(PersonalInformation $personalInformation): void
+    {
+        $personalInformation->username = auth()->user()?->username;
+    }
 
     /**
-     * Handle the PersonalInformation "created" event.
+     * doesn't work
+     * @param PersonalInformation $personalInformation
+     * @return void
      */
     public function created(PersonalInformation $personalInformation): void
     {
-        $personalInformation->username = auth()->user()?->name;
+        $personalInformation->username = auth()->user()?->username;
     }
 }

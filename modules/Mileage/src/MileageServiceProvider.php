@@ -4,7 +4,7 @@ namespace AcMarche\Mileage;
 
 use Illuminate\Support\ServiceProvider;
 
-class MileageServiceProvider extends ServiceProvider
+final class MileageServiceProvider extends ServiceProvider
 {
     /**
      * Register services.

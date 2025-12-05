@@ -13,16 +13,11 @@ final class ManagePersonalInformation extends ManageRecords
 
     protected function getHeaderActions(): array
     {
-        $userHasRecord = PersonalInformation::where('username', auth()->user()?->name)->exists();
+        $userHasRecord = PersonalInformation::where('username', auth()->user()?->username)->exists();
 
         return [
             CreateAction::make()
-                ->visible(! $userHasRecord)
-                ->mutateFormDataUsing(function (array $data): array {
-                    $data['username'] = auth()->user()?->name;
-
-                    return $data;
-                }),
+                ->visible(! $userHasRecord),
         ];
     }
 }
