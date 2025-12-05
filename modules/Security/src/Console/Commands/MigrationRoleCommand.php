@@ -233,6 +233,86 @@ final class MigrationRoleCommand extends Command
             $this->info("  Skipped: {$relationshipsSkipped} relationships (already exist)");
         }
 
+        // Now migrate user-module relationships
+        $this->newLine();
+        $this->info('Starting user-module relationship migration...');
+
+        // Get all distinct user-module combinations from role_user and roles tables
+        $userModules = DB::connection('mariadb')
+            ->table('role_user')
+            ->join('roles', 'role_user.role_id', '=', 'roles.id')
+            ->select('role_user.user_id', 'roles.module_id')
+            ->distinct()
+            ->get();
+
+        if ($userModules->isEmpty()) {
+            $this->warn('No user-module relationships found.');
+
+            if (count($errors) > 0) {
+                $this->newLine();
+                $this->error('Errors encountered:');
+                foreach ($errors as $error) {
+                    $this->error("  • {$error}");
+                }
+
+                return SfCommand::FAILURE;
+            }
+
+            $this->newLine();
+            $this->info('✓ All migrations completed successfully!');
+
+            return SfCommand::SUCCESS;
+        }
+
+        $this->info("Found {$userModules->count()} user-module relationships to create.");
+
+        $moduleRelationshipsCreated = 0;
+        $moduleRelationshipsSkipped = 0;
+
+        $progressBar = $this->output->createProgressBar($userModules->count());
+        $progressBar->start();
+
+        foreach ($userModules as $userModule) {
+            try {
+                // Check if relationship already exists
+                $existingModuleRelation = DB::connection('mariadb')
+                    ->table('module_user')
+                    ->where('user_id', $userModule->user_id)
+                    ->where('module_id', $userModule->module_id)
+                    ->first();
+
+                if ($existingModuleRelation) {
+                    $moduleRelationshipsSkipped++;
+                    $progressBar->advance();
+
+                    continue;
+                }
+
+                // Create user-module relationship
+                DB::connection('mariadb')
+                    ->table('module_user')
+                    ->insert([
+                        'user_id' => $userModule->user_id,
+                        'module_id' => $userModule->module_id,
+                    ]);
+
+                $moduleRelationshipsCreated++;
+            } catch (Exception $e) {
+                $errors[] = "Failed to create module relationship for user {$userModule->user_id} and module {$userModule->module_id}: {$e->getMessage()}";
+            }
+
+            $progressBar->advance();
+        }
+
+        $progressBar->finish();
+        $this->newLine(2);
+
+        $this->info('✓ User-module migration completed!');
+        $this->info("  Created: {$moduleRelationshipsCreated} user-module relationships");
+        if ($moduleRelationshipsSkipped > 0) {
+            $this->info("  Skipped: {$moduleRelationshipsSkipped} relationships (already exist)");
+        }
+
         if (count($errors) > 0) {
             $this->newLine();
             $this->error('Errors encountered:');
