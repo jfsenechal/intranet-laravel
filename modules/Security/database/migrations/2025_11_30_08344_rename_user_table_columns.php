@@ -21,13 +21,6 @@ return new class extends Migration {
             $table->rename('profils');
         });
 
-        // Rename columns in users table
-        Schema::connection('mariadb')->table('users', function (Blueprint $table) {
-            $table->renameColumn('nom', 'last_name');
-            $table->renameColumn('prenom', 'first_name');
-            $table->renameColumn('departement', 'department');
-        });
-
         // Rename columns in tabs table
         Schema::connection('mariadb')->table('tabs', function (Blueprint $table) {
             $table->renameColumn('nom', 'name');
@@ -36,9 +29,13 @@ return new class extends Migration {
 
         // Modify column properties in users table
         Schema::connection('mariadb')->table('users', function (Blueprint $table) {
+            $table->renameColumn('nom', 'last_name');
+            $table->renameColumn('prenom', 'first_name');
+            $table->renameColumn('departement', 'department');
             $table->string('name', 255)->nullable(false);
             $table->string('first_name')->nullable(false)->change();
             $table->string('last_name')->nullable(false)->change();
+            $table->string('news_attachment')->nullable(false)->default(false)->change();
             $table->string('phone', 50)->nullable();
             $table->string('mobile', 50)->nullable();
             $table->string('extension', 50)->nullable();

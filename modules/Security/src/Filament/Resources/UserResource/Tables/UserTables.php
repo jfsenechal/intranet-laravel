@@ -39,11 +39,11 @@ class UserTables
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Téléphone')
-                    ->icon('tabler-phone'),
+                    ->icon('tabler-phone')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('extension')
                     ->label('Extension')
                     ->icon('tabler-device-landline-phone'),
-                Tables\Columns\TextColumn::make('roles.name'),
                 Tables\Columns\TextColumn::make('username')
                     ->label('Nom d\'utilisateur')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -58,7 +58,6 @@ class UserTables
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

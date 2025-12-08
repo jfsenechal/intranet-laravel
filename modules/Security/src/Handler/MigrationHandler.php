@@ -24,11 +24,11 @@ final class MigrationHandler
     public static function findTheResource(Module $module): ?string
     {
         return match ($module->id) {
-            9 => DocumentResource::getUrl('index'),
-            13 => TripResource::getUrl('index'),
-            15 => NewsResource::getUrl('index'),
-            17 => UserResource::getUrl('index'),
-            44 => PublicationResource::getUrl('index'),
+            9 => DocumentResource::getUrl('index', panel: 'document-panel'),
+            13 => TripResource::getUrl('index', panel: 'mileage-panel'),
+            15 => NewsResource::getUrl('index', panel: 'news'),
+            17 => UserResource::getUrl('index', panel: 'security-panel'),
+            44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
             default => null,
         };
     }

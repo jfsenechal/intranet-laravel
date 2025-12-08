@@ -3,7 +3,7 @@
 namespace AcMarche\Security\Ldap;
 
 use AcMarche\Security\Constant\DepartmentEnum;
-use App\Ldap\User as UserLdap;
+use AcMarche\Security\Ldap\User as UserLdap;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Str;
@@ -20,7 +20,7 @@ final class UserHandler
             throw new Exception('Utilisateur déjà existant');
         }
         if ($userLdap = UserLdap::query()->findBy('sAMAccountName', $username)) {
-            $dataUser = User::generateDataFromLdap($userLdap, $username);
+            $dataUser = User::generateDataFromLdap($userLdap);
             $dataUser['username'] = $username;
             $dataUser['password'] = Str::password();
             $dataUser['departments'] = DepartmentEnum::from($data['departments'][0])->value;

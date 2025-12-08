@@ -59,6 +59,10 @@ done
 
 echo "All tables dropped and SQL dumps imported for specified databases."
 php artisan migrate
-php artisan db:seed
 echo "Migrate and db seed done."
+php artisan intranet:sync-users
+echo "Sync users done."
+php artisan db:seed
+echo "DB seed done."
 php artisan intranet:migration-role
+echo "Migration role done."

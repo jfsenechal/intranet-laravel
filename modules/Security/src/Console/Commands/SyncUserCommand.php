@@ -55,7 +55,7 @@ final class SyncUserCommand extends Command
 
     private function addUser(string $username, UserLdap $userLdap): void
     {
-        $data = User::generateDataFromLdap($userLdap, $username);
+        $data = User::generateDataFromLdap($userLdap);
         $data['username'] = $username;
         $data['password'] = Str::password();
         $user = User::create($data);
@@ -63,9 +63,9 @@ final class SyncUserCommand extends Command
         $this->info('Add '.$user->first_name.' '.$user->last_name);
     }
 
-    private function updateUser(User $user, mixed $userLdap): void
+    private function updateUser(User $user, UserLdap $userLdap): void
     {
-        $user->update(User::generateDataFromLdap($userLdap, $user->username));
+        $user->update(User::generateDataFromLdap($userLdap));
     }
 
     private function removeOldUsers(): void

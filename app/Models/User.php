@@ -164,7 +164,7 @@ class User extends Authenticatable
         return false;
     }
 
-    public static function generateDataFromLdap(UserLdap $userLdap, string $username): array
+    public static function generateDataFromLdap(UserLdap $userLdap): array
     {
         $email = $userLdap->getFirstAttribute('mail');
 

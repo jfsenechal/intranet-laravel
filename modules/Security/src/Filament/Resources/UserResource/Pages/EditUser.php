@@ -15,10 +15,11 @@ class EditUser extends EditRecord
     {
         return $this->getRecord()->last_name. ' ' . $this->getRecord()->first_name;
     }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
+            Actions\ViewAction::make()->icon('tabler-eye'),
         ];
     }
 }
