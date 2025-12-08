@@ -6,7 +6,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Schemas\Schema;
 
-final class PersonalInformationForm
+final class PersonalInformationAdminForm
 {
     public static function configure(Schema $schema): Schema
     {

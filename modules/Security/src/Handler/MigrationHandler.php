@@ -8,29 +8,28 @@ use AcMarche\News\Filament\Resources\NewsResource;
 use AcMarche\Publication\Filament\Resources\PublicationResource;
 use AcMarche\Security\Filament\Resources\UserResource;
 use AcMarche\Security\Models\Module;
-use Filament\Resources\Resource;
 
 final class MigrationHandler
 {
     public static function urlModule(Module $module): string
     {
-        $resource = self::correspondance($module);
+        $resource = self::findTheResource($module);
         if ($resource) {
-            return $resource::getUrl('index');
+            return $resource;
         }
 
         return '/admin';
     }
 
-    public static function correspondance(Module $module): ?Resource
+    public static function findTheResource(Module $module): ?string
     {
         return match ($module->id) {
-            9 => DocumentResource::class,
-            13 => TripResource::class,
-            15 => NewsResource::class,
-            17 => UserResource::class,
-            44 => PublicationResource::class,
-            default => '/admin'
+            9 => DocumentResource::getUrl('index'),
+            13 => TripResource::getUrl('index'),
+            15 => NewsResource::getUrl('index'),
+            17 => UserResource::getUrl('index'),
+            44 => PublicationResource::getUrl('index'),
+            default => null,
         };
     }
 }
