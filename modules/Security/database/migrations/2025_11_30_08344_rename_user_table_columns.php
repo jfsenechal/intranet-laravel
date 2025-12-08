@@ -42,6 +42,7 @@ return new class extends Migration {
             $table->string('color_primary', 50)->nullable();
             $table->string('color_secondary', 50)->nullable();
             $table->uuid('uuid')->nullable()->change();
+            $table->boolean('is_administrator')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

@@ -55,8 +55,9 @@ class ModuleForm
 
         if (!$user?->id > 0) {
             $components[] = Forms\Components\Select::make('user')
-                ->label('Utilisateur')
+                ->label('Agent')
                 ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
+                ->searchable()
                 ->columnSpanFull();
         }
 
@@ -95,7 +96,7 @@ class ModuleForm
         return $schema;
     }
 
-    private static function rolesField(?Module $module): CheckboxList
+    public static function rolesField(?Module $module): CheckboxList
     {
         return CheckboxList::make('roles')
             ->label('Rôles')

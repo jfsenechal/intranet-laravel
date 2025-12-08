@@ -41,6 +41,7 @@ class User extends Authenticatable
         'color_secondary',
         'email',
         'password',
+        'is_administrator',
     ];
 
     /**
