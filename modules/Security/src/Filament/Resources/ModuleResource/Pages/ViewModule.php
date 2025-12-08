@@ -4,14 +4,24 @@ namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
 
 use AcMarche\Security\Filament\Resources\ModuleResource;
 use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\UserRelationManager;
+use AcMarche\Security\Filament\Resources\ModuleResource\Schema\ModuleInfolist;
 use Filament\Actions;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewModule extends ViewRecord
+final class ViewModule extends ViewRecord
 {
     protected static string $resource = ModuleResource::class;
+
+    public function getTitle(): string
+    {
+        return 'Module '.$this->record->name;
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return ModuleInfolist::configure($schema);
+    }
 
     protected function getHeaderActions(): array
     {
@@ -21,25 +31,6 @@ class ViewModule extends ViewRecord
             Actions\DeleteAction::make()
                 ->icon('tabler-trash'),
         ];
-    }
-
-    public function getTitle(): string
-    {
-        return 'Module '.$this->record->name;
-    }
-
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                TextEntry::make('description')
-                    ->label(false),
-                TextEntry::make('is_public')
-                    ->label('Publique?'),
-                TextEntry::make('is_external')
-                    ->label('Externe?'),
-                TextEntry::make('url'),
-            ]);
     }
 
     protected function getAllRelationManagers(): array

@@ -12,6 +12,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -28,19 +29,22 @@ final class ModuleTables
                     ->searchable()
                     ->label('Intitulé')
                     ->url(fn (Module $record) => ModuleResource::getUrl('view', ['record' => $record->id])),
-                Tables\Columns\TextColumn::make('is_public')
-                    ->label('Public'),
-                Tables\Columns\TextColumn::make('is_external')
-                    ->label('Externe'),
-                Tables\Columns\TextColumn::make('roles.name')
-                    ->label('Rôles'),
+                Tables\Columns\IconColumn::make('is_public')
+                    ->label('Accessible à tous')
+                    ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)
+                    ->color('success'),
+                Tables\Columns\IconColumn::make('is_external')
+                    ->label('Url externe')
+                    ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)
+                    ->color('success'),
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Description'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

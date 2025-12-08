@@ -2,7 +2,6 @@
 
 namespace AcMarche\Security\Ldap;
 
-use AcMarche\Security\Constant\DepartmentEnum;
 use AcMarche\Security\Ldap\User as UserLdap;
 use App\Models\User;
 use Exception;
@@ -23,7 +22,6 @@ final class UserHandler
             $dataUser = User::generateDataFromLdap($userLdap);
             $dataUser['username'] = $username;
             $dataUser['password'] = Str::password();
-            $dataUser['departments'] = DepartmentEnum::from($data['departments'][0])->value;
 
             return User::create($dataUser);
         }
