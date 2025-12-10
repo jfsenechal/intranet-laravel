@@ -22,6 +22,7 @@ final class UserForm
                     ->label('Agent')
                     ->options(fn (UserRepository $repository): array => $repository->getUsersForSelect())
                     ->searchable()
+                    ->required()
                     ->columnSpanFull(),
                 DatePicker::make('college_trip_date')
                     ->label('Date de la décision du Collège')
