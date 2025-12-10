@@ -19,7 +19,7 @@ class BudgetArticleResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return 'heroicon-o-document-text';
+        return 'tabler-book-2';
     }
 
     public static function getNavigationLabel(): string

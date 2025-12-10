@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Mileage\Filament\Resources;
+namespace AcMarche\Mileage\Filament\Resources\Trip;
 
 use AcMarche\Mileage\Filament\Resources\Trip\Pages;
 use AcMarche\Mileage\Filament\Resources\Trip\Schema\TripForm;

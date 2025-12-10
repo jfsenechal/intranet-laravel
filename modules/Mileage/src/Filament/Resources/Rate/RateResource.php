@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Mileage\Filament\Resources;
+namespace AcMarche\Mileage\Filament\Resources\Rate;
 
 use AcMarche\Mileage\Filament\Resources\Rate\Pages;
 use AcMarche\Mileage\Filament\Resources\Rate\Schema\RateForm;

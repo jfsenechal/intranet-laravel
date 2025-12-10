@@ -2,7 +2,7 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Trip\Pages;
 
-use AcMarche\Mileage\Filament\Resources\TripResource;
+use AcMarche\Mileage\Filament\Resources\Trip\TripResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;

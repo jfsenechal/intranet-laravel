@@ -1,16 +1,17 @@
 <?php
 
-namespace AcMarche\News\Policies;
+namespace AcMarche\Mileage\Policies;
 
 // https://laravel.com/docs/12.x/authorization#creating-policies
 use AcMarche\Mileage\Models\BudgetArticle;
+use App\Models\User;
 
 final class BudgetArticlePolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(BudgetArticle $budgetArticle): bool
+    public function viewAny(User $user): bool
     {
         return true;
     }
@@ -18,7 +19,7 @@ final class BudgetArticlePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(BudgetArticle $budgetArticle): bool
+    public function view(User $user, BudgetArticle $budgetArticle): bool
     {
         return true;
     }
@@ -26,7 +27,7 @@ final class BudgetArticlePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(BudgetArticle $budgetArticle): bool
+    public function create(User $user): bool
     {
         return true;
         if ($user->hasRoles([RoleEnum::MANDATAIRE->value])) {
@@ -39,23 +40,23 @@ final class BudgetArticlePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(BudgetArticle $budgetArticle): bool
+    public function update(User $user, BudgetArticle $budgetArticle): bool
     {
-        return $this->isUserLinkedToAction($budgetArticle);
+        return $this->isUserLinkedToAction($user, $budgetArticle);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(BudgetArticle $budgetArticle): bool
+    public function delete(BudgetArticle $user, BudgetArticle $budgetArticle): bool
     {
-        return $this->isUserLinkedToAction($budgetArticle);
+        return $this->isUserLinkedToAction($user, $budgetArticle);
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(BudgetArticle $budgetArticle): bool
+    public function restore(BudgetArticle $user, BudgetArticle $budgetArticle): bool
     {
         return false;
     }
@@ -63,7 +64,7 @@ final class BudgetArticlePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(BudgetArticle $budgetArticle): bool
+    public function forceDelete(BudgetArticle $user, BudgetArticle $budgetArticle): bool
     {
         return false;
     }
@@ -71,7 +72,7 @@ final class BudgetArticlePolicy
     /**
      * Check if user is linked to the action either directly or through services
      */
-    private function isUserLinkedToAction(BudgetArticle $budgetArticle): bool
+    private function isUserLinkedToAction(User $user, BudgetArticle $budgetArticle): bool
     {
         return true;
         if ($user->hasRoles([RoleEnum::MANDATAIRE->value])) {
@@ -81,7 +82,7 @@ final class BudgetArticlePolicy
             return true;
         }
         // Check if user is directly linked to the action
-        $directlyLinked = $action->users()->where('user_id', $budgetArticle->id)->exists();
+        $directlyLinked = $action->users()->where('user_id', $user->id)->exists();
 
         if ($directlyLinked) {
             return true;
@@ -89,8 +90,8 @@ final class BudgetArticlePolicy
 
         // Check if user is member of any service that is linked to the action
         return $action->leaderServices()
-            ->whereHas('users', function ($query) use ($budgetArticle) {
-                $query->where('user_id', $budgetArticle->id);
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
             })
             ->exists();
     }

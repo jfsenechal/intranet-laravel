@@ -2,7 +2,7 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Rate\Pages;
 
-use AcMarche\Mileage\Filament\Resources\RateResource;
+use AcMarche\Mileage\Filament\Resources\Rate\RateResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateRate extends CreateRecord

@@ -3,7 +3,7 @@
 namespace AcMarche\Mileage\Filament\Resources\Trip\Pages;
 
 use AcMarche\Mileage\Filament\Resources\PersonalInformation\PersonalInformationResource;
-use AcMarche\Mileage\Filament\Resources\TripResource;
+use AcMarche\Mileage\Filament\Resources\Trip\TripResource;
 use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;

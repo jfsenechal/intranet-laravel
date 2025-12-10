@@ -11,6 +11,6 @@ final class CreateUser extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Ajouter un utilisateur';
+        return 'Ajouter un agent';
     }
 }

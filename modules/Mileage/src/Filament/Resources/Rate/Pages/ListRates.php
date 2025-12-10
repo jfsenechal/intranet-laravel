@@ -2,7 +2,7 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Rate\Pages;
 
-use AcMarche\Mileage\Filament\Resources\RateResource;
+use AcMarche\Mileage\Filament\Resources\Rate\RateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;

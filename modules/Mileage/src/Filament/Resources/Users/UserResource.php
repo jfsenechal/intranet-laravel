@@ -29,7 +29,7 @@ final class UserResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Les utilisateurs';
+        return 'Liste des agents';
     }
 
     public static function form(Schema $schema): Schema
