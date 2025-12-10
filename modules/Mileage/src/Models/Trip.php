@@ -5,11 +5,14 @@ namespace AcMarche\Mileage\Models;
 use AcMarche\Mileage\Observers\TripObserver;
 use AcMarche\Security\Models\HasUserAdd;
 use App\Models\User;
+use Database\Factories\TripFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[UseFactory(TripFactory::class)]
 #[ObservedBy([TripObserver::class])]
 final class Trip extends Model
 {

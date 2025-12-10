@@ -3,12 +3,15 @@
 namespace AcMarche\Mileage\Models;
 
 use AcMarche\Security\Models\HasUserAdd;
+use Database\Factories\DeclarationFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[UseFactory(DeclarationFactory::class)]
 final class Declaration extends Model
 {
     use HasFactory;

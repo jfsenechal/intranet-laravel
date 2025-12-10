@@ -2,9 +2,12 @@
 
 namespace AcMarche\Mileage\Models;
 
+use Database\Factories\RateFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[UseFactory(RateFactory::class)]
 class Rate extends Model
 {
     use HasFactory;
