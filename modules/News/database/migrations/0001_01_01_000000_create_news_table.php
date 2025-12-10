@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('user_add')->nullable();
             $table->boolean('archive')->default(false);
             $table->boolean('sent')->default(false);
-            $table->string('user_add');
             $table->json('medias')->nullable();
             $table->timestamps();
             $table->foreignIdFor(Category::class);
