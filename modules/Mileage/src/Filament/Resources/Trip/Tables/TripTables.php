@@ -2,11 +2,10 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Trip\Tables;
 
-use AcMarche\Mileage\Filament\Resources\TripResource;
+use AcMarche\Mileage\Filament\Resources\Trip\TripResource;
 use AcMarche\Mileage\Models\Trip;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables;
 use Filament\Tables\Table;

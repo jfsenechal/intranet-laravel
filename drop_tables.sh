@@ -66,3 +66,5 @@ php artisan db:seed
 echo "DB seed done."
 php artisan intranet:migration-role
 echo "Migration role done."
+php artisan mileage:migration
+echo "Migration mileage done."
