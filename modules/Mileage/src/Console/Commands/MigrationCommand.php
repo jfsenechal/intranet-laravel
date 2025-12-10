@@ -74,8 +74,8 @@ final class MigrationCommand extends Command
                         continue;
                     }
 
-                    if (! $profil->car_license_plate1) {
-                        $this->warn("User with ID {$profil->user_id} has no plate {$profil->last_name}");
+                    if (! $profil->college_trip_date) {
+                        $this->warn("User with ID {$profil->user_id} has no college_trip_date {$profil->last_name}");
                         $skipped++;
 
                         continue;

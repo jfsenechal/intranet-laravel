@@ -20,7 +20,7 @@ final class UserForm
             ->components([
                 Select::make('username')
                     ->label('Agent')
-                    ->options(fn(UserRepository $repository): array => $repository->getUsersForSelect())
+                    ->options(fn (UserRepository $repository): array => $repository->getUsersForSelect())
                     ->searchable()
                     ->columnSpanFull(),
                 DatePicker::make('college_trip_date')
@@ -32,5 +32,4 @@ final class UserForm
                 ModuleForm::rolesField($mileageModule),
             ]);
     }
-
 }

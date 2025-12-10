@@ -12,14 +12,14 @@ return new class extends Migration {
     {
         Schema::connection('maria-mileage')->create('personal_information', function (Blueprint $table) {
             $table->id();
-            $table->string('car_license_plate1');
+            $table->string('car_license_plate1')->nullable();
             $table->string('car_license_plate2')->nullable();
-            $table->string('street')->nullable(false);
-            $table->string('postal_code')->nullable(false);
-            $table->string('city')->nullable(false);
+            $table->string('street')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->string('city')->nullable();
             $table->string('username')->unique()->nullable(false);
-            $table->date('college_trip_date')->nullable();
-            $table->string('iban')->nullable(false);
+            $table->date('college_trip_date')->nullable(false);
+            $table->string('iban')->nullable();
             $table->boolean('omnium')->default(false);
         });
     }
