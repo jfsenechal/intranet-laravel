@@ -4,10 +4,10 @@ namespace AcMarche\Mileage\Policies;
 
 // https://laravel.com/docs/12.x/authorization#creating-policies
 use AcMarche\Mileage\Enums\RolesEnum;
-use AcMarche\Mileage\Models\PersonalInformation;
+use AcMarche\Mileage\Models\Trip;
 use App\Models\User;
 
-final class PersonalInformationPolicy
+final class TripPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -24,9 +24,9 @@ final class PersonalInformationPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, PersonalInformation $personalInformation): bool
+    public function view(User $user, Trip $trip): bool
     {
-        return $this->canWrite($user, $personalInformation);
+        return $this->canWrite($user, $trip);
     }
 
     /**
@@ -34,7 +34,7 @@ final class PersonalInformationPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+        if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
 
@@ -44,23 +44,23 @@ final class PersonalInformationPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, PersonalInformation $personalInformation): bool
+    public function update(User $user, Trip $trip): bool
     {
-        return $this->canWrite($user, $personalInformation);
+        return $this->canWrite($user, $trip);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, PersonalInformation $personalInformation): bool
+    public function delete(User $user, Trip $trip): bool
     {
-        return $this->canWrite($user, $personalInformation);
+        return $this->canWrite($user, $trip);
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, PersonalInformation $personalInformation): bool
+    public function restore(User $user, Trip $trip): bool
     {
         return false;
     }
@@ -68,7 +68,7 @@ final class PersonalInformationPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, PersonalInformation $personalInformation): bool
+    public function forceDelete(User $user, Trip $trip): bool
     {
         return false;
     }
@@ -76,12 +76,12 @@ final class PersonalInformationPolicy
     /**
      * Check if user is linked to the action either directly or through services
      */
-    private function canWrite(User $user, PersonalInformation $personalInformation): bool
+    private function canWrite(User $user, Trip $trip): bool
     {
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
 
-        return $personalInformation->username === $user->username;
+        return $trip->username === $user->username;
     }
 }

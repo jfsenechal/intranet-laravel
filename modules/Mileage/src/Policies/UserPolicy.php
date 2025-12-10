@@ -7,18 +7,14 @@ use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Models\BudgetArticle;
 use App\Models\User;
 
-final class BudgetArticlePolicy
+final class UserPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
-            return true;
-        }
-
-        return false;
+        return $this->canWrite($user);
     }
 
     /**
@@ -26,7 +22,8 @@ final class BudgetArticlePolicy
      */
     public function view(User $user, BudgetArticle $budgetArticle): bool
     {
-        return true;
+
+        return $this->canWrite($user);
     }
 
     /**
@@ -34,11 +31,8 @@ final class BudgetArticlePolicy
      */
     public function create(User $user): bool
     {
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
-            return true;
-        }
 
-        return false;
+        return $this->canWrite($user);
     }
 
     /**
@@ -46,11 +40,8 @@ final class BudgetArticlePolicy
      */
     public function update(User $user, BudgetArticle $budgetArticle): bool
     {
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
-            return true;
-        }
 
-        return false;
+        return $this->canWrite($user);
     }
 
     /**
@@ -58,11 +49,7 @@ final class BudgetArticlePolicy
      */
     public function delete(User $user, BudgetArticle $budgetArticle): bool
     {
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
-            return true;
-        }
-
-        return false;
+        return $this->canWrite($user);
     }
 
     /**
@@ -78,6 +65,15 @@ final class BudgetArticlePolicy
      */
     public function forceDelete(BudgetArticle $user, BudgetArticle $budgetArticle): bool
     {
+        return false;
+    }
+
+    private function canWrite(User $user): bool
+    {
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
         return false;
     }
 }
