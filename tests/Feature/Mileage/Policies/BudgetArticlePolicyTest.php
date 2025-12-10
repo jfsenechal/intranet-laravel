@@ -13,8 +13,8 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     // Override model connections for testing
-    config(['database.connections.maria-mileage' => config('database.connections.sqlite')]);
-    config(['database.connections.mariadb' => config('database.connections.sqlite')]);
+   config(['database.connections.maria-mileage' => config('database.connections.sqlite')]);
+   config(['database.connections.mariadb' => config('database.connections.sqlite')]);
 
     $this->policy = new BudgetArticlePolicy();
 });
