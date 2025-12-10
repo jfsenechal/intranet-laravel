@@ -13,7 +13,6 @@ return [
     */
 
     'connection' => 'maria-document',
-
     'connections' => [
         'maria-document' => [
             'driver' => env('DB_DOCUMENT_DRIVER', 'mariadb'),

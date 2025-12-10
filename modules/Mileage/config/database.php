@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'connection' => 'maria-mileage',
     'connections' => [
         'maria-mileage' => [
             'driver' => env('DB_MILEAGE_DRIVER', 'mariadb'),
