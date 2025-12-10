@@ -10,7 +10,7 @@ return [
     |
     */
 
-    'database_connection' => env('MILEAGE_DB_CONNECTION', 'maria-mileage'),
+    'database_connection' => env('DB_MILEAGE_CONNECTION', 'maria-mileage'),
 
     'default_currency' => 'EUR',
 ];

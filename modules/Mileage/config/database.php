@@ -3,7 +3,7 @@
 return [
     'connections' => [
         'maria-mileage' => [
-            'driver' => env('DB_MILEAGE_CONNECTION', 'mariadb'),
+            'driver' => env('DB_MILEAGE_DRIVER', 'mariadb'),
             'host' => env('DB_MILEAGE_HOST', '127.0.0.1'),
             'port' => env('DB_MILEAGE_PORT', '3306'),
             'database' => env('DB_MILEAGE_DATABASE', 'finance'),

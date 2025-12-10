@@ -74,6 +74,13 @@ final class MigrationCommand extends Command
                         continue;
                     }
 
+                    if (! $profil->car_license_plate1) {
+                        $this->warn("User with ID {$profil->user_id} has no plate {$profil->last_name}");
+                        $skipped++;
+
+                        continue;
+                    }
+
                     if (! $dryRun) {
                         // Create PersonalInformation record
                         PersonalInformation::create([

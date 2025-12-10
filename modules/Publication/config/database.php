@@ -16,7 +16,7 @@ return [
 
     'connections' => [
         'maria-publication' => [
-            'driver' => env('DB_PUBLICATION_CONNECTION', 'mariadb'),
+            'driver' => env('DB_PUBLICATION_DRIVER', 'mariadb'),
             'url' => env('DB_PUBLICATION_URL'),
             'host' => env('DB_PUBLICATION_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_PUBLICATION_PORT', env('DB_PORT', '3306')),
