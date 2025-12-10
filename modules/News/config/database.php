@@ -16,7 +16,7 @@ return [
 
     'connections' => [
         'maria-news' => [
-            'driver' => 'mariadb',
+            'driver' => env('DB_NEWS_CONNECTION', 'mariadb'),
             'url' => env('DB_NEWS_URL'),
             'host' => env('DB_NEWS_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_NEWS_PORT', env('DB_PORT', '3306')),

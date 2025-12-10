@@ -16,7 +16,7 @@ return [
 
     'connections' => [
         'maria-document' => [
-            'driver' => 'mariadb',
+            'driver' => env('DB_DOCUMENT_CONNECTION', 'mariadb'),
             'url' => env('DB_DOCUMENT_URL'),
             'host' => env('DB_DOCUMENT_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_DOCUMENT_PORT', env('DB_PORT', '3306')),
