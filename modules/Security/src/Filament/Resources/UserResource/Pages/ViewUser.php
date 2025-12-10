@@ -2,7 +2,7 @@
 
 namespace AcMarche\Security\Filament\Resources\UserResource\Pages;
 
-use AcMarche\Security\Filament\Resources\UserResource;
+use AcMarche\Security\Filament\Resources\UserResource\UserResource;
 use Filament\Actions;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;

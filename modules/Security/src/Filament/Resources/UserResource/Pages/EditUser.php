@@ -2,10 +2,10 @@
 
 namespace AcMarche\Security\Filament\Resources\UserResource\Pages;
 
-use AcMarche\Security\Filament\Resources\UserResource;
+use AcMarche\Security\Filament\Resources\UserResource\UserResource;
 use Filament\Actions;
-use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditUser extends EditRecord
 {

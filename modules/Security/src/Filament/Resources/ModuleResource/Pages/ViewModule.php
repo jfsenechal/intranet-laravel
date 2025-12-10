@@ -2,7 +2,7 @@
 
 namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
 
-use AcMarche\Security\Filament\Resources\ModuleResource;
+use AcMarche\Security\Filament\Resources\ModuleResource\ModuleResource;
 use AcMarche\Security\Filament\Resources\ModuleResource\RelationManagers\UserRelationManager;
 use AcMarche\Security\Filament\Resources\ModuleResource\Schema\ModuleInfolist;
 use Filament\Actions;

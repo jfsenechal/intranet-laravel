@@ -2,8 +2,7 @@
 
 namespace AcMarche\Security\Filament\Resources\UserResource\Pages;
 
-use AcMarche\Security\Filament\Resources\UserResource;
-use Filament\Actions;
+use AcMarche\Security\Filament\Resources\UserResource\UserResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord

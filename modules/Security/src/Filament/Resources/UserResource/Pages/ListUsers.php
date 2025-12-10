@@ -2,8 +2,8 @@
 
 namespace AcMarche\Security\Filament\Resources\UserResource\Pages;
 
-use AcMarche\Security\Filament\Resources\UserResource;
 use AcMarche\Security\Filament\Resources\UserResource\Schema\UserForm;
+use AcMarche\Security\Filament\Resources\UserResource\UserResource;
 use AcMarche\Security\Ldap\UserHandler;
 use Exception;
 use Filament\Actions;

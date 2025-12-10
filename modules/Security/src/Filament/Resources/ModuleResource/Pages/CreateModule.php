@@ -2,7 +2,7 @@
 
 namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
 
-use AcMarche\Security\Filament\Resources\ModuleResource;
+use AcMarche\Security\Filament\Resources\ModuleResource\ModuleResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateModule extends CreateRecord

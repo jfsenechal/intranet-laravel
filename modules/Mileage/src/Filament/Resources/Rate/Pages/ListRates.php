@@ -1,28 +1,27 @@
 <?php
 
-namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
+namespace AcMarche\Mileage\Filament\Resources\Rate\Pages;
 
-use AcMarche\Security\Filament\Resources\ModuleResource\ModuleResource;
+use AcMarche\Mileage\Filament\Resources\RateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListModule extends ListRecords
+class ListRates extends ListRecords
 {
-    protected static string $resource = ModuleResource::class;
+    protected static string $resource = RateResource::class;
 
     public function getTitle(): string|Htmlable
     {
-        return $this->getAllTableRecordsCount().' modules';
+        return 'Liste des tarifs';
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make()
-                ->label('Ajouter un module')
+                ->label('Ajouter un tarif')
                 ->icon('tabler-plus'),
         ];
     }
-
 }

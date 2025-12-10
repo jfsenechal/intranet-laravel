@@ -1,15 +1,15 @@
 <?php
 
-namespace AcMarche\Security\Filament\Resources\ModuleResource\Pages;
+namespace AcMarche\Mileage\Filament\Resources\BudgetArticle\Pages;
 
-use AcMarche\Security\Filament\Resources\ModuleResource\ModuleResource;
+use AcMarche\Mileage\Filament\Resources\BudgetArticle\BudgetArticleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
-class EditModule extends EditRecord
+class EditBudgetArticle extends EditRecord
 {
-    protected static string $resource = ModuleResource::class;
+    protected static string $resource = BudgetArticleResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -21,6 +21,6 @@ class EditModule extends EditRecord
 
     public function getTitle(): string|Htmlable
     {
-        return $this->getRecord()->name;
+        return $this->record->name;
     }
 }

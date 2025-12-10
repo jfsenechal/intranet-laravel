@@ -2,7 +2,7 @@
 
 namespace AcMarche\Security\Filament\Resources\ModuleResource\Tables;
 
-use AcMarche\Security\Filament\Resources\ModuleResource;
+use AcMarche\Security\Filament\Resources\ModuleResource\ModuleResource;
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
 use App\Models\User;

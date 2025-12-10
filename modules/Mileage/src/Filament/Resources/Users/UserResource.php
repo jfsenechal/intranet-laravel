@@ -17,8 +17,20 @@ use Filament\Tables\Table;
 final class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+    protected static ?int $navigationSort = 4;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-user-group';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Les utilisateurs';
+    }
 
     public static function form(Schema $schema): Schema
     {
