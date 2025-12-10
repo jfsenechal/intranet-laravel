@@ -14,6 +14,9 @@ final class PersonalInformationPolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
@@ -34,6 +37,9 @@ final class PersonalInformationPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
@@ -78,6 +84,9 @@ final class PersonalInformationPolicy
      */
     private function canWrite(User $user, PersonalInformation $personalInformation): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }

@@ -14,6 +14,9 @@ final class RatePolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
@@ -34,6 +37,9 @@ final class RatePolicy
      */
     public function create(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
@@ -46,6 +52,9 @@ final class RatePolicy
      */
     public function update(User $user, Rate $rate): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
@@ -56,8 +65,11 @@ final class RatePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(Rate $user, Rate $rate): bool
+    public function delete(User $user, Rate $rate): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }

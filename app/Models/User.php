@@ -3,7 +3,6 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use AcMarche\Security\Constant\RoleEnum;
 use AcMarche\Security\Ldap\User as UserLdap;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
@@ -169,10 +168,15 @@ final class User extends Authenticatable
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
-            return $this->hasRole(RoleEnum::INTRANET_ADMIN->value);
+            return $this->is_administrator;
         }
 
         return false;
+    }
+
+    public function isAdministrator(): bool
+    {
+        return $this->is_administrator;
     }
 
     protected static function boot(): void

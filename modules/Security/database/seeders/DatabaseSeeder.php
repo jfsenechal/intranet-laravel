@@ -19,6 +19,7 @@ final class DatabaseSeeder extends Seeder
             ->update([
                 'password' => Hash::make('marge'),
                 'email' => config('mail.webmaster_email'),
+                'is_administrator' => true,
             ]);
     }
 }

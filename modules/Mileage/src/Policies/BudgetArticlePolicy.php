@@ -14,6 +14,9 @@ final class BudgetArticlePolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
@@ -34,6 +37,9 @@ final class BudgetArticlePolicy
      */
     public function create(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
@@ -46,6 +52,9 @@ final class BudgetArticlePolicy
      */
     public function update(User $user, BudgetArticle $budgetArticle): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
@@ -58,6 +67,9 @@ final class BudgetArticlePolicy
      */
     public function delete(User $user, BudgetArticle $budgetArticle): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }

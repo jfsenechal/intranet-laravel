@@ -14,6 +14,9 @@ final class TripPolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
@@ -34,6 +37,9 @@ final class TripPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
@@ -78,6 +84,9 @@ final class TripPolicy
      */
     private function canWrite(User $user, Trip $trip): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
