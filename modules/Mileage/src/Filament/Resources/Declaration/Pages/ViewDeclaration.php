@@ -2,8 +2,8 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Declaration\Pages;
 
+use AcMarche\Mileage\Filament\Resources\Declaration\DeclarationResource;
 use AcMarche\Mileage\Filament\Resources\Declaration\Schema\DeclarationInfolist;
-use AcMarche\Mileage\Filament\Resources\DeclarationResource;
 use AcMarche\Mileage\Models\Declaration;
 use Filament\Actions;
 use Filament\Notifications\Notification;

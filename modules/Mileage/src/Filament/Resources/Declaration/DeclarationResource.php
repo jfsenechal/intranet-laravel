@@ -1,8 +1,7 @@
 <?php
 
-namespace AcMarche\Mileage\Filament\Resources;
+namespace AcMarche\Mileage\Filament\Resources\Declaration;
 
-use AcMarche\Mileage\Filament\Resources\Declaration\Pages;
 use AcMarche\Mileage\Filament\Resources\Declaration\Schema\DeclarationForm;
 use AcMarche\Mileage\Filament\Resources\Declaration\Tables\DeclarationTables;
 use AcMarche\Mileage\Models\Declaration;

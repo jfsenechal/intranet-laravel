@@ -15,7 +15,7 @@ class BudgetArticleResource extends Resource
 
     protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function getNavigationIcon(): ?string
     {

@@ -19,7 +19,7 @@ final class PersonalInformationResource extends Resource
 {
     protected static ?string $model = PersonalInformation::class;
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 3;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

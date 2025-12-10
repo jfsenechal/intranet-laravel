@@ -2,7 +2,6 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Declaration\Schema;
 
-use AcMarche\Mileage\Models\Declaration;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;

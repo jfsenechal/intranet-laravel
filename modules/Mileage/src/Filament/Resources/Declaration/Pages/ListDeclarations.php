@@ -2,8 +2,7 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Declaration\Pages;
 
-use AcMarche\Mileage\Filament\Resources\Declaration;
-use AcMarche\Mileage\Filament\Resources\DeclarationResource;
+use AcMarche\Mileage\Filament\Resources\Declaration\DeclarationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
