@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'maria-news';
 
     /**
@@ -33,11 +32,11 @@ return new class extends Migration
              }*/
             /**
              * Attachments
-            foreach (range(1, 3) as $i) {
-                $table->string('file_path_'.$i);
-                $table->integer('file_size_'.$i)->nullable();
-                $table->string('mime_type_'.$i)->nullable();
-            }*/
+             * foreach (range(1, 3) as $i) {
+             * $table->string('file_path_'.$i);
+             * $table->integer('file_size_'.$i)->nullable();
+             * $table->string('mime_type_'.$i)->nullable();
+             * }*/
         });
         Schema::connection('maria-news')->table('categorie', function (Blueprint $table) {
             $table->rename('categories');
