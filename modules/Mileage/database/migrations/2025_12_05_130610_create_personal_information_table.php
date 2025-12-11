@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('postal_code')->nullable();
             $table->string('city')->nullable();
             $table->string('username')->unique()->nullable(false);
-            $table->date('college_trip_date')->nullable(false);
+            $table->date('college_trip_date')->nullable();
             $table->string('iban')->nullable();
             $table->boolean('omnium')->default(false);
         });

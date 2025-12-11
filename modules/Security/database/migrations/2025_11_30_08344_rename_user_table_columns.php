@@ -18,7 +18,7 @@ return new class extends Migration {
         });
 
         Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
-            $table->rename('profils');
+            $table->rename('profiles');
         });
 
         // Rename columns in tabs table
@@ -48,7 +48,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::connection('mariadb')->table('profils', function (Blueprint $table) {
+        Schema::connection('mariadb')->table('profiles', function (Blueprint $table) {
             $table->renameColumn('plaque1', 'car_license_plate1');
             $table->renameColumn('plaque2', 'car_license_plate2');
             $table->renameColumn('rue', 'street');

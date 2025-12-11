@@ -25,14 +25,14 @@ final class MigrationCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Du vieux intranet vers le nouveau';
+    protected $description = 'Fetch all profiles from the old intranet database and migrate them to the new database';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        $this->info('Starting migration from intranet.profils to personal_information');
+        $this->info('Starting migration from intranet.profiles to personal_information');
 
         $dryRun = $this->option('dry-run');
 
@@ -41,24 +41,24 @@ final class MigrationCommand extends Command
         }
 
         try {
-            // Fetch all profils from the old intranet database
-            $profils = DB::connection('mariadb')
-                ->table('profils')
+            // Fetch all profiles from the old intranet database
+            $profiles = DB::connection('mariadb')
+                ->table('profiles')
                 ->get();
 
-            $this->info("Found {$profils->count()} profils to migrate");
+            $this->info("Found {$profiles->count()} profiles to migrate");
 
             $created = 0;
             $skipped = 0;
             $errors = 0;
 
-            foreach ($profils as $profil) {
+            foreach ($profiles as $profile) {
                 try {
                     // Get the user to retrieve the username
-                    $user = User::find($profil->user_id);
+                    $user = User::find($profile->user_id);
 
                     if (! $user) {
-                        $this->warn("User with ID {$profil->user_id} not found - skipping profil ID {$profil->id}");
+                        $this->warn("User with ID {$profile->user_id} not found - skipping profil ID {$profile->id}");
                         $skipped++;
 
                         continue;
@@ -74,25 +74,18 @@ final class MigrationCommand extends Command
                         continue;
                     }
 
-                    if (! $profil->college_trip_date) {
-                        $this->warn("User with ID {$profil->user_id} has no college_trip_date {$profil->username}");
-                        $skipped++;
-
-                        continue;
-                    }
-
                     if (! $dryRun) {
                         // Create PersonalInformation record
                         PersonalInformation::create([
                             'username' => $user->username,
-                            'car_license_plate1' => $profil->car_license_plate1,
-                            'car_license_plate2' => $profil->car_license_plate2,
-                            'street' => $profil->street,
-                            'postal_code' => (string) $profil->postal_code,
-                            'city' => $profil->city,
-                            'iban' => $profil->iban,
-                            'omnium' => (bool) $profil->omnium,
-                            'college_trip_date' => $profil->college_trip_date,
+                            'car_license_plate1' => $profile->car_license_plate1,
+                            'car_license_plate2' => $profile->car_license_plate2,
+                            'street' => $profile->street,
+                            'postal_code' => (string) $profile->postal_code,
+                            'city' => $profile->city,
+                            'iban' => $profile->iban,
+                            'omnium' => (bool) $profile->omnium,
+                            'college_trip_date' => $profile->college_trip_date,
                         ]);
 
                         $this->info("✓ Created PersonalInformation for user {$user->username}");
@@ -102,7 +95,7 @@ final class MigrationCommand extends Command
 
                     $created++;
                 } catch (Exception $e) {
-                    $this->error("Error migrating profil ID {$profil->id}: {$e->getMessage()}");
+                    $this->error("Error migrating profil ID {$profile->id}: {$e->getMessage()}");
                     $errors++;
                 }
             }
@@ -115,7 +108,7 @@ final class MigrationCommand extends Command
                     ['Created', $created],
                     ['Skipped', $skipped],
                     ['Errors', $errors],
-                    ['Total', $profils->count()],
+                    ['Total', $profiles->count()],
                 ]
             );
 

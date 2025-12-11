@@ -26,7 +26,7 @@ final class UserForm
                     ->columnSpanFull(),
                 DatePicker::make('college_trip_date')
                     ->label('Date de la décision du Collège')
-                    ->required(),
+                    ->required(false),
                 Checkbox::make('omnium')
                     ->label('Retenue omnium')
                     ->helperText('Cochez pour oui'),
