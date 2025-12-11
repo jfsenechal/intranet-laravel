@@ -1,7 +1,7 @@
-<x-filament-panels::page>
-    <div class="space-y-8">
+<div class="space-y-8 container mx-auto">
+    <x-filament-panels::page>
         @foreach ($this->getTabsWithModules() as $tab)
-            <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
                 {{-- Heading Section --}}
                 {{-- :icon="$tab->icon" --}}
 
@@ -19,7 +19,7 @@
 
                 {{-- Modules Grid --}}
                 @if ($tab->modules->isNotEmpty())
-                    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                         @foreach ($tab->modules as $module)
                             <a
                                 href="{{$module->is_external ? $module->url : url($module->url) }}"
@@ -75,5 +75,5 @@
                 </p>
             </div>
         @endif
-    </div>
-</x-filament-panels::page>
+    </x-filament-panels::page>
+</div>
