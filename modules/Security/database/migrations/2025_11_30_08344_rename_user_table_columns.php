@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'maria-security';
 
     /**
@@ -13,8 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /**
+         * Bug in testing must be created here
+         */
+        if (!Schema::connection('maria-security')->hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('email')->unique();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password');
+                $table->rememberToken();
+                $table->timestamps();
+            });
+        }
         // Modify column properties in users table only if old columns exist (legacy migration)
-
         Schema::connection('maria-security')->table('users', function (Blueprint $table) {
             if (Schema::connection('maria-security')->hasColumn('users', 'nom')) {
                 $table->renameColumn('nom', 'last_name');
@@ -43,16 +55,16 @@ return new class extends Migration
             $table->uuid('uuid')->nullable()->change();
             $table->boolean('is_administrator')->default(false);
 
-            if (! Schema::connection('maria-security')->hasColumn('users', 'name')) {
+            if (!Schema::connection('maria-security')->hasColumn('users', 'name')) {
                 $table->string('name');
             }
-            if (! Schema::connection('maria-security')->hasColumn('users', 'email_verified_at')) {
+            if (!Schema::connection('maria-security')->hasColumn('users', 'email_verified_at')) {
                 $table->timestamp('email_verified_at')->nullable();
             }
-            if (! Schema::connection('maria-security')->hasColumn('users', 'remember_token')) {
+            if (!Schema::connection('maria-security')->hasColumn('users', 'remember_token')) {
                 $table->rememberToken();
             }
-            if (! Schema::connection('maria-security')->hasColumn('users', 'created_at')) {
+            if (!Schema::connection('maria-security')->hasColumn('users', 'created_at')) {
                 $table->timestamps();
             }
         });

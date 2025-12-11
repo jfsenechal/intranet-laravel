@@ -19,7 +19,7 @@ return [
             'url' => env('DB_DOCUMENT_URL'),
             'host' => env('DB_DOCUMENT_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_DOCUMENT_PORT', env('DB_PORT', '3306')),
-            'database' => env('DB_DOCUMENT_DATABASE', 'intranet_document'),
+            'database' => env('DB_DOCUMENT_DATABASE', 'document'),
             'username' => env('DB_DOCUMENT_USERNAME', env('DB_USERNAME', 'root')),
             'password' => env('DB_DOCUMENT_PASSWORD', env('DB_PASSWORD', '')),
             'unix_socket' => env('DB_SOCKET', ''),

@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::connection('maria-mileage')->hasTable('tarif')) {
+        if (Schema::connection('maria-mileage')->hasTable('tarif')) {
             Schema::connection('maria-mileage')->table('tarif', function (Blueprint $table) {
                 $table->rename('rates');
             });
