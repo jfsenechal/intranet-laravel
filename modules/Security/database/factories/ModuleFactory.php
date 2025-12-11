@@ -5,7 +5,7 @@ namespace AcMarche\Security\Database\Factories;
 use AcMarche\Security\Models\Module;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ModuleFactory extends Factory
+final class ModuleFactory extends Factory
 {
     protected $model = Module::class;
 
@@ -17,7 +17,13 @@ class ModuleFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->Name(),
+            'name' => fake()->unique()->words(2, true),
+            'url' => fake()->url(),
+            'description' => fake()->sentence(),
+            'is_external' => fake()->boolean(20),
+            'is_public' => fake()->boolean(30),
+            'icon' => 'heroicon-o-cube',
+            'color' => fake()->hexColor(),
         ];
     }
 }
