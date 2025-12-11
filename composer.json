@@ -12,6 +12,7 @@
         "php": "^8.3",
         "ext-pdo": "*",
         "acmarche/app": "*@dev",
+        "acmarche/courrier": "*@dev",
         "acmarche/document": "*@dev",
         "acmarche/mileage": "*@dev",
         "acmarche/news": "*@dev",
@@ -34,6 +35,10 @@
         {
             "type": "path",
             "url": "./modules/App"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Courrier"
         },
         {
             "type": "path",

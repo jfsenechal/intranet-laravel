@@ -1,0 +1,33 @@
+{
+    "name": "acmarche/courrier",
+    "description": "Incoming physical mail management module for AcMarche",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "AcMarche",
+            "email": "info@acmarche.be"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^4.0",
+        "illuminate/contracts": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\Courrier\\": "src/",
+            "AcMarche\\Courrier\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\Courrier\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\Courrier\\CourrierServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
