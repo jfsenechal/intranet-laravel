@@ -8,8 +8,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'mariadb';
 
     /**
@@ -17,7 +16,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::connection('mariadb')->hasTable('heading')) {
+        if (Schema::connection('mariadb')->hasTable('heading')) {
+            Schema::connection('mariadb')->table('heading', function (Blueprint $table) {
+                $table->rename('tabs');
+            });
+            Schema::connection('mariadb')->table('tabs', function (Blueprint $table) {
+                $table->renameColumn('nom', 'name');
+                $table->renameColumn('icone', 'icon');
+            });
+        } else {
             Schema::create('tabs', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
@@ -25,7 +32,19 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::connection('mariadb')->hasTable('module')) {
+        if (Schema::connection('mariadb')->hasTable('module')) {
+            Schema::connection('mariadb')->table('module', function (Blueprint $table) {
+                $table->rename('modules');
+            });
+            Schema::connection('mariadb')->table('modules', function (Blueprint $table) {
+                $table->renameColumn('nom', 'name');
+                $table->renameColumn('exterieur', 'is_external');
+                $table->renameColumn('public', 'is_public');
+                $table->renameColumn('icone', 'icon');
+                $table->renameColumn('heading_id', 'tab_id');
+                $table->string('color')->default(null);
+            });
+        } else {
             Schema::create('modules', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
