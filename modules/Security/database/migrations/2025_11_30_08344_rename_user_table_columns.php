@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'mariadb';
 
     /**
@@ -13,20 +12,46 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Rename tables first
-        Schema::connection('mariadb')->table('heading', function (Blueprint $table) {
-            $table->rename('tabs');
-        });
+        if (!Schema::connection('mariadb')->hasTable('heading')) {
+            // Rename tables first
+            Schema::connection('mariadb')->table('heading', function (Blueprint $table) {
+                $table->rename('tabs');
+                // Rename columns in tabs table
+                Schema::connection('mariadb')->table('tabs', function (Blueprint $table) {
+                    $table->renameColumn('nom', 'name');
+                    $table->renameColumn('icone', 'icon');
+                });
+            });
+        }
 
-        Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
-            $table->rename('profiles');
-        });
+        if (!Schema::connection('mariadb')->hasTable('profiles')) {
+            Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
+                $table->rename('profiles');
+                Schema::connection('mariadb')->table('profiles', function (Blueprint $table) {
+                    $table->renameColumn('plaque1', 'car_license_plate1');
+                    $table->renameColumn('plaque2', 'car_license_plate2');
+                    $table->renameColumn('rue', 'street');
+                    $table->renameColumn('code_postal', 'postal_code');
+                    $table->renameColumn('localite', 'city');
+                    $table->renameColumn('deplacement_date_college', 'college_trip_date');
+                });
+            });
+        }
 
-        // Rename columns in tabs table
-        Schema::connection('mariadb')->table('tabs', function (Blueprint $table) {
-            $table->renameColumn('nom', 'name');
-            $table->renameColumn('icone', 'icon');
-        });
+        if (!Schema::connection('mariadb')->hasTable('modules')) {
+            Schema::connection('mariadb')->table('module', function (Blueprint $table) {
+                $table->rename('modules');
+            });
+            // Rename columns in modules table
+            Schema::connection('mariadb')->table('modules', function (Blueprint $table) {
+                $table->renameColumn('nom', 'name');
+                $table->renameColumn('exterieur', 'is_external');
+                $table->renameColumn('public', 'is_public');
+                $table->renameColumn('icone', 'icon');
+                $table->renameColumn('heading_id', 'tab_id');
+                $table->string('color')->default(null);
+            });
+        }
 
         // Modify column properties in users table
         Schema::connection('mariadb')->table('users', function (Blueprint $table) {
@@ -47,15 +72,6 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
-        });
-
-        Schema::connection('mariadb')->table('profiles', function (Blueprint $table) {
-            $table->renameColumn('plaque1', 'car_license_plate1');
-            $table->renameColumn('plaque2', 'car_license_plate2');
-            $table->renameColumn('rue', 'street');
-            $table->renameColumn('code_postal', 'postal_code');
-            $table->renameColumn('localite', 'city');
-            $table->renameColumn('deplacement_date_college', 'college_trip_date');
         });
     }
 };

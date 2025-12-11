@@ -37,19 +37,6 @@ return new class extends Migration
                 $table->string('color')->default(null);
                 $table->foreignIdFor(Tab::class)->nullable();
             });
-        } else {
-            Schema::connection('mariadb')->table('module', function (Blueprint $table) {
-                $table->rename('modules');
-            });
-            // Rename columns in modules table
-            Schema::connection('mariadb')->table('modules', function (Blueprint $table) {
-                $table->renameColumn('nom', 'name');
-                $table->renameColumn('exterieur', 'is_external');
-                $table->renameColumn('public', 'is_public');
-                $table->renameColumn('icone', 'icon');
-                $table->renameColumn('heading_id', 'tab_id');
-                $table->string('color')->default(null);
-            });
         }
 
         Schema::create('module_user', function (Blueprint $table) {

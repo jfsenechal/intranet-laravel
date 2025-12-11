@@ -12,22 +12,25 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (Schema::connection('maria-publication')->hasTable('publication')) {
-            Schema::connection('maria-publication')->table('publication', function (Blueprint $table) {
-                $table->rename('publications');
+        if (!Schema::connection('maria-publication')->hasTable('publications')) {
+            if (Schema::connection('maria-publication')->hasTable('publication')) {
+                Schema::connection('maria-publication')->table('publication', function (Blueprint $table) {
+                    $table->rename('publications');
+                });
+            }
+            Schema::connection('maria-publication')->table('publications', function (Blueprint $table) {
+                $table->renameColumn('title', 'name');
+                $table->renameColumn('createdAt', 'created_at');
+                $table->renameColumn('updatedAt', 'updated_at');
+                $table->string('user_add');
+                $table->softDeletes();
             });
         }
 
-        Schema::connection('maria-publication')->table('publications', function (Blueprint $table) {
-            $table->renameColumn('title', 'name');
-            $table->renameColumn('createdAt', 'created_at');
-            $table->renameColumn('updatedAt', 'updated_at');
-            $table->string('user_add');
-            $table->softDeletes();
-        });
-
-        Schema::connection('maria-publication')->table('category', function (Blueprint $table) {
-            $table->rename('categories');
-        });
+        if (!Schema::connection('maria-publication')->hasTable('categories')) {
+            Schema::connection('maria-publication')->table('category', function (Blueprint $table) {
+                $table->rename('categories');
+            });
+        }
     }
 };
