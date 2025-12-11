@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'mariadb';
 
     /**
@@ -13,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::connection('mariadb')->hasTable('heading')) {
+        if (!Schema::connection('mariadb')->hasTable('heading')) {
             // Rename tables first
             Schema::connection('mariadb')->table('heading', function (Blueprint $table) {
                 $table->rename('tabs');
@@ -25,7 +24,7 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::connection('mariadb')->hasTable('profiles')) {
+        if (!Schema::connection('mariadb')->hasTable('profiles')) {
             Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
                 $table->rename('profiles');
                 Schema::connection('mariadb')->table('profiles', function (Blueprint $table) {
@@ -39,7 +38,7 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::connection('mariadb')->hasTable('modules')) {
+        if (!Schema::connection('mariadb')->hasTable('modules')) {
             Schema::connection('mariadb')->table('module', function (Blueprint $table) {
                 $table->rename('modules');
             });
@@ -55,26 +54,42 @@ return new class extends Migration
         }
 
         // Modify column properties in users table only if old columns exist (legacy migration)
-        if (Schema::connection('mariadb')->hasColumn('users', 'nom')) {
-            Schema::connection('mariadb')->table('users', function (Blueprint $table) {
+
+        Schema::connection('mariadb')->table('users', function (Blueprint $table) {
+            if (Schema::connection('mariadb')->hasColumn('users', 'nom')) {
                 $table->renameColumn('nom', 'last_name');
-                $table->renameColumn('prenom', 'first_name');
-                $table->renameColumn('departement', 'department');
-                $table->string('name', 255)->nullable(false);
-                $table->string('first_name')->nullable(false)->change();
                 $table->string('last_name')->nullable(false)->change();
-                $table->string('news_attachment')->nullable(false)->default(false)->change();
-                $table->string('phone', 50)->nullable();
-                $table->string('mobile', 50)->nullable();
-                $table->string('extension', 50)->nullable();
-                $table->string('color_primary', 50)->nullable();
-                $table->string('color_secondary', 50)->nullable();
-                $table->uuid('uuid')->nullable()->change();
-                $table->boolean('is_administrator')->default(false);
-                $table->timestamp('email_verified_at')->nullable();
-                $table->rememberToken();
-                $table->timestamps();
-            });
-        }
+            } else {
+                $table->string('last_name')->nullable(false);
+            }
+            if (Schema::connection('mariadb')->hasColumn('users', 'prenom')) {
+                $table->renameColumn('prenom', 'first_name');
+                $table->string('first_name')->nullable(false)->change();
+            } else {
+                $table->string('first_name')->nullable(false);
+            }
+            if (Schema::connection('mariadb')->hasColumn('users', 'departement')) {
+                $table->renameColumn('departement', 'department');
+            } else {
+                $table->string('department')->nullable();
+            }
+
+            $table->string('news_attachment')->nullable(false)->default(false)->change();
+            $table->string('phone', 50)->nullable();
+            $table->string('mobile', 50)->nullable();
+            $table->string('extension', 50)->nullable();
+            $table->string('color_primary', 50)->nullable();
+            $table->string('color_secondary', 50)->nullable();
+            $table->uuid('uuid')->nullable()->change();
+            $table->boolean('is_administrator')->default(false);
+
+            /**
+             * check if columns exist before this 3 lines
+             */
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
     }
 };
