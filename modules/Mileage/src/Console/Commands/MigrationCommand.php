@@ -75,7 +75,7 @@ final class MigrationCommand extends Command
                     }
 
                     if (! $profil->college_trip_date) {
-                        $this->warn("User with ID {$profil->user_id} has no college_trip_date {$profil->last_name}");
+                        $this->warn("User with ID {$profil->user_id} has no college_trip_date {$profil->username}");
                         $skipped++;
 
                         continue;
