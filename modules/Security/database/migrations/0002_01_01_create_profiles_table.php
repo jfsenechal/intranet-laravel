@@ -4,19 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    protected $connection = 'mariadb';
+return new class extends Migration
+{
+    protected $connection = 'maria-security';
 
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        if (Schema::connection('mariadb')->hasTable('profiles')) {
-            Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
+        if (Schema::connection('maria-security')->hasTable('profiles')) {
+            Schema::connection('maria-security')->table('profile', function (Blueprint $table) {
                 $table->rename('profiles');
             });
-            Schema::connection('mariadb')->table('profiles', function (Blueprint $table) {
+            Schema::connection('maria-security')->table('profiles', function (Blueprint $table) {
                 $table->renameColumn('plaque1', 'car_license_plate1');
                 $table->renameColumn('plaque2', 'car_license_plate2');
                 $table->renameColumn('rue', 'street');
@@ -24,8 +25,7 @@ return new class extends Migration {
                 $table->renameColumn('localite', 'city');
                 $table->renameColumn('deplacement_date_college', 'college_trip_date');
             });
-        }
-        else {
+        } else {
             Schema::create('profiles', function (Blueprint $table) {
                 $table->id();
                 $table->string('car_license_plate1')->nullable();
