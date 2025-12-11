@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'mariadb';
 
     /**
@@ -12,7 +13,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::connection('mariadb')->hasTable('heading')) {
+        if (! Schema::connection('mariadb')->hasTable('heading')) {
             // Rename tables first
             Schema::connection('mariadb')->table('heading', function (Blueprint $table) {
                 $table->rename('tabs');
@@ -24,7 +25,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::connection('mariadb')->hasTable('profiles')) {
+        if (! Schema::connection('mariadb')->hasTable('profiles')) {
             Schema::connection('mariadb')->table('profile', function (Blueprint $table) {
                 $table->rename('profiles');
                 Schema::connection('mariadb')->table('profiles', function (Blueprint $table) {
@@ -38,7 +39,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::connection('mariadb')->hasTable('modules')) {
+        if (! Schema::connection('mariadb')->hasTable('modules')) {
             Schema::connection('mariadb')->table('module', function (Blueprint $table) {
                 $table->rename('modules');
             });
@@ -83,12 +84,15 @@ return new class extends Migration {
             $table->uuid('uuid')->nullable()->change();
             $table->boolean('is_administrator')->default(false);
 
-            /**
-             * check if columns exist before this 3 lines
-             */
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken();
-            $table->timestamps();
+            if (! Schema::connection('mariadb')->hasColumn('users', 'email_verified_at')) {
+                $table->timestamp('email_verified_at')->nullable();
+            }
+            if (! Schema::connection('mariadb')->hasColumn('users', 'remember_token')) {
+                $table->rememberToken();
+            }
+            if (! Schema::connection('mariadb')->hasColumn('users', 'created_at')) {
+                $table->timestamps();
+            }
         });
 
     }
