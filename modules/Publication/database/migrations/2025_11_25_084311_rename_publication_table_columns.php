@@ -12,9 +12,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::connection('maria-publication')->table('publication', function (Blueprint $table) {
-            $table->rename('publications');
-        });
+        // Skip if the old tables don't exist (fresh install already has new schema)
+        if (Schema::connection('maria-publication')->hasTable('publication')) {
+            Schema::connection('maria-publication')->table('publication', function (Blueprint $table) {
+                $table->rename('publications');
+            });
+        }
 
         Schema::connection('maria-publication')->table('publications', function (Blueprint $table) {
             $table->renameColumn('title', 'name');
