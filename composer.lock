@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "15fe03ea7a8f91c0572abfc73701fd26",
+    "content-hash": "f53d741a41f7ded6c83d7a314b28a37d",
     "packages": [
         {
             "name": "acmarche/app",
-            "version": "dev-master",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
             "dist": {
                 "type": "path",
                 "url": "./modules/App",
@@ -49,8 +49,50 @@
             }
         },
         {
+            "name": "acmarche/courrier",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
+            "dist": {
+                "type": "path",
+                "url": "./modules/Courrier",
+                "reference": "2409f0cea6a05f32de0517a4d7bd2811c43fabf7"
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "illuminate/contracts": "^12.0",
+                "php": "^8.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\Courrier\\CourrierServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\Courrier\\": "src/",
+                    "AcMarche\\Courrier\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\Courrier\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "Incoming physical mail management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
             "name": "acmarche/document",
-            "version": "dev-master",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
             "dist": {
                 "type": "path",
                 "url": "./modules/Document",
@@ -92,7 +134,7 @@
         },
         {
             "name": "acmarche/mileage",
-            "version": "dev-master",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
             "dist": {
                 "type": "path",
                 "url": "./modules/Mileage",
@@ -134,7 +176,7 @@
         },
         {
             "name": "acmarche/news",
-            "version": "dev-master",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
             "dist": {
                 "type": "path",
                 "url": "./modules/News",
@@ -176,7 +218,7 @@
         },
         {
             "name": "acmarche/publication",
-            "version": "dev-master",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
             "dist": {
                 "type": "path",
                 "url": "./modules/Publication",
@@ -218,7 +260,7 @@
         },
         {
             "name": "acmarche/security",
-            "version": "dev-master",
+            "version": "dev-claude/incoming-mail-module-01X4WvKmWuEzSFTY5pNLfaf8",
             "dist": {
                 "type": "path",
                 "url": "./modules/Security",
@@ -13350,6 +13392,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "acmarche/app": 20,
+        "acmarche/courrier": 20,
         "acmarche/document": 20,
         "acmarche/mileage": 20,
         "acmarche/news": 20,

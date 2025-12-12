@@ -1,0 +1,72 @@
+<?php
+
+namespace AcMarche\Courrier;
+
+use Illuminate\Support\ServiceProvider;
+
+final class CourrierServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        // Merge courrier config
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/courrier.php',
+            'courrier'
+        );
+
+        // Register database connection from module config
+        $this->registerDatabaseConnection();
+    }
+
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        // Load migrations
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        // Load views
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'courrier');
+
+        // Load routes
+        if (file_exists(__DIR__.'/../routes/web.php')) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        }
+
+        // Publish config
+        $this->publishes([
+            __DIR__.'/../config/courrier.php' => config_path('courrier.php'),
+        ], 'courrier-config');
+
+        // Publish database config
+        $this->publishes([
+            __DIR__.'/../config/database.php' => config_path('courrier-database.php'),
+        ], 'courrier-database-config');
+
+        // Publish migrations
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'courrier-migrations');
+
+        // Publish views
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/courrier'),
+        ], 'courrier-views');
+    }
+
+    /**
+     * Register the module's database connection.
+     */
+    protected function registerDatabaseConnection(): void
+    {
+        $connections = require __DIR__.'/../config/database.php';
+
+        foreach ($connections['connections'] ?? [] as $name => $config) {
+            config(['database.connections.'.$name => $config]);
+        }
+    }
+}
