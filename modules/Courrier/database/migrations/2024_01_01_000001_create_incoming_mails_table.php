@@ -8,42 +8,32 @@ return new class extends Migration
 {
     protected $connection = 'maria-courrier';
 
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         if (Schema::connection('maria-courrier')->hasTable('incoming_mails')) {
             return;
         }
 
-        Schema::create('incoming_mails', function (Blueprint $table): void {
+        Schema::connection('maria-courrier')->create('incoming_mails', function (Blueprint $table): void {
             $table->id();
-            $table->string('reference')->unique();
-            $table->string('sender_name');
-            $table->text('sender_address')->nullable();
-            $table->date('received_date');
-            $table->string('subject');
-            $table->text('description')->nullable();
-            $table->string('status')->default('pending');
-            $table->string('attachment_path')->nullable();
-            $table->string('attachment_name')->nullable();
-            $table->integer('attachment_size')->nullable();
-            $table->string('attachment_mime')->nullable();
-            $table->string('assigned_to')->nullable();
-            $table->date('processed_date')->nullable();
-            $table->text('notes')->nullable();
+            $table->string('reference_number');
+            $table->string('sender');
+            $table->longText('description')->nullable();
+            $table->date('mail_date');
+            $table->boolean('is_notified')->default(false);
+            $table->boolean('is_registered')->default(false);
+            $table->boolean('has_acknowledgment')->default(false);
             $table->string('user_add');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->index('reference_number');
+            $table->index('mail_date');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('incoming_mails');
+        Schema::connection('maria-courrier')->dropIfExists('incoming_mails');
     }
 };

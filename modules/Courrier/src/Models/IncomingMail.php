@@ -6,6 +6,7 @@ use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class IncomingMail extends Model
@@ -17,22 +18,37 @@ final class IncomingMail extends Model
     protected $connection = 'maria-courrier';
 
     protected $fillable = [
-        'reference',
-        'sender_name',
-        'sender_address',
-        'received_date',
-        'subject',
+        'reference_number',
+        'sender',
         'description',
-        'status',
-        'attachment_path',
-        'attachment_name',
-        'attachment_size',
-        'attachment_mime',
-        'assigned_to',
-        'processed_date',
-        'notes',
+        'mail_date',
+        'is_notified',
+        'is_registered',
+        'has_acknowledgment',
         'user_add',
     ];
+
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'incoming_mail_service')
+            ->withPivot('is_primary');
+    }
+
+    public function primaryService(): BelongsToMany
+    {
+        return $this->services()->wherePivot('is_primary', true);
+    }
+
+    public function recipients(): BelongsToMany
+    {
+        return $this->belongsToMany(Recipient::class, 'incoming_mail_recipient')
+            ->withPivot('is_primary');
+    }
+
+    public function primaryRecipient(): BelongsToMany
+    {
+        return $this->recipients()->wherePivot('is_primary', true);
+    }
 
     protected static function booted(): void
     {
@@ -47,9 +63,10 @@ final class IncomingMail extends Model
     protected function casts(): array
     {
         return [
-            'received_date' => 'date',
-            'processed_date' => 'date',
-            'attachment_size' => 'integer',
+            'mail_date' => 'date',
+            'is_notified' => 'boolean',
+            'is_registered' => 'boolean',
+            'has_acknowledgment' => 'boolean',
         ];
     }
 }

@@ -2,13 +2,12 @@
 
 namespace AcMarche\Courrier\Filament\Resources\IncomingMailResource\Schema;
 
+use AcMarche\Courrier\Models\Recipient;
+use AcMarche\Courrier\Models\Service;
 use Filament\Forms;
-use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 final class IncomingMailForm
 {
@@ -18,72 +17,62 @@ final class IncomingMailForm
             ->columns(1)
             ->components([
                 Flex::make([
-                    Section::make([
-                        Forms\Components\TextInput::make('reference')
-                            ->label('Référence')
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        Forms\Components\DatePicker::make('received_date')
-                            ->label('Date de réception')
-                            ->required()
-                            ->default(now())
-                            ->native(false),
-                        Forms\Components\TextInput::make('sender_name')
-                            ->label('Expéditeur')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\Textarea::make('sender_address')
-                            ->label('Adresse de l\'expéditeur')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('subject')
-                            ->label('Objet')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull(),
-                        Forms\Components\RichEditor::make('description')
-                            ->label('Description')
-                            ->columnSpanFull(),
-                        Forms\Components\Hidden::make('attachment_name'),
-                        Forms\Components\Hidden::make('attachment_mime'),
-                        Forms\Components\Hidden::make('attachment_size'),
-                        FileUpload::make('attachment_path')
-                            ->label('Pièce jointe')
-                            ->disk('public')
-                            ->directory('uploads/courrier')
-                            ->previewable(false)
-                            ->downloadable()
-                            ->maxSize(10240)
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state instanceof TemporaryUploadedFile) {
-                                    $set('attachment_name', $state->getFilename());
-                                    $set('attachment_mime', $state->getMimeType());
-                                    $set('attachment_size', $state->getSize());
-                                }
-                            }),
-                    ])->columnSpan(2),
-                    Section::make([
-                        Forms\Components\Select::make('status')
-                            ->label('Statut')
-                            ->required()
-                            ->default('pending')
-                            ->options([
-                                'pending' => 'En attente',
-                                'processed' => 'Traité',
-                                'archived' => 'Archivé',
-                            ]),
-                        Forms\Components\TextInput::make('assigned_to')
-                            ->label('Assigné à')
-                            ->maxLength(255),
-                        Forms\Components\DatePicker::make('processed_date')
-                            ->label('Date de traitement')
-                            ->native(false),
-                        Forms\Components\Textarea::make('notes')
-                            ->label('Notes')
-                            ->rows(4),
-                    ])->grow(false),
+                    Section::make('Informations du courrier')
+                        ->schema([
+                            Forms\Components\TextInput::make('reference_number')
+                                ->label('Numéro de référence')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\DatePicker::make('mail_date')
+                                ->label('Date du courrier')
+                                ->required()
+                                ->default(now())
+                                ->native(false),
+                            Forms\Components\TextInput::make('sender')
+                                ->label('Expéditeur')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\RichEditor::make('description')
+                                ->label('Description')
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2)
+                        ->columnSpan(2),
+                    Section::make('Options')
+                        ->schema([
+                            Forms\Components\Toggle::make('is_notified')
+                                ->label('Notifié')
+                                ->default(false),
+                            Forms\Components\Toggle::make('is_registered')
+                                ->label('Recommandé')
+                                ->default(false),
+                            Forms\Components\Toggle::make('has_acknowledgment')
+                                ->label('Accusé de réception')
+                                ->default(false),
+                        ])
+                        ->grow(false),
                 ])->from('md'),
+
+                Section::make('Affectation')
+                    ->schema([
+                        Forms\Components\Select::make('services')
+                            ->label('Services')
+                            ->relationship('services', 'name')
+                            ->getOptionLabelFromRecordUsing(fn (Service $record) => $record->initials ? "{$record->name} ({$record->initials})" : $record->name)
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->pivotData(['is_primary' => false]),
+                        Forms\Components\Select::make('recipients')
+                            ->label('Destinataires')
+                            ->relationship('recipients', 'last_name')
+                            ->getOptionLabelFromRecordUsing(fn (Recipient $record) => "{$record->first_name} {$record->last_name}")
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->pivotData(['is_primary' => false]),
+                    ])
+                    ->columns(2),
             ]);
     }
 }

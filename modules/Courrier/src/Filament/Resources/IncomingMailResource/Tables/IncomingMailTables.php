@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 final class IncomingMailTables
@@ -17,51 +18,67 @@ final class IncomingMailTables
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('received_date', 'desc')
+            ->defaultSort('mail_date', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
-                Tables\Columns\TextColumn::make('reference')
+                Tables\Columns\TextColumn::make('reference_number')
                     ->searchable()
                     ->label('Référence')
                     ->url(fn (IncomingMail $record) => IncomingMailResource::getUrl('view', ['record' => $record->id])),
-                Tables\Columns\TextColumn::make('received_date')
+                Tables\Columns\TextColumn::make('mail_date')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->label('Date de réception'),
-                Tables\Columns\TextColumn::make('sender_name')
+                    ->label('Date'),
+                Tables\Columns\TextColumn::make('sender')
                     ->searchable()
                     ->label('Expéditeur'),
-                Tables\Columns\TextColumn::make('subject')
+                Tables\Columns\TextColumn::make('description')
                     ->searchable()
-                    ->label('Objet')
-                    ->limit(50),
-                Tables\Columns\TextColumn::make('status')
+                    ->label('Description')
+                    ->html()
+                    ->limit(80),
+                Tables\Columns\TextColumn::make('services.name')
+                    ->label('Services')
                     ->badge()
-                    ->label('Statut')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'En attente',
-                        'processed' => 'Traité',
-                        'archived' => 'Archivé',
-                        default => $state,
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'processed' => 'success',
-                        'archived' => 'gray',
-                        default => 'gray',
-                    }),
-                Tables\Columns\TextColumn::make('assigned_to')
-                    ->searchable()
-                    ->label('Assigné à'),
+                    ->separator(',')
+                    ->limitList(2)
+                    ->expandableLimitedList(),
+                Tables\Columns\TextColumn::make('recipients.full_name')
+                    ->label('Destinataires')
+                    ->badge()
+                    ->color('gray')
+                    ->separator(',')
+                    ->limitList(2)
+                    ->expandableLimitedList(),
+                Tables\Columns\IconColumn::make('is_notified')
+                    ->label('Notifié')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('is_registered')
+                    ->label('Reco')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('has_acknowledgment')
+                    ->label('AR')
+                    ->boolean(),
             ])
             ->filters([
-                SelectFilter::make('status')
-                    ->label('Statut')
-                    ->options([
-                        'pending' => 'En attente',
-                        'processed' => 'Traité',
-                        'archived' => 'Archivé',
-                    ]),
+                SelectFilter::make('services')
+                    ->label('Service')
+                    ->relationship('services', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->multiple(),
+                SelectFilter::make('recipients')
+                    ->label('Destinataire')
+                    ->relationship('recipients', 'last_name')
+                    ->searchable()
+                    ->preload()
+                    ->multiple(),
+                TernaryFilter::make('is_notified')
+                    ->label('Notifié'),
+                TernaryFilter::make('is_registered')
+                    ->label('Recommandé'),
+                TernaryFilter::make('has_acknowledgment')
+                    ->label('Accusé de réception'),
             ])
             ->recordActions([
                 ViewAction::make(),

@@ -2,6 +2,7 @@
 
 namespace AcMarche\Courrier\Filament\Resources\IncomingMailResource\Schema;
 
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
@@ -13,24 +14,17 @@ final class IncomingMailInfolist
     {
         return $schema
             ->schema([
-                Section::make('Informations générales')
+                Section::make('Informations du courrier')
                     ->schema([
-                        TextEntry::make('reference')
-                            ->label('Référence')
+                        TextEntry::make('reference_number')
+                            ->label('Numéro de référence')
                             ->badge()
                             ->color('gray'),
-                        TextEntry::make('received_date')
-                            ->label('Date de réception')
+                        TextEntry::make('mail_date')
+                            ->label('Date du courrier')
                             ->date('d/m/Y'),
-                        TextEntry::make('sender_name')
+                        TextEntry::make('sender')
                             ->label('Expéditeur'),
-                        TextEntry::make('sender_address')
-                            ->label('Adresse de l\'expéditeur')
-                            ->columnSpanFull()
-                            ->hidden(fn ($state): bool => blank($state)),
-                        TextEntry::make('subject')
-                            ->label('Objet')
-                            ->columnSpanFull(),
                         TextEntry::make('description')
                             ->label('Description')
                             ->html()
@@ -39,52 +33,51 @@ final class IncomingMailInfolist
                             ->hidden(fn ($state): bool => blank($state)),
                     ])
                     ->columns(2),
-                Section::make('Traitement')
+
+                Section::make('Options')
                     ->schema([
-                        TextEntry::make('status')
-                            ->label('Statut')
+                        Flex::make([
+                            IconEntry::make('is_notified')
+                                ->label('Notifié')
+                                ->boolean(),
+                            IconEntry::make('is_registered')
+                                ->label('Recommandé')
+                                ->boolean(),
+                            IconEntry::make('has_acknowledgment')
+                                ->label('Accusé de réception')
+                                ->boolean(),
+                        ]),
+                    ]),
+
+                Section::make('Affectation')
+                    ->schema([
+                        TextEntry::make('services.name')
+                            ->label('Services')
                             ->badge()
-                            ->formatStateUsing(fn (string $state): string => match ($state) {
-                                'pending' => 'En attente',
-                                'processed' => 'Traité',
-                                'archived' => 'Archivé',
-                                default => $state,
-                            })
-                            ->color(fn (string $state): string => match ($state) {
-                                'pending' => 'warning',
-                                'processed' => 'success',
-                                'archived' => 'gray',
-                                default => 'gray',
-                            }),
-                        TextEntry::make('assigned_to')
-                            ->label('Assigné à')
+                            ->separator(',')
                             ->hidden(fn ($state): bool => blank($state)),
-                        TextEntry::make('processed_date')
-                            ->label('Date de traitement')
-                            ->date('d/m/Y')
-                            ->hidden(fn ($state): bool => blank($state)),
-                        TextEntry::make('notes')
-                            ->label('Notes')
-                            ->columnSpanFull()
+                        TextEntry::make('recipients.full_name')
+                            ->label('Destinataires')
+                            ->badge()
+                            ->color('gray')
+                            ->separator(',')
                             ->hidden(fn ($state): bool => blank($state)),
                     ])
                     ->columns(2),
-                Section::make('Pièce jointe')
+
+                Section::make('Métadonnées')
                     ->schema([
-                        Flex::make([
-                            TextEntry::make('attachment_name')
-                                ->label('Nom du fichier')
-                                ->hidden(fn ($state): bool => blank($state)),
-                            TextEntry::make('attachment_size')
-                                ->label('Taille')
-                                ->formatStateUsing(fn ($state): string => $state ? number_format($state / 1024, 2).' KB' : '-')
-                                ->hidden(fn ($state): bool => blank($state)),
-                            TextEntry::make('attachment_mime')
-                                ->label('Type')
-                                ->hidden(fn ($state): bool => blank($state)),
-                        ]),
+                        TextEntry::make('user_add')
+                            ->label('Créé par'),
+                        TextEntry::make('created_at')
+                            ->label('Date de création')
+                            ->dateTime('d/m/Y H:i'),
+                        TextEntry::make('updated_at')
+                            ->label('Dernière modification')
+                            ->dateTime('d/m/Y H:i'),
                     ])
-                    ->hidden(fn ($record): bool => blank($record->attachment_path)),
+                    ->columns(3)
+                    ->collapsed(),
             ]);
     }
 }
