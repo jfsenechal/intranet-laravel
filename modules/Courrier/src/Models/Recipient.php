@@ -15,6 +15,7 @@ final class Recipient extends Model
     use HasFactory;
 
     protected $connection = 'maria-courrier';
+
     protected bool $timestamp = false;
 
     protected $fillable = [
@@ -42,6 +43,11 @@ final class Recipient extends Model
     {
         return $this->belongsToMany(IncomingMail::class, 'incoming_mail_recipient')
             ->withPivot('is_primary');
+    }
+
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'recipient_service');
     }
 
     public function getFullNameAttribute(): string

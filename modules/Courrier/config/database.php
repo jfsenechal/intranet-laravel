@@ -17,7 +17,7 @@ return [
             'url' => env('DB_COURRIER_URL'),
             'host' => env('DB_COURRIER_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_COURRIER_PORT', env('DB_PORT', '3306')),
-            'database' => env('DB_COURRIER_DATABASE', 'courrier'),
+            'database' => env('DB_COURRIER_DATABASE', 'indicateur_ville'),
             'username' => env('DB_COURRIER_USERNAME', env('DB_USERNAME', 'root')),
             'password' => env('DB_COURRIER_PASSWORD', env('DB_PASSWORD', '')),
             'unix_socket' => env('DB_SOCKET', ''),

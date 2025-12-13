@@ -13,6 +13,7 @@ final class Service extends Model
     use HasFactory;
 
     protected $connection = 'maria-courrier';
+
     protected bool $timestamp = false;
 
     protected $fillable = [
@@ -26,6 +27,11 @@ final class Service extends Model
     {
         return $this->belongsToMany(IncomingMail::class, 'incoming_mail_service')
             ->withPivot('is_primary');
+    }
+
+    public function recipients(): BelongsToMany
+    {
+        return $this->belongsToMany(Recipient::class, 'recipient_service');
     }
 
     protected static function booted(): void
