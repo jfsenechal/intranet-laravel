@@ -15,6 +15,7 @@ final class Recipient extends Model
     use HasFactory;
 
     protected $connection = 'maria-courrier';
+    protected bool $timestamp = false;
 
     protected $fillable = [
         'supervisor_id',

@@ -13,6 +13,7 @@ final class Service extends Model
     use HasFactory;
 
     protected $connection = 'maria-courrier';
+    protected bool $timestamp = false;
 
     protected $fillable = [
         'slug',
