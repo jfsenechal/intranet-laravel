@@ -6,6 +6,7 @@ use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,6 +19,7 @@ final class IncomingMail extends Model
     protected $connection = 'maria-courrier';
 
     protected $fillable = [
+        'category_id',
         'reference_number',
         'sender',
         'description',
@@ -27,6 +29,11 @@ final class IncomingMail extends Model
         'has_acknowledgment',
         'user_add',
     ];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public function services(): BelongsToMany
     {

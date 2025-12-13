@@ -23,6 +23,7 @@ return new class extends Migration {
                 $table->renameColumn('recommande', 'is_registered');
                 $table->renameColumn('accuse', 'has_acknowledgment');
                 $table->integer('file_size')->nullable();
+                $table->foreignId('category_id')->nullable()->after('id')->constrained('categories')->nullOnDelete();
                 $table->string('file_mime')->nullable();
                 $table->softDeletes();
                 $table->index('reference_number');
@@ -38,6 +39,7 @@ return new class extends Migration {
                 $table->boolean('is_notified')->default(false);
                 $table->boolean('is_registered')->default(false);
                 $table->boolean('has_acknowledgment')->default(false);
+                $table->foreignId('category_id')->nullable()->after('id')->constrained('categories')->nullOnDelete();
                 $table->string('user_add');
                 $table->softDeletes();
                 $table->timestamps();
