@@ -1,15 +1,15 @@
 <?php
 
-namespace AcMarche\Courrier\Filament\Resources\ServiceResource\Pages;
+namespace AcMarche\Courrier\Filament\Resources\CategoryResource\Pages;
 
-use AcMarche\Courrier\Filament\Resources\ServiceResource;
+use AcMarche\Courrier\Filament\Resources\CategoryResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Filament\Resources\Pages\EditRecord;
 
-final class EditService extends EditRecord
+class EditCategory extends EditRecord
 {
-    protected static string $resource = ServiceResource::class;
+    protected static string $resource = CategoryResource::class;
 
     protected function getHeaderActions(): array
     {

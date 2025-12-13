@@ -30,9 +30,6 @@ final class ServiceTables
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Actif')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('incoming_mails_count')
-                    ->label('Courriers')
-                    ->counts('incomingMails'),
             ])
             ->filters([
                 TernaryFilter::make('is_active')

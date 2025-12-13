@@ -3,7 +3,6 @@
 namespace AcMarche\Courrier\Filament\Resources\RecipientResource\Pages;
 
 use AcMarche\Courrier\Filament\Resources\RecipientResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -19,9 +18,7 @@ final class ListRecipients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->label('Ajouter un destinataire')
-                ->icon('tabler-plus'),
+
         ];
     }
 }

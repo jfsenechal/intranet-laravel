@@ -5,6 +5,7 @@ namespace AcMarche\Courrier\Filament\Resources\RecipientResource\Pages;
 use AcMarche\Courrier\Filament\Resources\RecipientResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 final class EditRecipient extends EditRecord
 {
@@ -13,7 +14,13 @@ final class EditRecipient extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\ViewAction::make()
+                ->icon('tabler-eye'),
         ];
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return $this->getRecord()->last_name.' '.$this->getRecord()->first_name;
     }
 }
