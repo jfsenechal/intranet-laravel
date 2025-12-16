@@ -37,5 +37,7 @@
         <env name="DB_DOCUMENT_DRIVER" value="sqlite"/>
         <env name="DB_NEWS_DRIVER" value="sqlite"/>
         <env name="DB_PUBLICATION_DRIVER" value="sqlite"/>
+        <env name="DB_COURRIER_DRIVER" value="sqlite"/>
+        <env name="DB_COURRIER_DATABASE" value=":memory:"/>
     </php>
 </phpunit>
