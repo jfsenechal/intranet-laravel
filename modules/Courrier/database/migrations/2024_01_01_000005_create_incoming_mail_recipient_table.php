@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-courrier';
 
     public function up(): void
@@ -17,8 +18,8 @@ return new class extends Migration {
                 $table->renameColumn('principal', 'is_primary');
                 $table->renameColumn('courrier_id', 'incoming_mail_id');
                 $table->renameColumn('destinataire_id', 'recipient_id');
-                $table->foreignId('incoming_mail_id')->constrained('incoming_mails')->cascadeOnDelete();
-                $table->foreignId('recipient_id')->constrained('recipients')->cascadeOnDelete();
+                //   $table->foreignId('incoming_mail_id')->constrained('incoming_mails')->cascadeOnDelete();
+                //   $table->foreignId('recipient_id')->constrained('recipients')->cascadeOnDelete();
 
                 $table->index(['incoming_mail_id', 'recipient_id']);
             });

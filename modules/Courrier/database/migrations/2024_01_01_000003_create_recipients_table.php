@@ -16,7 +16,6 @@ return new class extends Migration {
             Schema::connection('maria-courrier')->table('recipients', function (Blueprint $table) {
                 $table->renameColumn('nom', 'last_name');
                 $table->renameColumn('prenom', 'first_name');
-                $table->renameColumn('nom', 'name');
                 $table->renameColumn('actif', 'is_active');
                 $table->renameColumn('tuteur_id', 'supervisor_id');
                 $table->renameColumn('slugname', 'slug');
