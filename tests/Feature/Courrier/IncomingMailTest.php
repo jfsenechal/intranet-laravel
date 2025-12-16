@@ -10,7 +10,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Override model connection for testing
     config(['database.connections.maria-courrier' => config('database.connections.sqlite')]);
 });
 
