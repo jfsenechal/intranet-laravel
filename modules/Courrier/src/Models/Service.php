@@ -9,15 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
-
 #[UseFactory(ServiceFactory::class)]
 final class Service extends Model
 {
     use HasFactory;
 
-    protected $connection = 'maria-courrier';
+    public $timestamps = false;
 
-    protected bool $timestamp = false;
+    protected $connection = 'maria-courrier';
 
     protected $fillable = [
         'slug',
