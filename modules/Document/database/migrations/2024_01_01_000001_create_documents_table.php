@@ -29,7 +29,7 @@ return new class extends Migration {
                 $table->string('file_mime')->nullable();
                 $table->softDeletes();
             });
-        } else {
+        } elseif (! Schema::connection('maria-document')->hasTable('documents')) {
             Schema::connection('maria-document')->create('documents', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name');
@@ -53,7 +53,7 @@ return new class extends Migration {
             Schema::connection('maria-document')->table('categories', function (Blueprint $table) {
                 $table->renameColumn('nom', 'name');
             });
-        } else {
+        } elseif (! Schema::connection('maria-document')->hasTable('categories')) {
             Schema::connection('maria-document')->create('categories', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
