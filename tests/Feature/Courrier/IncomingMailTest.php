@@ -6,19 +6,6 @@ use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
-
-RefreshDatabaseState::$migrated = true;
-
-// uses(RefreshDatabase::class);
-pest()->use(DatabaseTruncation::class);
-/*
-beforeEach(function () {
-    dump(13);
-    uses(DatabaseTruncation::class);
-});*/
 
 describe('IncomingMail Model', function () {
     test('can create an incoming mail', function () {
