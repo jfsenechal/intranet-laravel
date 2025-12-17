@@ -40,6 +40,7 @@ final class IncomingMail extends Model
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'incoming_mail_service')
+            ->using(IncomingMailService::class)
             ->withPivot('is_primary');
     }
 
@@ -51,6 +52,7 @@ final class IncomingMail extends Model
     public function recipients(): BelongsToMany
     {
         return $this->belongsToMany(Recipient::class, 'incoming_mail_recipient')
+            ->using(IncomingMailRecipient::class)
             ->withPivot('is_primary');
     }
 

@@ -18,7 +18,7 @@ final class Recipient extends Model
 
     protected $connection = 'maria-courrier';
 
-    protected bool $timestamp = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'supervisor_id',
