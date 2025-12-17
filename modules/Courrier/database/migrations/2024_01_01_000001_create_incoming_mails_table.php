@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         /**
-         * Before for foreign key
+         * Before for a foreign key
          */
         if (Schema::connection('maria-courrier')->hasTable('categorie')) {
             Schema::connection('maria-courrier')->table('categorie', function (Blueprint $table) {
@@ -75,5 +75,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::connection('maria-courrier')->dropIfExists('incoming_mails');
+        Schema::connection('maria-courrier')->dropIfExists('categories');
     }
 };
