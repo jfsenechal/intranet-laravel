@@ -5,13 +5,20 @@ declare(strict_types=1);
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 
-uses(RefreshDatabase::class);
+RefreshDatabaseState::$migrated = true;
 
+// uses(RefreshDatabase::class);
+pest()->use(DatabaseTruncation::class);
+/*
 beforeEach(function () {
-    config(['database.connections.maria-courrier' => config('database.connections.sqlite')]);
-});
+    dump(13);
+    uses(DatabaseTruncation::class);
+});*/
 
 describe('IncomingMail Model', function () {
     test('can create an incoming mail', function () {
@@ -20,7 +27,9 @@ describe('IncomingMail Model', function () {
             'sender' => 'Test Sender',
             'description' => 'Test Description',
         ]);
+        User::factory()->create([
 
+        ]);
         expect($mail)->toBeInstanceOf(IncomingMail::class)
             ->and($mail->reference_number)->toBe('TEST-2024-001')
             ->and($mail->sender)->toBe('Test Sender')
