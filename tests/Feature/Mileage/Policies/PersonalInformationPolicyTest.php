@@ -7,15 +7,8 @@ use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Policies\PersonalInformationPolicy;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Override model connections for testing
-    config(['database.connections.maria-mileage' => config('database.connections.sqlite')]);
-    config(['database.connections.mariadb' => config('database.connections.sqlite')]);
-
     $this->policy = new PersonalInformationPolicy();
 });
 

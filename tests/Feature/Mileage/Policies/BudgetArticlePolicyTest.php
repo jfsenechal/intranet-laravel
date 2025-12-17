@@ -7,15 +7,8 @@ use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Policies\BudgetArticlePolicy;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Override model connections for testing
-   config(['database.connections.maria-mileage' => config('database.connections.sqlite')]);
-   config(['database.connections.mariadb' => config('database.connections.sqlite')]);
-
     $this->policy = new BudgetArticlePolicy();
 });
 
@@ -24,7 +17,6 @@ describe('viewAny', function () {
         $user = User::factory()->create();
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
         $user->roles()->attach($role);
-
         expect($this->policy->viewAny($user))->toBeTrue();
     });
 
