@@ -3,7 +3,7 @@
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
 
-RefreshDatabaseState::$migrated = true;
+//RefreshDatabaseState::$migrated = true;
 
 test('example', function () {
     $response = $this->get('/');
