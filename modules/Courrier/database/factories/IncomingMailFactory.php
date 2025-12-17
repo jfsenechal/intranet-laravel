@@ -5,9 +5,6 @@ namespace AcMarche\Courrier\Database\Factories;
 use AcMarche\Courrier\Models\IncomingMail;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<IncomingMail>
- */
 final class IncomingMailFactory extends Factory
 {
     protected $model = IncomingMail::class;

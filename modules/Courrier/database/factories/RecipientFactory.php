@@ -6,9 +6,6 @@ use AcMarche\Courrier\Models\Recipient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<Recipient>
- */
 final class RecipientFactory extends Factory
 {
     protected $model = Recipient::class;

@@ -6,9 +6,6 @@ use AcMarche\Courrier\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<Service>
- */
 final class ServiceFactory extends Factory
 {
     protected $model = Service::class;

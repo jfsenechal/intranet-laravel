@@ -4,12 +4,14 @@ namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
 use AcMarche\Security\Models\HasUserAdd;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[UseFactory(IncomingMailFactory::class)]
 final class IncomingMail extends Model
 {
     use HasFactory;
