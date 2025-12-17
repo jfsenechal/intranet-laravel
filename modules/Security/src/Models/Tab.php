@@ -14,7 +14,6 @@ final class Tab extends Model
 {
     use HasFactory;
 
-    protected $connection = 'mariadb';
     public $timestamps = false;
 
     protected $fillable = [
