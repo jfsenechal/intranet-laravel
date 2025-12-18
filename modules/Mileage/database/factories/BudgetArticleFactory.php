@@ -7,9 +7,6 @@ namespace Database\Factories;
 use AcMarche\Mileage\Models\BudgetArticle;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\Mileage\Models\BudgetArticle>
- */
 class BudgetArticleFactory extends Factory
 {
     protected $model = BudgetArticle::class;
