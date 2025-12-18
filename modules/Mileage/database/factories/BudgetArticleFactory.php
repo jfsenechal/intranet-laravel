@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace AcMarche\Mileage\Database\Factories;
 
 use AcMarche\Mileage\Models\BudgetArticle;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class BudgetArticleFactory extends Factory
+final class BudgetArticleFactory extends Factory
 {
     protected $model = BudgetArticle::class;
 

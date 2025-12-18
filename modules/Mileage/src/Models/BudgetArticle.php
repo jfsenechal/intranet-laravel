@@ -2,7 +2,7 @@
 
 namespace AcMarche\Mileage\Models;
 
-use Database\Factories\BudgetArticleFactory;
+use AcMarche\Mileage\Database\Factories\BudgetArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[UseFactory(BudgetArticleFactory::class)]
-class BudgetArticle extends Model
+final class BudgetArticle extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -26,19 +26,19 @@ class BudgetArticle extends Model
         'department',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
-
     /**
      * @return HasMany<Declaration>
      */
     public function declarations(): HasMany
     {
         return $this->hasMany(Declaration::class, 'article_budgetaire', 'nom');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

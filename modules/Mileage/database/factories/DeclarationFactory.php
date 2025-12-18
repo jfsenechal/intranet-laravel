@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace AcMarche\Mileage\Database\Factories;
 
 use AcMarche\Mileage\Models\Declaration;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\Mileage\Models\Declaration>
- */
 class DeclarationFactory extends Factory
 {
     protected $model = Declaration::class;
@@ -36,7 +33,7 @@ class DeclarationFactory extends Factory
             'user_add' => fake()->userName(),
             'type_movement' => 'service',
             'college_date' => fake()->date(),
-            'budget_article' => null,
+            'budget_article' => fake()->jobTitle(),
             'departments' => 'ville',
         ];
     }

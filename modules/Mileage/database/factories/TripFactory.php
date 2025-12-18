@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace AcMarche\Mileage\Database\Factories;
 
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\Trip;

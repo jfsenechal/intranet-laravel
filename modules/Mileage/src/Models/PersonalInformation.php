@@ -2,8 +2,8 @@
 
 namespace AcMarche\Mileage\Models;
 
+use AcMarche\Mileage\Database\Factories\PersonalInformationFactory;
 use AcMarche\Mileage\Observers\PersonalInformationObserver;
-use Database\Factories\PersonalInformationFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

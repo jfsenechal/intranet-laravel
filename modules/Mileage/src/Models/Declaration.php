@@ -2,8 +2,8 @@
 
 namespace AcMarche\Mileage\Models;
 
+use AcMarche\Mileage\Database\Factories\DeclarationFactory;
 use AcMarche\Security\Models\HasUserAdd;
-use Database\Factories\DeclarationFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

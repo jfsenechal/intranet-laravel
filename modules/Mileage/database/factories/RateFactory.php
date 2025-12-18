@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace AcMarche\Mileage\Database\Factories;
 
 use AcMarche\Mileage\Models\Rate;
 use Illuminate\Database\Eloquent\Factories\Factory;
