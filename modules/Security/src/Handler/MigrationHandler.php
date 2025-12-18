@@ -2,11 +2,11 @@
 
 namespace AcMarche\Security\Handler;
 
-use AcMarche\Document\Filament\Resources\DocumentResource;
-use AcMarche\Mileage\Filament\Resources\Trip\TripResource;
-use AcMarche\News\Filament\Resources\NewsResource;
-use AcMarche\Publication\Filament\Resources\PublicationResource;
-use AcMarche\Security\Filament\Resources\UserResource\UserResource;
+use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
+use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
+use AcMarche\News\Filament\Resources\News\NewsResource;
+use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
+use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
 
 final class MigrationHandler
