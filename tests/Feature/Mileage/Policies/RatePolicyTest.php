@@ -142,7 +142,7 @@ describe('delete', function () {
 
         $rate = Rate::factory()->create();
 
-        expect($this->policy->delete($rate, $rate))->toBeTrue();
+        expect($this->policy->delete($user, $rate))->toBeTrue();
     });
 
     test('ville role user cannot delete rates', function () {
@@ -152,7 +152,7 @@ describe('delete', function () {
 
         $rate = Rate::factory()->create();
 
-        expect($this->policy->delete($rate, $rate))->toBeFalse();
+        expect($this->policy->delete($user, $rate))->toBeFalse();
     });
 
     test('cpas role user cannot delete rates', function () {
@@ -162,14 +162,14 @@ describe('delete', function () {
 
         $rate = Rate::factory()->create();
 
-        expect($this->policy->delete($rate, $rate))->toBeFalse();
+        expect($this->policy->delete($user, $rate))->toBeFalse();
     });
 
     test('user without role cannot delete rates', function () {
         $user = User::factory()->create();
         $rate = Rate::factory()->create();
 
-        expect($this->policy->delete($rate, $rate))->toBeFalse();
+        expect($this->policy->delete($user, $rate))->toBeFalse();
     });
 });
 
@@ -181,7 +181,7 @@ describe('restore', function () {
 
         $rate = Rate::factory()->create();
 
-        expect($this->policy->restore($rate, $rate))->toBeFalse();
+        expect($this->policy->restore($user, $rate))->toBeFalse();
     });
 });
 
@@ -193,6 +193,6 @@ describe('forceDelete', function () {
 
         $rate = Rate::factory()->create();
 
-        expect($this->policy->forceDelete($rate, $rate))->toBeFalse();
+        expect($this->policy->forceDelete($user, $rate))->toBeFalse();
     });
 });

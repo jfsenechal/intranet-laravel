@@ -80,7 +80,7 @@ final class RatePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(Rate $user, Rate $rate): bool
+    public function restore(User $user, Rate $rate): bool
     {
         return false;
     }
@@ -88,7 +88,7 @@ final class RatePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(Rate $user, Rate $rate): bool
+    public function forceDelete(User $user, Rate $rate): bool
     {
         return false;
     }
