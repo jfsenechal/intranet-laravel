@@ -131,7 +131,6 @@ final class User extends Authenticatable
     public function hasOneOfThisRoles(array $rolesToFind): bool
     {
         foreach ($this->roles()->get() as $role) {
-            dump('name'.$role->name, 'to find'.join(';',$rolesToFind));
             if (in_array($role->name, $rolesToFind)) {
                 return true;
             }
