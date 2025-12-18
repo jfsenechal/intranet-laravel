@@ -26,15 +26,7 @@ return new class extends Migration
                 $table->renameColumn('deplacement_date_college', 'college_trip_date');
             });
         } else {
-            Schema::create('profiles', function (Blueprint $table) {
-                $table->id();
-                $table->string('car_license_plate1')->nullable();
-                $table->string('car_license_plate2')->nullable();
-                $table->string('street')->nullable();
-                $table->string('postal_code')->nullable();
-                $table->string('city')->nullable();
-                $table->string('college_trip_date')->nullable();
-            });
+            //not use anymore
         }
     }
 };

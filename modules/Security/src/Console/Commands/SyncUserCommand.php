@@ -7,6 +7,7 @@ namespace AcMarche\Security\Console\Commands;
 use AcMarche\Security\Ldap\User as UserLdap;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Str;
 use Symfony\Component\Console\Command\Command as SfCommand;
 
@@ -59,7 +60,7 @@ final class SyncUserCommand extends Command
         $data['username'] = $username;
         $data['password'] = Str::password();
         $user = User::create($data);
-       // $user->addRole('ROLE_ADMIN');
+        // $user->addRole('ROLE_ADMIN');
         $this->info('Add '.$user->first_name.' '.$user->last_name);
     }
 
@@ -79,6 +80,17 @@ final class SyncUserCommand extends Command
         if (count($ldapUsernames) > 200) {
             foreach (User::all() as $user) {
                 if (!in_array($user->username, $ldapUsernames)) {
+                    $profile = DB::connection('mariadb')
+                        ->table('profiles')
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if ($profile) {
+                        DB::connection('mariadb')
+                            ->table('profiles')
+                            ->where('user_id', $user->id)
+                            ->delete();
+                    }
                     $user->delete();
                     $this->info('Removed from pst'.$user->first_name.' '.$user->last_name);
                 }
