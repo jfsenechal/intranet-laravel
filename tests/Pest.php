@@ -13,10 +13,10 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
 
-RefreshDatabaseState::$migrated = true;
+//RefreshDatabaseState::$migrated = true;
 pest()->extend(Tests\TestCase::class)
-    // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->use(Illuminate\Foundation\Testing\DatabaseTruncation::class)
+    //->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    //->use(Illuminate\Foundation\Testing\DatabaseTruncation::class)
     ->in('Feature');
 
 /*
