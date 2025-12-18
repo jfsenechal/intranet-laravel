@@ -77,12 +77,12 @@ describe('view', function () {
 });
 
 describe('create', function () {
-    test('admin can create personal information', function () {
+    test('admin cannot create personal information', function () {
         $user = User::factory()->create();
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
         $user->roles()->attach($role);
 
-        expect($this->policy->create($user))->toBeTrue();
+        expect($this->policy->create($user))->toBeFalse();
     });
 
     test('ville role user cannot create personal information', function () {
