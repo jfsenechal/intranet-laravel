@@ -4,16 +4,19 @@ namespace AcMarche\Mileage\Filament\Resources\Trips\Tables;
 
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\Mileage\Handler\DeclarationHandler;
-use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Repository\TripRepository;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class TripTables
 {
@@ -79,12 +82,32 @@ class TripTables
                     BulkAction::make('declared')
                         ->label('Déclarer les déplacements')
                         ->icon('tabler-confetti')
-                        ->action(function () {
-                            $budgetArticle = request()->get('budgetArticle');
-                            DeclarationHandler::handleTrips(request()->get('selectedRecords'), auth()->user(),$budgetArticle);
+                        ->schema([
+                            Select::make('budget_article_id')
+                                ->label('Article budgétaire')
+                                ->options(BudgetArticle::query()->pluck('name', 'id'))
+                                ->required()
+                                ->searchable(),
+                        ])
+                        ->action(function (Collection $records, array $data) {
+                            $budgetArticle = BudgetArticle::find($data['budget_article_id']);
 
-                            return true;
-                        }),
+                            try {
+                                $declarations = DeclarationHandler::handleTrips($records, auth()->user(), $budgetArticle);
+                                Notification::make()
+                                    ->title('Déclaration(s) crée(s)')
+                                    ->body($declarations->count() . ' déclaration(s) créée(s) avec ' . $records->count() . ' déplacement(s)')
+                                    ->success()
+                                    ->send();
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title('Erreur')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),
                 ]),
             ]);
