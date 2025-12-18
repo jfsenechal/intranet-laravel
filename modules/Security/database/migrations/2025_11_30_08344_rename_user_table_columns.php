@@ -31,8 +31,9 @@ return new class extends Migration {
             } else {
                 $table->string('department')->nullable();
             }
-
-            $table->string('username')->unique();
+            if (!Schema::connection('maria-security')->hasColumn('users', 'username')) {
+                $table->string('username')->unique();
+            }
             $table->string('news_attachment')->nullable(false)->default(false)->change();
             $table->string('phone', 50)->nullable();
             $table->string('mobile', 50)->nullable();

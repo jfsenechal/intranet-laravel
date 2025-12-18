@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::connection('maria-security')->hasTable('profiles')) {
+        if (Schema::connection('maria-security')->hasTable('profile')) {
             Schema::connection('maria-security')->table('profile', function (Blueprint $table) {
                 $table->rename('profiles');
             });
