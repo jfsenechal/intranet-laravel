@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use AcMarche\Security\Database\Factories\UserFactory;
 use AcMarche\Security\Ldap\User as UserLdap;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
-use Database\Factories\UserFactory;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
