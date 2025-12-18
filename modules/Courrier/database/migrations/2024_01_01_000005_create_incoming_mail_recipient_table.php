@@ -18,6 +18,7 @@ return new class extends Migration
                 $table->renameColumn('principal', 'is_primary');
                 $table->renameColumn('courrier_id', 'incoming_mail_id');
                 $table->renameColumn('destinataire_id', 'recipient_id');
+                $table->string('username')->nullable()->after('id');
                 //   $table->foreignId('incoming_mail_id')->constrained('incoming_mails')->cascadeOnDelete();
                 //   $table->foreignId('recipient_id')->constrained('recipients')->cascadeOnDelete();
 
@@ -30,6 +31,7 @@ return new class extends Migration
                 $table->foreignId('incoming_mail_id')->constrained('incoming_mails')->cascadeOnDelete();
                 $table->foreignId('recipient_id')->constrained('recipients')->cascadeOnDelete();
                 $table->boolean('is_primary')->default(false);
+                $table->string('username')->nullable()->after('id');
 
                 $table->index(['incoming_mail_id', 'recipient_id']);
             });

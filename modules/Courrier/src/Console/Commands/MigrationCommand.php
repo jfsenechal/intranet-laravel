@@ -18,7 +18,7 @@ final class MigrationCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'courrier:migration-incoming-mail-recipient {--dry-run : Run without making changes}';
+    protected $signature = 'courrier:migration {--dry-run : Run without making changes}';
 
     /**
      * The console command description.
@@ -46,18 +46,6 @@ final class MigrationCommand extends Command
                 $this->error('The incoming_mail_recipient table does not have a user_id column');
 
                 return SfCommand::FAILURE;
-            }
-
-            // Check if username column exists, if not add it
-            if (! Schema::connection('maria-courrier')->hasColumn('incoming_mail_recipient', 'username')) {
-                if (! $dryRun) {
-                    Schema::connection('maria-courrier')->table('incoming_mail_recipient', function ($table) {
-                        $table->string('username')->nullable()->after('id');
-                    });
-                    $this->info('✓ Added username column to incoming_mail_recipient table');
-                } else {
-                    $this->info('[DRY-RUN] Would add username column to incoming_mail_recipient table');
-                }
             }
 
             // Fetch all records with user_id
@@ -114,17 +102,6 @@ final class MigrationCommand extends Command
                 } catch (Exception $e) {
                     $this->error("Error migrating record ID {$recipient->id}: {$e->getMessage()}");
                     $errors++;
-                }
-            }
-
-            // After migration, offer to drop the user_id column
-            if (! $dryRun && $updated > 0 && $errors === 0) {
-                $this->newLine();
-                if ($this->confirm('Migration completed successfully. Do you want to drop the user_id column?', false)) {
-                    Schema::connection('maria-courrier')->table('incoming_mail_recipient', function ($table) {
-                        $table->dropColumn('user_id');
-                    });
-                    $this->info('✓ Dropped user_id column from incoming_mail_recipient table');
                 }
             }
 
