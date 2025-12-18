@@ -53,7 +53,7 @@ final class PersonalInformationPolicy
      */
     public function delete(User $user, PersonalInformation $personalInformation): bool
     {
-        return $this->canWrite($user, $personalInformation);
+        return false;
     }
 
     /**
