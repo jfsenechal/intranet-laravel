@@ -48,7 +48,7 @@ return new class extends Migration {
                 $table->decimal('rate_omnium', 10, 2);
                 $table->string('type_movement');
                 $table->date('college_date')->nullable();
-                $table->string('article_budgetaire');
+                $table->string('budget_article')->nullable(false);
                 $table->string('departments')->nullable();
                 $table->string('user_add');
                 $table->timestamps();

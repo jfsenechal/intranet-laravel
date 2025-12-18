@@ -12,20 +12,6 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        /**
-         * Bug in testing must be created here
-         */
-        if (!Schema::connection('maria-security')->hasTable('users')) {
-            Schema::create('users', function (Blueprint $table) {
-                $table->id();
-                $table->string('name');
-                $table->string('email')->unique();
-                $table->timestamp('email_verified_at')->nullable();
-                $table->string('password');
-                $table->rememberToken();
-                $table->timestamps();
-            });
-        }
         // Modify column properties in users table only if old columns exist (legacy migration)
         Schema::connection('maria-security')->table('users', function (Blueprint $table) {
             if (Schema::connection('maria-security')->hasColumn('users', 'nom')) {
@@ -46,6 +32,7 @@ return new class extends Migration {
                 $table->string('department')->nullable();
             }
 
+            $table->string('username')->unique();
             $table->string('news_attachment')->nullable(false)->default(false)->change();
             $table->string('phone', 50)->nullable();
             $table->string('mobile', 50)->nullable();
