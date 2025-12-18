@@ -33,6 +33,8 @@ class TripForm
                     ])
                     ->columns(2),
                 Section::make('Si déplacement externe')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->iconColor('warning')
                     ->description('Si vous avez quitté la zone 6900')
                     ->schema([
                         Forms\Components\TextInput::make('departure_location')

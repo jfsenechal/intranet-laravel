@@ -3,9 +3,9 @@
 namespace AcMarche\Mileage\Filament\Resources\Trips\Pages;
 
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
+use AcMarche\Mileage\Models\Trip;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Schema;
 
 class ViewTrip extends ViewRecord
 {
@@ -15,7 +15,11 @@ class ViewTrip extends ViewRecord
     {
         return [
             Actions\EditAction::make()
-                ->icon('tabler-edit'),
+                ->icon('tabler-edit')
+                ->disabled(fn(Trip $trip) => $trip->isDeclared())
+                ->tooltip(
+                    fn(Trip $trip) => $trip->isDeclared() ? 'Ce déplacement est déjà lié à une déclaration' : null
+                ),
             Actions\DeleteAction::make()
                 ->icon('tabler-trash'),
             Actions\RestoreAction::make(),
@@ -25,7 +29,7 @@ class ViewTrip extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->name;
+        return 'Détails du déplacement '.$this->record->id;
     }
 
 }

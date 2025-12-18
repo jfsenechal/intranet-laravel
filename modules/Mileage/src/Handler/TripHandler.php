@@ -22,17 +22,16 @@ final class TripHandler
         if ($rate) {
             $trip->rate = $rate->amount;
             $trip->omnium = $rate->omnium;
-            $trip->save();
         }
     }
 
     public function setTypeOfMovement(Trip $trip): void
     {
         if ($trip->arrival_date != null) {
-            $trip->type_movement = TypeMovementEnum::EXTERNAL;
+            $trip->type_movement = TypeMovementEnum::EXTERNAL->value;
 
             return;
         }
-        $trip->type_movement = TypeMovementEnum::INTERNAL;
+        $trip->type_movement = TypeMovementEnum::INTERNAL->value;
     }
 }

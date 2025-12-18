@@ -23,7 +23,6 @@ class TripTables
                     ->dateTime('d/m/Y')
                     ->sortable()
                     ->url(fn (Trip $record) => TripResource::getUrl('view', ['record' => $record->id])),
-
                 Tables\Columns\TextColumn::make('departure_location')
                     ->label('Départ')
                     ->searchable()
@@ -41,8 +40,10 @@ class TripTables
                     ->label('Type')
                     ->searchable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('declaration.last_name')
-                    ->label('Déclaré ?'),
+                Tables\Columns\IconColumn::make('declared')
+                    ->label('Déclaré')
+                    ->state(fn (Trip $record) => $record->isDeclared())
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Créé le')
                     ->dateTime()
@@ -50,7 +51,19 @@ class TripTables
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('declared')
+                    ->label('Déclaré')
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('declaration_id'),
+                        false: fn ($query) => $query->whereNull('declaration_id'),
+                    )
+                    ->default(false),
+                Tables\Filters\SelectFilter::make('type_movement')
+                    ->label('Type')
+                    ->options([
+                        'externe' => 'Externe',
+                        'service' => 'Service',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),

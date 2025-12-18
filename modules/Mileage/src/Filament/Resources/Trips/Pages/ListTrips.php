@@ -15,7 +15,7 @@ final class ListTrips extends ListRecords
 
     public function getTitle(): string|Htmlable
     {
-        return 'Liste des déplacements';
+        return 'Liste de mes déplacements';
     }
 
     protected function getHeaderActions(): array

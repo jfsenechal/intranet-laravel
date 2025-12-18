@@ -14,10 +14,18 @@ class TripObserver
     /**
      * Handle the Trip "created" event.
      */
-    public function created(Trip $trip): void
+    public function creating(Trip $trip): void
     {
         $this->tripHandler->setRate($trip);
         $this->tripHandler->setTypeOfMovement($trip);
+    }
+
+    /**
+     * Handle the Trip "created" event.
+     */
+    public function created(Trip $trip): void
+    {
+
     }
 
     /**

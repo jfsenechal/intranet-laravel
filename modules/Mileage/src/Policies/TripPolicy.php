@@ -80,7 +80,7 @@ final class TripPolicy
     }
 
     /**
-     * Check if user is linked to the action either directly or through services
+     * Check if the user is linked to the action either directly or through services
      */
     private function canWrite(User $user, Trip $trip): bool
     {
