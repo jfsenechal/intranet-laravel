@@ -4,7 +4,7 @@ namespace AcMarche\Mileage\Repository;
 
 use Illuminate\Database\Eloquent\Builder;
 
-final class DeclarationRepository
+class TripRepository
 {
     public static function getByUser(Builder $query): Builder
     {

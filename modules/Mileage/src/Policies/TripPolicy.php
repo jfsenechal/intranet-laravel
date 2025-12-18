@@ -2,7 +2,6 @@
 
 namespace AcMarche\Mileage\Policies;
 
-// https://laravel.com/docs/12.x/authorization#creating-policies
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Models\Trip;
 use App\Models\User;
@@ -40,6 +39,7 @@ final class TripPolicy
         if ($user->isAdministrator()) {
             return true;
         }
+
         if ($user->hasOneOfThisRoles(RolesEnum::getRoles())) {
             return true;
         }
@@ -80,7 +80,7 @@ final class TripPolicy
     }
 
     /**
-     * Check if the user is linked to the action either directly or through services
+     *
      */
     private function canWrite(User $user, Trip $trip): bool
     {
@@ -89,6 +89,10 @@ final class TripPolicy
         }
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
+        }
+
+        if ($trip->isDeclared()) {
+            return false;
         }
 
         return $trip->username === $user->username;

@@ -29,7 +29,7 @@ final class Declaration extends Model
         'first_name',
         'street',
         'postal_code',
-        'locality',
+        'city',
         'rate',
         'rate_omnium',
         'user_add',

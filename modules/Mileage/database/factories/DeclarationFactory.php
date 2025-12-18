@@ -27,7 +27,7 @@ class DeclarationFactory extends Factory
             'first_name' => fake()->firstName(),
             'street' => fake()->streetAddress(),
             'postal_code' => fake()->postcode(),
-            'locality' => fake()->city(),
+            'city' => fake()->city(),
             'rate' => fake()->randomFloat(2, 0.30, 0.50),
             'rate_omnium' => fake()->randomFloat(2, 0.01, 0.05),
             'user_add' => fake()->userName(),
