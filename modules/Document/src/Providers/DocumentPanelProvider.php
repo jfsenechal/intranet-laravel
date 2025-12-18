@@ -33,6 +33,7 @@ final class DocumentPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Pink,
             ])
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Document\\Filament\\Resources')

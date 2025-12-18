@@ -33,6 +33,7 @@ class NewsPanelProvider extends PanelProvider
                 'primary' => Color::Pink,
             ])
             ->brandName('Quoi de neuf?')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\News\\Filament\\Resources')

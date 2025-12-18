@@ -32,6 +32,7 @@ class SecurityPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(Width::Full)

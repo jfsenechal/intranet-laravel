@@ -40,10 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(Width::Full)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
-            // Module resources - uncomment after updating to Filament v4 compatible syntax
-            // ->discoverResources(in: base_path('modules/Document/src/Filament/Resources'), for: 'AcMarche\\Document\\Filament\\Resources')
-            // ->discoverResources(in: base_path('modules/News/src/Filament/Resources'), for: 'AcMarche\\News\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
+           ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
                 Dashboard::class,
             ])

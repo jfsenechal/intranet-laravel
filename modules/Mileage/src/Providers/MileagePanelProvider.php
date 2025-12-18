@@ -29,6 +29,7 @@ final class MileagePanelProvider extends PanelProvider
             ->id('mileage-panel')
             ->path('mileage')
             ->brandName('Frais de déplacement')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Pink,
             ])
