@@ -13,7 +13,7 @@
             <div class="text-gray-700 font-semibold text-lg">PST</div>
         </div>
         <div class="text-gray-700">
-            @php $logo = public_path('images/Marche_logo.png'); @endphp
+            @php $logo = public_path('vendor/app/images/Marche_logo.png'); @endphp
             @inlinedImage($logo)
         </div>
     </div>

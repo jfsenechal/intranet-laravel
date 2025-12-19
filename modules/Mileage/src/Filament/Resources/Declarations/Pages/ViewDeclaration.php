@@ -33,7 +33,7 @@ final class ViewDeclaration extends ViewRecord
                 ->label('Télécharger')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-                ->url(fn (Declaration $record) => route('download.action', $record))
+                ->url(fn(Declaration $record) => route('download.declaration', $record))
                 ->action(function (Declaration $record) {
                     Notification::make()
                         ->title('Pdf exporté')

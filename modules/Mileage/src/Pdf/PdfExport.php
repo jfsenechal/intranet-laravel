@@ -13,7 +13,7 @@ final class PdfExport
     {
         $calculator = new Calculator($declaration);
         $declarationSummary = $calculator->calculate();
-
+dd($declarationSummary,$declaration->id);
         return Pdf::view('mileage::declaration-pdf', [
             'declaration' => $declaration,
             'declarationSummary' => $declarationSummary,
