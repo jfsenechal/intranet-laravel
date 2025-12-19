@@ -5,6 +5,8 @@ namespace AcMarche\Mileage\Filament\Resources\Declarations\Schemas;
 use AcMarche\Mileage\Dto\DeclarationSummary;
 use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
@@ -118,6 +120,40 @@ final class DeclarationInfolist
                         ])->grow(false),
                     ])
                     ->icon('tabler-calculator')
+                    ->collapsible(),
+                Section::make('Détail des déplacements')
+                    ->icon('tabler-route')
+                    ->schema([
+                        RepeatableEntry::make('trips')
+                            ->hiddenLabel()
+                            ->table([
+                                TableColumn::make('Date'),
+                                TableColumn::make('Trajet'),
+                                TableColumn::make('Motif'),
+                                TableColumn::make('Distance'),
+                                TableColumn::make('Repas'),
+                                TableColumn::make('Train'),
+                            ])
+                            ->schema([
+                                TextEntry::make('departure_date')
+                                    ->date('d/m/Y'),
+                                TextEntry::make('trajet')
+                                    ->state(fn ($record): string => $record->departure_location && $record->arrival_location
+                                        ? $record->departure_location.' → '.$record->arrival_location
+                                        : '-'),
+                                TextEntry::make('content')
+                                    ->limit(40),
+                                TextEntry::make('distance')
+                                    ->suffix(' km'),
+                                TextEntry::make('meal_expense')
+                                    ->money('EUR')
+                                    ->placeholder('-'),
+                                TextEntry::make('train_expense')
+                                    ->money('EUR')
+                                    ->placeholder('-'),
+                            ]),
+                    ])
+                    ->columnSpanFull()
                     ->collapsible(),
             ]);
     }
