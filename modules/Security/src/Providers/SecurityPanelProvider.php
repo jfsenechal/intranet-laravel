@@ -34,7 +34,7 @@ class SecurityPanelProvider extends PanelProvider
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
-            ->sidebarCollapsibleOnDesktop()
+
             ->maxContentWidth(Width::Full)
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Security\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Security\\Filament\\Pages')

@@ -24,6 +24,7 @@ final class CourrierPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         $path = $this->getPluginBasePath().'/../';
+
         return $panel
             ->id('courrier-panel')
             ->path('indicateur')
@@ -33,7 +34,7 @@ final class CourrierPanelProvider extends PanelProvider
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
-            ->sidebarCollapsibleOnDesktop()
+
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Courrier\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Courrier\\Filament\\Pages')
             ->pages([
