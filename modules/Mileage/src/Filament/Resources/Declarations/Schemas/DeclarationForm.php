@@ -7,7 +7,7 @@ use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class DeclarationForm
+final class DeclarationForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -35,7 +35,7 @@ class DeclarationForm
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('locality')
+                        Forms\Components\TextInput::make('city')
                             ->label('Localité')
                             ->required()
                             ->maxLength(255),
@@ -43,7 +43,9 @@ class DeclarationForm
                         Forms\Components\TextInput::make('iban')
                             ->label('IBAN')
                             ->required()
-                            ->maxLength(255),
+                            ->rule('iban')
+                            ->placeholder('BE00 0000 0000 0000')
+                            ->helperText('Format: BE00 0000 0000 0000'),
                     ])
                     ->columns(2),
 
@@ -99,6 +101,34 @@ class DeclarationForm
                             ->label('Date collège'),
                     ])
                     ->columns(2),
+            ]);
+    }
+
+    public static function editForAdmin(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make('Informations personnelles')
+                    ->schema([
+                        Forms\Components\Select::make('budget_article')
+                            ->label('Article budgétaire')
+                            ->required()
+                            ->options(BudgetArticle::query()->pluck('name', 'name'))
+                            ->searchable(),
+                        Forms\Components\TextInput::make('iban')
+                            ->label('IBAN')
+                            ->required()
+                            ->rule('iban')
+                            ->placeholder('BE00 0000 0000 0000')
+                            ->helperText('Format: BE00 0000 0000 0000'),
+                        Forms\Components\TextInput::make('car_license_plate1')
+                            ->label('Plaque 1')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('car_license_plate2')
+                            ->label('Plaque 2')
+                            ->maxLength(255),
+                    ]),
             ]);
     }
 }
