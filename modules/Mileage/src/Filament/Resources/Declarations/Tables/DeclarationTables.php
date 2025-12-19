@@ -3,6 +3,7 @@
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Tables;
 
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
+use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\BulkActionGroup;
@@ -18,7 +19,8 @@ final class DeclarationTables
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->modifyQueryUsing(fn (Builder $query) => DeclarationRepository::getByUser($query))
+            ->defaultPaginationPageOption(50)
+            ->modifyQueryUsing(fn (Builder $query) => DeclarationRepository::getByUser($query)->with('trips'))
             ->columns([
                 Tables\Columns\TextColumn::make('last_name')
                     ->label('Nom')
@@ -42,8 +44,14 @@ final class DeclarationTables
                     ->label('Créé le')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('rate')
-                    ->label('Tarif')
+                Tables\Columns\TextColumn::make('totalRefund')
+                    ->label('Total à rembourser')
+                    ->state(function (Declaration $record): float {
+                        $record->loadMissing('trips');
+                        $calculator = new Calculator($record);
+
+                        return $calculator->calculate()->totalRefund;
+                    })
                     ->money('EUR'),
             ])
             ->filters([
