@@ -9,7 +9,7 @@ use Spatie\LaravelPdf\PdfBuilder;
 
 final class PdfExport
 {
-    public static function exportDeclaration(Declaration $declaration): PdfBuilder
+    public static function exportDeclaration(Declaration $declaration): PdfBuilder|Pdf
     {
         $declaration->load('trips');
         $calculator = new Calculator($declaration);
