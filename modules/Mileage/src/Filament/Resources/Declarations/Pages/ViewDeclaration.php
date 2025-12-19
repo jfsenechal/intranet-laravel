@@ -18,7 +18,7 @@ final class ViewDeclaration extends ViewRecord
 
     public function getTitle(): string|Htmlable
     {
-        return "Déclaration num ".$this->record->id.' ('.$this->record->type_movement.')';
+        return 'Déclaration num '.$this->record->id.' ('.$this->record->type_movement.')';
     }
 
     public function infolist(Schema $schema): Schema
@@ -32,7 +32,8 @@ final class ViewDeclaration extends ViewRecord
             Actions\Action::make('download')
                 ->label('Télécharger')
                 ->icon('tabler-download')
-                ->color(Color::Green)->url(fn(Declaration $record) => route('download.action', $record))
+                ->color(Color::Green)
+                ->url(fn (Declaration $record) => route('download.action', $record))
                 ->action(function (Declaration $record) {
                     Notification::make()
                         ->title('Pdf exporté')
