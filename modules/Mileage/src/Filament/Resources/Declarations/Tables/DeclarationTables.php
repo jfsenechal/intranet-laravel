@@ -44,6 +44,19 @@ final class DeclarationTables
                     ->label('Créé le')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('trips_count')
+                    ->label('Déplacements')
+                    ->counts('trips')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('totalKilometers')
+                    ->label('Nombre de km')
+                    ->state(function (Declaration $record): float {
+                        $record->loadMissing('trips');
+                        $calculator = new Calculator($record);
+
+                        return $calculator->calculate()->totalKilometers;
+                    })
+                    ->suffix('km'),
                 Tables\Columns\TextColumn::make('totalRefund')
                     ->label('Total à rembourser')
                     ->state(function (Declaration $record): float {
