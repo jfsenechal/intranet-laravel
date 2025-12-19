@@ -3,6 +3,7 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
+    AcMarche\Courrier\Providers\CourrierPanelProvider::class,
     AcMarche\Document\Providers\DocumentPanelProvider::class,
     AcMarche\News\Providers\NewsPanelProvider::class,
     AcMarche\Mileage\Providers\MileagePanelProvider::class,
