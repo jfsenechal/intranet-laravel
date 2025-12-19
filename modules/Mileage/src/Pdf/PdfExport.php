@@ -11,15 +11,17 @@ final class PdfExport
 {
     public static function exportDeclaration(Declaration $declaration): PdfBuilder
     {
+        $declaration->load('trips');
         $calculator = new Calculator($declaration);
         $declarationSummary = $calculator->calculate();
-dd($declarationSummary,$declaration->id);
+        $name = 'deplacement-'.$declaration->user_add.'-'.$declaration->created_at->format('d-m-Y').'.pdf';
+
         return Pdf::view('mileage::declaration-pdf', [
             'declaration' => $declaration,
             'declarationSummary' => $declarationSummary,
         ])
             // ->withBrowsershot(fn(Browsershot $shot) => $shot->setNodeBinary()->setNpmBinary()->setPuppeteerBinary()->setPuppeteerLaunchOptions([]))
-            ->download('action-'.$declaration->id.'.pdf');
+            ->download($name);
         // ->save('action-'.$action->id.'.pdf');
     }
 }
