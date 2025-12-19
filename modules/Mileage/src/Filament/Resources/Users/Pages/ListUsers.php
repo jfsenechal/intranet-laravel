@@ -16,6 +16,11 @@ final class ListUsers extends ListRecords
         return 'Liste des agents';
     }
 
+    public function getSubheading(): string|Htmlable|null
+    {
+        return 'Liste des agents ayant accès au module "Frais de déplacement"';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

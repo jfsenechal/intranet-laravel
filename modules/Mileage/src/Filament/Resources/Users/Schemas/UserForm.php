@@ -2,13 +2,14 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Users\Schemas;
 
-use AcMarche\Security\Filament\Resources\ModuleResource\Schema\ModuleForm;
+use AcMarche\Security\Filament\Resources\Modules\Schemas\ModuleForm;
 use AcMarche\Security\Repository\ModuleRepository;
 use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 
 final class UserForm
 {
@@ -23,7 +24,8 @@ final class UserForm
                     ->options(fn (UserRepository $repository): array => $repository->getUsersForSelect())
                     ->searchable()
                     ->required()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->hiddenOn(Operation::Edit),
                 DatePicker::make('college_trip_date')
                     ->label('Date de la décision du Collège')
                     ->required(false),

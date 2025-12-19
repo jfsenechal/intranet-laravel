@@ -12,7 +12,7 @@ final class EditUser extends EditRecord
 
     public function getTitle(): string|Htmlable
     {
-        return "Modification d'un utilisateur";
+        return 'Modification de '.$this->record->fullName();
     }
 
     protected function getHeaderActions(): array
