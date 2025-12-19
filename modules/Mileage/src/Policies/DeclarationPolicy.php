@@ -60,7 +60,13 @@ final class DeclarationPolicy
      */
     public function delete(User $user, Declaration $declaration): bool
     {
-        return $this->canWrite($user, $declaration);
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+        return false;
     }
 
     /**
