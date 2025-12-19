@@ -6,14 +6,13 @@ use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\ViewAction;
-use Filament\Pages\Page;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Forms\Components\DatePicker;
+use Filament\Resources\Concerns\HasTabs;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Resources\Pages\Page;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -23,26 +22,32 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
-final class AllDeclarations extends Page implements HasActions, HasSchemas, HasTable
+final class AllDeclarations extends ListRecords
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
-    //protected static string $view = 'mileage::filament.pages.all-declarations';
+    protected static string $resource = DeclarationResource::class;
 
     protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationLabel = 'Toutes les déclarations';
 
+    public static function isDiscovered(): bool
+    {
+        return true;
+    }
+
     protected static string|null|UnitEnum $navigationGroup = 'Administration';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Toutes les déclarations';
+    }
 
     public static function getNavigationIcon(): ?string
     {
         return 'tabler-list-check';
     }
 
-    public static function canAccess(): bool
+    public static function canAccess(array $parameters = []): bool
     {
         $user = Auth::user();
 
@@ -120,10 +125,10 @@ final class AllDeclarations extends Page implements HasActions, HasSchemas, HasT
                         'externe' => 'Externe',
                     ]),
                 Filter::make('created_at')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('created_from')
+                    ->schema([
+                        DatePicker::make('created_from')
                             ->label('Créé depuis'),
-                        \Filament\Forms\Components\DatePicker::make('created_until')
+                        DatePicker::make('created_until')
                             ->label('Créé jusqu\'à'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {

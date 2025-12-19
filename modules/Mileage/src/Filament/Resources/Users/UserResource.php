@@ -19,7 +19,7 @@ final class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
+    protected static string|null|UnitEnum $navigationGroup = 'Administration';
 
     protected static ?int $navigationSort = 7;
 

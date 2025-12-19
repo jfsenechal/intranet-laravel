@@ -5,7 +5,7 @@ namespace AcMarche\Mileage\Filament\Pages;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 
-class MileageProcedure extends Page
+class Procedure extends Page
 {
     protected string $view = 'mileage::filament.pages.mileage-procedure';
     protected static ?int $navigationSort = 4;
