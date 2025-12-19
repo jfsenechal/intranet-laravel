@@ -46,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views' => resource_path('views/vendor/app'),
         ], 'app-views');
 
+        // Publish public assets
+        $this->publishes([
+            __DIR__.'/../public' => public_path('vendor/app'),
+        ], 'app-assets');
+
         $this->buttonListModules();
     }
 }
