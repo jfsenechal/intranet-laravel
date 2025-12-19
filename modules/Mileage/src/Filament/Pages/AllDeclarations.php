@@ -8,12 +8,8 @@ use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Resources\Concerns\HasTabs;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\Page;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -30,12 +26,15 @@ final class AllDeclarations extends ListRecords
 
     protected static ?string $navigationLabel = 'Toutes les déclarations';
 
+    protected static string|null|UnitEnum $navigationGroup = 'Administration';
+
+    /**
+     * Force the page to be discovered by the navigation menu.
+     */
     public static function isDiscovered(): bool
     {
         return true;
     }
-
-    protected static string|null|UnitEnum $navigationGroup = 'Administration';
 
     public static function getNavigationLabel(): string
     {
