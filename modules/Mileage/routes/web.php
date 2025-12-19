@@ -1,5 +1,9 @@
 <?php
 
 use App\Http\Controllers\PdfExportController;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/download-declaration/{declaration}', [PdfExportController::class, 'download'])->name('download.declaration');
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/download-declaration/{declaration}', [PdfExportController::class, 'download'])
+        ->name('download.declaration');
+});
