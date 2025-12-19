@@ -43,7 +43,7 @@ return new class extends Migration {
                 $table->string('first_name');
                 $table->string('street');
                 $table->string('postal_code');
-                $table->string('locality');
+                $table->string('city');
                 $table->decimal('rate', 10, 2);
                 $table->decimal('rate_omnium', 10, 2);
                 $table->string('type_movement');
