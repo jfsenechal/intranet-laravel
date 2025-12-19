@@ -42,7 +42,8 @@ final class AppServiceProvider extends ServiceProvider
     private function configureTable(): void
     {
         Table::configureUsing(function (Table $table): void {
-            $table->striped()
+            $table
+                ->striped()
                 ->deferLoading();
         });
     }
