@@ -4,6 +4,7 @@ namespace AcMarche\Mileage\Filament\Resources\Declarations\Schemas;
 
 use AcMarche\Mileage\Models\BudgetArticle;
 use Filament\Forms;
+use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -108,27 +109,28 @@ final class DeclarationForm
     {
         return $schema
             ->schema([
-                Section::make('Informations personnelles')
-                    ->schema([
-                        Forms\Components\Select::make('budget_article')
-                            ->label('Article budgétaire')
-                            ->required()
-                            ->options(BudgetArticle::query()->pluck('name', 'name'))
-                            ->searchable(),
-                        Forms\Components\TextInput::make('iban')
-                            ->label('IBAN')
-                            ->required()
-                            ->rule('iban')
-                            ->placeholder('BE00 0000 0000 0000')
-                            ->helperText('Format: BE00 0000 0000 0000'),
-                        Forms\Components\TextInput::make('car_license_plate1')
-                            ->label('Plaque 1')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('car_license_plate2')
-                            ->label('Plaque 2')
-                            ->maxLength(255),
-                    ]),
+                Flex::make([
+                    Forms\Components\Select::make('budget_article')
+                        ->label('Article budgétaire')
+                        ->required()
+                        ->options(BudgetArticle::query()->pluck('name', 'name'))
+                        ->searchable(),
+                    Forms\Components\TextInput::make('iban')
+                        ->label('IBAN')
+                        ->required()
+                        ->rule('iban')
+                        ->placeholder('BE00 0000 0000 0000')
+                        ->helperText('Format: BE00 0000 0000 0000'),
+                ])->columnSpanFull(),
+                Flex::make([
+                    Forms\Components\TextInput::make('car_license_plate1')
+                        ->label('Plaque 1')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('car_license_plate2')
+                        ->label('Plaque 2')
+                        ->maxLength(255),
+                ])->columnSpanFull(),
             ]);
     }
 }
