@@ -106,6 +106,11 @@ final class ExportHandler
     {
         $data = $this->byUser($username);
         $name = 'declarations-'.$username.'.pdf';
+        $directory = storage_path('app/private/mileage/exports');
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
 
         return Pdf::view('mileage::filament.export.user_declarations', [
             'username' => $username,
@@ -115,7 +120,7 @@ final class ExportHandler
             'deplacements' => $data['deplacements'],
         ])
             ->landscape()
-            ->save($name);
+            ->save($directory.'/'.$name);
     }
 
     /**
