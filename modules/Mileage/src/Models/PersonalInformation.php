@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 final class PersonalInformation extends Model
 {
     use HasFactory;
+
     public $timestamps = false;
 
     protected $connection = 'maria-mileage';
@@ -33,7 +34,7 @@ final class PersonalInformation extends Model
     protected function casts(): array
     {
         return [
-
+            'omnium' => 'boolean',
         ];
     }
     //
