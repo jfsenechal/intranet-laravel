@@ -35,19 +35,20 @@ final class RateForm
                         Forms\Components\DatePicker::make('start_date')
                             ->label('Date début')
                             ->required()
+                            ->before('end_date')
                             ->live(onBlur: true)
                             ->rules([
-                                fn(Get $get, ?Rate $record): Closure => function (
+                                fn (Get $get, ?Rate $record): Closure => function (
                                     string $attribute,
                                     $value,
                                     Closure $fail
                                 ) use ($get, $record): void {
-                                    if (!$value) {
+                                    if (! $value) {
                                         return;
                                     }
 
                                     $endDate = $get('end_date');
-                                    if (!$endDate) {
+                                    if (! $endDate) {
                                         return;
                                     }
 
@@ -63,17 +64,17 @@ final class RateForm
                             ->after('start_date')
                             ->live(onBlur: true)
                             ->rules([
-                                fn(Get $get, ?Rate $record): Closure => function (
+                                fn (Get $get, ?Rate $record): Closure => function (
                                     string $attribute,
                                     $value,
                                     Closure $fail
                                 ) use ($get, $record): void {
-                                    if (!$value) {
+                                    if (! $value) {
                                         return;
                                     }
 
                                     $startDate = $get('start_date');
-                                    if (!$startDate) {
+                                    if (! $startDate) {
                                         return;
                                     }
 
