@@ -19,7 +19,10 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if ($this->app->environment('local') && class_exists(TelescopeServiceProvider::class)) {
+            $this->app->register(TelescopeServiceProvider::class);
+            $this->app->register(TelescopeServiceProvider::class);
+        }
     }
 
     /**
@@ -30,7 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
         Model::automaticallyEagerLoadRelationships();
 
-        if (! app()->environment('production')) {
+        if (!app()->environment('production')) {
             Mail::alwaysTo(config('mail.webmaster_email'));
         }
 
