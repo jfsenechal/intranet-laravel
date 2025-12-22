@@ -66,26 +66,7 @@ describe('setRate', function () {
             ->and($trip->omnium)->toBe('0.04');
     });
 
-    test('handles rate with null end_date', function () {
-        $rate = Rate::factory()->create([
-            'amount' => 0.50,
-            'omnium' => 0.05,
-            'start_date' => '2024-01-01',
-            'end_date' => null,
-        ]);
-
-        $trip = Trip::factory()->create([
-            'user_id' => $this->user->id,
-            'departure_date' => '2025-06-15',
-            'rate' => null,
-            'omnium' => null,
-        ]);
-
-        $this->handler->setRate($trip);
-
-        expect($trip->rate)->toBe('0.50')
-            ->and($trip->omnium)->toBe('0.05');
-    });
+    // Note: end_date is now required in the database schema, so null end_date is not supported
 
     test('does not set rate when no matching rate exists', function () {
         Rate::factory()->create([
