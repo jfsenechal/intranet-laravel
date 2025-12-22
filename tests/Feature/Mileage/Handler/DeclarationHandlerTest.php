@@ -71,7 +71,7 @@ describe('handleTrips', function () {
         $trips = collect([$trip1, $trip2, $trip3]);
 
         // Call the handler
-        $declarations = DeclarationHandler::handleTrips($trips, $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
 
         // Assertions
         expect($declarations)->toHaveCount(2)
@@ -105,7 +105,7 @@ describe('handleTrips', function () {
             'username' => $this->user->username,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([], $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips([], $this->user, $personalInfo, $this->budgetArticle);
 
         expect($declarations)->toBeEmpty();
     });
@@ -116,7 +116,7 @@ describe('handleTrips', function () {
             'departure_date' => '2024-02-15',
         ]);
 
-        DeclarationHandler::handleTrips([$trip], $this->user, $this->budgetArticle);
+        DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
     })->throws(Exception::class, 'Remplissez vos données personnelles');
 
     test('skips trips without matching rate', function () {
@@ -137,7 +137,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips([$trip], $personalInfo, $this->user, $this->budgetArticle);
 
         expect($declarations)->toBeEmpty();
     });
@@ -162,7 +162,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -193,7 +193,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -222,7 +222,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -252,7 +252,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -296,7 +296,7 @@ describe('handleTrips', function () {
 
         $trips = collect([$trip1, $trip2]);
 
-        $declarations = DeclarationHandler::handleTrips($trips, $this->user, $this->budgetArticle);
+        $declarations = DeclarationHandler::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
 
         // Should create 2 declarations (same type but different rate periods)
         expect($declarations)->toHaveCount(2);
