@@ -6,6 +6,7 @@ use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\Mileage\Handler\DeclarationHandler;
 use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Trip;
+use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use AcMarche\Mileage\Repository\TripRepository;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -24,7 +25,7 @@ class TripTables
     {
         return $table
             ->defaultSort('departure_date', 'desc')
-            ->modifyQueryUsing(fn (Builder $query) => TripRepository::getByUser($query))
+            ->modifyQueryUsing(fn(Builder $query) => TripRepository::getByUser($query))
             ->defaultPaginationPageOption(50)
             ->columns([
                 Tables\Columns\TextColumn::make('departure_date')
@@ -92,11 +93,23 @@ class TripTables
                         ->action(function (Collection $records, array $data) {
                             $budgetArticle = BudgetArticle::find($data['budget_article_id']);
 
+                            $personalInformation = PersonalInformationRepository::getByCurrentUser()->first();
+                            if (!$personalInformation) {
+                                throw new \Exception('Remplissez vos données personnelles');
+                            }
                             try {
-                                $declarations = DeclarationHandler::handleTrips($records, auth()->user(), $budgetArticle);
+                                $declarations = DeclarationHandler::handleTrips(
+                                    $records,
+                                    auth()->user(),
+                                    $personalInformation,
+                                    $budgetArticle
+                                );
                                 Notification::make()
                                     ->title('Déclaration(s) crée(s)')
-                                    ->body($declarations->count() . ' déclaration(s) créée(s) avec ' . $records->count() . ' déplacement(s)')
+                                    ->body(
+                                        $declarations->count().' déclaration(s) créée(s) avec '.$records->count(
+                                        ).' déplacement(s)'
+                                    )
                                     ->success()
                                     ->send();
                             } catch (\Exception $e) {

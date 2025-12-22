@@ -5,9 +5,9 @@ namespace AcMarche\Mileage\Handler;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
-use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -17,13 +17,17 @@ class DeclarationHandler
      * Create declarations from trips grouped by type_movement and rate period.
      * Each declaration will contain trips that have the same type_movement and fall within the same rate period.
      *
-     * @param  array<Trip>|Collection<int, Trip>  $trips
+     * @param array<Trip>|Collection<int, Trip> $trips
      * @return Collection<int, Declaration>
      *
      * @throws \Exception
      */
-    public static function handleTrips(array|Collection $trips, User $user, BudgetArticle $budgetArticle): Collection
-    {
+    public static function handleTrips(
+        array|Collection $trips,
+        User $user,
+        PersonalInformation $personalInformation,
+        BudgetArticle $budgetArticle
+    ): Collection {
         $trips = collect($trips);
 
         if ($trips->isEmpty()) {
@@ -34,11 +38,6 @@ class DeclarationHandler
         $rates = Rate::query()
             ->orderBy('start_date')
             ->get();
-
-        $personalInformation = PersonalInformationRepository::getByCurrentUser()->first();
-        if (! $personalInformation) {
-            throw new \Exception('Remplissez vos données personnelles');
-        }
 
         // Group trips by type_movement and rate
         $groupedTrips = $trips->groupBy(function (Trip $trip) use ($rates) {
@@ -64,7 +63,7 @@ class DeclarationHandler
 
             // Extract type_movement and rate_id from the group key
             $parts = explode('_', $groupKey);
-            $rateId = (int) array_pop($parts);
+            $rateId = (int)array_pop($parts);
             $typeMovement = implode('_', $parts);
 
             $rate = $rates->firstWhere('id', $rateId);
