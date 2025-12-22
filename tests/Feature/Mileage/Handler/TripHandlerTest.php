@@ -16,7 +16,7 @@ beforeEach(function () {
 describe('setRate', function () {
     test('sets rate and omnium from matching rate period', function () {
         $rate = Rate::factory()->create([
-            'amount' => 0.42,
+            'amount' => 0.44,
             'omnium' => 0.03,
             'start_date' => '2024-01-01',
             'end_date' => '2024-12-31',
@@ -31,7 +31,7 @@ describe('setRate', function () {
 
         $this->handler->setRate($trip);
 
-        expect($trip->rate)->toBe('0.42')
+        expect($trip->rate)->toBe('0.44')
             ->and($trip->omnium)->toBe('0.03');
     });
 
@@ -41,14 +41,14 @@ describe('setRate', function () {
             'amount' => 0.35,
             'omnium' => 0.02,
             'start_date' => '2024-01-01',
-            'end_date' => '2024-12-31',
+            'end_date' => '2024-06-31',
         ]);
 
         // Create newer rate
         $newerRate = Rate::factory()->create([
             'amount' => 0.45,
             'omnium' => 0.04,
-            'start_date' => '2024-06-01',
+            'start_date' => '2024-07-01',
             'end_date' => '2024-12-31',
         ]);
 
