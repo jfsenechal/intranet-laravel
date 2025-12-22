@@ -9,7 +9,21 @@ return [
     | Configure the storage settings for incoming mail attachments.
     |
     */
-
+    'meilisearch' => [
+        'index_name' => 'indicateur',
+        'filterable_attributes' => [
+            'date_courrier_timestamp',
+            'recommande',
+            'destinataires',
+            'services',
+            'numero',
+            'expediteur',
+        ],
+        'sortable_attributes' => [
+            'date_courrier_timestamp',
+            'expediteur',
+        ],
+    ],
     'storage' => [
         'disk' => env('COURRIER_DISK', 'public'),
         'directory' => env('COURRIER_DIRECTORY', 'courrier'),
@@ -45,19 +59,4 @@ return [
     */
 
     'max_file_size' => env('COURRIER_MAX_FILE_SIZE', 10240), // 10MB
-
-    /*
-    |--------------------------------------------------------------------------
-    | Mail Status Options
-    |--------------------------------------------------------------------------
-    |
-    | Available status options for incoming mail.
-    |
-    */
-
-    'statuses' => [
-        'pending' => 'Pending',
-        'processed' => 'Processed',
-        'archived' => 'Archived',
-    ],
 ];
