@@ -12,7 +12,7 @@ final class ExportHandler
     /**
      * Export declarations by year as PDF.
      *
-     * @param array<string> $departments
+     * @param  array<string>  $departments
      * @return array{declarations: Collection<int, array<string, mixed>>, totalKilometers: int}
      */
     public function byYear(int $year, array $departments = [], ?bool $omnium = null): array
@@ -26,7 +26,7 @@ final class ExportHandler
             $username = $declaration->user_add;
             $tripKilometers = $declaration->trips->sum('kilometers');
 
-            if (!$groupedData->has($username)) {
+            if (! $groupedData->has($username)) {
                 $groupedData[$username] = [
                     'distance' => 0,
                     'last_name' => $declaration->last_name,
@@ -53,7 +53,7 @@ final class ExportHandler
     /**
      * Generate PDF for annual declarations recap.
      *
-     * @param array<string> $departments
+     * @param  array<string>  $departments
      */
     public function exportByYearPdf(int $year, array $departments = [], ?bool $omnium = null): PdfBuilder
     {
@@ -65,40 +65,79 @@ final class ExportHandler
             'declarations' => $data['declarations'],
             'totalKilometers' => $data['totalKilometers'],
         ])
-            //->download($name)
+            // ->download($name)
             ->save($name);
     }
 
-    public function byUser(string $username)
+    /**
+     * Get data for user export.
+     *
+     * @return array{
+     *     declaration: \AcMarche\Mileage\Models\Declaration|null,
+     *     months: array<int, string>,
+     *     years: array<int>,
+     *     deplacements: array{interne: array<int, array<int, int>>, externe: array<int, array<int, int>>}
+     * }
+     */
+    public function byUser(string $username): array
     {
-        $user = $this->userRepository->findByUsername($username);
-        $profile = null;
-        if ($user instanceof User) {
-            $profile = $this->financeFrais->profileIsComplete($user);
-            $username = $user->getUsername();
-        } else {
-            $user = $this->declarationRepository->getOneDeclarationByUsername($username);
-        }
-        $months = $this->intranet->getMonths();
-        $date = new DateTime();
-        $nextYear = $date->add(new DateInterval('P1Y'));
-        $years = range(2016, $nextYear->format('Y'));
-        $deplacements = [];
-        $deplacements['interne'] = $this->getDeplacements($username, 'interne');
-        $deplacements['externe'] = $this->getDeplacements($username, 'externe');
-        $html = $this->renderView(
-            'mileage::filament.export.user_declarations',
-            [
-                'user' => $user,
-                'months' => $months,
-                'years' => $years,
-                'profile' => $profile,
-                'deplacements' => $deplacements,
-            ],
-        );
+        $declaration = DeclarationRepository::getOneDeclarationByUsername($username);
 
-        $name = "annees_".$username.'_'.Uuid::v4().".pdf";
-        $filePath = $this->getTmpDir().'/'.$name;
-        $this->generateAndSavePdf($html, $filePath, options: ['orientation' => 'landscape']);
+        $months = $this->getMonths();
+        $years = range(2016, (int) date('Y') + 1);
+
+        $deplacements = [
+            'interne' => DeclarationRepository::getKilometersByYearMonth($username, 'interne'),
+            'externe' => DeclarationRepository::getKilometersByYearMonth($username, 'externe'),
+        ];
+
+        return [
+            'declaration' => $declaration,
+            'months' => $months,
+            'years' => $years,
+            'deplacements' => $deplacements,
+        ];
+    }
+
+    /**
+     * Generate PDF for user declarations recap.
+     */
+    public function exportByUserPdf(string $username): PdfBuilder
+    {
+        $data = $this->byUser($username);
+        $name = 'declarations-'.$username.'.pdf';
+
+        return Pdf::view('mileage::filament.export.user_declarations', [
+            'username' => $username,
+            'declaration' => $data['declaration'],
+            'months' => $data['months'],
+            'years' => $data['years'],
+            'deplacements' => $data['deplacements'],
+        ])
+            ->landscape()
+            ->save($name);
+    }
+
+    /**
+     * Get months array.
+     *
+     * @return array<int, string>
+     */
+    private function getMonths(): array
+    {
+        return [
+            1 => 'Jan',
+            2 => 'Fév',
+            3 => 'Mar',
+            4 => 'Avr',
+            5 => 'Mai',
+            6 => 'Juin',
+            7 => 'Juil',
+            8 => 'Août',
+            9 => 'Sep',
+            10 => 'Oct',
+            11 => 'Nov',
+            12 => 'Déc',
+        ];
     }
 }
