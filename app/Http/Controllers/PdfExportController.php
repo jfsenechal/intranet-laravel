@@ -8,7 +8,7 @@ use Spatie\LaravelPdf\PdfBuilder;
 
 final class PdfExportController extends Controller
 {
-    public function download(Declaration $declaration): PdfBuilder
+    public function downloadDeclaration(Declaration $declaration): PdfBuilder
     {
         return PdfExport::exportDeclaration($declaration); // returns BinaryFileResponse
     }
