@@ -104,7 +104,7 @@ final class DeclarationForm
             ]);
     }
 
-    public static function editForAdmin(Schema $schema): Schema
+    public static function editFormForAdmin(Schema $schema): Schema
     {
         return $schema
             ->schema([
