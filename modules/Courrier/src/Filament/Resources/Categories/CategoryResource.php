@@ -22,6 +22,8 @@ final class CategoryResource extends Resource
 
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+
     public static function form(Schema $schema): Schema
     {
         return CategoryForm::configure($schema);

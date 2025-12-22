@@ -18,6 +18,8 @@ final class ServiceResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-building-office';

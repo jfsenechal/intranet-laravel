@@ -8,12 +8,13 @@ use AcMarche\Mileage\Models\BudgetArticle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
-class BudgetArticleResource extends Resource
+final class BudgetArticleResource extends Resource
 {
     protected static ?string $model = BudgetArticle::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
 
     protected static ?int $navigationSort = 6;
 

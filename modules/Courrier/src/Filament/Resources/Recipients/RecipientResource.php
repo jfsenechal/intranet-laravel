@@ -14,6 +14,7 @@ final class RecipientResource extends Resource
     protected static ?string $model = Recipient::class;
 
     protected static ?int $navigationSort = 3;
+    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
 
     public static function getNavigationIcon(): ?string
     {
