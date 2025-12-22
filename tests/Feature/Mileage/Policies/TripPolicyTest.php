@@ -150,7 +150,7 @@ describe('create', function () {
 });
 
 describe('update', function () {
-    test('admin can update any trip', function () {
+    test('admin cannot update any trip', function () {
         $user = User::factory()->create(['username' => 'admin']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
         $user->roles()->attach($role);
@@ -163,10 +163,10 @@ describe('update', function () {
             'user_add' => 'other_user',
         ]);
 
-        expect($this->policy->update($user, $trip))->toBeTrue();
+        expect($this->policy->update($user, $trip))->toBeFalse();
     });
 
-    test('owner can update their own trip', function () {
+    test('owner cannot update their own trip', function () {
         $user = User::factory()->create(['username' => 'owner']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
         $user->roles()->attach($role);
@@ -181,7 +181,7 @@ describe('update', function () {
         // Add username accessor to trip for testing
         $trip->username = $user->username;
 
-        expect($this->policy->update($user, $trip))->toBeTrue();
+        expect($this->policy->update($user, $trip))->toBeFalse();
     });
 
     test('non-owner cannot update others trip', function () {
@@ -221,7 +221,7 @@ describe('delete', function () {
         expect($this->policy->delete($user, $trip))->toBeTrue();
     });
 
-    test('owner can delete their own trip', function () {
+    test('owner cannot delete their own trip declared', function () {
         $user = User::factory()->create(['username' => 'owner']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
         $user->roles()->attach($role);
@@ -229,6 +229,22 @@ describe('delete', function () {
         $declaration = Declaration::factory()->create(['user_add' => 'owner']);
         $trip = Trip::factory()->create([
             'declaration_id' => $declaration->id,
+            'user_id' => $user->id,
+            'user_add' => 'owner',
+        ]);
+
+        // Add username accessor to trip for testing
+        $trip->username = $user->username;
+
+        expect($this->policy->delete($user, $trip))->toBeFalse();
+    });
+
+    test('owner can delete their own trip not declared', function () {
+        $user = User::factory()->create(['username' => 'owner']);
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
+        $user->roles()->attach($role);
+
+        $trip = Trip::factory()->create([
             'user_id' => $user->id,
             'user_add' => 'owner',
         ]);

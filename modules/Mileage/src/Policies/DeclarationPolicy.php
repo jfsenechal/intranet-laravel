@@ -29,7 +29,14 @@ final class DeclarationPolicy
      */
     public function view(User $user, Declaration $declaration): bool
     {
-        return $this->canWrite($user, $declaration);
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
+        return $declaration->username === $user->username;
     }
 
     /**
@@ -52,7 +59,14 @@ final class DeclarationPolicy
      */
     public function update(User $user, Declaration $declaration): bool
     {
-        return $this->canWrite($user, $declaration);
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
+        return $declaration->username === $user->username;
     }
 
     /**
@@ -66,6 +80,7 @@ final class DeclarationPolicy
         if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
             return true;
         }
+
         return false;
     }
 
@@ -83,20 +98,5 @@ final class DeclarationPolicy
     public function forceDelete(User $user, Declaration $declaration): bool
     {
         return false;
-    }
-
-    /**
-     * Check if user is linked to the action either directly or through services
-     */
-    private function canWrite(User $user, Declaration $declaration): bool
-    {
-        if ($user->isAdministrator()) {
-            return true;
-        }
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
-            return true;
-        }
-
-        return $declaration->username === $user->username;
     }
 }

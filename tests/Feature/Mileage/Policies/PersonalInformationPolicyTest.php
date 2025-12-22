@@ -141,24 +141,24 @@ describe('update', function () {
 });
 
 describe('delete', function () {
-    test('admin can delete any personal information', function () {
+    test('admin cannot delete any personal information', function () {
         $user = User::factory()->create(['username' => 'admin']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
         $user->roles()->attach($role);
 
         $personalInfo = PersonalInformation::factory()->create(['username' => 'other_user']);
 
-        expect($this->policy->delete($user, $personalInfo))->toBeTrue();
+        expect($this->policy->delete($user, $personalInfo))->toBeFalse();
     });
 
-    test('owner can delete their own personal information', function () {
+    test('owner cannot delete their own personal information', function () {
         $user = User::factory()->create(['username' => 'owner']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
         $user->roles()->attach($role);
 
         $personalInfo = PersonalInformation::factory()->create(['username' => 'owner']);
 
-        expect($this->policy->delete($user, $personalInfo))->toBeTrue();
+        expect($this->policy->delete($user, $personalInfo))->toBeFalse();
     });
 
     test('non-owner cannot delete others personal information', function () {

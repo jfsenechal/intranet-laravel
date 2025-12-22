@@ -28,7 +28,14 @@ final class TripPolicy
      */
     public function view(User $user, Trip $trip): bool
     {
-        return $this->canWrite($user, $trip);
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
+        return $trip->username === $user->username;
     }
 
     /**
@@ -52,7 +59,7 @@ final class TripPolicy
      */
     public function update(User $user, Trip $trip): bool
     {
-        return $this->canWrite($user, $trip);
+        return false;
     }
 
     /**
@@ -60,7 +67,18 @@ final class TripPolicy
      */
     public function delete(User $user, Trip $trip): bool
     {
-        return $this->canWrite($user, $trip);
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
+        if ($trip->isDeclared()) {
+            return false;
+        }
+
+        return $trip->username === $user->username;
     }
 
     /**
@@ -77,24 +95,5 @@ final class TripPolicy
     public function forceDelete(User $user, Trip $trip): bool
     {
         return false;
-    }
-
-    /**
-     *
-     */
-    private function canWrite(User $user, Trip $trip): bool
-    {
-        if ($user->isAdministrator()) {
-            return true;
-        }
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
-            return true;
-        }
-
-        if ($trip->isDeclared()) {
-            return false;
-        }
-
-        return $trip->username === $user->username;
     }
 }

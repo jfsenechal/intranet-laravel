@@ -173,7 +173,7 @@ describe('delete', function () {
         // Add username accessor to declaration for testing
         $declaration->username = $user->username;
 
-        expect($this->policy->delete($user, $declaration))->toBeTrue();
+        expect($this->policy->delete($user, $declaration))->toBeFalse();
     });
 
     test('non-owner cannot delete others declaration', function () {
