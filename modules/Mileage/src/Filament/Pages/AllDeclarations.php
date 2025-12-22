@@ -6,6 +6,7 @@ use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\ListRecords;
@@ -49,6 +50,9 @@ final class AllDeclarations extends ListRecords
     public static function canAccess(array $parameters = []): bool
     {
         $user = Auth::user();
+        if ($user?->isAdministrator()) {
+            return true;
+        }
 
         return $user?->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value) ?? false;
     }
@@ -61,7 +65,7 @@ final class AllDeclarations extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->query(Declaration::query()->with('trips'))
+            ->query(DeclarationRepository::findAll())
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
