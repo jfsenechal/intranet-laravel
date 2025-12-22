@@ -54,10 +54,12 @@
     <p class="mb-4">
         Le soussigné certifie que les déplacements "domicile-lieu de travail", effectués
         exceptionnellement et pour des raisons de service en dehors de son horaire normal,
-        n'ont pas été compensés par une absence de déplacements lors de la récupération des heures supplémentaires prestées.
+        n'ont pas été compensés par une absence de déplacements lors de la récupération des heures supplémentaires
+        prestées.
     </p>
     <p class="mb-6">
-        Certifié sincère et véritable à la somme de <strong>{{ number_format($declarationSummary->totalRefund, 2, ',', '.') }} €</strong>
+        Certifié sincère et véritable à la somme de
+        <strong>{{ number_format($declarationSummary->totalRefund, 2, ',', '.') }} €</strong>
     </p>
 
     <table class="w-full border border-gray-300 border-collapse mb-6">
@@ -78,9 +80,9 @@
     <div class="page-breaker"></div>
 
     @if($declaration->type_movement === 'interne')
-        @include('mileage::_internal_trips', ['rate' => $declaration->rate])
+        @include('mileage::filament.export._internal_trips', ['rate' => $declaration->rate])
     @elseif($declaration->type_movement === 'externe')
-        @include('mileage::_external_trips', ['rate' => $declaration->rate])
+        @include('mileage::filament.export._external_trips', ['rate' => $declaration->rate])
     @endif
 
     <div class="page-breaker"></div>

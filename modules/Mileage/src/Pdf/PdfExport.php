@@ -21,7 +21,7 @@ final class PdfExport
             'declarationSummary' => $declarationSummary,
         ])
             // ->withBrowsershot(fn(Browsershot $shot) => $shot->setNodeBinary()->setNpmBinary()->setPuppeteerBinary()->setPuppeteerLaunchOptions([]))
-            ->download($name);
-        // ->save('action-'.$action->id.'.pdf');
+            //   ->download($name);
+            ->save('action-'.$declaration->id.'.pdf');
     }
 }
