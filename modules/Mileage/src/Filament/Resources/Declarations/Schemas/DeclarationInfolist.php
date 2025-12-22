@@ -3,15 +3,20 @@
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Schemas;
 
 use AcMarche\Mileage\Dto\DeclarationSummary;
+use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Models\Trip;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Illuminate\Support\Facades\Auth;
 
 final class DeclarationInfolist
 {
@@ -126,32 +131,8 @@ final class DeclarationInfolist
                     ->schema([
                         RepeatableEntry::make('trips')
                             ->hiddenLabel()
-                            ->table([
-                                TableColumn::make('Date'),
-                                TableColumn::make('Trajet'),
-                                TableColumn::make('Motif'),
-                                TableColumn::make('Distance'),
-                                TableColumn::make('Repas'),
-                                TableColumn::make('Train'),
-                            ])
-                            ->schema([
-                                TextEntry::make('departure_date')
-                                    ->date('d/m/Y'),
-                                TextEntry::make('trajet')
-                                    ->state(fn ($record): string => $record->departure_location && $record->arrival_location
-                                        ? $record->departure_location.' → '.$record->arrival_location
-                                        : '-'),
-                                TextEntry::make('content')
-                                    ->limit(40),
-                                TextEntry::make('distance')
-                                    ->suffix(' km'),
-                                TextEntry::make('meal_expense')
-                                    ->money('EUR')
-                                    ->placeholder('-'),
-                                TextEntry::make('train_expense')
-                                    ->money('EUR')
-                                    ->placeholder('-'),
-                            ]),
+                            ->table(self::getTripTableColumns())
+                            ->schema(self::getTripSchema()),
                     ])
                     ->columnSpanFull()
                     ->collapsible(),
@@ -169,5 +150,88 @@ final class DeclarationInfolist
         }
 
         return $cache[$record->id];
+    }
+
+    /**
+     * @return array<TableColumn>
+     */
+    private static function getTripTableColumns(): array
+    {
+        $columns = [
+            TableColumn::make('Date'),
+            TableColumn::make('Trajet'),
+            TableColumn::make('Motif'),
+            TableColumn::make('Distance'),
+            TableColumn::make('Repas'),
+            TableColumn::make('Train'),
+        ];
+
+        if (self::canDetachTrip()) {
+            $columns[] = TableColumn::make('Actions');
+        }
+
+        return $columns;
+    }
+
+    /**
+     * @return array<TextEntry|Action>
+     */
+    private static function getTripSchema(): array
+    {
+        $schema = [
+            TextEntry::make('departure_date')
+                ->date('d/m/Y'),
+            TextEntry::make('trajet')
+                ->state(fn ($record): string => $record->departure_location && $record->arrival_location
+                    ? $record->departure_location.' → '.$record->arrival_location
+                    : '-'),
+            TextEntry::make('content')
+                ->limit(40),
+            TextEntry::make('distance')
+                ->suffix(' km'),
+            TextEntry::make('meal_expense')
+                ->money('EUR')
+                ->placeholder('-'),
+            TextEntry::make('train_expense')
+                ->money('EUR')
+                ->placeholder('-'),
+        ];
+
+        if (self::canDetachTrip()) {
+            $schema[] = TextEntry::make('id')
+                ->hiddenLabel()
+                ->formatStateUsing(fn () => '')
+                ->afterContent(
+                    Action::make('detach')
+                        ->label('Détacher')
+                        ->icon('tabler-unlink')
+                        ->color('danger')
+                        ->size('sm')
+                        ->requiresConfirmation()
+                        ->modalHeading('Détacher le déplacement')
+                        ->modalDescription('Êtes-vous sûr de vouloir détacher ce déplacement de la déclaration ? Le déplacement ne sera pas supprimé.')
+                        ->action(function (Trip $record): void {
+                            $record->update(['declaration_id' => null]);
+
+                            Notification::make()
+                                ->title('Déplacement détaché')
+                                ->success()
+                                ->send();
+                        })
+                );
+        }
+
+        return $schema;
+    }
+
+    private static function canDetachTrip(): bool
+    {
+        $user = Auth::user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        return $user->isAdministrator() || $user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value);
     }
 }
