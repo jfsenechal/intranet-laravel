@@ -3,23 +3,28 @@
 namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 
 use AcMarche\Courrier\Repository\ImapRepository;
+use Exception;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 final class InboxTables
 {
     public static function configure(Table $table): Table
     {
+        $imapRepository = new ImapRepository();
         return $table
-            ->records(fn (): array => ImapRepository::getMessages())
+            ->records(fn (): array => $imapRepository->getMessages())
             ->columns([
                 IconColumn::make('has_attachments')
                     ->label('')
@@ -50,6 +55,27 @@ final class InboxTables
                     ->schema(fn (array $record): array => self::getEmailViewSchema($record))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
+            ])
+            ->recordActions([
+                BulkAction::make('feature')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) use($imapRepository): void {
+                        try {
+                            $imapRepository->deleteMessages($records->pluck('id')->toArray());
+
+                            Notification::make()
+                                ->title('Message supprimé')
+                                ->success()
+                                ->send();
+                        } catch (Exception $exception) {
+                            Notification::make()
+                                ->title('Message failed to delete')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+                    }),
             ])
             ->paginated([10, 25, 50]);
     }
