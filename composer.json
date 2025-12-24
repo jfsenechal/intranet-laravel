@@ -20,7 +20,7 @@
         "acmarche/security": "*@dev",
         "barryvdh/laravel-dompdf": "^v3.1.1",
         "directorytree/ldaprecord-laravel": "^3.4",
-        "directorytree/imapengine-laravel": "^v1.1.1",
+        "directorytree/imapengine-laravel": "^v1.1",
         "filament/filament": "^4.0",
         "intervention/validation": "^4.6",
         "laravel/framework": "^12.0",
