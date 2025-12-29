@@ -2,7 +2,7 @@
 
 namespace AcMarche\Mileage\Filament\Pages;
 
-use AcMarche\Mileage\Enums\DepartmentEnum;
+use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Handler\ExportHandler;
 use Filament\Forms\Components\Radio;
@@ -97,7 +97,7 @@ final class AnnualExport extends Page implements HasForms
         $data = $this->form->getState();
 
         $department = $data['department'];
-        $year = (int)$data['year'];
+        $year = (int) $data['year'];
         $omnium = $data['omnium'] === '1';
 
         $exportHandler = new ExportHandler();
@@ -113,7 +113,7 @@ final class AnnualExport extends Page implements HasForms
         $data = $this->form->getState();
 
         $department = $data['department'];
-        $year = (int)$data['year'];
+        $year = (int) $data['year'];
         $omnium = $data['omnium'] === '1';
 
         $exportHandler = new ExportHandler();
