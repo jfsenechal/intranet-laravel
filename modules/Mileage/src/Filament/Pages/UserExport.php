@@ -3,8 +3,8 @@
 namespace AcMarche\Mileage\Filament\Pages;
 
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Factory\PdfFactory;
 use AcMarche\Mileage\Models\Declaration;
-use AcMarche\Mileage\Pdf\PdfFactory;
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use AcMarche\Mileage\Service\ExportDataAggregator;
 use Filament\Actions\Action;
