@@ -2,12 +2,12 @@
 
 namespace AcMarche\Mileage\Filament\Resources\BudgetArticles\Schemas;
 
-use AcMarche\Mileage\Enums\DepartmentEnum;
+use AcMarche\App\Enums\DepartmentEnum;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class BudgetArticleForm
+final class BudgetArticleForm
 {
     public static function configure(Schema $schema): Schema
     {
