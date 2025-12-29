@@ -3,6 +3,7 @@
 namespace AcMarche\Security\Handler;
 
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
+use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
@@ -24,7 +25,7 @@ final class MigrationHandler
     public static function findTheResource(Module $module): ?string
     {
         return match ($module->id) {
-            6 => PublicationResource::getUrl('index', panel: 'hrm-panel'),
+            6 => EmployeeResource::getUrl('index', panel: 'hrm-panel'),
             9 => DocumentResource::getUrl('index', panel: 'document-panel'),
             13 => TripResource::getUrl('index', panel: 'mileage-panel'),
             15 => NewsResource::getUrl('index', panel: 'news'),
