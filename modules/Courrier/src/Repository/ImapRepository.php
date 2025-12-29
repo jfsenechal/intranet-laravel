@@ -2,6 +2,10 @@
 
 namespace AcMarche\Courrier\Repository;
 
+use AcMarche\Courrier\Dto\EmailAttachment;
+use AcMarche\Courrier\Dto\EmailMessage;
+use AcMarche\Courrier\Dto\MailboxQuota;
+use AcMarche\Courrier\Exception\ImapException;
 use DirectoryTree\ImapEngine\Address;
 use DirectoryTree\ImapEngine\Attachment;
 use DirectoryTree\ImapEngine\Collections\FolderCollection;
@@ -16,72 +20,73 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ImapRepository
 {
-    final public const INBOX = 'INBOX';
+    public const string FOLDER_INBOX = 'INBOX';
 
-    final public const TRASH = 'INBOX/Trash';
+    public const string FOLDER_TRASH = 'INBOX/Trash';
+
+    private const int DEFAULT_DAYS_BACK = 10;
 
     private ?MailboxInterface $mailbox = null;
 
-    public function connectImap(): void
+    /**
+     * @throws ImapException
+     */
+    public function connect(): void
     {
+        if ($this->isConnected()) {
+            return;
+        }
+
         try {
             $this->mailbox = Imap::mailbox('imap_ville');
         } catch (Exception $e) {
             report($e);
+            throw ImapException::connectionFailed($e->getMessage());
         }
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    public function getMessages(): array
+    public function disconnect(): void
     {
-        $this->connectImap();
-        $inbox = $this->mailbox->inbox();
-        $messages = $inbox->messages()
-            ->since(now()->subDays(10))
+        if ($this->isConnected()) {
+            $this->mailbox->disconnect();
+            $this->mailbox = null;
+        }
+    }
+
+    public function isConnected(): bool
+    {
+        return $this->mailbox?->connected() ?? false;
+    }
+
+    /**
+     * @return array<int, EmailMessage>
+     *
+     * @throws ImapException
+     */
+    public function getMessages(int $daysBack = self::DEFAULT_DAYS_BACK): array
+    {
+        $this->ensureConnected();
+
+        $messages = $this->mailbox
+            ->inbox()
+            ->messages()
+            ->since(now()->subDays($daysBack))
             ->withHeaders()
             ->withBody()
             ->get();
 
         return collect($messages)
-            ->map(fn (MessageInterface $message): array => [
-                'uid' => $message->uid(),
-                'date' => $message->date()?->format('d/m/Y H:i') ?? '',
-                'from' => self::formatAddress($message->from()),
-                'from_email' => $message->from()?->email() ?? '',
-                'from_name' => $message->from()?->name() ?? '',
-                'subject' => $message->subject() ?? 'Sans objet',
-                'has_attachments' => $message->hasAttachments(),
-                'attachment_count' => $message->attachmentCount(),
-                'html' => $message->html(),
-                'text' => $message->text(),
-                'attachments' => collect($message->attachments())
-                    ->map(fn ($attachment): array => [
-                        'filename' => $attachment->filename() ?? 'Sans nom',
-                        'content_type' => $attachment->contentType(),
-                        'extension' => $attachment->extension(),
-                    ])
-                    ->toArray(),
-            ])
+            ->map(fn (MessageInterface $message): EmailMessage => $this->mapToEmailMessage($message))
             ->toArray();
-
     }
 
-    public function message(
-        string $uid
-    ): ?MessageInterface {
-        $inbox = $this->mailbox->inbox();
+    /**
+     * @throws ImapException
+     */
+    public function findMessageByUid(string $uid): ?MessageInterface
+    {
+        $this->ensureConnected();
 
-        return $inbox->messages()
-            ->withHeaders()
-            ->withBody()
-            ->find($uid);
-    }
-
-    public function getMessageByUid(
-        string $uid
-    ): ?MessageInterface {
         return $this->mailbox
             ->inbox()
             ->messages()
@@ -92,91 +97,102 @@ final class ImapRepository
     }
 
     /**
-     * @throws Exception
+     * @throws ImapException
      */
-    public function deleteMessage(
-        string $uid
-    ): void {
-        $message = $this->getMessageByUid($uid);
+    public function deleteMessage(string $uid): void
+    {
+        $message = $this->findMessageByUid($uid);
+
         if (! $message) {
-            throw new Exception('Message not found');
+            throw ImapException::messageNotFound($uid);
         }
-        $message?->markDeleted(true);
+
+        $message->markDeleted(true);
     }
 
-    public function getFolder(
-        string $folderName
-    ): ?FolderInterface {
-        $this->connectImap();
+    /**
+     * @param  array<int, string>  $uids
+     *
+     * @throws ImapException
+     */
+    public function deleteMessages(array $uids): void
+    {
+        foreach ($uids as $uid) {
+            $this->deleteMessage($uid);
+        }
+    }
+
+    /**
+     * @throws ImapException
+     */
+    public function getFolder(string $folderName): FolderInterface
+    {
+        $this->ensureConnected();
 
         return $this->mailbox->folders()->findOrFail($folderName);
     }
 
+    /**
+     * @throws ImapException
+     */
     public function listFolders(): FolderCollection
     {
-        $this->connectImap();
+        $this->ensureConnected();
 
         return $this->mailbox->folders()->get();
     }
 
     /**
-     * @throws Exception
+     * @throws ImapException
      */
-    public function getAttachment(
-        string $uid,
-        int $attachmentIndex
-    ): ?Attachment {
-        $this->connectImap();
-        $message = $this->getMessageByUid($uid);
+    public function getAttachment(string $uid, int $attachmentIndex): Attachment
+    {
+        $this->ensureConnected();
+
+        $message = $this->findMessageByUid($uid);
+
         if (! $message) {
-            throw new Exception('Message not found');
+            throw ImapException::messageNotFound($uid);
         }
 
-        $attachment = $message->attachments()[$attachmentIndex];
+        $attachments = $message->attachments();
 
-        if (! $attachment) {
-            throw new Exception('Attachment not found');
+        if (! isset($attachments[$attachmentIndex])) {
+            throw ImapException::attachmentNotFound($uid, $attachmentIndex);
         }
 
-        return $attachment;
+        return $attachments[$attachmentIndex];
     }
 
     /**
-     * @return array{usage: int, limit: int, pourcentage: float}
+     * @throws ImapException
      */
-    public function getQuota(): array
+    public function getQuota(): MailboxQuota
     {
-        $this->connectImap();
+        $this->ensureConnected();
 
         $data = $this->mailbox->inbox()->quota();
+        $usage = $data['INBOX']['STORAGE']['usage'];
+        $limit = $data['INBOX']['STORAGE']['limit'];
 
-        return [
-            'usage' => $data['INBOX']['STORAGE']['usage'],
-            'limit' => $data['INBOX']['STORAGE']['limit'],
-            'pourcentage' => ($data['INBOX']['STORAGE']['usage'] * 100) / $data['INBOX']['STORAGE']['limit'],
-        ];
+        return new MailboxQuota(
+            usage: $usage,
+            limit: $limit,
+            percentage: $limit > 0 ? ($usage * 100) / $limit : 0,
+        );
     }
 
-    public function close(): void
+    public function createAttachmentDownloadResponse(Attachment $attachment): StreamedResponse
     {
-        if ($this->mailbox?->connected()) {
-            $this->mailbox->disconnect();
-        }
-    }
-
-    public function downloadStreamAttachment(
-        Attachment $attachment
-    ): StreamedResponse {
         $stream = $attachment->contentStream();
-        $filename = $attachment->filename();
-        $mimeType = $attachment->contentType();
+        $filename = $attachment->filename() ?? 'attachment';
+        $mimeType = $attachment->contentType() ?? 'application/octet-stream';
         $size = $stream->getSize();
 
-        $response = new StreamedResponse(function () use ($stream) {
+        $response = new StreamedResponse(function () use ($stream): void {
             $outputStream = fopen('php://output', 'wb');
-            if ($outputStream === false) {
-                error_log('Failed to open php://output');
 
+            if ($outputStream === false) {
                 return;
             }
 
@@ -185,37 +201,78 @@ final class ImapRepository
                 flush();
             }
 
+            fclose($outputStream);
+
             if (method_exists($stream, 'close')) {
                 $stream->close();
             }
         });
 
         $response->headers->set('Content-Type', $mimeType);
-
-        $disposition = HeaderUtils::makeDisposition(
-            HeaderUtils::DISPOSITION_ATTACHMENT,
-            $filename,
-            preg_replace('/[^\x20-\x7E]/', '', $filename) ?: 'downloaded_file'
+        $response->headers->set(
+            'Content-Disposition',
+            HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $filename,
+                $this->sanitizeFilename($filename)
+            )
         );
-        $response->headers->set('Content-Disposition', $disposition);
 
         if ($size !== null) {
-            $response->headers->set('Content-Length', $size);
+            $response->headers->set('Content-Length', (string) $size);
         }
 
         return $response;
     }
 
-    public function deleteMessages(array $messages): void
+    /**
+     * @throws ImapException
+     */
+    private function ensureConnected(): void
     {
-        foreach ($messages as $message) {
-            $this->deleteMessage($message);
+        if (! $this->isConnected()) {
+            $this->connect();
+        }
+
+        if (! $this->mailbox) {
+            throw ImapException::notConnected();
         }
     }
 
-    private static function formatAddress(
-        ?Address $address
-    ): string {
+    private function mapToEmailMessage(MessageInterface $message): EmailMessage
+    {
+        return new EmailMessage(
+            uid: $message->uid(),
+            date: $message->date()?->format('d/m/Y H:i') ?? '',
+            from: $this->formatAddress($message->from()),
+            fromEmail: $message->from()?->email() ?? '',
+            fromName: $message->from()?->name() ?? '',
+            subject: $message->subject() ?? 'Sans objet',
+            hasAttachments: $message->hasAttachments(),
+            attachmentCount: $message->attachmentCount(),
+            html: $message->html(),
+            text: $message->text(),
+            attachments: $this->mapAttachments($message->attachments()),
+        );
+    }
+
+    /**
+     * @param  array<int, Attachment>  $attachments
+     * @return array<int, EmailAttachment>
+     */
+    private function mapAttachments(array $attachments): array
+    {
+        return collect($attachments)
+            ->map(fn (Attachment $attachment): EmailAttachment => new EmailAttachment(
+                filename: $attachment->filename() ?? 'Sans nom',
+                contentType: $attachment->contentType(),
+                extension: $attachment->extension(),
+            ))
+            ->toArray();
+    }
+
+    private function formatAddress(?Address $address): string
+    {
         if (! $address) {
             return '';
         }
@@ -224,9 +281,16 @@ final class ImapRepository
         $email = $address->email();
 
         if ($name && $name !== $email) {
-            return "{$name} <{$email}>";
+            return sprintf('%s <%s>', $name, $email);
         }
 
         return $email;
+    }
+
+    private function sanitizeFilename(string $filename): string
+    {
+        $sanitized = preg_replace('/[^\x20-\x7E]/', '', $filename);
+
+        return $sanitized ?: 'downloaded_file';
     }
 }
