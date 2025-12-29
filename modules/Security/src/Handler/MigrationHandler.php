@@ -24,6 +24,7 @@ final class MigrationHandler
     public static function findTheResource(Module $module): ?string
     {
         return match ($module->id) {
+            6 => PublicationResource::getUrl('index', panel: 'hrm-panel'),
             9 => DocumentResource::getUrl('index', panel: 'document-panel'),
             13 => TripResource::getUrl('index', panel: 'mileage-panel'),
             15 => NewsResource::getUrl('index', panel: 'news'),
