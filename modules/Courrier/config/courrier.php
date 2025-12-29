@@ -29,6 +29,7 @@ return [
             'host' => env('IMAP_INDICATEUR_VILLE_HOST'),
             'port' => 993,
             'encryption' => 'ssl',
+            'email' => env('IMAP_INDICATEUR_VILLE_EMAIL'),
             'username' => env('IMAP_INDICATEUR_VILLE_USER'),
             'password' => env('IMAP_INDICATEUR_VILLE_PWD'),
         ],
