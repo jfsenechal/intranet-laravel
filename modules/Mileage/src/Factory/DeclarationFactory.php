@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Mileage\Handler;
+namespace AcMarche\Mileage\Factory;
 
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Models\BudgetArticle;
@@ -11,7 +11,7 @@ use AcMarche\Mileage\Models\Trip;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
-class DeclarationHandler
+class DeclarationFactory
 {
     /**
      * Create declarations from trips grouped by type_movement and rate period.

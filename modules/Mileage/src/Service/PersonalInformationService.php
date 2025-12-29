@@ -1,12 +1,12 @@
 <?php
 
-namespace AcMarche\Mileage\Handler;
+namespace AcMarche\Mileage\Service;
 
 use AcMarche\Mileage\Models\PersonalInformation;
 use App\Models\User;
 use Exception;
 
-final class UserHandler
+final class PersonalInformationService
 {
     /**
      * @throws Exception

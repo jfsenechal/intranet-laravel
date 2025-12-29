@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\TypeMovementEnum;
-use AcMarche\Mileage\Handler\TripHandler;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
+use AcMarche\Mileage\Service\TripAttributeResolver;
 use App\Models\User;
 
 beforeEach(function () {
-    $this->handler = new TripHandler();
+    $this->handler = new TripAttributeResolver();
     $this->user = User::factory()->create();
 });
 

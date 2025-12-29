@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use AcMarche\Mileage\Handler\UserHandler;
 use AcMarche\Mileage\Models\PersonalInformation;
+use AcMarche\Mileage\Service\PersonalInformationService;
 use App\Models\User;
 
 beforeEach(function () {
@@ -17,7 +17,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => '2024-06-15',
         ];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         $personalInfo = PersonalInformation::where('username', $this->user->username)->first();
 
@@ -30,7 +30,7 @@ describe('createPersonalInformation', function () {
     test('creates personal information with default values', function () {
         $data = [];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         $personalInfo = PersonalInformation::where('username', $this->user->username)->first();
 
@@ -46,7 +46,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => '2024-01-10',
         ];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         $personalInfo = PersonalInformation::where('username', $this->user->username)->first();
 
@@ -68,7 +68,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => '2024-12-31',
         ];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         // Should still have only one record
         $count = PersonalInformation::where('username', $this->user->username)->count();
@@ -99,7 +99,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => '2024-06-15',
         ];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         $personalInfo = PersonalInformation::where('username', $this->user->username)->first();
 
@@ -120,7 +120,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => null,
         ];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         $personalInfo = PersonalInformation::where('username', $this->user->username)->first();
 
@@ -141,7 +141,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => null,
         ];
 
-        UserHandler::createPersonalInformation($this->user, $data);
+        PersonalInformationService::createPersonalInformation($this->user, $data);
 
         $personalInfo = PersonalInformation::where('username', $this->user->username)->first();
 
@@ -158,7 +158,7 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => '2024-06-15',
         ];
 
-        UserHandler::createPersonalInformation($invalidUser, $data);
+        PersonalInformationService::createPersonalInformation($invalidUser, $data);
     })->throws(Exception::class);
 
     test('creates personal information for multiple users', function () {
@@ -175,8 +175,8 @@ describe('createPersonalInformation', function () {
             'college_trip_date' => '2024-06-20',
         ];
 
-        UserHandler::createPersonalInformation($user1, $data1);
-        UserHandler::createPersonalInformation($user2, $data2);
+        PersonalInformationService::createPersonalInformation($user1, $data1);
+        PersonalInformationService::createPersonalInformation($user2, $data2);
 
         $personalInfo1 = PersonalInformation::where('username', 'user1')->first();
         $personalInfo2 = PersonalInformation::where('username', 'user2')->first();

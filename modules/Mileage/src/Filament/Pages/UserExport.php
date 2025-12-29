@@ -3,10 +3,10 @@
 namespace AcMarche\Mileage\Filament\Pages;
 
 use AcMarche\Mileage\Enums\RolesEnum;
-use AcMarche\Mileage\Handler\ExportHandler;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Pdf\PdfFactory;
 use AcMarche\Mileage\Repository\DeclarationRepository;
+use AcMarche\Mileage\Service\ExportDataAggregator;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -95,7 +95,7 @@ final class UserExport extends Page implements HasForms
         $username = $data['username'];
         $this->selectedUsername = $username;
 
-        $exportHandler = new ExportHandler();
+        $exportHandler = new ExportDataAggregator();
         $result = $exportHandler->byUser($username);
 
         $this->declaration = $result['declaration'];

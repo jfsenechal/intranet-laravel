@@ -1,25 +1,25 @@
 <?php
 
-namespace AcMarche\Mileage\Pdf;
+namespace AcMarche\Mileage\Factory;
 
-use AcMarche\Mileage\Handler\Calculator;
-use AcMarche\Mileage\Handler\ExportHandler;
+use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Service\ExportDataAggregator;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 final class PdfFactory
 {
-    private ExportHandler $exportHandler;
+    private ExportDataAggregator $exportHandler;
 
     public function __construct()
     {
-        $this->exportHandler = new ExportHandler();
+        $this->exportHandler = new ExportDataAggregator();
     }
 
     public  function createFromDeclaration(Declaration $declaration): array
     {
         $declaration->load('trips');
-        $calculator = new Calculator($declaration);
+        $calculator = new DeclarationCalculator($declaration);
         $declarationSummary = $calculator->calculate();
         $name = 'deplacement-'.$declaration->user_add.'-'.$declaration->created_at->format('d-m-Y').'.pdf';
 

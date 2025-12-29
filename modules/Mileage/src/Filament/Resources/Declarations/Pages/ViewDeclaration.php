@@ -2,10 +2,10 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Pages;
 
+use AcMarche\Mileage\Factory\PdfFactory;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Filament\Resources\Declarations\Schemas\DeclarationInfolist;
 use AcMarche\Mileage\Models\Declaration;
-use AcMarche\Mileage\Pdf\PdfFactory;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;

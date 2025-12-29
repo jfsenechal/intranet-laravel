@@ -1,12 +1,12 @@
 <?php
 
-namespace AcMarche\Mileage\Handler;
+namespace AcMarche\Mileage\Service;
 
 use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
 
-final class TripHandler
+final class TripAttributeResolver
 {
     public function setRate(Trip $trip): void
     {

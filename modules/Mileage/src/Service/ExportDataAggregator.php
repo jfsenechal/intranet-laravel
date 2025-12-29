@@ -1,11 +1,11 @@
 <?php
 
-namespace AcMarche\Mileage\Handler;
+namespace AcMarche\Mileage\Service;
 
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use Illuminate\Support\Collection;
 
-final class ExportHandler
+final class ExportDataAggregator
 {
     /**
      * Get data for declarations by year.

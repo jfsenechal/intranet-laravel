@@ -2,9 +2,9 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Schemas;
 
+use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Dto\DeclarationSummary;
 use AcMarche\Mileage\Enums\RolesEnum;
-use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\Trip;
 use Filament\Actions\Action;
@@ -145,7 +145,7 @@ final class DeclarationInfolist
 
         if (! isset($cache[$record->id])) {
             $record->loadMissing('trips');
-            $calculator = new Calculator($record);
+            $calculator = new DeclarationCalculator($record);
             $cache[$record->id] = $calculator->calculate();
         }
 

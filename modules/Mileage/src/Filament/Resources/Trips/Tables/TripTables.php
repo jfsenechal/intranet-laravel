@@ -2,8 +2,8 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Trips\Tables;
 
+use AcMarche\Mileage\Factory\DeclarationFactory;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
-use AcMarche\Mileage\Handler\DeclarationHandler;
 use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Repository\PersonalInformationRepository;
@@ -98,7 +98,7 @@ class TripTables
                                 throw new \Exception('Remplissez vos données personnelles');
                             }
                             try {
-                                $declarations = DeclarationHandler::handleTrips(
+                                $declarations = DeclarationFactory::handleTrips(
                                     $records,
                                     auth()->user(),
                                     $personalInformation,

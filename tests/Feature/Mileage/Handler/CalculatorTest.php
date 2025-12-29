@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Dto\DeclarationSummary;
-use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\Trip;
 
@@ -33,7 +33,7 @@ describe('calculate', function () {
 
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
         $summary = $calculator->calculate();
 
         expect($summary)->toBeInstanceOf(DeclarationSummary::class)
@@ -66,7 +66,7 @@ describe('calculateTotalKilometers', function () {
 
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalKilometers())->toBe(225);
     });
@@ -74,7 +74,7 @@ describe('calculateTotalKilometers', function () {
     test('returns zero when no trips exist', function () {
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalKilometers())->toBe(0);
     });
@@ -84,7 +84,7 @@ describe('calculateTotalMileageAllowance', function () {
     test('multiplies total kilometers by rate', function () {
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalMileageAllowance(100))->toBe(40.00)
             ->and($calculator->calculateTotalMileageAllowance(250))->toBe(100.00);
@@ -96,7 +96,7 @@ describe('calculateTotalMileageAllowance', function () {
         ]);
         $declaration->load('trips');
 
-        $calculator = new Calculator($declaration);
+        $calculator = new DeclarationCalculator($declaration);
 
         // 100 * 0.42 = 42.00
         expect($calculator->calculateTotalMileageAllowance(100))->toBe(42.00)
@@ -108,7 +108,7 @@ describe('calculateTotalOmnium', function () {
     test('returns zero when omnium is false', function () {
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalOmnium(100))->toBe(0.00);
     });
@@ -120,7 +120,7 @@ describe('calculateTotalOmnium', function () {
         ]);
         $declaration->load('trips');
 
-        $calculator = new Calculator($declaration);
+        $calculator = new DeclarationCalculator($declaration);
 
         expect($calculator->calculateTotalOmnium(100))->toBe(2.00)
             ->and($calculator->calculateTotalOmnium(250))->toBe(5.00);
@@ -131,7 +131,7 @@ describe('calculateTotalRefund', function () {
     test('subtracts omnium from mileage allowance', function () {
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalRefund(100.00, 10.00))->toBe(90.00)
             ->and($calculator->calculateTotalRefund(50.00, 5.00))->toBe(45.00);
@@ -140,7 +140,7 @@ describe('calculateTotalRefund', function () {
     test('handles zero omnium', function () {
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalRefund(100.00, 0.00))->toBe(100.00);
     });
@@ -160,7 +160,7 @@ describe('calculateMealExpense', function () {
 
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateMealExpense())->toBe(35.75);
     });
@@ -173,7 +173,7 @@ describe('calculateMealExpense', function () {
 
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateMealExpense())->toBe(0.00);
     });
@@ -193,7 +193,7 @@ describe('calculateTrainExpense', function () {
 
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTrainExpense())->toBe(75.50);
     });
@@ -206,7 +206,7 @@ describe('calculateTrainExpense', function () {
 
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTrainExpense())->toBe(0.00);
     });
@@ -216,7 +216,7 @@ describe('calculateTotalExpense', function () {
     test('sums meal and train expenses', function () {
         $this->declaration->load('trips');
 
-        $calculator = new Calculator($this->declaration);
+        $calculator = new DeclarationCalculator($this->declaration);
 
         expect($calculator->calculateTotalExpense(25.00, 30.00))->toBe(55.00)
             ->and($calculator->calculateTotalExpense(0.00, 50.00))->toBe(50.00)

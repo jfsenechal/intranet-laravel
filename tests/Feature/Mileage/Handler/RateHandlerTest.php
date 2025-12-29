@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use AcMarche\Mileage\Handler\RateHandler;
 use AcMarche\Mileage\Models\Rate;
+use AcMarche\Mileage\Validator\RateOverlapValidator;
 
 describe('hasOverlappingRate', function () {
     test('detects overlap when new range starts before existing range ends', function () {
@@ -14,7 +14,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-03-01 to 2024-09-30 (overlaps with existing)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-03-01', '2024-09-30', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-03-01', '2024-09-30', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -27,7 +27,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-01-01 to 2024-08-31 (overlaps with existing)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-08-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-08-31', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -40,7 +40,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-03-01 to 2024-06-30 (completely inside existing)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-03-01', '2024-06-30', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-03-01', '2024-06-30', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -53,7 +53,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-01-01 to 2024-12-31 (completely contains existing)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-12-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-12-31', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -66,7 +66,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-01-01 to 2024-03-31 (same start date)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-03-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-03-31', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -79,7 +79,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-03-01 to 2024-06-30 (same end date)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-03-01', '2024-06-30', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-03-01', '2024-06-30', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -92,7 +92,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-06-30 to 2024-12-31 (starts on existing end date - overlap)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-06-30', '2024-12-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-06-30', '2024-12-31', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -105,7 +105,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-01-01 to 2024-06-02 (ends after existing start date - overlap)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-06-02', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-06-02', null);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -118,7 +118,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-01-01 to 2024-05-31 (completely before existing)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-05-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-05-31', null);
 
         expect($hasOverlap)->toBeFalse();
     });
@@ -131,13 +131,13 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-07-01 to 2024-12-31 (completely after existing)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-07-01', '2024-12-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-07-01', '2024-12-31', null);
 
         expect($hasOverlap)->toBeFalse();
     });
 
     test('no overlap when no rates exist', function () {
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-12-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-12-31', null);
 
         expect($hasOverlap)->toBeFalse();
     });
@@ -150,7 +150,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // When editing the same rate, should not detect overlap with itself
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-01-01', '2024-06-30', $existingRate);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-01-01', '2024-06-30', $existingRate);
 
         expect($hasOverlap)->toBeFalse();
     });
@@ -168,7 +168,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // When editing second rate to overlap with first, should detect overlap
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-03-01', '2024-09-30', $rateBeingEdited);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-03-01', '2024-09-30', $rateBeingEdited);
 
         expect($hasOverlap)->toBeTrue();
     });
@@ -181,7 +181,7 @@ describe('hasOverlappingRate', function () {
         ]);
 
         // New rate: 2024-07-01 to 2024-12-31 (adjacent, no gap, no overlap)
-        $hasOverlap = RateHandler::hasOverlappingRate('2024-07-01', '2024-12-31', null);
+        $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-07-01', '2024-12-31', null);
 
         expect($hasOverlap)->toBeFalse();
     });

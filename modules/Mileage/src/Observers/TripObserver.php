@@ -2,12 +2,12 @@
 
 namespace AcMarche\Mileage\Observers;
 
-use AcMarche\Mileage\Handler\TripHandler;
 use AcMarche\Mileage\Models\Trip;
+use AcMarche\Mileage\Service\TripAttributeResolver;
 
 class TripObserver
 {
-    public function __construct(private readonly TripHandler $tripHandler)
+    public function __construct(private readonly TripAttributeResolver $tripAttributeResolver)
     {
     }
 
@@ -16,8 +16,8 @@ class TripObserver
      */
     public function creating(Trip $trip): void
     {
-        $this->tripHandler->setRate($trip);
-        $this->tripHandler->setTypeOfMovement($trip);
+        $this->tripAttributeResolver->setRate($trip);
+        $this->tripAttributeResolver->setTypeOfMovement($trip);
     }
 
     /**

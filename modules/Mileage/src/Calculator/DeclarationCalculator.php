@@ -1,11 +1,11 @@
 <?php
 
-namespace AcMarche\Mileage\Handler;
+namespace AcMarche\Mileage\Calculator;
 
 use AcMarche\Mileage\Dto\DeclarationSummary;
 use AcMarche\Mileage\Models\Declaration;
 
-final readonly class Calculator
+final readonly class DeclarationCalculator
 {
     public function __construct(
         private Declaration $declaration,

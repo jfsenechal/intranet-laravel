@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Filament\Resources\Users\Pages;
 
 use AcMarche\Mileage\Filament\Resources\Users\UserResource;
-use AcMarche\Mileage\Handler\UserHandler;
+use AcMarche\Mileage\Service\PersonalInformationService;
 use App\Models\User;
 use Exception;
 use Filament\Notifications\Notification;
@@ -29,7 +29,7 @@ final class CreateUser extends CreateRecord
         $user = $this->record;
 
         try {
-            UserHandler::createPersonalInformation($user, $this->data);
+            PersonalInformationService::createPersonalInformation($user, $this->data);
         } catch (Exception $e) {
             Notification::make()
                 ->warning()

@@ -2,8 +2,8 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Tables;
 
+use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
-use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\BulkActionGroup;
@@ -52,7 +52,7 @@ final class DeclarationTables
                     ->label('Nombre de km')
                     ->state(function (Declaration $record): float {
                         $record->loadMissing('trips');
-                        $calculator = new Calculator($record);
+                        $calculator = new DeclarationCalculator($record);
 
                         return $calculator->calculate()->totalKilometers;
                     })
@@ -61,7 +61,7 @@ final class DeclarationTables
                     ->label('Total à rembourser')
                     ->state(function (Declaration $record): float {
                         $record->loadMissing('trips');
-                        $calculator = new Calculator($record);
+                        $calculator = new DeclarationCalculator($record);
 
                         return $calculator->calculate()->totalRefund;
                     })

@@ -4,8 +4,8 @@ namespace AcMarche\Mileage\Filament\Pages;
 
 use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Mileage\Enums\RolesEnum;
-use AcMarche\Mileage\Handler\ExportHandler;
 use AcMarche\Mileage\Pdf\PdfFactory;
+use AcMarche\Mileage\Service\ExportDataAggregator;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -101,7 +101,7 @@ final class AnnualExport extends Page implements HasForms
         $year = (int)$data['year'];
         $omnium = $data['omnium'] === '1';
 
-        $exportHandler = new ExportHandler();
+        $exportHandler = new ExportDataAggregator();
         $result = $exportHandler->byYear($year, [$department], $omnium);
 
         $this->declarations = $result['declarations'];

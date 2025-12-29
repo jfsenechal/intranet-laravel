@@ -2,8 +2,8 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Rates\Schemas;
 
-use AcMarche\Mileage\Handler\RateHandler;
 use AcMarche\Mileage\Models\Rate;
+use AcMarche\Mileage\Validator\RateOverlapValidator;
 use Closure;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
@@ -52,7 +52,7 @@ final class RateForm
                                         return;
                                     }
 
-                                    if (RateHandler::hasOverlappingRate($value, $endDate, $record)) {
+                                    if (RateOverlapValidator::hasOverlappingRate($value, $endDate, $record)) {
                                         $fail('Cette période chevauche une période de tarif existante.');
                                     }
                                 },
@@ -78,7 +78,7 @@ final class RateForm
                                         return;
                                     }
 
-                                    if (RateHandler::hasOverlappingRate($startDate, $value, $record)) {
+                                    if (RateOverlapValidator::hasOverlappingRate($startDate, $value, $record)) {
                                         $fail('Cette période chevauche une période de tarif existante.');
                                     }
                                 },

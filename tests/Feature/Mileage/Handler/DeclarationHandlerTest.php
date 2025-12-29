@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
-use AcMarche\Mileage\Handler\DeclarationHandler;
+use AcMarche\Mileage\Factory\DeclarationFactory;
 use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\PersonalInformation;
@@ -74,7 +74,7 @@ describe('handleTrips', function () {
         $trips = collect([$trip1, $trip2, $trip3]);
 
         // Call the handler
-        $declarations = DeclarationHandler::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
 
         // Assertions - should create 2 declarations (one per type_movement + rate combination)
         expect($declarations)->toHaveCount(2)
@@ -113,7 +113,7 @@ describe('handleTrips', function () {
             'username' => $this->user->username,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([], $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips([], $this->user, $personalInfo, $this->budgetArticle);
 
         expect($declarations)->toBeEmpty();
     });
@@ -136,7 +136,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         expect($declarations)->toBeEmpty();
     });
@@ -161,7 +161,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -192,7 +192,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -221,7 +221,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -251,7 +251,7 @@ describe('handleTrips', function () {
             'declaration_id' => null,
         ]);
 
-        $declarations = DeclarationHandler::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips([$trip], $this->user, $personalInfo, $this->budgetArticle);
 
         $declaration = $declarations->first();
         $departments = json_decode($declaration->departments, true);
@@ -295,7 +295,7 @@ describe('handleTrips', function () {
 
         $trips = collect([$trip1, $trip2]);
 
-        $declarations = DeclarationHandler::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
+        $declarations = DeclarationFactory::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
 
         // Should create 2 declarations (same type but different rate periods)
         expect($declarations)->toHaveCount(2);

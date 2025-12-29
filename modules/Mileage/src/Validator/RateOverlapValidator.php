@@ -1,10 +1,10 @@
 <?php
 
-namespace AcMarche\Mileage\Handler;
+namespace AcMarche\Mileage\Validator;
 
 use AcMarche\Mileage\Models\Rate;
 
-class RateHandler
+class RateOverlapValidator
 {
     public static function hasOverlappingRate(string $startDate, string $endDate, ?Rate $currentRecord): bool
     {

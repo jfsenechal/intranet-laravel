@@ -2,9 +2,9 @@
 
 namespace AcMarche\Mileage\Filament\Pages;
 
+use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
-use AcMarche\Mileage\Handler\Calculator;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\ViewAction;
@@ -98,7 +98,7 @@ final class AllDeclarations extends ListRecords
                     ->label('Km')
                     ->state(function (Declaration $record): int {
                         $record->loadMissing('trips');
-                        $calculator = new Calculator($record);
+                        $calculator = new DeclarationCalculator($record);
 
                         return $calculator->calculate()->totalKilometers;
                     })
@@ -107,7 +107,7 @@ final class AllDeclarations extends ListRecords
                     ->label('Remboursement')
                     ->state(function (Declaration $record): float {
                         $record->loadMissing('trips');
-                        $calculator = new Calculator($record);
+                        $calculator = new DeclarationCalculator($record);
 
                         return $calculator->calculate()->totalRefund;
                     })
