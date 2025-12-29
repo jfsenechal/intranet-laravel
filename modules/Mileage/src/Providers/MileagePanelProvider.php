@@ -34,6 +34,7 @@ final class MileagePanelProvider extends PanelProvider
                 'primary' => Color::Pink,
             ])
             ->unsavedChangesAlerts()
+            ->databaseNotifications()
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Mileage\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Mileage\\Filament\\Pages')
             ->pages([
