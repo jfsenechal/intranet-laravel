@@ -6,4 +6,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/download-declaration/{declaration}', [PdfExportController::class, 'downloadDeclaration'])
         ->name('download.declaration');
+    Route::get('/download-use/{username}', [PdfExportController::class, 'downloadDeclarationByUser'])
+        ->name('download.user');
 });

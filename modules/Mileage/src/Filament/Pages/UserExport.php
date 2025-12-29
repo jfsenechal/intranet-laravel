@@ -6,9 +6,11 @@ use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Handler\ExportHandler;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
@@ -102,13 +104,36 @@ final class UserExport extends Page implements HasForms
         $this->searched = true;
     }
 
-    public function downloadPdf(): PdfBuilder
+    public function downloadPdf()
     {
         $data = $this->form->getState();
         $username = $data['username'];
 
         $exportHandler = new ExportHandler();
 
-        return $exportHandler->exportByUserPdf($username);
+        $pdf = $exportHandler->exportByUserPdf($username);
+        /*
+ return response()->download(
+            $this->invoice->file_path, 'invoice.pdf'
+        );
+       return $pdf->toResponse(request());
+*/
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->html;
+        }, 'users.pdf');
+    }
+
+    private function addNotification(): void
+    {
+        $recipient = auth()->user();
+
+        Notification::make()
+            ->title('Saved successfully')
+            ->actions([
+                Action::make('markAsUnread')
+                    ->button()
+                    ->markAsUnread(),
+            ])
+            ->sendToDatabase($recipient);
     }
 }
