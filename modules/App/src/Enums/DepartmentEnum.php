@@ -1,6 +1,6 @@
 <?php
 
-namespace AcMarche\Mileage\Enums;
+namespace AcMarche\App\Enums;
 
 enum DepartmentEnum: string
 {
