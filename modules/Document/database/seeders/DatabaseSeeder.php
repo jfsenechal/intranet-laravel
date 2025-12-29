@@ -5,7 +5,7 @@ namespace AcMarche\Document\Database\Seeders;
 use AcMarche\Document\Models\Document;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+final class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.

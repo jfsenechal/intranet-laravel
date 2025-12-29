@@ -8,12 +8,13 @@ use AcMarche\Hrm\Models\Service;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Organisation';
+    protected static string|null|UnitEnum $navigationGroup = 'Organisation';
 
     protected static ?int $navigationSort = 2;
 

@@ -7,9 +7,9 @@ use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum RoleEnum: string implements HasColor, HasLabel, HasDescription, HasIcon
+enum RoleEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
 {
-    case INTRANET_ADMIN = "ROLE_INTRANET_ADMIN";
+    case INTRANET_ADMIN = 'ROLE_INTRANET_ADMIN';
 
     public static function toArray(): array
     {

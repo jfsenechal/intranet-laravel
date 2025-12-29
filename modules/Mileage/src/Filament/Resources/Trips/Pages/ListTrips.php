@@ -31,9 +31,9 @@ final class ListTrips extends ListRecords
             Actions\CreateAction::make()
                 ->label('Nouveau déplacement')
                 ->icon('tabler-plus')
-                ->disabled(!$userHasPersonalInfo)
-                ->tooltip(!$userHasPersonalInfo ? 'Vous devez d\'abord compléter vos informations personnelles' : null)
-                ->url(!$userHasPersonalInfo ? PersonalInformationResource::getUrl('index') : null),
+                ->disabled(! $userHasPersonalInfo)
+                ->tooltip(! $userHasPersonalInfo ? 'Vous devez d\'abord compléter vos informations personnelles' : null)
+                ->url(! $userHasPersonalInfo ? PersonalInformationResource::getUrl('index') : null),
         ];
     }
 }

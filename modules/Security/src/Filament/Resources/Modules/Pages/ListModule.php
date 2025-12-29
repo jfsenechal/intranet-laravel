@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListModule extends ListRecords
+final class ListModule extends ListRecords
 {
     protected static string $resource = ModuleResource::class;
 
@@ -24,5 +24,4 @@ class ListModule extends ListRecords
                 ->icon('tabler-plus'),
         ];
     }
-
 }

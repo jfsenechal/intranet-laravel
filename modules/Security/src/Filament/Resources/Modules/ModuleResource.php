@@ -11,15 +11,16 @@ use AcMarche\Security\Filament\Resources\Modules\RelationManagers\RoleRelationMa
 use AcMarche\Security\Filament\Resources\Modules\Schemas\ModuleForm;
 use AcMarche\Security\Filament\Resources\Modules\Tables\ModuleTables;
 use AcMarche\Security\Models\Module;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
-class ModuleResource extends Resource
+final class ModuleResource extends Resource
 {
     protected static ?string $model = Module::class;
 
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {

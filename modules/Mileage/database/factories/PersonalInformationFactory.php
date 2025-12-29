@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\Mileage\Models\PersonalInformation>
  */
-class PersonalInformationFactory extends Factory
+final class PersonalInformationFactory extends Factory
 {
     protected $model = PersonalInformation::class;
 

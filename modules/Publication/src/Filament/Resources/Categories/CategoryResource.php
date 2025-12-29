@@ -2,10 +2,10 @@
 
 namespace AcMarche\Publication\Filament\Resources\Categories;
 
-use AcMarche\Publication\Filament\Resources\Categories\Pages;
 use AcMarche\Publication\Filament\Resources\Categories\Schemas\CategoryForm;
 use AcMarche\Publication\Filament\Resources\Categories\Tables\CategoryTables;
 use AcMarche\Publication\Models\Category;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -16,7 +16,7 @@ final class CategoryResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-tag';
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-tag';
 
     protected static ?string $navigationLabel = 'Categories';
 

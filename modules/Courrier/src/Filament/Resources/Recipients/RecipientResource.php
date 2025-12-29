@@ -8,13 +8,15 @@ use AcMarche\Courrier\Models\Recipient;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class RecipientResource extends Resource
 {
     protected static ?string $model = Recipient::class;
 
     protected static ?int $navigationSort = 3;
-    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+
+    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
 
     public static function getNavigationIcon(): ?string
     {

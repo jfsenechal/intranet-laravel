@@ -8,12 +8,13 @@ use AcMarche\Hrm\Models\Direction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class DirectionResource extends Resource
 {
     protected static ?string $model = Direction::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Organisation';
+    protected static string|null|UnitEnum $navigationGroup = 'Organisation';
 
     protected static ?int $navigationSort = 1;
 

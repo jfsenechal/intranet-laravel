@@ -8,6 +8,7 @@ use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use AcMarche\Mileage\Repository\TripRepository;
+use Exception;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -19,20 +20,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-class TripTables
+final class TripTables
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->defaultSort('departure_date', 'desc')
-            ->modifyQueryUsing(fn(Builder $query) => TripRepository::getByUser($query))
+            ->modifyQueryUsing(fn (Builder $query) => TripRepository::getByUser($query))
             ->defaultPaginationPageOption(50)
             ->columns([
                 Tables\Columns\TextColumn::make('departure_date')
                     ->label('Date')
                     ->dateTime('d/m/Y')
                     ->sortable()
-                    ->url(fn(Trip $record) => TripResource::getUrl('view', ['record' => $record->id])),
+                    ->url(fn (Trip $record) => TripResource::getUrl('view', ['record' => $record->id])),
                 Tables\Columns\TextColumn::make('departure_location')
                     ->label('Départ')
                     ->searchable()
@@ -52,7 +53,7 @@ class TripTables
                     ->toggleable(),
                 Tables\Columns\IconColumn::make('declared')
                     ->label('Déclaré')
-                    ->state(fn(Trip $record) => $record->isDeclared())
+                    ->state(fn (Trip $record) => $record->isDeclared())
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Créé le')
@@ -64,8 +65,8 @@ class TripTables
                 Tables\Filters\TernaryFilter::make('declared')
                     ->label('Déclaré')
                     ->queries(
-                        true: fn($query) => $query->whereNotNull('declaration_id'),
-                        false: fn($query) => $query->whereNull('declaration_id'),
+                        true: fn ($query) => $query->whereNotNull('declaration_id'),
+                        false: fn ($query) => $query->whereNull('declaration_id'),
                     )
                     ->default(false),
                 Tables\Filters\SelectFilter::make('type_movement')
@@ -94,8 +95,8 @@ class TripTables
                             $budgetArticle = BudgetArticle::find($data['budget_article_id']);
 
                             $personalInformation = PersonalInformationRepository::getByCurrentUser()->first();
-                            if (!$personalInformation) {
-                                throw new \Exception('Remplissez vos données personnelles');
+                            if (! $personalInformation) {
+                                throw new Exception('Remplissez vos données personnelles');
                             }
                             try {
                                 $declarations = DeclarationFactory::handleTrips(
@@ -112,7 +113,7 @@ class TripTables
                                     )
                                     ->success()
                                     ->send();
-                            } catch (\Exception $e) {
+                            } catch (Exception $e) {
                                 Notification::make()
                                     ->title('Erreur')
                                     ->body($e->getMessage())

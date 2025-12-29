@@ -16,7 +16,7 @@ final class PdfFactory
         $this->exportHandler = new ExportDataAggregator();
     }
 
-    public  function createFromDeclaration(Declaration $declaration): array
+    public function createFromDeclaration(Declaration $declaration): array
     {
         $declaration->load('trips');
         $calculator = new DeclarationCalculator($declaration);
@@ -25,7 +25,7 @@ final class PdfFactory
 
         $directory = storage_path('app/private/mileage/exports');
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
@@ -46,7 +46,7 @@ final class PdfFactory
     /**
      * Generate PDF for annual declarations recap.
      *
-     * @param array<string> $departments
+     * @param  array<string>  $departments
      */
     public function createByYear(int $year, array $departments = [], ?bool $omnium = null): array
     {
@@ -55,7 +55,7 @@ final class PdfFactory
 
         $directory = storage_path('app/private/mileage/exports');
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
@@ -85,7 +85,7 @@ final class PdfFactory
         $name = 'declarations-'.$username.'.pdf';
         $directory = storage_path('app/private/mileage/exports');
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 

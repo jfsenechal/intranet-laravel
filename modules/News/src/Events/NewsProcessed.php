@@ -9,16 +9,14 @@ use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewsProcessed  implements ShouldDispatchAfterCommit
+final class NewsProcessed implements ShouldDispatchAfterCommit
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(private readonly News $news)
-    {
-    }
+    public function __construct(private readonly News $news) {}
 
     public function news(): News
     {
@@ -36,5 +34,4 @@ class NewsProcessed  implements ShouldDispatchAfterCommit
             new PrivateChannel('channel-name'),
         ];
     }
-
 }

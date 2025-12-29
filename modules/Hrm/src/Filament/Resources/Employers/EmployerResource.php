@@ -14,12 +14,13 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 final class EmployerResource extends Resource
 {
     protected static ?string $model = Employer::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Configuration';
+    protected static string|null|UnitEnum $navigationGroup = 'Configuration';
 
     protected static ?int $navigationSort = 4;
 

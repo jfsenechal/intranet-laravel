@@ -7,15 +7,16 @@ use AcMarche\Security\Filament\Resources\Users\RelationManagers\ModuleRelationMa
 use AcMarche\Security\Filament\Resources\Users\Schemas\UserForm;
 use AcMarche\Security\Filament\Resources\Users\Tables\UserTables;
 use App\Models\User;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
-class UserResource extends Resource
+final class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-users';
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-users';
 
     public static function getNavigationGroup(): ?string
     {

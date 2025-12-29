@@ -4,9 +4,10 @@ namespace AcMarche\Courrier\Console\Commands;
 
 use AcMarche\App\Meilisearch\MeiliTrait;
 use AcMarche\Courrier\Search\MeiliIndexer;
+use DateTimeImmutable;
 use Illuminate\Console\Command;
 
-class MeiliIndexerCommand extends Command
+final class MeiliIndexerCommand extends Command
 {
     use MeiliTrait;
 
@@ -38,8 +39,8 @@ class MeiliIndexerCommand extends Command
         if ($year && $year > 2010) {
             $meiliServer->addCourriersByYear($year);
         } elseif ($date) {
-            $dateTime = \DateTime::createFromFormat('Y-m-d', $date);
-            if ($dateTime instanceof \DateTime) {
+            $dateTime = DateTimeImmutable::createFromFormat('Y-m-d', $date);
+            if ($dateTime instanceof DateTimeImmutable) {
                 $meiliServer->addCourriersByDate($dateTime);
             } else {
                 $this->error('Invalid date format : '.$date);
@@ -47,6 +48,4 @@ class MeiliIndexerCommand extends Command
         }
 
     }
-
-
 }

@@ -7,15 +7,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Category extends Model
+final class Category extends Model
 {
     use HasFactory;
 
-    protected $connection = 'maria-document';
     public $timestamps = false;
+
+    protected $connection = 'maria-document';
+
     protected $fillable = ['name'];
 
-    //Model::automaticallyEagerLoadRelationships();
+    /**
+     * @return BelongsToMany<Document>
+     */
+    public function documents(): BelongsToMany
+    {
+        return $this->belongsToMany(Document::class);
+    }
+
+    // Model::automaticallyEagerLoadRelationships();
 
     /**
      * To resolve name
@@ -24,13 +34,5 @@ class Category extends Model
     protected static function newFactory(): CategoryFactory
     {
         return CategoryFactory::new();
-    }
-
-    /**
-     * @return BelongsToMany<Document>
-     */
-    public function documents(): BelongsToMany
-    {
-        return $this->belongsToMany(Document::class);
     }
 }

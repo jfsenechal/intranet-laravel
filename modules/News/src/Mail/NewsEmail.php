@@ -17,9 +17,7 @@ final class NewsEmail extends Mailable
 
     public ?string $logo = null;
 
-    public function __construct(public readonly News $news)
-    {
-    }
+    public function __construct(public readonly News $news) {}
 
     /**
      * Get the message envelope.
@@ -38,7 +36,7 @@ final class NewsEmail extends Mailable
     public function content(): Content
     {
         $this->logo = public_path('images/Marche_logo.png');
-        if (!file_exists($this->logo)) {
+        if (! file_exists($this->logo)) {
             $this->logo = null;
         }
 

@@ -5,7 +5,7 @@ namespace AcMarche\Publication\Filament\Resources\Categories\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
-class CategoryForm
+final class CategoryForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -15,7 +15,7 @@ class CategoryForm
                     ->label('Nom')
                     ->required()
                     ->maxLength(255)
-                ->columnSpanFull(),
+                    ->columnSpanFull(),
                 TextInput::make('url')
                     ->label('Url marche.be')
                     ->required()

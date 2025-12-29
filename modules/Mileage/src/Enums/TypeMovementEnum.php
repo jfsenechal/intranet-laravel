@@ -3,7 +3,8 @@
 namespace AcMarche\Mileage\Enums;
 
 use Filament\Support\Contracts\HasLabel;
-use Illuminate\Contracts\Support\Htmlable;use Illuminate\Support\Str;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Str;
 
 enum TypeMovementEnum: string implements HasLabel
 {

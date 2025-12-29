@@ -10,6 +10,11 @@ final class ViewCategory extends ViewRecord
 {
     protected static string $resource = CategoryResource::class;
 
+    public function getTitle(): string
+    {
+        return $this->record->name;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -18,10 +23,5 @@ final class ViewCategory extends ViewRecord
             Actions\DeleteAction::make()
                 ->icon('tabler-trash'),
         ];
-    }
-
-    public function getTitle(): string
-    {
-        return $this->record->name;
     }
 }

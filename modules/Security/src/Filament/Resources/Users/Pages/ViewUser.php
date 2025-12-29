@@ -8,16 +8,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewUser extends ViewRecord
+final class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\EditAction::make(),
-        ];
-    }
 
     public function getTitle(): string
     {
@@ -46,4 +39,10 @@ class ViewUser extends ViewRecord
         ]);
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\EditAction::make(),
+        ];
+    }
 }

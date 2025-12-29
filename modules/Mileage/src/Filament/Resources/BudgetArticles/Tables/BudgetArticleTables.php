@@ -7,7 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class BudgetArticleTables
+final class BudgetArticleTables
 {
     public static function configure(Table $table): Table
     {

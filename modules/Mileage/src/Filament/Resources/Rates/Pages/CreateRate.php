@@ -5,7 +5,7 @@ namespace AcMarche\Mileage\Filament\Resources\Rates\Pages;
 use AcMarche\Mileage\Filament\Resources\Rates\RateResource;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateRate extends CreateRecord
+final class CreateRate extends CreateRecord
 {
     protected static string $resource = RateResource::class;
 

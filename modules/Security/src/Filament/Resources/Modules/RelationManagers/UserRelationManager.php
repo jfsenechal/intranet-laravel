@@ -9,7 +9,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class UserRelationManager extends RelationManager
+final class UserRelationManager extends RelationManager
 {
     protected static string $relationship = 'users';
 
@@ -32,5 +32,4 @@ class UserRelationManager extends RelationManager
     {
         return ModuleForm::addUserFromModule($schema, $this->ownerRecord);
     }
-
 }

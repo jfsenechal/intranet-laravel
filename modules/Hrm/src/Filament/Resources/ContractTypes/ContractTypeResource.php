@@ -14,12 +14,13 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 final class ContractTypeResource extends Resource
 {
     protected static ?string $model = ContractType::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Configuration';
+    protected static string|null|UnitEnum $navigationGroup = 'Configuration';
 
     protected static ?int $navigationSort = 3;
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Mileage\Database\Factories;
 
-use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\Trip;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\Mileage\Models\Trip>
  */
-class TripFactory extends Factory
+final class TripFactory extends Factory
 {
     protected $model = Trip::class;
 

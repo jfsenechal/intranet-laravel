@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\Mileage\Models\Rate>
  */
-class RateFactory extends Factory
+final class RateFactory extends Factory
 {
     protected $model = Rate::class;
 

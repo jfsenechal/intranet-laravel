@@ -18,7 +18,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class SecurityPanelProvider extends PanelProvider
+final class SecurityPanelProvider extends PanelProvider
 {
     use PluginTrait;
 

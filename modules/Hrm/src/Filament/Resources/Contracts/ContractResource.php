@@ -8,12 +8,13 @@ use AcMarche\Hrm\Models\Contract;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Personnel';
+    protected static string|null|UnitEnum $navigationGroup = 'Personnel';
 
     protected static ?int $navigationSort = 2;
 

@@ -9,7 +9,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class RoleRelationManager extends RelationManager
+final class RoleRelationManager extends RelationManager
 {
     protected static string $relationship = 'roles';
 
@@ -32,5 +32,4 @@ class RoleRelationManager extends RelationManager
     {
         return RoleForm::configure($schema);
     }
-
 }

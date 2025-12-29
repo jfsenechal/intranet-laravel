@@ -5,13 +5,54 @@ namespace AcMarche\Courrier\Search;
 use AcMarche\App\Meilisearch\MeiliServer;
 use AcMarche\App\Meilisearch\MeiliTrait;
 use AcMarche\Courrier\Models\IncomingMail;
+use DateTimeInterface;
 use Illuminate\Support\Carbon;
 
-class MeiliIndexer
+use function chr;
+
+final class MeiliIndexer
 {
     use MeiliTrait;
 
     private string $primaryKey = 'id';
+
+    public static function cleandata($data): string
+    {
+        $data = preg_replace('#&nbsp;#', ' ', (string) $data);
+        $data = preg_replace('#&amp;#', ' ', $data); // &
+        $data = preg_replace('#&#', ' ', $data);
+        $data = preg_replace('#<#', '', $data);
+        $data = preg_replace('#’#', "'", $data);
+        $data = preg_replace(["#\(#", "#\)#"], '', $data);
+        $special_chars = [
+            '?',
+            '[',
+            ']',
+            '/',
+            '\\',
+            '=',
+            '<',
+            '>',
+            ':',
+            ';',
+            ',',
+            '"',
+            '&',
+            '$',
+            '#',
+            '*',
+            '|',
+            '~',
+            '`',
+            '!',
+            '{',
+            '}',
+            chr(0),
+        ];
+        $data = str_replace($special_chars, ' ', $data);
+
+        return mb_trim($data);
+    }
 
     public function addCourrier(IncomingMail $incomingMail): void
     {
@@ -32,7 +73,7 @@ class MeiliIndexer
         $index->addDocuments($documents, $this->primaryKey);
     }
 
-    public function addCourriersByDate(\DateTimeInterface $date): void
+    public function addCourriersByDate(DateTimeInterface $date): void
     {
         $this->init(config('courrier.meilisearch.index_name'));
         $documents = [];
@@ -75,8 +116,8 @@ class MeiliIndexer
         $document['expediteur'] = $this->cleandata($courrier->expediteur);
         $document['destinataires'] = $destinatairesId;
         $document['services'] = $servicesId;
-        $document['original'] = $original; //pour affichage
-        $document['copie'] = $copie; //pour affichage
+        $document['original'] = $original; // pour affichage
+        $document['copie'] = $copie; // pour affichage
         $document['recommande'] = $courrier->recommande;
         $document['date_courrier'] = $courrier->date_courrier->format('Y-m-d');
         $date = $courrier->date_courrier;
@@ -115,43 +156,5 @@ class MeiliIndexer
     private static function createKey(int $id): string
     {
         return 'courrier-'.$id;
-    }
-
-    public static function cleandata($data): string
-    {
-        $data = preg_replace('#&nbsp;#', ' ', (string)$data);
-        $data = preg_replace('#&amp;#', ' ', $data); //&
-        $data = preg_replace('#&#', ' ', $data);
-        $data = preg_replace('#<#', '', $data);
-        $data = preg_replace('#’#', "'", $data);
-        $data = preg_replace(["#\(#", "#\)#"], '', $data);
-        $special_chars = [
-            '?',
-            '[',
-            ']',
-            '/',
-            '\\',
-            '=',
-            '<',
-            '>',
-            ':',
-            ';',
-            ',',
-            '"',
-            '&',
-            '$',
-            '#',
-            '*',
-            '|',
-            '~',
-            '`',
-            '!',
-            '{',
-            '}',
-            \chr(0),
-        ];
-        $data = str_replace($special_chars, ' ', $data);
-
-        return trim($data);
     }
 }

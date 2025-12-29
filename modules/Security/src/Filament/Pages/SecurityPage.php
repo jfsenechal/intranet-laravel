@@ -2,12 +2,14 @@
 
 namespace AcMarche\Security\Filament\Pages;
 
+use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 
-class SecurityPage extends Page
+final class SecurityPage extends Page
 {
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-document-text';
+
     protected string $view = 'security::filament.pages.security';
 
     public static function getNavigationLabel(): string
@@ -15,14 +17,13 @@ class SecurityPage extends Page
         return 'Security page';
     }
 
-    public function getTitle(): string|Htmlable
-    {
-        return 'Page title security';
-    }
-
     public static function canAccess(): bool
     {
         return true;
     }
 
+    public function getTitle(): string|Htmlable
+    {
+        return 'Page title security';
+    }
 }

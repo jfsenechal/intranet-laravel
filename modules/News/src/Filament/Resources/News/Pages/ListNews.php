@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListNews extends ListRecords
+final class ListNews extends ListRecords
 {
     protected static string $resource = NewsResource::class;
 

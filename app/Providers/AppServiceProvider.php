@@ -33,7 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
         Model::automaticallyEagerLoadRelationships();
 
-        if (!app()->environment('production')) {
+        if (! app()->environment('production')) {
             Mail::alwaysTo(config('mail.webmaster_email'));
         }
 

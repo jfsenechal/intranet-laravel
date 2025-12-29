@@ -16,6 +16,7 @@ final class Role extends Model
     use HasFactory;
 
     public $timestamps = false;
+
     protected $fillable = ['name', 'description', 'module_id'];
 
     public function module(): BelongsTo

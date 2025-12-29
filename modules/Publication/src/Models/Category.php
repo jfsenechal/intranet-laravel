@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 final class Category extends Model
 {
     public $timestamps = false;
+
     protected $connection = 'maria-publication';
 
     protected $fillable = [

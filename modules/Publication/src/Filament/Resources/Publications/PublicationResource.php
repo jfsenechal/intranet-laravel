@@ -2,10 +2,10 @@
 
 namespace AcMarche\Publication\Filament\Resources\Publications;
 
-use AcMarche\Publication\Filament\Resources\Publications\Pages;
 use AcMarche\Publication\Filament\Resources\Publications\Schemas\PublicationForm;
 use AcMarche\Publication\Filament\Resources\Publications\Tables\PublicationTables;
 use AcMarche\Publication\Models\Publication;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -16,7 +16,7 @@ final class PublicationResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-newspaper';
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-newspaper';
 
     protected static ?string $navigationLabel = 'Publications';
 

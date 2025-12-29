@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 final class IncomingMailService extends Pivot
 {
-    protected $table = 'incoming_mail_service';
-
     public $timestamps = false;
+
+    protected $table = 'incoming_mail_service';
 
     protected function casts(): array
     {

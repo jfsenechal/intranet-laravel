@@ -9,18 +9,19 @@ use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Collection;
 
-class DeclarationFactory
+final class DeclarationFactory
 {
     /**
      * Create declarations from trips grouped by type_movement and rate period.
      * Each declaration will contain trips that have the same type_movement and fall within the same rate period.
      *
-     * @param array<Trip>|Collection<int, Trip> $trips
+     * @param  array<Trip>|Collection<int, Trip>  $trips
      * @return Collection<int, Declaration>
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function handleTrips(
         array|Collection $trips,
@@ -63,7 +64,7 @@ class DeclarationFactory
 
             // Extract type_movement and rate_id from the group key
             $parts = explode('_', $groupKey);
-            $rateId = (int)array_pop($parts);
+            $rateId = (int) array_pop($parts);
             $typeMovement = implode('_', $parts);
 
             $rate = $rates->firstWhere('id', $rateId);

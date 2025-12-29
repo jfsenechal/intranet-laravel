@@ -11,6 +11,11 @@ final class EditPublication extends EditRecord
 {
     protected static string $resource = PublicationResource::class;
 
+    public function getTitle(): string|Htmlable
+    {
+        return $this->getRecord()->name;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -18,10 +23,4 @@ final class EditPublication extends EditRecord
                 ->icon('tabler-eye'),
         ];
     }
-
-    public function getTitle(): string|Htmlable
-    {
-        return $this->getRecord()->name;
-    }
-
 }

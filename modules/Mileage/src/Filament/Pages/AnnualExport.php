@@ -98,7 +98,7 @@ final class AnnualExport extends Page implements HasForms
         $data = $this->form->getState();
 
         $department = $data['department'];
-        $year = (int)$data['year'];
+        $year = (int) $data['year'];
         $omnium = $data['omnium'] === '1';
 
         $exportHandler = new ExportDataAggregator();
@@ -114,7 +114,7 @@ final class AnnualExport extends Page implements HasForms
         $data = $this->form->getState();
 
         $department = $data['department'];
-        $year = (int)$data['year'];
+        $year = (int) $data['year'];
         $omnium = $data['omnium'] === '1';
 
         $pdfFactory = new PdfFactory();

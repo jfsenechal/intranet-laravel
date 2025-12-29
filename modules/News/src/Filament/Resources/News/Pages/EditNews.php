@@ -7,9 +7,14 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
-class EditNews extends EditRecord
+final class EditNews extends EditRecord
 {
     protected static string $resource = NewsResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return $this->getRecord()->name;
+    }
 
     protected function getHeaderActions(): array
     {
@@ -17,10 +22,5 @@ class EditNews extends EditRecord
             Actions\ViewAction::make()
                 ->icon('tabler-eye'),
         ];
-    }
-
-    public function getTitle(): string|Htmlable
-    {
-        return $this->getRecord()->name;
     }
 }

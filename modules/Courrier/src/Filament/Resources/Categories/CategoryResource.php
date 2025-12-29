@@ -13,6 +13,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class CategoryResource extends Resource
 {
@@ -22,7 +23,7 @@ final class CategoryResource extends Resource
 
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
 
     public static function form(Schema $schema): Schema
     {

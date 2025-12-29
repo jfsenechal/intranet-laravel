@@ -5,9 +5,10 @@ namespace AcMarche\App;
 use AcMarche\App\Traits\HooksTrait;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     use HooksTrait;
+
     /**
      * Register services.
      */

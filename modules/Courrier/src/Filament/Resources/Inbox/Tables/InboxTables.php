@@ -2,8 +2,9 @@
 
 namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 
+use AcMarche\Courrier\Dto\EmailMessage;
+use AcMarche\Courrier\Exception\ImapException;
 use AcMarche\Courrier\Repository\ImapRepository;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -23,8 +24,9 @@ final class InboxTables
     public static function configure(Table $table): Table
     {
         $imapRepository = new ImapRepository();
+
         return $table
-            ->records(fn (): array => $imapRepository->getMessages())
+            ->records(fn (): array => self::getRecords($imapRepository))
             ->columns([
                 IconColumn::make('has_attachments')
                     ->label('')
@@ -56,28 +58,51 @@ final class InboxTables
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
             ])
-            ->recordActions([
-                BulkAction::make('feature')
+            ->toolbarActions([
+                BulkAction::make('delete')
+                    ->label('Supprimer')
+                    ->icon('tabler-trash')
+                    ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function (Collection $records) use($imapRepository): void {
+                    ->action(function (Collection $records) use ($imapRepository): void {
                         try {
-                            $imapRepository->deleteMessages($records->pluck('id')->toArray());
+                            $imapRepository->deleteMessages($records->pluck('uid')->toArray());
 
                             Notification::make()
-                                ->title('Message supprimé')
+                                ->title('Messages supprimés')
                                 ->success()
                                 ->send();
-                        } catch (Exception $exception) {
+                        } catch (ImapException $exception) {
                             Notification::make()
-                                ->title('Message failed to delete')
+                                ->title('Erreur lors de la suppression')
+                                ->body($exception->getMessage())
                                 ->danger()
                                 ->send();
-
-                            return;
                         }
                     }),
             ])
             ->paginated([10, 25, 50]);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function getRecords(ImapRepository $imapRepository): array
+    {
+        try {
+            return array_map(
+                fn (EmailMessage $message): array => $message->toArray(),
+                $imapRepository->getMessages()
+            );
+        } catch (ImapException $e) {
+            Notification::make()
+                ->title('Erreur de connexion IMAP')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+
+            return [];
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListDocuments extends ListRecords
+final class ListDocuments extends ListRecords
 {
     protected static string $resource = DocumentResource::class;
 

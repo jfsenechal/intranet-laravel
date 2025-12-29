@@ -6,7 +6,7 @@ use AcMarche\News\Events\NewsProcessed;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateNews extends CreateRecord
+final class CreateNews extends CreateRecord
 {
     protected static string $resource = NewsResource::class;
 

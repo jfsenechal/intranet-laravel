@@ -5,13 +5,11 @@ namespace AcMarche\App\Meilisearch;
 use Meilisearch\Contracts\DeleteTasksQuery;
 use Meilisearch\Endpoints\Keys;
 
-class MeiliServer
+final class MeiliServer
 {
     use MeiliTrait;
 
-    public function __construct(private readonly string $indexName)
-    {
-    }
+    public function __construct(private readonly string $indexName) {}
 
     public static function createKey($id): string
     {
@@ -19,7 +17,6 @@ class MeiliServer
     }
 
     /**
-     *
      * @return array<'taskUid','indexUid','status','enqueuedAt'>
      */
     public function createIndex(string $indexName, string $primaryKey = 'id'): array
@@ -34,9 +31,6 @@ class MeiliServer
     /**
      * https://raw.githubusercontent.com/meilisearch/meilisearch/latest/config.toml
      * curl -X PATCH 'http://localhost:7700/experimental-features/' -H 'Content-Type: application/json' -H 'Authorization: Bearer xxxxxx' --data-binary '{"containsFilter": true}'
-     * @param array $filterableAttributes
-     * @param array $sortableAttributes
-     * @return array
      */
     public function settings(array $filterableAttributes, array $sortableAttributes): array
     {

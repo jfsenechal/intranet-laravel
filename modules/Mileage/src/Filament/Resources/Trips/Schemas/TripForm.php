@@ -6,7 +6,7 @@ use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class TripForm
+final class TripForm
 {
     public static function configure(Schema $schema): Schema
     {

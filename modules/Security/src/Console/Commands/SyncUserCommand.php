@@ -35,14 +35,14 @@ final class SyncUserCommand extends Command
         // $this->agentRole = Role::where('name', RoleEnum::AGENT->value)->first();
 
         foreach (UserLdap::all() as $userLdap) {
-            if (!$userLdap->getFirstAttribute('mail')) {
+            if (! $userLdap->getFirstAttribute('mail')) {
                 continue;
             }
-            if (!$this->isActive($userLdap)) {
+            if (! $this->isActive($userLdap)) {
                 continue;
             }
             $username = $userLdap->getFirstAttribute('samaccountname');
-            if (!$user = User::where('username', $username)->first()) {
+            if (! $user = User::where('username', $username)->first()) {
                 $this->addUser($username, $userLdap);
             } else {
                 $this->updateUser($user, $userLdap);
@@ -79,7 +79,7 @@ final class SyncUserCommand extends Command
 
         if (count($ldapUsernames) > 200) {
             foreach (User::all() as $user) {
-                if (!in_array($user->username, $ldapUsernames)) {
+                if (! in_array($user->username, $ldapUsernames)) {
                     $profile = DB::connection('mariadb')
                         ->table('profiles')
                         ->where('user_id', $user->id)

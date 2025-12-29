@@ -17,7 +17,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class PublicationPanelProvider extends PanelProvider
+final class PublicationPanelProvider extends PanelProvider
 {
     use PluginTrait;
 

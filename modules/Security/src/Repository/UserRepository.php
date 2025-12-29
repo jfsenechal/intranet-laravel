@@ -26,10 +26,10 @@ final class UserRepository
     {
         $users = [];
         foreach (UserLdap::all() as $userLdap) {
-            if (!$userLdap->getFirstAttribute('mail')) {
+            if (! $userLdap->getFirstAttribute('mail')) {
                 continue;
             }
-            if (!self::isActif($userLdap)) {
+            if (! self::isActif($userLdap)) {
                 continue;
             }
             $username = $userLdap->getFirstAttribute('samaccountname');

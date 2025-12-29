@@ -11,6 +11,7 @@ use AcMarche\Courrier\Models\Service;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class ServiceResource extends Resource
 {
@@ -18,7 +19,7 @@ final class ServiceResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
 
     public static function getNavigationIcon(): ?string
     {

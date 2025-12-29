@@ -12,15 +12,31 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
+
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
 #[AsCommand(name: 'intranet:create-user')]
-class CreateUserCommand extends Command
+final class CreateUserCommand extends Command
 {
     protected $description = 'Create a new user';
 
     protected $name = 'intranet:create-user';
+
+    /**
+     * @var array{'name': string | null, 'email': string | null, 'password': string | null}
+     */
+    protected array $options;
+
+    public function handle(): int
+    {
+        $this->options = $this->options();
+
+        $user = $this->createUser();
+        $this->sendSuccessMessage($user);
+
+        return self::SUCCESS;
+    }
 
     /**
      * @return array<InputOption>
@@ -56,65 +72,50 @@ class CreateUserCommand extends Command
     }
 
     /**
-     * @var array{'name': string | null, 'email': string | null, 'password': string | null}
-     */
-    protected array $options;
-
-    public function handle(): int
-    {
-        $this->options = $this->options();
-
-        $user = $this->createUser();
-        $this->sendSuccessMessage($user);
-
-        return static::SUCCESS;
-    }
-
-    /**
      * @return array{'name': string, 'email': string, 'password': string}
      */
     protected function getUserData(): array
     {
         return [
             'name' => $this->options['name'] ?? text(
-                    label: 'Name',
-                    required: true,
-                ),
+                label: 'Name',
+                required: true,
+            ),
             'username' => $this->options['username'] ?? text(
-                    label: 'Username',
-                    required: true,
-                ),
+                label: 'Username',
+                required: true,
+            ),
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'email' => $this->options['email'] ?? text(
-                    label: 'Email address',
-                    required: true,
-                    validate: fn(string $email): ?string => match (true) {
-                        !filter_var($email, FILTER_VALIDATE_EMAIL) => 'The email address must be valid.',
-                        static::getUserModel()::query()->where('email', $email)->exists(
-                        ) => 'A user with this email address already exists',
-                        default => null,
-                    },
-                ),
+                label: 'Email address',
+                required: true,
+                validate: fn (string $email): ?string => match (true) {
+                    ! filter_var($email, FILTER_VALIDATE_EMAIL) => 'The email address must be valid.',
+                    self::getUserModel()::query()->where('email', $email)->exists(
+                    ) => 'A user with this email address already exists',
+                    default => null,
+                },
+            ),
 
             'password' => Hash::make(
                 $this->options['password'] ?? password(
-                label: 'Password',
-                required: true,
-            )
+                    label: 'Password',
+                    required: true,
+                )
             ),
         ];
     }
 
-    protected function createUser(): Model & Authenticatable
+    protected function createUser(): Model&Authenticatable
     {
         /** @var Model & Authenticatable $user */
-        $user = static::getUserModel()::query()->create($this->getUserData());
+        $user = self::getUserModel()::query()->create($this->getUserData());
 
         return $user;
     }
 
-    protected function sendSuccessMessage(Model & Authenticatable $user): void
+    protected function sendSuccessMessage(Model&Authenticatable $user): void
     {
         $loginUrl = Filament::getLoginUrl();
 

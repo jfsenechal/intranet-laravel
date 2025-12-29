@@ -7,6 +7,7 @@ use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\RoleRepository;
 use App\Models\User;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -20,7 +21,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class UserTables
+final class UserTables
 {
     public static function configure(Table $table): Table
     {
@@ -82,7 +83,7 @@ class UserTables
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Rôles')
-                    ->state(fn(Model|User $record): string => $record->rolesByModule($owner->id)
+                    ->state(fn (Model|User $record): string => $record->rolesByModule($owner->id)
                         ->pluck('name')->implode(', ')),
             ])
             ->headerActions([
@@ -95,7 +96,7 @@ class UserTables
                             Notification::make()
                                 ->success()
                                 ->title('Utilisateur ajouté');
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->danger()
                                 ->title('Erreur '.$e->getMessage());
@@ -110,14 +111,14 @@ class UserTables
 
                         return $data;
                     })
-                    ->schema(fn(Schema $schema) => ModuleForm::addUserFromModule($schema, $owner))
+                    ->schema(fn (Schema $schema) => ModuleForm::addUserFromModule($schema, $owner))
                     ->action(function (array $data, Schema $schema) use ($owner) {
                         try {
                             ModuleHandler::syncUserRolesForModule($owner, $schema->getRecord(), $data);
                             Notification::make()
                                 ->success()
                                 ->title('Utilisateur ajouté');
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->danger()
                                 ->title('Erreur '.$e->getMessage());
@@ -133,5 +134,4 @@ class UserTables
                     }),
             ]);
     }
-
 }

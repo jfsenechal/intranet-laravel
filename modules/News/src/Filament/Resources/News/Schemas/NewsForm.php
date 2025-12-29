@@ -12,13 +12,13 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
-class NewsForm
+final class NewsForm
 {
     public static function configete(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                Forms\Components\FileUpload::make('featured_image')
+                FileUpload::make('featured_image')
                     ->label('Featured Image')
                     ->image()
                     ->disk('public')
@@ -40,7 +40,7 @@ class NewsForm
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(
-                                fn(string $operation, $state, Set $set) => $operation === 'create' ? $set(
+                                fn (string $operation, $state, Set $set) => $operation === 'create' ? $set(
                                     'slug',
                                     Str::slug($state)
                                 ) : null
@@ -61,8 +61,8 @@ class NewsForm
                             ->maxFiles(3)
                             ->disk('public')
                             ->directory('uploads/news')
-                            //->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf'])
-                            //->preserveFilenames()
+                            // ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf'])
+                            // ->preserveFilenames()
                             ->multiple()
                             ->previewable(false)
                             ->downloadable()

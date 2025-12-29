@@ -5,13 +5,14 @@ namespace AcMarche\News\Observers;
 use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\News;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mime\Address;
 
 /**
  * Seel all observers https://laravel.com/docs/12.x/eloquent#events
  */
-class NewsObserver
+final class NewsObserver
 {
     /**
      * Handle the News "created" event.
@@ -23,7 +24,7 @@ class NewsObserver
             try {
                 Mail::to(new Address('jf@marche.be'))
                     ->send(new NewsEmail($news));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 dd($e->getMessage());
             }
         }

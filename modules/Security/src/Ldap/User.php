@@ -4,7 +4,7 @@ namespace AcMarche\Security\Ldap;
 
 use LdapRecord\Models\Model;
 
-class User extends Model
+final class User extends Model
 {
     /**
      * The object classes of the LDAP model.
@@ -16,6 +16,6 @@ class User extends Model
         'user',
     ];
 
-    //public   $filter1 = "(&(|(sAMAccountName=$uid))(objectClass=person))";
-    //public   $filter = '(&(objectClass=person)(!(uid=acmarche)))';
+    // public   $filter1 = "(&(|(sAMAccountName=$uid))(objectClass=person))";
+    // public   $filter = '(&(objectClass=person)(!(uid=acmarche)))';
 }

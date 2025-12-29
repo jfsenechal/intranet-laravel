@@ -17,7 +17,7 @@ final class ManagePersonalInformation extends ManageRecords
 
         return [
             CreateAction::make()
-                ->visible(!$userHasRecord),
+                ->visible(! $userHasRecord),
         ];
     }
 }

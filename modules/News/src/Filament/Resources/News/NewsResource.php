@@ -2,7 +2,6 @@
 
 namespace AcMarche\News\Filament\Resources\News;
 
-use AcMarche\News\Filament\Resources\News\Pages;
 use AcMarche\News\Filament\Resources\News\Schemas\NewsForm;
 use AcMarche\News\Filament\Resources\News\Tables\NewsTables;
 use AcMarche\News\Models\News;
@@ -10,7 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
-class NewsResource extends Resource
+final class NewsResource extends Resource
 {
     protected static ?string $model = News::class;
 

@@ -52,11 +52,11 @@ final class MigrationRoleCommand extends Command
 
         // Count total roles to migrate
         foreach ($fosGroups as $fosGroup) {
-            //skip intranet admin
+            // skip intranet admin
             if ($fosGroup->id === 61) {
                 continue;
             }
-            if (!empty($fosGroup->roles)) {
+            if (! empty($fosGroup->roles)) {
                 $rolesArray = json_decode($fosGroup->roles, true);
                 if (is_array($rolesArray)) {
                     $totalRoles += count($rolesArray);
@@ -79,14 +79,14 @@ final class MigrationRoleCommand extends Command
             if (empty($fosGroup->roles)) {
                 continue;
             }
-            //skip intranet admin
+            // skip intranet admin
             if ($fosGroup->id === 61) {
                 continue;
             }
 
             $rolesArray = json_decode($fosGroup->roles, true);
 
-            if (!is_array($rolesArray)) {
+            if (! is_array($rolesArray)) {
                 $errors[] = "Invalid JSON in group ID {$fosGroup->id}";
 
                 continue;
@@ -172,7 +172,7 @@ final class MigrationRoleCommand extends Command
                 ->where('id', $userGroup->group_id)
                 ->first();
 
-            if (!$fosGroup || empty($fosGroup->roles)) {
+            if (! $fosGroup || empty($fosGroup->roles)) {
                 $progressBar->advance();
 
                 continue;
@@ -180,7 +180,7 @@ final class MigrationRoleCommand extends Command
 
             $rolesArray = json_decode($fosGroup->roles, true);
 
-            if (!is_array($rolesArray)) {
+            if (! is_array($rolesArray)) {
                 $errors[] = "Invalid JSON in group ID {$fosGroup->id} for user {$userGroup->user_id}";
                 $progressBar->advance();
 
@@ -196,7 +196,7 @@ final class MigrationRoleCommand extends Command
                         ->where('name', $roleName)
                         ->first();
 
-                    if (!$role) {
+                    if (! $role) {
                         $errors[] = "Role '{$roleName}' not found for user {$userGroup->user_id}";
 
                         continue;

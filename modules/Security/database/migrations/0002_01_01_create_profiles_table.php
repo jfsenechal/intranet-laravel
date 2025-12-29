@@ -25,8 +25,8 @@ return new class extends Migration
                 $table->renameColumn('localite', 'city');
                 $table->renameColumn('deplacement_date_college', 'college_trip_date');
             });
-        } else {
-            //not use anymore
         }
+        // not use anymore
+
     }
 };

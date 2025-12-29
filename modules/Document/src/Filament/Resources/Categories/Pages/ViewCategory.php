@@ -6,9 +6,14 @@ use AcMarche\Document\Filament\Resources\Categories\CategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
-class ViewCategory extends ViewRecord
+final class ViewCategory extends ViewRecord
 {
     protected static string $resource = CategoryResource::class;
+
+    public function getTitle(): string
+    {
+        return $this->record->name;
+    }
 
     protected function getHeaderActions(): array
     {
@@ -19,10 +24,4 @@ class ViewCategory extends ViewRecord
                 ->icon('tabler-trash'),
         ];
     }
-
-    public function getTitle(): string
-    {
-        return $this->record->name;
-    }
-
 }

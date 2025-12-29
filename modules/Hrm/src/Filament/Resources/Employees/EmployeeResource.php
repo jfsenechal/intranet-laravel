@@ -8,12 +8,13 @@ use AcMarche\Hrm\Models\Employee;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 final class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Personnel';
+    protected static string|null|UnitEnum $navigationGroup = 'Personnel';
 
     protected static ?int $navigationSort = 1;
 

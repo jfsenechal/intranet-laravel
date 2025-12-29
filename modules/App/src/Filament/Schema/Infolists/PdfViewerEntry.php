@@ -75,14 +75,14 @@ final class PdfViewerEntry extends ViewEntry
 
         if ($this->shouldCheckFileExistence()) {
             try {
-                if (!$storage->exists($state)) {
+                if (! $storage->exists($state)) {
                     return null;
                 }
             } catch (UnableToCheckFileExistence $exception) {
                 return null;
             }
         }
-        //Log::error("ZEZE ".$state.' => '.$storage->url($state));
+        // Log::error("ZEZE ".$state.' => '.$storage->url($state));
         if ($this->getVisibility() === 'private') {
             try {
                 return $storage->temporaryUrl(
@@ -123,7 +123,7 @@ final class PdfViewerEntry extends ViewEntry
 
     public function shouldCheckFileExistence(): bool
     {
-        return (bool)$this->evaluate($this->shouldCheckFileExistence);
+        return (bool) $this->evaluate($this->shouldCheckFileExistence);
     }
 
     /**

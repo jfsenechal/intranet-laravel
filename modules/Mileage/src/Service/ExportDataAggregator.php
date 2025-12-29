@@ -10,7 +10,7 @@ final class ExportDataAggregator
     /**
      * Get data for declarations by year.
      *
-     * @param array<string> $departments
+     * @param  array<string>  $departments
      * @return array{declarations: Collection<int, array<string, mixed>>, totalKilometers: int}
      */
     public function byYear(int $year, array $departments = [], ?bool $omnium = null): array
@@ -24,7 +24,7 @@ final class ExportDataAggregator
             $username = $declaration->user_add;
             $tripKilometers = $declaration->trips->sum('kilometers');
 
-            if (!$groupedData->has($username)) {
+            if (! $groupedData->has($username)) {
                 $groupedData[$username] = [
                     'distance' => 0,
                     'last_name' => $declaration->last_name,
@@ -48,7 +48,6 @@ final class ExportDataAggregator
         ];
     }
 
-
     /**
      * Get data for user export.
      *
@@ -64,7 +63,7 @@ final class ExportDataAggregator
         $declaration = DeclarationRepository::getOneDeclarationByUsername($username);
 
         $months = $this->getMonths();
-        $years = range(2016, (int)date('Y') + 1);
+        $years = range(2016, (int) date('Y') + 1);
 
         $deplacements = [
             'interne' => DeclarationRepository::getKilometersByYearMonth($username, 'interne'),

@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListCategory extends ListRecords
+final class ListCategory extends ListRecords
 {
     protected static string $resource = CategoryResource::class;
 
@@ -24,5 +24,4 @@ class ListCategory extends ListRecords
                 ->icon('tabler-plus'),
         ];
     }
-
 }

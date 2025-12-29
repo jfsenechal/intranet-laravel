@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListRates extends ListRecords
+final class ListRates extends ListRecords
 {
     protected static string $resource = RateResource::class;
 

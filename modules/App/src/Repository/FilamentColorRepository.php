@@ -4,8 +4,9 @@ namespace AcMarche\App\Repository;
 
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Auth;
+use ReflectionClass;
 
-class FilamentColorRepository
+final class FilamentColorRepository
 {
     public static function userColor(): array
     {
@@ -62,7 +63,7 @@ class FilamentColorRepository
 
     public static function findConstantByValue(string $value): ?array
     {
-        $reflection = new \ReflectionClass(Color::class);
+        $reflection = new ReflectionClass(Color::class);
         foreach ($reflection->getConstants() as $name => $colors) {
             if ($name === ucfirst($value)) {
                 return $colors;

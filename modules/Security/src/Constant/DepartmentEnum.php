@@ -6,11 +6,11 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum DepartmentEnum:string implements HasColor, HasLabel, HasIcon
+enum DepartmentEnum: string implements HasColor, HasIcon, HasLabel
 {
-    case COMMON = "COMMON";
-    case CPAS = "CPAS";
-    case VILLE = "VILLE";
+    case COMMON = 'COMMON';
+    case CPAS = 'CPAS';
+    case VILLE = 'VILLE';
 
     public static function toArray(): array
     {
@@ -48,5 +48,4 @@ enum DepartmentEnum:string implements HasColor, HasLabel, HasIcon
             self::VILLE => 'tabler-cell-signal-5',
         };
     }
-
 }

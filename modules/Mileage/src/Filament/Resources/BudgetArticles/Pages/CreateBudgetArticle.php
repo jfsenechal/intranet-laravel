@@ -5,7 +5,7 @@ namespace AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages;
 use AcMarche\Mileage\Filament\Resources\BudgetArticles\BudgetArticleResource;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateBudgetArticle extends CreateRecord
+final class CreateBudgetArticle extends CreateRecord
 {
     protected static string $resource = BudgetArticleResource::class;
 

@@ -4,7 +4,7 @@ namespace AcMarche\Publication;
 
 use Illuminate\Support\ServiceProvider;
 
-class PublicationServiceProvider extends ServiceProvider
+final class PublicationServiceProvider extends ServiceProvider
 {
     /**
      * Register services.

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 #[UseFactory(RateFactory::class)]
-class Rate extends Model
+final class Rate extends Model
 {
     use HasFactory;
 

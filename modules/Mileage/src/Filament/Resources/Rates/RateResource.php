@@ -2,19 +2,19 @@
 
 namespace AcMarche\Mileage\Filament\Resources\Rates;
 
-use AcMarche\Mileage\Filament\Resources\Rates\Pages;
 use AcMarche\Mileage\Filament\Resources\Rates\Schemas\RateForm;
 use AcMarche\Mileage\Filament\Resources\Rates\Tables\RateTables;
 use AcMarche\Mileage\Models\Rate;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
-class RateResource extends Resource
+final class RateResource extends Resource
 {
     protected static ?string $model = Rate::class;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Paramètres';
+    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
 
     protected static ?int $navigationSort = 5;
 

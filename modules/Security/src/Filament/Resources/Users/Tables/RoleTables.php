@@ -8,7 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class RoleTables
+final class RoleTables
 {
     public static function inline(Table $table): Table
     {

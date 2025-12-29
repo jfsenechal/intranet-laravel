@@ -5,7 +5,7 @@ namespace AcMarche\News\Database\Factories;
 use AcMarche\News\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class CategoryFactory extends Factory
+final class CategoryFactory extends Factory
 {
     protected $model = Category::class;
 

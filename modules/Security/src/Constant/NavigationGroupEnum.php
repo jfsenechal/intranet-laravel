@@ -1,15 +1,15 @@
 <?php
-namespace AcMarche\Security\Constant;
 
+namespace AcMarche\Security\Constant;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum NavigationGroupEnum: string implements HasColor, HasLabel, HasDescription, HasIcon
+enum NavigationGroupEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
 {
-    case SETTINGS = "SETTINGS";
+    case SETTINGS = 'SETTINGS';
 
     public static function toArray(): array
     {
@@ -49,4 +49,3 @@ enum NavigationGroupEnum: string implements HasColor, HasLabel, HasDescription, 
         };
     }
 }
-

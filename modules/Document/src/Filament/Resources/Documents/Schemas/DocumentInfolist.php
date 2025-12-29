@@ -22,11 +22,11 @@ final class DocumentInfolist
                     ->html()
                     ->columnSpanFull()
                     ->prose()
-                    ->hidden(fn($state): bool => blank($state)),
+                    ->hidden(fn ($state): bool => blank($state)),
                 Flex::make([
                     TextEntry::make('file_size')
                         ->label('Taille')
-                        ->formatStateUsing(fn($state): string => $state ? number_format($state / 1024, 2).' KB' : '-')
+                        ->formatStateUsing(fn ($state): string => $state ? number_format($state / 1024, 2).' KB' : '-')
                         ->grow(false),
                     TextEntry::make('file_mime')
                         ->label('Type')

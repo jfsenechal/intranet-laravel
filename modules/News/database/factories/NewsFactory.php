@@ -5,7 +5,7 @@ namespace AcMarche\News\Database\Factories;
 use AcMarche\News\Models\News;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class NewsFactory extends Factory
+final class NewsFactory extends Factory
 {
     protected $model = News::class;
 

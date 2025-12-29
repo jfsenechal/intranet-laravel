@@ -1,13 +1,12 @@
 <?php
 
-
 namespace AcMarche\App\Console\Commands;
 
 use AcMarche\App\Meilisearch\MeiliServer;
 use AcMarche\App\Meilisearch\MeiliTrait;
 use Illuminate\Console\Command;
 
-class MeiliServerCommand extends Command
+final class MeiliServerCommand extends Command
 {
     use MeiliTrait;
 
@@ -36,7 +35,7 @@ class MeiliServerCommand extends Command
         $dump = $this->option('dump');
         $api = $this->option('api');
 
-        if (!$indexName) {
+        if (! $indexName) {
             $this->error('Index name is required');
 
             return;
@@ -77,7 +76,7 @@ class MeiliServerCommand extends Command
             $t = [$result['uid'], $result['status'], $result['type'], $result['startedAt']];
             $t['error'] = null;
             $t['url'] = null;
-            if ($result['status'] == 'failed') {
+            if ($result['status'] === 'failed') {
                 if (isset($result['error'])) {
                     $t['error'] = $result['error']['message'];
                     $t['link'] = $result['error']['link'];

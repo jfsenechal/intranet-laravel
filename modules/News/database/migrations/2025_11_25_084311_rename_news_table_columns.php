@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-news';
 
     /**
@@ -12,7 +13,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::connection('maria-news')->hasTable('news')) {
+        if (! Schema::connection('maria-news')->hasTable('news')) {
             Schema::connection('maria-news')->table('news', function (Blueprint $table) {
                 // Rename old columns to new Laravel convention names
                 $table->renameColumn('titre', 'name');
@@ -41,7 +42,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::connection('maria-news')->hasTable('categories')) {
+        if (! Schema::connection('maria-news')->hasTable('categories')) {
             Schema::connection('maria-news')->table('categorie', function (Blueprint $table) {
                 $table->rename('categories');
             });

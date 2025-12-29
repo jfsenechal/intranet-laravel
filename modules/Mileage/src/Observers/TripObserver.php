@@ -5,11 +5,9 @@ namespace AcMarche\Mileage\Observers;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Service\TripAttributeResolver;
 
-class TripObserver
+final class TripObserver
 {
-    public function __construct(private readonly TripAttributeResolver $tripAttributeResolver)
-    {
-    }
+    public function __construct(private readonly TripAttributeResolver $tripAttributeResolver) {}
 
     /**
      * Handle the Trip "created" event.
@@ -23,10 +21,7 @@ class TripObserver
     /**
      * Handle the Trip "created" event.
      */
-    public function created(Trip $trip): void
-    {
-
-    }
+    public function created(Trip $trip): void {}
 
     /**
      * Handle the Trip "updated" event.

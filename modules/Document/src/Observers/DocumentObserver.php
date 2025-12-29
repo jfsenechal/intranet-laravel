@@ -7,15 +7,12 @@ use AcMarche\Document\Models\Document;
 /**
  * Seel all observers https://laravel.com/docs/12.x/eloquent#events
  */
-class DocumentObserver
+final class DocumentObserver
 {
     /**
      * Handle the Document "created" event.
      */
-    public function created(Document $document): void
-    {
-
-    }
+    public function created(Document $document): void {}
 
     /**
      * Handle the Document "updated" event.

@@ -5,7 +5,7 @@ namespace AcMarche\Document\Database\Factories;
 use AcMarche\Document\Models\Document;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class DocumentFactory extends Factory
+final class DocumentFactory extends Factory
 {
     protected $model = Document::class;
 

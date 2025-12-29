@@ -7,7 +7,7 @@ use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
-class RoleRepository
+final class RoleRepository
 {
     public static function findByNameAndModuleId(string $name, int $moduleId): ?Role
     {
@@ -74,11 +74,11 @@ class RoleRepository
     public static function findRolesByUserAndModule(User $user, Module $module): array
     {
         return $user->roles() // Accesses the roles currently assigned to the user
-        ->where('module_id', $module->id) // Filters these roles to only those belonging to the given module
+            ->where('module_id', $module->id) // Filters these roles to only those belonging to the given module
         // 'module_id' is a column on your 'roles' table
-        ->pluck('roles.id') // Get only the IDs of these roles.
+            ->pluck('roles.id') // Get only the IDs of these roles.
         // 'roles.id' is important to specify the 'id' column of the 'roles' table,
         // not the pivot table's 'id' or another 'id'.
-        ->all();
+            ->all();
     }
 }

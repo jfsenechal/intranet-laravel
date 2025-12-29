@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ListBudgetArticles extends ListRecords
+final class ListBudgetArticles extends ListRecords
 {
     protected static string $resource = BudgetArticleResource::class;
 

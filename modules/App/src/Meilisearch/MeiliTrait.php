@@ -9,7 +9,7 @@ trait MeiliTrait
 {
     public ?Client $client = null;
 
-    private Indexes|null $index = null;
+    private ?Indexes $index = null;
 
     private ?string $masterKey = null;
 
@@ -20,11 +20,11 @@ trait MeiliTrait
         $this->setMasterKey(config('app.meilisearch.master_key'));
         $this->indexName = $indexName;
 
-        if (!$this->client) {
+        if (! $this->client) {
             $this->client = new Client('http://127.0.0.1:7700', $this->masterKey);
         }
 
-        if (!$this->index) {
+        if (! $this->index) {
             $this->index = $this->client->index($indexName);
         }
     }
