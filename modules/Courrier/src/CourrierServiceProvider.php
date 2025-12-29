@@ -2,6 +2,7 @@
 
 namespace AcMarche\Courrier;
 
+use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
 use Illuminate\Support\ServiceProvider;
 
 final class CourrierServiceProvider extends ServiceProvider
@@ -56,6 +57,23 @@ final class CourrierServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/courrier'),
         ], 'courrier-views');
+
+        // Register IMAP mailboxes
+        $this->registerImapMailboxes();
+    }
+
+    /**
+     * Register IMAP mailboxes for the courrier module.
+     */
+    protected function registerImapMailboxes(): void
+    {
+        Imap::register('imap_ville', [
+            'host' => config('courrier.imap.ville.host'),
+            'port' => config('courrier.imap.ville.port', 993),
+            'username' => config('courrier.imap.ville.username'),
+            'password' => config('courrier.imap.ville.password'),
+            'encryption' => config('courrier.imap.ville.encryption', 'ssl'),
+        ]);
     }
 
     /**

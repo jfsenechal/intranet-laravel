@@ -24,17 +24,8 @@ final class ImapRepository
 
     public function connectImap(): void
     {
-        Imap::register('imap_ville', [
-            'host' => config('courrier.imap.ville.host'),
-            'port' => config('courrier.imap.ville.port', 993),
-            'username' => config('courrier.imap.ville.username', ''),
-            'password' => config('courrier.imap.ville.password', ''),
-            'encryption' => config('courrier.imap.ville.encryption', 'ssl'),
-        ]);
-
         try {
             $this->mailbox = Imap::mailbox('imap_ville');
-
         } catch (Exception $e) {
             report($e);
         }
@@ -45,6 +36,7 @@ final class ImapRepository
      */
     public function getMessages(): array
     {
+        $this->connectImap();
         $inbox = $this->mailbox->inbox();
         $messages = $inbox->messages()
             ->since(now()->subDays(10))
@@ -53,7 +45,7 @@ final class ImapRepository
             ->get();
 
         return collect($messages)
-            ->map(fn(MessageInterface $message): array => [
+            ->map(fn (MessageInterface $message): array => [
                 'uid' => $message->uid(),
                 'date' => $message->date()?->format('d/m/Y H:i') ?? '',
                 'from' => self::formatAddress($message->from()),
@@ -65,7 +57,7 @@ final class ImapRepository
                 'html' => $message->html(),
                 'text' => $message->text(),
                 'attachments' => collect($message->attachments())
-                    ->map(fn($attachment): array => [
+                    ->map(fn ($attachment): array => [
                         'filename' => $attachment->filename() ?? 'Sans nom',
                         'content_type' => $attachment->contentType(),
                         'extension' => $attachment->extension(),
@@ -106,7 +98,7 @@ final class ImapRepository
         string $uid
     ): void {
         $message = $this->getMessageByUid($uid);
-        if (!$message) {
+        if (! $message) {
             throw new Exception('Message not found');
         }
         $message?->markDeleted(true);
@@ -136,13 +128,13 @@ final class ImapRepository
     ): ?Attachment {
         $this->connectImap();
         $message = $this->getMessageByUid($uid);
-        if (!$message) {
+        if (! $message) {
             throw new Exception('Message not found');
         }
 
         $attachment = $message->attachments()[$attachmentIndex];
 
-        if (!$attachment) {
+        if (! $attachment) {
             throw new Exception('Attachment not found');
         }
 
@@ -188,7 +180,7 @@ final class ImapRepository
                 return;
             }
 
-            while (!$stream->eof()) {
+            while (! $stream->eof()) {
                 fwrite($outputStream, $stream->read(8192));
                 flush();
             }
@@ -214,10 +206,17 @@ final class ImapRepository
         return $response;
     }
 
+    public function deleteMessages(array $messages): void
+    {
+        foreach ($messages as $message) {
+            $this->deleteMessage($message);
+        }
+    }
+
     private static function formatAddress(
         ?Address $address
     ): string {
-        if (!$address) {
+        if (! $address) {
             return '';
         }
 
@@ -229,12 +228,5 @@ final class ImapRepository
         }
 
         return $email;
-    }
-
-    public function deleteMessages(array $messages): void
-    {
-        foreach ($messages as $message) {
-            $this->deleteMessage($message);
-        }
     }
 }
