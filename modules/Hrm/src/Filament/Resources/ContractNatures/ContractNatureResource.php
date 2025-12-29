@@ -18,7 +18,7 @@ final class ContractNatureResource extends Resource
 {
     protected static ?string $model = ContractNature::class;
 
-    protected static ?string $navigationGroup = 'Configuration';
+    protected static string|null|\UnitEnum $navigationGroup = 'Configuration';
 
     protected static ?int $navigationSort = 2;
 

@@ -17,7 +17,7 @@ final class PrerequisiteResource extends Resource
 {
     protected static ?string $model = Prerequisite::class;
 
-    protected static ?string $navigationGroup = 'Configuration';
+    protected static string|null|\UnitEnum $navigationGroup = 'Configuration';
 
     protected static ?int $navigationSort = 7;
 

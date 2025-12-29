@@ -13,7 +13,7 @@ final class TrainingResource extends Resource
 {
     protected static ?string $model = Training::class;
 
-    protected static ?string $navigationGroup = 'Personnel';
+    protected static string|null|\UnitEnum $navigationGroup = 'Personnel';
 
     protected static ?int $navigationSort = 4;
 

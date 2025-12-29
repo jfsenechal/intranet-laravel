@@ -13,7 +13,7 @@ final class DirectionResource extends Resource
 {
     protected static ?string $model = Direction::class;
 
-    protected static ?string $navigationGroup = 'Organisation';
+    protected static string|null|\UnitEnum $navigationGroup = 'Organisation';
 
     protected static ?int $navigationSort = 1;
 

@@ -13,7 +13,7 @@ final class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
 
-    protected static ?string $navigationGroup = 'Personnel';
+    protected static string|null|\UnitEnum $navigationGroup = 'Personnel';
 
     protected static ?int $navigationSort = 2;
 

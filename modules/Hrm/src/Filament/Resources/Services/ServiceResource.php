@@ -13,7 +13,7 @@ final class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
-    protected static ?string $navigationGroup = 'Organisation';
+    protected static string|null|\UnitEnum $navigationGroup = 'Organisation';
 
     protected static ?int $navigationSort = 2;
 

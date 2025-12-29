@@ -13,7 +13,7 @@ final class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationGroup = 'Personnel';
+    protected static string|null|\UnitEnum $navigationGroup = 'Personnel';
 
     protected static ?int $navigationSort = 1;
 

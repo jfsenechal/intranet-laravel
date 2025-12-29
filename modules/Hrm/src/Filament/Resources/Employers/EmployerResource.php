@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,7 +19,7 @@ final class EmployerResource extends Resource
 {
     protected static ?string $model = Employer::class;
 
-    protected static ?string $navigationGroup = 'Configuration';
+    protected static string|null|\UnitEnum $navigationGroup = 'Configuration';
 
     protected static ?int $navigationSort = 4;
 
@@ -54,7 +55,7 @@ final class EmployerResource extends Resource
                             ->required()
                             ->maxLength(150)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn ($state, Set $set) => $set('slug', Str::slug($state))),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
