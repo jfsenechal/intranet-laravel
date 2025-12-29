@@ -5,6 +5,7 @@ namespace AcMarche\Mileage\Filament\Resources\Declarations\Pages;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Filament\Resources\Declarations\Schemas\DeclarationInfolist;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Pdf\PdfFactory;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -33,12 +34,19 @@ final class ViewDeclaration extends ViewRecord
                 ->label('Télécharger')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-                ->url(fn (Declaration $record) => route('download.declaration', $record))
                 ->action(function (Declaration $record) {
+
+                    $pdfFactory = new PdfFactory();
+                    $pdf = $pdfFactory->createFromDeclaration($record);
+
                     Notification::make()
                         ->title('Pdf exporté')
                         ->success()
                         ->send();
+
+                    return response()->download($pdf['path'], $pdf['name'], [
+                        'Content-Type' => 'application/pdf',
+                    ]);
                 }),
             Actions\Action::make('back')
                 ->label('Retour à la liste')

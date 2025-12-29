@@ -5,6 +5,7 @@ namespace AcMarche\Mileage\Filament\Pages;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Handler\ExportHandler;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Pdf\PdfFactory;
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -109,8 +110,8 @@ final class UserExport extends Page implements HasForms
         $data = $this->form->getState();
         $username = $data['username'];
 
-        $exportHandler = new ExportHandler();
-        $pdf = $exportHandler->exportByUserPdf($username);
+        $pdfFactory = new PdfFactory();
+        $pdf = $pdfFactory->createByUser($username);
 
         return response()->download($pdf['path'], $pdf['name'], [
             'Content-Type' => 'application/pdf',

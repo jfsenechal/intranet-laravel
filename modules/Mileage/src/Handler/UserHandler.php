@@ -9,7 +9,6 @@ use Exception;
 final class UserHandler
 {
     /**
-     *
      * @throws Exception
      */
     public static function createPersonalInformation(User $user, array $data): void

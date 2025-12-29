@@ -5,6 +5,7 @@ namespace AcMarche\Mileage\Filament\Pages;
 use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Handler\ExportHandler;
+use AcMarche\Mileage\Pdf\PdfFactory;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -15,7 +16,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Spatie\LaravelPdf\PdfBuilder;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use UnitEnum;
 
 final class AnnualExport extends Page implements HasForms
@@ -97,7 +98,7 @@ final class AnnualExport extends Page implements HasForms
         $data = $this->form->getState();
 
         $department = $data['department'];
-        $year = (int) $data['year'];
+        $year = (int)$data['year'];
         $omnium = $data['omnium'] === '1';
 
         $exportHandler = new ExportHandler();
@@ -108,16 +109,19 @@ final class AnnualExport extends Page implements HasForms
         $this->searched = true;
     }
 
-    public function downloadPdf(): PdfBuilder
+    public function downloadPdf(): BinaryFileResponse
     {
         $data = $this->form->getState();
 
         $department = $data['department'];
-        $year = (int) $data['year'];
+        $year = (int)$data['year'];
         $omnium = $data['omnium'] === '1';
 
-        $exportHandler = new ExportHandler();
+        $pdfFactory = new PdfFactory();
+        $pdf = $pdfFactory->createByYear($year, [$department], $omnium);
 
-        return $exportHandler->exportByYearPdf($year, [$department], $omnium);
+        return response()->download($pdf['path'], $pdf['name'], [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
 }
