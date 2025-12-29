@@ -12,7 +12,7 @@ final class ExportHandler
     /**
      * Export declarations by year as PDF.
      *
-     * @param array<string> $departments
+     * @param  array<string>  $departments
      * @return array{declarations: Collection<int, array<string, mixed>>, totalKilometers: int}
      */
     public function byYear(int $year, array $departments = [], ?bool $omnium = null): array
@@ -26,7 +26,7 @@ final class ExportHandler
             $username = $declaration->user_add;
             $tripKilometers = $declaration->trips->sum('kilometers');
 
-            if (!$groupedData->has($username)) {
+            if (! $groupedData->has($username)) {
                 $groupedData[$username] = [
                     'distance' => 0,
                     'last_name' => $declaration->last_name,
@@ -53,7 +53,7 @@ final class ExportHandler
     /**
      * Generate PDF for annual declarations recap.
      *
-     * @param array<string> $departments
+     * @param  array<string>  $departments
      */
     public function exportByYearPdf(int $year, array $departments = [], ?bool $omnium = null): PdfBuilder
     {
@@ -84,7 +84,7 @@ final class ExportHandler
         $declaration = DeclarationRepository::getOneDeclarationByUsername($username);
 
         $months = $this->getMonths();
-        $years = range(2016, (int)date('Y') + 1);
+        $years = range(2016, (int) date('Y') + 1);
 
         $deplacements = [
             'interne' => DeclarationRepository::getKilometersByYearMonth($username, 'interne'),
@@ -101,18 +101,22 @@ final class ExportHandler
 
     /**
      * Generate PDF for user declarations recap.
+     *
+     * @return array{path: string, name: string}
      */
-    public function exportByUserPdf(string $username): PdfBuilder
+    public function exportByUserPdf(string $username): array
     {
         $data = $this->byUser($username);
         $name = 'declarations-'.$username.'.pdf';
         $directory = storage_path('app/private/mileage/exports');
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
-        return Pdf::view('mileage::filament.export.user_declarations-pdf', [
+        $path = $directory.'/'.$name;
+
+        Pdf::view('mileage::filament.export.user_declarations-pdf', [
             'username' => $username,
             'declaration' => $data['declaration'],
             'months' => $data['months'],
@@ -120,8 +124,12 @@ final class ExportHandler
             'deplacements' => $data['deplacements'],
         ])
             ->landscape()
-            ->save($directory.'/'.$name)
-            ->download($name);
+            ->save($path);
+
+        return [
+            'path' => $path,
+            'name' => $name,
+        ];
     }
 
     /**

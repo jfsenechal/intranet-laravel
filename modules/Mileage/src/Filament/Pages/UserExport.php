@@ -15,7 +15,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
-use Spatie\LaravelPdf\PdfBuilder;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use UnitEnum;
 
 final class UserExport extends Page implements HasForms
@@ -104,23 +104,17 @@ final class UserExport extends Page implements HasForms
         $this->searched = true;
     }
 
-    public function downloadPdf()
+    public function downloadPdf(): BinaryFileResponse
     {
         $data = $this->form->getState();
         $username = $data['username'];
 
         $exportHandler = new ExportHandler();
-
         $pdf = $exportHandler->exportByUserPdf($username);
-        /*
- return response()->download(
-            $this->invoice->file_path, 'invoice.pdf'
-        );
-       return $pdf->toResponse(request());
-*/
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->html;
-        }, 'users.pdf');
+
+        return response()->download($pdf['path'], $pdf['name'], [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
 
     private function addNotification(): void
