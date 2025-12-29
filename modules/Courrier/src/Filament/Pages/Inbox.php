@@ -39,7 +39,7 @@ final class Inbox extends Page implements HasTable
 
     public function getTitle(): string|Htmlable
     {
-        return 'Boite mail';
+        return 'Boite mail '.config('courrier.imap.ville.email');
     }
 
     public function table(Table $table): Table
