@@ -16,6 +16,8 @@ return new class extends Migration
                 $table->rename('internships');
             });
             Schema::connection($this->connection)->table('internships', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('date_debut', 'start_date');
                 $table->renameColumn('date_fin', 'end_date');
                 $table->renameColumn('date_rappel', 'reminder_date');
@@ -48,6 +50,8 @@ return new class extends Migration
                 $table->rename('applications');
             });
             Schema::connection($this->connection)->table('applications', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('date_reception', 'received_at');
                 $table->renameColumn('courrier_reference', 'mail_reference');
                 $table->renameColumn('appel_public', 'public_call');
@@ -86,6 +90,8 @@ return new class extends Migration
                 $table->rename('deadlines');
             });
             Schema::connection($this->connection)->table('deadlines', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('intitule', 'title');
                 $table->renameColumn('date_debut', 'start_date');
                 $table->renameColumn('date_fin', 'end_date');
@@ -123,6 +129,7 @@ return new class extends Migration
                 $table->rename('hr_documents');
             });
             Schema::connection($this->connection)->table('hr_documents', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('intitule', 'title');
                 $table->renameColumn('fileName', 'file_name');
                 $table->renameColumn('remarques', 'notes');
@@ -149,6 +156,7 @@ return new class extends Migration
                 $table->rename('valorizations');
             });
             Schema::connection($this->connection)->table('valorizations', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('employeur', 'employer_name');
                 $table->renameColumn('duree', 'duration');
                 $table->renameColumn('contenu', 'content');
@@ -227,6 +235,7 @@ return new class extends Migration
         // SMS
         if (Schema::connection($this->connection)->hasTable('sms')) {
             Schema::connection($this->connection)->table('sms', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('numero', 'phone_number');
                 $table->renameColumn('date_rappel', 'reminder_date');
                 $table->renameColumn('date_send', 'sent_at');
@@ -256,6 +265,7 @@ return new class extends Migration
                 $table->rename('operators');
             });
             Schema::connection($this->connection)->table('operators', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('slugname', 'slug');
                 $table->renameColumn('contact_nom', 'contact_last_name');

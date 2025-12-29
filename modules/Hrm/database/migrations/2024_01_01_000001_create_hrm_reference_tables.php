@@ -36,6 +36,7 @@ return new class extends Migration
             });
             Schema::connection($this->connection)->table('directions', function (Blueprint $table) {
                 $table->renameColumn('intitule', 'title');
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('slugname', 'slug');
                 $table->renameColumn('directeur', 'director');
                 $table->renameColumn('abreviation', 'abbreviation');
@@ -100,6 +101,7 @@ return new class extends Migration
                 $table->rename('pay_scales');
             });
             Schema::connection($this->connection)->table('pay_scales', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('intitule', 'title');
             });
         } elseif (! Schema::connection($this->connection)->hasTable('pay_scales')) {
@@ -134,6 +136,7 @@ return new class extends Migration
                 $table->rename('contract_types');
             });
             Schema::connection($this->connection)->table('contract_types', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('slugname', 'slug');
             });
@@ -154,6 +157,7 @@ return new class extends Migration
                 $table->rename('contract_natures');
             });
             Schema::connection($this->connection)->table('contract_natures', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('slugname', 'slug');
             });
@@ -208,6 +212,7 @@ return new class extends Migration
                 $table->rename('prerequisites');
             });
             Schema::connection($this->connection)->table('prerequisites', function (Blueprint $table) {
+                $table->renameColumn('employeur_id', 'employer_id');
                 $table->renameColumn('intitule', 'title');
             });
         } elseif (! Schema::connection($this->connection)->hasTable('prerequisites')) {

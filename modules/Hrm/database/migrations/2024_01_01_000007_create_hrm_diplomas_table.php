@@ -15,6 +15,7 @@ return new class extends Migration
                 $table->rename('diplomas');
             });
             Schema::connection($this->connection)->table('diplomas', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('intitule', 'title');
                 $table->renameColumn('attestation_name', 'certificate_file');
                 $table->renameColumn('user', 'user_add');

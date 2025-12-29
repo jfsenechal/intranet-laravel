@@ -15,6 +15,7 @@ return new class extends Migration
                 $table->rename('evaluations');
             });
             Schema::connection($this->connection)->table('evaluations', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('date_evaluation', 'evaluation_date');
                 $table->renameColumn('date_prochaine', 'next_evaluation_date');
                 $table->renameColumn('date_validation', 'validation_date');

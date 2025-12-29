@@ -15,6 +15,7 @@ return new class extends Migration
                 $table->rename('absences');
             });
             Schema::connection($this->connection)->table('absences', function (Blueprint $table) {
+                $table->renameColumn('employe_id', 'employee_id');
                 $table->renameColumn('date_debut', 'start_date');
                 $table->renameColumn('date_fin', 'end_date');
                 $table->renameColumn('date_rappel', 'reminder_date');
