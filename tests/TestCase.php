@@ -18,12 +18,13 @@ abstract class TestCase extends BaseTestCase
         'maria-news',
         'maria-publication',
         'maria-security',
+        'maria-hrm',
     ];
 
     protected function beforeRefreshingDatabase(): void
     {
         $path = storage_path().'/../data/sqlite/';
-        $tables = ['courrier', 'document', 'intranet', 'mileage', 'news', 'publication'];
+        $tables = ['courrier', 'document', 'intranet', 'mileage', 'news', 'publication', 'hrm'];
 
         if (is_writable($path)) {
             shell_exec('rm -f '.$path.'*');

@@ -17,6 +17,7 @@
         "acmarche/mileage": "*@dev",
         "acmarche/news": "*@dev",
         "acmarche/publication": "*@dev",
+        "acmarche/hrm": "*@dev",
         "acmarche/security": "*@dev",
         "barryvdh/laravel-dompdf": "^v3.1.1",
         "directorytree/ldaprecord-laravel": "^3.4",
@@ -55,6 +56,10 @@
         {
             "type": "path",
             "url": "./modules/Publication"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Hrm"
         },
         {
             "type": "path",

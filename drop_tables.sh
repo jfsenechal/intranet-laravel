@@ -7,7 +7,7 @@ DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
 
 # List of databases to clean
-DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_ville")
+DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_ville" "grh_all")
 #DATABASES=("publication")
 
 # Function to drop all tables in a database
