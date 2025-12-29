@@ -20,4 +20,27 @@ final readonly class EmailMessage
         public ?string $text,
         public array $attachments,
     ) {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'uid' => $this->uid,
+            'date' => $this->date,
+            'from' => $this->from,
+            'from_email' => $this->fromEmail,
+            'from_name' => $this->fromName,
+            'subject' => $this->subject,
+            'has_attachments' => $this->hasAttachments,
+            'attachment_count' => $this->attachmentCount,
+            'html' => $this->html,
+            'text' => $this->text,
+            'attachments' => array_map(
+                fn (EmailAttachment $attachment): array => $attachment->toArray(),
+                $this->attachments
+            ),
+        ];
+    }
 }

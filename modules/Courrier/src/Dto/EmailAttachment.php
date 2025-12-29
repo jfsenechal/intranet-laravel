@@ -9,4 +9,16 @@ final readonly class EmailAttachment
         public ?string $contentType,
         public ?string $extension,
     ) {}
+
+    /**
+     * @return array{filename: string, content_type: ?string, extension: ?string}
+     */
+    public function toArray(): array
+    {
+        return [
+            'filename' => $this->filename,
+            'content_type' => $this->contentType,
+            'extension' => $this->extension,
+        ];
+    }
 }
