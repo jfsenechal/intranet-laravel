@@ -4,6 +4,7 @@ namespace AcMarche\Courrier\Policies;
 
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Models\Recipient;
 use App\Models\User;
 
 final class IncomingMailPolicy
@@ -21,6 +22,18 @@ final class IncomingMailPolicy
      */
     public function view(User $user, IncomingMail $incomingMail): bool
     {
+        if ($this->isAdministrator($user)) {
+            return true;
+        }
+
+        if ($this->isRecipientOfMail($user, $incomingMail)) {
+            return true;
+        }
+
+        if ($this->isMemberOfLinkedService($user, $incomingMail)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -80,5 +93,32 @@ final class IncomingMailPolicy
         }
 
         return false;
+    }
+
+    /**
+     * Check if the user is a recipient of the incoming mail.
+     */
+    private function isRecipientOfMail(User $user, IncomingMail $incomingMail): bool
+    {
+        return $incomingMail->recipients()
+            ->where('username', $user->username)
+            ->exists();
+    }
+
+    /**
+     * Check if the user is a member of a service linked to the incoming mail.
+     */
+    private function isMemberOfLinkedService(User $user, IncomingMail $incomingMail): bool
+    {
+        $serviceIds = $incomingMail->services()->pluck('services.id');
+
+        if ($serviceIds->isEmpty()) {
+            return false;
+        }
+
+        return Recipient::query()
+            ->where('username', $user->username)
+            ->whereHas('services', fn ($query) => $query->whereIn('services.id', $serviceIds))
+            ->exists();
     }
 }
