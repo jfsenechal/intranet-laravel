@@ -4,7 +4,7 @@ namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 
 use AcMarche\Courrier\Dto\EmailMessage;
 use AcMarche\Courrier\Exception\ImapException;
-use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxForm;
+use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxInfolist;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -51,7 +51,7 @@ final class InboxTables
                     ->icon(Heroicon::Eye)
                     ->modalHeading(fn (array $record): string => $record['subject'] ?? 'Sans objet')
                     ->modalWidth(Width::FiveExtraLarge)
-                    ->schema(fn (array $record): array => InboxForm::getEmailViewSchema($record))
+                    ->schema(fn (array $record): array => InboxInfolist::getEmailViewSchema($record))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
             ])

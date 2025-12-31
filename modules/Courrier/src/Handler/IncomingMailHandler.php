@@ -5,9 +5,10 @@ namespace AcMarche\Courrier\Handler;
 use AcMarche\Courrier\Exception\ImapException;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\ImapRepository;
+use Exception;
 use Filament\Notifications\Notification;
 
-class IncomingMailHandler
+final class IncomingMailHandler
 {
     /**
      * @param  array<string, mixed>  $data
@@ -80,7 +81,7 @@ class IncomingMailHandler
                         ->send();
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             report($e);
 
             Notification::make()
