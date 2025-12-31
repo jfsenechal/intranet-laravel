@@ -4,20 +4,17 @@ namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 
 use AcMarche\Courrier\Dto\EmailMessage;
 use AcMarche\Courrier\Exception\ImapException;
+use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxForm;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
-use Illuminate\Support\HtmlString;
 
 final class InboxTables
 {
@@ -54,7 +51,7 @@ final class InboxTables
                     ->icon(Heroicon::Eye)
                     ->modalHeading(fn (array $record): string => $record['subject'] ?? 'Sans objet')
                     ->modalWidth(Width::FiveExtraLarge)
-                    ->schema(fn (array $record): array => self::getEmailViewSchema($record))
+                    ->schema(fn (array $record): array => InboxForm::getEmailViewSchema($record))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
             ])
@@ -103,59 +100,5 @@ final class InboxTables
 
             return [];
         }
-    }
-
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<int, mixed>
-     */
-    private static function getEmailViewSchema(array $record): array
-    {
-        $components = [
-            Section::make('Informations')
-                ->schema([
-                    TextEntry::make('from')
-                        ->label('De')
-                        ->state($record['from']),
-                    TextEntry::make('date')
-                        ->label('Date')
-                        ->state($record['date']),
-                    TextEntry::make('subject')
-                        ->label('Objet')
-                        ->state($record['subject']),
-                ])
-                ->columns(3),
-        ];
-
-        // Add attachments section if there are any
-        if (! empty($record['attachments'])) {
-            $components[] = Section::make('Pièces jointes')
-                ->icon('tabler-paperclip')
-                ->schema([
-                    RepeatableEntry::make('attachments')
-                        ->hiddenLabel()
-                        ->state($record['attachments'])
-                        ->schema([
-                            TextEntry::make('filename')
-                                ->label('Fichier')
-                                ->icon('tabler-file'),
-                            TextEntry::make('content_type')
-                                ->label('Type'),
-                        ])
-                        ->columns(2),
-                ]);
-        }
-
-        // Add content section
-        $content = $record['html'] ?? $record['text'] ?? '';
-        $components[] = Section::make('Contenu')
-            ->schema([
-                TextEntry::make('content')
-                    ->hiddenLabel()
-                    ->state(new HtmlString($content))
-                    ->html(),
-            ]);
-
-        return $components;
     }
 }
