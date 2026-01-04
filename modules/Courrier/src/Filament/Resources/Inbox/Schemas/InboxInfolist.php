@@ -86,7 +86,7 @@ final class InboxInfolist
                 ->modalWidth(Width::SevenExtraLarge)
                 ->fillForm(fn (): array => [
                     'reference_number' => '',
-                    'sender' => $record['from_name'] ?: $record['from_email'],
+                    'sender' =>'',
                     'mail_date' => now(),
                     'description' => $record['subject'] ?? '',
                     'is_registered' => false,
