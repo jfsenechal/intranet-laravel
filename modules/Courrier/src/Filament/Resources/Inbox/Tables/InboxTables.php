@@ -51,7 +51,7 @@ final class InboxTables
                     ->icon(Heroicon::Eye)
                     ->modalHeading(fn (array $record): string => $record['subject'] ?? 'Sans objet')
                     ->modalWidth(Width::FiveExtraLarge)
-                    ->schema(fn (array $record): array => InboxInfolist::getEmailViewSchema($record))
+                    ->schema(fn (?array $record): array => InboxInfolist::getEmailViewSchema($record))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
             ])

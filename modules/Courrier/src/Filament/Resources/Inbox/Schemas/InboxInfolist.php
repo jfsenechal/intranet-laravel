@@ -13,11 +13,14 @@ use Illuminate\Support\HtmlString;
 final class InboxInfolist
 {
     /**
-     * @param  array<string, mixed>  $record
+     * @param  array<string, mixed>|null  $record
      * @return array<int, mixed>
      */
-    public static function getEmailViewSchema(array $record): array
+    public static function getEmailViewSchema(?array $record): array
     {
+        if (! $record) {
+            return [];
+        }
         $components = [
             Section::make('Informations')
                 ->schema([
