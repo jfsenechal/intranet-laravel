@@ -103,8 +103,13 @@ final class InboxInfolist
                     $filename,
                     $isPreviewable
                 ))
-                ->action(function (array $data) use ($uid, $attachmentCount): void {
+                ->action(function (array $data, Action $action) use ($uid, $attachmentCount): void {
                     IncomingMailHandler::handleIncomingMailCreation($data, $uid, $attachmentCount);
+
+                    // Close parent modal if only one attachment (message will be deleted)
+                    if ($attachmentCount === 1) {
+                        $action->cancelParentActions();
+                    }
                 })
                 ->modalSubmitActionLabel('Enregistrer le courrier');
         }
