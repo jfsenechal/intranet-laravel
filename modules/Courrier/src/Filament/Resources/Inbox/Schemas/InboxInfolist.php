@@ -82,11 +82,12 @@ final class InboxInfolist
                 ->label($filename)
                 ->icon(self::getAttachmentIcon($contentType))
                 ->color('gray')
+                ->record(null)
                 ->modalHeading("Traiter: {$filename}")
                 ->modalWidth(Width::SevenExtraLarge)
                 ->fillForm(fn (): array => [
                     'reference_number' => '',
-                    'sender' =>'',
+                    'sender' => '',
                     'mail_date' => now(),
                     'description' => $record['subject'] ?? '',
                     'is_registered' => false,

@@ -5,8 +5,8 @@ namespace AcMarche\Courrier\Filament\Resources\Inbox\Schemas;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Flex;
@@ -58,8 +58,9 @@ final class InboxForm
                         ->label('Expéditeur')
                         ->required()
                         ->maxLength(255),
-                    RichEditor::make('description')
+                    Textarea::make('description')
                         ->label('Description')
+                        ->rows(4)
                         ->columnSpanFull(),
                 ])
                 ->columns(2)
