@@ -34,7 +34,8 @@ final class DocumentPanelProvider extends PanelProvider
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
-
+            ->resourceCreatePageRedirect('view')
+            ->resourceEditPageRedirect('view')
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Document\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Document\\Filament\\Pages')
             ->pages([

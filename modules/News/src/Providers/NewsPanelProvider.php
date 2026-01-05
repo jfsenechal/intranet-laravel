@@ -34,7 +34,8 @@ final class NewsPanelProvider extends PanelProvider
             ->brandName('Quoi de neuf?')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
-
+            ->resourceCreatePageRedirect('view')
+            ->resourceEditPageRedirect('view')
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\News\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\News\\Filament\\Pages')
             ->pages([

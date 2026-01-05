@@ -34,6 +34,8 @@ final class HrmPanelProvider extends PanelProvider
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
+            ->resourceCreatePageRedirect('view')
+            ->resourceEditPageRedirect('view')
             ->databaseNotifications()
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Hrm\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Hrm\\Filament\\Pages')
