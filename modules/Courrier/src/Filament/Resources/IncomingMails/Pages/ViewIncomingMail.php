@@ -17,7 +17,7 @@ final class ViewIncomingMail extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->reference;
+        return $this->record->reference_number;
     }
 
     public function infolist(Schema $schema): Schema
