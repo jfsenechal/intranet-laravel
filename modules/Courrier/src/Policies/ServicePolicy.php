@@ -21,7 +21,7 @@ final class ServicePolicy
      */
     public function view(User $user, Service $service): bool
     {
-        return false;
+        return true;
     }
 
     /**
