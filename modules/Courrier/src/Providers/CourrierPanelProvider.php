@@ -33,6 +33,8 @@ final class CourrierPanelProvider extends PanelProvider
                 'primary' => Color::Pink,
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->resourceCreatePageRedirect('view')
+            ->resourceEditPageRedirect('view')
             ->unsavedChangesAlerts()
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Courrier\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Courrier\\Filament\\Pages')
