@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Console\Commands;
 
-use DB;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Command\Command as SfCommand;
 
 final class MigrationRoleCommand extends Command
