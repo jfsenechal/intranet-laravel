@@ -2,8 +2,12 @@
 
 namespace AcMarche\Courrier\Filament\Resources\Services\Schemas;
 
+use AcMarche\Courrier\Models\Recipient;
 use Filament\Forms;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Tables\Filters\QueryBuilder;
+use Illuminate\Database\Eloquent\Builder;
 
 final class ServiceForm
 {
@@ -22,6 +26,25 @@ final class ServiceForm
                 Forms\Components\Toggle::make('is_active')
                     ->label('Actif')
                     ->default(true),
+
+                Section::make('Membres du service')
+                    ->description('Sélectionnez les destinataires qui font partie de ce service')
+                    ->schema([
+                        Forms\Components\CheckboxList::make('recipients')
+                            ->hiddenLabel()
+                            ->relationship(
+                                titleAttribute: 'last_name',
+                                modifyQueryUsing: fn(Builder $query) => $query->where('is_active', true)->orderBy(
+                                    'last_name'
+                                ),
+                            )
+                            ->getOptionLabelFromRecordUsing(
+                                fn(Recipient $record) => "{$record->first_name} {$record->last_name}"
+                            )
+                            ->columns(3)
+                            ->searchable(),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 }

@@ -5,6 +5,7 @@ namespace AcMarche\Courrier\Filament\Resources\Services;
 use AcMarche\Courrier\Filament\Resources\Services\Pages\CreateService;
 use AcMarche\Courrier\Filament\Resources\Services\Pages\EditService;
 use AcMarche\Courrier\Filament\Resources\Services\Pages\ListServices;
+use AcMarche\Courrier\Filament\Resources\Services\Pages\ViewService;
 use AcMarche\Courrier\Filament\Resources\Services\Schemas\ServiceForm;
 use AcMarche\Courrier\Filament\Resources\Services\Tables\ServiceTables;
 use AcMarche\Courrier\Models\Service;
@@ -56,6 +57,7 @@ final class ServiceResource extends Resource
         return [
             'index' => ListServices::route('/'),
             'create' => CreateService::route('/create'),
+            'view' => ViewService::route('/{record}'),
             'edit' => EditService::route('/{record}/edit'),
         ];
     }

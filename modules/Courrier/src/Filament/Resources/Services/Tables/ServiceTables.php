@@ -23,10 +23,15 @@ final class ServiceTables
                     ->label('Nom')
                     ->searchable()
                     ->sortable()
-                    ->url(fn (Service $record) => ServiceResource::getUrl('edit', ['record' => $record->id])),
+                    ->url(fn (Service $record) => ServiceResource::getUrl('view', ['record' => $record->id])),
                 Tables\Columns\TextColumn::make('initials')
                     ->label('Initiales')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('recipients_count')
+                    ->label('Destinataires')
+                    ->counts('recipients')
+                    ->badge()
+                    ->color('gray'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Actif')
                     ->boolean(),
