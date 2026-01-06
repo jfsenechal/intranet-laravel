@@ -3,10 +3,10 @@
 namespace AcMarche\Courrier\Filament\Resources\Services\Schemas;
 
 use AcMarche\Courrier\Models\Recipient;
+use AcMarche\Courrier\Repository\RecipientRepository;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables\Filters\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 
 final class ServiceForm
@@ -34,9 +34,9 @@ final class ServiceForm
                             ->hiddenLabel()
                             ->relationship(
                                 titleAttribute: 'last_name',
-                                modifyQueryUsing: fn(Builder $query) => $query->where('is_active', true)->orderBy(
-                                    'last_name'
-                                ),
+                                modifyQueryUsing: fn(Builder $query) => RecipientRepository::queryActiveOrderByLastName(
+                                    $query
+                                )
                             )
                             ->getOptionLabelFromRecordUsing(
                                 fn(Recipient $record) => "{$record->first_name} {$record->last_name}"
