@@ -3,24 +3,17 @@
 namespace AcMarche\Courrier\Filament\Resources\NotifyRecipients\Tables;
 
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Repository\IncomingMailRepository;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class NotifyRecipientsTables
 {
     public static function configure(Table $table, ?string $mailDate): Table
     {
         return $table
-            ->query(
-                IncomingMail::query()
-                    ->where('is_notified', false)
-                    ->when($mailDate, function (Builder $query) use ($mailDate): void {
-                        $query->whereDate('mail_date', $mailDate);
-                    })
-                    ->with(['services', 'recipients', 'attachments', 'category'])
-            )
+            ->query(IncomingMailRepository::findByDateAndNotNotified())
             ->columns([
                 TextColumn::make('reference_number')
                     ->label('Numero')

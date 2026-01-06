@@ -7,10 +7,21 @@ use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class IncomingMailRepository
 {
+    public static function findByDateAndNotNotified(string $mailDate): Builder
+    {
+        return IncomingMail::query()
+            ->where('is_notified', false)
+            ->when($mailDate, function (Builder $query) use ($mailDate): void {
+                $query->whereDate('mail_date', $mailDate);
+            })
+            ->with(['services', 'recipients', 'attachments', 'category']);
+    }
+
     /**
      * @return Collection<int, IncomingMail>
      */
