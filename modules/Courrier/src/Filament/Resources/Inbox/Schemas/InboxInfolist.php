@@ -103,8 +103,15 @@ final class InboxInfolist
                     $filename,
                     $isPreviewable
                 ))
-                ->action(function (array $data, Action $action) use ($uid, $attachmentCount): void {
-                    IncomingMailHandler::handleIncomingMailCreation($data, $uid, $attachmentCount);
+                ->action(function (array $data, Action $action) use ($uid, $attachmentCount, $index, $filename, $contentType): void {
+                    IncomingMailHandler::handleIncomingMailCreation(
+                        $data,
+                        $uid,
+                        $attachmentCount,
+                        $index,
+                        $filename,
+                        $contentType
+                    );
 
                     // Close parent modal if only one attachment (message will be deleted)
                     if ($attachmentCount === 1) {

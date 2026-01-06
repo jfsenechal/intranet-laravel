@@ -3,18 +3,27 @@
 namespace AcMarche\Courrier\Handler;
 
 use AcMarche\Courrier\Exception\ImapException;
+use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Exception;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 final class IncomingMailHandler
 {
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function handleIncomingMailCreation(array $data, string $uid, int $attachmentCount): void
-    {
+    public static function handleIncomingMailCreation(
+        array $data,
+        string $uid,
+        int $attachmentCount,
+        int $attachmentIndex,
+        string $attachmentFilename,
+        string $attachmentMime
+    ): void {
         $imapRepository = new ImapRepository();
 
         try {
@@ -57,6 +66,9 @@ final class IncomingMailHandler
                 }
             }
 
+            // Save the attachment
+            self::saveAttachment($imapRepository, $incomingMail, $uid, $attachmentIndex, $attachmentFilename, $attachmentMime);
+
             Notification::make()
                 ->title('Courrier créé')
                 ->body("Le courrier #{$incomingMail->reference_number} a été créé avec succès.")
@@ -88,6 +100,46 @@ final class IncomingMailHandler
                 ->title('Erreur lors de la création du courrier')
                 ->body($e->getMessage())
                 ->danger()
+                ->send();
+        }
+    }
+
+    private static function saveAttachment(
+        ImapRepository $imapRepository,
+        IncomingMail $incomingMail,
+        string $uid,
+        int $attachmentIndex,
+        string $filename,
+        string $mime
+    ): void {
+        try {
+            $attachment = $imapRepository->getAttachment($uid, $attachmentIndex);
+            $stream = $attachment->contentStream();
+
+            // Generate unique filename
+            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            $storedFilename = sprintf(
+                '%d_%s.%s',
+                $incomingMail->id,
+                Str::slug(pathinfo($filename, PATHINFO_FILENAME)),
+                $extension
+            );
+
+            // Save to storage
+            $path = "courrier/attachments/{$storedFilename}";
+            Storage::disk('local')->put($path, $stream->getContents());
+
+            // Create attachment record
+            Attachment::create([
+                'incoming_mail_id' => $incomingMail->id,
+                'file_name' => $storedFilename,
+                'mime' => $mime,
+            ]);
+        } catch (ImapException $e) {
+            Notification::make()
+                ->title('Erreur lors de la sauvegarde de la pièce jointe')
+                ->body($e->getMessage())
+                ->warning()
                 ->send();
         }
     }

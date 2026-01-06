@@ -3,9 +3,12 @@
 namespace AcMarche\Courrier\Http\Controllers;
 
 use AcMarche\Courrier\Exception\ImapException;
+use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class AttachmentController extends Controller
@@ -56,5 +59,20 @@ final class AttachmentController extends Controller
         } catch (ImapException $e) {
             return response($e->getMessage(), 404);
         }
+    }
+
+    public function download(Attachment $attachment): BinaryFileResponse|Response
+    {
+        $path = "courrier/attachments/{$attachment->file_name}";
+
+        if (! Storage::disk('local')->exists($path)) {
+            return response('Fichier non trouvé', 404);
+        }
+
+        $fullPath = Storage::disk('local')->path($path);
+
+        return response()->download($fullPath, $attachment->file_name, [
+            'Content-Type' => $attachment->mime,
+        ]);
     }
 }

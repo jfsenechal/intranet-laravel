@@ -32,8 +32,9 @@ final class ViewIncomingMail extends ViewRecord
                 ->label('Télécharger la pièce jointe')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-                ->url(fn (IncomingMail $record) => Storage::disk('public')->url($record->attachment_path))
-                ->visible(fn (IncomingMail $record): bool => ! blank($record->attachment_path)),
+             //   ->url(fn (IncomingMail $record) => Storage::disk('public')->url($record->attachment_path))
+            //    ->visible(fn (IncomingMail $record): bool => ! blank($record->attachment_path)),
+        ,
             Actions\Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')
