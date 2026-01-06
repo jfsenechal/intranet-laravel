@@ -43,9 +43,7 @@ final class InboxInfolist
             $components[] = Section::make('Pièces jointes')
                 ->icon('tabler-paperclip')
                 ->schema([
-                    ActionGroup::make($attachmentActions)
-                        ->buttonGroup()
-                        ->dropdownPlacement('top-start'),
+                    ActionGroup::make($attachmentActions),
                 ]);
         }
 
