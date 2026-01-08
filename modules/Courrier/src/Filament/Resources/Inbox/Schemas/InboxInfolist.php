@@ -13,12 +13,12 @@ use Illuminate\Support\HtmlString;
 final class InboxInfolist
 {
     /**
-     * @param  array<string, mixed>|null  $record
+     * @param array<string, mixed>|null $record
      * @return array<int, mixed>
      */
     public static function getEmailViewSchema(?array $record): array
     {
-        if (! $record) {
+        if (!$record) {
             return [];
         }
         $components = [
@@ -38,13 +38,13 @@ final class InboxInfolist
         ];
 
         // Add attachments section if there are any
-        if (! empty($record['attachments'])) {
+        if (!empty($record['attachments'])) {
             $attachmentActions = self::buildAttachmentActions($record);
             $components[] = Section::make('Pièces jointes')
                 ->icon('tabler-paperclip')
-                ->schema([
-                    ActionGroup::make($attachmentActions),
-                ]);
+                ->description('Cliquez sur un fichier pour le traiter')
+                ->schema($attachmentActions)
+                ->columns(2);
         }
 
         // Add content section
@@ -61,7 +61,7 @@ final class InboxInfolist
     }
 
     /**
-     * @param  array<string, mixed>  $record
+     * @param array<string, mixed> $record
      * @return array<int, Action>
      */
     private static function buildAttachmentActions(array $record): array
@@ -86,7 +86,7 @@ final class InboxInfolist
                 ->record(null)
                 ->modalHeading("Traiter: {$filename}")
                 ->modalWidth(Width::SevenExtraLarge)
-                ->fillForm(fn (): array => [
+                ->fillForm(fn(): array => [
                     'reference_number' => '',
                     'sender' => '',
                     'mail_date' => now(),
@@ -94,28 +94,36 @@ final class InboxInfolist
                     'is_registered' => false,
                     'has_acknowledgment' => false,
                 ])
-                ->schema(fn (): array => InboxForm::getAttachmentFormSchema(
+                ->schema(fn(): array => InboxForm::getAttachmentFormSchema(
                     $uid,
                     $index,
                     $contentType,
                     $filename,
                     $isPreviewable
                 ))
-                ->action(function (array $data, Action $action) use ($uid, $attachmentCount, $index, $filename, $contentType): void {
-                    IncomingMailHandler::handleIncomingMailCreation(
-                        $data,
+                ->action(
+                    function (array $data, Action $action) use (
                         $uid,
                         $attachmentCount,
                         $index,
                         $filename,
                         $contentType
-                    );
+                    ): void {
+                        IncomingMailHandler::handleIncomingMailCreation(
+                            $data,
+                            $uid,
+                            $attachmentCount,
+                            $index,
+                            $filename,
+                            $contentType
+                        );
 
-                    // Close parent modal if only one attachment (message will be deleted)
-                    if ($attachmentCount === 1) {
-                        $action->cancelParentActions();
+                        // Close parent modal if only one attachment (message will be deleted)
+                        if ($attachmentCount === 1) {
+                            $action->cancelParentActions();
+                        }
                     }
-                })
+                )
                 ->modalSubmitActionLabel('Enregistrer le courrier');
         }
 
