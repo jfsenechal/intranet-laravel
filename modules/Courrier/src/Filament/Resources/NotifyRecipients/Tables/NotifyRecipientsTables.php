@@ -13,7 +13,7 @@ class NotifyRecipientsTables
     public static function configure(Table $table, ?string $mailDate): Table
     {
         return $table
-            ->query(IncomingMailRepository::findByDateAndNotNotified())
+            ->query(IncomingMailRepository::findByDateAndNotNotified($mailDate))
             ->columns([
                 TextColumn::make('reference_number')
                     ->label('Numero')
