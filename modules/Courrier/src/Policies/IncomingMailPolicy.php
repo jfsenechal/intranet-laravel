@@ -10,6 +10,18 @@ use App\Models\User;
 final class IncomingMailPolicy
 {
     /**
+     * Perform pre-authorization checks.
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return null;
+    }
+
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
@@ -22,11 +34,7 @@ final class IncomingMailPolicy
      */
     public function view(User $user, IncomingMail $incomingMail): bool
     {
-        if ($this->isAdministrator($user)) {
-            return true;
-        }
-
-        if ($this->isRecipientOfMail($user, $incomingMail)) {
+         if ($this->isRecipientOfMail($user, $incomingMail)) {
             return true;
         }
 
@@ -79,9 +87,6 @@ final class IncomingMailPolicy
 
     private function isAdministrator(User $user): bool
     {
-        if ($user->isAdministrator()) {
-            return true;
-        }
         if ($user->hasOneOfThisRoles(
             [
                 RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN,

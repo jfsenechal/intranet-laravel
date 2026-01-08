@@ -14,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 
 final class SendIncomingMailNotificationJob implements ShouldQueue
@@ -22,7 +23,8 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
     public function __construct(
         public readonly Carbon $mailDate,
-    ) {}
+    ) {
+    }
 
     public function handle(): void
     {
@@ -41,11 +43,13 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
             $includeAttachments = $recipient->receives_attachments;
 
             Mail::to($recipient->email)
-                ->queue(new IncomingMailNotification(
-                    $recipient,
-                    $incomingMails,
-                    $includeAttachments,
-                ));
+                ->queue(
+                    new IncomingMailNotification(
+                        $recipient,
+                        $incomingMails,
+                        $includeAttachments,
+                    )
+                );
 
             $incomingMails->each(function (IncomingMail $mail): void {
                 $mail->update(['is_notified' => true]);
@@ -82,7 +86,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
     private function recipientHasIndexRole(Recipient $recipient): bool
     {
-        if (! $recipient->username) {
+        if (!$recipient->username) {
             return false;
         }
 
@@ -90,14 +94,10 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
             ->where('username', $recipient->username)
             ->first();
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
-        return $user->hasOneOfThisRoles([
-            RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value,
-            RolesEnum::ROLE_INDICATEUR_CPAS_INDEX->value,
-            RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->value,
-        ]);
+        return Gate::check('courrier-index', ['user' => $user]);
     }
 }
