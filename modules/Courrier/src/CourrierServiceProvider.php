@@ -3,6 +3,7 @@
 namespace AcMarche\Courrier;
 
 use AcMarche\Courrier\Console\Commands\SyncCommand;
+use AcMarche\Courrier\Policies\RegisterPolicies;
 use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
 use Illuminate\Support\ServiceProvider;
 
@@ -34,6 +35,8 @@ final class CourrierServiceProvider extends ServiceProvider
                 SyncCommand::class,
             ]);
         }
+
+        RegisterPolicies::register();
 
         // Load migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');

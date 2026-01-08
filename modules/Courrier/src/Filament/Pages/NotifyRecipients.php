@@ -2,7 +2,6 @@
 
 namespace AcMarche\Courrier\Filament\Pages;
 
-use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Resources\NotifyRecipients\Schemas\NotifyRecipientsForm;
 use AcMarche\Courrier\Filament\Resources\NotifyRecipients\Tables\NotifyRecipientsTables;
 use AcMarche\Courrier\Jobs\SendIncomingMailNotificationJob;
@@ -23,7 +22,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 final class NotifyRecipients extends Page implements HasForms, HasTable
@@ -32,11 +31,6 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     use InteractsWithTable;
 
     public ?string $mail_date = null;
-
-    /**
-     * @var array<int, array{recipient: Recipient, mails: Collection<int, IncomingMail>}>
-     */
-    public array $previewData = [];
 
     protected static string|null|BackedEnum $navigationIcon = 'tabler-mail-forward';
 
@@ -50,18 +44,12 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
 
     public static function canAccess(array $parameters = []): bool
     {
-        $user = Auth::user();
-        if ($user?->isAdministrator()) {
-            return true;
-        }
-
-        return $user?->hasRole(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value) ?? false;
+        return Gate::check('courrier-index');
     }
 
     public function mount(): void
     {
         $this->mail_date = now()->format('Y-m-d');
-        $this->loadPreviewData();
     }
 
     public function getTitle(): string|Htmlable
@@ -82,7 +70,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     public function loadPreviewData(): void
     {
         if (!$this->mail_date) {
-            $this->previewData = [];
+            //$this->previewData = [];
 
             return;
         }
@@ -105,7 +93,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
             }
         }
 
-        $this->previewData = $preview;
+      //  $this->previewData = $preview;
     }
 
     protected function getHeaderActions(): array
