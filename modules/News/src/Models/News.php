@@ -5,8 +5,10 @@ namespace AcMarche\News\Models;
 use AcMarche\News\Observers\NewsObserver;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -16,6 +18,7 @@ final class News extends Model
     use HasFactory;
     use HasUserAdd;
     use SoftDeletes;
+    use Prunable;
 
     protected $connection = 'maria-news';
 
@@ -56,5 +59,12 @@ final class News extends Model
             'published_at' => 'datetime',
             'medias' => 'array',
         ];
+    }
+
+    public function prunable(): Builder
+    {
+        return News::query()->where('published_at', '<', now()->subDays(720));
+        // Console Kernel.php
+        $schedule->command('news:prune')->daily();
     }
 }
