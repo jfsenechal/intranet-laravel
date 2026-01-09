@@ -4,7 +4,6 @@ namespace AcMarche\Courrier\Filament\Resources\Inbox\Schemas;
 
 use AcMarche\Courrier\Handler\IncomingMailHandler;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Width;
@@ -13,12 +12,12 @@ use Illuminate\Support\HtmlString;
 final class InboxInfolist
 {
     /**
-     * @param array<string, mixed>|null $record
+     * @param  array<string, mixed>|null  $record
      * @return array<int, mixed>
      */
     public static function getEmailViewSchema(?array $record): array
     {
-        if (!$record) {
+        if (! $record) {
             return [];
         }
         $components = [
@@ -38,7 +37,7 @@ final class InboxInfolist
         ];
 
         // Add attachments section if there are any
-        if (!empty($record['attachments'])) {
+        if (! empty($record['attachments'])) {
             $attachmentActions = self::buildAttachmentActions($record);
             $components[] = Section::make('Pièces jointes')
                 ->icon('tabler-paperclip')
@@ -61,7 +60,7 @@ final class InboxInfolist
     }
 
     /**
-     * @param array<string, mixed> $record
+     * @param  array<string, mixed>  $record
      * @return array<int, Action>
      */
     private static function buildAttachmentActions(array $record): array
@@ -79,14 +78,20 @@ final class InboxInfolist
             $isPreviewable = str_starts_with($contentType, 'image/')
                 || $contentType === 'application/pdf';
 
+            $shouldAutoOpen = $attachmentCount === 1;
+
             $actions[] = Action::make("attachment_{$index}")
                 ->label($filename)
                 ->icon(self::getAttachmentIcon($contentType))
                 ->color('gray')
                 ->record(null)
                 ->modalHeading("Traiter: {$filename}")
+                ->extraAttributes(fn (): array => $shouldAutoOpen
+                    ? ['x-init' => '$nextTick(() => $el.click())']
+                    : []
+                )
                 ->modalWidth(Width::SevenExtraLarge)
-                ->fillForm(fn(): array => [
+                ->fillForm(fn (): array => [
                     'reference_number' => '',
                     'sender' => '',
                     'mail_date' => now(),
@@ -94,7 +99,7 @@ final class InboxInfolist
                     'is_registered' => false,
                     'has_acknowledgment' => false,
                 ])
-                ->schema(fn(): array => InboxForm::getAttachmentFormSchema(
+                ->schema(fn (): array => InboxForm::getAttachmentFormSchema(
                     $uid,
                     $index,
                     $contentType,
