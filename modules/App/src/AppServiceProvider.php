@@ -3,6 +3,7 @@
 namespace AcMarche\App;
 
 use AcMarche\App\Traits\HooksTrait;
+use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,13 @@ final class AppServiceProvider extends ServiceProvider
             __DIR__.'/../config/app.php',
             'app'
         );
+        Panel::configureUsing(function (Panel $panel): void {
+            if ($panel->getId() !== 'admin') {
+                return;
+            }
+
+            $panel->plugin(AppPlugin::make());
+        });
     }
 
     /**
