@@ -4,7 +4,9 @@ namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 
 use AcMarche\Courrier\Dto\EmailMessage;
 use AcMarche\Courrier\Exception\ImapException;
+use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxForm;
 use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxInfolist;
+use AcMarche\Courrier\Handler\IncomingMailHandler;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -49,11 +51,46 @@ final class InboxTables
                     ->label('Voir')
                     ->color('gray')
                     ->icon(Heroicon::Eye)
+                    ->visible(fn (array $record): bool => ($record['attachment_count'] ?? 0) !== 1)
                     ->modalHeading(fn (array $record): string => $record['subject'] ?? 'Sans objet')
                     ->modalWidth(Width::FiveExtraLarge)
                     ->schema(fn (?array $record): array => InboxInfolist::getEmailViewSchema($record))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
+                Action::make('process')
+                    ->label('Traiter')
+                    ->color('gray')
+                    ->icon(Heroicon::DocumentArrowDown)
+                    ->visible(fn (array $record): bool => ($record['attachment_count'] ?? 0) === 1)
+                    ->modalHeading(fn (array $record): string => $record['attachments'][0]['filename'] ?? 'Pièce jointe')
+                    ->modalWidth(Width::SevenExtraLarge)
+                    ->fillForm(fn (array $record): array => [
+                        'reference_number' => '',
+                        'sender' => '',
+                        'mail_date' => now(),
+                        'description' => $record['subject'] ?? '',
+                        'is_registered' => false,
+                        'has_acknowledgment' => false,
+                    ])
+                    ->schema(fn (array $record): array => InboxForm::getAttachmentFormSchema(
+                        $record['uid'],
+                        0,
+                        $record['attachments'][0]['content_type'] ?? 'application/octet-stream',
+                        $record['attachments'][0]['filename'] ?? 'Sans nom',
+                        str_starts_with($record['attachments'][0]['content_type'] ?? '', 'image/')
+                            || ($record['attachments'][0]['content_type'] ?? '') === 'application/pdf'
+                    ))
+                    ->action(function (array $data, array $record): void {
+                        IncomingMailHandler::handleIncomingMailCreation(
+                            $data,
+                            $record['uid'],
+                            1,
+                            0,
+                            $record['attachments'][0]['filename'] ?? 'Sans nom',
+                            $record['attachments'][0]['content_type'] ?? 'application/octet-stream'
+                        );
+                    })
+                    ->modalSubmitActionLabel('Enregistrer le courrier'),
             ])
             ->toolbarActions([
                 BulkAction::make('delete')
