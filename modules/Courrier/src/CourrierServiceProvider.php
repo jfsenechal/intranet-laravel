@@ -2,6 +2,7 @@
 
 namespace AcMarche\Courrier;
 
+use AcMarche\Courrier\Console\Commands\MergeCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
 use AcMarche\Courrier\Policies\RegisterPolicies;
 use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
@@ -32,6 +33,7 @@ final class CourrierServiceProvider extends ServiceProvider
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
+                MergeCommand::class,
                 SyncCommand::class,
             ]);
         }

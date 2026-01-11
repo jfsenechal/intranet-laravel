@@ -1,0 +1,37 @@
+                                                                                                                                                                  
+
+● Bash(php artisan courrier:merge --help)
+  ⎿  Description:                                                                                       
+       Merge indicateur_cpas and indicateur_bgm databases into the target database with department field
+     … +14 lines (ctrl+o to expand)
+
+● Done! The courrier:merge command is now ready.
+
+  Command Summary
+
+  # Dry run (see what would be merged without changes)
+  php artisan courrier:merge --dry-run
+
+  # Actually merge the databases
+  php artisan courrier:merge
+
+  # Merge to a different target database
+  php artisan courrier:merge --target=indicateur_test
+
+  What the command does:
+
+  1. Merges from: indicateur_cpas and indicateur_bgm
+  2. Into: indicateur_ville (default target)
+  3. Tables processed:
+    - categories (deduplicates by name)
+    - services (adds department suffix to slug)
+    - senders (adds department suffix to slug)
+    - recipients (handles supervisor hierarchy)
+    - incoming_mails (maps category IDs, sets department)
+    - attachments (maps incoming_mail IDs)
+    - Pivot tables: incoming_mail_service, incoming_mail_recipient, recipient_service
+  4. ID mapping: Tracks old→new IDs for all foreign key relationships
+  5. Department assignment:
+    - CPAS records get department = 'Cpas'
+    - BGM records get department = 'Bgm'
+
