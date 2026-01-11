@@ -31,6 +31,7 @@ final class IncomingMail extends Model
         'is_registered',
         'has_acknowledgment',
         'user_add',
+        'department',
     ];
 
     public function category(): BelongsTo

@@ -20,6 +20,7 @@ final class IncomingMailFactory extends Factory
             'is_registered' => fake()->boolean(20),
             'has_acknowledgment' => fake()->boolean(10),
             'user_add' => 'test_user',
+            'department' => null,
         ];
     }
 

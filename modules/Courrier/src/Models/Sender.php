@@ -2,15 +2,15 @@
 
 namespace AcMarche\Courrier\Models;
 
-use AcMarche\Courrier\Database\Factories\ServiceFactory;
+use AcMarche\Courrier\Database\Factories\SenderFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
-#[UseFactory(ServiceFactory::class)]
-final class Service extends Model
+#[UseFactory(SenderFactory::class)]
+final class Sender extends Model
 {
     use HasFactory;
 
@@ -21,8 +21,6 @@ final class Service extends Model
     protected $fillable = [
         'slug',
         'name',
-        'initials',
-        'is_active',
         'department',
     ];
 

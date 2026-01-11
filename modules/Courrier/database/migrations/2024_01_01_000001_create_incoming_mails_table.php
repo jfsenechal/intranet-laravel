@@ -1,5 +1,6 @@
 <?php
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -51,6 +52,8 @@ return new class extends Migration
                 $table->softDeletes();
                 $table->index('reference_number');
                 $table->index('mail_date');
+                $table->enum('department', DepartmentCourrierEnum::toArray())
+                    ->nullable();
             });
         } else {
             Schema::connection('maria-courrier')->create('incoming_mails', function (Blueprint $table): void {
@@ -68,6 +71,8 @@ return new class extends Migration
                 $table->timestamps();
                 $table->index('reference_number');
                 $table->index('mail_date');
+                $table->enum('department', DepartmentCourrierEnum::toArray())
+                    ->nullable();
             });
         }
     }

@@ -19,6 +19,7 @@ final class ServiceFactory extends Factory
             'name' => $name,
             'initials' => Str::upper(Str::substr($name, 0, 3)),
             'is_active' => true,
+            'department' => null,
         ];
     }
 
