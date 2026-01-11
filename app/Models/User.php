@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Security\Database\Factories\UserFactory;
 use AcMarche\Security\Ldap\User as UserLdap;
 use AcMarche\Security\Models\Module;
@@ -176,6 +178,30 @@ final class User extends Authenticatable
     public function isAdministrator(): bool
     {
         return $this->is_administrator;
+    }
+
+    public function courrierDepartment(): ?DepartmentCourrierEnum
+    {
+        return match (true) {
+            $this->hasOneOfThisRoles([
+                RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value,
+                RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value,
+                RolesEnum::ROLE_INDICATEUR_VILLE_READ->value,
+            ]) => DepartmentCourrierEnum::VILLE,
+            $this->hasOneOfThisRoles([
+                RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value,
+                RolesEnum::ROLE_INDICATEUR_CPAS->value,
+                RolesEnum::ROLE_INDICATEUR_CPAS_INDEX->value,
+                RolesEnum::ROLE_INDICATEUR_CPAS_READ->value,
+            ]) => DepartmentCourrierEnum::CPAS,
+            $this->hasOneOfThisRoles([
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value,
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE->value,
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->value,
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_READ->value,
+            ]) => DepartmentCourrierEnum::BGM,
+            default => null,
+        };
     }
 
     protected static function boot(): void

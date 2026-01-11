@@ -3,6 +3,7 @@
 namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\ServiceFactory;
+use AcMarche\Courrier\Models\Concerns\HasDepartmentScope;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Illuminate\Support\Str;
 #[UseFactory(ServiceFactory::class)]
 final class Service extends Model
 {
+    use HasDepartmentScope;
     use HasFactory;
 
     public $timestamps = false;

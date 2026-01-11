@@ -3,6 +3,7 @@
 namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
+use AcMarche\Courrier\Models\Concerns\HasDepartmentScope;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[UseFactory(IncomingMailFactory::class)]
 final class IncomingMail extends Model
 {
+    use HasDepartmentScope;
     use HasFactory;
     use HasUserAdd;
     use SoftDeletes;
