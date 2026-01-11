@@ -9,11 +9,23 @@ use App\Models\User;
 final class CategoryPolicy
 {
     /**
+     * Perform pre-authorization checks.
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return $this->isAdministrator($user);
+    }
+
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $this->isAdministrator($user);
     }
 
     /**
@@ -21,7 +33,7 @@ final class CategoryPolicy
      */
     public function view(User $user, Category $category): bool
     {
-        return false;
+        return $this->isAdministrator($user);
     }
 
     /**
@@ -66,9 +78,6 @@ final class CategoryPolicy
 
     private function isAdministrator(User $user): bool
     {
-        if ($user->isAdministrator()) {
-            return true;
-        }
         if ($user->hasOneOfThisRoles(
             [
                 RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN,

@@ -9,11 +9,22 @@ use App\Models\User;
 final class ServicePolicy
 {
     /**
+     * Perform pre-authorization checks.
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return $this->isAdministrator($user);
+    }
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $this->isAdministrator($user);
     }
 
     /**
@@ -21,7 +32,7 @@ final class ServicePolicy
      */
     public function view(User $user, Service $service): bool
     {
-        return true;
+        return $this->isAdministrator($user);
     }
 
     /**

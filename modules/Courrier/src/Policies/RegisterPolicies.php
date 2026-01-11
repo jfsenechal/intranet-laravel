@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Gate;
 
 class RegisterPolicies
 {
-    public static function register():void
+    public static function register(): void
     {
         Gate::define('courrier-index', function (User $user) {
             if ($user?->isAdministrator()) {
