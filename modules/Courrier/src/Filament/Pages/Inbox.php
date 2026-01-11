@@ -19,7 +19,7 @@ final class Inbox extends Page implements HasTable
 
     protected static string|null|BackedEnum $navigationIcon = 'tabler-inbox';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $navigationLabel = 'Boite mail';
 

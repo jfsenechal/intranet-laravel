@@ -34,7 +34,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
 
     protected static string|null|BackedEnum $navigationIcon = 'tabler-mail-forward';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationLabel = 'Notifier les destinataires';
 
