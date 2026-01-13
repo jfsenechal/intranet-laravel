@@ -18,7 +18,8 @@
         "psr-4": {
             "AcMarche\\Mileage\\": "src/",
             "AcMarche\\Mileage\\Database\\Factories\\": "database/factories/",
-            "AcMarche\\Mileage\\Database\\Seeders\\": "database/seeders/"
+            "AcMarche\\Mileage\\Database\\Seeders\\": "database/seeders/",
+            "AcMarche\\Mileage\\Tests\\": "tests"
         }
     },
     "extra": {

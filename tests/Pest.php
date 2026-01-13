@@ -17,7 +17,7 @@ use Illuminate\Foundation\Testing\RefreshDatabaseState;
 pest()->extend(Tests\TestCase::class)
     // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     // ->use(Illuminate\Foundation\Testing\DatabaseTruncation::class)
-    ->in('Feature');
+    ->in('Feature', '../modules/Courrier/tests/Feature','../modules/Mileage/tests/Feature');
 
 /*
 |--------------------------------------------------------------------------
