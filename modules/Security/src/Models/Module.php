@@ -18,6 +18,7 @@ final class Module extends Model
     use HasFactory;
 
     public $timestamps = false;
+    public bool $migrated = false;
 
     protected $fillable = [
         'name',

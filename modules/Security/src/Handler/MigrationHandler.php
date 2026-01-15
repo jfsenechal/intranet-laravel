@@ -13,14 +13,14 @@ use AcMarche\Security\Models\Module;
 
 final class MigrationHandler
 {
-    public static function urlModule(Module $module): string
+    public static function urlModule(Module $module): ?string
     {
         $resource = self::findTheResource($module);
         if ($resource) {
             return $resource;
         }
 
-        return '/admin';
+        return null;
     }
 
     public static function findTheResource(Module $module): ?string

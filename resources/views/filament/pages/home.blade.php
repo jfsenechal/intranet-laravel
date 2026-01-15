@@ -21,19 +21,21 @@
                 @if ($tab->modules->isNotEmpty())
                     <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                         @foreach ($tab->modules as $module)
-                            <a
-                                href="{{$module->is_external ? $module->url : url($module->url) }}"
-                                @if ($module->is_external) target="_blank" rel="noopener noreferrer" @endif
-                                class="group flex items-start gap-4 rounded-lg border border-gray-200 p-4 transition hover:border-primary-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-primary-500 dark:hover:bg-gray-700/50"
-                            >
+                            @if ($module->migrated)
+                                <a
+                                    href="{{ $module->is_external ? $module->url : url($module->url) }}"
+                                    @if ($module->is_external) target="_blank" rel="noopener noreferrer" @endif
+                                    class="group flex items-start gap-4 rounded-lg border border-gray-200 p-4 transition hover:border-primary-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-primary-500 dark:hover:bg-gray-700/50"
+                                >
+                            @else
+                                <div class="flex items-start gap-4 rounded-lg border border-gray-200 bg-gray-100 p-4 opacity-60 dark:border-gray-700 dark:bg-gray-700">
+                            @endif
                                 {{-- Module Icon --}}
-                                {{--      :icon="$module->icon" --}}
                                 @if ($module->icon)
                                     <div class="flex-shrink-0">
                                         <x-filament::icon
-
                                             icon="heroicon-o-arrow-top-right-on-square"
-                                            class="h-6 w-6 transition group-hover:text-primary-600 dark:group-hover:text-primary-400"
+                                            class="h-6 w-6 text-gray-400"
                                             :style="$module->color ? 'color: ' . $module->color : ''"
                                         />
                                     </div>
@@ -41,9 +43,9 @@
 
                                 {{-- Module Content --}}
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="font-semibold text-gray-900 group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-400">
+                                    <h3 class="font-semibold text-gray-900 dark:text-white">
                                         {{ $module->name }}
-                                        @if ($module->is_external)
+                                        @if ($module->is_external && $module->migrated)
                                             <x-filament::icon
                                                 icon="heroicon-o-arrow-top-right-on-square"
                                                 class="inline h-3 w-3"
@@ -56,7 +58,11 @@
                                         </p>
                                     @endif
                                 </div>
-                            </a>
+                            @if ($module->migrated)
+                                </a>
+                            @else
+                                </div>
+                            @endif
                         @endforeach
                     </div>
                 @else

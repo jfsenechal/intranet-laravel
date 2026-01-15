@@ -58,8 +58,16 @@ final class Homepage extends Page
         $tabs = TabRepository::getTabsWithModules();
         foreach ($tabs as $tab) {
             foreach ($tab->modules as $module) {
-                if (! $module->is_external) {
-                    $module->url = MigrationHandler::urlModule($module);
+                if (!$module->is_external) {
+                    if ($url = MigrationHandler::urlModule($module)) {
+                        $module->url = $url;
+                        $module->migrated = true;
+                    } else {
+                        $module->migrated = false;
+                    }
+                }
+                else{
+                    $module->migrated = true;
                 }
             }
         }
