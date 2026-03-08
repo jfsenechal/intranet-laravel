@@ -1,0 +1,78 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Pages;
+
+use AcMarche\Security\Handler\MigrationHandler;
+use AcMarche\Security\Repository\TabRepository;
+use BackedEnum;
+use Filament\Pages\Page;
+use Filament\Support\Enums\Width;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Collection;
+
+final class Homepage extends Page
+{
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-document-text';
+
+    protected string $view = 'filament.pages.home';
+
+    protected static ?string $navigationLabel = 'Accueil';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Accueil';
+    }
+
+    public static function canAccess(): bool
+    {
+        return true;
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return 'Accueil ';
+    }
+
+    public function getLayout(): string
+    {
+        return self::$layout ?? 'filament-panels::components.layout.base';
+    }
+
+    public function getMaxContentWidth(): Width|null|string
+    {
+        return Width::Screen;
+    }
+
+    public function getColumns(): int|string|array
+    {
+        return 2;
+    }
+
+    /**
+     * Get all tabs with their modules
+     */
+    public function getTabsWithModules(): Collection
+    {
+        $tabs = TabRepository::getTabsWithModules();
+        foreach ($tabs as $tab) {
+            foreach ($tab->modules as $module) {
+                if (! $module->is_external) {
+                    if ($url = MigrationHandler::urlModule($module)) {
+                        $module->url = $url;
+                        $module->migrated = true;
+                    } else {
+                        $module->migrated = false;
+                    }
+                } else {
+                    $module->migrated = true;
+                }
+            }
+        }
+
+        return $tabs;
+    }
+}

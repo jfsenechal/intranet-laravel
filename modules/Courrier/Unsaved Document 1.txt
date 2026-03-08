@@ -1,0 +1,54 @@
+
+  Implementation Summary
+
+  1. Created HasDepartmentScope trait
+
+  File: modules/Courrier/src/Models/Concerns/HasDepartmentScope.php
+
+  - Global scope: Automatically filters queries by the authenticated user's department
+  - Auto-assignment: Automatically sets department when creating records
+  - Helper scopes:
+    - forDepartment(DepartmentCourrierEnum $department) - filter by specific department
+    - allDepartments() - bypass the department filter
+
+  2. Added courrierDepartment() method to User model
+
+  File: app/Models/User.php
+
+  Maps user roles to departments:
+  - ROLE_INDICATEUR_VILLE_* → DepartmentCourrierEnum::VILLE
+  - ROLE_INDICATEUR_CPAS_* → DepartmentCourrierEnum::CPAS
+  - ROLE_INDICATEUR_BOURGMESTRE_* → DepartmentCourrierEnum::BGM
+  - No matching roles → null (sees all records)
+
+  3. Applied trait to models
+
+  - IncomingMail
+  - Service
+  - Sender
+
+  4. Tests created
+
+  File: tests/Feature/Courrier/DepartmentScopeTest.php
+
+  Tests for:
+  - User department detection from roles
+  - Global scope filtering
+  - Auto-assignment on create
+  - Custom scopes (forDepartment, allDepartments)
+
+  Note: Tests require pdo_sqlite PHP extension which isn't installed in this environment. You can install it with:
+  sudo apt-get install php8.5-sqlite3
+
+  Usage Examples
+
+  // User with VILLE role sees only VILLE records
+  $this->actingAs($villeUser);
+  $mails = IncomingMail::all(); // Only VILLE mails
+
+  // Bypass filter when needed (e.g., admin reports)
+  $allMails = IncomingMail::query()->allDepartments()->get();
+
+  // Filter by specific department
+  $cpasMails = IncomingMail::query()->forDepartment(DepartmentCourrierEnum::CPAS)->get();
+

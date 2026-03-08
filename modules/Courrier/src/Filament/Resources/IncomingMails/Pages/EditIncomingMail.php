@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
+
+use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+final class EditIncomingMail extends EditRecord
+{
+    protected static string $resource = IncomingMailResource::class;
+
+    public function getTitle(): string
+    {
+        return 'Modifier le courrier';
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
+    }
+}

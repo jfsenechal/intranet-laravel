@@ -1,0 +1,273 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Enums\RolesEnum;
+use AcMarche\Security\Database\Factories\UserFactory;
+use AcMarche\Security\Ldap\User as UserLdap;
+use AcMarche\Security\Models\Module;
+use AcMarche\Security\Models\Role;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+
+#[UseFactory(UserFactory::class)]
+final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
+{
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'first_name',
+        'last_name',
+        'phone',
+        'extension',
+        'mobile',
+        'username',
+        'uuid',
+        'mandatory',
+        'color_primary',
+        'color_secondary',
+        'email',
+        'password',
+        'is_administrator',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'app_authentication_secret',
+        'app_authentication_recovery_codes',
+    ];
+
+    public static function generateDataFromLdap(UserLdap $userLdap): array
+    {
+        $email = $userLdap->getFirstAttribute('mail');
+
+        /*   $department = match (true) {
+               str_contains($email, 'cpas.marche') => DepartmentEnum::CPAS->value,
+               str_contains($email, 'ac.marche') => DepartmentEnum::VILLE->value,
+               default => DepartmentEnum::VILLE->value,
+           };*/
+
+        $fullName = $userLdap->getFirstAttribute('givenname').' '.$userLdap->getFirstAttribute('sn');
+
+        return [
+            'name' => $fullName,
+            'first_name' => $userLdap->getFirstAttribute('givenname'),
+            'last_name' => $userLdap->getFirstAttribute('sn'),
+            'email' => $email,
+            // 'departments' => [$department],
+            'mobile' => $userLdap->getFirstAttribute('mobile'),
+            'phone' => $userLdap->getFirstAttribute('telephoneNumber'),
+            'extension' => $userLdap->getFirstAttribute('ipPhone'),
+            'uuid' => Str::uuid(),
+        ];
+    }
+
+    /**
+     * Get the user's initials
+     */
+    public function initials(): string
+    {
+        return Str::of($this->name)
+            ->explode(' ')
+            ->take(2)
+            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->implode('');
+    }
+
+    public function fullName(): string
+    {
+        return $this->last_name.' '.$this->first_name;
+    }
+
+    /**
+     * The roles that belong to the user.
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * The modules that belong to the user.
+     */
+    public function modules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class);
+    }
+
+    public function rolesByModule(int $moduleId): array|Collection
+    {
+        return $this->roles()
+            ->where('module_id', $moduleId)
+            ->get();
+    }
+
+    public function hasRole(string $roleToFind): bool
+    {
+        foreach ($this->roles()->get() as $role) {
+            if ($role->name === $roleToFind) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasOneOfThisRoles(array $rolesToFind): bool
+    {
+        foreach ($this->roles()->get() as $role) {
+            if (in_array($role->name, $rolesToFind)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function addRole(Role $role): void
+    {
+        if (! $this->hasRole($role->name)) {
+            $this->roles()->attach($role);
+        }
+    }
+
+    public function hasModule(string $moduleToFind): bool
+    {
+        foreach ($this->modules()->get() as $module) {
+            if ($module->name === $moduleToFind) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function addModule(Module $module): void
+    {
+        if (! $this->hasModule($module->name)) {
+            $this->modules()->attach($module);
+        }
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return $this->is_administrator;
+        }
+
+        return false;
+    }
+
+    public function isAdministrator(): bool
+    {
+        return $this->is_administrator;
+    }
+
+    public function courrierDepartment(): ?DepartmentCourrierEnum
+    {
+        return match (true) {
+            $this->hasOneOfThisRoles([
+                RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value,
+                RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value,
+                RolesEnum::ROLE_INDICATEUR_VILLE_READ->value,
+            ]) => DepartmentCourrierEnum::VILLE,
+            $this->hasOneOfThisRoles([
+                RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value,
+                RolesEnum::ROLE_INDICATEUR_CPAS->value,
+                RolesEnum::ROLE_INDICATEUR_CPAS_INDEX->value,
+                RolesEnum::ROLE_INDICATEUR_CPAS_READ->value,
+            ]) => DepartmentCourrierEnum::CPAS,
+            $this->hasOneOfThisRoles([
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value,
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE->value,
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->value,
+                RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_READ->value,
+            ]) => DepartmentCourrierEnum::BGM,
+            default => null,
+        };
+    }
+
+    public function getAppAuthenticationSecret(): ?string
+    {
+        return $this->app_authentication_secret;
+    }
+
+    public function saveAppAuthenticationSecret(?string $secret): void
+    {
+        $this->app_authentication_secret = $secret;
+        $this->save();
+    }
+
+    public function getAppAuthenticationHolderName(): string
+    {
+        return $this->email;
+    }
+
+    /** @phpstan-ignore-next-line */
+    public function getAppAuthenticationRecoveryCodes(): ?array
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->app_authentication_recovery_codes;
+    }
+
+    public function saveAppAuthenticationRecoveryCodes(?array $codes): void
+    {
+        /** @phpstan-ignore-next-line */
+        $this->app_authentication_recovery_codes = $codes;
+        $this->save();
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        self::saving(function ($model) {
+            // Unset the field so it doesn't save to the database
+            if (isset($model->attributes['plainPassword'])) {
+                $model->plainPassword = $model->attributes['plainPassword'];
+                unset($model->attributes['plainPassword']);
+            }
+        });
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'app_authentication_secret' => 'encrypted',
+            'app_authentication_recovery_codes' => 'encrypted:array',
+            'roles' => 'array',
+            'is_administrator' => 'boolean',
+        ];
+    }
+}
