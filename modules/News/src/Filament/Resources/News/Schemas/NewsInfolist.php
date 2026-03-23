@@ -26,7 +26,7 @@ final class NewsInfolist
                     ->color(fn ($state) => DepartmentEnum::tryFrom($state)?->getColor() ?? 'gray')
                     ->icon('tabler-mail'),
                 TextEntry::make('content')
-                    ->label(false)
+                    ->label(null)
                     ->html()
                     ->columnSpanFull()
                     ->prose(),

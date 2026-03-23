@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::connection('maria-news')->hasTable('news')) {
+        if (! Schema::connection('maria-news')->hasColumn('news','name')) {
             Schema::connection('maria-news')->table('news', function (Blueprint $table) {
                 // Rename old columns to new Laravel convention names
                 $table->renameColumn('titre', 'name');

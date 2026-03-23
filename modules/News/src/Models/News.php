@@ -20,7 +20,7 @@ final class News extends Model
     use HasFactory;
     use HasUserAdd;
     use Prunable;
-    use SoftDeletes;
+    //use SoftDeletes;
 
     protected $connection = 'maria-news';
 

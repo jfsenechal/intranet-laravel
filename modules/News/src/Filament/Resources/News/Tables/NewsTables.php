@@ -84,7 +84,8 @@ final class NewsTables
                     }),
             ], layout: FiltersLayout::AboveContent)->filtersFormWidth(Width::FourExtraLarge)
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                ->visible(false),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
