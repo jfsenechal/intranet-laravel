@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Console\Commands;
 
-use AcMarche\Security\Ldap\User as UserLdap;
+use AcMarche\Security\Ldap\UserLdap;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

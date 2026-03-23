@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Repository;
 
-use AcMarche\Security\Ldap\User as UserLdap;
+use AcMarche\Security\Ldap\UserLdap;
 use App\Models\User;
 
 final class UserRepository

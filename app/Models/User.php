@@ -7,7 +7,7 @@ namespace App\Models;
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Security\Database\Factories\UserFactory;
-use AcMarche\Security\Ldap\User as UserLdap;
+use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;

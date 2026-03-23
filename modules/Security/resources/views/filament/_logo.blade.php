@@ -1,3 +1,3 @@
-<div class="flex items-center justify-center">
-    <img src="{{ asset('/images/logo_black-192x192.png') }}" alt="logo">
+<div class="flex flex-col items-center justify-center">
+    <img src="{{ asset('/images/marche_logo.png') }}" alt="logo">
 </div>

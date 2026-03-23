@@ -6,7 +6,7 @@ namespace AcMarche\Security\Ldap;
 
 use LdapRecord\Models\Model;
 
-final class User extends Model
+final class UserLdap extends Model
 {
     /**
      * The object classes of the LDAP model.

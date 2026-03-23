@@ -6,7 +6,7 @@ namespace AcMarche\Courrier\Console\Commands;
 
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
-use AcMarche\Security\Ldap\User as UserLdap;
+use AcMarche\Security\Ldap\UserLdap;
 use Illuminate\Console\Command;
 use LdapRecord\Models\Model;
 

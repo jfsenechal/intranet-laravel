@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Ldap;
 
-use AcMarche\Security\Ldap\User as UserLdap;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Str;
