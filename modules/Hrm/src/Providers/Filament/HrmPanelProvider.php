@@ -37,7 +37,7 @@ final class HrmPanelProvider extends PanelProvider
         return $panel
             ->id('hrm-panel')
             ->path('hrm')
-            ->brandName('Gestion RH')
+            ->brandName('Resources Humaines')
             ->colors([
                 'primary' => Color::Emerald,
             ])

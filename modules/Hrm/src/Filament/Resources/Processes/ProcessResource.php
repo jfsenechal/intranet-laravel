@@ -30,7 +30,7 @@ final class ProcessResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::BookOpen;
 
     #[Override]
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 7;
 
     #[Override]
     protected static ?string $navigationLabel = 'Processus';

@@ -29,7 +29,7 @@ final class SmsReminderResource extends Resource
     protected static string|null|UnitEnum $navigationGroup = 'Listing';
 
     #[Override]
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 8;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'phone_number';

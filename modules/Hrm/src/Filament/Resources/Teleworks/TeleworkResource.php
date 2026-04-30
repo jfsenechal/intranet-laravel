@@ -28,7 +28,7 @@ final class TeleworkResource extends Resource
     protected static string|null|UnitEnum $navigationGroup = 'Listing';
 
     #[Override]
-    protected static ?int $navigationSort = 99;
+    protected static ?int $navigationSort = 9;
 
     public static function getNavigationIcon(): string
     {

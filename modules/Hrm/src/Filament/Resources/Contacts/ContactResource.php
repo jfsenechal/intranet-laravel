@@ -30,7 +30,7 @@ final class ContactResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
     #[Override]
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected static ?string $navigationLabel = 'Contacts';
