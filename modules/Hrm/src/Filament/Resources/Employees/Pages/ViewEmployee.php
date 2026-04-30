@@ -10,15 +10,17 @@ use AcMarche\Hrm\Filament\Resources\Contracts\ContractResource;
 use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
 use AcMarche\Hrm\Filament\Resources\Diplomas\DiplomaResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
-use AcMarche\Hrm\Filament\Resources\Evaluations\EvaluationResource;
+use AcMarche\Hrm\Filament\Resources\Evaluations\Schemas\EvaluationForm;
 use AcMarche\Hrm\Filament\Resources\HrDocuments\Schemas\HrDocumentForm;
 use AcMarche\Hrm\Filament\Resources\Internships\Schemas\InternshipForm;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
 use AcMarche\Hrm\Filament\Resources\Trainings\TrainingResource;
-use AcMarche\Hrm\Filament\Resources\Valorizations\ValorizationResource;
+use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationForm;
 use AcMarche\Hrm\Models\Application;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Evaluation;
 use AcMarche\Hrm\Models\Internship;
+use AcMarche\Hrm\Models\Valorization;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -90,16 +92,44 @@ final class ViewEmployee extends ViewRecord
                         ->label('Ajouter un diplôme')
                         ->icon('tabler-plus')
                         ->url(DiplomaResource::getUrl('create', $employeeId)),
-                    Action::make('addEvaluation')
-                        ->label('Ajouter un évaluation')
-                        ->icon('tabler-plus')
-                        ->url(EvaluationResource::getUrl('create', $employeeId)),
+                    CreateAction::make('addEvaluation')
+                        ->label('Ajouter une évaluation')
+                        ->icon('tabler-plus')->modal()
+                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema))
+                        ->mountUsing(function (Schema $schema): void {
+                            $employee = $this->getEmployeeFromQuery();
+
+                            $schema->fill($employee ? ['employee_id' => $employee->id] : []);
+                        })
+                        ->modalHeading(function (): string {
+                            if ($employee = $this->getEmployeeFromQuery()) {
+                                return 'Ajouter une évaluation pour '.$employee->last_name.' '.$employee->first_name;
+                            }
+
+                            abort(404);
+                        })->action(function (array $data) {
+                            Evaluation::create($data);
+                        }),
 
                 ])->dropdown(false),
-                Action::make('addValorization')
+                CreateAction::make('addValorization')
                     ->label('Ajouter une valorisation')
-                    ->icon('tabler-plus')
-                    ->url(ValorizationResource::getUrl('create', $employeeId)),
+                    ->icon('tabler-plus')->modal()
+                    ->schema(fn (Schema $schema) => ValorizationForm::configure($schema))
+                    ->mountUsing(function (Schema $schema): void {
+                        $employee = $this->getEmployeeFromQuery();
+
+                        $schema->fill($employee ? ['employee_id' => $employee->id] : []);
+                    })
+                    ->modalHeading(function (): string {
+                        if ($employee = $this->getEmployeeFromQuery()) {
+                            return 'Ajouter une valorisation pour '.$employee->last_name.' '.$employee->first_name;
+                        }
+
+                        abort(404,'Agent non trouvé');
+                    })->action(function (array $data) {
+                        Valorization::create($data);
+                    }),
                 CreateAction::make('addInternship')
                     ->label('Ajouter un stage')
                     ->icon('tabler-plus')
@@ -115,7 +145,7 @@ final class ViewEmployee extends ViewRecord
                             return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
                         }
 
-                        return 'Ajouter un stage';
+                        abort(404,'Agent non trouvé');
                     })->action(function (array $data) {
                         Internship::create($data);
                     }),
@@ -134,7 +164,7 @@ final class ViewEmployee extends ViewRecord
                             return 'Ajouter une candidature pour '.$employee->last_name.' '.$employee->first_name;
                         }
 
-                        return 'Ajouter une candidature';
+                        abort(404,'Agent non trouvé');
                     })->action(function (array $data) {
                         Application::create($data);
                     }),
