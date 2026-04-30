@@ -16,11 +16,7 @@ use AcMarche\Hrm\Filament\Resources\Internships\Schemas\InternshipForm;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
 use AcMarche\Hrm\Filament\Resources\Trainings\TrainingResource;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationForm;
-use AcMarche\Hrm\Models\Application;
 use AcMarche\Hrm\Models\Employee;
-use AcMarche\Hrm\Models\Evaluation;
-use AcMarche\Hrm\Models\Internship;
-use AcMarche\Hrm\Models\Valorization;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -76,6 +72,7 @@ final class ViewEmployee extends ViewRecord
                     Action::make('addDocument')
                         ->label('Ajouter un document')
                         ->icon('tabler-plus')
+                        ->modal()
                         ->modalHeading('Ajouter un document')
                         ->schema(HrDocumentForm::getSchema())
                         ->action(function (array $data, Employee $record): void {
@@ -91,58 +88,61 @@ final class ViewEmployee extends ViewRecord
                     Action::make('addDiploma')
                         ->label('Ajouter un diplôme')
                         ->icon('tabler-plus')
+                        ->modal()
                         ->url(DiplomaResource::getUrl('create', $employeeId)),
                     CreateAction::make('addEvaluation')
                         ->label('Ajouter une évaluation')
                         ->icon('tabler-plus')->modal()
-                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema))
+                        ->schema(fn(Schema $schema) => EvaluationForm::configure($schema))
                         ->mountUsing(function (Schema $schema, Employee $employee): void {
                             $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                         })
                         ->modalHeading(function (Employee $employee): string {
                             return 'Ajouter une évaluation pour '.$employee->last_name.' '.$employee->first_name;
-                        })->action(function (array $data) {
-                            Evaluation::create($data);
+                        })
+                        ->action(function (array $data, Employee $record): void {
+                            $record->evaluations()->create($data);
                         }),
 
                 ])->dropdown(false),
                 CreateAction::make('addValorization')
                     ->label('Ajouter une valorisation')
-                    ->icon('tabler-plus')->modal()
-                    ->schema(fn (Schema $schema) => ValorizationForm::configure($schema))
-                    ->mountUsing(function (Schema $schema, Employee $employee): void {
-                        $schema->fill($employee ? ['employee_id' => $employee->id] : []);
-                    })
+                    ->icon('tabler-plus')
+                    ->modal()
+                    ->schema(fn(Schema $schema) => ValorizationForm::configure($schema))
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter une valorisation pour '.$employee->last_name.' '.$employee->first_name;
-                    })->action(function (array $data) {
-                        Valorization::create($data);
+                    })
+                    ->action(function (array $data, Employee $record): void {
+                        $record->valorizations()->create($data);
                     }),
                 CreateAction::make('addInternship')
                     ->label('Ajouter un stage')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn (Schema $schema) => InternshipForm::configure($schema))
+                    ->schema(fn(Schema $schema) => InternshipForm::configure($schema))
                     ->mountUsing(function (Schema $schema, Employee $employee): void {
                         $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                     })
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
-                    })->action(function (array $data) {
-                        Internship::create($data);
+                    })
+                    ->action(function (array $data, Employee $record): void {
+                        $record->internships()->create($data);
                     }),
                 CreateAction::make('addApplication')
                     ->label('Ajouter une candidature')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn (Schema $schema) => ApplicationForm::configure($schema))
+                    ->schema(fn(Schema $schema) => ApplicationForm::configure($schema))
                     ->mountUsing(function (Schema $schema, Employee $employee): void {
                         $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                     })
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter une candidature pour '.$employee->last_name.' '.$employee->first_name;
-                    })->action(function (array $data) {
-                        Application::create($data);
+                    })
+                    ->action(function (array $data, Employee $record): void {
+                        $record->applications()->create($data);
                     }),
             ])
                 ->label('Ajouter...')
