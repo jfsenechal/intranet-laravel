@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     protected $connection = 'maria-hrm';
 
     public function up(): void
@@ -29,7 +28,10 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('internships')) {
+            Schema::connection($this->connection)->table('internships', function (Blueprint $table): void {
+                $table->unsignedBigInteger('employee_id')->nullable(false)->change();
+            });
+        } elseif (!Schema::connection($this->connection)->hasTable('internships')) {
             Schema::connection($this->connection)->create('internships', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id');
@@ -67,7 +69,10 @@ return new class extends Migration
                 $table->renameColumn('updatedAt', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('applications')) {
+            Schema::connection($this->connection)->table('applications', function (Blueprint $table): void {
+                $table->unsignedBigInteger('employee_id')->nullable(false)->change();
+            });
+        } elseif (!Schema::connection($this->connection)->hasTable('applications')) {
             Schema::connection($this->connection)->create('applications', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id');
@@ -105,7 +110,7 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('deadlines')) {
+        } elseif (!Schema::connection($this->connection)->hasTable('deadlines')) {
             Schema::connection($this->connection)->create('deadlines', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -139,7 +144,10 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('hr_documents')) {
+            Schema::connection($this->connection)->table('hr_documents', function (Blueprint $table): void {
+                $table->unsignedBigInteger('employee_id')->nullable(false)->change();
+            });
+        } elseif (!Schema::connection($this->connection)->hasTable('hr_documents')) {
             Schema::connection($this->connection)->create('hr_documents', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -167,7 +175,10 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('valorizations')) {
+            Schema::connection($this->connection)->table('valorizations', function (Blueprint $table): void {
+                $table->unsignedBigInteger('employee_id')->nullable(false)->change();
+            });
+        } elseif (!Schema::connection($this->connection)->hasTable('valorizations')) {
             Schema::connection($this->connection)->create('valorizations', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -207,7 +218,7 @@ return new class extends Migration
                 $table->renameColumn('updatedAt', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('teleworks')) {
+        } elseif (!Schema::connection($this->connection)->hasTable('teleworks')) {
             Schema::connection($this->connection)->create('teleworks', function (Blueprint $table): void {
                 $table->id();
                 $table->uuid('uuid')->unique();
@@ -249,7 +260,10 @@ return new class extends Migration
                 $table->renameColumn('updatedAt', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('sms_reminders')) {
+            Schema::connection($this->connection)->table('sms_reminders', function (Blueprint $table): void {
+                $table->unsignedBigInteger('employee_id')->nullable(false)->change();
+            });
+        } elseif (!Schema::connection($this->connection)->hasTable('sms_reminders')) {
             Schema::connection($this->connection)->create('sms_reminders', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -267,59 +281,7 @@ return new class extends Migration
         // Operators
         if (Schema::connection($this->connection)->hasTable('operateur')) {
             Schema::connection($this->connection)->table('operateur', function (Blueprint $table): void {
-                $table->rename('operators');
-            });
-            Schema::connection($this->connection)->table('operators', function (Blueprint $table): void {
-                $table->renameColumn('employeur_id', 'employer_id');
-                $table->renameColumn('nom', 'name');
-                $table->renameColumn('slugname', 'slug');
-                $table->renameColumn('contact_nom', 'contact_last_name');
-                $table->renameColumn('contact_prenom', 'contact_first_name');
-                $table->renameColumn('fonction', 'job_title');
-                $table->renameColumn('telephone', 'phone');
-                $table->renameColumn('adresse', 'address');
-                $table->renameColumn('code_postal', 'postal_code');
-                $table->renameColumn('ville', 'city');
-                $table->renameColumn('objectifs', 'objectives');
-                $table->renameColumn('remarques', 'notes');
-                $table->renameColumn('transmis_le', 'transmitted_at');
-                $table->renameColumn('date_reception', 'received_at');
-                $table->renameColumn('courrier_reference', 'mail_reference');
-                $table->renameColumn('courrier_nombre', 'mail_count');
-                $table->renameColumn('niveau_diplome', 'diploma_level');
-                $table->renameColumn('nature_diplome', 'diploma_nature');
-                $table->renameColumn('archive', 'is_archived');
-                $table->renameColumn('user', 'user_add');
-                $table->renameColumn('created', 'created_at');
-                $table->renameColumn('updated', 'updated_at');
-            });
-        } elseif (! Schema::connection($this->connection)->hasTable('operators')) {
-            Schema::connection($this->connection)->create('operators', function (Blueprint $table): void {
-                $table->id();
-                $table->foreignId('service_id')->nullable();
-                $table->foreignId('employer_id')->nullable();
-                $table->string('name', 255);
-                $table->string('slug', 62);
-                $table->string('contact_last_name', 255)->nullable();
-                $table->string('contact_first_name', 255)->nullable();
-                $table->string('job_title', 255)->nullable();
-                $table->string('email', 255)->nullable();
-                $table->string('phone', 255)->nullable();
-                $table->string('gsm', 255)->nullable();
-                $table->string('address', 255)->nullable();
-                $table->integer('postal_code')->nullable();
-                $table->string('city', 255)->nullable();
-                $table->longText('objectives')->nullable();
-                $table->longText('notes')->nullable();
-                $table->date('transmitted_at')->nullable();
-                $table->date('received_at')->nullable();
-                $table->longText('mail_reference')->nullable();
-                $table->integer('mail_count')->default(0);
-                $table->longText('diploma_level')->nullable();
-                $table->string('diploma_nature', 200)->nullable();
-                $table->boolean('is_archived')->default(false);
-                $table->string('user_add', 255);
-                $table->timestamps();
+                $table->drop('operators');
             });
         }
 
@@ -334,7 +296,7 @@ return new class extends Migration
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
-        } elseif (! Schema::connection($this->connection)->hasTable('hr_notifications')) {
+        } elseif (!Schema::connection($this->connection)->hasTable('hr_notifications')) {
             Schema::connection($this->connection)->create('hr_notifications', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name', 250);
@@ -347,7 +309,7 @@ return new class extends Migration
         }
 
         // Notification Users
-        if (! Schema::connection($this->connection)->hasTable('notification_users')) {
+        if (!Schema::connection($this->connection)->hasTable('notification_users')) {
             Schema::connection($this->connection)->create('notification_users', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('notification_id');

@@ -96,17 +96,11 @@ final class ViewEmployee extends ViewRecord
                         ->label('Ajouter une évaluation')
                         ->icon('tabler-plus')->modal()
                         ->schema(fn (Schema $schema) => EvaluationForm::configure($schema))
-                        ->mountUsing(function (Schema $schema): void {
-                            $employee = $this->getEmployeeFromQuery();
-
+                        ->mountUsing(function (Schema $schema, Employee $employee): void {
                             $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                         })
-                        ->modalHeading(function (): string {
-                            if ($employee = $this->getEmployeeFromQuery()) {
-                                return 'Ajouter une évaluation pour '.$employee->last_name.' '.$employee->first_name;
-                            }
-
-                            abort(404);
+                        ->modalHeading(function (Employee $employee): string {
+                            return 'Ajouter une évaluation pour '.$employee->last_name.' '.$employee->first_name;
                         })->action(function (array $data) {
                             Evaluation::create($data);
                         }),
@@ -116,17 +110,11 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter une valorisation')
                     ->icon('tabler-plus')->modal()
                     ->schema(fn (Schema $schema) => ValorizationForm::configure($schema))
-                    ->mountUsing(function (Schema $schema): void {
-                        $employee = $this->getEmployeeFromQuery();
-
+                    ->mountUsing(function (Schema $schema, Employee $employee): void {
                         $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                     })
-                    ->modalHeading(function (): string {
-                        if ($employee = $this->getEmployeeFromQuery()) {
-                            return 'Ajouter une valorisation pour '.$employee->last_name.' '.$employee->first_name;
-                        }
-
-                        abort(404,'Agent non trouvé');
+                    ->modalHeading(function (Employee $employee): string {
+                        return 'Ajouter une valorisation pour '.$employee->last_name.' '.$employee->first_name;
                     })->action(function (array $data) {
                         Valorization::create($data);
                     }),
@@ -135,17 +123,11 @@ final class ViewEmployee extends ViewRecord
                     ->icon('tabler-plus')
                     ->modal()
                     ->schema(fn (Schema $schema) => InternshipForm::configure($schema))
-                    ->mountUsing(function (Schema $schema): void {
-                        $employee = $this->getEmployeeFromQuery();
-
+                    ->mountUsing(function (Schema $schema, Employee $employee): void {
                         $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                     })
-                    ->modalHeading(function (): string {
-                        if ($employee = $this->getEmployeeFromQuery()) {
-                            return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
-                        }
-
-                        abort(404,'Agent non trouvé');
+                    ->modalHeading(function (Employee $employee): string {
+                        return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
                     })->action(function (array $data) {
                         Internship::create($data);
                     }),
@@ -154,21 +136,14 @@ final class ViewEmployee extends ViewRecord
                     ->icon('tabler-plus')
                     ->modal()
                     ->schema(fn (Schema $schema) => ApplicationForm::configure($schema))
-                    ->mountUsing(function (Schema $schema): void {
-                        $employee = $this->getEmployeeFromQuery();
-
+                    ->mountUsing(function (Schema $schema, Employee $employee): void {
                         $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                     })
-                    ->modalHeading(function (): string {
-                        if ($employee = $this->getEmployeeFromQuery()) {
-                            return 'Ajouter une candidature pour '.$employee->last_name.' '.$employee->first_name;
-                        }
-
-                        abort(404,'Agent non trouvé');
+                    ->modalHeading(function (Employee $employee): string {
+                        return 'Ajouter une candidature pour '.$employee->last_name.' '.$employee->first_name;
                     })->action(function (array $data) {
                         Application::create($data);
                     }),
-
             ])
                 ->label('Ajouter...')
                 ->color('warning')
@@ -178,12 +153,5 @@ final class ViewEmployee extends ViewRecord
             DeleteAction::make()
                 ->icon(Heroicon::Trash),
         ];
-    }
-
-    private function getEmployeeFromQuery(): ?Employee
-    {
-        $employeeId = request()->query('employee_id');
-
-        return $employeeId ? Employee::find($employeeId) : null;
     }
 }
