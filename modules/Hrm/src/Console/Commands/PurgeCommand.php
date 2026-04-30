@@ -4,66 +4,53 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Console\Commands;
 
+use AcMarche\Hrm\Enums\StatusEnum;
+use AcMarche\Hrm\Mail\PurgedApplicationsMail;
+use AcMarche\Hrm\Models\Employee;
 use Illuminate\Console\Command;
-use Override;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Console\Command\Command as SfCommand;
 
 final class PurgeCommand extends Command
 {
-    #[Override]
     protected $signature = 'hrm:purge';
 
-    #[Override]
-    protected $description = 'Purge: delete old records from tables';
+    protected $description = 'Purge candidates without applications received in the last year';
 
-    public function handle(): void
+    public function handle(): int
     {
-        $args = [
-            'statut' => Statuts::CANDIDATURE,
-        ];
-        $candidats = $this->employeRepository->findBy($args);
-        $archives = [];
+        $recipients = (array) config('hrm.team_emails', []);
 
-        $oneYearAgo = new DateTime();
-        $oneYearAgo->modify('-1 year');
+        if ($recipients === []) {
+            $this->error('No HRM team emails configured (hrm.team_emails).');
 
-        foreach ($candidats as $employe) {
-            $candidatures = $this->candidatureRepository->findRecent($employe, $oneYearAgo);
-            if (count($candidatures) === 0) {
-                $archives[] = $employe;
-                $this->employeRepository->remove($employe);
-            }
+            return SfCommand::FAILURE;
         }
 
-        usort(
-            $archives,
-            function ($a, $b) {
-                return $a->getNom() <=> $b->getNom();
-            },
-        );
+        $oneYearAgo = Carbon::now()->subYear()->startOfDay();
 
-        if ($archives !== []) {
-            $message = (new TemplatedEmail())
-                ->subject('Les candidats suivant ont été supprimés')
-                ->from('no-reply@marche.be');
-            foreach ($this->commandInit->getAll() as $email) {
-                $message->addTo($email);
-            }
+        $candidates = Employee::query()
+            ->where('status', StatusEnum::APPLICATION)
+            ->whereDoesntHave('applications', function (Builder $query) use ($oneYearAgo): void {
+                $query->where('received_at', '>=', $oneYearAgo);
+            })
+            ->orderBy('last_name')
+            ->get();
 
-            $message
-                ->htmlTemplate('@AcMarcheGrh/archive/mail_auto_archive.html.twig')
-                ->context(
-                    [
-                        'candidats' => $archives,
-                    ],
-                );
+        if ($candidates->isEmpty()) {
+            $this->info('No stale candidates to purge.');
 
-            try {
-                $this->mailer->send($message);
-            } catch (TransportExceptionInterface $e) {
-                $io->error($e->getMessage().' archives');
-            }
-
-            $this->employeRepository->flush();
+            return SfCommand::SUCCESS;
         }
+
+        Mail::to($recipients)->send(new PurgedApplicationsMail($candidates));
+
+        $candidates->each(fn (Employee $candidate) => $candidate->delete());
+
+        $this->info("Purged {$candidates->count()} candidate(s).");
+
+        return SfCommand::SUCCESS;
     }
 }
