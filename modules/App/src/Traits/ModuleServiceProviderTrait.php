@@ -41,10 +41,14 @@ trait ModuleServiceProviderTrait
         $path = $this->modulePath();
 
         // Load migrations
-        $this->loadMigrationsFrom($path.'/database/migrations');
+        if (is_dir($path.'/database/migrations')) {
+            $this->loadMigrationsFrom($path.'/database/migrations');
+        }
 
-        // Load views (note: views are in views/ not resources/views/)
-        $this->loadViewsFrom($path.'/resources/views', $name);
+        // Load views
+        if (is_dir($path.'/resources/views')) {
+            $this->loadViewsFrom($path.'/resources/views', $name);
+        }
 
         // Load routes
         if (file_exists($path.'/routes/web.php')) {
