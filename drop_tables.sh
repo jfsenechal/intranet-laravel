@@ -6,6 +6,13 @@ DB_PORT="${DB_PORT:-3306}"
 DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
 
+# Build password argument only if DB_PASS is set
+if [ -n "$DB_PASS" ]; then
+  DB_PASS_ARG=(-p"$DB_PASS")
+else
+  DB_PASS_ARG=()
+fi
+
 # List of databases to clean
 DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_ville" "grh_all" "pst" "mailinglist" "agent")
 
@@ -16,7 +23,7 @@ drop_all_tables() {
   echo "Processing database: $db_name"
 
   # Get all table names
-  TABLES=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" -Nse "SELECT GROUP_CONCAT(table_name SEPARATOR ',') FROM information_schema.tables WHERE
+  TABLES=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" "${DB_PASS_ARG[@]}" -Nse "SELECT GROUP_CONCAT(table_name SEPARATOR ',') FROM information_schema.tables WHERE
 table_schema='$db_name'")
 
   if [ -z "$TABLES" ]; then
@@ -25,7 +32,7 @@ table_schema='$db_name'")
   fi
 
   # Disable foreign key checks and drop all tables
-  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$db_name" <<EOF
+  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" "${DB_PASS_ARG[@]}" "$db_name" <<EOF
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS $TABLES;
 SET FOREIGN_KEY_CHECKS = 1;
@@ -45,7 +52,7 @@ import_sql_dump() {
   fi
 
   echo "Importing SQL dump for database: $db_name"
-  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$db_name" < "$sql_file"
+  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" "${DB_PASS_ARG[@]}" "$db_name" < "$sql_file"
   echo "SQL dump imported for database: $db_name"
 }
 
@@ -56,7 +63,7 @@ for db in "${DATABASES[@]}"; do
   echo "---"
 done
 
-mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "pst" -e "SET FOREIGN_KEY_CHECKS = 0; DROP TABLE IF EXISTS \`cache\`, \`cache_locks\`, \`failed_jobs\`, \`jobs\`, \`job_batches\`, \`migrations\`, \`notifications\`, \`password_reset_tokens\`, \`personal_access_tokens\`, \`roles\`, \`role_user\`, \`sessions\`, \`users\`; SET FOREIGN_KEY_CHECKS = 1;"
+mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" "${DB_PASS_ARG[@]}" "pst" -e "SET FOREIGN_KEY_CHECKS = 0; DROP TABLE IF EXISTS \`cache\`, \`cache_locks\`, \`failed_jobs\`, \`jobs\`, \`job_batches\`, \`migrations\`, \`notifications\`, \`password_reset_tokens\`, \`personal_access_tokens\`, \`roles\`, \`role_user\`, \`sessions\`, \`users\`; SET FOREIGN_KEY_CHECKS = 1;"
 
 
 echo "All tables dropped and SQL dumps imported for specified databases."
