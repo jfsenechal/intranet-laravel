@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Security\Database\Seeders;
 
 use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Providers\PstServiceProvider;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -26,11 +27,13 @@ final class DatabaseSeeder extends Seeder
                 'username' => config('app.default_user.name'),
                 'is_administrator' => true,
             ]);
-        Role::factory()->create([
+        Role::create([
             'name' => RoleEnum::ADMIN->value,
+            'module_id' => PstServiceProvider::$module_id,
         ]);
-        Role::factory()->create([
+        Role::create([
             'name' => RoleEnum::MANDATAIRE->value,
+            'module_id' => PstServiceProvider::$module_id,
         ]);
 
     }
