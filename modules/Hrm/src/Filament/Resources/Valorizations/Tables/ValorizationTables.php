@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Valorizations\Tables;
 
-use AcMarche\Hrm\Models\Valorization;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -20,13 +19,6 @@ final class ValorizationTables
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('employee.last_name')
-                    ->label('Agent')
-                    ->formatStateUsing(
-                        fn (Valorization $record): string => $record->employee->last_name.' '.$record->employee->first_name
-                    )
-                    ->searchable(['last_name', 'first_name'])
-                    ->sortable(),
                 TextColumn::make('employer_name')
                     ->label('Employeur')
                     ->searchable()
@@ -35,17 +27,9 @@ final class ValorizationTables
                     ->label('Durée')
                     ->sortable(),
                 TextColumn::make('regime')
-                    ->label('Régime')
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('content')
-                    ->label('Contenu')
-                    ->limit(60)
-                    ->toggleable(),
-                TextColumn::make('file_name')
-                    ->label('Fichier')
-                    ->formatStateUsing(fn (?string $state): string => $state ? '✓' : '—')
-                    ->toggleable(),
+                    ->label('Régime horaire')
+                    ->toggleable()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
                     ->date('d/m/Y')
@@ -61,29 +45,6 @@ final class ValorizationTables
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
-    }
-
-    public static function relation(Table $table): Table
-    {
-        return $table
-            ->defaultPaginationPageOption(25)
-            ->columns([
-                TextColumn::make('employer_name')
-                    ->label('Employeur')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('duration')
-                    ->label('Durée')
-                    ->sortable(),
-                TextColumn::make('regime')
-                    ->label('Régime')
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('content')
-                    ->label('Contenu')
-                    ->limit(60)
-                    ->toggleable(),
             ]);
     }
 }

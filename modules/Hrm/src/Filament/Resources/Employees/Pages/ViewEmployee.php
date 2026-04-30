@@ -88,18 +88,11 @@ final class ViewEmployee extends ViewRecord
                     Action::make('addDiploma')
                         ->label('Ajouter un diplôme')
                         ->icon('tabler-plus')
-                        ->modal()
                         ->url(DiplomaResource::getUrl('create', $employeeId)),
                     CreateAction::make('addEvaluation')
                         ->label('Ajouter une évaluation')
                         ->icon('tabler-plus')->modal()
-                        ->schema(fn(Schema $schema) => EvaluationForm::configure($schema))
-                        ->mountUsing(function (Schema $schema, Employee $employee): void {
-                            $schema->fill($employee ? ['employee_id' => $employee->id] : []);
-                        })
-                        ->modalHeading(function (Employee $employee): string {
-                            return 'Ajouter une évaluation pour '.$employee->last_name.' '.$employee->first_name;
-                        })
+                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema))
                         ->action(function (array $data, Employee $record): void {
                             $record->evaluations()->create($data);
                         }),
@@ -109,7 +102,7 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter une valorisation')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn(Schema $schema) => ValorizationForm::configure($schema))
+                    ->schema(fn (Schema $schema) => ValorizationForm::configure($schema))
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter une valorisation pour '.$employee->last_name.' '.$employee->first_name;
                     })
@@ -120,10 +113,7 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter un stage')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn(Schema $schema) => InternshipForm::configure($schema))
-                    ->mountUsing(function (Schema $schema, Employee $employee): void {
-                        $schema->fill($employee ? ['employee_id' => $employee->id] : []);
-                    })
+                    ->schema(fn (Schema $schema) => InternshipForm::configure($schema))
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
                     })
@@ -134,7 +124,7 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter une candidature')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn(Schema $schema) => ApplicationForm::configure($schema))
+                    ->schema(fn (Schema $schema) => ApplicationForm::configure($schema))
                     ->mountUsing(function (Schema $schema, Employee $employee): void {
                         $schema->fill($employee ? ['employee_id' => $employee->id] : []);
                     })

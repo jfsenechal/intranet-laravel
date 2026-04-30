@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-hrm';
 
     public function up(): void
@@ -31,7 +32,7 @@ return new class extends Migration {
             Schema::connection($this->connection)->table('internships', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('internships')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('internships')) {
             Schema::connection($this->connection)->create('internships', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id');
@@ -72,7 +73,7 @@ return new class extends Migration {
             Schema::connection($this->connection)->table('applications', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('applications')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('applications')) {
             Schema::connection($this->connection)->create('applications', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id');
@@ -110,7 +111,7 @@ return new class extends Migration {
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('deadlines')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('deadlines')) {
             Schema::connection($this->connection)->create('deadlines', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -147,7 +148,7 @@ return new class extends Migration {
             Schema::connection($this->connection)->table('hr_documents', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('hr_documents')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('hr_documents')) {
             Schema::connection($this->connection)->create('hr_documents', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -178,7 +179,7 @@ return new class extends Migration {
             Schema::connection($this->connection)->table('valorizations', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('valorizations')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('valorizations')) {
             Schema::connection($this->connection)->create('valorizations', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -218,7 +219,7 @@ return new class extends Migration {
                 $table->renameColumn('updatedAt', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('teleworks')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('teleworks')) {
             Schema::connection($this->connection)->create('teleworks', function (Blueprint $table): void {
                 $table->id();
                 $table->uuid('uuid')->unique();
@@ -263,7 +264,7 @@ return new class extends Migration {
             Schema::connection($this->connection)->table('sms_reminders', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('sms_reminders')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('sms_reminders')) {
             Schema::connection($this->connection)->create('sms_reminders', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('employee_id')->nullable();
@@ -296,7 +297,7 @@ return new class extends Migration {
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('hr_notifications')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('hr_notifications')) {
             Schema::connection($this->connection)->create('hr_notifications', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name', 250);
@@ -309,7 +310,7 @@ return new class extends Migration {
         }
 
         // Notification Users
-        if (!Schema::connection($this->connection)->hasTable('notification_users')) {
+        if (! Schema::connection($this->connection)->hasTable('notification_users')) {
             Schema::connection($this->connection)->create('notification_users', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('notification_id');

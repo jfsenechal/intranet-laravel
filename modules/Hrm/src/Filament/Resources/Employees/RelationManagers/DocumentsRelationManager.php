@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\HrDocuments\Schemas\HrDocumentInfolist;
 use AcMarche\Hrm\Filament\Resources\HrDocuments\Tables\HrDocumentTables;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -25,8 +27,13 @@ final class DocumentsRelationManager extends RelationManager
         return true;
     }
 
+    public function infolist(Schema $schema): Schema
+    {
+        return HrDocumentInfolist::configure($schema);
+    }
+
     public function table(Table $table): Table
     {
-        return HrDocumentTables::relation($table);
+        return HrDocumentTables::configure($table);
     }
 }
