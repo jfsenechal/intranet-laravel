@@ -6,6 +6,7 @@ namespace AcMarche\Pst\Http\Controllers;
 
 use AcMarche\Pst\Filament\Exports\PdfExport;
 use AcMarche\Pst\Models\Action;
+use App\Http\Controllers\Controller;
 use Filament\Actions\Action as FilamentAction;
 use Filament\Notifications\Notification;
 use Illuminate\Http\RedirectResponse;

@@ -6,6 +6,7 @@ namespace AcMarche\Pst\Http\Controllers;
 
 use AcMarche\Security\Repository\UserRepository;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Controller;
 
 final class SelectDepartmentController extends Controller
 {
