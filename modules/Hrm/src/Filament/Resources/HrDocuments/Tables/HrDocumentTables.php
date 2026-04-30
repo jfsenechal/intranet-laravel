@@ -64,29 +64,4 @@ final class HrDocumentTables
                 ]),
             ]);
     }
-
-    public static function relation(Table $table): Table
-    {
-        return $table
-            ->defaultSort('created_at', 'desc')
-            ->defaultPaginationPageOption(25)
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Intitulé')
-                    ->searchable()
-                    ->sortable()
-                    ->limit(50),
-                TextColumn::make('file_name')
-                    ->label('Fichier')
-                    ->formatStateUsing(fn (?string $state): string => $state ? '✓' : '—')
-                    ->url(
-                        fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null,
-                        shouldOpenInNewTab: true,
-                    ),
-                TextColumn::make('created_at')
-                    ->label('Créé le')
-                    ->date('d/m/Y')
-                    ->sortable(),
-            ]);
-    }
 }
