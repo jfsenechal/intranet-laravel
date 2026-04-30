@@ -1,0 +1,58 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Mileage\Filament\Resources\BudgetArticles;
+
+use AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages\CreateBudgetArticle;
+use AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages\EditBudgetArticle;
+use AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages\ListBudgetArticles;
+use AcMarche\Mileage\Filament\Resources\BudgetArticles\Schemas\BudgetArticleForm;
+use AcMarche\Mileage\Filament\Resources\BudgetArticles\Tables\BudgetArticleTables;
+use AcMarche\Mileage\Models\BudgetArticle;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Override;
+use UnitEnum;
+
+final class BudgetArticleResource extends Resource
+{
+    #[Override]
+    protected static ?string $model = BudgetArticle::class;
+
+    #[Override]
+    protected static string|null|UnitEnum $navigationGroup = 'Paramètres';
+
+    #[Override]
+    protected static ?int $navigationSort = 6;
+
+    public static function getNavigationIcon(): string
+    {
+        return 'tabler-book-2';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Articles budgétaires';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return BudgetArticleForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return BudgetArticleTables::configure($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListBudgetArticles::route('/'),
+            'create' => CreateBudgetArticle::route('/create'),
+            'edit' => EditBudgetArticle::route('/{record}/edit'),
+        ];
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "agents": [
+        "claude_code"
+    ],
+    "cloud": false,
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch": true,
+    "packages": [
+        "filament/filament",
+        "filament/blueprint",
+        "spatie/laravel-pdf",
+        "fruitcake/laravel-debugbar"
+    ],
+    "sail": false,
+    "skills": [
+        "laravel-best-practices",
+        "configure-nightwatch",
+        "scout-development",
+        "pest-testing",
+        "tailwindcss-development",
+        "laravel-pdf",
+        "debug-using-debugbar"
+    ]
+}

@@ -1,0 +1,14 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../modules/**/views/**/*.blade.php';
+@source '../../../../resources/views/components/**/*';
+
+.fi-sidebar-nav {
+    border-right: 1px solid #e4e4e5;
+}
+
+.dark .fi-sidebar-nav {
+    border-right: 1px solid #18181B;
+}

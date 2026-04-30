@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Hrm\Filament\Resources\ContractTypes\Pages;
+
+use AcMarche\Hrm\Filament\Resources\ContractTypes\ContractTypeResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Override;
+
+final class ListContractTypes extends ListRecords
+{
+    #[Override]
+    protected static string $resource = ContractTypeResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->label('Ajouter un type')
+                ->icon('tabler-plus'),
+        ];
+    }
+}

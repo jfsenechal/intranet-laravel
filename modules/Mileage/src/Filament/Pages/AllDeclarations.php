@@ -1,0 +1,158 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Mileage\Filament\Pages;
+
+use AcMarche\Mileage\Calculator\DeclarationCalculator;
+use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
+use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Repository\DeclarationRepository;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Override;
+use UnitEnum;
+
+final class AllDeclarations extends ListRecords
+{
+    #[Override]
+    protected static string $resource = DeclarationResource::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 3;
+
+    #[Override]
+    protected static ?string $navigationLabel = 'Toutes les déclarations';
+
+    #[Override]
+    protected static string|null|UnitEnum $navigationGroup = 'Administration';
+
+    /**
+     * Force the page to be discovered by the navigation menu.
+     */
+    public static function isDiscovered(): bool
+    {
+        return true;
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Toutes les déclarations';
+    }
+
+    public static function getNavigationIcon(): string
+    {
+        return 'tabler-list-check';
+    }
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        $user = Auth::user();
+        if ($user?->isAdministrator()) {
+            return true;
+        }
+
+        return $user?->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value) ?? false;
+    }
+
+    public function getTitle(): string
+    {
+        return 'Toutes les déclarations';
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(DeclarationRepository::findAll())
+            ->defaultSort('created_at', 'desc')
+            ->defaultPaginationPageOption(50)
+            ->columns([
+                TextColumn::make('user_add')
+                    ->label('Utilisateur')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('last_name')
+                    ->label('Nom')
+                    ->searchable()
+                    ->sortable()
+                    ->url(fn (Declaration $record): string => DeclarationResource::getUrl('view', ['record' => $record->id])),
+                TextColumn::make('first_name')
+                    ->label('Prénom')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('type_movement')
+                    ->label('Type')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Créé le')
+                    ->date('d/m/Y')
+                    ->sortable(),
+                TextColumn::make('trips_count')
+                    ->label('Déplacements')
+                    ->counts('trips')
+                    ->sortable(),
+                TextColumn::make('totalKilometers')
+                    ->label('Km')
+                    ->state(function (Declaration $record): int {
+                        $record->loadMissing('trips');
+                        $calculator = new DeclarationCalculator($record);
+
+                        return $calculator->calculate()->totalKilometers;
+                    })
+                    ->suffix(' km'),
+                TextColumn::make('totalRefund')
+                    ->label('Remboursement')
+                    ->state(function (Declaration $record): float {
+                        $record->loadMissing('trips');
+                        $calculator = new DeclarationCalculator($record);
+
+                        return $calculator->calculate()->totalRefund;
+                    })
+                    ->money('EUR'),
+            ])
+            ->filters([
+                SelectFilter::make('user_add')
+                    ->label('Utilisateur')
+                    ->options(fn () => Declaration::query()
+                        ->distinct()
+                        ->pluck('user_add', 'user_add')
+                        ->toArray())
+                    ->searchable(),
+                SelectFilter::make('type_movement')
+                    ->label('Type de déplacement')
+                    ->options([
+                        'interne' => 'Interne',
+                        'externe' => 'Externe',
+                    ]),
+                Filter::make('created_at')
+                    ->schema([
+                        DatePicker::make('created_from')
+                            ->label('Créé depuis'),
+                        DatePicker::make('created_until')
+                            ->label('Créé jusqu\'à'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['created_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['created_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                        )),
+            ])
+            ->recordActions([
+                ViewAction::make()
+                    ->url(fn (Declaration $record): string => DeclarationResource::getUrl('view', ['record' => $record->id])),
+            ]);
+    }
+}

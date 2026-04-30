@@ -1,0 +1,70 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Mileage\Filament\Resources\Users;
+
+use AcMarche\Mileage\Filament\Resources\Users\Pages\CreateUser;
+use AcMarche\Mileage\Filament\Resources\Users\Pages\EditUser;
+use AcMarche\Mileage\Filament\Resources\Users\Pages\ListUsers;
+use AcMarche\Mileage\Filament\Resources\Users\Schemas\UserForm;
+use AcMarche\Mileage\Filament\Resources\Users\Tables\UsersTable;
+use App\Models\User;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use Override;
+use UnitEnum;
+
+final class UserResource extends Resource
+{
+    #[Override]
+    protected static ?string $model = User::class;
+
+    #[Override]
+    protected static string|null|UnitEnum $navigationGroup = 'Administration';
+
+    #[Override]
+    protected static ?int $navigationSort = 7;
+
+    #[Override]
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-user-group';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Liste des agents';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return UserForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return UsersTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
+        ];
+    }
+}
