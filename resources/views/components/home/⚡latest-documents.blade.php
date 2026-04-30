@@ -32,7 +32,7 @@ new class extends Component
             </div>
             <h2 class="text-lg font-bold">Derniers documents utilisés</h2>
         </div>
-        <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
+        <span class="rounded-full bg-white/20 px-3 py-1  font-semibold backdrop-blur">
             {{ $latestDocuments->count() }}
         </span>
     </div>
@@ -52,7 +52,7 @@ new class extends Component
                     <p class="truncate font-medium text-gray-900 group-hover:text-emerald-600">
                         {{ $document->name }}
                     </p>
-                    <p class="mt-0.5 text-xs text-gray-500">
+                    <p class="mt-0.5  text-gray-500">
                         {{ $document->created_at?->translatedFormat('d F Y') }}
                         @if ($document->file_name)
                             — {{ $document->file_name }}

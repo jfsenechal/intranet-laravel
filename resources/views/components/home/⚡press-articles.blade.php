@@ -78,12 +78,12 @@ class extends Component
                     {{ $article['title'] ?? $article['name'] ?? 'Article' }}
                 </p>
                 @if (! empty($article['source']) || ! empty($article['publisher']))
-                    <p class="mt-1 text-xs font-medium uppercase tracking-wide text-cyan-600">
+                    <p class="mt-1  font-medium uppercase tracking-wide text-cyan-600">
                         {{ $article['source'] ?? $article['publisher'] }}
                     </p>
                 @endif
                 @if (! empty($article['publishedAt']) || ! empty($article['published_at']) || ! empty($article['date']))
-                    <p class="mt-1 text-xs text-gray-500">
+                    <p class="mt-1  text-gray-500">
                         {{ Carbon::parse($article['publishedAt'] ?? $article['published_at'] ?? $article['date'])->translatedFormat('d F Y') }}
                     </p>
                 @endif

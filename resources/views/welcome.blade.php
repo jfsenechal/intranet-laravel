@@ -284,8 +284,8 @@
                     --container-5xl: 64rem;
                     --container-6xl: 72rem;
                     --container-7xl: 80rem;
-                    --text-xs: .75rem;
-                    --text-xs--line-height: calc(1 / .75);
+                    --: .75rem;
+                    ----line-height: calc(1 / .75);
                     --text-sm: .875rem;
                     --text-sm--line-height: calc(1.25 / .875);
                     --text-base: 1rem;

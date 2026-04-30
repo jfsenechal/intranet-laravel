@@ -93,7 +93,7 @@ new class extends Component
     <div class="absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-white/5 blur-3xl"></div>
     <div class="relative flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <div class="min-w-0">
-            <p class="text-xs font-medium uppercase tracking-wider opacity-80">
+            <p class=" font-medium uppercase tracking-wider opacity-80">
                 {{ $today }}
             </p>
             <h1 class="mt-1 text-2xl font-extrabold md:text-3xl">Bienvenue sur l'intranet</h1>
@@ -107,7 +107,7 @@ new class extends Component
                 <span class="text-3xl leading-none animate-float">{{ $weather['icon'] }}</span>
                 <div class="leading-tight">
                     <p class="text-2xl font-bold">{{ number_format($weather['temperature'], 1, ',', ' ') }}°C</p>
-                    <p class="text-xs uppercase tracking-wider opacity-80">
+                    <p class=" uppercase tracking-wider opacity-80">
                         Marche · {{ $weather['label'] }}
                     </p>
                 </div>

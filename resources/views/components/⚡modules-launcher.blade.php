@@ -148,7 +148,7 @@ new class extends Component {
                                             @endif
                                         </span>
                                         @if ($module->description)
-                                            <span class="mt-0.5 line-clamp-2 block text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="mt-0.5 line-clamp-2 block  text-gray-500 dark:text-gray-400">
                                                 {{ $module->description }}
                                             </span>
                                         @endif
@@ -170,7 +170,7 @@ new class extends Component {
                                             {{ $module->name }}
                                         </span>
                                         @if ($module->description)
-                                            <span class="mt-0.5 line-clamp-2 block text-xs text-gray-500 dark:text-gray-500">
+                                            <span class="mt-0.5 line-clamp-2 block  text-gray-500 dark:text-gray-500">
                                                 {{ $module->description }}
                                             </span>
                                         @endif

@@ -99,7 +99,7 @@ class extends Component
             </div>
             <h2 class="text-lg font-bold">Flux d'actualité</h2>
         </div>
-        <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
+        <span class="rounded-full bg-white/20 px-3 py-1  font-semibold backdrop-blur">
             {{ count($rssItems) }}
         </span>
     </div>
@@ -112,14 +112,14 @@ class extends Component
                 class="group block p-4 transition hover:bg-gray-50 animate-fade-in-up"
                 style="--delay: {{ 0.5 + ($index * 0.03) }}s"
             >
-                <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-purple-600">
+                <p class="mb-1  font-semibold uppercase tracking-wide text-purple-600">
                     {{ $item['source'] }}
                 </p>
                 <p class="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-purple-700">
                     {{ $item['title'] }}
                 </p>
                 @if ($item['date'])
-                    <p class="mt-1 text-xs text-gray-500">
+                    <p class="mt-1  text-gray-500">
                         {{ Carbon::parse($item['date'])->translatedFormat('d F Y à H:i') }}
                     </p>
                 @endif

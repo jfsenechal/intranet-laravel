@@ -40,7 +40,7 @@ new class extends Component
             </div>
             <h2 class="text-base font-bold">Nouveaux agents</h2>
         </div>
-        <span class="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold backdrop-blur">
+        <span class="rounded-full bg-white/20 px-2 py-0.5  font-semibold backdrop-blur">
             {{ $latestEmployees->count() }}
         </span>
     </div>
@@ -69,14 +69,14 @@ new class extends Component
                         {{ $employee->first_name }} {{ $employee->last_name }}
                     </p>
                     @if ($employee->hired_at)
-                        <p class="text-xs text-gray-500">
+                        <p class=" text-gray-500">
                             engagé le {{ $employee->hired_at->translatedFormat('d F Y') }}
                         </p>
                     @endif
                 </div>
             </a>
         @empty
-            <p class="text-center text-xs text-gray-500">Aucun nouvel agent.</p>
+            <p class="text-center  text-gray-500">Aucun nouvel agent.</p>
         @endforelse
     </div>
 </div>

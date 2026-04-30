@@ -45,7 +45,7 @@ new class extends Component
         </div>
         <div class="min-w-0">
             <h2 class="text-base font-bold">Anniversaires</h2>
-            <p class="text-xs opacity-90">{{ $today }}</p>
+            <p class=" opacity-90">{{ $today }}</p>
         </div>
     </div>
     <div class="p-4">
@@ -74,7 +74,7 @@ new class extends Component
         @empty
             <div class="flex flex-col items-center justify-center py-4 text-center">
                 <span class="text-2xl">🎈</span>
-                <p class="mt-1 text-xs text-gray-500">Aucun anniversaire aujourd'hui.</p>
+                <p class="mt-1  text-gray-500">Aucun anniversaire aujourd'hui.</p>
             </div>
         @endforelse
     </div>

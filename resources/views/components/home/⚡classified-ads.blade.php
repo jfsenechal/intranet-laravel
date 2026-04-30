@@ -32,7 +32,7 @@ new class extends Component
             </div>
             <h2 class="text-base font-bold">Petites annonces</h2>
         </div>
-        <span class="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold backdrop-blur">
+        <span class="rounded-full bg-white/20 px-2 py-0.5  font-semibold backdrop-blur">
             {{ $latestAds->count() }}
         </span>
     </div>
@@ -46,12 +46,12 @@ new class extends Component
                 <p class="truncate text-sm font-medium text-gray-900 group-hover:text-pink-600">
                     {{ $ad->title ?? $ad->name }}
                 </p>
-                <p class="mt-0.5 text-xs text-gray-500">
+                <p class="mt-0.5  text-gray-500">
                     {{ $ad->created_at?->translatedFormat('d F Y') }}
                 </p>
             </a>
         @empty
-            <p class="p-4 text-center text-xs text-gray-500">Aucune annonce.</p>
+            <p class="p-4 text-center  text-gray-500">Aucune annonce.</p>
         @endforelse
     </div>
 </div>

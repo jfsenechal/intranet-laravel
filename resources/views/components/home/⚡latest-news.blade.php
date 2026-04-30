@@ -32,7 +32,7 @@ new class extends Component
             </div>
             <h2 class="text-lg font-bold">Dernières actualités</h2>
         </div>
-        <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
+        <span class="rounded-full bg-white/20 px-3 py-1  font-semibold backdrop-blur">
             {{ $latestNews->count() }}
         </span>
     </div>
@@ -48,7 +48,7 @@ new class extends Component
                     <p class="truncate font-medium text-gray-900 group-hover:text-blue-600">
                         {{ $news->title ?? $news->name }}
                     </p>
-                    <p class="mt-0.5 text-xs text-gray-500">
+                    <p class="mt-0.5  text-gray-500">
                         {{ $news->created_at?->translatedFormat('d F Y') }}
                         @if ($news->user_add)
                             — {{ $news->user_add }}
