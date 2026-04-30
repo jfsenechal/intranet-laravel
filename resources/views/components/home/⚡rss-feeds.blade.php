@@ -70,7 +70,7 @@ class extends Component
         return <<<'HTML'
         <div class="card-hover overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-200" style="--delay: 0.45s">
             <div class="gradient-rss flex items-center gap-3 p-5 text-white">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur"></div>
+                <div class="flex size-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur"></div>
                 <h2 class="text-lg font-bold">Flux d'actualité</h2>
             </div>
             <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
@@ -92,8 +92,8 @@ class extends Component
 <div class="card-hover overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 animate-fade-in-up" style="--delay: 0.45s">
     <div class="gradient-rss flex items-center justify-between p-5 text-white">
         <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <div class="flex size-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M5.5 18a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM.5 10.5v3.5a9 9 0 019 9h3.5A12.5 12.5 0 00.5 10.5zm0-7v3.5A16 16 0 0116.5 23H20A19.5 19.5 0 00.5 3.5z" />
                 </svg>
             </div>

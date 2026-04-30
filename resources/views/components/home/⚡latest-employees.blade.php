@@ -33,8 +33,8 @@ new class extends Component
 <div class="card-hover overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 animate-fade-in-up" style="--delay: 0.3s">
     <div class="gradient-employee flex items-center justify-between p-4 text-white">
         <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex size-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
             </div>
@@ -55,13 +55,13 @@ new class extends Component
                     <img
                         src="{{ Storage::disk('public')->url($employee->photo) }}"
                         alt="{{ $employee->first_name }} {{ $employee->last_name }}"
-                        class="h-10 w-10 rounded-full object-cover ring-2 ring-indigo-300"
+                        class="size-10 rounded-full object-cover ring-2 ring-indigo-300"
                     />
                 @else
                     <img
                         src="https://ui-avatars.com/api/?size=128&background=6366f1&color=fff&name={{ urlencode(trim($employee->first_name.' '.$employee->last_name)) }}"
                         alt="{{ $employee->first_name }} {{ $employee->last_name }}"
-                        class="h-10 w-10 rounded-full object-cover ring-2 ring-indigo-300"
+                        class="size-10 rounded-full object-cover ring-2 ring-indigo-300"
                     />
                 @endif
                 <div class="min-w-0 flex-1">

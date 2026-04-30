@@ -89,11 +89,11 @@ new class extends Component
 ?>
 
 <div class="relative overflow-hidden rounded-3xl gradient-hero px-8 py-5 text-white shadow-2xl animate-fade-in-up">
-    <div class="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-3xl"></div>
-    <div class="absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-white/5 blur-3xl"></div>
+    <div class="absolute -right-10 -top-10 size-48 rounded-full bg-white/10 blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-10 size-56 rounded-full bg-white/5 blur-3xl"></div>
     <div class="relative flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <div class="min-w-0">
-            <p class="font-medium uppercase tracking-wider opacity-80">
+            <p class=" font-medium uppercase tracking-wider opacity-80">
                 {{ $today }}
             </p>
             <h1 class="mt-1 text-2xl font-extrabold md:text-3xl">Bienvenue sur l'intranet</h1>
@@ -105,9 +105,9 @@ new class extends Component
         @if ($weather)
             <div class="flex items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-md ring-1 ring-white/20">
                 <span class="text-3xl leading-none animate-float">{{ $weather['icon'] }}</span>
-                <div class="leading-tight">
-                    <p class="text-2xl font-bold">{{ number_format($weather['temperature'], 1, ',', ' ') }}°C</p>
-                    <p class="uppercase tracking-wider opacity-80">
+                <div>
+                    <p class="text-2xl font-bold tabular-nums">{{ number_format($weather['temperature'], 1, ',', ' ') }}°C</p>
+                    <p class=" uppercase tracking-wider opacity-80">
                         Marche · {{ $weather['label'] }}
                     </p>
                 </div>
