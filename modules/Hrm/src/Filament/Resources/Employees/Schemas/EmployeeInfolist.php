@@ -128,6 +128,9 @@ final class EmployeeInfolist
                                         IconEntry::make('is_archived')
                                             ->label('Archivé')
                                             ->boolean(),
+                                        IconEntry::make('is_new_hire')
+                                            ->label('Nouvel agent')
+                                            ->boolean(),
                                     ]),
                                 Fieldset::make('Dates')
                                     ->columns(3)

@@ -68,6 +68,7 @@ use Spatie\Sluggable\SlugOptions;
     'candidate_service_id',
     'user_add',
     'updated_by',
+    'is_new_hire',
 ])]
 #[Table(name: 'employees')]
 final class Employee extends Model
@@ -238,7 +239,7 @@ final class Employee extends Model
 
         self::creating(function (Employee $employee): void {
             if (empty($employee->uuid)) {
-                $employee->uuid = (string) Str::uuid();
+                $employee->uuid = (string)Str::uuid();
             }
         });
     }
@@ -261,6 +262,7 @@ final class Employee extends Model
             'candidate_mail_sent_at' => 'date',
             'show_birthday' => 'boolean',
             'is_archived' => 'boolean',
+            'is_new_hire' => 'boolean',
             'status' => StatusEnum::class,
             'intern_type' => InternTypeEnum::class,
         ];

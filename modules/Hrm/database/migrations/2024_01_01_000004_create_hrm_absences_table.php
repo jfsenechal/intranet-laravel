@@ -32,6 +32,7 @@ return new class extends Migration
                 $table->renameColumn('pointeuse', 'clock_updated');
                 $table->renameColumn('encare', 'certimed');
                 $table->renameColumn('dossier_agent', 'agent_file');
+                $table->string('work_capacity_assessment', 150)->nullable();
             });
         } elseif (! Schema::connection($this->connection)->hasTable('absences')) {
             Schema::connection($this->connection)->create('absences', function (Blueprint $table): void {
@@ -51,6 +52,7 @@ return new class extends Migration
                 $table->string('acropole', 5)->nullable()->comment('oui ou non');
                 $table->string('agent_file', 5)->nullable()->comment('oui ou non');
                 $table->string('user_add', 255);
+                $table->string('work_capacity_assessment', 150)->nullable();
                 $table->string('updated_by', 255)->nullable();
                 $table->timestamps();
             });

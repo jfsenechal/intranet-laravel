@@ -99,6 +99,9 @@ final class EmployeeForm
                                             ->live(),
                                         Toggle::make('is_archived')
                                             ->label('Archivé'),
+                                        Toggle::make('is_new_hire')
+                                            ->label('Nouvel agent ?')
+                                            ->helperText('Il apparaitra dans la liste des nouveaux agents'),
                                     ]),
                                 Fieldset::make('Dates')
                                     ->columns(3)

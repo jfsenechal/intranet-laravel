@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Models;
 
 use AcMarche\Hrm\Enums\ReasonsEnum;
+use AcMarche\Hrm\Enums\WorkCapacityAssessmentEnum;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'agent_file',
     'user_add',
     'updated_by',
+    'work_capacity_assessment',
 ])]
 #[Table(name: 'absences')]
 final class Absence extends Model
@@ -65,6 +67,7 @@ final class Absence extends Model
             'acropole' => 'boolean',
             'agent_file' => 'boolean',
             'reason' => ReasonsEnum::class,
+            'work_capacity_assessment' => WorkCapacityAssessmentEnum::class,
         ];
     }
 }

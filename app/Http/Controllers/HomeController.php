@@ -32,11 +32,27 @@ final class HomeController extends Controller
         return view('home', [
             'latestNews' => News::query()->latest('created_at')->limit(6)->get(),
             'latestDocuments' => Document::query()->latest('created_at')->limit(6)->get(),
-            'latestAds' => ClassifiedAd::query()->latest('created_at')->limit(6)->get(),
+            'latestAds' => ClassifiedAd::query()->latest('created_at')->limit(4)->get(),
+            'latestEmployees' => $this->fetchLatestEmployees(),
             'todayBirthdays' => $this->fetchTodayBirthdays(),
             'rssItems' => $this->fetchRssItems(),
             'pressArticles' => $this->fetchPressArticles(),
         ]);
+    }
+
+    /**
+     * @return Collection<int, Employee>
+     */
+    private function fetchLatestEmployees(): Collection
+    {
+        return Employee::query()
+            ->where('is_archived', false)
+            ->whereNotNull('hired_at')
+            ->whereHas('activeContracts')
+            ->with('activeContracts')
+            ->orderByDesc('hired_at')
+            ->limit(5)
+            ->get();
     }
 
     /**
