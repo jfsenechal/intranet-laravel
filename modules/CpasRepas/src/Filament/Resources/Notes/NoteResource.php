@@ -1,0 +1,58 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\CpasRepas\Filament\Resources\Notes;
+
+use AcMarche\CpasRepas\Filament\Resources\Notes\Pages\CreateNote;
+use AcMarche\CpasRepas\Filament\Resources\Notes\Pages\EditNote;
+use AcMarche\CpasRepas\Filament\Resources\Notes\Pages\ListNotes;
+use AcMarche\CpasRepas\Filament\Resources\Notes\Schemas\NoteForm;
+use AcMarche\CpasRepas\Filament\Resources\Notes\Tables\NoteTables;
+use AcMarche\CpasRepas\Models\Note;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Override;
+use UnitEnum;
+
+final class NoteResource extends Resource
+{
+    #[Override]
+    protected static ?string $model = Note::class;
+
+    #[Override]
+    protected static string|null|UnitEnum $navigationGroup = 'CPAS Repas';
+
+    #[Override]
+    protected static ?int $navigationSort = 7;
+
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-document-text';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Client notes';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return NoteForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return NoteTables::configure($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListNotes::route('/'),
+            'create' => CreateNote::route('/create'),
+            'edit' => EditNote::route('/{record}/edit'),
+        ];
+    }
+}
