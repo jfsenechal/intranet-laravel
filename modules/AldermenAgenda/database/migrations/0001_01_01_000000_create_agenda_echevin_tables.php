@@ -32,10 +32,8 @@ return new class extends Migration
                 $table->renameColumn('organisateur', 'organizer');
                 $table->renameColumn('lieu', 'location');
                 $table->renameColumn('representant', 'representative');
-                $table->renameColumn('date_rappel', 'file1_name');
-                $table->renameColumn('date_rappel', 'file_name');
                 $table->renameColumn('created', 'created_at');
-                $table->renameColumn('updated_at', 'file_name');
+                $table->renameColumn('updated', 'updated_at');
             });
         }
         if (Schema::connection('maria-aldermen-agenda')->hasTable('archives')) {
