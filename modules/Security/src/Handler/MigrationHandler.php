@@ -18,6 +18,7 @@ use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
+use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
 use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
 use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
@@ -44,6 +45,7 @@ final class MigrationHandler
     {
         return match ($module->id) {
             3 => EventResource::getUrl('index', panel: 'aldermen-agenda-panel'),
+            4 => OffenseResource::getUrl('index', panel: 'offenses-panel'),
             6 => EmployeeResource::getUrl('index', panel: 'hrm-panel'),
             9 => DocumentResource::getUrl('index', panel: 'document-panel'),
             13 => TripResource::getUrl('index', panel: 'mileage-panel'),
