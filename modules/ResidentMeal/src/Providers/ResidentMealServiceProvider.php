@@ -25,7 +25,7 @@ final class ResidentMealServiceProvider extends ServiceProvider
 
     protected function moduleName(): string
     {
-        return 'resident_meal';
+        return 'resident-meal';
     }
 
     protected function modulePath(): string

@@ -31,6 +31,10 @@
         },
         {
             "type": "path",
+            "url": "./modules/ResidentMeal"
+        },
+        {
+            "type": "path",
             "url": "./modules/MealDelivery"
         },
         {
