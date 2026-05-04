@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Connection('maria-cpasrepas')]
+#[Connection('maria-meal-delivery')]
 #[Fillable(['client_id', 'note_date', 'description', 'is_done', 'done_by'])]
 final class Note extends Model
 {

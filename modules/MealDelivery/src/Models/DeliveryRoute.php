@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Connection('maria-cpasrepas')]
+#[Connection('maria-meal-delivery')]
 #[Fillable(['name'])]
 final class DeliveryRoute extends Model
 {

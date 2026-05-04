@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('maria-cpasrepas')->create('orders', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('orders', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('week_id')->nullable()->constrained('weeks')->nullOnDelete();
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-cpasrepas')->dropIfExists('orders');
+        Schema::connection('maria-meal-delivery')->dropIfExists('orders');
     }
 };

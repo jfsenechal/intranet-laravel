@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('maria-cpasrepas')->create('clients', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('clients', function (Blueprint $table): void {
             $table->id();
             $table->string('salutation')->nullable();
             $table->string('last_name');
@@ -39,6 +39,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-cpasrepas')->dropIfExists('clients');
+        Schema::connection('maria-meal-delivery')->dropIfExists('clients');
     }
 };

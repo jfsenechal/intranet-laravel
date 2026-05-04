@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Connection('maria-cpasrepas')]
+#[Connection('maria-meal-delivery')]
 #[Fillable(['route_id', 'client_id', 'position'])]
 final class RouteOrder extends Model
 {

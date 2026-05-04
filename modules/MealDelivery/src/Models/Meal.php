@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Connection('maria-cpasrepas')]
+#[Connection('maria-meal-delivery')]
 #[Fillable(['date', 'soup_count', 'notes', 'order_id', 'at_cafeteria'])]
 final class Meal extends Model
 {

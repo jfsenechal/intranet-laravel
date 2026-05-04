@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Connection('maria-cpasrepas')]
+#[Connection('maria-meal-delivery')]
 #[Fillable([
     'salutation',
     'last_name',

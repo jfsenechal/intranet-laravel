@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('maria-cpasrepas')->create('delivery_routes', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('delivery_routes', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->timestamps();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-cpasrepas')->dropIfExists('delivery_routes');
+        Schema::connection('maria-meal-delivery')->dropIfExists('delivery_routes');
     }
 };

@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('maria-cpasrepas')->create('menus', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('menus', function (Blueprint $table): void {
             $table->id();
             $table->integer('position');
             $table->integer('quantity')->default(0);
@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-cpasrepas')->dropIfExists('menus');
+        Schema::connection('maria-meal-delivery')->dropIfExists('menus');
     }
 };

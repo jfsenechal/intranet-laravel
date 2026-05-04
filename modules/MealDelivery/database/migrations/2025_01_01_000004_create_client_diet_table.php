@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('maria-cpasrepas')->create('client_diet', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('client_diet', function (Blueprint $table): void {
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->foreignId('diet_id')->constrained('diets')->cascadeOnDelete();
             $table->primary(['client_id', 'diet_id']);
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-cpasrepas')->dropIfExists('client_diet');
+        Schema::connection('maria-meal-delivery')->dropIfExists('client_diet');
     }
 };

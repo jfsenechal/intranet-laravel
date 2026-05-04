@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('maria-cpasrepas')->create('weeks', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('weeks', function (Blueprint $table): void {
             $table->id();
             $table->date('first_day');
             $table->json('days')->nullable();
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-cpasrepas')->dropIfExists('weeks');
+        Schema::connection('maria-meal-delivery')->dropIfExists('weeks');
     }
 };
