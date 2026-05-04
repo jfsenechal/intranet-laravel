@@ -58,6 +58,8 @@ final class AbsenceInfolist
                         ->label('Raison'),
                     TextEntry::make('ssa')
                         ->label('SSA'),
+                    TextEntry::make('work_capacity_assessment')
+                        ->label('Évaluation de la capacité de travail'),
                 ]),
             TextEntry::make('notes')
                 ->label('Notes')

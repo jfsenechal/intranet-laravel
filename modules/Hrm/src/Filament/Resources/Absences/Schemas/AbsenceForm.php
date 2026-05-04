@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Absences\Schemas;
 
 use AcMarche\Hrm\Enums\ReasonsEnum;
+use AcMarche\Hrm\Enums\WorkCapacityAssessmentEnum;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -39,12 +41,17 @@ final class AbsenceForm
                             ->label('Raison')
                             ->enum(ReasonsEnum::class)
                             ->options(ReasonsEnum::class),
-                        Select::make('ssa')
+                        Radio::make('ssa')
                             ->label('MEDEX / SSA / Certificat médical / Justificatif reçu ?')
                             ->options([
-                                'oui' => 'Oui',
-                                'non' => 'Non',
-                            ]),
+                                'Oui' => 'Oui',
+                                'Non' => 'Non',
+                            ])
+                            ->inline(),
+                        Select::make('work_capacity_assessment')
+                            ->label('Évaluation de la capacité de travail')
+                            ->enum(WorkCapacityAssessmentEnum::class)
+                            ->options(WorkCapacityAssessmentEnum::class),
                     ]),
                 Section::make('Options')
                     ->columns(3)
