@@ -1,0 +1,4 @@
+create tests for hrm module
+before began, read filament docs
+https://filamentphp.com/docs/5.x/testing/overview
+and guidelines in vendor/filament/blueprint/resources/markdown/planning/testing.md
