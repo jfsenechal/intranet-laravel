@@ -11,21 +11,10 @@ use Filament\Actions\Action as FilamentAction;
 use Filament\Notifications\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelPdf\PdfBuilder;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-
-use function Spatie\LaravelPdf\Support\pdf;
 
 final class PdfExportController extends Controller
 {
-    // todo try
-    public function exprotTiti(Action $action): PdfBuilder
-    {
-        return pdf()
-            ->view('pdf.action', ['action' => $action])
-            ->name('action.pdf');
-    }
-
     public function export(Action $action): RedirectResponse
     {
         $relativePath = PdfExport::exportAction($action);
