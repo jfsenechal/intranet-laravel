@@ -14,14 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['position', 'quantity', 'meal_id'])]
 final class Menu extends Model
 {
-    protected function casts(): array
-    {
-        return [
-            'position' => 'integer',
-            'quantity' => 'integer',
-        ];
-    }
-
     /**
      * @return BelongsTo<Meal, Menu>
      */
@@ -36,5 +28,13 @@ final class Menu extends Model
     public function diets(): BelongsToMany
     {
         return $this->belongsToMany(Diet::class, 'diet_menu');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'position' => 'integer',
+            'quantity' => 'integer',
+        ];
     }
 }

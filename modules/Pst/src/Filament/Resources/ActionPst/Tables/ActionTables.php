@@ -50,7 +50,7 @@ final class ActionTables
         return $table
             ->defaultSort('name')
             ->defaultPaginationPageOption(50)
-            ->recordUrl(fn(Action $record): string => ActionPstResource::getUrl('view', [$record]))
+            ->recordUrl(fn (Action $record): string => ActionPstResource::getUrl('view', [$record]))
             ->columns(self::getColumns())
             ->filters([
                 //
@@ -62,7 +62,7 @@ final class ActionTables
         return $table
             ->defaultSort('name')
             ->defaultPaginationPageOption(50)
-            ->recordUrl(fn(Action $record): string => ActionPstResource::getUrl('view', [$record]))
+            ->recordUrl(fn (Action $record): string => ActionPstResource::getUrl('view', [$record]))
             ->columns([
                 TextColumn::make('id')
                     ->sortable()
@@ -72,7 +72,7 @@ final class ActionTables
                     ->sortable()
                     ->label('Intitulé')
                     ->limit(95)
-                    ->url(fn(Action $record): string => ActionPstResource::getUrl('view', ['record' => $record->id]))
+                    ->url(fn (Action $record): string => ActionPstResource::getUrl('view', ['record' => $record->id]))
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
 
@@ -101,7 +101,7 @@ final class ActionTables
 
         $columns[] = TextColumn::make('roadmap')
             ->label('Feuille de route')
-            ->formatStateUsing(fn($state) => $state?->getLabel() ?? '-')
+            ->formatStateUsing(fn ($state) => $state?->getLabel() ?? '-')
             ->sortable()
             ->toggleable(isToggledHiddenByDefault: true);
 
@@ -111,8 +111,8 @@ final class ActionTables
             ->limitList(2)
             ->expandableLimitedList()
             ->formatStateUsing(
-                fn($state, Action $record) => $record->mandataries->map(
-                    fn($user): string => $user->first_name.' '.$user->last_name
+                fn ($state, Action $record) => $record->mandataries->map(
+                    fn ($user): string => $user->first_name.' '.$user->last_name
                 )->join(', ')
             )
             ->toggleable(isToggledHiddenByDefault: true);
@@ -123,8 +123,8 @@ final class ActionTables
             ->limitList(2)
             ->expandableLimitedList()
             ->formatStateUsing(
-                fn($state, Action $record) => $record->users->map(
-                    fn($user): string => $user->first_name.' '.$user->last_name
+                fn ($state, Action $record) => $record->users->map(
+                    fn ($user): string => $user->first_name.' '.$user->last_name
                 )->join(', ')
             )
             ->toggleable(isToggledHiddenByDefault: true);
@@ -164,14 +164,14 @@ final class ActionTables
 
         $columns[] = TextColumn::make('validated')
             ->label('Validé')
-            ->formatStateUsing(fn($state): string => $state ? 'Oui' : 'Non')
+            ->formatStateUsing(fn ($state): string => $state ? 'Oui' : 'Non')
             ->toggleable(isToggledHiddenByDefault: true);
 
         return $table
             ->defaultSort('name')
             ->defaultPaginationPageOption(50)
             ->persistFiltersInSession()
-            ->recordUrl(fn(Action $record): string => ActionPstResource::getUrl('view', [$record]))
+            ->recordUrl(fn (Action $record): string => ActionPstResource::getUrl('view', [$record]))
             ->columns($columns)
             ->filters(self::getFilters())
             ->filtersFormColumns(3)
@@ -186,7 +186,7 @@ final class ActionTables
                 ->relationship(
                     'operationalObjective',
                     'name',
-                    modifyQueryUsing: fn(Builder $query) => $query
+                    modifyQueryUsing: fn (Builder $query) => $query
                         ->where(function (Builder $query): void {
                             $query->forSelectedDepartment()
                                 ->orWhereNull('department');
@@ -198,14 +198,14 @@ final class ActionTables
                 ->label('État d\'avancement')
                 ->options(
                     collect(ActionStateEnum::cases())
-                        ->mapWithKeys(fn(ActionStateEnum $action): array => [$action->value => $action->getLabel()])
+                        ->mapWithKeys(fn (ActionStateEnum $action): array => [$action->value => $action->getLabel()])
                         ->all()
                 ),
             SelectFilter::make('type')
                 ->label('Type')
                 ->options(
                     collect(ActionTypeEnum::cases())
-                        ->mapWithKeys(fn(ActionTypeEnum $action): array => [$action->value => $action->getLabel()])
+                        ->mapWithKeys(fn (ActionTypeEnum $action): array => [$action->value => $action->getLabel()])
                         ->all()
                 ),
             SelectFilter::make('scope')
@@ -214,7 +214,7 @@ final class ActionTables
             Filter::make('without_odds')
                 ->label('Sans ODD')
                 ->toggle()
-                ->query(fn(Builder $query): Builder => $query->whereDoesntHave('odds')),
+                ->query(fn (Builder $query): Builder => $query->whereDoesntHave('odds')),
             SelectFilter::make('synergy')
                 ->label(ActionSynergyEnum::getTitle())
                 ->options(ActionSynergyEnum::class),
@@ -222,24 +222,24 @@ final class ActionTables
                 ->label('Agents')
                 ->relationship('users', 'last_name')
                 //  ->modifyQueryUsing(fn(Builder $query) => $query->orderBy('last_name', 'asc'))
-                ->getOptionLabelFromRecordUsing(fn($record): string => $record->first_name.' '.$record->last_name)
+                ->getOptionLabelFromRecordUsing(fn ($record): string => $record->first_name.' '.$record->last_name)
                 ->searchable(['first_name', 'last_name']),
             SelectFilter::make('services')
                 ->label('Services')
-                ->options(fn() => Service::query()->orderBy('name')->pluck('name', 'id'))
+                ->options(fn () => Service::query()->orderBy('name')->pluck('name', 'id'))
                 ->multiple()
                 ->searchable()
-                ->query(fn(Builder $query, array $data): Builder => $query->when(
+                ->query(fn (Builder $query, array $data): Builder => $query->when(
                     $data['values'],
-                    fn(Builder $query, array $services): Builder => $query->where(
-                        fn(Builder $query) => $query
-                            ->whereHas('leaderServices', fn(Builder $q) => $q->whereIn('services.id', $services))
-                            ->orWhereHas('partnerServices', fn(Builder $q) => $q->whereIn('services.id', $services))
+                    fn (Builder $query, array $services): Builder => $query->where(
+                        fn (Builder $query) => $query
+                            ->whereHas('leaderServices', fn (Builder $q) => $q->whereIn('services.id', $services))
+                            ->orWhereHas('partnerServices', fn (Builder $q) => $q->whereIn('services.id', $services))
                     )
                 )),
             TrashedFilter::make()
                 ->label('Supprimées')
-                ->visible(fn(): bool => auth()->user()?->hasOneOfThisRoles([RoleEnum::ADMIN->value]) ?? false),
+                ->visible(fn (): bool => auth()->user()?->hasOneOfThisRoles([RoleEnum::ADMIN->value]) ?? false),
         ];
     }
 
@@ -260,7 +260,7 @@ final class ActionTables
                 ->label('Numéro'),
             TextColumn::make('oo')
                 ->label('Oo')
-                ->state(fn(): string => 'Oo')
+                ->state(fn (): string => 'Oo')
                 ->tooltip(function (TextColumn $column): ?string {
                     $record = $column->getRecord();
 
@@ -272,7 +272,7 @@ final class ActionTables
                 ->sortable()
                 ->label('Intitulé')
                 ->limit(95)
-                ->url(fn(Action $record): string => ActionPstResource::getUrl('view', ['record' => $record->id]))
+                ->url(fn (Action $record): string => ActionPstResource::getUrl('view', ['record' => $record->id]))
                 ->tooltip(function (TextColumn $column): ?string {
                     $state = $column->getState();
 
@@ -284,18 +284,18 @@ final class ActionTables
                 }),
             TextColumn::make('state')
                 ->label('État d\'avancement')
-                ->formatStateUsing(fn(ActionStateEnum $state): string => $state->getLabel() ?? 'Unknown')
+                ->formatStateUsing(fn (ActionStateEnum $state): string => $state->getLabel() ?? 'Unknown')
                 ->toggleable(),
             TextColumn::make('isInternal')
                 ->label('Interne')
-                ->state(fn(Action $record): string => $record->isInternal() ? 'Oui' : 'Non')
+                ->state(fn (Action $record): string => $record->isInternal() ? 'Oui' : 'Non')
                 ->toggleable(),
             TextColumn::make('type')
-                ->formatStateUsing(fn(ActionTypeEnum $state): string => $state->getLabel() ?? 'Unknown')
+                ->formatStateUsing(fn (ActionTypeEnum $state): string => $state->getLabel() ?? 'Unknown')
                 ->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('synergy')
                 ->label(ActionSynergyEnum::getTitle())
-                ->formatStateUsing(fn($state) => $state?->getLabel() ?? '-')
+                ->formatStateUsing(fn ($state) => $state?->getLabel() ?? '-')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('leaderServices.name')
@@ -316,8 +316,8 @@ final class ActionTables
                 ->limitList(2)
                 ->expandableLimitedList()
                 ->formatStateUsing(
-                    fn($state, Action $record) => $record->users->map(
-                        fn($user): string => $user->first_name.' '.$user->last_name
+                    fn ($state, Action $record) => $record->users->map(
+                        fn ($user): string => $user->first_name.' '.$user->last_name
                     )->join(', ')
                 )
                 ->toggleable(isToggledHiddenByDefault: true),

@@ -13,11 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['name', 'not_deletable'])]
 final class Diet extends Model
 {
-    protected function casts(): array
+    public function __toString(): string
     {
-        return [
-            'not_deletable' => 'boolean',
-        ];
+        return (string) $this->name;
     }
 
     /**
@@ -28,8 +26,10 @@ final class Diet extends Model
         return $this->belongsToMany(Client::class, 'client_diet');
     }
 
-    public function __toString(): string
+    protected function casts(): array
     {
-        return (string) $this->name;
+        return [
+            'not_deletable' => 'boolean',
+        ];
     }
 }

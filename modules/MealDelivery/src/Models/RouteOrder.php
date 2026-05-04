@@ -15,13 +15,6 @@ final class RouteOrder extends Model
 {
     protected $table = 'route_orders';
 
-    protected function casts(): array
-    {
-        return [
-            'position' => 'integer',
-        ];
-    }
-
     /**
      * @return BelongsTo<DeliveryRoute, RouteOrder>
      */
@@ -36,5 +29,12 @@ final class RouteOrder extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'position' => 'integer',
+        ];
     }
 }

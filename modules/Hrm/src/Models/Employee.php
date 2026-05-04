@@ -239,7 +239,7 @@ final class Employee extends Model
 
         self::creating(function (Employee $employee): void {
             if (empty($employee->uuid)) {
-                $employee->uuid = (string)Str::uuid();
+                $employee->uuid = (string) Str::uuid();
             }
         });
     }

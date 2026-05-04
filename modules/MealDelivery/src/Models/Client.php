@@ -38,14 +38,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 ])]
 final class Client extends Model
 {
-    protected function casts(): array
+    public function __toString(): string
     {
-        return [
-            'birth_date' => 'date',
-            'is_active' => 'boolean',
-            'use_cafeteria' => 'boolean',
-            'postal_code' => 'integer',
-        ];
+        return $this->last_name.' '.$this->first_name;
     }
 
     /**
@@ -96,8 +91,13 @@ final class Client extends Model
         return $this->hasMany(Note::class);
     }
 
-    public function __toString(): string
+    protected function casts(): array
     {
-        return $this->last_name.' '.$this->first_name;
+        return [
+            'birth_date' => 'date',
+            'is_active' => 'boolean',
+            'use_cafeteria' => 'boolean',
+            'postal_code' => 'integer',
+        ];
     }
 }

@@ -36,6 +36,11 @@ final class Event extends Model
 
     protected $table = 'agenda_echevin_events';
 
+    public function __toString(): string
+    {
+        return $this->title;
+    }
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
@@ -47,11 +52,6 @@ final class Event extends Model
     public function participations(): HasMany
     {
         return $this->hasMany(Participation::class);
-    }
-
-    public function __toString(): string
-    {
-        return $this->title;
     }
 
     protected function casts(): array

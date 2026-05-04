@@ -21,6 +21,11 @@ final class Recipient extends Model
 
     protected $table = 'agenda_echevin_recipients';
 
+    public function __toString(): string
+    {
+        return $this->last_name.' '.$this->first_name;
+    }
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
@@ -31,11 +36,6 @@ final class Recipient extends Model
     public function participations(): HasMany
     {
         return $this->hasMany(Participation::class);
-    }
-
-    public function __toString(): string
-    {
-        return $this->last_name.' '.$this->first_name;
     }
 
     protected function casts(): array

@@ -15,6 +15,11 @@ final class DeliveryRoute extends Model
 {
     protected $table = 'delivery_routes';
 
+    public function __toString(): string
+    {
+        return (string) $this->name;
+    }
+
     /**
      * @return HasMany<Client, DeliveryRoute>
      */
@@ -29,10 +34,5 @@ final class DeliveryRoute extends Model
     public function routeOrders(): HasMany
     {
         return $this->hasMany(RouteOrder::class, 'route_id');
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->name;
     }
 }

@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-hrm';
 
     public function up(): void
@@ -71,7 +72,7 @@ return new class extends Migration {
                 $table->removeColumn('mobile_office');
                 $table->boolean('is_new_hire')->default(false);
             });
-        } elseif (!Schema::connection($this->connection)->hasTable('employees')) {
+        } elseif (! Schema::connection($this->connection)->hasTable('employees')) {
             Schema::connection($this->connection)->create('employees', function (Blueprint $table): void {
                 $table->id();
                 $table->uuid('uuid')->unique();

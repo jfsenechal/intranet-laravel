@@ -13,12 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['client_id', 'note_date', 'description', 'is_done', 'done_by'])]
 final class Note extends Model
 {
-    protected function casts(): array
+    public function __toString(): string
     {
-        return [
-            'note_date' => 'date',
-            'is_done' => 'boolean',
-        ];
+        return 'Note of '.($this->note_date?->format('d-m-Y') ?? '');
     }
 
     /**
@@ -29,8 +26,11 @@ final class Note extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function __toString(): string
+    protected function casts(): array
     {
-        return 'Note of '.($this->note_date?->format('d-m-Y') ?? '');
+        return [
+            'note_date' => 'date',
+            'is_done' => 'boolean',
+        ];
     }
 }

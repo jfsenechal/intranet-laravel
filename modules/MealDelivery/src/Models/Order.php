@@ -14,13 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['week_id', 'client_id', 'notes', 'is_last_meal'])]
 final class Order extends Model
 {
-    protected function casts(): array
-    {
-        return [
-            'is_last_meal' => 'boolean',
-        ];
-    }
-
     /**
      * @return BelongsTo<Week, Order>
      */
@@ -43,5 +36,12 @@ final class Order extends Model
     public function meals(): HasMany
     {
         return $this->hasMany(Meal::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_last_meal' => 'boolean',
+        ];
     }
 }

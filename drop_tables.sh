@@ -67,7 +67,6 @@ mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" "${DB_PASS_ARG[@]}" "pst" -e "SET F
 
 echo "All tables dropped and SQL dumps imported for specified databases."
 php artisan migrate
-exit
 echo "Migrate and db seed done."
 php artisan intranet:sync-users
 echo "Sync users done."

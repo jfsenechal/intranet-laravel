@@ -13,13 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['first_day', 'days', 'notes', 'is_archived'])]
 final class Week extends Model
 {
-    protected function casts(): array
+    public function __toString(): string
     {
-        return [
-            'first_day' => 'date',
-            'days' => 'array',
-            'is_archived' => 'boolean',
-        ];
+        return 'Week of: '.($this->first_day?->format('d-m-Y') ?? '');
     }
 
     /**
@@ -30,8 +26,12 @@ final class Week extends Model
         return $this->hasMany(Order::class);
     }
 
-    public function __toString(): string
+    protected function casts(): array
     {
-        return 'Week of: '.($this->first_day?->format('d-m-Y') ?? '');
+        return [
+            'first_day' => 'date',
+            'days' => 'array',
+            'is_archived' => 'boolean',
+        ];
     }
 }

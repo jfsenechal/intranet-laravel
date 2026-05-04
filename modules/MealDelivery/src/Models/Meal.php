@@ -14,13 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['date', 'soup_count', 'notes', 'order_id', 'at_cafeteria'])]
 final class Meal extends Model
 {
-    protected function casts(): array
+    public function __toString(): string
     {
-        return [
-            'date' => 'date',
-            'soup_count' => 'integer',
-            'at_cafeteria' => 'boolean',
-        ];
+        return $this->date?->format('d-m-Y') ?? '';
     }
 
     /**
@@ -39,8 +35,12 @@ final class Meal extends Model
         return $this->hasMany(Menu::class);
     }
 
-    public function __toString(): string
+    protected function casts(): array
     {
-        return $this->date?->format('d-m-Y') ?? '';
+        return [
+            'date' => 'date',
+            'soup_count' => 'integer',
+            'at_cafeteria' => 'boolean',
+        ];
     }
 }
