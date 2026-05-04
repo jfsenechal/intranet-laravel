@@ -60,7 +60,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold uppercase tracking-wider text-gray-500">Intranet</p>
-                    <p class="text-lg font-bold text-gray-900">Ville de Marche-en-Famenne</p>
+                    <p class="text-lg font-bold text-gray-900">Ville/Cpas de Marche-en-Famenne</p>
                 </div>
             </div>
             @auth

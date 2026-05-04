@@ -15,7 +15,7 @@ new class extends Component
     {
         return Employee::query()
             ->where('is_archived', false)
-            ->whereNotNull('hired_at')
+            ->where('is_new_hire', true)
             ->whereHas('activeContracts')
             ->with('activeContracts')
             ->orderByDesc('hired_at')

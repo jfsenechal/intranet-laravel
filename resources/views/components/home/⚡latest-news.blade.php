@@ -12,7 +12,11 @@ new class extends Component
      */
     public function news(): Collection
     {
-        return News::query()->latest('created_at')->limit(6)->get();
+        return News::query()
+            ->with('category')
+            ->latest('created_at')
+            ->limit(6)
+            ->get();
     }
 
     public function with(): array
@@ -45,9 +49,19 @@ new class extends Component
             >
                 <div class="mt-1 size-2 shrink-0 rounded-full bg-blue-500 group-hover:animate-pulse"></div>
                 <div class="min-w-0 flex-1">
-                    <p class="truncate font-medium text-gray-900 group-hover:text-blue-600">
-                        {{ $news->title ?? $news->name }}
-                    </p>
+                    <div class="flex items-center gap-2">
+                        <p class="truncate font-medium text-gray-900 group-hover:text-blue-600">
+                            {{ $news->title ?? $news->name }}
+                        </p>
+                        @if ($news->category)
+                            <span
+                                class="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                                style="background-color: {{ $news->category->color ?? '#6b7280' }}"
+                            >
+                                {{ $news->category->name }}
+                            </span>
+                        @endif
+                    </div>
                     <p class="mt-0.5  text-gray-500">
                         {{ $news->created_at?->translatedFormat('d F Y') }}
                         @if ($news->user_add)
