@@ -5,6 +5,14 @@ declare(strict_types=1);
 uses(PHPUnit\Framework\TestCase::class)->in('Sms');
 
 uses(
+    AcMarche\Hrm\Tests\HrmTestCase::class,
+    Illuminate\Foundation\Testing\RefreshDatabase::class,
+)->in(
+    '../modules/Hrm/tests/Feature',
+    '../modules/Hrm/tests/Unit',
+);
+
+uses(
     Tests\TestCase::class,
     Illuminate\Foundation\Testing\RefreshDatabase::class,
 )->in(

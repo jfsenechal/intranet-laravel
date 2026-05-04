@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Models;
 
 use AcMarche\Agent\Models\Profile;
+use AcMarche\Hrm\Database\Factories\EmployeeFactory;
 use AcMarche\Hrm\Enums\InternTypeEnum;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,6 +73,7 @@ use Spatie\Sluggable\SlugOptions;
     'is_new_hire',
 ])]
 #[Table(name: 'employees')]
+#[UseFactory(EmployeeFactory::class)]
 final class Employee extends Model
 {
     use HasFactory;
