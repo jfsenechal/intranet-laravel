@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Mediation\Filament\Resources\Complainants\Pages;
+
+use AcMarche\Mediation\Filament\Resources\Complainants\ComplainantResource;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
+use Override;
+
+final class EditComplainant extends EditRecord
+{
+    #[Override]
+    protected static string $resource = ComplainantResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
+    }
+}
