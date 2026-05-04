@@ -39,8 +39,8 @@ final class EventInfolist
                     ->label('Lieu'),
                 TextEntry::make('representative')
                     ->label('Représentant'),
-                IconEntry::make('is_walk')
-                    ->label('Marche')
+                IconEntry::make('is_local')
+                    ->label('Sur la commune ?')
                     ->boolean(),
                 IconEntry::make('sent')
                     ->label('Envoyé')

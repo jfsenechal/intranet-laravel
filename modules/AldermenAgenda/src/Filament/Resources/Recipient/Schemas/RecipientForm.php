@@ -27,14 +27,10 @@ final class RecipientForm
                     ->label('Email')
                     ->email()
                     ->required()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
-                TextInput::make('token')
-                    ->label('Token')
-                    ->required()
-                    ->maxLength(255),
+                    ->maxLength(150),
                 Toggle::make('ics')
                     ->label('ICS')
+                    ->helperText('Joindre au mail')
                     ->default(true),
             ]);
     }

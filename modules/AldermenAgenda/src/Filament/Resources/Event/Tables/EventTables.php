@@ -52,11 +52,11 @@ final class EventTables
                     ->trueLabel('Envoyés seulement')
                     ->falseLabel('Non envoyés seulement')
                     ->native(false),
-                TernaryFilter::make('is_walk')
-                    ->label('Marche')
+                TernaryFilter::make('is_local')
+                    ->label('Sur la commune')
                     ->boolean()
-                    ->trueLabel('Marches seulement')
-                    ->falseLabel('Non marches seulement')
+                    ->trueLabel('Sur la commune seulement')
+                    ->falseLabel('Pas sur la commune seulement')
                     ->native(false),
             ])
             ->recordActions([

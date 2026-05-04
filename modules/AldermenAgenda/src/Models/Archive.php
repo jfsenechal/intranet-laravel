@@ -15,7 +15,7 @@ final class Archive extends Model
 {
     use HasFactory;
 
-    protected $table = 'agenda_echevin_archives';
+    protected $table = 'histories';
 
     protected function casts(): array
     {

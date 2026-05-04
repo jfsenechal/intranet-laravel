@@ -8,18 +8,17 @@ use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 #[Connection('maria-aldermen-agenda')]
-#[Fillable(['slug', 'last_name', 'first_name', 'email', 'ics', 'token'])]
+#[Fillable(['slug', 'last_name', 'first_name', 'email', 'ics'])]
 final class Recipient extends Model
 {
     use HasFactory;
     use HasSlug;
 
-    protected $table = 'agenda_echevin_recipients';
+    protected $table = 'recipients';
 
     public function __toString(): string
     {
@@ -31,11 +30,6 @@ final class Recipient extends Model
         return SlugOptions::create()
             ->generateSlugsFrom(['last_name', 'first_name'])
             ->saveSlugsTo('slug');
-    }
-
-    public function participations(): HasMany
-    {
-        return $this->hasMany(Participation::class);
     }
 
     protected function casts(): array

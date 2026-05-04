@@ -73,10 +73,8 @@ final class EventForm
                             ->label('Représentant')
                             ->maxLength(255)
                             ->nullable(),
-                        Toggle::make('is_walk')
-                            ->label('Marche'),
-                        Toggle::make('sent')
-                            ->label('Envoyé'),
+                        Toggle::make('is_local')
+                            ->label('Sur la commune ?'),
                     ])->grow(false),
                 ])->from('md'),
             ]);

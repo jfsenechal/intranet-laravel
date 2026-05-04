@@ -21,8 +21,6 @@ final class RecipientInfolist
                 TextEntry::make('email')
                     ->label('Email')
                     ->icon('heroicon-o-envelope'),
-                TextEntry::make('token')
-                    ->label('Token'),
                 IconEntry::make('ics')
                     ->label('ICS')
                     ->boolean(),
