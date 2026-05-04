@@ -23,7 +23,15 @@
         },
         {
             "type": "path",
+            "url": "./modules/AgendaEchevin"
+        },
+        {
+            "type": "path",
             "url": "./modules/App"
+        },
+        {
+            "type": "path",
+            "url": "./modules/CpasRepas"
         },
         {
             "type": "path",
@@ -63,6 +71,10 @@
         },
         {
             "type": "path",
+            "url": "./modules/Mediation"
+        },
+        {
+            "type": "path",
             "url": "./modules/Pst"
         },
         {
@@ -82,13 +94,16 @@
         "php": "^8.5",
         "ext-pdo": "*",
         "acmarche/ad": "*@dev",
+        "acmarche/agenda-echevin": "*@dev",
         "acmarche/agent": "*@dev",
         "acmarche/app": "*@dev",
+        "acmarche/cpas-repas": "*@dev",
         "acmarche/courrier": "*@dev",
         "acmarche/document": "*@dev",
         "acmarche/email-management": "*@dev",
         "acmarche/hrm": "*@dev",
         "acmarche/mailing-list": "*@dev",
+        "acmarche/mediation": "*@dev",
         "acmarche/mileage": "*@dev",
         "acmarche/news": "*@dev",
         "acmarche/pst": "*@dev",
