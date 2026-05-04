@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Security\Handler;
 
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
+use AcMarche\AldermenAgenda\Filament\Resources\Event\EventResource;
 use AcMarche\App\Filament\Pages\ClaimRequestPage;
 use AcMarche\App\Filament\Pages\EmailsListPage;
 use AcMarche\App\Filament\Pages\TeleworkPage;
@@ -13,6 +14,7 @@ use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
+use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
@@ -40,6 +42,7 @@ final class MigrationHandler
     public static function findTheResource(Module $module): ?string
     {
         return match ($module->id) {
+            3 => EventResource::getUrl('index', panel: 'aldermen-agenda-panel'),
             6 => EmployeeResource::getUrl('index', panel: 'hrm-panel'),
             9 => DocumentResource::getUrl('index', panel: 'document-panel'),
             13 => TripResource::getUrl('index', panel: 'mileage-panel'),
@@ -51,6 +54,7 @@ final class MigrationHandler
             26 => VacationPage::getUrl(panel: 'app-panel'),
             33 => EmailsListPage::getUrl(panel: 'app-panel'),
             36 => ClaimRequestPage::getUrl(panel: 'app-panel'),
+            39 => OrderResource::getUrl(panel: 'meal-delivery-panel'),
             40 => ProfileResource::getUrl('index', panel: 'agent-panel'),
             42 => WhoIsWhoIndex::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
