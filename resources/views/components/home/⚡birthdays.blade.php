@@ -1,5 +1,6 @@
 <?php
 
+use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Models\Employee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -17,6 +18,8 @@ new class extends Component
 
         return Employee::query()
             ->where('show_birthday', true)
+            ->where('is_archived', false)
+            ->where('status', StatusEnum::AGENT)
             ->whereNotNull('birth_date')
             ->whereRaw('MONTH(birth_date) = ?', [$today->month])
             ->whereRaw('DAY(birth_date) = ?', [$today->day])
