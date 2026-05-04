@@ -2,22 +2,29 @@
 
 declare(strict_types=1);
 
+use Pdo\Mysql;
+
 return [
+    'connection' => 'maria-meal-delivery',
     'connections' => [
         'maria-meal-delivery' => [
-            'driver' => 'mysql',
-            'host' => env('CPASREPAS_DB_HOST', env('DB_HOST', '127.0.0.1')),
-            'port' => env('CPASREPAS_DB_PORT', env('DB_PORT', '3306')),
-            'database' => env('CPASREPAS_DB_DATABASE', 'meal-delivery'),
-            'username' => env('CPASREPAS_DB_USERNAME', env('DB_USERNAME', 'root')),
-            'password' => env('CPASREPAS_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'driver' => env('DB_CPASREPAS_DRIVER', 'mariadb'),
+            'url' => env('DB_CPASREPAS_URL'),
+            'host' => env('DB_CPASREPAS_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_CPASREPAS_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_CPASREPAS_DATABASE', 'cpas_repas'),
+            'username' => env('DB_CPASREPAS_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_CPASREPAS_PASSWORD', env('DB_PASSWORD', '')),
             'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
     ],
 ];

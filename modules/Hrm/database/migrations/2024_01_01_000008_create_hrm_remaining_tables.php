@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -29,6 +30,7 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
+            $this->dropForeignKeysOnColumn('internships', 'employee_id');
             Schema::connection($this->connection)->table('internships', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
@@ -70,6 +72,7 @@ return new class extends Migration
                 $table->renameColumn('updatedAt', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
+            $this->dropForeignKeysOnColumn('applications', 'employee_id');
             Schema::connection($this->connection)->table('applications', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
@@ -145,6 +148,7 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
+            $this->dropForeignKeysOnColumn('hr_documents', 'employee_id');
             Schema::connection($this->connection)->table('hr_documents', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
@@ -176,6 +180,7 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
+            $this->dropForeignKeysOnColumn('valorizations', 'employee_id');
             Schema::connection($this->connection)->table('valorizations', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
@@ -261,6 +266,7 @@ return new class extends Migration
                 $table->renameColumn('updatedAt', 'updated_at');
                 $table->renameColumn('updateBy', 'updated_by');
             });
+            $this->dropForeignKeysOnColumn('sms_reminders', 'employee_id');
             Schema::connection($this->connection)->table('sms_reminders', function (Blueprint $table): void {
                 $table->unsignedBigInteger('employee_id')->nullable(false)->change();
             });
@@ -315,6 +321,24 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('notification_id');
                 $table->string('user', 255);
+            });
+        }
+    }
+
+    private function dropForeignKeysOnColumn(string $table, string $column): void
+    {
+        $foreignKeys = DB::connection($this->connection)->select(
+            'SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = ?
+               AND COLUMN_NAME = ?
+               AND REFERENCED_TABLE_NAME IS NOT NULL',
+            [$table, $column]
+        );
+
+        foreach ($foreignKeys as $fk) {
+            Schema::connection($this->connection)->table($table, function (Blueprint $blueprint) use ($fk): void {
+                $blueprint->dropForeign($fk->CONSTRAINT_NAME);
             });
         }
     }
