@@ -8,6 +8,7 @@ return [
     AcMarche\Ad\Providers\Filament\AdPanelProvider::class,
     AcMarche\App\Providers\Filament\AppPanelProvider::class,
     AcMarche\AldermenAgenda\Providers\Filament\AldermenAgendaPanelProvider::class,
+    AcMarche\Mediation\Providers\Filament\MediationPanelProvider::class,
     AcMarche\MealDelivery\Providers\Filament\MealDeliveryPanelProvider::class,
     AcMarche\MealDelivery\Providers\Filament\MealDeliveryPanelProvider::class,
     AcMarche\Security\Providers\Filament\SecurityPanelProvider::class,
