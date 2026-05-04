@@ -10,6 +10,20 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::connection('maria-meal-delivery')->hasTable('note')) {
+            Schema::connection('maria-meal-delivery')->table('note', function (Blueprint $table): void {
+                $table->rename('notes');
+            });
+            Schema::connection('maria-meal-delivery')->table('notes', function (Blueprint $table): void {
+                $table->renameColumn('dateNote', 'note_date');
+                $table->renameColumn('isDone', 'is_done');
+                $table->renameColumn('doneBy', 'done_by');
+            });
+        }
+
+        if (Schema::connection('maria-meal-delivery')->hasTable('notes')) {
+            return;
+        }
         Schema::connection('maria-meal-delivery')->create('notes', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();

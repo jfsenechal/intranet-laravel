@@ -10,6 +10,21 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::connection('maria-meal-delivery')->hasTable('repas')) {
+            Schema::connection('maria-meal-delivery')->table('repas', function (Blueprint $table): void {
+                $table->rename('meals');
+            });
+            Schema::connection('maria-meal-delivery')->table('meals', function (Blueprint $table): void {
+                $table->renameColumn('commande_id', 'order_id');
+                $table->renameColumn('jour', 'date');
+                $table->renameColumn('nb_potage', 'soup_count');
+                $table->renameColumn('remarque', 'notes');
+            });
+        }
+
+        if (Schema::connection('maria-meal-delivery')->hasTable('meals')) {
+            return;
+        }
         Schema::connection('maria-meal-delivery')->create('meals', function (Blueprint $table): void {
             $table->id();
             $table->date('date');

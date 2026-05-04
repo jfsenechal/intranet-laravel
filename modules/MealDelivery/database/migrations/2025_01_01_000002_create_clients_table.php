@@ -10,6 +10,38 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::connection('maria-meal-delivery')->hasTable('client')) {
+            Schema::connection('maria-meal-delivery')->table('client', function (Blueprint $table): void {
+                $table->rename('clients');
+            });
+            Schema::connection('maria-meal-delivery')->table('clients', function (Blueprint $table): void {
+                $table->renameColumn('civilite', 'salutation');
+                $table->renameColumn('nom', 'last_name');
+                $table->renameColumn('prenom', 'first_name');
+                $table->renameColumn('slugname', 'slug');
+                $table->renameColumn('rue', 'street');
+                $table->renameColumn('numero', 'number');
+                $table->renameColumn('code_postal', 'postal_code');
+                $table->renameColumn('localite', 'city');
+                $table->renameColumn('etage', 'floor');
+                $table->renameColumn('telephone', 'phone');
+                $table->renameColumn('ne_le', 'birth_date');
+                $table->renameColumn('contact_nom', 'contact_name');
+                $table->renameColumn('contact_telephone', 'contact_phone');
+                $table->renameColumn('contact_remarque', 'contact_notes');
+                $table->renameColumn('remarque', 'notes');
+                $table->renameColumn('commande_recurrente', 'recurring_order');
+                $table->renameColumn('tournee_id', 'route_id');
+                $table->renameColumn('tournee_save', 'route_backup');
+                $table->renameColumn('is_actif', 'is_active');
+                $table->renameColumn('createdAt', 'created_at');
+                $table->renameColumn('updatedAt', 'updated_at');
+            });
+        }
+
+        if (Schema::connection('maria-meal-delivery')->hasTable('clients')) {
+            return;
+        }
         Schema::connection('maria-meal-delivery')->create('clients', function (Blueprint $table): void {
             $table->id();
             $table->string('salutation')->nullable();
