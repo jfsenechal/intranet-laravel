@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "27252c369f2a5eb0362b15cf65c30ee2",
+    "content-hash": "8d73e0392455a9719eab1b0268bbc02f",
     "packages": [
         {
             "name": "acmarche/ad",
@@ -560,6 +560,49 @@
                 }
             ],
             "description": "News management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/offenses",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/Offenses",
+                "reference": "12addbff8f1cafd40ca922fdd3328a826f89362e"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\Offenses\\Providers\\OffensesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\Offenses\\": "src/",
+                    "AcMarche\\Offenses\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\Offenses\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\Offenses\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "Offenses (administrative sanctions) module for AcMarche",
             "transport-options": {
                 "relative": true
             }
@@ -17449,6 +17492,7 @@
         "acmarche/mediation": 20,
         "acmarche/mileage": 20,
         "acmarche/news": 20,
+        "acmarche/offenses": 20,
         "acmarche/pst": 20,
         "acmarche/publication": 20,
         "acmarche/qrcode": 20,

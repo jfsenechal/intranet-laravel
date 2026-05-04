@@ -39,7 +39,7 @@ final class HrmPanelProvider extends PanelProvider
             ->path('hrm')
             ->brandName('Resources Humaines')
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::Amber,
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()

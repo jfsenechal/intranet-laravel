@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Mediation\Filament\Resources\AgreementTypes\Tables;
+namespace AcMarche\Offenses\Filament\Resources\OffenseActs\Tables;
 
+use AcMarche\Offenses\Filament\Resources\OffenseActs\OffenseActResource;
+use AcMarche\Offenses\Models\OffenseAct;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -11,7 +13,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-final class AgreementTypeTables
+final class OffenseActTables
 {
     public static function configure(Table $table): Table
     {
@@ -21,16 +23,12 @@ final class AgreementTypeTables
                 TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (OffenseAct $record): string => OffenseActResource::getUrl('view', ['record' => $record->id])),
 
-                TextColumn::make('slug')
-                    ->label('Slug')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('case_files_count')
-                    ->label('Dossiers')
-                    ->counts('caseFiles')
+                TextColumn::make('offenses_count')
+                    ->label('Sanctions')
+                    ->counts('offenses')
                     ->sortable(),
             ])
             ->filters([])
@@ -38,7 +36,6 @@ final class AgreementTypeTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
-            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

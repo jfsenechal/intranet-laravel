@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Mediation\Filament\Resources\AgreementTypes\Pages;
+namespace AcMarche\Offenses\Filament\Resources\OffenseActs\Pages;
 
-use AcMarche\Mediation\Filament\Resources\AgreementTypes\AgreementTypeResource;
+use AcMarche\Offenses\Filament\Resources\OffenseActs\OffenseActResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class ViewAgreementType extends ViewRecord
+final class ViewOffenseAct extends ViewRecord
 {
     #[Override]
-    protected static string $resource = AgreementTypeResource::class;
+    protected static string $resource = OffenseActResource::class;
 
     protected function getHeaderActions(): array
     {

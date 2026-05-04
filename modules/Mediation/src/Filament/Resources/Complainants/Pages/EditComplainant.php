@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\Mediation\Filament\Resources\Complainants\Pages;
 
 use AcMarche\Mediation\Filament\Resources\Complainants\ComplainantResource;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditComplainant extends EditRecord
@@ -18,8 +18,7 @@ final class EditComplainant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            ViewAction::make()->icon(Heroicon::Eye),
         ];
     }
 }

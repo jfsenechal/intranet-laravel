@@ -2,23 +2,26 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Mediation\Filament\Resources\CaseFiles\Pages;
+namespace AcMarche\Offenses\Filament\Resources\Offenses\Pages;
 
-use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
+use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class ViewCaseFile extends ViewRecord
+final class ViewOffense extends ViewRecord
 {
     #[Override]
-    protected static string $resource = CaseFileResource::class;
+    protected static string $resource = OffenseResource::class;
 
     public function getTitle(): string
     {
-        return 'Dossier N°'.$this->record->number.' - '.$this->record->nature;
+        $offender = $this->record->offender;
+        $name = $offender ? mb_trim($offender->last_name.' '.$offender->first_name) : '—';
+
+        return 'Sanction · '.$name;
     }
 
     protected function getHeaderActions(): array

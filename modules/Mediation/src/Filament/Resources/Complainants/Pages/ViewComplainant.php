@@ -8,6 +8,7 @@ use AcMarche\Mediation\Filament\Resources\Complainants\ComplainantResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewComplainant extends ViewRecord
@@ -18,8 +19,8 @@ final class ViewComplainant extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make()->icon('tabler-edit'),
-            DeleteAction::make()->icon('tabler-trash'),
+            EditAction::make()->icon(Heroicon::Pencil),
+            DeleteAction::make()->icon(Heroicon::Trash),
         ];
     }
 }

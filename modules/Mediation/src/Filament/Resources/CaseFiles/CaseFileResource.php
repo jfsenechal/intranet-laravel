@@ -9,6 +9,7 @@ use AcMarche\Mediation\Filament\Resources\CaseFiles\Pages\EditCaseFile;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\Pages\ListCaseFiles;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\Pages\ViewCaseFile;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\Schemas\CaseFileForm;
+use AcMarche\Mediation\Filament\Resources\CaseFiles\Schemas\CaseFileInfolist;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\Tables\CaseFileTables;
 use AcMarche\Mediation\Models\CaseFile;
 use Filament\Resources\Resource;
@@ -37,6 +38,11 @@ final class CaseFileResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return CaseFileForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return CaseFileInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

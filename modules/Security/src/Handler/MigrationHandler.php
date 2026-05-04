@@ -15,7 +15,7 @@ use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
-use AcMarche\Mediation\Filament\Resources\Complainants\ComplainantResource;
+use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
@@ -50,7 +50,7 @@ final class MigrationHandler
             15 => NewsResource::getUrl('index', panel: 'news'),
             16 => IncomingMailResource::getUrl('index', panel: 'courrier-panel'),
             17 => UserResource::getUrl('index', panel: 'security-panel'),
-            18 => ComplainantResource::getUrl('index', panel: 'mediation-panel'),
+            18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
             21 => SignatureResource::getUrl('index', panel: 'app-panel'),
             22 => 'https://agenda.marche.be',
             26 => VacationPage::getUrl(panel: 'app-panel'),

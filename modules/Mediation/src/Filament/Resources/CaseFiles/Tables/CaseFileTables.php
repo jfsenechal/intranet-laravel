@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Mediation\Filament\Resources\CaseFiles\Tables;
 
-use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
-use AcMarche\Mediation\Models\CaseFile;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -23,8 +21,7 @@ final class CaseFileTables
             ->columns([
                 TextColumn::make('number')
                     ->label('N°')
-                    ->sortable()
-                    ->url(fn (CaseFile $record): string => CaseFileResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
 
                 TextColumn::make('nature')
                     ->label('Nature')
@@ -57,6 +54,7 @@ final class CaseFileTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
