@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\ResientMeal\Providers;
+namespace AcMarche\ResidentMeal\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use Illuminate\Support\ServiceProvider;
