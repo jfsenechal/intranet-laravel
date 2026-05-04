@@ -1,0 +1,35 @@
+{
+    "name": "acmarche/agenda-echevin",
+    "description": "Agenda des Échevins management",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "AcMarche",
+            "email": "info@acmarche.be"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "filament/filament": "^5.0",
+        "illuminate/contracts": "^12.0|^13.0",
+        "spatie/laravel-sluggable": "^3.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\AldermenAgenda\\": "src/",
+            "AcMarche\\AldermenAgenda\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\AldermenAgenda\\Database\\Seeders\\": "database/seeders/",
+            "AcMarche\\AldermenAgenda\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\AldermenAgenda\\Providers\\AldermenAgendaServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -23,7 +23,7 @@
         },
         {
             "type": "path",
-            "url": "./modules/AgendaEchevin"
+            "url": "./modules/AldermenAgenda"
         },
         {
             "type": "path",
@@ -31,7 +31,7 @@
         },
         {
             "type": "path",
-            "url": "./modules/CpasRepas"
+            "url": "./modules/MealDelivery"
         },
         {
             "type": "path",
@@ -94,10 +94,11 @@
         "php": "^8.5",
         "ext-pdo": "*",
         "acmarche/ad": "*@dev",
-        "acmarche/agenda-echevin": "*@dev",
+        "acmarche/aldermen-agenda": "*@dev",
         "acmarche/agent": "*@dev",
         "acmarche/app": "*@dev",
-        "acmarche/cpas-repas": "*@dev",
+        "acmarche/meal-delivery": "*@dev",
+        "acmarche/resident-meal": "*@dev",
         "acmarche/courrier": "*@dev",
         "acmarche/document": "*@dev",
         "acmarche/email-management": "*@dev",
