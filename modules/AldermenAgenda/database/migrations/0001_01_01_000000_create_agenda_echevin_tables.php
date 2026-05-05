@@ -22,7 +22,7 @@ return new class extends Migration {
                     $table->renameColumn('prenom', 'first_name');
                 }
             );
-        } else {
+        } elseif( ! Schema::connection('maria-aldermen-agenda')->hasTable('aldermen_recipients')) {
             Schema::connection('maria-aldermen-agenda')->create(
                 'aldermen_recipients',
                 function (Blueprint $table): void {
@@ -51,7 +51,7 @@ return new class extends Migration {
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
-        } else {
+        } elseif (! Schema::connection('maria-aldermen-agenda')->hasTable('events')) {
             Schema::connection('maria-aldermen-agenda')->create('events', function (Blueprint $table): void {
                 $table->id();
                 $table->string('slug', 70)->unique();
@@ -83,7 +83,7 @@ return new class extends Migration {
                 $table->renameColumn('destinataires', 'recipients');
                 $table->timestamps();
             });
-        } else {
+        } elseif (! Schema::connection('maria-aldermen-agenda')->hasTable('aldermen_archives')) {
             Schema::connection('maria-aldermen-agenda')->create(
                 'aldermen_archives',
                 function (Blueprint $table): void {
