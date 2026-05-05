@@ -53,6 +53,10 @@ trait HrmAuthorization
             return true;
         }
 
+        if ($user->username === $employee->username) {
+            return true;
+        }
+
         $topSlugs = $this->employeeTopEmployerSlugs($employee);
 
         if ($this->canReadCpas($user) && in_array('cpas', $topSlugs, true)) {
