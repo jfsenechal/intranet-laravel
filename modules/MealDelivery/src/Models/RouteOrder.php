@@ -6,15 +6,15 @@ namespace AcMarche\MealDelivery\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Connection('maria-meal-delivery')]
 #[Fillable(['route_id', 'client_id', 'position'])]
+#[Table(name: 'route_orders')]
 final class RouteOrder extends Model
 {
-    protected $table = 'route_orders';
-
     /**
      * @return BelongsTo<DeliveryRoute, RouteOrder>
      */

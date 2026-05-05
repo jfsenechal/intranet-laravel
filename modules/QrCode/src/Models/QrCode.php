@@ -8,6 +8,7 @@ use AcMarche\QrCode\Database\Factories\QrCodeFactory;
 use AcMarche\QrCode\Enums\QrCodeActionEnum;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,12 +45,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'encryption',
     'network_hidden',
 ])]
+#[Table(name: 'qr_codes')]
 final class QrCode extends Model
 {
     use HasFactory;
     use SoftDeletes;
-
-    protected $table = 'qr_codes';
 
     /**
      * @return BelongsTo<User, QrCode>

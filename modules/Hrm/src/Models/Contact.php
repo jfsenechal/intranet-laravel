@@ -6,6 +6,7 @@ namespace AcMarche\Hrm\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 #[Connection('maria-hrm')]
@@ -18,4 +19,5 @@ use Illuminate\Database\Eloquent\Model;
     'phone_2',
     'description',
 ])]
+#[Table(name: 'hrm_contacts')]
 final class Contact extends Model {}

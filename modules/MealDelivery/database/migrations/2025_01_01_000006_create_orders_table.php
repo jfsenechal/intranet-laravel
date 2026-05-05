@@ -36,9 +36,4 @@ return new class extends Migration
             $table->unique(['week_id', 'client_id']);
         });
     }
-
-    public function down(): void
-    {
-        Schema::connection('maria-meal-delivery')->dropIfExists('orders');
-    }
 };

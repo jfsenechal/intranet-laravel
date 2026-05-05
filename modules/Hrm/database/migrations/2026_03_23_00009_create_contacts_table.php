@@ -12,10 +12,10 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::connection('maria-hrm')->hasTable('contacts')) {
+        if (Schema::connection('maria-hrm')->hasTable('hrm_contacts')) {
             return;
         }
-        Schema::create('contacts', function (Blueprint $table): void {
+        Schema::create('hrm_contacts', function (Blueprint $table): void {
             $table->id();
             $table->string('last_name');
             $table->string('first_name')->nullable();

@@ -28,9 +28,4 @@ return new class extends Migration
             $table->primary(['client_id', 'diet_id']);
         });
     }
-
-    public function down(): void
-    {
-        Schema::connection('maria-meal-delivery')->dropIfExists('client_diet');
-    }
 };

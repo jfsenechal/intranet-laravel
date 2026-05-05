@@ -6,6 +6,7 @@ namespace AcMarche\AldermenAgenda\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
@@ -28,12 +29,11 @@ use Spatie\Sluggable\SlugOptions;
     'file1_name',
     'file2_name',
 ])]
+#[Table(name: 'events')]
 final class Event extends Model
 {
     use HasFactory;
     use HasSlug;
-
-    protected $table = 'events';
 
     public function __toString(): string
     {

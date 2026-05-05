@@ -6,6 +6,7 @@ namespace AcMarche\AldermenAgenda\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
@@ -13,12 +14,11 @@ use Spatie\Sluggable\SlugOptions;
 
 #[Connection('maria-aldermen-agenda')]
 #[Fillable(['slug', 'last_name', 'first_name', 'email', 'ics'])]
+#[Table(name: 'aldermen_recipients')]
 final class Recipient extends Model
 {
     use HasFactory;
     use HasSlug;
-
-    protected $table = 'recipients';
 
     public function __toString(): string
     {

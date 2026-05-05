@@ -12,28 +12,23 @@ return new class extends Migration
     {
         if (Schema::connection('maria-meal-delivery')->hasTable('absence')) {
             Schema::connection('maria-meal-delivery')->table('absence', function (Blueprint $table): void {
-                $table->rename('absences');
+                $table->rename('delivery_absences');
             });
-            Schema::connection('maria-meal-delivery')->table('absences', function (Blueprint $table): void {
+            Schema::connection('maria-meal-delivery')->table('delivery_absences', function (Blueprint $table): void {
                 $table->renameColumn('date_debut', 'start_date');
                 $table->renameColumn('date_fin', 'end_date');
             });
         }
 
-        if (Schema::connection('maria-meal-delivery')->hasTable('absences')) {
+        if (Schema::connection('maria-meal-delivery')->hasTable('delivery_absences')) {
             return;
         }
-        Schema::connection('maria-meal-delivery')->create('absences', function (Blueprint $table): void {
+        Schema::connection('maria-meal-delivery')->create('delivery_absences', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('client_id')->unique()->constrained('clients')->cascadeOnDelete();
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();
         });
-    }
-
-    public function down(): void
-    {
-        Schema::connection('maria-meal-delivery')->dropIfExists('absences');
     }
 };

@@ -6,15 +6,15 @@ namespace AcMarche\MealDelivery\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Connection('maria-meal-delivery')]
 #[Fillable(['name'])]
+#[Table(name: 'delivery_routes')]
 final class DeliveryRoute extends Model
 {
-    protected $table = 'delivery_routes';
-
     public function __toString(): string
     {
         return (string) $this->name;
