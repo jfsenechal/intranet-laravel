@@ -27,7 +27,6 @@ final class CategoryTables
                     ->searchable()
                     ->label('Intitulé')
                     ->limit(120)
-                    ->url(fn (Category $record): string => CategoryResource::getUrl('view', ['record' => $record->id]))
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
 
@@ -52,6 +51,7 @@ final class CategoryTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

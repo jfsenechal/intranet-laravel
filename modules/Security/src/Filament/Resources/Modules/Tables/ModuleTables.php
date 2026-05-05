@@ -31,7 +31,7 @@ final class ModuleTables
                 TextColumn::make('name')
                     ->searchable()
                     ->label('Intitulé')
-                    ->url(fn (Module $record): string => ModuleResource::getUrl('view', ['record' => $record->id])),
+                    ,
                 IconColumn::make('is_public')
                     ->label('Accessible à tous')
                     ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)
@@ -52,6 +52,7 @@ final class ModuleTables
             ->recordActions([
                 ViewAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
@@ -67,8 +68,7 @@ final class ModuleTables
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
-                    ->label('Intitulé')
-                    ->url(fn (Module $record): string => ModuleResource::getUrl('view', ['record' => $record->id])),
+                    ->label('Intitulé'),
                 TextColumn::make('roles.name')
                     ->label('Rôles'),
             ])
@@ -86,6 +86,7 @@ final class ModuleTables
                     ->action(function (Module $module) use ($ownerRecord): void {
                         ModuleHandler::revokeModuleFromUser($ownerRecord, $module->id);
                     }),
-            ]);
+            ])
+            ->recordAction(ViewAction::class);
     }
 }

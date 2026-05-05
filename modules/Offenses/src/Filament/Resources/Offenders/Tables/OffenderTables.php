@@ -24,8 +24,7 @@ final class OffenderTables
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (Offender $record): string => OffenderResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable()                    ,
 
                 TextColumn::make('first_name')
                     ->label('Prénom')
@@ -56,6 +55,7 @@ final class OffenderTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

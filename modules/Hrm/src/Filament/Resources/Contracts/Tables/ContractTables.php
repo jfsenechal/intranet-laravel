@@ -11,7 +11,6 @@ use AcMarche\Hrm\Filament\Filters\DirectionFilter;
 use AcMarche\Hrm\Filament\Filters\EmployerFilter;
 use AcMarche\Hrm\Filament\Filters\PayScaleFilter;
 use AcMarche\Hrm\Filament\Filters\ServiceFilter;
-use AcMarche\Hrm\Filament\Resources\Contracts\ContractResource;
 use AcMarche\Hrm\Models\Contract;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -37,7 +36,7 @@ final class ContractTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn (Contract $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn(Contract $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable(),
@@ -116,9 +115,9 @@ final class ContractTables
                     ->trueLabel('Dépassée')
                     ->falseLabel('À venir ou sans fin')
                     ->queries(
-                        true: fn (Builder $query): Builder => $query->whereDate('end_date', '<', today()),
-                        false: fn (Builder $query): Builder => $query->where(
-                            fn (Builder $query) => $query
+                        true: fn(Builder $query): Builder => $query->whereDate('end_date', '<', today()),
+                        false: fn(Builder $query): Builder => $query->where(
+                            fn(Builder $query) => $query
                                 ->whereDate('end_date', '>=', today())
                                 ->orWhereNull('end_date'),
                         ),
@@ -182,8 +181,8 @@ final class ContractTables
             ->recordActions([
                 Action::make('view')
                     ->label('Voir')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn (Contract $record): string => ContractResource::getUrl('view', ['record' => $record])),
-            ]);
+                    ->icon('heroicon-o-eye'),
+            ])
+            ->recordAction(ViewAction::class);
     }
 }

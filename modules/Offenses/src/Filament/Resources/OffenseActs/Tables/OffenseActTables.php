@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Filament\Resources\OffenseActs\Tables;
 
-use AcMarche\Offenses\Filament\Resources\OffenseActs\OffenseActResource;
-use AcMarche\Offenses\Models\OffenseAct;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -23,9 +21,7 @@ final class OffenseActTables
                 TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (OffenseAct $record): string => OffenseActResource::getUrl('view', ['record' => $record->id])),
-
+                    ->sortable(),
                 TextColumn::make('offenses_count')
                     ->label('Sanctions')
                     ->counts('offenses')
@@ -36,6 +32,7 @@ final class OffenseActTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

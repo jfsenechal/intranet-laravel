@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\Categories\RelationManagers;
 
-use AcMarche\News\Filament\Resources\News\NewsResource;
-use AcMarche\News\Models\News;
+use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -27,8 +26,7 @@ final class NewsRelationManager extends RelationManager
                 TextColumn::make('name')
                     ->label('Intitulé')
                     ->limit(80)
-                    ->searchable()
-                    ->url(fn (News $record): string => NewsResource::getUrl('view', ['record' => $record->id])),
+                    ->searchable(),
                 IconColumn::make('archive')
                     ->label('Archivé')
                     ->boolean(),
@@ -45,6 +43,10 @@ final class NewsRelationManager extends RelationManager
                     ->trueLabel('Archivés seulement')
                     ->falseLabel('Non archivés seulement')
                     ->native(false),
-            ]);
+            ])
+            ->recordActions([
+                ViewAction::make(),
+            ])
+            ->recordAction(ViewAction::class);
     }
 }

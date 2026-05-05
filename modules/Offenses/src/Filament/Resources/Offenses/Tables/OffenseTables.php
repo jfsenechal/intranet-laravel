@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Filament\Resources\Offenses\Tables;
 
-use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
-use AcMarche\Offenses\Models\Offense;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -29,8 +27,7 @@ final class OffenseTables
                 TextColumn::make('decision_date')
                     ->label('Décision')
                     ->date('d/m/Y')
-                    ->sortable()
-                    ->url(fn (Offense $record): string => OffenseResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
 
                 TextColumn::make('offender.last_name')
                     ->label('Nom')
@@ -73,12 +70,13 @@ final class OffenseTables
 
                 Filter::make('with_fine')
                     ->label('Avec amende')
-                    ->query(fn (Builder $query): Builder => $query->whereNotNull('fine_amount')),
+                    ->query(fn(Builder $query): Builder => $query->whereNotNull('fine_amount')),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

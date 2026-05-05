@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\Recipients\Tables;
 
-use AcMarche\Courrier\Filament\Resources\Recipients\RecipientResource;
-use AcMarche\Courrier\Models\Recipient;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -25,7 +24,7 @@ final class RecipientTables
                     ->label('Nom')
                     ->searchable()
                     ->sortable()
-                    ->url(fn (Recipient $record): string => RecipientResource::getUrl('edit', ['record' => $record->id])),
+                ,
                 TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable()
@@ -48,8 +47,10 @@ final class RecipientTables
             ])
             ->filters([])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

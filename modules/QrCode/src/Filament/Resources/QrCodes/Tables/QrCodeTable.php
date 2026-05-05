@@ -30,7 +30,7 @@ final class QrCodeTable
                 TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
-                    ->url(fn (QrCode $record): string => QrCodeResource::getUrl('view', ['record' => $record->id])),
+                    ,
                 TextColumn::make('action')
                     ->label('Action')
                     ->badge()
@@ -57,6 +57,7 @@ final class QrCodeTable
                 EditAction::make()->icon('tabler-edit'),
                 DeleteAction::make()->icon('tabler-trash'),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

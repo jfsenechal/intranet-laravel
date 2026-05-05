@@ -26,8 +26,7 @@ final class IncomingMailTables
             ->columns([
                 TextColumn::make('reference_number')
                     ->searchable()
-                    ->label('Référence')
-                    ->url(fn (IncomingMail $record): string => IncomingMailResource::getUrl('view', ['record' => $record->id])),
+                    ->label('Référence'),
                 TextColumn::make('mail_date')
                     ->date('d/m/Y')
                     ->sortable()
@@ -87,6 +86,7 @@ final class IncomingMailTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

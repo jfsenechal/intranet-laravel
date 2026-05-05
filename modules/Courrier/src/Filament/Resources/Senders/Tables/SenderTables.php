@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\Senders\Tables;
 
-use AcMarche\Courrier\Filament\Resources\Senders\SenderResource;
-use AcMarche\Courrier\Models\Sender;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,7 +23,6 @@ final class SenderTables
                     ->searchable()
                     ->label('Nom')
                     ->limit(120)
-                    ->url(fn (Sender $record): string => SenderResource::getUrl('view', ['record' => $record->id]))
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
 
@@ -42,6 +39,7 @@ final class SenderTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

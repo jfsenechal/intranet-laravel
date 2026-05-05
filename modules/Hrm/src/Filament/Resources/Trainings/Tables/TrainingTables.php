@@ -7,9 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Trainings\Tables;
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Filters\ContractActiveFilter;
 use AcMarche\Hrm\Filament\Filters\EmployerFilter;
-use AcMarche\Hrm\Filament\Resources\Trainings\TrainingResource;
 use AcMarche\Hrm\Models\Training;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -34,7 +32,7 @@ final class TrainingTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn (Training $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn(Training $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable(),
@@ -59,13 +57,13 @@ final class TrainingTables
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('duration_minutes')
                     ->label('Durée')
-                    ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state))
+                    ->formatStateUsing(fn(?int $state): string => Training::formatDuration($state))
                     ->summarize(
                         Summarizer::make()
                             ->label('Total')
                             ->using(
-                                fn (Builder $query): string => Training::formatDuration(
-                                    (int) $query->sum('duration_minutes')
+                                fn(Builder $query): string => Training::formatDuration(
+                                    (int)$query->sum('duration_minutes')
                                 )
                             )
                     )
@@ -136,13 +134,13 @@ final class TrainingTables
                     ->sortable(),
                 TextColumn::make('duration_minutes')
                     ->label('Durée')
-                    ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state))
+                    ->formatStateUsing(fn(?int $state): string => Training::formatDuration($state))
                     ->summarize(
                         Summarizer::make()
                             ->label('Total')
                             ->using(
-                                fn (Builder $query): string => Training::formatDuration(
-                                    (int) $query->sum('duration_minutes')
+                                fn(Builder $query): string => Training::formatDuration(
+                                    (int)$query->sum('duration_minutes')
                                 )
                             )
                     )
@@ -172,10 +170,8 @@ final class TrainingTables
                     ->falseLabel('En cours'),
             ])
             ->recordActions([
-                Action::make('view')
-                    ->label('Voir')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn (Training $record): string => TrainingResource::getUrl('view', ['record' => $record])),
-            ]);
+                ViewAction::make(),
+            ])
+            ->recordAction(ViewAction::class);
     }
 }

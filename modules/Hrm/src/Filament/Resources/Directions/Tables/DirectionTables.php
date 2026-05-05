@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Directions\Tables;
 
-use AcMarche\Hrm\Filament\Resources\Directions\DirectionResource;
-use AcMarche\Hrm\Models\Direction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,10 +22,9 @@ final class DirectionTables
                 TextColumn::make('name')
                     ->label('Intitule')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (Direction $record): string => DirectionResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
                 TextColumn::make('abbreviation')
-                    ->label('Abreviation')
+                    ->label('Abréviation')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('director')
@@ -49,6 +46,7 @@ final class DirectionTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

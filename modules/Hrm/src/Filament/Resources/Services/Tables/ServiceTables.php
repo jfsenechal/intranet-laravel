@@ -25,10 +25,9 @@ final class ServiceTables
                 TextColumn::make('name')
                     ->label('Intitule')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (Service $record): string => ServiceResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
                 TextColumn::make('abbreviation')
-                    ->label('Abreviation')
+                    ->label('Abréviation')
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('direction.name')
@@ -49,6 +48,7 @@ final class ServiceTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

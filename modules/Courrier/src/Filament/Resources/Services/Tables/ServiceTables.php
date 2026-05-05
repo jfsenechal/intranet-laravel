@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\Services\Tables;
 
-use AcMarche\Courrier\Filament\Resources\Services\ServiceResource;
-use AcMarche\Courrier\Models\Service;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -23,8 +22,7 @@ final class ServiceTables
                 TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (Service $record): string => ServiceResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
                 TextColumn::make('initials')
                     ->label('Initiales')
                     ->searchable(),
@@ -39,8 +37,10 @@ final class ServiceTables
             ])
             ->filters([])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

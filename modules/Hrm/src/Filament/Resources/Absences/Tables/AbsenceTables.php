@@ -6,9 +6,7 @@ namespace AcMarche\Hrm\Filament\Resources\Absences\Tables;
 
 use AcMarche\Hrm\Enums\ReasonsEnum;
 use AcMarche\Hrm\Filament\Filters\ContractActiveFilter;
-use AcMarche\Hrm\Filament\Resources\Absences\AbsenceResource;
 use AcMarche\Hrm\Models\Absence;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -35,7 +33,7 @@ final class AbsenceTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn (Absence $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn(Absence $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable()
@@ -82,14 +80,14 @@ final class AbsenceTables
                         ]),
                     ])
                     ->columnSpanFull()
-                    ->query(fn (Builder $query, array $data): Builder => $query
+                    ->query(fn(Builder $query, array $data): Builder => $query
                         ->when(
                             $data['from'] ?? null,
-                            fn (Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
+                            fn(Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
                         )
                         ->when(
                             $data['until'] ?? null,
-                            fn (Builder $query, $date): Builder => $query->whereDate('start_date', '<=', $date),
+                            fn(Builder $query, $date): Builder => $query->whereDate('start_date', '<=', $date),
                         )),
                 TernaryFilter::make('is_closed')
                     ->label('Clôturée')
@@ -138,10 +136,8 @@ final class AbsenceTables
                     ->boolean(),
             ])
             ->recordActions([
-                Action::make('view')
-                    ->label('Voir')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn (Absence $record): string => AbsenceResource::getUrl('view', ['record' => $record])),
-            ]);
+                ViewAction::make(),
+            ])
+            ->recordAction(ViewAction::class);
     }
 }

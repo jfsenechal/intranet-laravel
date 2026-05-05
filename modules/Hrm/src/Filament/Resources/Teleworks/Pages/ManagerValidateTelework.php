@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Override;
@@ -75,7 +76,8 @@ final class ManagerValidateTelework extends EditRecord
         return [
             Action::make('back')
                 ->label('Retour à la demande')
-                ->url(fn () => ViewTelework::getUrl(['record' => $this->record])),
+                ->icon(Heroicon::ArrowLeft)
+                ->url(fn() => ViewTelework::getUrl(['record' => $this->record])),
         ];
     }
 }

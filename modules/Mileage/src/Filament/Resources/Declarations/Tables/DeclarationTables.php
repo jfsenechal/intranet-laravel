@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Tables;
 
 use AcMarche\Mileage\Calculator\DeclarationCalculator;
-use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\BulkActionGroup;
@@ -22,13 +21,12 @@ final class DeclarationTables
         return $table
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
-            ->modifyQueryUsing(fn (Builder $query) => DeclarationRepository::getByUser($query)->with('trips'))
+            ->modifyQueryUsing(fn(Builder $query) => DeclarationRepository::getByUser($query)->with('trips'))
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (Declaration $record): string => DeclarationResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
                 TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable()
@@ -75,6 +73,7 @@ final class DeclarationTables
             ->recordActions([
                 ViewAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

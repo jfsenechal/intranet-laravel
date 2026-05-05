@@ -30,8 +30,7 @@ final class TripTables
                 TextColumn::make('departure_date')
                     ->label('Date')
                     ->dateTime('d/m/Y')
-                    ->sortable()
-                    ->url(fn (Trip $record): string => TripResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable()                    ,
                 TextColumn::make('departure_location')
                     ->label('Départ')
                     ->searchable()
@@ -77,6 +76,7 @@ final class TripTables
             ->recordActions([
                 ViewAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     CreateDeclarationAction::make(),

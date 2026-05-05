@@ -82,8 +82,7 @@ final class AllDeclarations extends ListRecords
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn (Declaration $record): string => DeclarationResource::getUrl('view', ['record' => $record->id])),
+                    ->sortable(),
                 TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable()
@@ -151,8 +150,8 @@ final class AllDeclarations extends ListRecords
                         )),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->url(fn (Declaration $record): string => DeclarationResource::getUrl('view', ['record' => $record->id])),
-            ]);
+                ViewAction::make(),
+            ])
+            ->recordAction(ViewAction::class);
     }
 }

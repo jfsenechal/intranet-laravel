@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Document\Filament\Resources\Documents\Tables;
 
-use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
-use AcMarche\Document\Models\Document;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,8 +22,7 @@ final class DocumentTables
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
-                    ->label('Intitulé')
-                    ->url(fn (Document $record): string => DocumentResource::getUrl('view', ['record' => $record->id])),
+                    ->label('Intitulé'),
                 TextColumn::make('category.name')
                     ->searchable()
                     ->label('Catégorie'),
@@ -39,6 +36,7 @@ final class DocumentTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

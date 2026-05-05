@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Ad\Filament\Resources\Categories\Tables;
 
-use AcMarche\Ad\Filament\Resources\Categories\CategoryResource;
-use AcMarche\Ad\Models\Category;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -27,7 +25,6 @@ final class CategoryTables
                     ->searchable()
                     ->label('Intitulé')
                     ->limit(120)
-                    ->url(fn (Category $record): string => CategoryResource::getUrl('view', ['record' => $record->id]))
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
 
@@ -52,6 +49,7 @@ final class CategoryTables
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
