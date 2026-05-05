@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Schemas;
 
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -131,11 +132,9 @@ final class ClientForm
                             ->preload()
                             ->nullable(),
 
-                        Select::make('diets')
+                        CheckboxList::make('diets')
                             ->label('Dietary requirements')
                             ->relationship('diets', 'name')
-                            ->multiple()
-                            ->preload()
                             ->searchable(),
 
                         Textarea::make('recurring_order')
