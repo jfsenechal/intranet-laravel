@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Filament\Resources\Offenses\Schemas;
 
-use AcMarche\Offenses\Models\Offender;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -18,51 +20,47 @@ final class OffenseForm
     {
         return $schema
             ->schema([
-                Section::make('Sanction')
-                    ->schema([
-                        Select::make('offender_id')
-                            ->label('Contrevenant')
-                            ->relationship('offender', 'last_name')
-                            ->getOptionLabelFromRecordUsing(
-                                fn (Offender $record): string => mb_trim($record->last_name.' '.$record->first_name)
-                            )
-                            ->searchable(['last_name', 'first_name'])
-                            ->preload()
-                            ->required(),
-
+                Flex::make([
+                    Section::make([
+                        Hidden::make('offender_id'),
                         Select::make('offense_act_id')
                             ->label('Acte')
                             ->relationship('offenseAct', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
-
+                        TextInput::make('prosecutor_opinion')
+                            ->label('Avis du procureur')
+                            ->maxLength(255)
+                            ->nullable(),
+                        FileUpload::make('file_name')
+                            ->label('Fichier')
+                            ->disk('public')
+                            ->directory(config('offenses.uploads.offenses'))
+                            ->previewable(false)
+                            ->downloadable()
+                            ->maxSize(10240)
+                            ->nullable()
+                            ->columnSpanFull(),
+                    ])
+                        ->columns(2),
+                    Section::make([
                         DatePicker::make('decision_date')
                             ->label('Date de décision')
                             ->nullable(),
-
+                        Toggle::make('mediation')
+                            ->label('Médiation')
+                            ->default(false),
                         TextInput::make('fine_amount')
                             ->label('Amende (€)')
                             ->numeric()
                             ->step(0.01)
                             ->nullable(),
 
-                        Toggle::make('mediation')
-                            ->label('Médiation')
-                            ->default(false),
-
-                        TextInput::make('prosecutor_opinion')
-                            ->label('Avis du procureur')
-                            ->maxLength(255)
-                            ->nullable(),
-
-                        TextInput::make('file_name')
-                            ->label('Fichier')
-                            ->maxLength(255)
-                            ->nullable()
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2),
+                    ])->grow(false),
+                ])
+                    ->columnSpanFull()
+                    ->from('md'),
             ]);
     }
 }

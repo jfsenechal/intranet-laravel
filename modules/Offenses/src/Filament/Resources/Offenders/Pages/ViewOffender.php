@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AcMarche\Offenses\Filament\Resources\Offenders\Pages;
 
 use AcMarche\Offenses\Filament\Resources\Offenders\OffenderResource;
+use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -23,7 +25,14 @@ final class ViewOffender extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $id = ['offender_id' => $this->record->id];
+
         return [
+            Action::make('addOffense')
+                ->label('Ajouter une incivilité')
+                ->icon(Heroicon::Plus)
+                ->color('success')
+                ->url(OffenseResource::getUrl('create', $id)),
             EditAction::make()->icon(Heroicon::Pencil),
             DeleteAction::make()->icon(Heroicon::Trash),
         ];

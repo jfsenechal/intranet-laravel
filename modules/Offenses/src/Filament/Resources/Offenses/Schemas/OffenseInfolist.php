@@ -18,8 +18,6 @@ final class OffenseInfolist
                 Section::make('Sanction')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('offenseAct.name')
-                            ->label('Acte'),
                         TextEntry::make('decision_date')
                             ->label('Date de décision')
                             ->date('d/m/Y')
@@ -33,9 +31,6 @@ final class OffenseInfolist
                             ->boolean(),
                         TextEntry::make('prosecutor_opinion')
                             ->label('Avis du procureur')
-                            ->placeholder('—'),
-                        TextEntry::make('file_name')
-                            ->label('Fichier')
                             ->placeholder('—'),
                     ]),
 

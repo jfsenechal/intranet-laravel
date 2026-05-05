@@ -15,6 +15,14 @@ final class EditOffense extends EditRecord
     #[Override]
     protected static string $resource = OffenseResource::class;
 
+    public function getTitle(): string
+    {
+        $offender = $this->record->offender;
+        $name = $offender ? mb_trim($offender->last_name.' '.$offender->first_name) : '—';
+
+        return 'Sanction · '.$name;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

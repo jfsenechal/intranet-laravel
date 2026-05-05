@@ -11,4 +11,17 @@ return [
     | Configuration settings for the Offenses (administrative sanctions) module.
     |
     */
+    'storage' => [
+        'disk' => env('DOCUMENT_DISK', 'public'),
+        'directory' => env('DOCUMENT_DIRECTORY', 'offenses'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Upload Directories
+    |--------------------------------------------------------------------------
+    */
+    'uploads' => [
+        'offenses' => 'uploads/offense',
+    ],
 ];

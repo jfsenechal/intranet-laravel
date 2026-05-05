@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Models;
 
+use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 final class Offense extends Model
 {
+    use HasUserAdd;
+
     public function offender(): BelongsTo
     {
         return $this->belongsTo(Offender::class);
@@ -30,6 +33,11 @@ final class Offense extends Model
     public function offenseAct(): BelongsTo
     {
         return $this->belongsTo(OffenseAct::class);
+    }
+
+    protected static function booted(): void
+    {
+        self::bootHasUser();
     }
 
     protected function casts(): array

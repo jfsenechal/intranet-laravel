@@ -35,7 +35,7 @@ final class OffensesPanelProvider extends PanelProvider
             ->brandName('Sanctions administratives')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
-                'primary' => Color::Red,
+                'primary' => Color::Yellow,
             ])
             ->unsavedChangesAlerts()
             ->resourceCreatePageRedirect('view')
