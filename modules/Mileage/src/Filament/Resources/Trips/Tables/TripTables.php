@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Filament\Resources\Trips\Tables;
 
 use AcMarche\Mileage\Filament\CreateDeclarationAction;
-use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Repository\TripRepository;
 use Filament\Actions\BulkActionGroup;
@@ -30,7 +29,7 @@ final class TripTables
                 TextColumn::make('departure_date')
                     ->label('Date')
                     ->dateTime('d/m/Y')
-                    ->sortable()                    ,
+                    ->sortable(),
                 TextColumn::make('departure_location')
                     ->label('Départ')
                     ->searchable()

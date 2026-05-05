@@ -23,8 +23,7 @@ final class RecipientTables
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()
-                ,
+                    ->sortable(),
                 TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable()

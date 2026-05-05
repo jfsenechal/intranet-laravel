@@ -21,7 +21,7 @@ final class DeclarationTables
         return $table
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
-            ->modifyQueryUsing(fn(Builder $query) => DeclarationRepository::getByUser($query)->with('trips'))
+            ->modifyQueryUsing(fn (Builder $query) => DeclarationRepository::getByUser($query)->with('trips'))
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')

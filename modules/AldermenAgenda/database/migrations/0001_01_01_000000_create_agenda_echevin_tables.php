@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-aldermen-agenda';
 
     public function up(): void
@@ -22,7 +23,7 @@ return new class extends Migration {
                     $table->renameColumn('prenom', 'first_name');
                 }
             );
-        } elseif( ! Schema::connection('maria-aldermen-agenda')->hasTable('aldermen_recipients')) {
+        } elseif (! Schema::connection('maria-aldermen-agenda')->hasTable('aldermen_recipients')) {
             Schema::connection('maria-aldermen-agenda')->create(
                 'aldermen_recipients',
                 function (Blueprint $table): void {

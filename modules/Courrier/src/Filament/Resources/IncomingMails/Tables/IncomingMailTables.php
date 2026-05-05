@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Tables;
 
-use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
-use AcMarche\Courrier\Models\IncomingMail;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
