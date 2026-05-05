@@ -46,7 +46,8 @@ final class ComplainantForm
                         TextInput::make('street')
                             ->label('Rue')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->columnSpanFull(),
 
                         TextInput::make('postal_code')
                             ->label('Code postal')

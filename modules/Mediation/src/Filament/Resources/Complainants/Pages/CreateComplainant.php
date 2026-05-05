@@ -12,4 +12,6 @@ final class CreateComplainant extends CreateRecord
 {
     #[Override]
     protected static string $resource = ComplainantResource::class;
+
+    protected static ?string $title = 'Nouveau plaignant';
 }
