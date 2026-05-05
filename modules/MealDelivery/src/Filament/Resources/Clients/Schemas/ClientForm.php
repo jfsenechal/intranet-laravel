@@ -19,7 +19,7 @@ final class ClientForm
     {
         return $schema
             ->schema([
-                Section::make('Personal information')
+                Section::make('Informations')
                     ->schema([
                         Grid::make(3)
                             ->schema([
@@ -34,35 +34,35 @@ final class ClientForm
                                     ->columnSpan(1),
 
                                 TextInput::make('last_name')
-                                    ->label('Last name')
+                                    ->label('Nom')
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(1),
 
                                 TextInput::make('first_name')
-                                    ->label('First name')
+                                    ->label('Prénom')
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(1),
                             ]),
 
                         DatePicker::make('birth_date')
-                            ->label('Birth date')
+                            ->label('Né le')
                             ->nullable(),
                     ]),
 
-                Section::make('Address')
+                Section::make('Adresse')
                     ->schema([
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('street')
-                                    ->label('Street')
+                                    ->label('Rue')
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(2),
 
                                 TextInput::make('number')
-                                    ->label('Number')
+                                    ->label('Numéro')
                                     ->required()
                                     ->maxLength(20)
                                     ->columnSpan(1),
@@ -71,20 +71,20 @@ final class ClientForm
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('postal_code')
-                                    ->label('Postal code')
+                                    ->label('Code postal')
                                     ->required()
                                     ->numeric()
                                     ->columnSpan(1),
 
                                 TextInput::make('city')
-                                    ->label('City')
+                                    ->label('Localité')
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(2),
                             ]),
 
                         TextInput::make('floor')
-                            ->label('Floor / Apartment')
+                            ->label('Etage')
                             ->maxLength(100)
                             ->nullable(),
                     ]),
@@ -98,33 +98,34 @@ final class ClientForm
                             ->nullable(),
 
                         TextInput::make('phone')
-                            ->label('Phone')
+                            ->label('Téléphone')
                             ->tel()
                             ->maxLength(50)
                             ->nullable(),
 
                         TextInput::make('contact_name')
-                            ->label('Emergency contact name')
+                            ->label('Personne de contact')
                             ->maxLength(255)
                             ->nullable(),
 
                         TextInput::make('contact_phone')
-                            ->label('Emergency contact phone')
+                            ->label('Téléphone du contact')
                             ->tel()
                             ->maxLength(50)
                             ->nullable(),
 
                         Textarea::make('contact_notes')
-                            ->label('Emergency contact notes')
+                            ->label('Contact remarque')
                             ->rows(2)
                             ->nullable(),
                     ])
                     ->columns(2),
 
-                Section::make('Delivery settings')
+                Section::make('Paramètres de la tournée')
                     ->schema([
                         Select::make('route_id')
-                            ->label('Delivery route')
+                            ->label('Tournée')
+                            ->helperText('Préférence de la tournée')
                             ->relationship('deliveryRoute', 'name')
                             ->searchable()
                             ->preload()
@@ -138,14 +139,9 @@ final class ClientForm
                             ->searchable(),
 
                         Textarea::make('recurring_order')
-                            ->label('Recurring order')
+                            ->label('Commande recurrente')
+                            ->helperText('Par ex. menu1 et 2 tous les mercredi sauf si poisson')
                             ->rows(3)
-                            ->nullable()
-                            ->columnSpanFull(),
-
-                        Textarea::make('route_backup')
-                            ->label('Route backup notes')
-                            ->rows(2)
                             ->nullable()
                             ->columnSpanFull(),
                     ])
@@ -155,14 +151,19 @@ final class ClientForm
                     ->schema([
                         Toggle::make('is_active')
                             ->label('Active')
+                            ->helperText(
+                                'Si la personne ne commande plus, décochez cette case, elle ne sera plus proposée dans les futures commandes et dans les tournées'
+                            )
                             ->default(true),
 
                         Toggle::make('use_cafeteria')
-                            ->label('Uses cafeteria')
+                            ->label('Mange à la cafétéria')
+                            ->helperText('Permettra de le préciser ou pas sur les commandes')
                             ->default(false),
 
                         Textarea::make('notes')
                             ->label('Notes')
+                            ->helperText('Votre profession actuelle ou ancienne')
                             ->rows(3)
                             ->nullable()
                             ->columnSpanFull(),

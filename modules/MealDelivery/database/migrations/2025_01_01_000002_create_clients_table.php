@@ -32,7 +32,7 @@ return new class extends Migration
                 $table->renameColumn('remarque', 'notes');
                 $table->renameColumn('commande_recurrente', 'recurring_order');
                 $table->renameColumn('tournee_id', 'route_id');
-                $table->renameColumn('tournee_save', 'route_backup');
+                $table->removeColumn('tournee_save');
                 $table->renameColumn('is_actif', 'is_active');
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');
@@ -62,7 +62,6 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->text('recurring_order')->nullable();
             $table->foreignId('route_id')->nullable()->constrained('delivery_routes')->nullOnDelete();
-            $table->text('route_backup')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('use_cafeteria')->default(false);
             $table->timestamps();

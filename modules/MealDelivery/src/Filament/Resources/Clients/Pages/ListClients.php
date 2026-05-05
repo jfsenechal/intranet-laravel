@@ -16,14 +16,14 @@ final class ListClients extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Clients';
+        return $this->getAllTableRecordsCount().' clients';
     }
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Add client')
+                ->label('Ajouter un client')
                 ->icon('tabler-plus'),
         ];
     }

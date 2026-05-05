@@ -10,7 +10,6 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -23,34 +22,35 @@ final class ClientTables
             ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('last_name')
-                    ->label('Last name')
+                    ->label('Nom')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('first_name')
-                    ->label('First name')
+                    ->label('Prénom')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('city')
-                    ->label('City')
+                    ->label('Localité')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('phone')
-                    ->label('Phone')
+                    ->label('Téléphone')
                     ->toggleable(),
 
                 TextColumn::make('deliveryRoute.name')
                     ->label('Route')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 IconColumn::make('use_cafeteria')
                     ->label('Cafeteria')
@@ -62,10 +62,6 @@ final class ClientTables
                     ->label('Active clients')
                     ->query(fn (Builder $query) => $query->where('is_active', true))
                     ->default(),
-
-                SelectFilter::make('route')
-                    ->label('Delivery route')
-                    ->relationship('deliveryRoute', 'name'),
             ])
             ->recordActions([
                 EditAction::make(),
