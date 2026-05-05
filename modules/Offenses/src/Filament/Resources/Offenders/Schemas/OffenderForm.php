@@ -37,7 +37,8 @@ final class OffenderForm
                     ->schema([
                         TextInput::make('street')
                             ->label('Rue')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->columnSpanFull(),
 
                         TextInput::make('postal_code')
                             ->label('Code postal')
@@ -47,7 +48,7 @@ final class OffenderForm
                             ->label('Localité')
                             ->maxLength(255),
                     ])
-                    ->columns(3),
+                    ->columns(2),
             ]);
     }
 }

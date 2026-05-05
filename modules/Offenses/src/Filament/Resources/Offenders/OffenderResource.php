@@ -10,6 +10,7 @@ use AcMarche\Offenses\Filament\Resources\Offenders\Pages\ListOffenders;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\ViewOffender;
 use AcMarche\Offenses\Filament\Resources\Offenders\Schemas\OffenderForm;
 use AcMarche\Offenses\Filament\Resources\Offenders\Tables\OffenderTables;
+use AcMarche\Offenses\Filament\Resources\Offenses\Schemas\OffenderInfolist;
 use AcMarche\Offenses\Models\Offender;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -37,6 +38,11 @@ final class OffenderResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return OffenderForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return OffenderInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
