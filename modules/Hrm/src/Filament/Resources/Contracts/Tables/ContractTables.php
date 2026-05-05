@@ -36,7 +36,7 @@ final class ContractTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn(Contract $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn (Contract $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable(),
@@ -115,9 +115,9 @@ final class ContractTables
                     ->trueLabel('Dépassée')
                     ->falseLabel('À venir ou sans fin')
                     ->queries(
-                        true: fn(Builder $query): Builder => $query->whereDate('end_date', '<', today()),
-                        false: fn(Builder $query): Builder => $query->where(
-                            fn(Builder $query) => $query
+                        true: fn (Builder $query): Builder => $query->whereDate('end_date', '<', today()),
+                        false: fn (Builder $query): Builder => $query->where(
+                            fn (Builder $query) => $query
                                 ->whereDate('end_date', '>=', today())
                                 ->orWhereNull('end_date'),
                         ),

@@ -26,7 +26,7 @@ final class DiplomaTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn(Diploma $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn (Diploma $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable(),
@@ -37,7 +37,7 @@ final class DiplomaTables
                     ->limit(50),
                 TextColumn::make('certificate_file')
                     ->label('Fichier')
-                    ->formatStateUsing(fn(?string $state): string => $state ? '✓' : '—')
+                    ->formatStateUsing(fn (?string $state): string => $state ? '✓' : '—')
                     ->toggleable(),
                 TextColumn::make('user_add')
                     ->label('Ajouté par')
@@ -80,7 +80,7 @@ final class DiplomaTables
                     ->limit(50),
                 TextColumn::make('certificate_file')
                     ->label('Fichier')
-                    ->formatStateUsing(fn(?string $state): string => $state ? '✓' : '—'),
+                    ->formatStateUsing(fn (?string $state): string => $state ? '✓' : '—'),
                 TextColumn::make('created_at')
                     ->label('Créé le')
                     ->date('d/m/Y')

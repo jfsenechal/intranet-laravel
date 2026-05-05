@@ -77,7 +77,7 @@ final class ManagerValidateTelework extends EditRecord
             Action::make('back')
                 ->label('Retour à la demande')
                 ->icon(Heroicon::ArrowLeft)
-                ->url(fn() => ViewTelework::getUrl(['record' => $this->record])),
+                ->url(fn () => ViewTelework::getUrl(['record' => $this->record])),
         ];
     }
 }

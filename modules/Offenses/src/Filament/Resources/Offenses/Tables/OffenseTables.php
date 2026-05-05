@@ -24,11 +24,6 @@ final class OffenseTables
             ->defaultSort('decision_date', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('decision_date')
-                    ->label('Décision')
-                    ->date('d/m/Y')
-                    ->sortable(),
-
                 TextColumn::make('offender.last_name')
                     ->label('Nom')
                     ->searchable()
@@ -44,6 +39,11 @@ final class OffenseTables
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('decision_date')
+                    ->label('Décision')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fine_amount')
                     ->label('Amende')
                     ->money('EUR')
@@ -70,7 +70,7 @@ final class OffenseTables
 
                 Filter::make('with_fine')
                     ->label('Avec amende')
-                    ->query(fn(Builder $query): Builder => $query->whereNotNull('fine_amount')),
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('fine_amount')),
             ])
             ->recordActions([
                 ViewAction::make(),

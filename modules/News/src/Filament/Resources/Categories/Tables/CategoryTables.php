@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\Categories\Tables;
 
-use AcMarche\News\Filament\Resources\Categories\CategoryResource;
-use AcMarche\News\Models\Category;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;

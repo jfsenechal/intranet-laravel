@@ -38,7 +38,7 @@ final class DeadlineTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn(Deadline $record): string => $record->employee?->last_name.' '.$record->employee?->first_name
+                        fn (Deadline $record): string => $record->employee?->last_name.' '.$record->employee?->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable()
@@ -85,9 +85,9 @@ final class DeadlineTables
                         DatePicker::make('end_date_from')
                             ->label('Date de l\'échéance (à partir de)'),
                     ])
-                    ->query(fn(Builder $query, array $data): Builder => $query->when(
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['end_date_from'] ?? null,
-                        fn(Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
+                        fn (Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
                     )),
                 Filter::make('reminder_date_from')
                     ->label('Date de rappel')
@@ -95,9 +95,9 @@ final class DeadlineTables
                         DatePicker::make('reminder_date_from')
                             ->label('Date de rappel (à partir de)'),
                     ])
-                    ->query(fn(Builder $query, array $data): Builder => $query->when(
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['reminder_date_from'] ?? null,
-                        fn(Builder $query, $date): Builder => $query->whereDate('reminder_date', '>=', $date),
+                        fn (Builder $query, $date): Builder => $query->whereDate('reminder_date', '>=', $date),
                     )),
                 TernaryFilter::make('is_closed')
                     ->label('Clôturée')

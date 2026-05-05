@@ -33,7 +33,7 @@ final class AbsenceTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn(Absence $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn (Absence $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable()
@@ -80,14 +80,14 @@ final class AbsenceTables
                         ]),
                     ])
                     ->columnSpanFull()
-                    ->query(fn(Builder $query, array $data): Builder => $query
+                    ->query(fn (Builder $query, array $data): Builder => $query
                         ->when(
                             $data['from'] ?? null,
-                            fn(Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
+                            fn (Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
                         )
                         ->when(
                             $data['until'] ?? null,
-                            fn(Builder $query, $date): Builder => $query->whereDate('start_date', '<=', $date),
+                            fn (Builder $query, $date): Builder => $query->whereDate('start_date', '<=', $date),
                         )),
                 TernaryFilter::make('is_closed')
                     ->label('Clôturée')

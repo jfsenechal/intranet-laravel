@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\QrCode\Filament\Resources\QrCodes\Tables;
 
 use AcMarche\QrCode\Enums\QrCodeActionEnum;
-use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\QrCode\Models\QrCode;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -29,8 +28,7 @@ final class QrCodeTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Nom')
-                    ->searchable()
-                    ,
+                    ->searchable(),
                 TextColumn::make('action')
                     ->label('Action')
                     ->badge()

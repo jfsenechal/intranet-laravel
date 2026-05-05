@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Security\Filament\Resources\Modules\Tables;
 
 use AcMarche\Security\Filament\Actions\RevokeAction;
-use AcMarche\Security\Filament\Resources\Modules\ModuleResource;
 use AcMarche\Security\Handler\ModuleHandler;
 use AcMarche\Security\Models\Module;
 use App\Models\User;
@@ -30,8 +29,7 @@ final class ModuleTables
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
-                    ->label('Intitulé')
-                    ,
+                    ->label('Intitulé'),
                 IconColumn::make('is_public')
                     ->label('Accessible à tous')
                     ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)

@@ -32,7 +32,7 @@ final class TrainingTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn(Training $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn (Training $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable(),
@@ -57,13 +57,13 @@ final class TrainingTables
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('duration_minutes')
                     ->label('Durée')
-                    ->formatStateUsing(fn(?int $state): string => Training::formatDuration($state))
+                    ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state))
                     ->summarize(
                         Summarizer::make()
                             ->label('Total')
                             ->using(
-                                fn(Builder $query): string => Training::formatDuration(
-                                    (int)$query->sum('duration_minutes')
+                                fn (Builder $query): string => Training::formatDuration(
+                                    (int) $query->sum('duration_minutes')
                                 )
                             )
                     )
@@ -134,13 +134,13 @@ final class TrainingTables
                     ->sortable(),
                 TextColumn::make('duration_minutes')
                     ->label('Durée')
-                    ->formatStateUsing(fn(?int $state): string => Training::formatDuration($state))
+                    ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state))
                     ->summarize(
                         Summarizer::make()
                             ->label('Total')
                             ->using(
-                                fn(Builder $query): string => Training::formatDuration(
-                                    (int)$query->sum('duration_minutes')
+                                fn (Builder $query): string => Training::formatDuration(
+                                    (int) $query->sum('duration_minutes')
                                 )
                             )
                     )

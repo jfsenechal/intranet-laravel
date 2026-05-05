@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Filament\Resources\Offenders\Tables;
 
-use AcMarche\Offenses\Filament\Resources\Offenders\OffenderResource;
-use AcMarche\Offenses\Models\Offender;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,7 +22,7 @@ final class OffenderTables
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
-                    ->sortable()                    ,
+                    ->sortable(),
 
                 TextColumn::make('first_name')
                     ->label('Prénom')

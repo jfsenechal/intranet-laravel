@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Services\Tables;
 
 use AcMarche\Hrm\Filament\Filters\DirectionFilter;
-use AcMarche\Hrm\Filament\Resources\Services\ServiceResource;
-use AcMarche\Hrm\Models\Service;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
