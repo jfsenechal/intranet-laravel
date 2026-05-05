@@ -44,7 +44,7 @@ final class OffenderInfolist
                                 TextEntry::make('offenseAct.name')
                                     ->label('Acte')
                                     ->url(
-                                        fn(Model $record): string => OffenseResource::getUrl(
+                                        fn (Model $record): string => OffenseResource::getUrl(
                                             'view',
                                             ['record' => $record->id]
                                         )
