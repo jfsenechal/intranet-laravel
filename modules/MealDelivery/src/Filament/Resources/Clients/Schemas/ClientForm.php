@@ -139,7 +139,7 @@ final class ClientForm
                             ->searchable(),
 
                         Textarea::make('recurring_order')
-                            ->label('Commande recurrente')
+                            ->label('Commande récurrente')
                             ->helperText('Par ex. menu1 et 2 tous les mercredi sauf si poisson')
                             ->rows(3)
                             ->nullable()
