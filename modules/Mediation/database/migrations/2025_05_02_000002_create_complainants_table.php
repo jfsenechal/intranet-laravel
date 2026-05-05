@@ -27,7 +27,7 @@ return new class extends Migration
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
-        } else {
+        } elseif (! Schema::connection('maria-mediation')->hasTable('complainants')) {
             Schema::connection('maria-mediation')->create('complainants', function (Blueprint $table): void {
                 $table->id();
                 $table->string('slug', 70)->unique();

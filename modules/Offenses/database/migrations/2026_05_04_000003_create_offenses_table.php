@@ -25,7 +25,7 @@ return new class extends Migration
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
-        } else {
+        } elseif (! Schema::connection('maria-offenses')->hasTable('offenses')) {
             Schema::connection('maria-offenses')->create('offenses', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('offender_id')->nullable()->constrained('offenders')->nullOnDelete();

@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('slugname', 'slug');
             });
-        } else {
+        } elseif (! Schema::connection('maria-mediation')->hasTable('agreement_types')) {
             Schema::connection('maria-mediation')->create('agreement_types', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name');
@@ -26,10 +26,5 @@ return new class extends Migration
                 $table->timestamps();
             });
         }
-    }
-
-    public function down(): void
-    {
-        Schema::connection('maria-mediation')->dropIfExists('agreement_types');
     }
 };

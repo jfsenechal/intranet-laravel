@@ -24,7 +24,7 @@ return new class extends Migration
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
-        } else {
+        } elseif (! Schema::connection('maria-mediation')->hasTable('case_files')) {
             Schema::connection('maria-mediation')->create('case_files', function (Blueprint $table): void {
                 $table->id();
                 $table->integer('number')->nullable();
