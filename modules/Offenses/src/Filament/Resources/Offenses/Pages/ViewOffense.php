@@ -32,8 +32,8 @@ final class ViewOffense extends ViewRecord
                 ->label('Télécharger le document')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-                ->visible(fn(Offense $record) => $record->file_name)
-                ->url(fn(Offense $record) => Storage::disk('public')->url($record->file_name)),
+                ->visible(fn (Offense $record) => $record->file_name)
+                ->url(fn (Offense $record) => Storage::disk('public')->url($record->file_name)),
             EditAction::make()->icon(Heroicon::Pencil),
             DeleteAction::make()->icon(Heroicon::Trash),
         ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\Mediation\Policies;
 
 use AcMarche\Mediation\Enums\RolesEnum;

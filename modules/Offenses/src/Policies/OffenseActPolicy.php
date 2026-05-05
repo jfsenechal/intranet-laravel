@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Policies;
 
-use AcMarche\Offenses\Enums\RolesEnum;
 use App\Models\User;
 
 // https://laravel.com/docs/12.x/authorization#creating-policies
 final class OffenseActPolicy
 {
     use PolicyTrait;
+
     /**
      * Determine whether the user can view any models.
      */
@@ -66,5 +66,4 @@ final class OffenseActPolicy
     {
         return false;
     }
-
 }

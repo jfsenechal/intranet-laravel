@@ -52,13 +52,13 @@ final class CaseFileForm
                             ->label('Plaignant')
                             ->relationship('complainant', 'last_name')
                             ->getOptionLabelFromRecordUsing(
-                                fn(Complainant $record) => $record->last_name.' '.$record->first_name
+                                fn (Complainant $record) => $record->last_name.' '.$record->first_name
                             )
                             ->searchable()
                             ->required()
-                            ->disabled(fn($get) => filled($get('complainant_id'))),
+                            ->disabled(fn ($get) => filled($get('complainant_id'))),
                         Hidden::make('complainant_id')
-                            ->visible(fn($get) => filled($get('complainant_id'))),
+                            ->visible(fn ($get) => filled($get('complainant_id'))),
                         Select::make('agreement_type_id')
                             ->label("Type d'accord")
                             ->relationship('agreementType', 'name')

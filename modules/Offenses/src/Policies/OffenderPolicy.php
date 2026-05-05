@@ -66,6 +66,4 @@ final class OffenderPolicy
     {
         return false;
     }
-
-
 }

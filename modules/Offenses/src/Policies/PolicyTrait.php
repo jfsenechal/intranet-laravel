@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\Offenses\Policies;
 
 use AcMarche\Offenses\Enums\RolesEnum;

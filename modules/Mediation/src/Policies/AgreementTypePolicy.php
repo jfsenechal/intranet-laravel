@@ -66,5 +66,4 @@ final class AgreementTypePolicy
     {
         return false;
     }
-
 }

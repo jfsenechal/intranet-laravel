@@ -66,6 +66,4 @@ final class ComplainantPolicy
     {
         return false;
     }
-
-
 }

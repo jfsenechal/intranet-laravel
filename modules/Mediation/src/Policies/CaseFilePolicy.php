@@ -10,6 +10,7 @@ use App\Models\User;
 final class CaseFilePolicy
 {
     use PolicyTrait;
+
     /**
      * Determine whether the user can view any models.
      */
@@ -65,5 +66,4 @@ final class CaseFilePolicy
     {
         return false;
     }
-
 }
