@@ -6,6 +6,7 @@ namespace AcMarche\Mediation\Filament\Resources\CaseFiles\Schemas;
 
 use AcMarche\Mediation\Models\Complainant;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -50,10 +51,14 @@ final class CaseFileForm
                         Select::make('complainant_id')
                             ->label('Plaignant')
                             ->relationship('complainant', 'last_name')
-                            ->getOptionLabelFromRecordUsing(fn (Complainant $record) => $record->last_name.' '.$record->first_name)
+                            ->getOptionLabelFromRecordUsing(
+                                fn(Complainant $record) => $record->last_name.' '.$record->first_name
+                            )
                             ->searchable()
-                            ->required(),
-
+                            ->required()
+                            ->disabled(fn($get) => filled($get('complainant_id'))),
+                        Hidden::make('complainant_id')
+                            ->visible(fn($get) => filled($get('complainant_id'))),
                         Select::make('agreement_type_id')
                             ->label("Type d'accord")
                             ->relationship('agreementType', 'name')
