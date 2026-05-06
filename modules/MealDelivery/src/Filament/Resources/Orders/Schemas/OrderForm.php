@@ -25,11 +25,9 @@ final class OrderForm
 
                 Repeater::make('meals')
                     ->hiddenLabel()
-                    ->relationship()
-                    ->orderColumn('date')
-                    ->itemLabel(fn(array $state): ?string => isset($state['date'])
+                    ->itemLabel(fn (array $state): ?string => isset($state['date'])
                         ? CarbonImmutable::parse($state['date'])->translatedFormat('l j F')
-                        : null
+                        : null,
                     )
                     ->schema([
                         Hidden::make('date'),
@@ -40,26 +38,17 @@ final class OrderForm
                             ->minValue(0)
                             ->default(0),
 
-                        Repeater::make('menus')
-                            ->hiddenLabel()
-                            ->relationship()
-                            ->orderColumn('position')
-                            ->itemLabel(fn(array $state): string => 'Menu '.($state['position'] ?? '?'))
-                            ->schema([
-                                Hidden::make('position'),
+                        TextInput::make('menu_1')
+                            ->label('Menu 1')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(0),
 
-                                TextInput::make('quantity')
-                                    ->hiddenLabel()
-                                    ->numeric()
-                                    ->minValue(0)
-                                    ->default(0),
-                            ])
-                            ->minItems(2)
-                            ->maxItems(2)
-                            ->addable(false)
-                            ->deletable(false)
-                            ->reorderable(false)
-                            ->collapsible(false),
+                        TextInput::make('menu_2')
+                            ->label('Menu 2')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(0),
 
                         Textarea::make('notes')
                             ->label('Remarque')
@@ -71,7 +60,7 @@ final class OrderForm
                     ->deletable(false)
                     ->reorderable(false)
                     ->collapsible(false)
-                    ->defaultItems(7)
+                    ->defaultItems(0)
                     ->columnSpanFull(),
 
                 Section::make()

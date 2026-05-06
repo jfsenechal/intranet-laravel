@@ -6,8 +6,13 @@ namespace AcMarche\MealDelivery\Filament\Resources\Orders\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
 use AcMarche\MealDelivery\Models\Client;
+use AcMarche\MealDelivery\Models\Meal;
+use AcMarche\MealDelivery\Models\Menu;
+use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Override;
 
 final class CreateOrder extends CreateRecord
@@ -49,11 +54,9 @@ final class CreateOrder extends CreateRecord
                 ->map(fn (string $day): array => [
                     'date' => $day,
                     'soup_count' => 0,
+                    'menu_1' => 0,
+                    'menu_2' => 0,
                     'notes' => null,
-                    'menus' => [
-                        ['position' => 1, 'quantity' => 0],
-                        ['position' => 2, 'quantity' => 0],
-                    ],
                 ])
                 ->values()
                 ->all(),
@@ -79,5 +82,41 @@ final class CreateOrder extends CreateRecord
             $client->first_name,
             $week->first_day->translatedFormat('j F Y'),
         );
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        $meals = $data['meals'] ?? [];
+        unset($data['meals']);
+
+        return DB::connection('maria-meal-delivery')->transaction(function () use ($data, $meals): Order {
+            $order = Order::query()->create($data);
+
+            foreach ($meals as $mealData) {
+                $menu1 = (int) ($mealData['menu_1'] ?? 0);
+                $menu2 = (int) ($mealData['menu_2'] ?? 0);
+
+                $meal = Meal::query()->create([
+                    'order_id' => $order->id,
+                    'date' => $mealData['date'] ?? null,
+                    'soup_count' => (int) ($mealData['soup_count'] ?? 0),
+                    'notes' => $mealData['notes'] ?? null,
+                ]);
+
+                Menu::query()->create([
+                    'meal_id' => $meal->id,
+                    'position' => 1,
+                    'quantity' => $menu1,
+                ]);
+
+                Menu::query()->create([
+                    'meal_id' => $meal->id,
+                    'position' => 2,
+                    'quantity' => $menu2,
+                ]);
+            }
+
+            return $order;
+        });
     }
 }
