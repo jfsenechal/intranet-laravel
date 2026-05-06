@@ -2,7 +2,7 @@
 
 namespace AcMarche\ResidentMeal\Enums;
 
-enum RolesEnum
+enum RolesEnum: string
 {
-
+    case ROLE_CPAS_MEAL = 'ROLE_CPAS_MEAL';
 }

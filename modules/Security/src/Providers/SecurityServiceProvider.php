@@ -7,6 +7,7 @@ namespace AcMarche\Security\Providers;
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Security\Console\Commands\CreateUserCommand;
 use AcMarche\Security\Console\Commands\MigrationRoleCommand;
+use AcMarche\Security\Console\Commands\SyncRolesCommand;
 use AcMarche\Security\Console\Commands\SyncUserCommand;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +30,7 @@ final class SecurityServiceProvider extends ServiceProvider
                 CreateUserCommand::class,
                 SyncUserCommand::class,
                 MigrationRoleCommand::class,
+                SyncRolesCommand::class,
             ]);
         }
         $this->bootModule();
