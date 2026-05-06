@@ -20,10 +20,12 @@ final class ClientForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->schema([
-                Grid::make(2)
+                Grid::make(3)
                     ->schema([
                         Group::make()
+                            ->columnSpan(2)
                             ->schema([
                                 Section::make('Informations')
                                     ->schema([
@@ -150,6 +152,7 @@ final class ClientForm
                             ]),
 
                         Section::make('Paramètres de la tournée')
+                            ->columnSpan(1)
                             ->schema([
                                 Select::make('route_id')
                                     ->label('Tournée')
