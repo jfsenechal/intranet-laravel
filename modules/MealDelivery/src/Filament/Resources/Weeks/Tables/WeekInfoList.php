@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Tables;
 
+use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Week;
 use Carbon\CarbonImmutable;
@@ -34,7 +35,11 @@ final class WeekInfoList
                                 TableColumn::make('Menus 2')->alignment(Alignment::End),
                             ])
                             ->schema([
-                                TextEntry::make('date'),
+                                TextEntry::make('date')
+                                    ->url(fn (mixed $record): ?string => is_array($record)
+                                        ? ($record['date_url'] ?? null)
+                                        : null,
+                                    ),
                                 TextEntry::make('clients_count')->alignment(Alignment::End),
                                 TextEntry::make('soup_count')->alignment(Alignment::End),
                                 TextEntry::make('menu1_count')->alignment(Alignment::End),
@@ -45,7 +50,7 @@ final class WeekInfoList
     }
 
     /**
-     * @return array<int, array{date: string, clients_count: int, soup_count: int, menu1_count: int, menu2_count: int}>
+     * @return array<int, array{date: string, date_url: string, clients_count: int, soup_count: int, menu1_count: int, menu2_count: int}>
      */
     private static function buildDaysSummary(Week $week): array
     {
@@ -65,11 +70,15 @@ final class WeekInfoList
             ->groupBy(fn (Meal $meal): string => $meal->date->format('Y-m-d'));
 
         return $days
-            ->map(function (string $day) use ($mealsByDay): array {
+            ->map(function (string $day) use ($mealsByDay, $week): array {
                 $meals = $mealsByDay->get($day, collect());
 
                 return [
                     'date' => CarbonImmutable::parse($day)->translatedFormat('l j F Y'),
+                    'date_url' => WeekResource::getUrl('day', [
+                        'record' => $week->id,
+                        'date' => $day,
+                    ]),
                     'clients_count' => $meals->pluck('order.client_id')->unique()->count(),
                     'soup_count' => (int) $meals->sum('soup_count'),
                     'menu1_count' => (int) $meals->sum(
