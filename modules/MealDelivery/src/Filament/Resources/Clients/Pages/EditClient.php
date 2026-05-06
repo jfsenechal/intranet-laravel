@@ -16,7 +16,7 @@ final class EditClient extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Edit client';
+        return $this->record->last_name.' '.$this->record->first_name;
     }
 
     protected function getHeaderActions(): array
