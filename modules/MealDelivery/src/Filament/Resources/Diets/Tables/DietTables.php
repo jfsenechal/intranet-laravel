@@ -7,7 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Diets\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -19,19 +19,21 @@ final class DietTables
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Nom')
                     ->searchable()
                     ->sortable(),
 
-                IconColumn::make('not_deletable')
-                    ->label('Not deletable')
-                    ->boolean()
+                TextColumn::make('clients_count')
+                    ->label('Clients')
+                    ->counts('clients')
                     ->sortable(),
             ])
             ->filters([])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

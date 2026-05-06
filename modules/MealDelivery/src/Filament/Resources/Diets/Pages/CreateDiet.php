@@ -20,6 +20,6 @@ final class CreateDiet extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Add diet';
+        return 'Ajouter un régime alimentaire';
     }
 }

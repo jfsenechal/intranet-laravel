@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Diets\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Diets\DietResource;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class EditDiet extends EditRecord
+final class ViewDiet extends ViewRecord
 {
     #[Override]
     protected static string $resource = DietResource::class;
@@ -22,8 +24,10 @@ final class EditDiet extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make()
-                ->icon('tabler-eye'),
+            EditAction::make()
+                ->icon(Heroicon::Pencil),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 }

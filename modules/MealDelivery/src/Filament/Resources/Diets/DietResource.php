@@ -7,7 +7,9 @@ namespace AcMarche\MealDelivery\Filament\Resources\Diets;
 use AcMarche\MealDelivery\Filament\Resources\Diets\Pages\CreateDiet;
 use AcMarche\MealDelivery\Filament\Resources\Diets\Pages\EditDiet;
 use AcMarche\MealDelivery\Filament\Resources\Diets\Pages\ListDiets;
+use AcMarche\MealDelivery\Filament\Resources\Diets\Pages\ViewDiet;
 use AcMarche\MealDelivery\Filament\Resources\Diets\Schemas\DietForm;
+use AcMarche\MealDelivery\Filament\Resources\Diets\Schemas\DietInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Diets\Tables\DietTables;
 use AcMarche\MealDelivery\Models\Diet;
 use Filament\Resources\Resource;
@@ -30,12 +32,17 @@ final class DietResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Diets';
+        return 'Régimes alimentaires';
     }
 
     public static function form(Schema $schema): Schema
     {
         return DietForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return DietInfoList::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -49,6 +56,7 @@ final class DietResource extends Resource
             'index' => ListDiets::route('/'),
             'create' => CreateDiet::route('/create'),
             'edit' => EditDiet::route('/{record}/edit'),
+            'view' => ViewDiet::route('/{record}/view'),
         ];
     }
 }

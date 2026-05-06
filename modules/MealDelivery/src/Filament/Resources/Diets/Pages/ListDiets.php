@@ -16,7 +16,7 @@ final class ListDiets extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Diets';
+        return 'Liste des régimes alimentaires';
     }
 
     protected function getHeaderActions(): array
