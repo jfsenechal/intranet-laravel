@@ -54,10 +54,6 @@ final class ClientForm
                                                     ->columnSpan(1),
                                             ]),
 
-                                        DatePicker::make('birth_date')
-                                            ->label('Né le')
-                                            ->nullable(),
-
                                         Grid::make(3)
                                             ->schema([
                                                 TextInput::make('street')
@@ -88,10 +84,17 @@ final class ClientForm
                                                     ->columnSpan(2),
                                             ]),
 
-                                        TextInput::make('floor')
-                                            ->label('Etage')
-                                            ->maxLength(100)
-                                            ->nullable(),
+
+                                        Grid::make(2)
+                                            ->schema([
+                                                DatePicker::make('birth_date')
+                                                    ->label('Né le')
+                                                    ->nullable(),
+                                                TextInput::make('floor')
+                                                    ->label('Etage')
+                                                    ->maxLength(100)
+                                                    ->nullable(),
+                                            ]),
                                     ]),
 
                                 Section::make('Contact')
@@ -162,16 +165,16 @@ final class ClientForm
                                     ->preload()
                                     ->nullable(),
 
-                                CheckboxList::make('diets')
-                                    ->label('Dietary requirements')
-                                    ->relationship('diets', 'name')
-                                    ->searchable(),
-
                                 Textarea::make('recurring_order')
                                     ->label('Commande récurrente')
                                     ->helperText('Par ex. menu1 et 2 tous les mercredi sauf si poisson')
                                     ->rows(3)
                                     ->nullable(),
+
+                                CheckboxList::make('diets')
+                                    ->label('Régimes')
+                                    ->relationship('diets', 'name')
+                                    ->searchable(),
                             ]),
                     ]),
             ]);
