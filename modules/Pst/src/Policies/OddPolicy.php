@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Policies;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use App\Models\User;
 
 final class OddPolicy
@@ -67,10 +67,10 @@ final class OddPolicy
 
     private function hasRoles(User $user): bool
     {
-        if ($user->hasOneOfThisRoles([RoleEnum::MANDATAIRE->value])) {
+        if ($user->hasOneOfThisRoles([RolesEnum::MANDATAIRE->value])) {
             return false;
         }
 
-        return $user->hasOneOfThisRoles([RoleEnum::ADMIN->value]);
+        return $user->hasOneOfThisRoles([RolesEnum::ADMIN->value]);
     }
 }

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Policies;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 
 trait ActionEditPolicyTrait
 {
     public static function isUserLinkedToAction($user, $action): bool
     {
-        if ($user->hasOneOfThisRoles([RoleEnum::MANDATAIRE->value])) {
+        if ($user->hasOneOfThisRoles([RolesEnum::MANDATAIRE->value])) {
             return false;
         }
-        if ($user->hasOneOfThisRoles([RoleEnum::ADMIN->value])) {
+        if ($user->hasOneOfThisRoles([RolesEnum::ADMIN->value])) {
             return true;
         }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\News\Schemas;
 
-use AcMarche\Security\Constant\DepartmentWithCommonEnum;
+use AcMarche\Security\Enums\DepartmentWithCommonEnum;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;

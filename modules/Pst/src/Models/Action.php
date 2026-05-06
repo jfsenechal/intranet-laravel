@@ -11,7 +11,7 @@ use AcMarche\Pst\Enums\ActionScopeEnum;
 use AcMarche\Pst\Enums\ActionStateEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
 use AcMarche\Pst\Enums\ActionTypeEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Enums\YesOrNoEnum;
 use AcMarche\Pst\Models\Scopes\DepartmentScope;
 use AcMarche\Pst\Models\Scopes\HasDepartmentScope;
@@ -218,7 +218,7 @@ final class Action extends Model
                     ->from(DB::raw('`intranet`.`users`'))
                     ->join(DB::raw('`intranet`.`role_user`'), 'intranet.users.id', '=', 'intranet.role_user.user_id')
                     ->join(DB::raw('`intranet`.`roles`'), 'intranet.role_user.role_id', '=', 'intranet.roles.id')
-                    ->where('intranet.roles.name', RoleEnum::MANDATAIRE->value);
+                    ->where('intranet.roles.name', RolesEnum::MANDATAIRE->value);
             });
     }
 

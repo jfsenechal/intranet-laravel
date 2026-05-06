@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Policies;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use App\Models\User;
 
 final class UserPolicy
@@ -67,6 +67,6 @@ final class UserPolicy
 
     private function hasRoles(User $user): bool
     {
-        return $user->hasOneOfThisRoles([RoleEnum::ADMIN->value]);
+        return $user->hasOneOfThisRoles([RolesEnum::ADMIN->value]);
     }
 }

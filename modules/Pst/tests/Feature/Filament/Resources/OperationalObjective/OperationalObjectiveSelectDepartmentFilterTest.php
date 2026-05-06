@@ -6,7 +6,7 @@ namespace AcMarche\Pst\Tests\Feature\Filament\Resources\OperationalObjective;
 
 use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Pst\Enums\ActionScopeEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\OperationalObjective\Pages\CreateOperationalObjective;
 use AcMarche\Pst\Models\StrategicObjective;
 use AcMarche\Security\Models\Role;
@@ -36,7 +36,7 @@ final class OperationalObjectiveSelectDepartmentFilterTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('pst'));
 
-        $this->adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
+        $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
     }
 
     public function test_user_can_select_strategic_objective_from_same_department(): void

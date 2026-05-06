@@ -7,7 +7,7 @@ namespace AcMarche\Pst\Tests\Feature\Filament\Resources\ActionPst;
 use AcMarche\Pst\Enums\ActionStateEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
 use AcMarche\Pst\Enums\ActionTypeEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\EditActionPst;
 use AcMarche\Pst\Models\Action;
 use AcMarche\Pst\Models\History;
@@ -35,7 +35,7 @@ final class ActionHistoryTrackingTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('pst'));
 
-        $adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
+        $adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
         $this->adminUser = User::factory()->create();
         $this->adminUser->roles()->attach($adminRole);
 
@@ -152,7 +152,7 @@ final class ActionHistoryTrackingTest extends TestCase
 
     public function test_adding_mandataire_creates_history_record(): void
     {
-        $mandataireRole = Role::factory()->create(['name' => RoleEnum::MANDATAIRE->value]);
+        $mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
         $mandataire = User::factory()->create([
             'first_name' => 'Pierre',
             'last_name' => 'Durand',

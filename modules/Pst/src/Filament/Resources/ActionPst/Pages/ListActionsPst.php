@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Pst\Filament\Resources\ActionPst\Pages;
 
 use AcMarche\Pst\Enums\ActionStateEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
 use AcMarche\Pst\Models\Action;
 use Filament\Actions;
@@ -37,7 +37,7 @@ final class ListActionsPst extends ListRecords
                 ->label('Toutes')
                 ->badge(fn () => Action::query()->count()),
         ];
-        if (auth()->user()->hasRole(RoleEnum::ADMIN->value)) {
+        if (auth()->user()->hasRole(RolesEnum::ADMIN->value)) {
             $tabs[1] = Tab::make('NotValidated')
                 ->label('Non validées')
                 ->badgeColor('warning')

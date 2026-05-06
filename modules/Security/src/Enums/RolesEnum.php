@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Security\Constant;
+namespace AcMarche\Security\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum NavigationGroupEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
+enum RolesEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
 {
-    case SETTINGS = 'SETTINGS';
+    case INTRANET_ADMIN = 'ROLE_INTRANET_ADMIN';
 
     public static function toArray(): array
     {
         $values = [];
-        foreach (ActionStateEnum::cases() as $actionStateEnum) {
+        foreach (self::cases() as $actionStateEnum) {
             $values[] = $actionStateEnum->value;
         }
 
@@ -26,28 +26,28 @@ enum NavigationGroupEnum: string implements HasColor, HasDescription, HasIcon, H
     public function getLabel(): string
     {
         return match ($this) {
-            self::SETTINGS => 'Paramètres',
+            self::INTRANET_ADMIN => 'Administrateur',
         };
     }
 
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::SETTINGS => 'danger',
+            self::INTRANET_ADMIN => 'success',
         };
     }
 
     public function getDescription(): ?string
     {
         return match ($this) {
-            self::SETTINGS => 'danger',
+            self::INTRANET_ADMIN => 'Accès à tout et peut paramètrer l\'application',
         };
     }
 
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::SETTINGS => 'tabler-settings',
+            self::INTRANET_ADMIN => 'Administrateur',
         };
     }
 }

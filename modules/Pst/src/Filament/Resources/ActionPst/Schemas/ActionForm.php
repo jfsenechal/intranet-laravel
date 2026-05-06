@@ -10,7 +10,7 @@ use AcMarche\Pst\Enums\ActionScopeEnum;
 use AcMarche\Pst\Enums\ActionStateEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
 use AcMarche\Pst\Enums\ActionTypeEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Enums\YesOrNoEnum;
 use AcMarche\Pst\Models\OperationalObjective;
 use AcMarche\Security\Repository\UserRepository;
@@ -125,7 +125,7 @@ final class ActionForm
                             ->required()
                             ->readOnly(
                                 fn (?string $operation = null): bool => $operation === 'edit' && ! auth()->user()->hasRole(
-                                    RoleEnum::ADMIN->value
+                                    RolesEnum::ADMIN->value
                                 )
                             )
                             ->maxLength(255),
@@ -133,8 +133,8 @@ final class ActionForm
                             ->label('Validée')
                             ->options(YesOrNoEnum::class)
                             ->inline()
-                            ->default(fn (): ?int => UserRepository::departmentSelected() === DepartmentEnum::CPAS->value || auth()->user()->hasRole(RoleEnum::ADMIN->value) ? YesOrNoEnum::YES->value : null)
-                            ->visible(fn () => auth()->user()->hasRole(RoleEnum::ADMIN->value))
+                            ->default(fn (): ?int => UserRepository::departmentSelected() === DepartmentEnum::CPAS->value || auth()->user()->hasRole(RolesEnum::ADMIN->value) ? YesOrNoEnum::YES->value : null)
+                            ->visible(fn () => auth()->user()->hasRole(RolesEnum::ADMIN->value))
                             ->grow(false),
                     ])
                         ->grow(true)
@@ -154,7 +154,7 @@ final class ActionForm
                         ->searchable(['name'])
                         ->disabled(
                             fn (?string $operation = null): bool => $operation === 'edit' && ! auth()->user()->hasRole(
-                                RoleEnum::ADMIN->value
+                                RolesEnum::ADMIN->value
                             )
                         )
                         ->preload()
@@ -182,7 +182,7 @@ final class ActionForm
                         ->options(ActionTypeEnum::class)
                         ->disabled(
                             fn (?string $operation = null): bool => $operation === 'edit' && ! auth()->user()->hasRole(
-                                RoleEnum::ADMIN->value
+                                RolesEnum::ADMIN->value
                             )
                         )
                         ->inline(),
@@ -193,7 +193,7 @@ final class ActionForm
                     ToggleButtons::make('roadmap')
                         ->label('Feuille de route')
                         ->options(ActionRoadmapEnum::class)
-                        ->visible(fn () => auth()->user()->hasRole(RoleEnum::ADMIN->value))
+                        ->visible(fn () => auth()->user()->hasRole(RolesEnum::ADMIN->value))
                         ->inline(),
                     ToggleButtons::make('scope')
                         ->label('Volet')
@@ -226,7 +226,7 @@ final class ActionForm
                             modifyQueryUsing: fn (Builder $query) => $query
                                 ->whereHas(
                                     'roles',
-                                    fn (Builder $query) => $query->where('name', RoleEnum::MANDATAIRE->value)
+                                    fn (Builder $query) => $query->where('name', RolesEnum::MANDATAIRE->value)
                                 )
                                 ->orderBy('last_name')
                                 ->orderBy('first_name'),

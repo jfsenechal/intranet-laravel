@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Pst\Tests\Feature\Filament\Resources\ActionPst;
 
 use AcMarche\Pst\Enums\ActionScopeEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\ListActionsPst;
 use AcMarche\Pst\Models\Action;
 use AcMarche\Pst\Models\OperationalObjective;
@@ -31,7 +31,7 @@ final class ActionTablesTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('pst'));
 
-        $this->adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
+        $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
 
         $this->adminUser = User::factory()->create();
         $this->adminUser->roles()->attach($this->adminRole);

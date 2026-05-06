@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Filament\Resources\Modules;
 
-use AcMarche\Security\Constant\NavigationGroupEnum;
+use AcMarche\Security\Enums\NavigationGroupEnum;
 use AcMarche\Security\Filament\Resources\Modules\Pages\CreateModule;
 use AcMarche\Security\Filament\Resources\Modules\Pages\EditModule;
 use AcMarche\Security\Filament\Resources\Modules\Pages\ListModule;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Security\Constant;
+namespace AcMarche\Security\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;

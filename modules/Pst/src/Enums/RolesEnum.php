@@ -9,7 +9,7 @@ use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum RoleEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
+enum RolesEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
 {
     case PST = 'ROLE_PST';
     case ADMIN = 'ROLE_PST_ADMIN';

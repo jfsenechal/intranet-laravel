@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Policies;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Models\Action;
 use App\Models\User;
 
@@ -34,7 +34,7 @@ final class ActionPolicy
      */
     public function create(User $user): bool
     {
-        return ! $user->hasOneOfThisRoles([RoleEnum::MANDATAIRE->value]);
+        return ! $user->hasOneOfThisRoles([RolesEnum::MANDATAIRE->value]);
     }
 
     /**
@@ -58,7 +58,7 @@ final class ActionPolicy
      */
     public function restore(User $user): bool
     {
-        return $user->hasOneOfThisRoles([RoleEnum::ADMIN->value]);
+        return $user->hasOneOfThisRoles([RolesEnum::ADMIN->value]);
     }
 
     /**

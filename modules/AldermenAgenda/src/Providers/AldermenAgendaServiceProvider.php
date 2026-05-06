@@ -11,7 +11,7 @@ final class AldermenAgendaServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 20;
+    public static int $module_id = 3;
 
     public function register(): void
     {

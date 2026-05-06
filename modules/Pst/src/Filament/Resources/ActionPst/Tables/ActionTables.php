@@ -8,7 +8,7 @@ use AcMarche\Pst\Enums\ActionScopeEnum;
 use AcMarche\Pst\Enums\ActionStateEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
 use AcMarche\Pst\Enums\ActionTypeEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
 use AcMarche\Pst\Models\Action;
 use AcMarche\Pst\Models\Service;
@@ -249,7 +249,7 @@ final class ActionTables
                 )),
             TrashedFilter::make()
                 ->label('Supprimées')
-                ->visible(fn (): bool => auth()->user()?->hasOneOfThisRoles([RoleEnum::ADMIN->value]) ?? false),
+                ->visible(fn (): bool => auth()->user()?->hasOneOfThisRoles([RolesEnum::ADMIN->value]) ?? false),
         ];
     }
 

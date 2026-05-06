@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Database\Seeders;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Models\Odd;
 use AcMarche\Pst\Models\Service;
 use AcMarche\Security\Models\Role;
@@ -22,11 +22,11 @@ final class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $adminRole = Role::factory()->create([
-            'name' => RoleEnum::ADMIN->value,
+            'name' => RolesEnum::ADMIN->value,
         ]);
 
-        foreach (RoleEnum::cases() as $role) {
-            if ($role !== RoleEnum::ADMIN) {
+        foreach (RolesEnum::cases() as $role) {
+            if ($role !== RolesEnum::ADMIN) {
                 Role::factory()->create([
                     'name' => $role->value,
                     'description' => $role->getDescription(),

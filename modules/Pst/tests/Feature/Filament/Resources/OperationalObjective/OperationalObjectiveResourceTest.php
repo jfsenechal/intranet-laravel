@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\Pst\Enums\ActionScopeEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\OperationalObjective\Pages\CreateOperationalObjective;
 use AcMarche\Pst\Filament\Resources\OperationalObjective\Pages\EditOperationalObjective;
 use AcMarche\Pst\Filament\Resources\OperationalObjective\Pages\ListOperationalObjectives;
@@ -27,7 +27,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('pst'));
-    $adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
+    $adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
     $this->adminUser = User::factory()->create();
     $this->adminUser->roles()->attach($adminRole);
 

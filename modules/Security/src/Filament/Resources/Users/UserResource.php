@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Filament\Resources\Users;
 
-use AcMarche\Security\Constant\NavigationGroupEnum;
+use AcMarche\Security\Enums\NavigationGroupEnum;
 use AcMarche\Security\Filament\Resources\Users\Pages\CreateUser;
 use AcMarche\Security\Filament\Resources\Users\Pages\EditUser;
 use AcMarche\Security\Filament\Resources\Users\Pages\ListUsers;

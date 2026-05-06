@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\App\Enums\DepartmentEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\Users\Pages\EditUser;
 use AcMarche\Pst\Filament\Resources\Users\Pages\ListUsers;
 use AcMarche\Security\Models\Role;
@@ -15,7 +15,7 @@ use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('pst'));
-    $adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
+    $adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
     $this->adminUser = User::factory()->create();
     $this->adminUser->roles()->attach($adminRole);
 

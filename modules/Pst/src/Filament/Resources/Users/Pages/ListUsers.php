@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Filament\Resources\Users\Pages;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\Users\Schemas\UserForm;
 use AcMarche\Pst\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Ldap\UserHandler;
@@ -35,7 +35,7 @@ final class ListUsers extends ListRecords
                 ->modal()
                 ->modalHeading('Importer un utilisateur de la LDAP')
                 ->schema(fn (Schema $schema): Schema => UserForm::add($schema))
-                ->visible(fn (): bool => auth()->user()->hasOneOfThisRoles([RoleEnum::ADMIN->value]))
+                ->visible(fn (): bool => auth()->user()->hasOneOfThisRoles([RolesEnum::ADMIN->value]))
                 ->action(function (array $data): void {
                     try {
                         $user = UserHandler::createUserFromLdap($data);

@@ -14,9 +14,25 @@ use AcMarche\Courrier\Enums\RolesEnum as RoleEnumCourrier;
 use AcMarche\Courrier\Providers\CourrierServiceProvider;
 use AcMarche\Document\Enums\RolesEnum as RoleEnumDocument;
 use AcMarche\Document\Providers\DocumentServiceProvider;
+use AcMarche\Hrm\Enums\RolesEnum as RoleEnumHrm;
+use AcMarche\Hrm\Providers\HrmServiceProvider;
+use AcMarche\Mediation\Enums\RolesEnum as RoleEnumMediation;
+use AcMarche\Mediation\Providers\MediationServiceProvider;
+use AcMarche\Mileage\Enums\RolesEnum as RoleEnumMileage;
+use AcMarche\Mileage\Providers\MileageServiceProvider;
 use AcMarche\News\Enums\RolesEnum as RoleEnumNews;
 use AcMarche\News\Providers\NewsServiceProvider;
+use AcMarche\Offenses\Enums\RolesEnum as RoleEnumOffenses;
+use AcMarche\Offenses\Providers\OffensesServiceProvider;
+use AcMarche\Pst\Enums\RolesEnum as RoleEnumPst;
+use AcMarche\Pst\Providers\PstServiceProvider;
+use AcMarche\Publication\Enums\RolesEnum as RoleEnumPublication;
+use AcMarche\Publication\Providers\PublicationServiceProvider;
+use AcMarche\ResidentMeal\Enums\RolesEnum as RoleEnumResidentMeal;
+use AcMarche\ResidentMeal\Providers\ResidentMealServiceProvider;
+use AcMarche\Security\Enums\RolesEnum as RoleEnumSecurity;
 use AcMarche\Security\Models\Role;
+use AcMarche\Security\Providers\SecurityServiceProvider;
 use Illuminate\Console\Command;
 use Override;
 use Symfony\Component\Console\Command\Command as SfCommand;
@@ -45,12 +61,20 @@ final class SyncRolesCommand extends Command
     public function handle(): int
     {
         $mappings = [
-            [NewsServiceProvider::class, RoleEnumNews::cases()],
             [AgentServiceProvider::class, RoleEnumAgent::cases()],
             [AldermenAgendaServiceProvider::class, RoleEnumAldermenAgenda::cases()],
             [AdServiceProvider::class, RoleEnumAd::cases()],
             [CourrierServiceProvider::class, RoleEnumCourrier::cases()],
             [DocumentServiceProvider::class, RoleEnumDocument::cases()],
+            [HrmServiceProvider::class, RoleEnumHrm::cases()],
+            [MediationServiceProvider::class, RoleEnumMediation::cases()],
+            [MileageServiceProvider::class, RoleEnumMileage::cases()],
+            [NewsServiceProvider::class, RoleEnumNews::cases()],
+            [OffensesServiceProvider::class, RoleEnumOffenses::cases()],
+            [PstServiceProvider::class, RoleEnumPst::cases()],
+            [PublicationServiceProvider::class, RoleEnumPublication::cases()],
+            [ResidentMealServiceProvider::class, RoleEnumResidentMeal::cases()],
+            [SecurityServiceProvider::class, RoleEnumSecurity::cases()],
         ];
 
         foreach ($mappings as [$providerClass, $cases]) {

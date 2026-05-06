@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\News\Schemas;
 
-use AcMarche\Security\Constant\DepartmentWithCommonEnum;
+use AcMarche\Security\Enums\DepartmentWithCommonEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;

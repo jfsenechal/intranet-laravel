@@ -8,7 +8,7 @@ use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Pst\Enums\ActionScopeEnum;
 use AcMarche\Pst\Enums\ActionStateEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\CreateActionPst;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\ListActionsPst;
 use AcMarche\Pst\Models\Action;
@@ -54,8 +54,8 @@ final class ActionDepartmentTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('pst'));
 
-        $this->adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
-        $this->mandataireRole = Role::factory()->create(['name' => RoleEnum::MANDATAIRE->value]);
+        $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
+        $this->mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
     }
 
     public function test_user_with_ville_department_sees_only_ville_actions(): void

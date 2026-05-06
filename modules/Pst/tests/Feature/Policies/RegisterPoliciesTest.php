@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Tests\Feature\Policies;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Models\Action;
 use AcMarche\Pst\Models\OperationalObjective;
 use AcMarche\Pst\Models\Service;
@@ -33,8 +33,8 @@ final class RegisterPoliciesTest extends TestCase
     {
         parent::setUp();
 
-        $this->adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
-        $this->mandataireRole = Role::factory()->create(['name' => RoleEnum::MANDATAIRE->value]);
+        $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
+        $this->mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
 
         $this->adminUser = User::factory()->create();
         $this->adminUser->roles()->attach($this->adminRole);

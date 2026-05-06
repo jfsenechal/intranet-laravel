@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Tests\Feature\Filament\Resources\ActionPst;
 
-use AcMarche\Pst\Enums\RoleEnum;
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\CreateActionPst;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\EditActionPst;
 use AcMarche\Pst\Models\Action;
@@ -38,7 +38,7 @@ final class ActionFormTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('pst'));
 
-        $this->adminRole = Role::factory()->create(['name' => RoleEnum::ADMIN->value]);
+        $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
 
         $this->adminUser = User::factory()->create();
         $this->adminUser->roles()->attach($this->adminRole);
@@ -182,7 +182,7 @@ final class ActionFormTest extends TestCase
 
     public function test_mandataire_cannot_edit_action_even_if_directly_linked(): void
     {
-        $mandataireRole = Role::factory()->create(['name' => RoleEnum::MANDATAIRE->value]);
+        $mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
         $mandataireUser = User::factory()->create();
         $mandataireUser->roles()->attach($mandataireRole);
 
@@ -197,7 +197,7 @@ final class ActionFormTest extends TestCase
 
     public function test_mandataire_cannot_edit_action_even_if_in_leader_service(): void
     {
-        $mandataireRole = Role::factory()->create(['name' => RoleEnum::MANDATAIRE->value]);
+        $mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
         $mandataireUser = User::factory()->create();
         $mandataireUser->roles()->attach($mandataireRole);
 
