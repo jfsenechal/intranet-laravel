@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -22,17 +23,17 @@ final class WeekTables
             ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('first_day')
-                    ->label('First day')
-                    ->date()
+                    ->label('Commence le')
+                    ->formatStateUsing(fn ($state): string => $state->translatedFormat('j F Y'))
                     ->sortable(),
 
                 TextColumn::make('orders_count')
-                    ->label('Orders')
+                    ->label('Commandes')
                     ->counts('orders')
                     ->sortable(),
 
                 IconColumn::make('is_archived')
-                    ->label('Archived')
+                    ->label('Archivée')
                     ->boolean()
                     ->sortable(),
 
@@ -48,8 +49,10 @@ final class WeekTables
                     ->default(),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

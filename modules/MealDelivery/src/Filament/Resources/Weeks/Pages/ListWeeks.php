@@ -16,14 +16,14 @@ final class ListWeeks extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Weeks';
+        return 'Liste des semaines';
     }
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Add week')
+                ->label('Ajouter une semaine')
                 ->icon('tabler-plus'),
         ];
     }
