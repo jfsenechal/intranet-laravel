@@ -20,6 +20,6 @@ final class CreateOrder extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Add order';
+        return 'Nouvelle commande';
     }
 }

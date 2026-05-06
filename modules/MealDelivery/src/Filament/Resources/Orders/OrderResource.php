@@ -30,7 +30,7 @@ final class OrderResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Orders';
+        return 'Commandes';
     }
 
     public static function form(Schema $schema): Schema
