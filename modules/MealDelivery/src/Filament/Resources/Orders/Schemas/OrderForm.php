@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Orders\Schemas;
 
-use Filament\Forms\Components\Select;
+use Carbon\CarbonImmutable;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -16,37 +18,72 @@ final class OrderForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->schema([
+                Hidden::make('week_id'),
+                Hidden::make('client_id'),
+
+                Repeater::make('meals')
+                    ->hiddenLabel()
+                    ->relationship()
+                    ->orderColumn('date')
+                    ->itemLabel(fn (array $state): ?string => isset($state['date'])
+                        ? CarbonImmutable::parse($state['date'])->translatedFormat('l j F')
+                        : null
+                    )
+                    ->schema([
+                        Hidden::make('date'),
+
+                        TextInput::make('soup_count')
+                            ->label('Potage')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(0),
+
+                        Repeater::make('menus')
+                            ->hiddenLabel()
+                            ->relationship()
+                            ->orderColumn('position')
+                            ->itemLabel(fn (array $state): string => 'Menu '.($state['position'] ?? '?'))
+                            ->schema([
+                                Hidden::make('position'),
+
+                                TextInput::make('quantity')
+                                    ->hiddenLabel()
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(0),
+                            ])
+                            ->minItems(2)
+                            ->maxItems(2)
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->collapsible(false),
+
+                        Textarea::make('notes')
+                            ->label('Remarque')
+                            ->rows(2)
+                            ->nullable(),
+                    ])
+                    ->grid(['default' => 1, 'md' => 2, 'lg' => 4, '2xl' => 7])
+                    ->addable(false)
+                    ->deletable(false)
+                    ->reorderable(false)
+                    ->collapsible(false)
+                    ->columnSpanFull(),
+
                 Section::make()
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('week_id')
-                                    ->label('Week')
-                                    ->relationship('week', 'first_day')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->columnSpan(1),
-
-                                Select::make('client_id')
-                                    ->label('Client')
-                                    ->relationship('client', 'last_name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->columnSpan(1),
-                            ]),
-
                         Toggle::make('is_last_meal')
-                            ->label('Last meal (close client)')
+                            ->label('Dernière commande ?')
+                            ->helperText('Si oui, prendre feuille nouvelle commande')
                             ->default(false),
 
                         Textarea::make('notes')
-                            ->label('Notes')
-                            ->rows(3)
-                            ->nullable()
-                            ->columnSpanFull(),
+                            ->label('Remarque générale')
+                            ->rows(2)
+                            ->nullable(),
                     ]),
             ]);
     }
