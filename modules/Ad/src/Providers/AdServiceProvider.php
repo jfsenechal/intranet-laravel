@@ -11,7 +11,7 @@ final class AdServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 15;
+    public static int $module_id = 62;
 
     public function register(): void
     {

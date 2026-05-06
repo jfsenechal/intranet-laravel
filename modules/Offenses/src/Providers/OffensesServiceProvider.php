@@ -11,7 +11,7 @@ final class OffensesServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 8;
+    public static int $module_id = 4;
 
     public function register(): void
     {

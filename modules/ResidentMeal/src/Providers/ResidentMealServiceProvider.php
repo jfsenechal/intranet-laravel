@@ -11,7 +11,7 @@ final class ResidentMealServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 20;
+    public static int $module_id = 55;
 
     public function register(): void
     {
