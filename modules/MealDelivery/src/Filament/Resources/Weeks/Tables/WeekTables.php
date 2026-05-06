@@ -44,7 +44,7 @@ final class WeekTables
             ])
             ->filters([
                 Filter::make('active')
-                    ->label('Active weeks')
+                    ->label('Non archivées')
                     ->query(fn (Builder $query) => $query->where('is_archived', false))
                     ->default(),
             ])

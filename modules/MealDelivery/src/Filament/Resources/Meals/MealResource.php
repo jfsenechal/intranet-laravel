@@ -14,15 +14,11 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Override;
-use UnitEnum;
 
 final class MealResource extends Resource
 {
     #[Override]
     protected static ?string $model = Meal::class;
-
-    #[Override]
-    protected static string|null|UnitEnum $navigationGroup = 'CPAS Repas';
 
     #[Override]
     protected static ?int $navigationSort = 4;

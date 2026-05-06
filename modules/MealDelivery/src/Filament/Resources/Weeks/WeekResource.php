@@ -7,22 +7,20 @@ namespace AcMarche\MealDelivery\Filament\Resources\Weeks;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\CreateWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\EditWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ListWeeks;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ViewWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas\WeekForm;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\Tables\WeekInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Tables\WeekTables;
 use AcMarche\MealDelivery\Models\Week;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Override;
-use UnitEnum;
 
 final class WeekResource extends Resource
 {
     #[Override]
     protected static ?string $model = Week::class;
-
-    #[Override]
-    protected static string|null|UnitEnum $navigationGroup = 'CPAS Repas';
 
     #[Override]
     protected static ?int $navigationSort = 2;
@@ -34,12 +32,17 @@ final class WeekResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Weeks';
+        return 'Semaines';
     }
 
     public static function form(Schema $schema): Schema
     {
         return WeekForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return WeekInfoList::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -53,6 +56,7 @@ final class WeekResource extends Resource
             'index' => ListWeeks::route('/'),
             'create' => CreateWeek::route('/create'),
             'edit' => EditWeek::route('/{record}/edit'),
+            'view' => ViewWeek::route('/{record}/view'),
         ];
     }
 }
