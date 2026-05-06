@@ -27,7 +27,7 @@ final class OrderForm
                     ->hiddenLabel()
                     ->relationship()
                     ->orderColumn('date')
-                    ->itemLabel(fn (array $state): ?string => isset($state['date'])
+                    ->itemLabel(fn(array $state): ?string => isset($state['date'])
                         ? CarbonImmutable::parse($state['date'])->translatedFormat('l j F')
                         : null
                     )
@@ -44,7 +44,7 @@ final class OrderForm
                             ->hiddenLabel()
                             ->relationship()
                             ->orderColumn('position')
-                            ->itemLabel(fn (array $state): string => 'Menu '.($state['position'] ?? '?'))
+                            ->itemLabel(fn(array $state): string => 'Menu '.($state['position'] ?? '?'))
                             ->schema([
                                 Hidden::make('position'),
 
@@ -71,6 +71,7 @@ final class OrderForm
                     ->deletable(false)
                     ->reorderable(false)
                     ->collapsible(false)
+                    ->defaultItems(7)
                     ->columnSpanFull(),
 
                 Section::make()
