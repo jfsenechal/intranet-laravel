@@ -20,6 +20,6 @@ final class CreateNote extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Add note';
+        return 'Ajouter une note';
     }
 }

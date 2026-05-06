@@ -17,7 +17,7 @@ final class MealForm
         return $schema
             ->schema([
                 Section::make()
-                    ->schema(),
+                    ->schema(self::getMealSchema()),
             ]);
     }
 

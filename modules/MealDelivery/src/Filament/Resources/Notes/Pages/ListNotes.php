@@ -16,14 +16,14 @@ final class ListNotes extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Client notes';
+        return 'Liste des notes';
     }
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Add note')
+                ->label('Ajouter une note')
                 ->icon('tabler-plus'),
         ];
     }

@@ -6,6 +6,9 @@ namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientInfoList;
+use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;
+use AcMarche\MealDelivery\Models\Client;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -32,6 +35,15 @@ final class ViewClient extends ViewRecord
         return [
             EditAction::make()
                 ->icon('tabler-edit'),
+            CreateAction::make('addNote')
+                ->label('Ajouter une note')
+                ->icon('tabler-plus')
+                ->modal()
+                ->schema(fn(Schema $schema) => NoteForm::configure($schema))
+                ->action(function (array $data, Client $record): void {
+                    $record->notes()->create($data);
+                }),
+
             DeleteAction::make()
                 ->icon('tabler-trash'),
         ];

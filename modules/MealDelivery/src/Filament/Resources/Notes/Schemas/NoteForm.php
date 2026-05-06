@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Notes\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -23,16 +23,9 @@ final class NoteForm
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Select::make('client_id')
-                                    ->label('Client')
-                                    ->relationship('client', 'last_name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->columnSpan(1),
-
+                                Hidden::make('client_id'),
                                 DatePicker::make('note_date')
-                                    ->label('Date')
+                                    ->label('Ajouté le')
                                     ->required()
                                     ->default(now())
                                     ->columnSpan(1),
@@ -47,16 +40,16 @@ final class NoteForm
                         Grid::make(2)
                             ->schema([
                                 Toggle::make('is_done')
-                                    ->label('Done')
+                                    ->label('Traité')
                                     ->default(false)
                                     ->live()
                                     ->columnSpan(1),
 
                                 TextInput::make('done_by')
-                                    ->label('Done by')
+                                    ->label('Traité par')
                                     ->maxLength(100)
                                     ->nullable()
-                                    ->visible(fn ($get) => (bool) $get('is_done'))
+                                    ->visible(fn($get) => (bool)$get('is_done'))
                                     ->columnSpan(1),
                             ]),
                     ]),
