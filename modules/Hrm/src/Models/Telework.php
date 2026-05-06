@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Models;
 
+use AcMarche\Hrm\Database\Factories\TeleworkFactory;
 use AcMarche\Hrm\Enums\DayTypeEnum;
 use AcMarche\Hrm\Enums\LocationTypeEnum;
 use AcMarche\Hrm\Enums\WeekdayEnum;
@@ -11,6 +12,7 @@ use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -39,6 +41,7 @@ use Illuminate\Support\Str;
     'updated_by',
 ])]
 #[Table(name: 'teleworks')]
+#[UseFactory(TeleworkFactory::class)]
 final class Telework extends Model
 {
     use HasFactory;

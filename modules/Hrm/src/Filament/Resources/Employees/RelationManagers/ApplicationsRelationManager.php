@@ -27,6 +27,6 @@ final class ApplicationsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return ApplicationTables::relation($table);
+        return ApplicationTables::configure($table);
     }
 }

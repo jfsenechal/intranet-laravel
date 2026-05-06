@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Offenses\Filament\Resources\Offenses\Schemas;
+namespace AcMarche\Offenses\Filament\Resources\Offenders\Schemas;
 
 use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
 use Filament\Infolists\Components\IconEntry;

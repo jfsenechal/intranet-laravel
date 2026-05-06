@@ -20,7 +20,7 @@ final class ViewDeadline extends ViewRecord
 
     public function getTitle(): string|Htmlable
     {
-        if ($this->record->employe) {
+        if ($this->record->employee) {
             return 'Echéance de '.$this->record->employee->last_name.' '.$this->record->employee->first_name;
         }
 
