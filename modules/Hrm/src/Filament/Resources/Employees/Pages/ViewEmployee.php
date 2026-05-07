@@ -11,6 +11,7 @@ use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
 use AcMarche\Hrm\Filament\Resources\Diplomas\DiplomaResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Filament\Resources\Evaluations\Schemas\EvaluationForm;
+use AcMarche\Hrm\Filament\Resources\HrDocuments\HrDocumentCreator;
 use AcMarche\Hrm\Filament\Resources\HrDocuments\Schemas\HrDocumentForm;
 use AcMarche\Hrm\Filament\Resources\Internships\Schemas\InternshipForm;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
@@ -27,7 +28,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Facades\Storage;
 use Override;
 
 final class ViewEmployee extends ViewRecord
@@ -76,13 +76,7 @@ final class ViewEmployee extends ViewRecord
                         ->modalHeading('Ajouter un document')
                         ->schema(HrDocumentForm::getSchema())
                         ->action(function (array $data, Employee $record): void {
-                            $path = $data['file_name'] ?? null;
-                            $record->documents()->create([
-                                'name' => $data['name'],
-                                'file_name' => $path,
-                                'mime' => $path ? (Storage::disk('public')->mimeType($path) ?: '') : '',
-                                'notes' => $data['notes'] ?? null,
-                            ]);
+                            HrDocumentCreator::createForEmployee($record, $data);
                         })
                         ->successNotificationTitle('Document ajouté'),
                     Action::make('addDiploma')
