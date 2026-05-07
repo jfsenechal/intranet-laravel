@@ -26,7 +26,9 @@ final class HrDocumentInfolist
                             ->placeholder('—')
                             ->icon('heroicon-o-arrow-down-tray')
                             ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
-                            ->url(fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null)
+                            ->url(fn (?string $state): ?string => $state
+                                ? Storage::disk('public')->url(config('hrm.uploads.documents').'/'.$state)
+                                : null)
                             ->openUrlInNewTab(),
                         TextEntry::make('notes')
                             ->label('Remarques')

@@ -19,15 +19,15 @@ return [
     |--------------------------------------------------------------------------
     */
     'uploads' => [
-        'documents' => 'uploads/hrm/documents',
-        'photos' => 'uploads/hrm/photos',
-        'contracts' => 'uploads/hrm/contracts',
-        'diplomas' => 'uploads/hrm/diplomas',
-        'evaluations' => 'uploads/hrm/evaluations',
-        'formations' => 'uploads/hrm/formations',
-        'valorizations' => 'uploads/hrm/valorizations',
-        'candidates' => 'uploads/hrm/candidates',
-        'students' => 'uploads/hrm/students',
+        'documents' => 'data/hrm/documents',
+        'photos' => 'data/hrm/photos',
+        'contracts' => 'data/hrm/contracts',
+        'diplomas' => 'data/hrm/diplomas',
+        'evaluations' => 'data/hrm/evaluations',
+        'formations' => 'data/hrm/formations',
+        'valorizations' => 'data/hrm/valorizations',
+        'candidates' => 'data/hrm/candidates',
+        'students' => 'data/hrm/students',
     ],
     /*
     |--------------------------------------------------------------------------
