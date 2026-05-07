@@ -35,7 +35,8 @@ final class WeekTables
                 IconColumn::make('is_archived')
                     ->label('Archivée')
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('notes')
                     ->label('Notes')

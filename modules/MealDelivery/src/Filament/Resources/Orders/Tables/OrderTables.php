@@ -60,4 +60,40 @@ final class OrderTables
                 ]),
             ]);
     }
+
+    public static function relation(Table $table): Table
+    {
+        return $table
+            ->defaultSort('client.last_name')
+            ->defaultPaginationPageOption(50)
+            ->columns([
+                TextColumn::make('client.last_name')
+                    ->label('Last name')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('client.first_name')
+                    ->label('First name')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('meals_count')
+                    ->label('Meals')
+                    ->counts('meals')
+                    ->sortable(),
+
+                IconColumn::make('is_last_meal')
+                    ->label('Last meal')
+                    ->boolean()
+                    ->sortable(),
+            ])
+            ->filters([
+                Filter::make('last_meal')
+                    ->label('Last meal orders')
+                    ->query(fn (Builder $query) => $query->where('is_last_meal', true)),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ]);
+    }
 }

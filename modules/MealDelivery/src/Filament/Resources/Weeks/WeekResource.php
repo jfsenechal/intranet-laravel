@@ -9,6 +9,7 @@ use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\EditWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ListDayMeals;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ListWeeks;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ViewWeek;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\RelationManagers\OrdersRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas\WeekForm;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Tables\WeekInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Tables\WeekTables;
@@ -49,6 +50,13 @@ final class WeekResource extends Resource
     public static function table(Table $table): Table
     {
         return WeekTables::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            OrdersRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

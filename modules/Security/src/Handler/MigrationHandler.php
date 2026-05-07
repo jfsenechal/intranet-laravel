@@ -14,7 +14,7 @@ use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
-use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
@@ -58,7 +58,7 @@ final class MigrationHandler
             26 => VacationPage::getUrl(panel: 'app-panel'),
             33 => EmailsListPage::getUrl(panel: 'app-panel'),
             36 => ClaimRequestPage::getUrl(panel: 'app-panel'),
-            39 => OrderResource::getUrl(panel: 'meal-delivery-panel'),
+            39 => WeekResource::getUrl(panel: 'meal-delivery-panel'),
             40 => ProfileResource::getUrl('index', panel: 'agent-panel'),
             42 => WhoIsWhoIndex::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),

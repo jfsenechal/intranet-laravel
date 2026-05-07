@@ -15,6 +15,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 final class WeekInfoList
 {
@@ -74,7 +75,7 @@ final class WeekInfoList
                 $meals = $mealsByDay->get($day, collect());
 
                 return [
-                    'date' => CarbonImmutable::parse($day)->translatedFormat('l j F Y'),
+                    'date' => Str::title(CarbonImmutable::parse($day)->translatedFormat('l j F Y')),
                     'date_url' => WeekResource::getUrl('day', [
                         'record' => $week->id,
                         'date' => $day,
