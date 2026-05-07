@@ -22,7 +22,7 @@ final class ViewClient extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->last_name.' '.$this->record->first_name;
+        return $this->record->salutation.' '.$this->record->last_name.' '.$this->record->first_name;
     }
 
     public function infolist(Schema $schema): Schema
@@ -38,8 +38,9 @@ final class ViewClient extends ViewRecord
             CreateAction::make('addNote')
                 ->label('Ajouter une note')
                 ->icon('tabler-plus')
+                ->color('success')
                 ->modal()
-                ->schema(fn (Schema $schema) => NoteForm::configure($schema))
+                ->schema(fn(Schema $schema) => NoteForm::configure($schema))
                 ->action(function (array $data, Client $record): void {
                     $record->notes()->create($data);
                 }),

@@ -23,6 +23,11 @@ final class NoteResource extends Resource
     #[Override]
     protected static ?int $navigationSort = 7;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) self::getModel()::query()->where('is_done', false)->count();
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-document-text';

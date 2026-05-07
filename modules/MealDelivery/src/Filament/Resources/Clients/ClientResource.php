@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Clients;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\CreateClient;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\EditClient;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\ListClients;
+use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\ViewClient;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientForm;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Tables\ClientTables;
 use AcMarche\MealDelivery\Models\Client;
@@ -49,6 +50,7 @@ final class ClientResource extends Resource
             'index' => ListClients::route('/'),
             'create' => CreateClient::route('/create'),
             'edit' => EditClient::route('/{record}/edit'),
+            'view' => ViewClient::route('/{record}/view'),
         ];
     }
 }
