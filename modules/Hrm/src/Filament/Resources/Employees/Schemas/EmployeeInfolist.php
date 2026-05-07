@@ -46,10 +46,10 @@ final class EmployeeInfolist
                                                     mb_trim($record->first_name.' '.$record->last_name)
                                                 )
                                             )
-                                            ->columnSpan(3),
+                                            ->columnSpan(2),
                                         Fieldset::make('Coordonnées')
                                             ->columns(2)
-                                            ->columnSpan(9)
+                                            ->columnSpan(10)
                                             ->schema([
                                                 TextEntry::make('address')
                                                     ->label('Adresse')
