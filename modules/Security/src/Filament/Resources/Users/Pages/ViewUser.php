@@ -6,10 +6,10 @@ namespace AcMarche\Security\Filament\Resources\Users\Pages;
 
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Override;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class ViewUser extends ViewRecord
 {
@@ -21,32 +21,14 @@ final class ViewUser extends ViewRecord
         return $this->record->full_name ?? 'Empty name';
     }
 
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema->schema([
-            TextEntry::make('first_name')
-                ->label('Prénom'),
-            TextEntry::make('last_name')
-                ->label('Nom'),
-            TextEntry::make('email')
-                ->label('Email')
-                ->icon('tabler-mail'),
-            TextEntry::make('phone')
-                ->label('Téléphone')
-                ->icon('tabler-phone'),
-            TextEntry::make('mobile')
-                ->label('Mobile')
-                ->icon('tabler-device-mobile'),
-            TextEntry::make('extension')
-                ->label('Extension')
-                ->icon('tabler-device-landline-phone'),
-        ]);
-    }
-
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            Impersonate::make()
+                ->color('success')
+                ->record($this->getRecord()),
+            EditAction::make()
+                ->icon(Heroicon::Pencil),
         ];
     }
 }

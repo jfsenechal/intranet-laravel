@@ -11,6 +11,7 @@ use AcMarche\Security\Filament\Resources\Users\Pages\ListUsers;
 use AcMarche\Security\Filament\Resources\Users\Pages\ViewUser;
 use AcMarche\Security\Filament\Resources\Users\RelationManagers\ModuleRelationManager;
 use AcMarche\Security\Filament\Resources\Users\Schemas\UserForm;
+use AcMarche\Security\Filament\Resources\Users\Schemas\UserInfolist;
 use AcMarche\Security\Filament\Resources\Users\Tables\UserTables;
 use App\Models\User;
 use BackedEnum;
@@ -40,6 +41,11 @@ final class UserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return UserInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
