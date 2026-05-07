@@ -9,6 +9,7 @@ use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\EditOrder;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\ListOrders;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\ViewOrder;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Schemas\OrderForm;
+use AcMarche\MealDelivery\Filament\Resources\Orders\Schemas\OrderInfolist;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Tables\OrderTables;
 use AcMarche\MealDelivery\Models\Order;
 use Filament\Resources\Resource;
@@ -37,6 +38,11 @@ final class OrderResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return OrderForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return OrderInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
