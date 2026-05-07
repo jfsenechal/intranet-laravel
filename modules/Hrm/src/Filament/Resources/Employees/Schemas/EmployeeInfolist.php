@@ -38,7 +38,6 @@ final class EmployeeInfolist
                                     ->schema([
                                         ImageEntry::make('photo')
                                             ->label('Photo')
-                                            ->hiddenLabel()
                                             ->disk('public')
                                             ->imageHeight(260)
                                             ->defaultImageUrl(
