@@ -400,3 +400,9 @@ livewire(ListUsers::class)
 - **Never assume full-width layout.** `Grid`, `Section`, and `Fieldset` do not span all columns by default. Explicitly set column spans when needed.
 
 </laravel-boost-guidelines>
+
+in whoiswho module                      
+create a function to get photo of employee
+1. if employee->username check if a profile'user photo exist (Filament\Auth\Pages\EditProfile)
+2. if employee->show_photo get photo from hrm
+3. if not display a default photo   

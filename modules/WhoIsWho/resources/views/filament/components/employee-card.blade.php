@@ -11,9 +11,7 @@
         ->filter()
         ->unique()
         ->values();
-    $photoUrl = $employee->photo
-        ? \Illuminate\Support\Facades\Storage::disk('public')->url($employee->photo)
-        : 'https://ui-avatars.com/api/?size=160&name=' . urlencode($fullName !== '' ? $fullName : '?');
+    $photoUrl = \AcMarche\WhoIsWho\Repository\EmployeeRepository::photoUrl($employee);
     $phoneDisplay = $employee->professional_phone
         ? trim($employee->professional_phone . ($employee->professional_phone_extension ? ' (ext. ' . $employee->professional_phone_extension . ')' : ''))
         : null;

@@ -7,8 +7,10 @@ namespace AcMarche\WhoIsWho\Repository;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Service;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Storage;
 
 final class EmployeeRepository
 {
@@ -96,5 +98,32 @@ final class EmployeeRepository
         return self::activeAgents()->groupBy(
             fn (Employee $employee): string => mb_strtoupper(mb_substr((string) $employee->last_name, 0, 1)) ?: '#'
         )->sortKeys();
+    }
+
+    /**
+     * Resolve the employee's photo URL using a 3-tier fallback:
+     * 1. The User profile avatar matched by `username` (set via Filament profile page).
+     * 2. The Employee `photo` from HRM, when `show_photo` is enabled.
+     * 3. A generated default avatar based on the employee's name.
+     */
+    public static function photoUrl(Employee $employee): string
+    {
+        if (filled($employee->username)) {
+            $user = User::query()
+                ->where('username', $employee->username)
+                ->first();
+
+            if ($user instanceof User && filled($user->avatar_url)) {
+                return Storage::disk('public')->url($user->avatar_url);
+            }
+        }
+
+        if ($employee->show_photo && filled($employee->photo)) {
+            return Storage::disk('public')->url($employee->photo);
+        }
+
+        $fullName = mb_trim(($employee->first_name ?? '').' '.($employee->last_name ?? ''));
+
+        return 'https://ui-avatars.com/api/?size=160&name='.urlencode($fullName !== '' ? $fullName : '?');
     }
 }
