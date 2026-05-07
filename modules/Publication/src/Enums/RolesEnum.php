@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\Publication\Enums;
 
 enum RolesEnum: string

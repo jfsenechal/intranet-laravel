@@ -49,7 +49,7 @@ final class NoteForm
                                     ->label('Traité par')
                                     ->maxLength(100)
                                     ->nullable()
-                                    ->visible(fn($get) => (bool)$get('is_done'))
+                                    ->visible(fn ($get) => (bool) $get('is_done'))
                                     ->columnSpan(1),
                             ]),
                     ]),

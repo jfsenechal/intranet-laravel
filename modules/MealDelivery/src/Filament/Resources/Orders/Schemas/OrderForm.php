@@ -26,7 +26,7 @@ final class OrderForm
 
                 Repeater::make('meals')
                     ->hiddenLabel()
-                    ->itemLabel(fn(array $state): ?string => isset($state['date'])
+                    ->itemLabel(fn (array $state): ?string => isset($state['date'])
                         ? Str::title(CarbonImmutable::parse($state['date'])->translatedFormat('l j F'))
                         : null,
                     )

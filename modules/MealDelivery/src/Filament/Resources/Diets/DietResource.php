@@ -26,7 +26,7 @@ final class DietResource extends Resource
     #[Override]
     protected static ?int $navigationSort = 6;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Paramètres';
+    protected static string|UnitEnum|null $navigationGroup = 'Paramètres';
 
     public static function getNavigationIcon(): string
     {

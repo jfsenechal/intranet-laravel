@@ -84,7 +84,6 @@ final class ClientForm
                                                     ->columnSpan(2),
                                             ]),
 
-
                                         Grid::make(2)
                                             ->schema([
                                                 DatePicker::make('birth_date')

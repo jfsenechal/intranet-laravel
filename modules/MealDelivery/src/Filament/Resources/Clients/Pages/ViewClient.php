@@ -39,12 +39,13 @@ final class ViewClient extends ViewRecord
                 ->label('Ajouter une note')
                 ->icon('tabler-plus')
                 ->modal()
-                ->schema(fn(Schema $schema) => NoteForm::configure($schema))
+                ->schema(fn (Schema $schema) => NoteForm::configure($schema))
                 ->action(function (array $data, Client $record): void {
                     $record->notes()->create($data);
                 }),
 
             DeleteAction::make()
+                ->label('Supprimer le client')
                 ->icon('tabler-trash'),
         ];
     }

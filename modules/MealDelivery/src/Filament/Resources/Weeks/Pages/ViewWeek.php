@@ -57,6 +57,7 @@ final class ViewWeek extends ViewRecord
                 ->icon(Heroicon::Pencil),
 
             DeleteAction::make()
+                ->label('Supprimer la semaine')
                 ->icon(Heroicon::Trash),
         ];
     }
