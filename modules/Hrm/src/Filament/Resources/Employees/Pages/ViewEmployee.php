@@ -130,7 +130,7 @@ final class ViewEmployee extends ViewRecord
                     }),
             ])
                 ->label('Ajouter...')
-                ->color('warning')
+                ->color('success')
                 ->icon('tabler-plus')
                 ->dropdownWidth(Width::FitContent)
                 ->button(),
