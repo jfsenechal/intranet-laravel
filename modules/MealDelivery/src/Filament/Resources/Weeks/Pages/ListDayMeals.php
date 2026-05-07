@@ -11,12 +11,14 @@ use AcMarche\MealDelivery\Models\Week;
 use Carbon\CarbonImmutable;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Override;
 
 final class ListDayMeals extends Page implements HasTable
@@ -66,7 +68,12 @@ final class ListDayMeals extends Page implements HasTable
 
                 IconColumn::make('at_cafeteria')
                     ->label('Cafétéria')
-                    ->boolean(),
+                    ->boolean()
+                    ->summarize(
+                        Count::make()
+                            ->label('Total')
+                            ->query(fn (QueryBuilder $query): QueryBuilder => $query->where('at_cafeteria', true)),
+                    ),
 
                 TextColumn::make('soup_count')
                     ->label('Potage')
