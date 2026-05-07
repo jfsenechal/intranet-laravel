@@ -68,6 +68,7 @@ return new class extends Migration
                 $table->renameColumn('echelle_id', 'pay_scale_id');
                 $table->renameColumn('prerequis_id', 'prerequisite_id');
                 $table->renameColumn('mutuelle_id', 'health_insurance_id');
+                $table->renameColumn('image_display', 'show_photo');
                 $table->removeColumn('phone_office');
                 $table->removeColumn('mobile_office');
                 $table->boolean('is_new_hire')->default(false);
@@ -127,6 +128,7 @@ return new class extends Migration
                 $table->string('user_add', 255);
                 $table->string('updated_by', 255)->nullable();
                 $table->boolean('is_new_hire')->default(false);
+                $table->boolean('show_photo')->default(true);
                 $table->timestamps();
             });
         }

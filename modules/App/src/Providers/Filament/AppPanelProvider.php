@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\App\Providers\Filament;
 
+use AcMarche\App\Filament\Pages\Auth\EditProfile;
 use AcMarche\App\Filament\Pages\DashboardPage;
 use AcMarche\App\Filament\Pages\TeleworkPage;
 use AcMarche\App\Traits\HooksTrait;
@@ -44,11 +45,7 @@ final class AppPanelProvider extends PanelProvider
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->spa()
-            ->profile()
-            ->multiFactorAuthentication(
-                AppAuthentication::make()
-                    ->recoverable(),
-            )
+            ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications()
             ->unsavedChangesAlerts()

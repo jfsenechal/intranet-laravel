@@ -14,6 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -51,13 +52,22 @@ final class EmployeeForm
                                             ->maxLength(100),
                                         DatePicker::make('birth_date')
                                             ->label('Date de naissance'),
-                                        Toggle::make('show_birthday')
-                                            ->label('Afficher anniversaire')
-                                            ->helperText('En page d\'accueil et dans qui est qui.')
-                                            ->default(true),
                                         TextInput::make('national_registry_number')
                                             ->label('Registre national')
                                             ->maxLength(100),
+                                        Grid::make(2)
+                                            ->columnSpanFull()
+                                            ->schema([
+                                                Toggle::make('show_birthday')
+                                                    ->label('Afficher anniversaire')
+                                                    ->helperText('En page d\'accueil et dans qui est qui.')
+                                                    ->default(true),
+                                                Toggle::make('show_photo')
+                                                    ->label('Afficher la photo')
+                                                    ->helperText('En page d\'accueil et dans qui est qui.')
+                                                    ->default(true),
+                                            ]),
+
                                     ]),
                                 Section::make('Coordonnées')
                                     ->columns(2)

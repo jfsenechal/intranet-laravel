@@ -41,10 +41,10 @@ final class EmployeeInfolist
                                             ->disk('public')
                                             ->imageHeight(260)
                                             ->defaultImageUrl(
-                                                fn (Employee $record
+                                                fn(Employee $record
                                                 ): string => 'https://ui-avatars.com/api/?size=256&name='.urlencode(
-                                                    mb_trim($record->first_name.' '.$record->last_name)
-                                                )
+                                                        mb_trim($record->first_name.' '.$record->last_name)
+                                                    )
                                             )
                                             ->columnSpan(2),
                                         Fieldset::make('Coordonnées')
@@ -54,7 +54,7 @@ final class EmployeeInfolist
                                                 TextEntry::make('address')
                                                     ->label('Adresse')
                                                     ->state(
-                                                        fn (Employee $record): string => mb_trim(
+                                                        fn(Employee $record): string => mb_trim(
                                                             $record->address.' '.$record->postal_code.' '.$record->city
                                                         )
                                                     )
@@ -82,7 +82,7 @@ final class EmployeeInfolist
                                                             ->label('Téléphone')
                                                             ->icon('heroicon-o-phone')
                                                             ->state(
-                                                                fn (Employee $record
+                                                                fn(Employee $record
                                                                 ): ?string => $record->professional_phone === null ? null : mb_trim(
                                                                     $record->professional_phone.($record->professional_phone_extension !== null ? ' (ext. '.$record->professional_phone_extension.')' : '')
                                                                 )
@@ -101,11 +101,20 @@ final class EmployeeInfolist
                                         TextEntry::make('birth_date')
                                             ->label('Date de naissance')
                                             ->date('d/m/Y'),
-                                        IconEntry::make('show_birthday')
-                                            ->label('Afficher la date d\' anniversaire')
-                                            ->boolean(),
                                         TextEntry::make('national_registry_number')
                                             ->label('Registre national'),
+                                        Grid::make(2)
+                                            ->columnSpanFull()
+                                            ->schema([
+                                                IconEntry::make('show_birthday')
+                                                    ->label('Afficher la date d\' anniversaire')
+                                                    ->helperText('En page d\'accueil et dans qui est qui.')
+                                                    ->boolean(),
+                                                IconEntry::make('show_photo')
+                                                    ->label('Afficher la photo')
+                                                    ->helperText('En page d\'accueil et dans qui est qui.')
+                                                    ->boolean(),
+                                            ]),
                                     ]),
                             ]),
                         Tab::make('Emploi')
@@ -119,7 +128,7 @@ final class EmployeeInfolist
                                         TextEntry::make('status')
                                             ->label('Statut')
                                             ->badge()
-                                            ->color(fn (?StatusEnum $state): string => match ($state) {
+                                            ->color(fn(?StatusEnum $state): string => match ($state) {
                                                 StatusEnum::AGENT => 'success',
                                                 StatusEnum::RETIRED => 'info',
                                                 StatusEnum::TERMINATED, StatusEnum::RESIGNED, StatusEnum::ENDED, StatusEnum::CONTRACT_ENDED => 'danger',
@@ -168,23 +177,37 @@ final class EmployeeInfolist
                                                     ->modalHeading('Prérequis')
                                                     ->modalSubmitAction(false)
                                                     ->modalCancelActionLabel('Fermer')
-                                                    ->visible(fn (Employee $record): bool => $record->prerequisite !== null)
+                                                    ->visible(
+                                                        fn(Employee $record): bool => $record->prerequisite !== null
+                                                    )
                                                     ->schema([
                                                         TextEntry::make('prerequisite_name')
                                                             ->label('Nom')
-                                                            ->state(fn (Employee $record): ?string => $record->prerequisite?->name),
+                                                            ->state(
+                                                                fn(Employee $record
+                                                                ): ?string => $record->prerequisite?->name
+                                                            ),
                                                         TextEntry::make('prerequisite_profession')
                                                             ->label('Profession')
-                                                            ->state(fn (Employee $record): ?string => $record->prerequisite?->profession),
+                                                            ->state(
+                                                                fn(Employee $record
+                                                                ): ?string => $record->prerequisite?->profession
+                                                            ),
                                                         TextEntry::make('prerequisite_employer')
                                                             ->label('Employeur')
-                                                            ->state(fn (Employee $record): ?string => $record->prerequisite?->employer?->name),
+                                                            ->state(
+                                                                fn(Employee $record
+                                                                ): ?string => $record->prerequisite?->employer?->name
+                                                            ),
                                                         TextEntry::make('prerequisite_description')
                                                             ->label('Description')
                                                             ->html()
                                                             ->prose()
                                                             ->columnSpanFull()
-                                                            ->state(fn (Employee $record): ?string => $record->prerequisite?->description),
+                                                            ->state(
+                                                                fn(Employee $record
+                                                                ): ?string => $record->prerequisite?->description
+                                                            ),
                                                     ])
                                             ),
                                         TextEntry::make('allowance')
@@ -223,7 +246,11 @@ final class EmployeeInfolist
                                     ->schema([
                                         TextEntry::make('full_name')
                                             ->label('Nom complet')
-                                            ->state(fn (Employee $record): string => mb_trim($record->last_name.' '.$record->first_name)),
+                                            ->state(
+                                                fn(Employee $record): string => mb_trim(
+                                                    $record->last_name.' '.$record->first_name
+                                                )
+                                            ),
                                         TextEntry::make('savedEmployer.name')
                                             ->label('Employeur')
                                             ->placeholder('—'),
@@ -231,7 +258,12 @@ final class EmployeeInfolist
                                             ->label('Photo')
                                             ->disk('public')
                                             ->imageHeight(120)
-                                            ->defaultImageUrl(fn (Employee $record): string => 'https://ui-avatars.com/api/?size=128&name='.urlencode(mb_trim($record->first_name.' '.$record->last_name))),
+                                            ->defaultImageUrl(
+                                                fn(Employee $record
+                                                ): string => 'https://ui-avatars.com/api/?size=128&name='.urlencode(
+                                                        mb_trim($record->first_name.' '.$record->last_name)
+                                                    )
+                                            ),
                                         TextEntry::make('activeContracts.service.name')
                                             ->label('Services (contrats actifs)')
                                             ->listWithLineBreaks()
@@ -239,18 +271,18 @@ final class EmployeeInfolist
                                     ]),
                                 TextEntry::make('profile.username')
                                     ->label('Nom utilisateur')
-                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
+                                    ->visible(fn(Employee $record): bool => $record->profile !== null)
                                     ->placeholder('—')
                                     ->suffixAction(RequestProfileChangeAction::make()),
                                 TextEntry::make('delete_profile')
                                     ->label('Suppression')
                                     ->state('Demander la suppression du compte informatique.')
-                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
+                                    ->visible(fn(Employee $record): bool => $record->profile !== null)
                                     ->suffixAction(RequestProfileDeletionAction::make()),
                                 TextEntry::make('no_profile')
                                     ->label('Compte informatique')
                                     ->state('Aucun profil informatique pour cet agent.')
-                                    ->visible(fn (Employee $record): bool => $record->profile === null)
+                                    ->visible(fn(Employee $record): bool => $record->profile === null)
                                     ->suffixAction(RequestProfileAction::make()),
                             ]),
                         Tab::make('Candidat')
@@ -274,8 +306,12 @@ final class EmployeeInfolist
                                     ->label('Document du stagiaire')
                                     ->placeholder('—')
                                     ->icon('heroicon-o-arrow-down-tray')
-                                    ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
-                                    ->url(fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null)
+                                    ->formatStateUsing(fn(?string $state): ?string => $state ? 'Télécharger' : null)
+                                    ->url(
+                                        fn(?string $state): ?string => $state ? Storage::disk('public')->url(
+                                            $state
+                                        ) : null
+                                    )
                                     ->openUrlInNewTab(),
                             ]),
                         Tab::make('Etudiant')

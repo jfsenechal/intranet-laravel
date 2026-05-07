@@ -16,6 +16,7 @@ use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
@@ -49,6 +51,7 @@ use Laravel\Scout\Searchable;
     'password',
     'is_administrator',
     'news_attachment',
+    'avatar_url',
 ])]
 #[Hidden([
     'password',
@@ -56,7 +59,7 @@ use Laravel\Scout\Searchable;
     'app_authentication_secret',
     'app_authentication_recovery_codes',
 ])]
-final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasName
+final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasName
 {
     use HasApiTokens, HasFactory, Notifiable, Searchable;
     use UserCourrierTrait, UserMailingListTrait,UserPstTrait;
@@ -254,6 +257,15 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     public function getFilamentName(): string
     {
         return $this->full_name;
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if (blank($this->avatar_url)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->avatar_url);
     }
 
     public function fullNameAsString(): string
