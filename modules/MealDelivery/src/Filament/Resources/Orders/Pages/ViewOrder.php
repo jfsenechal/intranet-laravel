@@ -25,7 +25,8 @@ final class ViewOrder extends ViewRecord
         $week = $order->week;
 
         return sprintf(
-            'Repas pour %s %s, semaine du %s',
+            'Commande %d pour %s %s, semaine du %s',
+            $order->id,
             $client->last_name,
             $client->first_name,
             $week->formattedFirstDay(),

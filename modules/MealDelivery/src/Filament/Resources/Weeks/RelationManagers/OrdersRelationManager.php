@@ -26,7 +26,7 @@ final class OrdersRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return 'Commandes';
+        return 'Commandes ('.$ownerRecord->orders()->count().')';
     }
 
     public function isReadOnly(): bool
@@ -47,12 +47,13 @@ final class OrdersRelationManager extends RelationManager
         $columns = [
             TextColumn::make('client_name')
                 ->label('Client')
+                ->tooltip('Détails de la commande')
                 ->state(fn (Order $record): string => mb_trim(
                     ($record->client?->last_name ?? '').' '.($record->client?->first_name ?? ''),
                 ))
                 ->url(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record->id]))
                 ->searchable(['client.last_name', 'client.first_name'])
-                ->sortable(['client.last_name', 'client.first_name']),
+                ->sortable(['clients.last_name', 'clients.first_name']),
         ];
 
         $dayBorder = ['class' => 'border-l border-amber-500 dark:border-gray-700'];
@@ -81,9 +82,12 @@ final class OrdersRelationManager extends RelationManager
         }
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['client', 'meals.menus']))
-            ->defaultSort('client.last_name')
-            ->defaultPaginationPageOption(100)
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with(['client', 'meals.menus'])
+                ->leftJoin('clients', 'clients.id', '=', 'orders.client_id')
+                ->select('orders.*'))
+            ->defaultSort('clients.last_name')
+            ->paginated(false)
             ->columns($columns)
             ->recordActions([
                 EditAction::make(),
