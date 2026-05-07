@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 final class TrainingInfolist
 {
@@ -24,7 +25,7 @@ final class TrainingInfolist
                     ->columns(1)
                     ->schema([
                         Section::make('Attestation')
-                            ->columns(2)
+                            ->columns(3)
                             ->schema([
                                 IconEntry::make('certificate_received')
                                     ->label('Attestation reçue')
@@ -32,6 +33,13 @@ final class TrainingInfolist
                                 TextEntry::make('certificate_received_at')
                                     ->label('Reçue le')
                                     ->date('d/m/Y'),
+                                TextEntry::make('certificate_file')
+                                    ->label('Fichier attestation')
+                                    ->placeholder('—')
+                                    ->icon('heroicon-o-arrow-down-tray')
+                                    ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
+                                    ->url(fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null)
+                                    ->openUrlInNewTab(),
                             ]),
                         Fieldset::make('Dates')
                             ->columns(4)

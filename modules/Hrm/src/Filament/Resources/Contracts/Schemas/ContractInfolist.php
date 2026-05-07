@@ -9,6 +9,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 final class ContractInfolist
 {
@@ -80,6 +81,24 @@ final class ContractInfolist
                         IconEntry::make('is_suspended')
                             ->label('Suspension')
                             ->boolean(),
+                    ]),
+                Section::make('Documents')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('file1_name')
+                            ->label('Document 1')
+                            ->placeholder('—')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
+                            ->url(fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null)
+                            ->openUrlInNewTab(),
+                        TextEntry::make('file2_name')
+                            ->label('Document 2')
+                            ->placeholder('—')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
+                            ->url(fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null)
+                            ->openUrlInNewTab(),
                     ]),
                 Section::make('College')
                     ->schema([

@@ -40,9 +40,7 @@ final class HrDocumentTables
                     ->label('Fichier')
                     ->formatStateUsing(fn (?string $state): string => $state ? '✓' : '—')
                     ->url(
-                        fn (?string $state): ?string => $state
-                            ? Storage::disk('public')->url(config('hrm.uploads.documents').'/'.$state)
-                            : null,
+                        fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null,
                         shouldOpenInNewTab: true,
                     )
                     ->toggleable(),
