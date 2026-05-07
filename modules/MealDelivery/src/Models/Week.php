@@ -18,6 +18,11 @@ final class Week extends Model
         return 'Week of: '.($this->first_day?->format('d-m-Y') ?? '');
     }
 
+    public function formattedFirstDay(): string
+    {
+        return $this->first_day?->translatedFormat('j F Y') ?? '';
+    }
+
     /**
      * @return HasMany<Order, Week>
      */

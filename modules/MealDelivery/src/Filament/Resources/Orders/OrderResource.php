@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Orders;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\CreateOrder;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\EditOrder;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\ListOrders;
+use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\ViewOrder;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Schemas\OrderForm;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Tables\OrderTables;
 use AcMarche\MealDelivery\Models\Order;
@@ -49,6 +50,7 @@ final class OrderResource extends Resource
             'index' => ListOrders::route('/'),
             'create' => CreateOrder::route('/create'),
             'edit' => EditOrder::route('/{record}/edit'),
+            'view' => ViewOrder::route('/{record}/view'),
         ];
     }
 }

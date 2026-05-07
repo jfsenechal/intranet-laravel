@@ -16,7 +16,7 @@ final class EditWeek extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Semaine du '.$this->record->first_day->translatedFormat('j F Y');
+        return 'Semaine du '.$this->record->formattedFirstDay();
     }
 
     protected function getHeaderActions(): array

@@ -35,7 +35,7 @@ final class EditOrder extends EditRecord
             'Repas pour %s %s, semaine du %s',
             $client->last_name,
             $client->first_name,
-            $week->first_day->translatedFormat('j F Y'),
+            $week->formattedFirstDay(),
         );
     }
 

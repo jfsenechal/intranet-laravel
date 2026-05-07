@@ -23,14 +23,14 @@ final class ListDayMeals extends Page implements HasTable
 {
     use InteractsWithTable;
 
+    public Week $record;
+
+    public string $date;
+
     #[Override]
     protected static string $resource = WeekResource::class;
 
     protected string $view = 'meal-delivery::filament.resources.weeks.pages.list-day-meals';
-
-    public Week $record;
-
-    public string $date;
 
     public function mount(int|string $record, string $date): void
     {
@@ -47,7 +47,7 @@ final class ListDayMeals extends Page implements HasTable
     {
         return [
             WeekResource::getUrl() => 'Semaines',
-            WeekResource::getUrl('view', ['record' => $this->record->id]) => 'Semaine du '.$this->record->first_day->translatedFormat('j F Y'),
+            WeekResource::getUrl('view', ['record' => $this->record->id]) => 'Semaine du '.$this->record->formattedFirstDay(),
             $this->getTitle(),
         ];
     }
@@ -59,7 +59,7 @@ final class ListDayMeals extends Page implements HasTable
             ->columns([
                 TextColumn::make('client_name')
                     ->label('Client')
-                    ->state(fn (Meal $record): string => trim(
+                    ->state(fn (Meal $record): string => mb_trim(
                         ($record->order?->client?->last_name ?? '').' '.($record->order?->client?->first_name ?? ''),
                     ))
                     ->sortable(['order.client.last_name']),
