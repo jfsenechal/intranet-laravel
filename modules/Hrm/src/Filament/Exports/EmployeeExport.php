@@ -6,19 +6,17 @@ namespace AcMarche\Hrm\Filament\Exports;
 
 use AcMarche\Hrm\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\CSV\Writer;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-final class EmployeeExport implements FromQuery, WithHeadings, WithMapping
+final readonly class EmployeeExport
 {
-    public function __construct(private readonly Builder $query) {}
+    public function __construct(private Builder $query) {}
 
-    public function query(): Builder
-    {
-        return $this->query;
-    }
-
+    /**
+     * @return list<string>
+     */
     public function headings(): array
     {
         return [
@@ -33,9 +31,9 @@ final class EmployeeExport implements FromQuery, WithHeadings, WithMapping
     }
 
     /**
-     * @param  Employee  $row
+     * @return list<null|string>
      */
-    public function map($row): array
+    public function map(Employee $row): array
     {
         return [
             $row->last_name,
@@ -46,5 +44,23 @@ final class EmployeeExport implements FromQuery, WithHeadings, WithMapping
             $row->private_email,
             $row->is_archived ? 'Oui' : 'Non',
         ];
+    }
+
+    public function downloadCsv(string $filename): StreamedResponse
+    {
+        return new StreamedResponse(function (): void {
+            $writer = new Writer();
+            $writer->openToFile('php://output');
+            $writer->addRow(Row::fromValues($this->headings()));
+
+            $this->query->lazy()->each(function (Employee $employee) use ($writer): void {
+                $writer->addRow(Row::fromValues($this->map($employee)));
+            });
+
+            $writer->close();
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 }

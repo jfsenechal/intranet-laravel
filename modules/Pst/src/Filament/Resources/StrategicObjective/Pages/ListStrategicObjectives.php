@@ -10,7 +10,6 @@ use AcMarche\Security\Repository\UserRepository;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Maatwebsite\Excel\Facades\Excel;
 use Override;
 
 final class ListStrategicObjectives extends ListRecords
@@ -34,10 +33,7 @@ final class ListStrategicObjectives extends ListRecords
                 ->icon('tabler-download')
                 ->color('secondary')
                 ->action(
-                    fn () => Excel::download(
-                        new StrategicObjectiveExport(UserRepository::departmentSelected()),
-                        'pst.xlsx'
-                    )
+                    fn () => new StrategicObjectiveExport(UserRepository::departmentSelected())->downloadXlsx('pst.xlsx'),
                 ),
             CreateAction::make()
                 ->label('Ajouter un OS')

@@ -12,8 +12,6 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
-use Maatwebsite\Excel\Excel;
-use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
 use Override;
 
 final class ListEmployees extends ListRecords
@@ -34,16 +32,13 @@ final class ListEmployees extends ListRecords
         return [
             CreateAction::make()
                 ->label('Ajouter un agent')
-                ->icon('tabler-plus'),
+                ->icon('tabler-plus')
+                ->color('success'),
             Action::make('export')
                 ->label('Exporter en CSV')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('warning')
-                ->action(fn () => ExcelFacade::download(
-                    new EmployeeExport($this->getFilteredTableQuery()),
-                    'agents.csv',
-                    Excel::CSV,
-                )),
+                ->action(fn () => new EmployeeExport($this->getFilteredTableQuery())->downloadCsv('agents.csv')),
         ];
     }
 }

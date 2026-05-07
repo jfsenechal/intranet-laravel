@@ -32,9 +32,9 @@ final class ListDayMeals extends Page implements HasTable
 
     protected string $view = 'meal-delivery::filament.resources.weeks.pages.list-day-meals';
 
-    public function mount(int|string $record, string $date): void
+    public function mount(Week $record, string $date): void
     {
-        $this->record = Week::query()->findOrFail($record);
+        $this->record = $record;
         $this->date = CarbonImmutable::parse($date)->format('Y-m-d');
     }
 
@@ -62,7 +62,7 @@ final class ListDayMeals extends Page implements HasTable
                     ->state(fn (Meal $record): string => mb_trim(
                         ($record->order?->client?->last_name ?? '').' '.($record->order?->client?->first_name ?? ''),
                     ))
-                    ->sortable(['order.client.last_name']),
+                    ->sortable(['clients.last_name', 'clients.first_name']),
 
                 IconColumn::make('at_cafeteria')
                     ->label('Cafétéria')
@@ -81,15 +81,17 @@ final class ListDayMeals extends Page implements HasTable
                     ->summarize(Sum::make()->label('Total')),
             ])
             ->paginated(false)
-            ->defaultSort('client_name');
+            ->defaultSort('clients.last_name');
     }
 
     private function buildQuery(): Builder
     {
         return Meal::query()
             ->select('meals.*')
+            ->join('orders', 'orders.id', '=', 'meals.order_id')
+            ->leftJoin('clients', 'clients.id', '=', 'orders.client_id')
             ->whereDate('meals.date', $this->date)
-            ->whereHas('order', fn (Builder $query) => $query->where('week_id', $this->record->id))
+            ->where('orders.week_id', $this->record->id)
             ->with('order.client')
             ->selectSub(
                 Menu::query()

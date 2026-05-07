@@ -80,7 +80,7 @@ final class WeekInfoList
                     'date_url' => WeekResource::getUrl('day', [
                         'record' => $week->id,
                         'date' => $day,
-                    ]),
+                    ], panel: 'meal-delivery-panel'),
                     'clients_count' => $meals->pluck('order.client_id')->unique()->count(),
                     'soup_count' => (int) $meals->sum('soup_count'),
                     'menu1_count' => (int) $meals->sum(
