@@ -163,7 +163,6 @@ final class ContractTables
                     ->sortable(),
                 TextColumn::make('work_regime')
                     ->label('Regime')
-                    ->suffix('%')
                     ->sortable()
                     ->toggleable(),
                 IconColumn::make('is_closed')
