@@ -37,10 +37,11 @@ final class WeekInfoList
                             ])
                             ->schema([
                                 TextEntry::make('date')
-                                    ->url(fn (mixed $record): ?string => is_array($record)
-                                        ? ($record['date_url'] ?? null)
-                                        : null,
-                                    ),
+                                    ->url(function (TextEntry $component): ?string {
+                                        $row = $component->getContainer()->getConstantState();
+
+                                        return is_array($row) ? ($row['date_url'] ?? null) : null;
+                                    }),
                                 TextEntry::make('clients_count')->alignment(Alignment::End),
                                 TextEntry::make('soup_count')->alignment(Alignment::End),
                                 TextEntry::make('menu1_count')->alignment(Alignment::End),
