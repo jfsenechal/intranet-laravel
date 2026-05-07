@@ -8,6 +8,7 @@ use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Courrier\Models\UserCourrierTrait;
 use AcMarche\MailingList\Models\UserMailingListTrait;
 use AcMarche\Pst\Models\UserPstTrait;
+use AcMarche\Security\Enums\RolesEnum;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
@@ -27,7 +28,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Lab404\Impersonate\Models\Impersonate;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 
@@ -58,7 +58,7 @@ use Laravel\Scout\Searchable;
 ])]
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasName
 {
-    use HasApiTokens, HasFactory, Impersonate, Notifiable, Searchable;
+    use HasApiTokens, HasFactory, Notifiable, Searchable;
     use UserCourrierTrait, UserMailingListTrait,UserPstTrait;
 
     public static function generateDataFromLdap(UserLdap $userLdap): array
@@ -259,6 +259,15 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     public function fullNameAsString(): string
     {
         return $this->last_name.' '.$this->first_name;
+    }
+
+    public function canImpersonate()
+    {
+        if ($this->isAdministrator()) {
+            return true;
+        }
+
+        return $this->hasOneOfThisRoles([RolesEnum::INTRANET_ADMIN->value]);
     }
 
     protected static function boot(): void

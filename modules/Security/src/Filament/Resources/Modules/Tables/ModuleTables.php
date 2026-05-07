@@ -34,7 +34,7 @@ final class ModuleTables
                     ->label('Accessible à tous')
                     ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)
                     ->color('success')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 IconColumn::make('is_external')
                     ->label('Url externe')
                     ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)
@@ -42,7 +42,7 @@ final class ModuleTables
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('description')
                     ->label('Description')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->filters([
                 //

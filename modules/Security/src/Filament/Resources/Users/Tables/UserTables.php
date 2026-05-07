@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Filament\Resources\Users\Tables;
 
+use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Security\Filament\Actions\RevokeAction;
 use AcMarche\Security\Filament\Resources\Modules\Schemas\ModuleForm;
 use AcMarche\Security\Handler\ModuleHandler;
@@ -20,7 +21,9 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 final class UserTables
@@ -56,8 +59,17 @@ final class UserTables
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('roles')
-                    ->relationship('roles', 'name'),
+                SelectFilter::make('departments')
+                    ->label('Département')
+                    ->options(DepartmentEnum::class)
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['value'] ?? null,
+                        fn (Builder $query, string $value): Builder => $query->whereJsonContains('departments', $value),
+                    )),
+                TernaryFilter::make('is_administrator')
+                    ->label('Administrateur'),
+                TernaryFilter::make('news_attachment')
+                    ->label('Pièce jointe news'),
             ])
             ->recordActions([
                 ViewAction::make(),
