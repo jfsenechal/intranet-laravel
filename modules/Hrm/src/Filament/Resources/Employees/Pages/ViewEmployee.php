@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\Pages;
 
+use AcMarche\Hrm\Filament\Actions\ExportPdfAction;
 use AcMarche\Hrm\Filament\Resources\Absences\AbsenceResource;
 use AcMarche\Hrm\Filament\Resources\Applications\Schemas\ApplicationForm;
 use AcMarche\Hrm\Filament\Resources\Contracts\ContractResource;
@@ -47,6 +48,7 @@ final class ViewEmployee extends ViewRecord
         return [
             EditAction::make()
                 ->icon(Heroicon::Pencil),
+            ExportPdfAction::make(),
             ActionGroup::make([
                 ActionGroup::make([
                     Action::make('addAbsence')

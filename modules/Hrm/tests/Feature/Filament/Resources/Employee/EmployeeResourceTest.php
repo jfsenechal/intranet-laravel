@@ -14,6 +14,7 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 use function Pest\Laravel\assertDatabaseHas;
 
@@ -144,5 +145,39 @@ describe('table', function (): void {
         Livewire::test(ListEmployees::class)
             ->loadTable()
             ->assertCanSeeTableRecords($records);
+    });
+});
+
+describe('export pdf action', function (): void {
+    it('renders the export pdf action on the view page', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertActionExists('exportPdf');
+    });
+
+    it('can trigger the export pdf action without relations', function (): void {
+        Pdf::fake();
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->callAction('exportPdf', data: ['relations' => []])
+            ->assertHasNoActionErrors();
+
+        Pdf::assertViewIs('hrm::pdf.employee');
+        Pdf::assertViewHas('employee');
+        Pdf::assertViewHas('selectedRelations', []);
+    });
+
+    it('can trigger the export pdf action with selected relations', function (): void {
+        Pdf::fake();
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->callAction('exportPdf', data: ['relations' => ['contracts', 'absences']])
+            ->assertHasNoActionErrors();
+
+        Pdf::assertViewIs('hrm::pdf.employee');
+        Pdf::assertViewHas('selectedRelations', ['contracts', 'absences']);
     });
 });
