@@ -1,11 +1,23 @@
+@php($user = auth()->user())
 <x-filament-panels::page>
 
     <x-slot name="title">
         Vacation
     </x-slot>
-    <h1>Bonjour {user.name}</h1>
-    Votre message d'absence peut aussi être activé depuis chez vous via : https://agenda.marche.be
-    Une fois connectez cliquez sur "Absence prolongée"
 
+    <x-filament::callout
+        icon="heroicon-o-information-circle"
+        color="info"
+    >
+        <x-slot name="heading">
+            Votre message d'absence
+        </x-slot>
+
+        <x-slot name="description">
+            Votre message d'absence peut être activé via :<br/>
+            <a href="https://agenda.marche.be/SOGo/so/{{$user.username}}/Preferences#!/mailer">agenda.marche.be</a>
+           <br/><br/> Cliquez sur "Absence prolongée"
+        </x-slot>
+    </x-filament::callout>
 
 </x-filament-panels::page>
