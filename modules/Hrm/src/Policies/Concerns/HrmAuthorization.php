@@ -105,7 +105,6 @@ trait HrmAuthorization
     private function employeeTopEmployerSlugs(Employee $employee): array
     {
         return $employee->contracts()
-            ->active()
             ->with('employer')
             ->get()
             ->map(fn (Contract $contract): ?Employer => $contract->employer)
