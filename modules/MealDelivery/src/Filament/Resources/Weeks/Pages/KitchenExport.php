@@ -6,7 +6,9 @@ namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Week;
+use AcMarche\MealDelivery\Policies\Concerns\MealDeliveryAuthorization;
 use AcMarche\MealDelivery\Service\KitchenExportAggregator;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\Page;
@@ -19,6 +21,8 @@ use function Spatie\LaravelPdf\Support\pdf;
 
 final class KitchenExport extends Page
 {
+    use MealDeliveryAuthorization;
+
     public Week $record;
 
     public string $date;
@@ -38,10 +42,15 @@ final class KitchenExport extends Page
 
     protected string $view = 'meal-delivery::filament.resources.weeks.pages.kitchen-export';
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        $user = auth()->user();
+
+        return $user instanceof User && self::canAccessStatic($user);
+    }
+
     public function mount(Week $record, string $date): void
     {
-        abort_unless(auth()->user()?->can('meal-delivery-access'), 403);
-
         $this->record = $record;
         $this->date = CarbonImmutable::parse($date)->format('Y-m-d');
         $this->summary = (new KitchenExportAggregator())->build($record, $this->date);
@@ -56,7 +65,8 @@ final class KitchenExport extends Page
     {
         return [
             WeekResource::getUrl() => 'Semaines',
-            WeekResource::getUrl('view', ['record' => $this->record->id]) => 'Semaine du '.$this->record->formattedFirstDay(),
+            WeekResource::getUrl('view', ['record' => $this->record->id]
+            ) => 'Semaine du '.$this->record->formattedFirstDay(),
             $this->getTitle(),
         ];
     }

@@ -6,7 +6,9 @@ namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Week;
+use AcMarche\MealDelivery\Policies\Concerns\MealDeliveryAuthorization;
 use AcMarche\MealDelivery\Service\RouteSheetsAggregator;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Filament\Resources\Pages\Page;
 use Override;
@@ -17,6 +19,8 @@ use function Spatie\LaravelPdf\Support\pdf;
 
 final class RouteSheets extends Page
 {
+    use MealDeliveryAuthorization;
+
     public Week $record;
 
     public string $date;
@@ -35,10 +39,15 @@ final class RouteSheets extends Page
 
     protected string $view = 'meal-delivery::filament.resources.weeks.pages.route-sheets';
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        $user = auth()->user();
+
+        return $user instanceof User && self::canAccessStatic($user);
+    }
+
     public function mount(Week $record, string $date): void
     {
-        abort_unless(auth()->user()?->can('meal-delivery-access'), 403);
-
         $this->record = $record;
         $this->date = CarbonImmutable::parse($date)->format('Y-m-d');
         $this->sheets = (new RouteSheetsAggregator())->build($record, $this->date);

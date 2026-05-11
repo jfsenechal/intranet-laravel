@@ -9,6 +9,15 @@ use App\Models\User;
 
 trait MealDeliveryAuthorization
 {
+    protected static function canAccessStatic(User $user): bool
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return $user->hasRole(RolesEnum::ROLE_CPAS_REPAS->value);
+    }
+
     protected function isAdmin(User $user): bool
     {
         return $user->isAdministrator();
@@ -16,10 +25,6 @@ trait MealDeliveryAuthorization
 
     protected function canAccess(User $user): bool
     {
-        if ($this->isAdmin($user)) {
-            return true;
-        }
-
-        return $user->hasRole(RolesEnum::ROLE_CPAS_REPAS->value);
+        return self::canAccessStatic($user);
     }
 }
