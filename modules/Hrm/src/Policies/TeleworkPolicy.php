@@ -14,7 +14,7 @@ final class TeleworkPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->hasAnyHrmRole($user);
+        return $this->isAdmin($user);
     }
 
     public function view(User $user, Telework $telework): bool

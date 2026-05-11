@@ -28,7 +28,10 @@ final class EmployeeTables
         return $table
             ->defaultSort('last_name')
             ->defaultPaginationPageOption(50)
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('activeContracts'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with([
+                'activeContracts.employer',
+                'activeContracts.direction',
+            ]))
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')
@@ -44,6 +47,24 @@ final class EmployeeTables
                     ->label('Fonctions')
                     ->state(fn (Employee $record): string => $record->activeContracts
                         ->pluck('job_title')
+                        ->filter()
+                        ->unique()
+                        ->implode(', '))
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('active_employers')
+                    ->label('Employeurs')
+                    ->state(fn (Employee $record): string => $record->activeContracts
+                        ->pluck('employer.name')
+                        ->filter()
+                        ->unique()
+                        ->implode(', '))
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('active_directions')
+                    ->label('Directions')
+                    ->state(fn (Employee $record): string => $record->activeContracts
+                        ->pluck('direction.name')
                         ->filter()
                         ->unique()
                         ->implode(', '))

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 #[Connection('maria-hrm')]
@@ -46,6 +47,14 @@ final class Telework extends Model
 {
     use HasFactory;
     use HasUserAdd;
+
+    /**
+     * @return BelongsTo<Employee, Telework>
+     */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'user_add', 'username');
+    }
 
     protected static function booted(): void
     {
