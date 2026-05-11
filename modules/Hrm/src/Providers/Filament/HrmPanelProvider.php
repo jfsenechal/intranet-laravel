@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Providers\Filament;
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
 use AcMarche\Hrm\Enums\StatusEnum;
+use AcMarche\Hrm\Filament\Pages\HrmDashboard;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -58,7 +59,9 @@ final class HrmPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Hrm\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Hrm\\Filament\\Pages')
-            ->pages([])
+            ->pages([
+                HrmDashboard::class,
+            ])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\Hrm\\Filament\\Widgets')
             ->widgets([])
             ->navigationItems([
