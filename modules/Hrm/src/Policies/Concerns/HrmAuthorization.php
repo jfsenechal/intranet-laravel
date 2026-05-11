@@ -39,6 +39,10 @@ trait HrmAuthorization
 
     protected function hasAnyHrmRole(User $user): bool
     {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
         return $user->hasOneOfThisRoles([
             RolesEnum::ROLE_GRH_ADMIN->value,
             RolesEnum::ROLE_GRH_CPAS_READ->value,

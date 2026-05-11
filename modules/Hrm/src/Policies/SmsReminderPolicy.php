@@ -8,7 +8,7 @@ use AcMarche\Hrm\Models\SmsReminder;
 use AcMarche\Hrm\Policies\Concerns\HrmAuthorization;
 use App\Models\User;
 
-final class SmsPolicy
+final class SmsReminderPolicy
 {
     use HrmAuthorization;
 
