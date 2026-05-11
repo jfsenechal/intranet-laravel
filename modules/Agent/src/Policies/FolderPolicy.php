@@ -4,43 +4,36 @@ declare(strict_types=1);
 
 namespace AcMarche\Agent\Policies;
 
-use AcMarche\Agent\Enums\RolesEnum;
+use AcMarche\Agent\Policies\Concerns\AgentAuthorization;
 use App\Models\User;
 
 final class FolderPolicy
 {
-    public function before(User $user): ?bool
-    {
-        if ($user->isAdministrator()) {
-            return true;
-        }
-
-        return null;
-    }
+    use AgentAuthorization;
 
     public function viewAny(User $user): bool
     {
-        return $this->isAgentAdministrator($user);
+        return $this->isAdmin($user);
     }
 
     public function view(User $user): bool
     {
-        return $this->isAgentAdministrator($user);
+        return $this->isAdmin($user);
     }
 
     public function create(User $user): bool
     {
-        return $this->isAgentAdministrator($user);
+        return $this->isAdmin($user);
     }
 
     public function update(User $user): bool
     {
-        return $this->isAgentAdministrator($user);
+        return $this->isAdmin($user);
     }
 
     public function delete(User $user): bool
     {
-        return $this->isAgentAdministrator($user);
+        return $this->isAdmin($user);
     }
 
     public function restore(): bool
@@ -53,10 +46,4 @@ final class FolderPolicy
         return false;
     }
 
-    private function isAgentAdministrator(User $user): bool
-    {
-        return $user->hasOneOfThisRoles([
-            RolesEnum::ROLE_AGENT_ADMIN->value,
-        ]);
-    }
 }
