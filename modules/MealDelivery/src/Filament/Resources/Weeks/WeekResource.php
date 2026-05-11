@@ -9,6 +9,7 @@ use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\EditWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\KitchenExport;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ListDayMeals;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ListWeeks;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\RouteSheets;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ViewWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\RelationManagers\OrdersRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas\WeekForm;
@@ -69,6 +70,7 @@ final class WeekResource extends Resource
             'view' => ViewWeek::route('/{record}/view'),
             'day' => ListDayMeals::route('/{record}/day/{date}'),
             'kitchen' => KitchenExport::route('/{record}/kitchen/{date}'),
+            'routes' => RouteSheets::route('/{record}/routes/{date}'),
         ];
     }
 }

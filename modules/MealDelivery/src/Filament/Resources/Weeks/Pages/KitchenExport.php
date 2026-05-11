@@ -40,6 +40,8 @@ final class KitchenExport extends Page
 
     public function mount(Week $record, string $date): void
     {
+        abort_unless(auth()->user()?->can('meal-delivery-access'), 403);
+
         $this->record = $record;
         $this->date = CarbonImmutable::parse($date)->format('Y-m-d');
         $this->summary = (new KitchenExportAggregator())->build($record, $this->date);
