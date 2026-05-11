@@ -6,16 +6,16 @@ namespace AcMarche\Hrm\Filament\Exports;
 
 use AcMarche\Hrm\Models\Employee;
 use Spatie\Browsershot\Browsershot;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Spatie\LaravelPdf\PdfBuilder;
 
 use function Spatie\LaravelPdf\Support\pdf;
 
 final class EmployeePdfExport
 {
     /**
-     * @param list<string> $relations
+     * @param  list<string>  $relations
      */
-    public static function download(Employee $employee, array $relations): StreamedResponse
+    public static function download(Employee $employee, array $relations): PdfBuilder
     {
         $eagerLoad = array_filter($relations);
 

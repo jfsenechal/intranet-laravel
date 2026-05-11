@@ -164,9 +164,9 @@ describe('export pdf action', function (): void {
             ->callAction('exportPdf', data: ['relations' => []])
             ->assertHasNoActionErrors();
 
-        Pdf::assertViewIs('hrm::pdf.employee');
-        Pdf::assertViewHas('employee');
-        Pdf::assertViewHas('selectedRelations', []);
+        Pdf::assertRespondedWithPdf(fn (\Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
+            && array_key_exists('employee', $pdf->viewData)
+            && ($pdf->viewData['selectedRelations'] ?? null) === []);
     });
 
     it('can trigger the export pdf action with selected relations', function (): void {
@@ -177,7 +177,7 @@ describe('export pdf action', function (): void {
             ->callAction('exportPdf', data: ['relations' => ['contracts', 'absences']])
             ->assertHasNoActionErrors();
 
-        Pdf::assertViewIs('hrm::pdf.employee');
-        Pdf::assertViewHas('selectedRelations', ['contracts', 'absences']);
+        Pdf::assertRespondedWithPdf(fn (\Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
+            && ($pdf->viewData['selectedRelations'] ?? null) === ['contracts', 'absences']);
     });
 });
