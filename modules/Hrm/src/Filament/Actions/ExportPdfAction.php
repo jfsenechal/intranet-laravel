@@ -40,13 +40,7 @@ final class ExportPdfAction
                     ->columns(2),
             ])
             ->action(function (array $data, Employee $record): PdfBuilder {
-                try {
-                    return EmployeePdfExport::download($record, $data['relations'] ?? []);
-                }
-                catch (\Exception $e) {
-                    dd($e);
-                }
-
+                return EmployeePdfExport::download($record, $data['relations'] ?? []);
             });
     }
 }
