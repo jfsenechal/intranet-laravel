@@ -128,7 +128,7 @@
         "filament/spatie-laravel-media-library-plugin": "^5.0",
         "intervention/validation": "^4.6",
         "laravel/framework": "^13.0",
-        "laravel/nightwatch": "^1.24",
+        "laravel/nightwatch": "^1.26",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.23",
         "laravel/tinker": "^3.0",
