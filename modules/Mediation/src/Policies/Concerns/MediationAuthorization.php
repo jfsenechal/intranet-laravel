@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Mediation\Policies;
+namespace AcMarche\Mediation\Policies\Concerns;
 
 use AcMarche\Mediation\Enums\RolesEnum;
 use App\Models\User;
 
-trait PolicyTrait
+trait MediationAuthorization
 {
     public function hasRole(User $user): bool
     {

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\Mediation\Policies;
 
+use AcMarche\Mediation\Policies\Concerns\MediationAuthorization;
 use App\Models\User;
 
 // https://laravel.com/docs/12.x/authorization#creating-policies
 final class CaseFilePolicy
 {
-    use PolicyTrait;
+    use MediationAuthorization;
 
     /**
      * Determine whether the user can view any models.

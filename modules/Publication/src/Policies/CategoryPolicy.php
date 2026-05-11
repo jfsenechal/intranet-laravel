@@ -2,30 +2,28 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Mediation\Policies;
+namespace AcMarche\Publication\Policies;
 
-use AcMarche\Mediation\Models\Complainant;
-use AcMarche\Mediation\Policies\Concerns\MediationAuthorization;
+use AcMarche\Publication\Enums\RolesEnum;
 use App\Models\User;
 
-final class ComplainantPolicy
+// https://laravel.com/docs/12.x/authorization#creating-policies
+final class CategoryPolicy
 {
-    use MediationAuthorization;
-
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(): bool
     {
-        return $this->hasRole($user);
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Complainant $offender): bool
+    public function view(): bool
     {
-        return $this->hasRole($user);
+        return true;
     }
 
     /**
@@ -39,17 +37,17 @@ final class ComplainantPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Complainant $offender): bool
+    public function update(User $user): bool
     {
-        return $this->hasRole($user, $offender);
+        return $this->hasRole($user);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Complainant $offender): bool
+    public function delete(User $user): bool
     {
-        return $this->hasRole($user, $offender);
+        return $this->hasRole($user);
     }
 
     /**
@@ -66,5 +64,14 @@ final class ComplainantPolicy
     public function forceDelete(): bool
     {
         return false;
+    }
+
+    public function hasRole(User $user)
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return $user->hasOneOfThisRoles([RolesEnum::ROLE_PUBLICATION->value]);
     }
 }
