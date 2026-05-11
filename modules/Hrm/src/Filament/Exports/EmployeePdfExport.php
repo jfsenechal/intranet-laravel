@@ -6,7 +6,7 @@ namespace AcMarche\Hrm\Filament\Exports;
 
 use AcMarche\Hrm\Models\Employee;
 use Spatie\Browsershot\Browsershot;
-use Spatie\LaravelPdf\PdfBuilder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 use function Spatie\LaravelPdf\Support\pdf;
 
@@ -15,7 +15,7 @@ final class EmployeePdfExport
     /**
      * @param  list<string>  $relations
      */
-    public static function download(Employee $employee, array $relations): PdfBuilder
+    public static function download(Employee $employee, array $relations): StreamedResponse
     {
         $eagerLoad = array_filter($relations);
 
@@ -35,7 +35,9 @@ final class EmployeePdfExport
 
         $employee->loadMissing(array_values($eagerLoad));
 
-        return pdf()
+        $filename = $employee->last_name.'-'.$employee->first_name.'.pdf';
+
+        $pdf = pdf()
             ->view('hrm::pdf.employee', [
                 'employee' => $employee,
                 'selectedRelations' => $relations,
@@ -48,7 +50,15 @@ final class EmployeePdfExport
                     $browsershot->setChromePath($path);
                 }
             })
-            ->name($employee->last_name.'-'.$employee->first_name.'.pdf')
+            ->name($filename)
             ->download();
+
+        return response()->streamDownload(
+            function () use ($pdf): void {
+                echo $pdf->toResponse(request())->getContent();
+            },
+            $filename,
+            ['Content-Type' => 'application/pdf'],
+        );
     }
 }

@@ -9,7 +9,7 @@ use AcMarche\Hrm\Models\Employee;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Support\Icons\Heroicon;
-use Spatie\LaravelPdf\PdfBuilder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ExportPdfAction
 {
@@ -39,7 +39,7 @@ final class ExportPdfAction
                     ])
                     ->columns(2),
             ])
-            ->action(function (array $data, Employee $record): PdfBuilder {
+            ->action(function (array $data, Employee $record): StreamedResponse {
                 return EmployeePdfExport::download($record, $data['relations'] ?? []);
             });
     }
