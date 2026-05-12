@@ -26,3 +26,4 @@ Thumbs.db
 tests/Browser/Screenshots
 *.sql
 /data
+.idea

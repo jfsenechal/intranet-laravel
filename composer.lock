@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "16d39b2daf20d93dd24c7b97956a85de",
+    "content-hash": "9610eb06557ff98d0a44fa3ed58a011f",
     "packages": [
         {
             "name": "acmarche/ad",
@@ -819,6 +819,49 @@
                 }
             ],
             "description": "Security management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/telecommunication",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/Telecommunication",
+                "reference": "b7fb9b8841b6e26dfb64225d2a4f96208c0fee44"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\Telecommunication\\Providers\\TelecommunicationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\Telecommunication\\": "src/",
+                    "AcMarche\\Telecommunication\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\Telecommunication\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\Telecommunication\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "telecommunication management module for AcMarche",
             "transport-options": {
                 "relative": true
             }
@@ -1933,16 +1976,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v4.0.4",
+            "version": "v4.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "a82c083039a1df5903939d480a51b226ca9df470"
+                "reference": "7283a1e10b26fdaf829dedb4f84eaf1486a1fb84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/a82c083039a1df5903939d480a51b226ca9df470",
-                "reference": "a82c083039a1df5903939d480a51b226ca9df470",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/7283a1e10b26fdaf829dedb4f84eaf1486a1fb84",
+                "reference": "7283a1e10b26fdaf829dedb4f84eaf1486a1fb84",
                 "shasum": ""
             },
             "require": {
@@ -2005,7 +2048,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-02T16:07:43+00:00"
+            "time": "2026-05-11T22:22:52+00:00"
         },
         {
             "name": "directorytree/ldaprecord-laravel",
@@ -5607,16 +5650,16 @@
         },
         {
             "name": "nette/utils",
-            "version": "v4.1.3",
+            "version": "v4.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/utils.git",
-                "reference": "bb3ea637e3d131d72acc033cfc2746ee893349fe"
+                "reference": "7da6c396d7ebe142bc857c20479d5e70a5e1aac7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/utils/zipball/bb3ea637e3d131d72acc033cfc2746ee893349fe",
-                "reference": "bb3ea637e3d131d72acc033cfc2746ee893349fe",
+                "url": "https://api.github.com/repos/nette/utils/zipball/7da6c396d7ebe142bc857c20479d5e70a5e1aac7",
+                "reference": "7da6c396d7ebe142bc857c20479d5e70a5e1aac7",
                 "shasum": ""
             },
             "require": {
@@ -5692,9 +5735,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nette/utils/issues",
-                "source": "https://github.com/nette/utils/tree/v4.1.3"
+                "source": "https://github.com/nette/utils/tree/v4.1.4"
             },
-            "time": "2026-02-13T03:05:33+00:00"
+            "time": "2026-05-11T20:49:54+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -7329,16 +7372,16 @@
         },
         {
             "name": "secondnetwork/blade-tabler-icons",
-            "version": "v3.41.0",
+            "version": "v3.44.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/secondnetwork/blade-tabler-icons.git",
-                "reference": "cd1f24b5680b74ca6a10451377f6b331b5e953bd"
+                "reference": "856ad75e2c0704096bf4a708b6464620e41d1a34"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/secondnetwork/blade-tabler-icons/zipball/cd1f24b5680b74ca6a10451377f6b331b5e953bd",
-                "reference": "cd1f24b5680b74ca6a10451377f6b331b5e953bd",
+                "url": "https://api.github.com/repos/secondnetwork/blade-tabler-icons/zipball/856ad75e2c0704096bf4a708b6464620e41d1a34",
+                "reference": "856ad75e2c0704096bf4a708b6464620e41d1a34",
                 "shasum": ""
             },
             "require": {
@@ -7381,9 +7424,9 @@
             ],
             "support": {
                 "issues": "https://github.com/secondnetwork/blade-tabler-icons/issues",
-                "source": "https://github.com/secondnetwork/blade-tabler-icons/tree/v3.41.0"
+                "source": "https://github.com/secondnetwork/blade-tabler-icons/tree/v3.44.0"
             },
-            "time": "2026-03-30T10:09:04+00:00"
+            "time": "2026-05-11T14:36:11+00:00"
         },
         {
             "name": "simplesoftwareio/simple-qrcode",
@@ -8159,16 +8202,16 @@
         },
         {
             "name": "stechstudio/filament-impersonate",
-            "version": "v5.3.0",
+            "version": "v5.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stechstudio/filament-impersonate.git",
-                "reference": "00197ab5a7cbb18a2b8726a70eddefc943317794"
+                "reference": "1b75c9b2a55828ac1f68f86db2f552c20821b774"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stechstudio/filament-impersonate/zipball/00197ab5a7cbb18a2b8726a70eddefc943317794",
-                "reference": "00197ab5a7cbb18a2b8726a70eddefc943317794",
+                "url": "https://api.github.com/repos/stechstudio/filament-impersonate/zipball/1b75c9b2a55828ac1f68f86db2f552c20821b774",
+                "reference": "1b75c9b2a55828ac1f68f86db2f552c20821b774",
                 "shasum": ""
             },
             "require": {
@@ -8199,9 +8242,9 @@
             "description": "A Filament package to impersonate your users.",
             "support": {
                 "issues": "https://github.com/stechstudio/filament-impersonate/issues",
-                "source": "https://github.com/stechstudio/filament-impersonate/tree/v5.3.0"
+                "source": "https://github.com/stechstudio/filament-impersonate/tree/v5.4.0"
             },
-            "time": "2026-04-14T01:55:02+00:00"
+            "time": "2026-05-11T15:38:00+00:00"
         },
         {
             "name": "symfony/clock",
@@ -16090,16 +16133,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "2.4.2",
+            "version": "2.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "e645b6463c6a88ea5b44b17d3387d35a912c7946"
+                "reference": "891824c6c59f02a56a5dd58ea8edc44e6c0ece29"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/e645b6463c6a88ea5b44b17d3387d35a912c7946",
-                "reference": "e645b6463c6a88ea5b44b17d3387d35a912c7946",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/891824c6c59f02a56a5dd58ea8edc44e6c0ece29",
+                "reference": "891824c6c59f02a56a5dd58ea8edc44e6c0ece29",
                 "shasum": ""
             },
             "require": {
@@ -16138,7 +16181,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/2.4.2"
+                "source": "https://github.com/rectorphp/rector/tree/2.4.3"
             },
             "funding": [
                 {
@@ -16146,7 +16189,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-16T13:07:34+00:00"
+            "time": "2026-05-12T11:17:24+00:00"
         },
         {
             "name": "revolt/event-loop",
@@ -17438,6 +17481,7 @@
         "acmarche/qrcode": 20,
         "acmarche/resident-meal": 20,
         "acmarche/security": 20,
+        "acmarche/telecommunication": 20,
         "acmarche/who-is-who": 20
     },
     "prefer-stable": true,
