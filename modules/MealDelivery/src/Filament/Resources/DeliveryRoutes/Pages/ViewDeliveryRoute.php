@@ -9,6 +9,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 use Override;
 
 final class ViewDeliveryRoute extends ViewRecord
@@ -21,9 +23,11 @@ final class ViewDeliveryRoute extends ViewRecord
         return $this->record->name;
     }
 
-    public function getSubheading(): string
+    public function getSubheading(): string|Htmlable|null
     {
-        return 'Cliquez sur l\icône pour changer l\'order ensuit glissez de bas en haut pour changer l\'ordre de livraison';
+        return new HtmlString(
+            'Cliquez sur l\'icône 🔃 pour changer l\'ordre, ensuite glissez de bas en haut pour changer l\'ordre de livraison'
+        );
     }
 
     #[Override]
