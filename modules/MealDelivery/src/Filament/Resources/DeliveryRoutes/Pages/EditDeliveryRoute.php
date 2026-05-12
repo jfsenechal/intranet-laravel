@@ -16,7 +16,7 @@ final class EditDeliveryRoute extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Edit delivery route';
+        return $this->record->name;
     }
 
     protected function getHeaderActions(): array

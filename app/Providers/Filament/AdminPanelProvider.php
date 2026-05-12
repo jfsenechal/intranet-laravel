@@ -59,7 +59,7 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])->globalSearchFieldSuffix(fn(): ?string => match (Platform::detect()) {
+            ])->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
                 Platform::Windows, Platform::Linux => 'CTRL + K',
                 Platform::Mac => '⌘ + K',
                 default => null,

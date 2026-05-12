@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
-use AcMarche\MealDelivery\Enums\RolesEnum;
-use App\Models\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 final class MealDeliveryServiceProvider extends ServiceProvider

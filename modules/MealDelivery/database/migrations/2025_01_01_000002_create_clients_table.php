@@ -36,6 +36,7 @@ return new class extends Migration
                 $table->renameColumn('is_actif', 'is_active');
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');
+                $table->foreignId('route_id')->nullable(false)->change();
             });
         }
 
@@ -61,7 +62,7 @@ return new class extends Migration
             $table->text('contact_notes')->nullable();
             $table->text('notes')->nullable();
             $table->text('recurring_order')->nullable();
-            $table->foreignId('route_id')->nullable()->constrained('delivery_routes')->nullOnDelete();
+            $table->foreignId('route_id')->constrained('delivery_routes');
             $table->boolean('is_active')->default(true);
             $table->boolean('use_cafeteria')->default(false);
             $table->timestamps();

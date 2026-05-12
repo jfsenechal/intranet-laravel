@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\DeliveryRouteResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Override;
 
@@ -16,15 +15,13 @@ final class ListDeliveryRoutes extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Delivery Routes';
+        return 'Les tournées';
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Add delivery route')
-                ->icon('tabler-plus'),
+
         ];
     }
 }

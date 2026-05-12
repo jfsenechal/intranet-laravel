@@ -164,7 +164,7 @@ describe('export pdf action', function (): void {
             ->callAction('exportPdf', data: ['relations' => []])
             ->assertHasNoActionErrors();
 
-        Pdf::assertRespondedWithPdf(fn (\Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
+        Pdf::assertRespondedWithPdf(fn (Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
             && array_key_exists('employee', $pdf->viewData)
             && ($pdf->viewData['selectedRelations'] ?? null) === []);
     });
@@ -177,7 +177,7 @@ describe('export pdf action', function (): void {
             ->callAction('exportPdf', data: ['relations' => ['contracts', 'absences']])
             ->assertHasNoActionErrors();
 
-        Pdf::assertRespondedWithPdf(fn (\Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
+        Pdf::assertRespondedWithPdf(fn (Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
             && ($pdf->viewData['selectedRelations'] ?? null) === ['contracts', 'absences']);
     });
 });

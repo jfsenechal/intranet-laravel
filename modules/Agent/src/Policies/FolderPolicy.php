@@ -45,5 +45,4 @@ final class FolderPolicy
     {
         return false;
     }
-
 }

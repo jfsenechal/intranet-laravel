@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'notes',
     'recurring_order',
     'route_id',
-    'route_backup',
+    'route_position',
     'is_active',
     'use_cafeteria',
 ])]
@@ -68,14 +68,6 @@ final class Client extends Model
     }
 
     /**
-     * @return HasMany<RouteOrder, Client>
-     */
-    public function routeOrders(): HasMany
-    {
-        return $this->hasMany(RouteOrder::class);
-    }
-
-    /**
      * @return BelongsToMany<Diet, Client>
      */
     public function diets(): BelongsToMany
@@ -98,6 +90,7 @@ final class Client extends Model
             'is_active' => 'boolean',
             'use_cafeteria' => 'boolean',
             'postal_code' => 'integer',
+            'route_position' => 'integer',
         ];
     }
 }

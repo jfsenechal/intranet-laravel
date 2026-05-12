@@ -74,6 +74,8 @@ final class PublicationPolicy
 
         if ($user->hasOneOfThisRoles([RolesEnum::ROLE_PUBLICATION->value])) {
             return true;
-        }       return false;
+        }
+
+return false;
     }
 }

@@ -40,7 +40,7 @@ final class ViewClient extends ViewRecord
                 ->icon('tabler-plus')
                 ->color('success')
                 ->modal()
-                ->schema(fn(Schema $schema) => NoteForm::configure($schema))
+                ->schema(fn (Schema $schema) => NoteForm::configure($schema))
                 ->action(function (array $data, Client $record): void {
                     $record->notes()->create($data);
                 }),

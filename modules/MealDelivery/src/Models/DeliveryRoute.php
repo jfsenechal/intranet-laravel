@@ -29,10 +29,16 @@ final class DeliveryRoute extends Model
     }
 
     /**
-     * @return HasMany<RouteOrder, DeliveryRoute>
+     * Active clients not using cafeteria
+     *
+     * @return HasMany<Client, DeliveryRoute>
      */
-    public function routeOrders(): HasMany
+    public function activeClients(): HasMany
     {
-        return $this->hasMany(RouteOrder::class, 'route_id');
+        return $this->hasMany(Client::class, 'route_id')
+            ->where('use_cafeteria', false)
+            ->where('is_active', true)
+            ->orderByRaw('route_position IS NULL, route_position ASC')
+            ->orderBy('last_name');
     }
 }

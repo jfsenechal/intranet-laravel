@@ -6,7 +6,6 @@ namespace AcMarche\MealDelivery\Service;
 
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\Meal;
-use AcMarche\MealDelivery\Models\RouteOrder;
 use AcMarche\MealDelivery\Models\Week;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,14 +60,9 @@ final class RouteSheetsAggregator
             ->whereHas('order', fn (Builder $query) => $query->where('week_id', $week->id))
             ->with([
                 'order.client.deliveryRoute',
-                'order.client.routeOrders',
                 'menus.diets:id,name',
             ])
             ->get();
-
-        $routePositions = RouteOrder::query()
-            ->get(['client_id', 'route_id', 'position'])
-            ->keyBy(fn (RouteOrder $routeOrder): string => $routeOrder->client_id.':'.$routeOrder->route_id);
 
         $routes = DeliveryRoute::query()->orderBy('id')->get(['id', 'name']);
 
@@ -104,9 +98,8 @@ final class RouteSheetsAggregator
                 continue;
             }
 
-            $override = $routePositions->get($client->id.':'.$routeId);
-            if ($override !== null) {
-                $sortPosition = (int) $override->position;
+            if ($client->route_position !== null) {
+                $sortPosition = (int) $client->route_position;
             }
 
             $routeBuckets[$routeId]['rows'][] = [

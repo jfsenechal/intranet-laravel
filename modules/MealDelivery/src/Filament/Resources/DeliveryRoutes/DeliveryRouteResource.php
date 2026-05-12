@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes;
 
+use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\ViewDeliveryRoute;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages\CreateDeliveryRoute;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages\EditDeliveryRoute;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages\ListDeliveryRoutes;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Schemas\DeliveryRouteForm;
+use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Schemas\DeliveryRouteInfoList;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Tables\DeliveryRouteTables;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use Filament\Resources\Resource;
@@ -30,12 +32,17 @@ final class DeliveryRouteResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Delivery Routes';
+        return 'Tournées';
     }
 
     public static function form(Schema $schema): Schema
     {
         return DeliveryRouteForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return DeliveryRouteInfoList::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -49,6 +56,7 @@ final class DeliveryRouteResource extends Resource
             'index' => ListDeliveryRoutes::route('/'),
             'create' => CreateDeliveryRoute::route('/create'),
             'edit' => EditDeliveryRoute::route('/{record}/edit'),
+            'view' => ViewDeliveryRoute::route('/{record}/view'),
         ];
     }
 }

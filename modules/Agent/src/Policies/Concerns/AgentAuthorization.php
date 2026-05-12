@@ -14,6 +14,7 @@ trait AgentAuthorization
         if ($user->isAdministrator()) {
             return true;
         }
+
         return $user->hasOneOfThisRoles([
             RolesEnum::ROLE_AGENT_ADMIN->value,
         ]);
