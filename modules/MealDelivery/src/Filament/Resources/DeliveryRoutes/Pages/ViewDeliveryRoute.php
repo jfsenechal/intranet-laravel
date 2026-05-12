@@ -8,6 +8,7 @@ use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\DeliveryRouteResourc
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 use Override;
 
 final class ViewDeliveryRoute extends ViewRecord
@@ -18,6 +19,20 @@ final class ViewDeliveryRoute extends ViewRecord
     public function getTitle(): string
     {
         return $this->record->name;
+    }
+
+    public function getSubheading(): string
+    {
+        return 'Cliquez sur l\icône pour changer l\'order ensuit glissez de bas en haut pour changer l\'ordre de livraison';
+    }
+
+    #[Override]
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getRelationManagersContentComponent(),
+            ]);
     }
 
     protected function getHeaderActions(): array
