@@ -11,7 +11,7 @@ final class TelecommunicationServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 42;
+    public static int $module_id = 10;
 
     public function register(): void
     {
@@ -31,6 +31,6 @@ final class TelecommunicationServiceProvider extends ServiceProvider
 
     protected function moduleName(): string
     {
-        return 'who-is-who';
+        return 'telecommunication';
     }
 }

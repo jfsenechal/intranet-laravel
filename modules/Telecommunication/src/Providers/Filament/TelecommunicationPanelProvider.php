@@ -30,9 +30,9 @@ final class TelecommunicationPanelProvider extends PanelProvider
         $path = $this->getPluginBasePath().'/../../';
 
         return $panel
-            ->id('who-is-who-panel')
-            ->path('who-is-who')
-            ->brandName('Qui est qui ?')
+            ->id('telecommunication-panel')
+            ->path('telecommunication')
+            ->brandName('Télécommunications')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Pink,
@@ -41,13 +41,12 @@ final class TelecommunicationPanelProvider extends PanelProvider
             ->resourceCreatePageRedirect('view')
             ->resourceEditPageRedirect('view')
             ->databaseNotifications()
-
-            ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\WhoIsWho\\Filament\\Resources')
-            ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\WhoIsWho\\Filament\\Pages')
+            ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\Telecommunication\\Filament\\Resources')
+            ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\Telecommunication\\Filament\\Pages')
             ->pages([
 
             ])
-            ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\WhoIsWho\\Filament\\Widgets')
+            ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\Telecommunication\\Filament\\Widgets')
             ->widgets([
 
             ])
