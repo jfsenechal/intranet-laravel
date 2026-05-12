@@ -38,7 +38,7 @@ final class AbsencePolicy
 
     public function restore(User $user): bool
     {
-        return $this->isAdmin($user);
+        return false;
     }
 
     public function forceDelete(): bool

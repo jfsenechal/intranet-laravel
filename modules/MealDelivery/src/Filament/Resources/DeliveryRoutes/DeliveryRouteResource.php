@@ -8,6 +8,7 @@ use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\ViewDeliveryRoute;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages\CreateDeliveryRoute;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages\EditDeliveryRoute;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages\ListDeliveryRoutes;
+use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\RelationManagers\ClientsRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Schemas\DeliveryRouteForm;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Schemas\DeliveryRouteInfoList;
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Tables\DeliveryRouteTables;
@@ -48,6 +49,13 @@ final class DeliveryRouteResource extends Resource
     public static function table(Table $table): Table
     {
         return DeliveryRouteTables::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ClientsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Tables;
 
+use AcMarche\MealDelivery\Models\Client;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -32,10 +33,13 @@ final class ClientTables
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('city')
-                    ->label('Localité')
-                    ->searchable()
-                    ->sortable()
+                TextColumn::make('address')
+                    ->label('Adresse')
+                    ->state(fn (Client $record): string => mb_trim($record->street.' '.$record->number.', '.$record->postal_code.' '.$record->city))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->where('street', 'like', "%{$search}%")
+                        ->orWhere('number', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%"))
                     ->toggleable(),
 
                 TextColumn::make('phone')

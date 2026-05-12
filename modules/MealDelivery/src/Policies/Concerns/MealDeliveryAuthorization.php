@@ -18,11 +18,6 @@ trait MealDeliveryAuthorization
         return $user->hasRole(RolesEnum::ROLE_CPAS_REPAS->value);
     }
 
-    protected function isAdmin(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
     protected function canAccess(User $user): bool
     {
         return self::canAccessStatic($user);
