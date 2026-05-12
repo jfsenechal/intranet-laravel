@@ -44,13 +44,16 @@ return new class extends Migration
                 $table->renameColumn('icone', 'icon');
                 $table->renameColumn('heading_id', 'tab_id');
                 $table->string('color')->default(null);
+                $table->text('role_description')->nullable();
             });
         } else {
             Schema::create('modules', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name')->unique();
                 $table->string('url')->nullable();
+                $table->string('url')->nullable();
                 $table->text('description')->nullable();
+                $table->text('role_description')->nullable();
                 $table->boolean('is_external')->default(false);
                 $table->boolean('is_public')->default(false);
                 $table->string('icon')->default(null);

@@ -24,8 +24,8 @@ final class ModuleInfolist
                                 ->label('Description')
                                 ->hiddenLabel()
                                 ->columnSpanFull(),
-                            TextEntry::make('description_role')
-                                ->label('Description rôle')
+                            TextEntry::make('role_description')
+                                ->label('Description de l\'attribution des rôles')
                                 ->columnSpanFull(),
                             TextEntry::make('roles.name')
                                 ->label('Rôles')
@@ -34,7 +34,7 @@ final class ModuleInfolist
                         ]),
                     Grid::make(1)
                         ->schema([
-                            Section::make('Etat')
+                            Section::make('État')
                                 ->label(null)
                                 ->schema([
                                     IconEntry::make('is_public')

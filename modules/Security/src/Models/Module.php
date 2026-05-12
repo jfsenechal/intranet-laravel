@@ -21,7 +21,7 @@ use Override;
     'name',
     'url',
     'description',
-    'description_role',
+    'role_description',
     'extern',
     'is_public',
     'is_external',
