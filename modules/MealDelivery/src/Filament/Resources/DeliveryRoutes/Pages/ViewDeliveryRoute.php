@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\DeliveryRouteResource;
+use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Tables\DeliveryRouteTables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Tables\Table;
 use Override;
 
 final class ViewDeliveryRoute extends ViewRecord

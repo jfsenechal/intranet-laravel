@@ -24,7 +24,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
-use AcMarche\WhoIsWho\Filament\Pages\Index as WhoIsWhoIndex;
+use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
 use Illuminate\Support\Collection;
 
 final class MigrationHandler
@@ -60,7 +60,7 @@ final class MigrationHandler
             36 => ClaimRequestPage::getUrl(panel: 'app-panel'),
             39 => WeekResource::getUrl(panel: 'meal-delivery-panel'),
             40 => ProfileResource::getUrl('index', panel: 'agent-panel'),
-            42 => WhoIsWhoIndex::getUrl(panel: 'who-is-who-panel'),
+            42 => WhoIsWhoSearch::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
             50 => TeleworkPage::getUrl(panel: 'app-panel'),
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
