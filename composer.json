@@ -91,6 +91,10 @@
         },
         {
             "type": "path",
+            "url": "./modules/Telecommunication"
+        },
+        {
+            "type": "path",
             "url": "./modules/Agent"
         },
         {
@@ -120,6 +124,7 @@
         "acmarche/qrcode": "*@dev",
         "acmarche/resident-meal": "*@dev",
         "acmarche/security": "*@dev",
+        "acmarche/telecommunication": "*@dev",
         "acmarche/who-is-who": "*@dev",
         "chrome-php/chrome": "^1.15",
         "directorytree/imapengine-laravel": "^v1.2.1",
