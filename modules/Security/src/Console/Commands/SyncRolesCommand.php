@@ -14,9 +14,12 @@ use AcMarche\Courrier\Enums\RolesEnum as RoleEnumCourrier;
 use AcMarche\Courrier\Providers\CourrierServiceProvider;
 use AcMarche\Document\Enums\RolesEnum as RoleEnumDocument;
 use AcMarche\Document\Providers\DocumentServiceProvider;
+use AcMarche\EmailManagement\Providers\EmailManagementServiceProvider;
 use AcMarche\Hrm\Enums\RolesEnum as RoleEnumHrm;
 use AcMarche\Hrm\Providers\HrmServiceProvider;
+use AcMarche\MealDelivery\Providers\MealDeliveryServiceProvider;
 use AcMarche\Mediation\Enums\RolesEnum as RoleEnumMediation;
+use AcMarche\MealDelivery\Enums\RolesEnum as RoleEnumMealDelivery;
 use AcMarche\Mediation\Providers\MediationServiceProvider;
 use AcMarche\Mileage\Enums\RolesEnum as RoleEnumMileage;
 use AcMarche\Mileage\Providers\MileageServiceProvider;
@@ -29,6 +32,7 @@ use AcMarche\Pst\Providers\PstServiceProvider;
 use AcMarche\Publication\Enums\RolesEnum as RoleEnumPublication;
 use AcMarche\Publication\Providers\PublicationServiceProvider;
 use AcMarche\ResidentMeal\Enums\RolesEnum as RoleEnumResidentMeal;
+use AcMarche\EmailManagement\Enums\RolesEnum as RoleEnumEmailManagement;
 use AcMarche\ResidentMeal\Providers\ResidentMealServiceProvider;
 use AcMarche\Security\Enums\RolesEnum as RoleEnumSecurity;
 use AcMarche\Security\Models\Role;
@@ -66,7 +70,9 @@ final class SyncRolesCommand extends Command
             [AdServiceProvider::class, RoleEnumAd::cases()],
             [CourrierServiceProvider::class, RoleEnumCourrier::cases()],
             [DocumentServiceProvider::class, RoleEnumDocument::cases()],
+            [EmailManagementServiceProvider::class, RoleEnumEmailManagement::cases()],
             [HrmServiceProvider::class, RoleEnumHrm::cases()],
+            [MealDeliveryServiceProvider::class, RoleEnumMealDelivery::cases()],
             [MediationServiceProvider::class, RoleEnumMediation::cases()],
             [MileageServiceProvider::class, RoleEnumMileage::cases()],
             [NewsServiceProvider::class, RoleEnumNews::cases()],
