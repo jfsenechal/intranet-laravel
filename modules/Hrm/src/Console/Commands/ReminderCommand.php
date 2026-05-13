@@ -9,7 +9,6 @@ use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ViewDeadline;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
-use AcMarche\Hrm\Filament\Resources\Evaluations\Pages\ViewEvaluation;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\ViewSmsReminder;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Mail\ReminderMail;
@@ -240,7 +239,7 @@ final class ReminderCommand extends Command
                     $recipients,
                     'Évaluation',
                     $evaluation,
-                    ViewEvaluation::getUrl(['record' => $evaluation]),
+                    ViewEmployee::getUrl(['record' => $evaluation->employee]),
                     $evaluation->employee,
                 );
             });
