@@ -9,6 +9,7 @@ use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;
 use AcMarche\MealDelivery\Models\Client;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -41,6 +42,7 @@ final class ViewClient extends ViewRecord
                 ->icon('tabler-plus')
                 ->color('success')
                 ->modal()
+                ->createAnother(false)
                 ->schema(fn (Schema $schema) => NoteForm::configure($schema))
                 ->action(function (array $data, Client $record): void {
                     $record->notes()->create($data);
@@ -48,14 +50,33 @@ final class ViewClient extends ViewRecord
             CreateAction::make('addAbsence')
                 ->label('Ajouter une absence')
                 ->icon('tabler-plus')
-                ->color('success')
+                ->color('warning')
+                ->visible(fn (Client $record): bool => $record->absence === null)
                 ->modal()
+                ->createAnother(false)
                 ->schema(fn (Schema $schema) => AbsenceForm::configure($schema))
                 ->action(function (array $data, Client $record): void {
-                    $record->absence()->updateOrCreate(
-                        ['client_id' => $record->id],
-                        $data,
-                    );
+                    $record->absence()->create($data);
+                }),
+            Action::make('editAbsence')
+                ->label('Modifier l\'absence')
+                ->icon('tabler-edit')
+                ->color('warning')
+                ->visible(fn (Client $record): bool => $record->absence !== null)
+                ->modal()
+                ->fillForm(fn (Client $record): array => $record->absence?->toArray() ?? [])
+                ->schema(fn (Schema $schema) => AbsenceForm::configure($schema))
+                ->action(function (array $data, Client $record): void {
+                    $record->absence?->update($data);
+                }),
+            Action::make('deleteAbsence')
+                ->label('Supprimer l\'absence')
+                ->icon('tabler-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->visible(fn (Client $record): bool => $record->absence !== null)
+                ->action(function (Client $record): void {
+                    $record->absence?->delete();
                 }),
 
             DeleteAction::make()

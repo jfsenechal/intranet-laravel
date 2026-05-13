@@ -94,6 +94,21 @@ final class ClientInfoList
                                             ->columnSpanFull(),
                                     ]),
 
+                                Section::make('Absence')
+                                    ->columns(2)
+                                    ->visible(fn ($record): bool => $record->absence !== null)
+                                    ->schema([
+                                        TextEntry::make('absence.start_date')
+                                            ->label('Du')
+                                            ->date()
+                                            ->placeholder('—'),
+
+                                        TextEntry::make('absence.end_date')
+                                            ->label('Au')
+                                            ->date()
+                                            ->placeholder('—'),
+                                    ]),
+
                             ]),
 
                         Grid::make(2)
