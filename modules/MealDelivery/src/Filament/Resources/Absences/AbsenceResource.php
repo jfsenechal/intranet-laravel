@@ -11,7 +11,6 @@ use AcMarche\MealDelivery\Filament\Resources\Absences\Tables\AbsenceTables;
 use AcMarche\MealDelivery\Models\Absence;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Override;
 
@@ -29,7 +28,8 @@ final class AbsenceResource extends Resource
     }
 
     public static function getNavigationIcon(): string
-    { return 'heroicon-o-paper-airplane';
+    {
+        return 'heroicon-o-paper-airplane';
     }
 
     public static function getNavigationLabel(): string
