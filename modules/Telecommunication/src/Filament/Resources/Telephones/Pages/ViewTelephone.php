@@ -22,7 +22,7 @@ final class ViewTelephone extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->user_name.' — '.$this->record->number;
+        return $this->record->number.' - '.$this->record->lineType?->name;
     }
 
     public function infolist(Schema $schema): Schema

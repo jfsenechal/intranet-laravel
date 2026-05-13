@@ -40,12 +40,11 @@ final class TelephoneResource extends Resource
     protected static ?string $pluralModelLabel = 'téléphones';
 
     #[Override]
-    protected static ?string $recordTitleAttribute = 'user_name';
+    protected static ?string $recordTitleAttribute = 'number';
 
     public static function getGloballySearchableAttributes(): array
     {
         return [
-            'user_name',
             'number',
             'service',
             'department',
