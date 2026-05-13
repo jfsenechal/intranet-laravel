@@ -24,6 +24,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
+use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -49,6 +50,7 @@ final class MigrationHandler
             4 => OffenseResource::getUrl('index', panel: 'offenses-panel'),
             6 => EmployeeResource::getUrl('index', panel: 'hrm-panel'),
             9 => DocumentResource::getUrl('index', panel: 'document-panel'),
+            10 => TelephoneResource::getUrl('index', panel: 'telecommunication-panel'),
             13 => TripResource::getUrl('index', panel: 'mileage-panel'),
             15 => NewsResource::getUrl('index', panel: 'news'),
             16 => IncomingMailResource::getUrl('index', panel: 'courrier-panel'),
