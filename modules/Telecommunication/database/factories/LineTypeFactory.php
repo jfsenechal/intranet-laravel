@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\Telecommunication\Database\Factories;
+
+use AcMarche\Telecommunication\Models\LineType;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends Factory<LineType>
+ */
+final class LineTypeFactory extends Factory
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $name = fake()->unique()->word();
+
+        return [
+            'slug' => Str::slug($name),
+            'name' => ucfirst($name),
+        ];
+    }
+}
