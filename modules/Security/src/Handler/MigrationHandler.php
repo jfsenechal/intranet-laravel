@@ -25,6 +25,7 @@ use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 final class MigrationHandler
@@ -70,14 +71,33 @@ final class MigrationHandler
     }
 
     /**
-     * Get all modules sorted by name ASC, with migration status resolved.
+     * Get modules accessible to the given user, sorted by name ASC, with migration status resolved.
+     *
+     * Public modules are always included; non-public modules require the user to hold
+     * at least one role belonging to that module.
      *
      * @return Collection<int,Module>
      */
-    public static function getAllModules(): Collection
+    public static function getAllModules(?User $user = null): Collection
     {
-        return Module::query()
-            ->whereNotIn('id', self::modules_to_skip)
+        $user ??= auth()->user();
+        if (! $user instanceof User) {
+            return collect();
+        }
+
+        $query = Module::query()
+            ->whereNotIn('id', self::modules_to_skip);
+
+        if (! $user->isAdministrator()) {
+            $query->where(function ($query) use ($user): void {
+                $query->where('is_public', true)
+                    ->orWhereHas('roles.users', function ($subQuery) use ($user): void {
+                        $subQuery->where('users.id', $user->id);
+                    });
+            });
+        }
+
+        return $query
             ->orderBy('name')
             ->get()
             ->each(function (Module $module): void {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
+namespace AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\DeliveryRouteResource;
 use Filament\Actions\DeleteAction;
