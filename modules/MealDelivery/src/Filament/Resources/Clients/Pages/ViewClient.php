@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 
+use AcMarche\MealDelivery\Filament\Resources\Absence\Schemas\AbsenceForm;
 use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;
@@ -43,6 +44,18 @@ final class ViewClient extends ViewRecord
                 ->schema(fn (Schema $schema) => NoteForm::configure($schema))
                 ->action(function (array $data, Client $record): void {
                     $record->notes()->create($data);
+                }),
+            CreateAction::make('addAbsence')
+                ->label('Ajouter une absence')
+                ->icon('tabler-plus')
+                ->color('success')
+                ->modal()
+                ->schema(fn (Schema $schema) => AbsenceForm::configure($schema))
+                ->action(function (array $data, Client $record): void {
+                    $record->absence()->updateOrCreate(
+                        ['client_id' => $record->id],
+                        $data,
+                    );
                 }),
 
             DeleteAction::make()

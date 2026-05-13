@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Table(name: 'delivery_absences')]
 final class Absence extends Model
 {
+    public $timestamps = false;
+
     /**
      * @return BelongsTo<Client, Absence>
      */

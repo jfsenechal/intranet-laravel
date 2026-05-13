@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('agent:prune-profiles')->daily();
 Schedule::command('intranet:sync-users')->daily();
+Schedule::command('meal-delivery:prune-absences')->daily();

@@ -76,6 +76,6 @@ final class PublicationPolicy
             return true;
         }
 
-return false;
+        return false;
     }
 }
