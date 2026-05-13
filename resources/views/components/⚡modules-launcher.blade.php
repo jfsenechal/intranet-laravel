@@ -14,7 +14,6 @@ new class extends Component {
 
 <div>
     {{-- Trigger Button (rendered in sidebar) --}}
-    <div class="mb-3 px-3">
         <button
             x-data
             @click="window.dispatchEvent(new CustomEvent('toggle-modules-launcher'))"
@@ -24,7 +23,6 @@ new class extends Component {
             <x-filament::icon icon="heroicon-m-squares-2x2" class="h-5 w-5"/>
             Applications
         </button>
-    </div>
 
     @php
         $colors = [
