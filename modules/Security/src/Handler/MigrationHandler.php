@@ -11,8 +11,10 @@ use AcMarche\App\Filament\Pages\EmailsListPage;
 use AcMarche\App\Filament\Pages\TeleworkPage;
 use AcMarche\App\Filament\Pages\VacationPage;
 use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
+use AcMarche\Conseil\Filament\Resources\Pvs\PvResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
+use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
@@ -58,6 +60,7 @@ final class MigrationHandler
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
             21 => SignatureResource::getUrl('index', panel: 'app-panel'),
             22 => 'https://agenda.marche.be',
+            25 => PvResource::getUrl('index', panel: 'conseil-panel'),
             26 => VacationPage::getUrl(panel: 'app-panel'),
             33 => EmailsListPage::getUrl(panel: 'app-panel'),
             36 => ClaimRequestPage::getUrl(panel: 'app-panel'),
@@ -68,6 +71,7 @@ final class MigrationHandler
             50 => TeleworkPage::getUrl(panel: 'app-panel'),
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
+            59 => TicketResource::getUrl('index', panel: 'guichet-hdv-panel'),
             default => null,
         };
     }

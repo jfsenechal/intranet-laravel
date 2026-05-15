@@ -11,7 +11,7 @@ final class GuichetHdvServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 63;
+    public static int $module_id = 59;
 
     public function register(): void
     {
@@ -25,7 +25,7 @@ final class GuichetHdvServiceProvider extends ServiceProvider
 
     protected function moduleName(): string
     {
-        return 'guichethdv';
+        return 'guichet-hdv';
     }
 
     protected function modulePath(): string
