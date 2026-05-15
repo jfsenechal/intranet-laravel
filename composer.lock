@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e8cdab3c5fc8b953dea93e56dc887951",
+    "content-hash": "455852d1389575dace66d0d24ea60abc",
     "packages": [
         {
             "name": "acmarche/ad",
@@ -905,6 +905,49 @@
                 }
             ],
             "description": "Security management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/sports-activities",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/SportsActivities",
+                "reference": "ad5f9970a3ec02ef40c3b11f45f1ac44a1053701"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\SportsActivities\\Providers\\SportsActivitiesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\SportsActivities\\": "src/",
+                    "AcMarche\\SportsActivities\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\SportsActivities\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\SportsActivities\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "Sports activities management module for AcMarche",
             "transport-options": {
                 "relative": true
             }
@@ -17568,6 +17611,7 @@
         "acmarche/qrcode": 20,
         "acmarche/resident-meal": 20,
         "acmarche/security": 20,
+        "acmarche/sports-activities": 20,
         "acmarche/telecommunication": 20,
         "acmarche/who-is-who": 20
     },

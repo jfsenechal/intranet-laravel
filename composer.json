@@ -108,6 +108,10 @@
         {
             "type": "path",
             "url": "./modules/Conseil"
+        },
+        {
+            "type": "path",
+            "url": "./modules/SportsActivities"
         }
     ],
     "require": {
@@ -136,6 +140,7 @@
         "acmarche/who-is-who": "*@dev",
         "acmarche/guichet-hdv": "*@dev",
         "acmarche/conseil": "*@dev",
+        "acmarche/sports-activities": "*@dev",
         "chrome-php/chrome": "^1.15",
         "directorytree/imapengine-laravel": "^v1.2.1",
         "directorytree/ldaprecord-laravel": "^v4.0.0",

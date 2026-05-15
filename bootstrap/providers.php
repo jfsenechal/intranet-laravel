@@ -27,4 +27,5 @@ return [
     AcMarche\Telecommunication\Providers\Filament\TelecommunicationPanelProvider::class,
     AcMarche\GuichetHdv\Providers\Filament\GuichetHdvPanelProvider::class,
     AcMarche\Conseil\Providers\Filament\ConseilPanelProvider::class,
+    AcMarche\SportsActivities\Providers\Filament\SportsActivitiesPanelProvider::class,
 ];
