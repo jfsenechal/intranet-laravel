@@ -21,6 +21,7 @@ abstract class TestCase extends BaseTestCase
         'maria-hrm',
         'maria-mileage',
         'maria-publication',
+        'maria-guichet',
     ];
 
     protected function refreshApplication(): void
