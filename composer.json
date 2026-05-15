@@ -104,6 +104,10 @@
         {
             "type": "path",
             "url": "./modules/GuichetHdv"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Conseil"
         }
     ],
     "require": {
@@ -131,6 +135,7 @@
         "acmarche/telecommunication": "*@dev",
         "acmarche/who-is-who": "*@dev",
         "acmarche/guichet-hdv": "*@dev",
+        "acmarche/conseil": "*@dev",
         "chrome-php/chrome": "^1.15",
         "directorytree/imapengine-laravel": "^v1.2.1",
         "directorytree/ldaprecord-laravel": "^v4.0.0",
