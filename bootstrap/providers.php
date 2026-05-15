@@ -26,4 +26,5 @@ return [
     AcMarche\QrCode\Providers\Filament\QrCodePanelProvider::class,
     AcMarche\Telecommunication\Providers\Filament\TelecommunicationPanelProvider::class,
     AcMarche\GuichetHdv\Providers\Filament\GuichetHdvPanelProvider::class,
+    AcMarche\Conseil\Providers\Filament\ConseilPanelProvider::class,
 ];
