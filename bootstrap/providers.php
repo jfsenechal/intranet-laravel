@@ -25,4 +25,5 @@ return [
     AcMarche\WhoIsWho\Providers\Filament\WhoIsWhoPanelProvider::class,
     AcMarche\QrCode\Providers\Filament\QrCodePanelProvider::class,
     AcMarche\Telecommunication\Providers\Filament\TelecommunicationPanelProvider::class,
+    AcMarche\GuichetHdv\Providers\Filament\GuichetHdvPanelProvider::class,
 ];

@@ -36,4 +36,5 @@ uses(
     '../modules/Courrier/tests/Unit',
     '../modules/QrCode/tests/Unit',
     '../modules/QrCode/tests/Feature',
+    '../modules/GuichetHdv/tests/Feature',
 );
