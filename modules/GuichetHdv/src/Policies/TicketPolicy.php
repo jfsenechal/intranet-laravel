@@ -52,8 +52,8 @@ final class TicketPolicy
         }
 
         return $user->hasOneOfThisRoles([
-            RolesEnum::ROLE_EGUICHET_ADMIN->value,
-            RolesEnum::ROLE_EGUICHET->value,
+            RolesEnum::ROLE_GUICHET_AGENT->value,
+            RolesEnum::ROLE_GUICHET->value,
         ]);
     }
 
@@ -63,6 +63,6 @@ final class TicketPolicy
             return true;
         }
 
-        return $user->hasOneOfThisRoles([RolesEnum::ROLE_EGUICHET_ADMIN->value]);
+        return $user->hasOneOfThisRoles([RolesEnum::ROLE_GUICHET_AGENT->value]);
     }
 }

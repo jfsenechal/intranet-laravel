@@ -14,7 +14,7 @@ else
 fi
 
 # List of databases to clean
-DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_ville" "grh_all" "pst" "mailinglist" "agent" "cpas_repas" "mediation" "invitation" "sanction" "telephone" "ticket" "conseil")
+DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_ville" "grh_all" "pst" "mailinglist" "agent" "cpas_repas" "mediation" "invitation" "sanction" "telephone" "guichet" "conseil")
 
 # Function to drop all tables in a database
 drop_all_tables() {

@@ -51,6 +51,6 @@ final class OfficePolicy
             return true;
         }
 
-        return $user->hasOneOfThisRoles([RolesEnum::ROLE_EGUICHET_ADMIN->value]);
+        return $user->hasOneOfThisRoles([RolesEnum::ROLE_GUICHET_AGENT->value]);
     }
 }

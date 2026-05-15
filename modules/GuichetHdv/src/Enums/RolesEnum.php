@@ -9,8 +9,8 @@ use Illuminate\Contracts\Support\Htmlable;
 
 enum RolesEnum: string implements HasLabel
 {
-    case ROLE_EGUICHET_ADMIN = 'ROLE_EGUICHET_ADMIN';
-    case ROLE_EGUICHET = 'ROLE_EGUICHET';
+    case ROLE_GUICHET_AGENT = 'ROLE_GUICHET_AGENT';
+    case ROLE_GUICHET = 'ROLE_GUICHET';
 
     /**
      * @return array<string, string>
@@ -28,8 +28,8 @@ enum RolesEnum: string implements HasLabel
     public function getLabel(): string|Htmlable|null
     {
         return match ($this) {
-            self::ROLE_EGUICHET_ADMIN => 'Admin guichet',
-            self::ROLE_EGUICHET => 'Agent guichet',
+            self::ROLE_GUICHET_AGENT => 'Admin guichet',
+            self::ROLE_GUICHET => 'Agent guichet',
         };
     }
 }

@@ -6,5 +6,5 @@ namespace AcMarche\Conseil\Enums;
 
 enum RolesEnum: string
 {
-    case ROLE_CONSEIL = 'ROLE_CONSEIL';
+    case ROLE_CONSEIL_ADMIN = 'ROLE_CONSEIL_ADMIN';
 }

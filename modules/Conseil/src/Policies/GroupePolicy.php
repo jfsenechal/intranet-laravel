@@ -71,7 +71,7 @@ final class GroupePolicy
             return true;
         }
 
-        if ($user->hasOneOfThisRoles([RolesEnum::ROLE_CONSEIL->value])) {
+        if ($user->hasOneOfThisRoles([RolesEnum::ROLE_CONSEIL_ADMIN->value])) {
             return true;
         }
 
