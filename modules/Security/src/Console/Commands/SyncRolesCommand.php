@@ -12,10 +12,14 @@ use AcMarche\AldermenAgenda\Enums\RolesEnum as RoleEnumAldermenAgenda;
 use AcMarche\AldermenAgenda\Providers\AldermenAgendaServiceProvider;
 use AcMarche\Courrier\Enums\RolesEnum as RoleEnumCourrier;
 use AcMarche\Courrier\Providers\CourrierServiceProvider;
+use AcMarche\CpasLibrary\Enums\RolesEnum as RoleEnumCpasLibrary;
+use AcMarche\CpasLibrary\Providers\CpasLibraryServiceProvider;
 use AcMarche\Document\Enums\RolesEnum as RoleEnumDocument;
 use AcMarche\Document\Providers\DocumentServiceProvider;
 use AcMarche\EmailManagement\Enums\RolesEnum as RoleEnumEmailManagement;
 use AcMarche\EmailManagement\Providers\EmailManagementServiceProvider;
+use AcMarche\GuichetHdv\Enums\RolesEnum as RoleEnumGuichetHdv;
+use AcMarche\GuichetHdv\Providers\GuichetHdvServiceProvider;
 use AcMarche\Hrm\Enums\RolesEnum as RoleEnumHrm;
 use AcMarche\Hrm\Providers\HrmServiceProvider;
 use AcMarche\MealDelivery\Enums\RolesEnum as RoleEnumMealDelivery;
@@ -37,6 +41,7 @@ use AcMarche\ResidentMeal\Providers\ResidentMealServiceProvider;
 use AcMarche\Security\Enums\RolesEnum as RoleEnumSecurity;
 use AcMarche\Security\Models\Role;
 use AcMarche\Security\Providers\SecurityServiceProvider;
+use AcMarche\SportsActivities\Enums\RolesEnum as RoleEnumSportsActivities;
 use Illuminate\Console\Command;
 use Override;
 use Symfony\Component\Console\Command\Command as SfCommand;
@@ -68,6 +73,9 @@ final class SyncRolesCommand extends Command
             [AgentServiceProvider::class, RoleEnumAgent::cases()],
             [AldermenAgendaServiceProvider::class, RoleEnumAldermenAgenda::cases()],
             [AdServiceProvider::class, RoleEnumAd::cases()],
+            [CpasLibraryServiceProvider::class, RoleEnumCpasLibrary::cases()],
+            [GuichetHdvServiceProvider::class, RoleEnumGuichetHdv::cases()],
+            [SecurityServiceProvider::class, RoleEnumSportsActivities::cases()],
             [CourrierServiceProvider::class, RoleEnumCourrier::cases()],
             [DocumentServiceProvider::class, RoleEnumDocument::cases()],
             [EmailManagementServiceProvider::class, RoleEnumEmailManagement::cases()],

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "455852d1389575dace66d0d24ea60abc",
+    "content-hash": "fe02545e1cb8a036510c09b638fd4719",
     "packages": [
         {
             "name": "acmarche/ad",
@@ -260,6 +260,49 @@
                 }
             ],
             "description": "Incoming physical mail management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/cpas-library",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/CpasLibrary",
+                "reference": "c4885e6fd50bf5e478c0f0817e5cc0e651971055"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\CpasLibrary\\Providers\\CpasLibraryServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\CpasLibrary\\": "src/",
+                    "AcMarche\\CpasLibrary\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\CpasLibrary\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\CpasLibrary\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "CPAS library (bibliothèque) module for AcMarche intranet",
             "transport-options": {
                 "relative": true
             }
@@ -17596,6 +17639,7 @@
         "acmarche/app": 20,
         "acmarche/conseil": 20,
         "acmarche/courrier": 20,
+        "acmarche/cpas-library": 20,
         "acmarche/document": 20,
         "acmarche/email-management": 20,
         "acmarche/guichet-hdv": 20,

@@ -13,6 +13,7 @@ use AcMarche\App\Filament\Pages\VacationPage;
 use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\Conseil\Filament\Resources\Pvs\PvResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
@@ -69,6 +70,7 @@ final class MigrationHandler
             42 => WhoIsWhoSearch::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
             50 => TeleworkPage::getUrl(panel: 'app-panel'),
+            52 => FicheResource::getUrl('index', panel: 'cpas-library-panel'),
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
             59 => TicketResource::getUrl('index', panel: 'guichet-hdv-panel'),

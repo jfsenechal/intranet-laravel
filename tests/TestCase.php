@@ -22,6 +22,7 @@ abstract class TestCase extends BaseTestCase
         'maria-mileage',
         'maria-publication',
         'maria-guichet',
+        'maria-cpas-library',
     ];
 
     protected function refreshApplication(): void

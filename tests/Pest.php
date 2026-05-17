@@ -37,4 +37,6 @@ uses(
     '../modules/QrCode/tests/Unit',
     '../modules/QrCode/tests/Feature',
     '../modules/GuichetHdv/tests/Feature',
+    '../modules/CpasLibrary/tests/Feature',
+    '../modules/CpasLibrary/tests/Unit',
 );
