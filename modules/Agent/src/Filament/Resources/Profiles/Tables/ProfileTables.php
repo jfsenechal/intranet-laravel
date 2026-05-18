@@ -60,7 +60,8 @@ final class ProfileTables
             ])
             ->filters([
                 TernaryFilter::make('no_mail')->label('Sans mailbox'),
-                TernaryFilter::make('employee_id')->label('Sans employee_id'),
+                TernaryFilter::make('employee_id')->label('Sans référence de la db GRH'),
+                TernaryFilter::make('username')->label('Sans référence à la LDAP'),
             ])
             ->recordActions([
                 ViewAction::make(),

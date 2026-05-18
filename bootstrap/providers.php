@@ -29,5 +29,6 @@ return [
     AcMarche\Conseil\Providers\Filament\ConseilPanelProvider::class,
     AcMarche\CpasLibrary\Providers\Filament\CpasLibraryPanelProvider::class,
     AcMarche\College\Providers\Filament\CollegePanelProvider::class,
+    AcMarche\ActivityManager\Providers\Filament\ActivityManagerPanelProvider::class,
     AcMarche\SportsActivities\Providers\Filament\SportsActivitiesPanelProvider::class,
 ];

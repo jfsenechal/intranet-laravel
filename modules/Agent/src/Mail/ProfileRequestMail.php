@@ -49,10 +49,6 @@ final class ProfileRequestMail extends Mailable
             ->unique()
             ->implode(', ');
 
-        if ($employers === '') {
-            $employers = $this->employee->savedEmployer?->name ?? '';
-        }
-
         $fullName = mb_trim($this->employee->first_name.' '.$this->employee->last_name);
         $label = $employers !== '' ? $fullName.' - '.$employers : $fullName;
 

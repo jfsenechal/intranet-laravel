@@ -120,6 +120,10 @@
         {
             "type": "path",
             "url": "./modules/College"
+        },
+        {
+            "type": "path",
+            "url": "./modules/ActivityManager"
         }
     ],
     "require": {
@@ -150,6 +154,7 @@
         "acmarche/conseil": "*@dev",
         "acmarche/cpas-library": "*@dev",
         "acmarche/college": "*@dev",
+        "acmarche/activity-manager": "*@dev",
         "acmarche/sports-activities": "*@dev",
         "chrome-php/chrome": "^1.15",
         "directorytree/imapengine-laravel": "^v1.2.1",

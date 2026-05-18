@@ -241,6 +241,7 @@ final class EmployeeInfolist
                             ->icon(Heroicon::OutlinedUserCircle)
                             ->schema([
                                 Section::make('Données partagées avec le module Agent')
+                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
                                     ->description('Informations que le module Agent connaît de cet employé.')
                                     ->columns(2)
                                     ->schema([
@@ -251,9 +252,6 @@ final class EmployeeInfolist
                                                     $record->last_name.' '.$record->first_name
                                                 )
                                             ),
-                                        TextEntry::make('savedEmployer.name')
-                                            ->label('Employeur')
-                                            ->placeholder('—'),
                                         ImageEntry::make('photo')
                                             ->label('Photo')
                                             ->disk('public')

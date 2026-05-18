@@ -41,4 +41,6 @@ uses(
     '../modules/CpasLibrary/tests/Unit',
     '../modules/College/tests/Feature',
     '../modules/College/tests/Unit',
+    '../modules/ActivityManager/tests/Feature',
+    '../modules/ActivityManager/tests/Unit',
 );

@@ -10,6 +10,7 @@ use AcMarche\Security\Repository\LdapRepository;
 use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -40,7 +41,7 @@ final class CreateProfile extends CreateRecord
 
         if ($this->employeeId !== null) {
             $this->employee = Employee::query()
-                ->with(['activeContracts.service', 'savedEmployer'])
+                ->with(['activeContracts.service'])
                 ->find($this->employeeId);
         }
     }
@@ -71,21 +72,21 @@ final class CreateProfile extends CreateRecord
             $components[] = Section::make('Employé')
                 ->columns(2)
                 ->schema([
-                    Placeholder::make('last_name')
+                    TextEntry::make('last_name')
                         ->label('Nom')
-                        ->content($this->employee->last_name),
-                    Placeholder::make('first_name')
+                        ->state($this->employee->last_name),
+                    TextEntry::make('first_name')
                         ->label('Prénom')
-                        ->content($this->employee->first_name),
-                    Placeholder::make('services')
+                        ->state($this->employee->first_name),
+                    TextEntry::make('services')
                         ->label('Services (contrats actifs)')
-                        ->content($services !== '' ? $services : '—'),
-                    Placeholder::make('hired_at')
+                        ->state($services !== '' ? $services : '—'),
+                    TextEntry::make('hired_at')
                         ->label('Entré le')
-                        ->content($this->employee->hired_at?->format('d/m/Y') ?? '—'),
-                    Placeholder::make('status')
+                        ->state($this->employee->hired_at?->format('d/m/Y') ?? '—'),
+                    TextEntry::make('status')
                         ->label('Statut')
-                        ->content((string) $this->employee->status),
+                        ->state((string) $this->employee->status),
                 ]);
         }
 
