@@ -18,7 +18,7 @@ final class ActivityManagerServiceProvider extends ServiceProvider
 {
     use ModuleServiceProviderTrait;
 
-    public static int $module_id = 63;
+    public static int $module_id = 41;
 
     public function register(): void
     {

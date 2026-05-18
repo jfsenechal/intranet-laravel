@@ -30,7 +30,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
-use AcMarche\SportsActivities\Filament\Resources\Activites\ActiviteResource;
+use AcMarche\ActivityManager\Filament\Resources\Activites\ActiviteResource;
 use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
 use App\Models\User;
@@ -73,6 +73,7 @@ final class MigrationHandler
             36 => ClaimRequestPage::getUrl(panel: 'app-panel'),
             39 => WeekResource::getUrl(panel: 'meal-delivery-panel'),
             40 => ProfileResource::getUrl('index', panel: 'agent-panel'),
+            41 => ActiviteResource::getUrl('index', panel: 'activity-manager-panel'),
             42 => WhoIsWhoSearch::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
             50 => TeleworkPage::getUrl(panel: 'app-panel'),
