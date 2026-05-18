@@ -6,13 +6,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
-{
+return new class() extends Migration {
     protected $connection = 'maria-cpas-library';
 
     public function up(): void
     {
         if (Schema::connection('maria-cpas-library')->hasTable('categorie')) {
+            Schema::connection('maria-cpas-library')->table('categorie', function (Blueprint $table): void {
+                $table->json('departments')->nullable()->change();
+            });
             return;
         }
         Schema::connection('maria-cpas-library')->create('categorie', function (Blueprint $table): void {
@@ -23,7 +25,7 @@ return new class() extends Migration
             $table->string('slug', 255)->nullable()->unique();
             $table->string('icon', 255)->nullable();
             $table->string('color', 255)->nullable();
-            $table->json('departments');
+            $table->json('departments')->nullable();
             $table->boolean('public')->default(false);
             $table->json('users')->nullable();
             $table->index('parent_id');
