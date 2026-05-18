@@ -59,7 +59,7 @@ final class MigrationHandler
             9 => DocumentResource::getUrl('index', panel: 'document-panel'),
             10 => TelephoneResource::getUrl('index', panel: 'telecommunication-panel'),
             13 => TripResource::getUrl('index', panel: 'mileage-panel'),
-            15 => NewsResource::getUrl('index', panel: 'news'),
+            15 => NewsResource::getUrl('index', panel: 'news-panel'),
             16 => IncomingMailResource::getUrl('index', panel: 'courrier-panel'),
             17 => UserResource::getUrl('index', panel: 'security-panel'),
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),

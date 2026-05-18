@@ -25,6 +25,7 @@ abstract class TestCase extends BaseTestCase
         'maria-cpas-library',
         'maria-college',
         'maria-activity-manager',
+        'maria-street-watch',
     ];
 
     protected function refreshApplication(): void

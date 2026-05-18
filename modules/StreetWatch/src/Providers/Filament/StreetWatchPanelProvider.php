@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\News\Providers\Filament;
+namespace AcMarche\StreetWatch\Providers\Filament;
 
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
@@ -20,7 +20,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-final class NewsPanelProvider extends PanelProvider
+final class StreetWatchPanelProvider extends PanelProvider
 {
     use HooksTrait;
     use PluginTrait;
@@ -30,23 +30,23 @@ final class NewsPanelProvider extends PanelProvider
         $path = $this->getPluginBasePath().'/../../';
 
         return $panel
-            ->id('news-panel')
-            ->path('news')
-            ->colors([
-                'primary' => Color::Pink,
-            ])
-            ->brandName('Quoi de neuf?')
+            ->id('street-watch-panel')
+            ->path('street-watch')
+            ->brandName('Travail de rue')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->colors([
+                'primary' => Color::Rose,
+            ])
             ->unsavedChangesAlerts()
             ->resourceCreatePageRedirect('view')
             ->resourceEditPageRedirect('view')
-
-            ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\News\\Filament\\Resources')
-            ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\News\\Filament\\Pages')
+            ->databaseNotifications()
+            ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\StreetWatch\\Filament\\Resources')
+            ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\StreetWatch\\Filament\\Pages')
             ->pages([
 
             ])
-            ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\News\\Filament\\Widgets')
+            ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\StreetWatch\\Filament\\Widgets')
             ->widgets([
 
             ])

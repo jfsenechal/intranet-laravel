@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c29ea0e8da90d5c13059f2c20f2f7bdb",
+    "content-hash": "30cf9fa0b375bd2098fadb29e25dc857",
     "packages": [
         {
             "name": "acmarche/activity-manager",
@@ -1077,6 +1077,49 @@
                 }
             ],
             "description": "Sports activities management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/street-watch",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/StreetWatch",
+                "reference": "bd6929556b0676998c5b7500754e2cba476fa129"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\StreetWatch\\Providers\\StreetWatchServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\StreetWatch\\": "src/",
+                    "AcMarche\\StreetWatch\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\StreetWatch\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\StreetWatch\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "StreetWatch (travail de rue) module for AcMarche intranet",
             "transport-options": {
                 "relative": true
             }
@@ -17744,6 +17787,7 @@
         "acmarche/resident-meal": 20,
         "acmarche/security": 20,
         "acmarche/sports-activities": 20,
+        "acmarche/street-watch": 20,
         "acmarche/telecommunication": 20,
         "acmarche/who-is-who": 20
     },

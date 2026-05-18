@@ -43,4 +43,6 @@ uses(
     '../modules/College/tests/Unit',
     '../modules/ActivityManager/tests/Feature',
     '../modules/ActivityManager/tests/Unit',
+    '../modules/StreetWatch/tests/Feature',
+    '../modules/StreetWatch/tests/Unit',
 );

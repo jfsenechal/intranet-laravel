@@ -30,5 +30,6 @@ return [
     AcMarche\CpasLibrary\Providers\Filament\CpasLibraryPanelProvider::class,
     AcMarche\College\Providers\Filament\CollegePanelProvider::class,
     AcMarche\ActivityManager\Providers\Filament\ActivityManagerPanelProvider::class,
+    AcMarche\StreetWatch\Providers\Filament\StreetWatchPanelProvider::class,
     AcMarche\SportsActivities\Providers\Filament\SportsActivitiesPanelProvider::class,
 ];
