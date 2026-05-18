@@ -28,5 +28,6 @@ return [
     AcMarche\GuichetHdv\Providers\Filament\GuichetHdvPanelProvider::class,
     AcMarche\Conseil\Providers\Filament\ConseilPanelProvider::class,
     AcMarche\CpasLibrary\Providers\Filament\CpasLibraryPanelProvider::class,
+    AcMarche\College\Providers\Filament\CollegePanelProvider::class,
     AcMarche\SportsActivities\Providers\Filament\SportsActivitiesPanelProvider::class,
 ];

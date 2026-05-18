@@ -39,4 +39,6 @@ uses(
     '../modules/GuichetHdv/tests/Feature',
     '../modules/CpasLibrary/tests/Feature',
     '../modules/CpasLibrary/tests/Unit',
+    '../modules/College/tests/Feature',
+    '../modules/College/tests/Unit',
 );

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe02545e1cb8a036510c09b638fd4719",
+    "content-hash": "ae39939f9da7e0d779d527eb93919357",
     "packages": [
         {
             "name": "acmarche/ad",
@@ -174,6 +174,49 @@
                 }
             ],
             "description": "App management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/college",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/College",
+                "reference": "8fd0c6fc8ea1665a318f56836de9ae44e265d2cd"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\College\\Providers\\CollegeServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\College\\": "src/",
+                    "AcMarche\\College\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\College\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\College\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "College (Collège communal) module for AcMarche intranet",
             "transport-options": {
                 "relative": true
             }
@@ -12128,16 +12171,16 @@
         },
         {
             "name": "amphp/http-client",
-            "version": "v5.3.5",
+            "version": "v5.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/http-client.git",
-                "reference": "90005b86255fa87a705671a769ec8d0451b3c61a"
+                "reference": "ca155026acafa74a612d776a97202d53077fee86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/http-client/zipball/90005b86255fa87a705671a769ec8d0451b3c61a",
-                "reference": "90005b86255fa87a705671a769ec8d0451b3c61a",
+                "url": "https://api.github.com/repos/amphp/http-client/zipball/ca155026acafa74a612d776a97202d53077fee86",
+                "reference": "ca155026acafa74a612d776a97202d53077fee86",
                 "shasum": ""
             },
             "require": {
@@ -12213,7 +12256,7 @@
             ],
             "support": {
                 "issues": "https://github.com/amphp/http-client/issues",
-                "source": "https://github.com/amphp/http-client/tree/v5.3.5"
+                "source": "https://github.com/amphp/http-client/tree/v5.3.6"
             },
             "funding": [
                 {
@@ -12221,7 +12264,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-13T23:17:50+00:00"
+            "time": "2026-05-15T23:29:38+00:00"
         },
         {
             "name": "amphp/http-server",
@@ -16364,16 +16407,16 @@
         },
         {
             "name": "revolt/event-loop",
-            "version": "v1.0.8",
+            "version": "v1.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/revoltphp/event-loop.git",
-                "reference": "b6fc06dce8e9b523c9946138fa5e62181934f91c"
+                "reference": "44061cf513e53c6200372fc935ac42271566295d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/revoltphp/event-loop/zipball/b6fc06dce8e9b523c9946138fa5e62181934f91c",
-                "reference": "b6fc06dce8e9b523c9946138fa5e62181934f91c",
+                "url": "https://api.github.com/repos/revoltphp/event-loop/zipball/44061cf513e53c6200372fc935ac42271566295d",
+                "reference": "44061cf513e53c6200372fc935ac42271566295d",
                 "shasum": ""
             },
             "require": {
@@ -16383,7 +16426,7 @@
                 "ext-json": "*",
                 "jetbrains/phpstorm-stubs": "^2019.3",
                 "phpunit/phpunit": "^9",
-                "psalm/phar": "^5.15"
+                "psalm/phar": "6.16.*"
             },
             "type": "library",
             "extra": {
@@ -16430,29 +16473,29 @@
             ],
             "support": {
                 "issues": "https://github.com/revoltphp/event-loop/issues",
-                "source": "https://github.com/revoltphp/event-loop/tree/v1.0.8"
+                "source": "https://github.com/revoltphp/event-loop/tree/v1.0.9"
             },
-            "time": "2025-08-27T21:33:23+00:00"
+            "time": "2026-05-16T17:55:38+00:00"
         },
         {
             "name": "sebastian/cli-parser",
-            "version": "4.2.0",
+            "version": "4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/cli-parser.git",
-                "reference": "90f41072d220e5c40df6e8635f5dafba2d9d4d04"
+                "reference": "7d05781b13f7dec9043a629a21d086ed74582a15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/cli-parser/zipball/90f41072d220e5c40df6e8635f5dafba2d9d4d04",
-                "reference": "90f41072d220e5c40df6e8635f5dafba2d9d4d04",
+                "url": "https://api.github.com/repos/sebastianbergmann/cli-parser/zipball/7d05781b13f7dec9043a629a21d086ed74582a15",
+                "reference": "7d05781b13f7dec9043a629a21d086ed74582a15",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "^12.0"
+                "phpunit/phpunit": "^12.5.25"
             },
             "type": "library",
             "extra": {
@@ -16481,7 +16524,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/cli-parser/issues",
                 "security": "https://github.com/sebastianbergmann/cli-parser/security/policy",
-                "source": "https://github.com/sebastianbergmann/cli-parser/tree/4.2.0"
+                "source": "https://github.com/sebastianbergmann/cli-parser/tree/4.2.1"
             },
             "funding": [
                 {
@@ -16501,7 +16544,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-14T09:36:45+00:00"
+            "time": "2026-05-17T05:29:34+00:00"
         },
         {
             "name": "sebastian/comparator",
@@ -17637,6 +17680,7 @@
         "acmarche/agent": 20,
         "acmarche/aldermen-agenda": 20,
         "acmarche/app": 20,
+        "acmarche/college": 20,
         "acmarche/conseil": 20,
         "acmarche/courrier": 20,
         "acmarche/cpas-library": 20,

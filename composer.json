@@ -116,6 +116,10 @@
         {
             "type": "path",
             "url": "./modules/CpasLibrary"
+        },
+        {
+            "type": "path",
+            "url": "./modules/College"
         }
     ],
     "require": {
@@ -145,6 +149,7 @@
         "acmarche/guichet-hdv": "*@dev",
         "acmarche/conseil": "*@dev",
         "acmarche/cpas-library": "*@dev",
+        "acmarche/college": "*@dev",
         "acmarche/sports-activities": "*@dev",
         "chrome-php/chrome": "^1.15",
         "directorytree/imapengine-laravel": "^v1.2.1",
