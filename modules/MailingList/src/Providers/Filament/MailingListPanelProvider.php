@@ -32,7 +32,7 @@ final class MailingListPanelProvider extends PanelProvider
         $path = $this->getPluginBasePath().'/../../';
 
         return $panel
-            ->id('mailing-list')
+            ->id('mailing-list-panel')
             ->path('mailing-list')
             ->spa()
             ->brandName('Carnets et liste de diffusion')

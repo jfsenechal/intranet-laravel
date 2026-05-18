@@ -17,7 +17,7 @@ return new class() extends Migration
         }
         Schema::connection('maria-cpas-library')->create('fiche', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('category_id')->nullable();
+            $table->integer('category_id')->nullable();
             $table->string('type', 255)->nullable();
             $table->string('source', 255)->nullable();
             $table->date('date_promulgation')->nullable();

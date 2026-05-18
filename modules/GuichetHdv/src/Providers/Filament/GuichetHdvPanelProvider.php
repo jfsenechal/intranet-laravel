@@ -30,7 +30,7 @@ final class GuichetHdvPanelProvider extends PanelProvider
         $path = $this->getPluginBasePath().'/../../';
 
         return $panel
-            ->id('guichet-hdv')
+            ->id('guichet-hdv-panel')
             ->path('guichet-hdv')
             ->colors([
                 'primary' => Color::Teal,

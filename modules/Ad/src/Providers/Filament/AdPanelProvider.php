@@ -30,7 +30,7 @@ final class AdPanelProvider extends PanelProvider
         $path = $this->getPluginBasePath().'/../../';
 
         return $panel
-            ->id('ad')
+            ->id('ad-panel')
             ->path('ad')
             ->colors([
                 'primary' => Color::Pink,

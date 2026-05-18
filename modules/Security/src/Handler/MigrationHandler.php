@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Handler;
 
+use AcMarche\Ad\Filament\Resources\ClassifiedAd\ClassifiedAdResource;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\AldermenAgenda\Filament\Resources\Event\EventResource;
 use AcMarche\App\Filament\Pages\ClaimRequestPage;
@@ -18,6 +19,7 @@ use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
+use AcMarche\MailingList\Filament\Resources\AddressBooks\AddressBookResource;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
@@ -28,6 +30,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
+use AcMarche\SportsActivities\Filament\Resources\Activites\ActiviteResource;
 use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
 use App\Models\User;
@@ -61,6 +64,7 @@ final class MigrationHandler
             17 => UserResource::getUrl('index', panel: 'security-panel'),
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
             19 => NotificationResource::getUrl('index', panel: 'college-panel'),
+            20 => ActiviteResource::getUrl('index', panel: 'sports-activities-panel'),
             21 => SignatureResource::getUrl('index', panel: 'app-panel'),
             22 => 'https://agenda.marche.be',
             25 => PvResource::getUrl('index', panel: 'conseil-panel'),
@@ -76,6 +80,8 @@ final class MigrationHandler
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
             59 => TicketResource::getUrl('index', panel: 'guichet-hdv-panel'),
+            61 => AddressBookResource::getUrl('index', panel: 'mailing-list-panel'),
+            62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
             default => null,
         };
     }
@@ -91,14 +97,14 @@ final class MigrationHandler
     public static function getAllModules(?User $user = null): Collection
     {
         $user ??= auth()->user();
-        if (! $user instanceof User) {
+        if (!$user instanceof User) {
             return collect();
         }
 
         $query = Module::query()
             ->whereNotIn('id', self::modules_to_skip);
 
-        if (! $user->isAdministrator()) {
+        if (!$user->isAdministrator()) {
             $query->where(function ($query) use ($user): void {
                 $query->where('is_public', true)
                     ->orWhereHas('roles.users', function ($subQuery) use ($user): void {
