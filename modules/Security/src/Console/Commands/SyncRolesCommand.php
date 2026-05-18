@@ -10,6 +10,8 @@ use AcMarche\Agent\Enums\RolesEnum as RoleEnumAgent;
 use AcMarche\Agent\Providers\AgentServiceProvider;
 use AcMarche\AldermenAgenda\Enums\RolesEnum as RoleEnumAldermenAgenda;
 use AcMarche\AldermenAgenda\Providers\AldermenAgendaServiceProvider;
+use AcMarche\College\Enums\RolesEnum as RoleEnumCollege;
+use AcMarche\College\Providers\CollegeServiceProvider;
 use AcMarche\Courrier\Enums\RolesEnum as RoleEnumCourrier;
 use AcMarche\Courrier\Providers\CourrierServiceProvider;
 use AcMarche\CpasLibrary\Enums\RolesEnum as RoleEnumCpasLibrary;
@@ -42,6 +44,7 @@ use AcMarche\Security\Enums\RolesEnum as RoleEnumSecurity;
 use AcMarche\Security\Models\Role;
 use AcMarche\Security\Providers\SecurityServiceProvider;
 use AcMarche\SportsActivities\Enums\RolesEnum as RoleEnumSportsActivities;
+use AcMarche\SportsActivities\Providers\SportsActivitiesServiceProvider;
 use Illuminate\Console\Command;
 use Override;
 use Symfony\Component\Console\Command\Command as SfCommand;
@@ -75,8 +78,8 @@ final class SyncRolesCommand extends Command
             [AdServiceProvider::class, RoleEnumAd::cases()],
             [CpasLibraryServiceProvider::class, RoleEnumCpasLibrary::cases()],
             [GuichetHdvServiceProvider::class, RoleEnumGuichetHdv::cases()],
-            [SecurityServiceProvider::class, RoleEnumSportsActivities::cases()],
             [CourrierServiceProvider::class, RoleEnumCourrier::cases()],
+            [CollegeServiceProvider::class, RoleEnumCollege::cases()],
             [DocumentServiceProvider::class, RoleEnumDocument::cases()],
             [EmailManagementServiceProvider::class, RoleEnumEmailManagement::cases()],
             [HrmServiceProvider::class, RoleEnumHrm::cases()],
@@ -88,6 +91,7 @@ final class SyncRolesCommand extends Command
             [PstServiceProvider::class, RoleEnumPst::cases()],
             [PublicationServiceProvider::class, RoleEnumPublication::cases()],
             [ResidentMealServiceProvider::class, RoleEnumResidentMeal::cases()],
+            [SportsActivitiesServiceProvider::class, RoleEnumSportsActivities::cases()],
             [SecurityServiceProvider::class, RoleEnumSecurity::cases()],
         ];
 

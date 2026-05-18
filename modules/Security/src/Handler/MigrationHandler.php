@@ -11,6 +11,7 @@ use AcMarche\App\Filament\Pages\EmailsListPage;
 use AcMarche\App\Filament\Pages\TeleworkPage;
 use AcMarche\App\Filament\Pages\VacationPage;
 use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
+use AcMarche\College\Filament\Resources\Notifications\NotificationResource;
 use AcMarche\Conseil\Filament\Resources\Pvs\PvResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
@@ -59,6 +60,7 @@ final class MigrationHandler
             16 => IncomingMailResource::getUrl('index', panel: 'courrier-panel'),
             17 => UserResource::getUrl('index', panel: 'security-panel'),
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
+            19 => NotificationResource::getUrl('index', panel: 'college-panel'),
             21 => SignatureResource::getUrl('index', panel: 'app-panel'),
             22 => 'https://agenda.marche.be',
             25 => PvResource::getUrl('index', panel: 'conseil-panel'),
