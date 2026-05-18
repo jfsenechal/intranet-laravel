@@ -1,0 +1,34 @@
+{
+    "name": "acmarche/activity-manager",
+    "description": "ActivityManager (Maison des Aînés) module for AcMarche intranet",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "AcMarche",
+            "email": "info@acmarche.be"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "filament/filament": "^5.0",
+        "illuminate/contracts": "^12.0|^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AcMarche\\ActivityManager\\": "src/",
+            "AcMarche\\ActivityManager\\Database\\Factories\\": "database/factories/",
+            "AcMarche\\ActivityManager\\Database\\Seeders\\": "database/seeders/",
+            "AcMarche\\ActivityManager\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcMarche\\ActivityManager\\Providers\\ActivityManagerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
