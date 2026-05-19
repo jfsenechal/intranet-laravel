@@ -29,7 +29,7 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureTable();
-        $this->translatableComponents();
+        //   $this->translatableComponents();
         if (! app()->environment('production') && config('mail.redirect_to')) {
             Mail::alwaysTo(config('mail.redirect_to'));
         }

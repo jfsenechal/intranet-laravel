@@ -16,14 +16,14 @@ final class ListClassifiedAd extends ListRecords
 
     public function getTitle(): string
     {
-        return $this->getAllTableRecordsCount().' actualités';
+        return $this->getAllTableRecordsCount().' petites annonces';
     }
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Ajouter une actualité')
+                ->label('Ajouter une petite annonce')
                 ->icon('tabler-plus'),
         ];
     }

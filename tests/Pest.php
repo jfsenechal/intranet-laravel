@@ -10,6 +10,8 @@ uses(
 )->in(
     '../modules/Hrm/tests/Feature',
     '../modules/Hrm/tests/Unit',
+    '../modules/Ad/tests/Feature',
+    '../modules/Ad/tests/Unit',
 );
 
 uses(

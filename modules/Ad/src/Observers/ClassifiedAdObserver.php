@@ -6,8 +6,10 @@ namespace AcMarche\Ad\Observers;
 
 use AcMarche\Ad\Mail\ClassifiedAdEmail;
 use AcMarche\Ad\Models\ClassifiedAd;
+use AcMarche\Ad\Models\Subscriber;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mime\Address;
 
@@ -28,6 +30,20 @@ final class ClassifiedAdObserver
                     ->send(new ClassifiedAdEmail($classifiedAd));
             } catch (Exception $e) {
                 dd($e->getMessage());
+            }
+        }
+
+        foreach (Subscriber::query()->cursor() as $subscriber) {
+            try {
+                Mail::to(new Address(
+                    (string) $subscriber->email,
+                    trim($subscriber->first_name.' '.$subscriber->last_name),
+                ))->send(new ClassifiedAdEmail($classifiedAd));
+            } catch (Exception $exception) {
+                Log::warning('ClassifiedAd subscriber mail failed', [
+                    'subscriber_id' => $subscriber->id,
+                    'error' => $exception->getMessage(),
+                ]);
             }
         }
     }
