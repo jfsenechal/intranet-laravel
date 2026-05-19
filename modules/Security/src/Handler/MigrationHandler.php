@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Handler;
 
+use AcMarche\ActivityManager\Filament\Resources\Activites\ActiviteResource;
 use AcMarche\Ad\Filament\Resources\ClassifiedAd\ClassifiedAdResource;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\AldermenAgenda\Filament\Resources\Event\EventResource;
@@ -30,7 +31,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
-use AcMarche\ActivityManager\Filament\Resources\Activites\ActiviteResource;
+use AcMarche\StreetWatch\Filament\Resources\Incidents\IncidentResource;
 use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
 use App\Models\User;
@@ -81,6 +82,7 @@ final class MigrationHandler
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
             59 => TicketResource::getUrl('index', panel: 'guichet-hdv-panel'),
+            60 => IncidentResource::getUrl('index', panel: 'street-watch-hdv-panel'),
             61 => AddressBookResource::getUrl('index', panel: 'mailing-list-panel'),
             62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
             default => null,
@@ -98,14 +100,14 @@ final class MigrationHandler
     public static function getAllModules(?User $user = null): Collection
     {
         $user ??= auth()->user();
-        if (!$user instanceof User) {
+        if (! $user instanceof User) {
             return collect();
         }
 
         $query = Module::query()
             ->whereNotIn('id', self::modules_to_skip);
 
-        if (!$user->isAdministrator()) {
+        if (! $user->isAdministrator()) {
             $query->where(function ($query) use ($user): void {
                 $query->where('is_public', true)
                     ->orWhereHas('roles.users', function ($subQuery) use ($user): void {

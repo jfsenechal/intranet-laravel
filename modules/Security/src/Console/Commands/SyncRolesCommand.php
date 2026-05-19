@@ -44,8 +44,8 @@ use AcMarche\Security\Enums\RolesEnum as RoleEnumSecurity;
 use AcMarche\Security\Models\Role;
 use AcMarche\Security\Providers\SecurityServiceProvider;
 use AcMarche\SportsActivities\Enums\RolesEnum as RoleEnumSportsActivities;
-use AcMarche\StreetWatch\Enums\RolesEnum as RoleEnumStreetWatch;
 use AcMarche\SportsActivities\Providers\SportsActivitiesServiceProvider;
+use AcMarche\StreetWatch\Enums\RolesEnum as RoleEnumStreetWatch;
 use AcMarche\StreetWatch\Providers\StreetWatchServiceProvider;
 use Illuminate\Console\Command;
 use Override;
@@ -96,7 +96,6 @@ final class SyncRolesCommand extends Command
             [SportsActivitiesServiceProvider::class, RoleEnumSportsActivities::cases()],
             [SecurityServiceProvider::class, RoleEnumSecurity::cases()],
             [StreetWatchServiceProvider::class, RoleEnumStreetWatch::cases()],
-
         ];
 
         foreach ($mappings as [$providerClass, $cases]) {

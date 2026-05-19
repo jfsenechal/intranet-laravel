@@ -23,9 +23,9 @@ final class PieceJointe extends Model
 {
     use HasFactory;
 
-    protected $table = 'PieceJointe';
-
     public $timestamps = false;
+
+    protected $table = 'PieceJointe';
 
     /**
      * @return BelongsTo<Groupe, $this>

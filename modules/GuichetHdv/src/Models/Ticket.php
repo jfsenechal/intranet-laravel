@@ -26,9 +26,9 @@ final class Ticket extends Model
 {
     use HasFactory;
 
-    const CREATED_AT = 'createdAt';
+    public const CREATED_AT = 'createdAt';
 
-    const UPDATED_AT = 'updatedAt';
+    public const UPDATED_AT = 'updatedAt';
 
     /**
      * @return BelongsTo<Office, $this>

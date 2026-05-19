@@ -8,7 +8,6 @@ use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Repository\LdapRepository;
 use AcMarche\Security\Repository\UserRepository;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\CreateRecord;

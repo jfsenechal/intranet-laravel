@@ -23,11 +23,11 @@ final class OrdreJour extends Model
 {
     use HasFactory;
 
+    public const CREATED_AT = 'createdAt';
+
+    public const UPDATED_AT = 'updatedAt';
+
     protected $table = 'ordre_jour';
-
-    const CREATED_AT = 'createdAt';
-
-    const UPDATED_AT = 'updatedAt';
 
     /**
      * @var array<string, string>

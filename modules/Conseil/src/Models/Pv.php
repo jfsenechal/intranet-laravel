@@ -22,9 +22,9 @@ final class Pv extends Model
 {
     use HasFactory;
 
-    const CREATED_AT = 'createdAt';
+    public const CREATED_AT = 'createdAt';
 
-    const UPDATED_AT = 'updatedAt';
+    public const UPDATED_AT = 'updatedAt';
 
     /**
      * @var array<string, string>
