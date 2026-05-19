@@ -12,6 +12,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class ProfileTables
 {
@@ -59,10 +60,24 @@ final class ProfileTables
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TernaryFilter::make('no_mail')->label('Sans mailbox'),
-                TernaryFilter::make('employee_id')->label('Sans référence de la db GRH'),
-                TernaryFilter::make('username')->label('Sans référence à la LDAP'),
+                TernaryFilter::make('no_mail')
+                    ->label('Sans mailbox'),
+                TernaryFilter::make('employee_id')
+                    ->label('Sans référence de la db GRH')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNull('employee_id'),
+                        false: fn (Builder $query) => $query->whereNotNull('employee_id'),
+                        blank: fn (Builder $query) => $query,
+                    ),
+                TernaryFilter::make('username')
+                    ->label('Sans référence à la LDAP')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNull('username'),
+                        false: fn (Builder $query) => $query->whereNotNull('username'),
+                        blank: fn (Builder $query) => $query,
+                    ),
             ])
+            ->filtersFormColumns(2)
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
