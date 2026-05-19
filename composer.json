@@ -13,13 +13,16 @@
     "license": "MIT",
     "repositories": [
         {
-            "name": "filament",
-            "type": "composer",
-            "url": "https://packages.filamentphp.com/composer"
+            "type": "path",
+            "url": "./modules/ActivityManager"
         },
         {
             "type": "path",
             "url": "./modules/Ad"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Agent"
         },
         {
             "type": "path",
@@ -31,15 +34,19 @@
         },
         {
             "type": "path",
-            "url": "./modules/ResidentMeal"
+            "url": "./modules/College"
         },
         {
             "type": "path",
-            "url": "./modules/MealDelivery"
+            "url": "./modules/Conseil"
         },
         {
             "type": "path",
             "url": "./modules/Courrier"
+        },
+        {
+            "type": "path",
+            "url": "./modules/CpasLibrary"
         },
         {
             "type": "path",
@@ -51,23 +58,7 @@
         },
         {
             "type": "path",
-            "url": "./modules/Mileage"
-        },
-        {
-            "type": "path",
-            "url": "./modules/News"
-        },
-        {
-            "type": "path",
-            "url": "./modules/MailingList"
-        },
-        {
-            "type": "path",
-            "url": "./modules/Publication"
-        },
-        {
-            "type": "path",
-            "url": "./modules/QrCode"
+            "url": "./modules/GuichetHdv"
         },
         {
             "type": "path",
@@ -75,7 +66,23 @@
         },
         {
             "type": "path",
+            "url": "./modules/MailingList"
+        },
+        {
+            "type": "path",
+            "url": "./modules/MealDelivery"
+        },
+        {
+            "type": "path",
             "url": "./modules/Mediation"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Mileage"
+        },
+        {
+            "type": "path",
+            "url": "./modules/News"
         },
         {
             "type": "path",
@@ -87,27 +94,19 @@
         },
         {
             "type": "path",
+            "url": "./modules/Publication"
+        },
+        {
+            "type": "path",
+            "url": "./modules/QrCode"
+        },
+        {
+            "type": "path",
+            "url": "./modules/ResidentMeal"
+        },
+        {
+            "type": "path",
             "url": "./modules/Security"
-        },
-        {
-            "type": "path",
-            "url": "./modules/Telecommunication"
-        },
-        {
-            "type": "path",
-            "url": "./modules/Agent"
-        },
-        {
-            "type": "path",
-            "url": "./modules/WhoIsWho"
-        },
-        {
-            "type": "path",
-            "url": "./modules/GuichetHdv"
-        },
-        {
-            "type": "path",
-            "url": "./modules/Conseil"
         },
         {
             "type": "path",
@@ -115,31 +114,37 @@
         },
         {
             "type": "path",
-            "url": "./modules/CpasLibrary"
-        },
-        {
-            "type": "path",
-            "url": "./modules/College"
-        },
-        {
-            "type": "path",
-            "url": "./modules/ActivityManager"
-        },
-        {
-            "type": "path",
             "url": "./modules/StreetWatch"
+        },
+        {
+            "type": "path",
+            "url": "./modules/Telecommunication"
+        },
+        {
+            "type": "path",
+            "url": "./modules/WhoIsWho"
+        },
+        {
+            "name": "filament",
+            "type": "composer",
+            "url": "https://packages.filamentphp.com/composer"
         }
     ],
     "require": {
         "php": "^8.5",
         "ext-pdo": "*",
+        "acmarche/activity-manager": "*@dev",
         "acmarche/ad": "*@dev",
         "acmarche/agent": "*@dev",
         "acmarche/aldermen-agenda": "*@dev",
         "acmarche/app": "*@dev",
+        "acmarche/college": "*@dev",
+        "acmarche/conseil": "*@dev",
         "acmarche/courrier": "*@dev",
+        "acmarche/cpas-library": "*@dev",
         "acmarche/document": "*@dev",
         "acmarche/email-management": "*@dev",
+        "acmarche/guichet-hdv": "*@dev",
         "acmarche/hrm": "*@dev",
         "acmarche/mailing-list": "*@dev",
         "acmarche/meal-delivery": "*@dev",
@@ -152,15 +157,10 @@
         "acmarche/qrcode": "*@dev",
         "acmarche/resident-meal": "*@dev",
         "acmarche/security": "*@dev",
+        "acmarche/sports-activities": "*@dev",
+        "acmarche/street-watch": "*@dev",
         "acmarche/telecommunication": "*@dev",
         "acmarche/who-is-who": "*@dev",
-        "acmarche/guichet-hdv": "*@dev",
-        "acmarche/conseil": "*@dev",
-        "acmarche/cpas-library": "*@dev",
-        "acmarche/college": "*@dev",
-        "acmarche/activity-manager": "*@dev",
-        "acmarche/street-watch": "*@dev",
-        "acmarche/sports-activities": "*@dev",
         "chrome-php/chrome": "^1.15",
         "directorytree/imapengine-laravel": "^v1.2.1",
         "directorytree/ldaprecord-laravel": "^v4.0.0",
