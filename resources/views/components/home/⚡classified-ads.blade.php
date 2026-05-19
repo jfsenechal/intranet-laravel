@@ -30,16 +30,32 @@ new class extends Component
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
             </div>
-            <h2 class="text-base font-bold">Petites annonces</h2>
+            <a href="{{ ClassifiedAdResource::getUrl('index', panel: 'ad-panel') }}" class="text-base font-bold transition hover:underline">
+                Petites annonces
+            </a>
         </div>
-        <span class="rounded-full bg-white/20 px-2 py-0.5  font-semibold backdrop-blur">
-            {{ $latestAds->count() }}
-        </span>
+        <div class="flex items-center gap-2">
+            <span class="rounded-full bg-white/20 px-2 py-0.5 font-semibold backdrop-blur">
+                {{ $latestAds->count() }}
+            </span>
+            @auth
+                <a
+                    href="{{ ClassifiedAdResource::getUrl('create', panel: 'ad-panel') }}"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/30"
+                    title="Ajouter une annonce"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Ajouter
+                </a>
+            @endauth
+        </div>
     </div>
     <div class="divide-y divide-gray-100">
         @forelse ($latestAds as $index => $ad)
             <a
-                href="{{ ClassifiedAdResource::getUrl('view', ['record' => $ad->id], panel: 'ad') }}"
+                href="{{ ClassifiedAdResource::getUrl('view', ['record' => $ad->id], panel: 'ad-panel') }}"
                 class="group block p-3 transition hover:bg-gray-50 animate-fade-in-up"
                 style="--delay: {{ 0.3 + ($index * 0.05) }}s"
             >

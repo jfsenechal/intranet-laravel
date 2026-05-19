@@ -30,11 +30,27 @@ new class extends Component
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
             </div>
-            <h2 class="text-lg font-bold">Derniers documents utilisés</h2>
+            <a href="{{ DocumentResource::getUrl('index', panel: 'document-panel') }}" class="text-lg font-bold transition hover:underline">
+                Derniers documents utilisés
+            </a>
         </div>
-        <span class="rounded-full bg-white/20 px-3 py-1  font-semibold backdrop-blur">
-            {{ $latestDocuments->count() }}
-        </span>
+        <div class="flex items-center gap-2">
+            <span class="rounded-full bg-white/20 px-3 py-1 font-semibold backdrop-blur">
+                {{ $latestDocuments->count() }}
+            </span>
+            @auth
+                <a
+                    href="{{ DocumentResource::getUrl('create', panel: 'document-panel') }}"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/30"
+                    title="Ajouter un document"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Ajouter
+                </a>
+            @endauth
+        </div>
     </div>
     <div class="divide-y divide-gray-100">
         @forelse ($latestDocuments as $index => $document)
