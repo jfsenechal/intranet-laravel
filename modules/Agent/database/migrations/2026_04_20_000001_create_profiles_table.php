@@ -28,8 +28,6 @@ return new class extends Migration
                 if (! Schema::connection('maria-agent')->hasColumn('profiles', 'created_at')) {
                     $table->timestamps();
                 }
-                // todo ->nullable(false)
-                // $table->string('username')->nullable(false)->change();
             });
         } elseif (! Schema::connection('maria-agent')->hasTable('profiles')) {
             Schema::connection('maria-agent')->create('profiles', function (Blueprint $table): void {

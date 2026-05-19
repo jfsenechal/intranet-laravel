@@ -7,6 +7,7 @@ namespace AcMarche\Agent\Filament\Resources\Profiles\Schemas;
 use AcMarche\Agent\Filament\Forms\Components\FolderBrowser;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\LdapRepository;
+use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
@@ -31,12 +32,11 @@ final class ProfileForm
                         ->icon(Heroicon::OutlinedUserCircle)
                         ->columns(2)
                         ->schema([
-                            TextInput::make('username')
-                                ->label('Identifiant Ldap')
-                                ->required()
-                                ->disabled()
-                                ->dehydrated()
-                                ->maxLength(255),
+                            Select::make('username')
+                                ->label('Utilisateur LDAP')
+                                ->helperText('Lier à la LDAP si celle-ci existe')
+                                ->options(UserRepository::listLdapUsersForSelect())
+                                ->searchable(),
                             TextInput::make('location')
                                 ->label('Dans quel local travaillera-t-il ?')
                                 ->columnSpanFull(),

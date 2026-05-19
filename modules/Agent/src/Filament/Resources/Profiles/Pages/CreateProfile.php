@@ -102,11 +102,14 @@ final class CreateProfile extends CreateRecord
         $data['emails'] ??= [];
         $data['modules'] ??= [];
 
-        if (! empty($data['username'])) {
-            if (($userLdap = LdapRepository::findByUsername($data['username'])) instanceof Model) {
-                $data['first_name'] = $userLdap->getFirstAttribute('givenname').'prenom pas trouvé';
-                $data['last_name'] = $userLdap->getFirstAttribute('sn') ?? 'nom pas trouvé';
-            }
+        if (! empty($data['username'])
+            && ($userLdap = LdapRepository::findByUsername($data['username'])) instanceof Model) {
+            $data['first_name'] = $userLdap->getFirstAttribute('givenname') ?? 'prenom pas trouvé';
+            $data['last_name'] = $userLdap->getFirstAttribute('sn') ?? 'nom pas trouvé';
+        } elseif ($this->employeeId !== null
+            && ($employee = Employee::query()->find($this->employeeId)) instanceof Employee) {
+            $data['first_name'] = $employee->first_name;
+            $data['last_name'] = $employee->last_name;
         }
 
         if ($this->employeeId !== null) {

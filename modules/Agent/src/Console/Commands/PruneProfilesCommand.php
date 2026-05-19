@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Console\Commands;
 
 use AcMarche\Agent\Models\Profile;
-use AcMarche\Security\Repository\LdapRepository;
+use AcMarche\Hrm\Models\Employee;
 use Illuminate\Console\Command;
 use Override;
 use Symfony\Component\Console\Command\Command as SfCommand;
@@ -22,7 +22,7 @@ final class PruneProfilesCommand extends Command
      * @var string
      */
     #[Override]
-    protected $description = 'Delete Agent profiles whose username no longer exists in LDAP';
+    protected $description = 'Delete Agent profiles whose employee_id no longer exists in HRM DB';
 
     public function handle(): int
     {
@@ -31,7 +31,7 @@ final class PruneProfilesCommand extends Command
 
         Profile::query()->chunkById(200, function ($profiles) use (&$deleted, $dryRun): void {
             foreach ($profiles as $profile) {
-                if ($this->existsInLdap($profile->username)) {
+                if ($this->existsInDbHrm($profile->employee_id)) {
                     continue;
                 }
 
@@ -50,8 +50,10 @@ final class PruneProfilesCommand extends Command
         return SfCommand::SUCCESS;
     }
 
-    private function existsInLdap(?string $username): bool
+    private function existsInDbHrm(?int $employeeId): bool
     {
-        return LdapRepository::existsByUsername($username);
+        return Employee::query()
+            ->find($employeeId)
+            ->exists();
     }
 }
