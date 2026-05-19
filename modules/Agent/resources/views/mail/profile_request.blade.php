@@ -7,13 +7,13 @@
     </p>
 
     <p>
-        Merci de compléter son profil et de l'envoyer au service informatique une fois complété.
+        Merci de créer son profil et de l'envoyer au responsable pour le compléter.
     </p>
 
     <p style="margin-top: 24px;">
         <a href="{{ $url }}"
            style="background-color: #059669; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
-            Voir le profil
+            Voir et valider la création du profil
         </a>
     </p>
 
