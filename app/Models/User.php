@@ -146,24 +146,14 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
     public function hasRole(string $roleToFind): bool
     {
-        foreach ($this->roles()->get() as $role) {
-            if ($role->name === $roleToFind) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->loadedRoles()->contains('name', $roleToFind);
     }
 
     public function hasOneOfThisRoles(array $rolesToFind): bool
     {
-        foreach ($this->roles()->get() as $role) {
-            if (in_array($role->name, $rolesToFind)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->loadedRoles()->contains(
+            fn (Role $role): bool => in_array($role->name, $rolesToFind, true),
+        );
     }
 
     public function addRole(Role $role): void
@@ -175,13 +165,7 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
     public function hasModule(string $moduleToFind): bool
     {
-        foreach ($this->modules()->get() as $module) {
-            if ($module->name === $moduleToFind) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->loadedModules()->contains('name', $moduleToFind);
     }
 
     public function addModule(Module $module): void
@@ -316,5 +300,23 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
             'is_administrator' => 'boolean',
             'news_attachment' => 'boolean',
         ];
+    }
+
+    private function loadedRoles(): Collection
+    {
+        if (! $this->relationLoaded('roles')) {
+            $this->setRelation('roles', $this->roles()->get());
+        }
+
+        return $this->getRelation('roles');
+    }
+
+    private function loadedModules(): Collection
+    {
+        if (! $this->relationLoaded('modules')) {
+            $this->setRelation('modules', $this->modules()->get());
+        }
+
+        return $this->getRelation('modules');
     }
 }
