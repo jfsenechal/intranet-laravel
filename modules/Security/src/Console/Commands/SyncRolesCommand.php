@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Console\Commands;
 
+use AcMarche\ActivityManager\Enums\RolesEnum as RoleEnumActivityManager;
+use AcMarche\ActivityManager\Providers\ActivityManagerServiceProvider;
 use AcMarche\Ad\Enums\RolesEnum as RoleEnumAd;
 use AcMarche\Ad\Providers\AdServiceProvider;
 use AcMarche\Agent\Enums\RolesEnum as RoleEnumAgent;
@@ -12,6 +14,8 @@ use AcMarche\AldermenAgenda\Enums\RolesEnum as RoleEnumAldermenAgenda;
 use AcMarche\AldermenAgenda\Providers\AldermenAgendaServiceProvider;
 use AcMarche\College\Enums\RolesEnum as RoleEnumCollege;
 use AcMarche\College\Providers\CollegeServiceProvider;
+use AcMarche\Conseil\Enums\RolesEnum as RoleEnumConseil;
+use AcMarche\Conseil\Providers\ConseilServiceProvider;
 use AcMarche\Courrier\Enums\RolesEnum as RoleEnumCourrier;
 use AcMarche\Courrier\Providers\CourrierServiceProvider;
 use AcMarche\CpasLibrary\Enums\RolesEnum as RoleEnumCpasLibrary;
@@ -47,6 +51,8 @@ use AcMarche\SportsActivities\Enums\RolesEnum as RoleEnumSportsActivities;
 use AcMarche\SportsActivities\Providers\SportsActivitiesServiceProvider;
 use AcMarche\StreetWatch\Enums\RolesEnum as RoleEnumStreetWatch;
 use AcMarche\StreetWatch\Providers\StreetWatchServiceProvider;
+use AcMarche\Telecommunication\Enums\RolesEnum as RoleEnumTelecommunication;
+use AcMarche\Telecommunication\Providers\TelecommunicationServiceProvider;
 use Illuminate\Console\Command;
 use Override;
 use Symfony\Component\Console\Command\Command as SfCommand;
@@ -96,6 +102,9 @@ final class SyncRolesCommand extends Command
             [SportsActivitiesServiceProvider::class, RoleEnumSportsActivities::cases()],
             [SecurityServiceProvider::class, RoleEnumSecurity::cases()],
             [StreetWatchServiceProvider::class, RoleEnumStreetWatch::cases()],
+            [ActivityManagerServiceProvider::class, RoleEnumActivityManager::cases()],
+            [ConseilServiceProvider::class, RoleEnumConseil::cases()],
+            [TelecommunicationServiceProvider::class, RoleEnumTelecommunication::cases()],
         ];
 
         foreach ($mappings as [$providerClass, $cases]) {

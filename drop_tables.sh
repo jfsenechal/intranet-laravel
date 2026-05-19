@@ -72,10 +72,10 @@ php artisan intranet:sync-users
 echo "Sync users done."
 php artisan db:seed
 echo "DB seed done."
-php artisan intranet:migration-role
-echo "Migration role done."
 php artisan intranet:sync-role
 echo "Sync role done."
+php artisan intranet:migration-role
+echo "Migration role done."
 php artisan mileage:migration
 echo "Migration done."
 exit

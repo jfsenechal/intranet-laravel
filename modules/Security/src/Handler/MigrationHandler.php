@@ -82,7 +82,7 @@ final class MigrationHandler
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
             59 => TicketResource::getUrl('index', panel: 'guichet-hdv-panel'),
-            60 => IncidentResource::getUrl('index', panel: 'street-watch-hdv-panel'),
+            60 => IncidentResource::getUrl('index', panel: 'street-watch-panel'),
             61 => AddressBookResource::getUrl('index', panel: 'mailing-list-panel'),
             62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
             default => null,
