@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\MealDelivery\Filament\Resources\Absence\Schemas;
+namespace AcMarche\MealDelivery\Filament\Resources\Absences\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;

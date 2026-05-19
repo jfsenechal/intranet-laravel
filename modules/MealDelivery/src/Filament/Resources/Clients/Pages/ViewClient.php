@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 
 use AcMarche\MealDelivery\Filament\Actions\ExportMonthlyOrdersAction;
-use AcMarche\MealDelivery\Filament\Resources\Absence\Schemas\AbsenceForm;
+use AcMarche\MealDelivery\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;

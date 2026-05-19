@@ -79,7 +79,8 @@ final class ClassifiedAdTables
                         $data['created_until'],
                         fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                     )),
-            ], layout: FiltersLayout::AboveContent)->filtersFormWidth(Width::FourExtraLarge)
+            ])
+            ->filtersFormWidth(Width::FourExtraLarge)
             ->recordActions([
                 ViewAction::make()
                     ->visible(false),
