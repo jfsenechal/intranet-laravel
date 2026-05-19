@@ -7,7 +7,7 @@ namespace AcMarche\Conseil\Policies;
 use AcMarche\Conseil\Enums\RolesEnum;
 use App\Models\User;
 
-final class MinutePolicy
+final class PvPolicy
 {
     public function viewAny(User $user): bool
     {

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\Conseil\Database\Factories;
 
-use AcMarche\Conseil\Models\Minute;
+use AcMarche\Conseil\Models\Pv;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Minute>
+ * @extends Factory<Pv>
  */
-final class MinuteFactory extends Factory
+final class PvFactory extends Factory
 {
     /**
      * @return array<string, mixed>

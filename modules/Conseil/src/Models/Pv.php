@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace AcMarche\Conseil\Models;
 
-use AcMarche\Conseil\Database\Factories\MinuteFactory;
+use AcMarche\Conseil\Database\Factories\PvFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[UseFactory(MinuteFactory::class)]
+#[UseFactory(PvFactory::class)]
 #[Connection('maria-conseil')]
 #[Fillable([
     'name',
     'meeting_date',
     'file_name',
 ])]
-final class Minute extends Model
+final class Pv extends Model
 {
     use HasFactory;
 

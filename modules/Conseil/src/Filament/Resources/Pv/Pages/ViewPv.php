@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Conseil\Filament\Resources\Minutes\Pages;
+namespace AcMarche\Conseil\Filament\Resources\Pvs\Pages;
 
-use AcMarche\Conseil\Filament\Resources\Minutes\MinuteResource;
+use AcMarche\Conseil\Filament\Resources\Pvs\PvResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -14,10 +14,10 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class ViewMinute extends ViewRecord
+final class ViewPv extends ViewRecord
 {
     #[Override]
-    protected static string $resource = MinuteResource::class;
+    protected static string $resource = PvResource::class;
 
     public function getTitle(): string
     {

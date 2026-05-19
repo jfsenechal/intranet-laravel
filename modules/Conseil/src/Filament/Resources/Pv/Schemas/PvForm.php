@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Conseil\Filament\Resources\Minutes\Schemas;
+namespace AcMarche\Conseil\Filament\Resources\Pvs\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -11,7 +11,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-final class MinuteForm
+final class PvForm
 {
     public static function configure(Schema $schema): Schema
     {

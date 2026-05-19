@@ -14,16 +14,16 @@ return new class extends Migration
     {
         if (Schema::connection('maria-conseil')->hasTable('pv')) {
             Schema::connection('maria-conseil')->table('pv', function (Blueprint $table): void {
-                $table->rename('minutes');
+                $table->rename('pvs');
             });
-            Schema::connection('maria-conseil')->table('minutes', function (Blueprint $table): void {
+            Schema::connection('maria-conseil')->table('pvs', function (Blueprint $table): void {
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('date_pv', 'meeting_date');
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');
             });
-        } elseif (! Schema::connection('maria-conseil')->hasTable('minutes')) {
-            Schema::connection('maria-conseil')->create('minutes', function (Blueprint $table): void {
+        } elseif (! Schema::connection('maria-conseil')->hasTable('pvs')) {
+            Schema::connection('maria-conseil')->create('pvs', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name', 100);
                 $table->date('meeting_date');
@@ -31,10 +31,5 @@ return new class extends Migration
                 $table->timestamps();
             });
         }
-    }
-
-    public function down(): void
-    {
-        Schema::connection('maria-conseil')->dropIfExists('minutes');
     }
 };

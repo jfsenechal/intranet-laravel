@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Conseil\Filament\Resources\Minutes;
+namespace AcMarche\Conseil\Filament\Resources\Pvs;
 
-use AcMarche\Conseil\Filament\Resources\Minutes\Pages\CreateMinute;
-use AcMarche\Conseil\Filament\Resources\Minutes\Pages\EditMinute;
-use AcMarche\Conseil\Filament\Resources\Minutes\Pages\ListMinutes;
-use AcMarche\Conseil\Filament\Resources\Minutes\Pages\ViewMinute;
-use AcMarche\Conseil\Filament\Resources\Minutes\Schemas\MinuteForm;
-use AcMarche\Conseil\Filament\Resources\Minutes\Tables\MinutesTable;
-use AcMarche\Conseil\Models\Minute;
+use AcMarche\Conseil\Filament\Resources\Pvs\Pages\CreatePv;
+use AcMarche\Conseil\Filament\Resources\Pvs\Pages\EditPv;
+use AcMarche\Conseil\Filament\Resources\Pvs\Pages\ListPvs;
+use AcMarche\Conseil\Filament\Resources\Pvs\Pages\ViewPv;
+use AcMarche\Conseil\Filament\Resources\Pvs\Schemas\PvForm;
+use AcMarche\Conseil\Filament\Resources\Pvs\Tables\PvsTable;
+use AcMarche\Conseil\Models\Pv;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -18,10 +18,10 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Override;
 
-final class MinuteResource extends Resource
+final class PvResource extends Resource
 {
     #[Override]
-    protected static ?string $model = Minute::class;
+    protected static ?string $model = Pv::class;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
@@ -50,12 +50,12 @@ final class MinuteResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return MinuteForm::configure($schema);
+        return PvForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return MinutesTable::configure($table);
+        return PvsTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -68,10 +68,10 @@ final class MinuteResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListMinutes::route('/'),
-            'create' => CreateMinute::route('/create'),
-            'view' => ViewMinute::route('/{record}'),
-            'edit' => EditMinute::route('/{record}/edit'),
+            'index' => ListPvs::route('/'),
+            'create' => CreatePv::route('/create'),
+            'view' => ViewPv::route('/{record}'),
+            'edit' => EditPv::route('/{record}/edit'),
         ];
     }
 }

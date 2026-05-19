@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Conseil\Filament\Resources\Minutes\Tables;
+namespace AcMarche\Conseil\Filament\Resources\Pvs\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -12,7 +12,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-final class MinutesTable
+final class PvsTable
 {
     public static function configure(Table $table): Table
     {

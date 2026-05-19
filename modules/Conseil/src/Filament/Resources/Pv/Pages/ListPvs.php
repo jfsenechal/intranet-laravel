@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Conseil\Filament\Resources\Minutes\Pages;
+namespace AcMarche\Conseil\Filament\Resources\Pvs\Pages;
 
-use AcMarche\Conseil\Filament\Resources\Minutes\MinuteResource;
+use AcMarche\Conseil\Filament\Resources\Pvs\PvResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class ListMinutes extends ListRecords
+final class ListPvs extends ListRecords
 {
     #[Override]
-    protected static string $resource = MinuteResource::class;
+    protected static string $resource = PvResource::class;
 
     protected function getHeaderActions(): array
     {
