@@ -12,9 +12,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Schemas\Components\Flex;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -32,6 +32,14 @@ final class ClassifiedAdTables
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('category')->where('archive', '!=', '1'))
             ->columns([
                 Stack::make([
+                    ImageColumn::make('cover')
+                        ->state(fn (ClassifiedAd $record): ?string => self::firstImage($record))
+                        ->visibility('public')
+                        ->disk('public')
+                        ->height(160)
+                        ->extraImgAttributes([
+                            'class' => 'w-full rounded-t-lg object-cover',
+                        ]),
                     TextColumn::make('name')
                         ->label('Intitulé')
                         ->limit(120)
@@ -50,9 +58,16 @@ final class ClassifiedAdTables
                             // Only render the tooltip if the column content exceeds the length limit.
                             return $state;
                         }),
-                ]),
-                TextColumn::make('category.name')
-                    ->label('Catégorie'),
+                    TextColumn::make('category.name')
+                        ->label('Catégorie')
+                        ->badge()
+                        ->color('gray'),
+                ])->space(2),
+            ])
+            ->contentGrid([
+                'sm' => 2,
+                'md' => 3,
+                'xl' => 4,
             ])
             ->filters([
                 SelectFilter::make('category_id')
@@ -91,5 +106,24 @@ final class ClassifiedAdTables
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    private static function firstImage(ClassifiedAd $record): ?string
+    {
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'];
+
+        foreach ((array) ($record->medias ?? []) as $media) {
+            if (! is_string($media) || $media === '') {
+                continue;
+            }
+
+            $extension = mb_strtolower(pathinfo($media, PATHINFO_EXTENSION));
+
+            if (in_array($extension, $imageExtensions, true)) {
+                return $media;
+            }
+        }
+
+        return null;
     }
 }
