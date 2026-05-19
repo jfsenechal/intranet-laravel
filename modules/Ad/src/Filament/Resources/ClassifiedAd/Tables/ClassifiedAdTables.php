@@ -36,7 +36,8 @@ final class ClassifiedAdTables
                         ->state(fn (ClassifiedAd $record): ?string => self::firstImage($record))
                         ->visibility('public')
                         ->disk('public')
-                        ->height(160)
+                        ->defaultImageUrl(self::placeholderImage())
+                        ->imageHeight(160)
                         ->extraImgAttributes([
                             'class' => 'w-full rounded-t-lg object-cover',
                         ]),
@@ -45,8 +46,11 @@ final class ClassifiedAdTables
                         ->limit(120)
                         ->weight('bold')
                         ->size('md')
-                        ->description(fn (ClassifiedAd $record): string => Str::limit($record->content, 250, ' (...)'),
-                            position: 'below')
+                        ->description(fn (ClassifiedAd $record): string => Str::limit(
+                            mb_trim(html_entity_decode(strip_tags((string) $record->content), ENT_QUOTES | ENT_HTML5)),
+                            250,
+                            ' (...)'
+                        ), position: 'below')
                         ->color(Color::Green)
                         ->tooltip(function (TextColumn $column): ?string {
                             $state = $column->getState();
@@ -66,8 +70,8 @@ final class ClassifiedAdTables
             ])
             ->contentGrid([
                 'sm' => 2,
-                'md' => 3,
-                'xl' => 4,
+                'md' => 2,
+                'xl' => 2,
             ])
             ->filters([
                 SelectFilter::make('category_id')
@@ -125,5 +129,22 @@ final class ClassifiedAdTables
         }
 
         return null;
+    }
+
+    private static function placeholderImage(): string
+    {
+        $svg = <<<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
+    <rect width="400" height="240" fill="#e5e7eb"/>
+    <g fill="none" stroke="#9ca3af" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(160 80)">
+        <rect x="0" y="0" width="80" height="80" rx="8"/>
+        <circle cx="26" cy="26" r="8"/>
+        <path d="M0 64 L26 42 L48 60 L64 48 L80 64"/>
+    </g>
+    <text x="200" y="190" font-family="system-ui,sans-serif" font-size="16" fill="#6b7280" text-anchor="middle">Aucune image</text>
+</svg>
+SVG;
+
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
     }
 }
