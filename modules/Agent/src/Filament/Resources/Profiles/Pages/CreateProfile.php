@@ -36,13 +36,12 @@ final class CreateProfile extends CreateRecord
     #[Override]
     public function mount(): void
     {
-        parent::mount();
-
         if ($this->employeeId !== null) {
             $this->employee = Employee::query()
-                ->with(['activeContracts.service'])
                 ->find($this->employeeId);
         }
+
+        parent::mount();
     }
 
     #[Override]
@@ -54,13 +53,12 @@ final class CreateProfile extends CreateRecord
             return 'Ajouter un profil pour '.$fullName;
         }
 
-        return self::$title ?? 'Ajouter un profil';
+        abort(404, 'Employee not found');
     }
 
     public function form(Schema $schema): Schema
     {
         $components = [];
-
         if ($this->employee instanceof Employee) {
             $services = $this->employee->activeContracts
                 ->map(fn ($contract) => $contract->service?->name)
@@ -85,15 +83,15 @@ final class CreateProfile extends CreateRecord
                         ->state($this->employee->hired_at?->format('d/m/Y') ?? '—'),
                     TextEntry::make('status')
                         ->label('Statut')
-                        ->state((string) $this->employee->status),
+                        ->state($this->employee->status?->getLabel() ?? '—'),
                 ]);
-        }
 
-        $components[] = Select::make('username')
-            ->label('Utilisateur LDAP')
-            ->options(UserRepository::listLdapUsersForSelect())
-            ->searchable()
-            ->required();
+            $components[] = Select::make('username')
+                ->label('Utilisateur LDAP')
+                ->helperText('Lier à la LDAP si celle-ci existe')
+                ->options(UserRepository::listLdapUsersForSelect())
+                ->searchable();
+        }
 
         return $schema->schema($components);
     }
@@ -106,8 +104,8 @@ final class CreateProfile extends CreateRecord
 
         if (! empty($data['username'])) {
             if (($userLdap = LdapRepository::findByUsername($data['username'])) instanceof Model) {
-                $data['first_name'] = $userLdap->getFirstAttribute('givenname');
-                $data['last_name'] = $userLdap->getFirstAttribute('sn');
+                $data['first_name'] = $userLdap->getFirstAttribute('givenname').'prenom pas trouvé';
+                $data['last_name'] = $userLdap->getFirstAttribute('sn') ?? 'nom pas trouvé';
             }
         }
 
