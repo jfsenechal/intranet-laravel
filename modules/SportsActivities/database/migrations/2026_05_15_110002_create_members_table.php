@@ -28,7 +28,6 @@ return new class() extends Migration
             $table->string('mobile', 255)->nullable();
             $table->string('email', 255)->nullable();
             $table->longText('comment')->nullable();
-            $table->string('user', 255);
             $table->timestamps();
         });
     }

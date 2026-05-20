@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'price',
     'description',
     'comment',
-    'user',
 ])]
 final class Group extends Model
 {

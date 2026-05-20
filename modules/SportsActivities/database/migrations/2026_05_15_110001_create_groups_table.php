@@ -27,7 +27,6 @@ return new class() extends Migration
             $table->double('price')->default(0);
             $table->longText('description')->nullable();
             $table->longText('comment')->nullable();
-            $table->string('user', 255);
             $table->timestamps();
         });
     }

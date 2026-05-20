@@ -6,13 +6,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
-{
+return new class() extends Migration {
     protected $connection = 'maria-rescam';
 
     public function up(): void
     {
-        if (Schema::connection('maria-rescam')->hasTable('registrations')) {
+        if (Schema::connection('maria-rescam')->hasTable('inscriptions')) {
+            Schema::connection('maria-rescam')->table('inscriptions', function (Blueprint $table): void {
+                $table->renameColumn('user', 'user_add');
+            });
+
             return;
         }
 
@@ -23,7 +26,7 @@ return new class() extends Migration
             $table->foreignId('member_id')->constrained('members');
             $table->double('price')->nullable();
             $table->longText('comment')->nullable();
-            $table->string('user', 255);
+            $table->string('user_add', 255);
             $table->timestamps();
 
             $table->unique(['activity_id', 'group_id', 'member_id'], 'registration_idx');

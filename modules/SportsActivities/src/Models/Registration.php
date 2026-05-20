@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\SportsActivities\Models;
 
+use AcMarche\Security\Models\HasUserAdd;
 use AcMarche\SportsActivities\Database\Factories\RegistrationFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,11 +21,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'member_id',
     'price',
     'comment',
-    'user',
 ])]
 final class Registration extends Model
 {
     use HasFactory;
+    use HasUserAdd;
 
     /**
      * @var array<string, string>
@@ -55,5 +56,10 @@ final class Registration extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    protected static function booted(): void
+    {
+        self::bootHasUser();
     }
 }

@@ -26,7 +26,6 @@ return new class() extends Migration
             $table->id();
             $table->string('name', 255);
             $table->longText('description')->nullable();
-            $table->string('user', 255);
             $table->boolean('archived')->default(false);
             $table->timestamps();
         });

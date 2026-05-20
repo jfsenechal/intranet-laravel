@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\SportsActivities\Filament\Resources\Groups\Tables;
 
 use AcMarche\SportsActivities\Filament\Exports\GroupRegistrationsPdfExport;
+use AcMarche\SportsActivities\Filament\Resources\Registrations\Schemas\RegistrationForm;
 use AcMarche\SportsActivities\Filament\Resources\Registrations\Schemas\RegistrationInfoList;
 use AcMarche\SportsActivities\Models\Group;
 use Filament\Actions\Action;
@@ -61,6 +62,18 @@ final class GroupsTable
                     ->icon(Heroicon::ArrowDownTray)
                     ->color('info')
                     ->action(fn (Group $record): StreamedResponse => GroupRegistrationsPdfExport::download($record)),
+                Action::make('addRegistration')
+                    ->label('Inscrire un sportif')
+                    ->icon(Heroicon::UserPlus)
+                    ->color('success')
+                    ->modalHeading(fn (Group $record): string => 'Nouvelle inscription - '.($record->activity?->name ?? $record->day))
+                    ->schema(RegistrationForm::schemaSelectMember())
+                    ->action(function (array $data, Group $record): void {
+                        $record->registrations()->create([
+                            ...$data,
+                            'activity_id' => $record->activity_id,
+                        ]);
+                    }),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),

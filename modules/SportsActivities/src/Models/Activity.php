@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'name',
     'description',
-    'user',
     'archived',
 ])]
 final class Activity extends Model

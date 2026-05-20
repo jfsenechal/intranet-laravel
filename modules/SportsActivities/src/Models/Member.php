@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'mobile',
     'email',
     'comment',
-    'user',
 ])]
 final class Member extends Model
 {

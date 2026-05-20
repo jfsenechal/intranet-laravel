@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AcMarche\SportsActivities\Filament\Resources\Members\Pages;
 
 use AcMarche\SportsActivities\Filament\Resources\Members\MemberResource;
+use AcMarche\SportsActivities\Filament\Resources\Registrations\Schemas\RegistrationForm;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -62,6 +64,15 @@ final class ViewMember extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('addRegistration')
+                ->label('Inscrire à une activité')
+                ->icon(Heroicon::UserPlus)
+                ->color('success')
+                ->modalHeading('Nouvelle inscription')
+                ->schema(RegistrationForm::schemaSelectActivity())
+                ->action(function (array $data): void {
+                    $this->record->registrations()->create($data);
+                }),
             EditAction::make()
                 ->label('Modifier')
                 ->icon(Heroicon::PencilSquare),
