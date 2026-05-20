@@ -28,10 +28,15 @@ final class GroupsTable
                     ->sortable(),
                 TextColumn::make('time')->label('Heure')
                     ->sortable(),
-                TextColumn::make('location')->label('Lieu'),
-                TextColumn::make('age')->label('Âge'),
-                TextColumn::make('price')->label('Prix')
-                    ->money('EUR')->sortable(),
+                TextColumn::make('location')
+                    ->label('Lieu')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('age')
+                    ->label('Âge'),
+                TextColumn::make('price')
+                    ->label('Prix')
+                    ->money('EUR')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('registrations_count')
                     ->counts('registrations')
                     ->label('Inscriptions'),
@@ -46,7 +51,8 @@ final class GroupsTable
                     ->label('Inscrits')
                     ->icon(Heroicon::UserGroup)
                     ->color('info')
-                    ->modalHeading(fn (Group $record): string => 'Inscrits - '.($record->activity?->name ?? $record->day))
+                    ->modalHeading(fn (Group $record): string => 'Inscrits - '.($record->activity?->name ?? $record->day)
+                    )
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer')
                     ->schema(fn (Schema $schema): Schema => RegistrationInfoList::configure($schema)),

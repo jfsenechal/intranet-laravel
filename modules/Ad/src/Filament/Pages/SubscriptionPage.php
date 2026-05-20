@@ -42,14 +42,6 @@ final class SubscriptionPage extends Page implements HasForms
         return "S'abonner aux nouvelles annonces";
     }
 
-    /**
-     * @return array<int, string>
-     */
-    protected function getForms(): array
-    {
-        return ['subscribeForm', 'unsubscribeForm'];
-    }
-
     public function subscribeForm(Schema $schema): Schema
     {
         return $schema
@@ -128,6 +120,14 @@ final class SubscriptionPage extends Page implements HasForms
             ->title('Désabonnement effectué')
             ->success()
             ->send();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function getForms(): array
+    {
+        return ['subscribeForm', 'unsubscribeForm'];
     }
 
     /**

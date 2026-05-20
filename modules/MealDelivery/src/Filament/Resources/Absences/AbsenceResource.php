@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Absences;
 
-use AcMarche\MealDelivery\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\MealDelivery\Filament\Resources\Absences\Pages\EditAbsence;
 use AcMarche\MealDelivery\Filament\Resources\Absences\Pages\ListAbsences;
+use AcMarche\MealDelivery\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\MealDelivery\Filament\Resources\Absences\Tables\AbsenceTables;
 use AcMarche\MealDelivery\Models\Absence;
 use Filament\Resources\Resource;

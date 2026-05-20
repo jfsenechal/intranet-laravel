@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AcMarche\ActivityManager\Providers;
 
 use AcMarche\ActivityManager\Models\Activity;
-use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\ActivityManager\Models\Member;
+use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\ActivityManager\Policies\ActivityPolicy;
-use AcMarche\ActivityManager\Policies\SchedulePolicy;
 use AcMarche\ActivityManager\Policies\MemberPolicy;
+use AcMarche\ActivityManager\Policies\SchedulePolicy;
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;

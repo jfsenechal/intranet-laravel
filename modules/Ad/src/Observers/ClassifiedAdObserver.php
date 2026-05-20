@@ -37,7 +37,7 @@ final class ClassifiedAdObserver
             try {
                 Mail::to(new Address(
                     (string) $subscriber->email,
-                    trim($subscriber->first_name.' '.$subscriber->last_name),
+                    mb_trim($subscriber->first_name.' '.$subscriber->last_name),
                 ))->send(new ClassifiedAdEmail($classifiedAd));
             } catch (Exception $exception) {
                 Log::warning('ClassifiedAd subscriber mail failed', [

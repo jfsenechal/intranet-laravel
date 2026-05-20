@@ -15,7 +15,7 @@ final class SubscriptionService
      */
     public function findEligibleEmployee(string $email): ?Employee
     {
-        $email = mb_strtolower(trim($email));
+        $email = mb_strtolower(mb_trim($email));
 
         if ($email === '') {
             return null;
@@ -42,7 +42,7 @@ final class SubscriptionService
         }
 
         return Subscriber::query()->updateOrCreate(
-            ['email' => mb_strtolower(trim($email))],
+            ['email' => mb_strtolower(mb_trim($email))],
             [
                 'first_name' => (string) $employee->first_name,
                 'last_name' => (string) $employee->last_name,
@@ -52,7 +52,7 @@ final class SubscriptionService
 
     public function unsubscribe(string $email): bool
     {
-        $email = mb_strtolower(trim($email));
+        $email = mb_strtolower(mb_trim($email));
 
         if ($email === '') {
             return false;

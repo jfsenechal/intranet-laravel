@@ -19,13 +19,29 @@ final class RegistrationsTable
     {
         return $table
             ->columns([
-                TextColumn::make('member.last_name')->label('Nom')->sortable()->searchable(),
-                TextColumn::make('member.first_name')->label('Prénom')->sortable()->searchable(),
-                TextColumn::make('activity.name')->label('Activité')->sortable()->searchable(),
-                TextColumn::make('group.day')->label('Jour'),
-                TextColumn::make('group.location')->label('Lieu'),
-                TextColumn::make('price')->label('Prix')->money('EUR')->sortable(),
-                TextColumn::make('created_at')->label('Inscription')->date()->sortable(),
+                TextColumn::make('member.last_name')
+                    ->label('Nom')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('member.first_name')
+                    ->label('Prénom')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('activity.name')
+                    ->label('Activité')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('group.day')
+                    ->label('Jour'),
+                TextColumn::make('group.location')
+                    ->label('Lieu'),
+                TextColumn::make('price')
+                    ->label('Prix')
+                    ->money('EUR'),
+                TextColumn::make('created_at')
+                    ->label('Inscription')
+                    ->date()
+                    ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

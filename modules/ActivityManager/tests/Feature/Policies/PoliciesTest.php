@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
 use AcMarche\ActivityManager\Models\Activity;
-use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\ActivityManager\Models\Member;
+use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;

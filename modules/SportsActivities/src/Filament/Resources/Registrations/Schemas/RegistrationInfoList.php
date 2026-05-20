@@ -28,20 +28,20 @@ final class RegistrationInfoList
                     ])
                     ->schema([
                         TextEntry::make('name')
-                            ->state(fn(Registration $record): string => self::memberName($record->member)),
+                            ->state(fn (Registration $record): string => self::memberName($record->member)),
                         TextEntry::make('address')
-                            ->state(fn(Registration $record): string => self::memberAddress($record->member)),
+                            ->state(fn (Registration $record): string => self::memberAddress($record->member)),
                         TextEntry::make('phone')
                             ->placeholder('-')
                             ->state(
-                                fn(Registration $record): ?string => $record->member?->phone ?: $record->member?->mobile
+                                fn (Registration $record): ?string => $record->member?->phone ?: $record->member?->mobile
                             ),
                         TextEntry::make('email')
                             ->placeholder('-')
-                            ->state(fn(Registration $record): ?string => $record->member?->email),
+                            ->state(fn (Registration $record): ?string => $record->member?->email),
                         TextEntry::make('birth_date')
                             ->placeholder('-')
-                            ->state(fn(Registration $record): ?string => $record->member?->birth_date?->format('d/m/Y')
+                            ->state(fn (Registration $record): ?string => $record->member?->birth_date?->format('d/m/Y')
                             ),
                     ]),
             ]);

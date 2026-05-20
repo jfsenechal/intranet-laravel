@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use AcMarche\College\Enums\RolesEnum;
-use AcMarche\College\Models\Recipient;
 use AcMarche\College\Models\Notification;
+use AcMarche\College\Models\Recipient;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;

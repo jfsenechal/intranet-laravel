@@ -21,7 +21,7 @@ final class GroupInfoList
                 ->contained(false)
                 ->schema([
                     Section::make()
-                        ->heading(fn(Group $record): string => $record->name())
+                        ->heading(fn (Group $record): string => $record->name())
                         ->columns(2)
                         ->schema([
                             TextEntry::make('price')
@@ -29,7 +29,7 @@ final class GroupInfoList
                                 ->money('EUR'),
                             TextEntry::make('registrations_count')
                                 ->label('Inscrits')
-                                ->state(fn(Group $record): string => $record->registrations->count().' inscrits'),
+                                ->state(fn (Group $record): string => $record->registrations->count().' inscrits'),
                             RepeatableEntry::make('registrations')
                                 ->hiddenLabel()
                                 ->columnSpanFull()
