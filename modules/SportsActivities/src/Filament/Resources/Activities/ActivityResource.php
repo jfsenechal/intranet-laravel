@@ -10,6 +10,7 @@ use AcMarche\SportsActivities\Filament\Resources\Activities\Pages\ListActivities
 use AcMarche\SportsActivities\Filament\Resources\Activities\Pages\ViewActivity;
 use AcMarche\SportsActivities\Filament\Resources\Activities\RelationManagers\GroupsRelationManager;
 use AcMarche\SportsActivities\Filament\Resources\Activities\Schemas\ActivityForm;
+use AcMarche\SportsActivities\Filament\Resources\Activities\Schemas\ActivityInfoList;
 use AcMarche\SportsActivities\Filament\Resources\Activities\Tables\ActivitiesTable;
 use AcMarche\SportsActivities\Models\Activity;
 use BackedEnum;
@@ -57,6 +58,11 @@ final class ActivityResource extends Resource
     public static function table(Table $table): Table
     {
         return ActivitiesTable::configure($table);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return ActivityInfoList::configure($schema);
     }
 
     public static function getRelations(): array
