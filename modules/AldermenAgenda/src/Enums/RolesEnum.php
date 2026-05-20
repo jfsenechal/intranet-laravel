@@ -15,7 +15,7 @@ enum RolesEnum: string implements HasLabel
     {
         switch ($this) {
             case self::ROLE_INVITATION:
-                'Invitations';
+                return 'Invitations';
             default:
                 return null;
         }

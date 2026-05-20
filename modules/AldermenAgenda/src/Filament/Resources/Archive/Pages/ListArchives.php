@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\AldermenAgenda\Filament\Resources\Archive\Pages;
 
 use AcMarche\AldermenAgenda\Filament\Resources\Archive\ArchiveResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Override;
 
@@ -22,9 +21,6 @@ final class ListArchives extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Ajouter une archive')
-                ->icon('tabler-plus'),
         ];
     }
 }

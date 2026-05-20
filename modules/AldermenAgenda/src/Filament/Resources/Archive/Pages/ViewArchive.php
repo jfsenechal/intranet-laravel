@@ -7,7 +7,6 @@ namespace AcMarche\AldermenAgenda\Filament\Resources\Archive\Pages;
 use AcMarche\AldermenAgenda\Filament\Resources\Archive\ArchiveResource;
 use AcMarche\AldermenAgenda\Filament\Resources\Archive\Schemas\ArchiveInfolist;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Override;
@@ -30,8 +29,6 @@ final class ViewArchive extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make()
-                ->icon('tabler-edit'),
             DeleteAction::make()
                 ->icon('tabler-trash'),
         ];
