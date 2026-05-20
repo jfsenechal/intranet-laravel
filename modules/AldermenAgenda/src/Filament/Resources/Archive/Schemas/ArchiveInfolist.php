@@ -13,7 +13,7 @@ final class ArchiveInfolist
     {
         return $schema
             ->schema([
-                TextEntry::make('title')
+                TextEntry::make('name')
                     ->label('Intitulé'),
                 TextEntry::make('sent_at')
                     ->label('Date d\'envoi')

@@ -17,7 +17,7 @@ final class EditArchive extends EditRecord
 
     public function getTitle(): string|Htmlable
     {
-        return $this->getRecord()->title ?? 'Archive';
+        return $this->getRecord()->name ?? 'Archive';
     }
 
     protected function getHeaderActions(): array

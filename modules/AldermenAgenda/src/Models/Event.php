@@ -39,13 +39,13 @@ final class Event extends Model
 
     public function __toString(): string
     {
-        return $this->title;
+        return $this->name;
     }
 
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom(['title'])
+            ->generateSlugsFrom(['name'])
             ->saveSlugsTo('slug')
             ->allowSlugReuse();
     }

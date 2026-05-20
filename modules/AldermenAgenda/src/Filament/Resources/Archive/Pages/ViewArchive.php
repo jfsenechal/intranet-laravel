@@ -19,7 +19,7 @@ final class ViewArchive extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->title ?? 'Archive';
+        return $this->record->name ?? 'Archive';
     }
 
     public function infolist(Schema $schema): Schema

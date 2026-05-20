@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $event->title }}</title>
+    <title>{{ $event->name }}</title>
 </head>
 <body style="background-color: #f8fafc; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; margin: 0; padding: 0;">
 <div style="max-width: 752px; margin: 0 auto; padding: 24px;">

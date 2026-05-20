@@ -17,7 +17,7 @@ final class ArchiveForm
         return $schema
             ->columns(1)
             ->schema([
-                TextInput::make('title')
+                TextInput::make('name')
                     ->label('Intitulé')
                     ->maxLength(255)
                     ->nullable(),

@@ -24,7 +24,7 @@ final class EventEmail extends Mailable
         public readonly bool $isPreview = false,
     ) {
         $prefix = $this->isPreview ? '[Aperçu] ' : '';
-        $this->subject = $prefix.$this->event->title;
+        $this->subject = $prefix.$this->event->name;
     }
 
     /**
