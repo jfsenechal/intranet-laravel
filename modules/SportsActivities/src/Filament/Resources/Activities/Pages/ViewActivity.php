@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace AcMarche\SportsActivities\Filament\Resources\Activities\Pages;
 
+use AcMarche\SportsActivities\Filament\Exports\ActivityGroupsPdfExport;
 use AcMarche\SportsActivities\Filament\Resources\Activities\ActivityResource;
 use AcMarche\SportsActivities\Filament\Resources\Groups\Schemas\GroupForm;
+use AcMarche\SportsActivities\Models\Activity;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Grid;
 use Filament\Support\Icons\Heroicon;
 use Override;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ViewActivity extends ViewRecord
 {
@@ -36,6 +36,11 @@ final class ViewActivity extends ViewRecord
                 ->action(function (array $data): void {
                     $this->record->groups()->create($data);
                 }),
+            Action::make('exportPdf')
+                ->label('Exporter en PDF')
+                ->icon(Heroicon::ArrowDownTray)
+                ->color('info')
+                ->action(fn (Activity $record): StreamedResponse => ActivityGroupsPdfExport::download($record)),
             EditAction::make()
                 ->label('Modifier')
                 ->icon(Heroicon::PencilSquare),
