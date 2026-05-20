@@ -25,7 +25,7 @@ final class EventForm
             ->schema([
                 Flex::make([
                     Section::make([
-                        TextInput::make('title')
+                        TextInput::make('name')
                             ->label('Intitulé')
                             ->required()
                             ->maxLength(255)

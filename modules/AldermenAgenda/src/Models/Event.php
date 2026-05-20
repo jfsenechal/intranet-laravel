@@ -18,7 +18,7 @@ use Spatie\Sluggable\SlugOptions;
 #[Fillable([
     'slug',
     'event_type',
-    'title',
+    'name',
     'description',
     'start_at',
     'end_at',
