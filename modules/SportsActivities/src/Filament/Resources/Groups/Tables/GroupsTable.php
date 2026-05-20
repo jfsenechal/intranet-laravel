@@ -44,10 +44,10 @@ final class GroupsTable
                     ->label('Inscrits')
                     ->icon(Heroicon::UserGroup)
                     ->color('info')
-                    ->modalHeading(fn(Group $record): string => 'Groupes - '.$record->name())
+                    ->modalHeading(fn (Group $record): string => 'Inscrits - '.($record->activity?->name ?? $record->day))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer')
-                    ->schema(fn(Schema $schema): Schema => RegistrationInfoList::configure($schema)),
+                    ->schema(fn (Schema $schema): Schema => RegistrationInfoList::configure($schema)),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),

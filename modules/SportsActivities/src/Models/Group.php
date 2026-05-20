@@ -39,7 +39,7 @@ final class Group extends Model
 
     public function name(): string
     {
-        return $this->day.' '.$this->age;
+        return 'Groupe '.$this->day.' '.$this->time.' '.$this->age;
     }
 
     /**
