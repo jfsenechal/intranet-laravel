@@ -31,6 +31,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
+use AcMarche\SportsActivities\Filament\Resources\Activities\ActivityResource;
 use AcMarche\StreetWatch\Filament\Resources\Incidents\IncidentResource;
 use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
@@ -65,7 +66,7 @@ final class MigrationHandler
             17 => UserResource::getUrl('index', panel: 'security-panel'),
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
             19 => NotificationResource::getUrl('index', panel: 'college-panel'),
-            20 => ActiviteResource::getUrl('index', panel: 'sports-activities-panel'),
+            20 => ActivityResource::getUrl('index', panel: 'sports-activities-panel'),
             21 => SignatureResource::getUrl('index', panel: 'app-panel'),
             22 => 'https://agenda.marche.be',
             25 => PvResource::getUrl('index', panel: 'conseil-panel'),
