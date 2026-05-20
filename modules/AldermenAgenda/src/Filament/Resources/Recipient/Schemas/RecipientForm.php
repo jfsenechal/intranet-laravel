@@ -30,7 +30,9 @@ final class RecipientForm
                     ->maxLength(150),
                 Toggle::make('ics')
                     ->label('ICS')
-                    ->helperText('Joindre au mail')
+                    ->helperText(
+                        'Ce fichier permet au destinataire d\'ajouter directement la manifestation dans son agenda'
+                    )
                     ->default(true),
             ]);
     }

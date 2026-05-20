@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\AldermenAgenda\Filament\Resources\Event\Schemas;
 
+use AcMarche\AldermenAgenda\Enums\EventTypesEnum;
+use AcMarche\AldermenAgenda\Enums\OrganizersEnum;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -27,16 +30,18 @@ final class EventForm
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
-                        TextInput::make('event_type')
+                        Radio::make('event_type')
                             ->label('Type d\'événement')
-                            ->required()
-                            ->maxLength(255),
-                        TextInput::make('organizer')
+                            ->enum(EventTypesEnum::class)
+                            ->options(EventTypesEnum::class)
+                            ->required(),
+                        Radio::make('organizer')
                             ->label('Organisateur')
-                            ->required()
-                            ->maxLength(255),
+                            ->enum(OrganizersEnum::class)
+                            ->options(OrganizersEnum::class)
+                            ->required(),
                         Textarea::make('description')
-                            ->label('Objet')
+                            ->label('Description')
                             ->required()
                             ->columnSpanFull(),
                         FileUpload::make('file1_name')

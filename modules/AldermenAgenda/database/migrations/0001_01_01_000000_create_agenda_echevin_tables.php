@@ -57,7 +57,7 @@ return new class extends Migration
                 $table->id();
                 $table->string('slug', 70)->unique();
                 $table->string('event_type');
-                $table->string('title');
+                $table->string('name');
                 $table->text('description');
                 $table->dateTime('start_at');
                 $table->dateTime('end_at');

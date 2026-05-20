@@ -19,7 +19,7 @@ final class ViewEvent extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->title;
+        return $this->record->name;
     }
 
     public function infolist(Schema $schema): Schema

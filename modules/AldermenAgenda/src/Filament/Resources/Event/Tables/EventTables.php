@@ -21,7 +21,7 @@ final class EventTables
             ->defaultSort('start_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('title')
+                TextColumn::make('name')
                     ->label('Intitulé')
                     ->searchable()
                     ->sortable()

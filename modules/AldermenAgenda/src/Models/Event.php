@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\AldermenAgenda\Models;
 
+use AcMarche\AldermenAgenda\Enums\EventTypesEnum;
+use AcMarche\AldermenAgenda\Enums\OrganizersEnum;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -56,6 +58,8 @@ final class Event extends Model
             'reminder_at' => 'datetime',
             'is_walk' => 'boolean',
             'sent' => 'boolean',
+            'event_type' => EventTypesEnum::class,
+            'organizer' => OrganizersEnum::class,
         ];
     }
 }

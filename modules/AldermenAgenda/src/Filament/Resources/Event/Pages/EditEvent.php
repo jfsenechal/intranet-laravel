@@ -18,7 +18,7 @@ final class EditEvent extends EditRecord
 
     public function getTitle(): string|Htmlable
     {
-        return $this->getRecord()->title;
+        return $this->getRecord()->name;
     }
 
     protected function getHeaderActions(): array
