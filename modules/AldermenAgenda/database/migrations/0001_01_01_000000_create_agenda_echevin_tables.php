@@ -48,7 +48,7 @@ return new class extends Migration
                 $table->renameColumn('is_marche', 'is_local');
                 $table->renameColumn('organisateur', 'organizer');
                 $table->renameColumn('lieu', 'location');
-                $table->renameColumn('representant', 'representative');
+                $table->dropColumn('representant');
                 $table->renameColumn('created', 'created_at');
                 $table->renameColumn('updated', 'updated_at');
             });
@@ -65,7 +65,6 @@ return new class extends Migration
                 $table->boolean('is_local')->default(true);
                 $table->string('organizer');
                 $table->string('location')->nullable();
-                $table->string('representative')->nullable();
                 $table->boolean('sent')->default(false);
                 $table->string('file1_name', 255)->nullable();
                 $table->string('file2_name', 255)->nullable();

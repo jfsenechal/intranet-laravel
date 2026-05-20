@@ -56,7 +56,8 @@ final class EventForm
                             ->directory(config('agenda_echevin.uploads.files'))
                             ->maxSize(7168)
                             ->nullable(),
-                    ]),
+                    ])
+                    ->columns(2),
                     Section::make([
                         DateTimePicker::make('start_at')
                             ->label('Date de début')
@@ -72,10 +73,6 @@ final class EventForm
                             ->suffixIcon('tabler-bell'),
                         TextInput::make('location')
                             ->label('Lieu')
-                            ->maxLength(255)
-                            ->nullable(),
-                        TextInput::make('representative')
-                            ->label('Représentant')
                             ->maxLength(255)
                             ->nullable(),
                         Toggle::make('is_local')

@@ -35,8 +35,6 @@ final class EventInfolist
                     ->icon('tabler-bell'),
                 TextEntry::make('location')
                     ->label('Lieu'),
-                TextEntry::make('representative')
-                    ->label('Représentant'),
                 IconEntry::make('is_local')
                     ->label('Sur la commune ?')
                     ->boolean(),
