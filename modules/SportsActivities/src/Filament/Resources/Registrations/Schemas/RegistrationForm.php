@@ -7,10 +7,10 @@ namespace AcMarche\SportsActivities\Filament\Resources\Registrations\Schemas;
 use AcMarche\SportsActivities\Models\Activity;
 use AcMarche\SportsActivities\Models\Group;
 use AcMarche\SportsActivities\Models\Member;
+use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -26,7 +26,7 @@ final class RegistrationForm
     {
         return [
             self::memberSelect(),
-            ...self::baseSchema(),
+            ...self::baseSchema(fn(Group $record): ?float => $record->price),
         ];
     }
 
@@ -45,26 +45,22 @@ final class RegistrationForm
     }
 
     /**
+     * @param Closure|null $priceDefault Resolves the default price (e.g. from the group).
      * @return array<int, mixed>
      */
-    public static function baseSchema(): array
+    public static function baseSchema(?Closure $priceDefault = null): array
     {
         return [
             Section::make('Inscription')
                 ->schema([
-                    Grid::make(2)->schema([
-                        TextInput::make('price')
-                            ->label('Prix')
-                            ->numeric(),
-                        TextInput::make('user')
-                            ->label('Créé par')
-                            ->required()
-                            ->maxLength(255),
-                        Textarea::make('comment')
-                            ->label('Remarque')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
+                    TextInput::make('price')
+                        ->label('Prix')
+                        ->helperText('Vous pouvez changer le prix si vous accordez une réduction')
+                        ->numeric()
+                        ->default($priceDefault),
+                    Textarea::make('comment')
+                        ->label('Remarque')
+                        ->rows(3),
                 ]),
         ];
     }
@@ -75,13 +71,13 @@ final class RegistrationForm
             ->label('Sportif')
             ->searchable()
             ->required()
-            ->getSearchResultsUsing(fn (string $search): array => Member::query()
+            ->getSearchResultsUsing(fn(string $search): array => Member::query()
                 ->where('last_name', 'like', "%{$search}%")
                 ->orWhere('first_name', 'like', "%{$search}%")
                 ->orderBy('last_name')
                 ->limit(50)
                 ->get()
-                ->mapWithKeys(fn (Member $member): array => [
+                ->mapWithKeys(fn(Member $member): array => [
                     $member->id => "{$member->last_name} {$member->first_name}",
                 ])
                 ->toArray())
@@ -96,14 +92,14 @@ final class RegistrationForm
     {
         return Select::make('activity_id')
             ->label('Activité')
-            ->options(fn (): array => Activity::query()
+            ->options(fn(): array => Activity::query()
                 ->orderBy('name')
                 ->pluck('name', 'id')
                 ->toArray())
             ->searchable()
             ->required()
             ->live()
-            ->afterStateUpdated(fn (Set $set) => $set('group_id', null));
+            ->afterStateUpdated(fn(Set $set) => $set('group_id', null));
     }
 
     private static function groupSelect(): Select
@@ -113,18 +109,23 @@ final class RegistrationForm
             ->required()
             ->options(function (Get $get): array {
                 $activityId = $get('activity_id');
-                if (! $activityId) {
+                if (!$activityId) {
                     return [];
                 }
 
                 return Group::query()
                     ->where('activity_id', $activityId)
                     ->get()
-                    ->mapWithKeys(fn (Group $group): array => [
+                    ->mapWithKeys(fn(Group $group): array => [
                         $group->id => "{$group->day} — {$group->time} — {$group->location}",
                     ])
                     ->toArray();
             })
-            ->searchable();
+            ->searchable()
+            ->live()
+            ->afterStateUpdated(function (Set $set, mixed $state): void {
+                $group = $state ? Group::find($state) : null;
+                $set('price', $group?->price);
+            });
     }
 }
