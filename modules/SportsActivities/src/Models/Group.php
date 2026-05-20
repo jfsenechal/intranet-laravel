@@ -37,6 +37,11 @@ final class Group extends Model
         'price' => 'float',
     ];
 
+    public function name(): string
+    {
+        return $this->day.' '.$this->age;
+    }
+
     /**
      * @return BelongsTo<Activity, $this>
      */

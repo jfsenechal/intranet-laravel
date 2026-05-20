@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\SportsActivities\Filament\Resources\Groups\Tables;
 
+use AcMarche\SportsActivities\Filament\Resources\Registrations\Schemas\RegistrationInfoList;
+use AcMarche\SportsActivities\Models\Group;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -19,15 +22,14 @@ final class GroupsTable
     {
         return $table
             ->columns([
-                TextColumn::make('activity.name')
-                    ->label('Activité')
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('day')->label('Jour')->sortable()->searchable(),
-                TextColumn::make('time')->label('Heure')->sortable(),
-                TextColumn::make('location')->label('Lieu')->sortable()->searchable(),
+                TextColumn::make('day')->label('Jour')
+                    ->sortable(),
+                TextColumn::make('time')->label('Heure')
+                    ->sortable(),
+                TextColumn::make('location')->label('Lieu'),
                 TextColumn::make('age')->label('Âge'),
-                TextColumn::make('price')->label('Prix')->money('EUR')->sortable(),
+                TextColumn::make('price')->label('Prix')
+                    ->money('EUR')->sortable(),
                 TextColumn::make('registrations_count')
                     ->counts('registrations')
                     ->label('Inscriptions'),
@@ -38,9 +40,14 @@ final class GroupsTable
                     ->relationship('activity', 'name'),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('Voir')
-                    ->icon(Heroicon::Eye),
+                Action::make('groupsInfo')
+                    ->label('Inscrits')
+                    ->icon(Heroicon::UserGroup)
+                    ->color('info')
+                    ->modalHeading(fn(Group $record): string => 'Groupes - '.$record->name())
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Fermer')
+                    ->schema(fn(Schema $schema): Schema => RegistrationInfoList::configure($schema)),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
