@@ -14,6 +14,8 @@ return new class() extends Migration {
         if (Schema::connection('maria-activity-manager')->hasTable('inscription')) {
             Schema::connection('maria-activity-manager')->table('inscription', function (Blueprint $table): void {
                 $table->rename('registrations');
+            });
+            Schema::connection('maria-activity-manager')->table('registrations', function (Blueprint $table): void {
                 $table->renameColumn('membre_id', 'member_id');
                 $table->renameColumn('cours_id', 'schedule_id');
             });

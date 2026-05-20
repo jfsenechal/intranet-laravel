@@ -14,10 +14,15 @@ return new class() extends Migration {
         if (Schema::connection('maria-activity-manager')->hasTable('dates_cours')) {
             Schema::connection('maria-activity-manager')->table('dates_cours', function (Blueprint $table): void {
                 $table->rename('activity_schedules');
-                $table->renameColumn('jour', 'schedule_date');
-                $table->renameColumn('remarque', 'comment');
-                $table->renameColumn('cours_id', 'schedule_id');
             });
+            Schema::connection('maria-activity-manager')->table(
+                'activity_schedules',
+                function (Blueprint $table): void {
+                    $table->renameColumn('jour', 'schedule_date');
+                    $table->renameColumn('remarque', 'comment');
+                    $table->renameColumn('cours_id', 'schedule_id');
+                }
+            );
 
             return;
         }
