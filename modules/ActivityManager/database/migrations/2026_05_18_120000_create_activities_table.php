@@ -13,11 +13,15 @@ return new class() extends Migration
     public function up(): void
     {
         if (Schema::connection('maria-activity-manager')->hasTable('activite')) {
+            Schema::connection('maria-activity-manager')->table('activite', function (Blueprint $table): void {
+                $table->rename('activities');
+                $table->renameColumn('nom', 'name');
+            });
             return;
         }
-        Schema::connection('maria-activity-manager')->create('activite', function (Blueprint $table): void {
+        Schema::connection('maria-activity-manager')->create('activities', function (Blueprint $table): void {
             $table->id();
-            $table->string('nom', 150);
+            $table->string('name', 150);
             $table->longText('description')->nullable();
         });
     }

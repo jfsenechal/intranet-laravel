@@ -6,16 +6,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
-{
+return new class() extends Migration {
     protected $connection = 'maria-activity-manager';
 
     public function up(): void
     {
         if (Schema::connection('maria-activity-manager')->hasTable('membre')) {
+            Schema::connection('maria-activity-manager')->table('membre', function (Blueprint $table): void {
+                $table->rename('members');
+
+            });
+
             return;
         }
-        Schema::connection('maria-activity-manager')->create('membre', function (Blueprint $table): void {
+        Schema::connection('maria-activity-manager')->create('members', function (Blueprint $table): void {
             $table->id();
             $table->string('civilite', 50)->nullable();
             $table->string('nom', 50);
