@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Handler;
 
-use AcMarche\ActivityManager\Filament\Resources\Activites\ActiviteResource;
+use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource as ActivityManagerResource;
 use AcMarche\Ad\Filament\Resources\ClassifiedAd\ClassifiedAdResource;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\AldermenAgenda\Filament\Resources\Event\EventResource;
@@ -31,7 +31,7 @@ use AcMarche\Publication\Filament\Resources\Publications\PublicationResource;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use AcMarche\Security\Models\Module;
-use AcMarche\SportsActivities\Filament\Resources\Activities\ActivityResource;
+use AcMarche\SportsActivities\Filament\Resources\Activities\ActivityResource as ActivitySportResource;
 use AcMarche\StreetWatch\Filament\Resources\Incidents\IncidentResource;
 use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
@@ -66,7 +66,7 @@ final class MigrationHandler
             17 => UserResource::getUrl('index', panel: 'security-panel'),
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
             19 => NotificationResource::getUrl('index', panel: 'college-panel'),
-            20 => ActivityResource::getUrl('index', panel: 'sports-activities-panel'),
+            20 => ActivitySportResource::getUrl('index', panel: 'sports-activities-panel'),
             21 => SignatureResource::getUrl('index', panel: 'app-panel'),
             22 => 'https://agenda.marche.be',
             25 => PvResource::getUrl('index', panel: 'conseil-panel'),
@@ -75,7 +75,7 @@ final class MigrationHandler
             36 => ClaimRequestPage::getUrl(panel: 'app-panel'),
             39 => WeekResource::getUrl(panel: 'meal-delivery-panel'),
             40 => ProfileResource::getUrl('index', panel: 'agent-panel'),
-            41 => ActiviteResource::getUrl('index', panel: 'activity-manager-panel'),
+            41 => ActivityManagerResource::getUrl('index', panel: 'activity-manager-panel'),
             42 => WhoIsWhoSearch::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
             50 => TeleworkPage::getUrl(panel: 'app-panel'),
