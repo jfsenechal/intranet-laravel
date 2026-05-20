@@ -8,7 +8,7 @@ use AcMarche\ActivityManager\Filament\Resources\Membres\Pages\CreateMembre;
 use AcMarche\ActivityManager\Filament\Resources\Membres\Pages\EditMembre;
 use AcMarche\ActivityManager\Filament\Resources\Membres\Pages\ListMembres;
 use AcMarche\ActivityManager\Filament\Resources\Membres\Pages\ViewMembre;
-use AcMarche\ActivityManager\Models\Membre;
+use AcMarche\ActivityManager\Models\Member;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -29,7 +29,7 @@ beforeEach(function (): void {
 });
 
 it('renders list, create, view and edit pages', function (): void {
-    $membre = Membre::factory()->create();
+    $membre = Member::factory()->create();
 
     livewire(ListMembres::class)->assertOk();
     livewire(CreateMembre::class)->assertOk();
@@ -38,7 +38,7 @@ it('renders list, create, view and edit pages', function (): void {
 });
 
 it('lists membres', function (): void {
-    $membres = Membre::factory(3)->create();
+    $membres = Member::factory(3)->create();
 
     livewire(ListMembres::class)
         ->loadTable()
@@ -58,7 +58,7 @@ it('creates a membre via the form', function (): void {
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    assertDatabaseHas(Membre::class, [
+    assertDatabaseHas(Member::class, [
         'nom' => 'Dupont',
         'prenom' => 'Marie',
         'email' => 'marie.dupont@example.com',
@@ -67,14 +67,14 @@ it('creates a membre via the form', function (): void {
 });
 
 it('updates a membre via the form', function (): void {
-    $membre = Membre::factory()->create(['enabled' => true]);
+    $membre = Member::factory()->create(['enabled' => true]);
 
     livewire(EditMembre::class, ['record' => $membre->id])
         ->fillForm(['enabled' => false])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(Membre::class, [
+    assertDatabaseHas(Member::class, [
         'id' => $membre->id,
         'enabled' => false,
     ]);

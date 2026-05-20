@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
-use AcMarche\ActivityManager\Models\Activite;
-use AcMarche\ActivityManager\Models\Cours;
-use AcMarche\ActivityManager\Models\Membre;
+use AcMarche\ActivityManager\Models\Activity;
+use AcMarche\ActivityManager\Models\Schedule;
+use AcMarche\ActivityManager\Models\Member;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -21,46 +21,46 @@ beforeEach(function (): void {
 });
 
 it('grants viewAny on Activite to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('viewAny', Activite::class))->toBeTrue();
-    expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Activite::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('viewAny', Activite::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('viewAny', Activity::class))->toBeTrue();
+    expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Activity::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('viewAny', Activity::class))->toBeFalse();
 });
 
 it('grants create on Activite to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('create', Activite::class))->toBeTrue();
-    expect(Gate::forUser($this->mdaAdmin)->allows('create', Activite::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('create', Activite::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('create', Activity::class))->toBeTrue();
+    expect(Gate::forUser($this->mdaAdmin)->allows('create', Activity::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('create', Activity::class))->toBeFalse();
 });
 
 it('grants viewAny on Cours to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('viewAny', Cours::class))->toBeTrue();
-    expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Cours::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('viewAny', Cours::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('viewAny', Schedule::class))->toBeTrue();
+    expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Schedule::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('viewAny', Schedule::class))->toBeFalse();
 });
 
 it('grants create on Cours to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('create', Cours::class))->toBeTrue();
-    expect(Gate::forUser($this->mdaAdmin)->allows('create', Cours::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('create', Cours::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('create', Schedule::class))->toBeTrue();
+    expect(Gate::forUser($this->mdaAdmin)->allows('create', Schedule::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('create', Schedule::class))->toBeFalse();
 });
 
 it('grants viewAny on Membre to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('viewAny', Membre::class))->toBeTrue();
-    expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Membre::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('viewAny', Membre::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('viewAny', Member::class))->toBeTrue();
+    expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Member::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('viewAny', Member::class))->toBeFalse();
 });
 
 it('grants create on Membre to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('create', Membre::class))->toBeTrue();
-    expect(Gate::forUser($this->mdaAdmin)->allows('create', Membre::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('create', Membre::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('create', Member::class))->toBeTrue();
+    expect(Gate::forUser($this->mdaAdmin)->allows('create', Member::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('create', Member::class))->toBeFalse();
 });
 
 it('forbids restore and forceDelete for everyone', function (): void {
-    expect(Gate::forUser($this->admin)->allows('restore', Activite::class))->toBeFalse();
-    expect(Gate::forUser($this->admin)->allows('forceDelete', Activite::class))->toBeFalse();
-    expect(Gate::forUser($this->admin)->allows('restore', Cours::class))->toBeFalse();
-    expect(Gate::forUser($this->admin)->allows('forceDelete', Cours::class))->toBeFalse();
-    expect(Gate::forUser($this->admin)->allows('restore', Membre::class))->toBeFalse();
-    expect(Gate::forUser($this->admin)->allows('forceDelete', Membre::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('restore', Activity::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('forceDelete', Activity::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('restore', Schedule::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('forceDelete', Schedule::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('restore', Member::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('forceDelete', Member::class))->toBeFalse();
 });

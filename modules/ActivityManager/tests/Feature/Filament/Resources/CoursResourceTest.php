@@ -7,8 +7,8 @@ use AcMarche\ActivityManager\Filament\Resources\Cours\Pages\CreateCours;
 use AcMarche\ActivityManager\Filament\Resources\Cours\Pages\EditCours;
 use AcMarche\ActivityManager\Filament\Resources\Cours\Pages\ListCours;
 use AcMarche\ActivityManager\Filament\Resources\Cours\Pages\ViewCours;
-use AcMarche\ActivityManager\Models\Activite;
-use AcMarche\ActivityManager\Models\Cours;
+use AcMarche\ActivityManager\Models\Activity;
+use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -29,7 +29,7 @@ beforeEach(function (): void {
 });
 
 it('renders list, create, view and edit pages', function (): void {
-    $cours = Cours::factory()->create();
+    $cours = Schedule::factory()->create();
 
     livewire(ListCours::class)->assertOk();
     livewire(CreateCours::class)->assertOk();
@@ -38,7 +38,7 @@ it('renders list, create, view and edit pages', function (): void {
 });
 
 it('lists cours', function (): void {
-    $cours = Cours::factory(3)->create();
+    $cours = Schedule::factory(3)->create();
 
     livewire(ListCours::class)
         ->loadTable()
@@ -46,7 +46,7 @@ it('lists cours', function (): void {
 });
 
 it('creates a cours via the form', function (): void {
-    $activite = Activite::factory()->create();
+    $activite = Activity::factory()->create();
 
     livewire(CreateCours::class)
         ->fillForm([
@@ -59,21 +59,21 @@ it('creates a cours via the form', function (): void {
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    assertDatabaseHas(Cours::class, [
+    assertDatabaseHas(Schedule::class, [
         'nom' => 'Yoga - Septembre 2026',
         'activite_id' => $activite->id,
     ]);
 });
 
 it('updates a cours via the form', function (): void {
-    $cours = Cours::factory()->create(['nom' => 'Old']);
+    $cours = Schedule::factory()->create(['nom' => 'Old']);
 
     livewire(EditCours::class, ['record' => $cours->id])
         ->fillForm(['nom' => 'New'])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(Cours::class, [
+    assertDatabaseHas(Schedule::class, [
         'id' => $cours->id,
         'nom' => 'New',
     ]);

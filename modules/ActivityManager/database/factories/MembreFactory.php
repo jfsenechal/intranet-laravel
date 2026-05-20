@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AcMarche\ActivityManager\Database\Factories;
 
 use AcMarche\ActivityManager\Enums\CiviliteEnum;
-use AcMarche\ActivityManager\Models\Membre;
+use AcMarche\ActivityManager\Models\Member;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Membre>
+ * @extends Factory<Member>
  */
 final class MembreFactory extends Factory
 {

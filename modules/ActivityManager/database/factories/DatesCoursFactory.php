@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Database\Factories;
 
-use AcMarche\ActivityManager\Models\Cours;
-use AcMarche\ActivityManager\Models\DatesCours;
+use AcMarche\ActivityManager\Models\Schedule;
+use AcMarche\ActivityManager\Models\SchedulesActivity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<DatesCours>
+ * @extends Factory<SchedulesActivity>
  */
 final class DatesCoursFactory extends Factory
 {
@@ -19,7 +19,7 @@ final class DatesCoursFactory extends Factory
     public function definition(): array
     {
         return [
-            'cours_id' => Cours::factory(),
+            'cours_id' => Schedule::factory(),
             'remarque' => fake()->optional()->sentence(),
             'jour' => fake()->dateTimeBetween('-1 year', '+1 year'),
         ];

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Database\Factories;
 
-use AcMarche\ActivityManager\Models\Activite;
+use AcMarche\ActivityManager\Models\Activity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Activite>
+ * @extends Factory<Activity>
  */
 final class ActiviteFactory extends Factory
 {

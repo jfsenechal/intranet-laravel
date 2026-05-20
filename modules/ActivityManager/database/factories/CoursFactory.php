@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Database\Factories;
 
-use AcMarche\ActivityManager\Models\Activite;
-use AcMarche\ActivityManager\Models\Cours;
+use AcMarche\ActivityManager\Models\Activity;
+use AcMarche\ActivityManager\Models\Schedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Cours>
+ * @extends Factory<Schedule>
  */
 final class CoursFactory extends Factory
 {
@@ -24,7 +24,7 @@ final class CoursFactory extends Factory
             'nom' => fake()->sentence(6),
             'date_debut' => $dateDebut,
             'date_fin' => fake()->dateTimeBetween($dateDebut, '+1 year'),
-            'activite_id' => Activite::factory(),
+            'activite_id' => Activity::factory(),
         ];
     }
 }

@@ -7,7 +7,7 @@ use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\CreateActivite;
 use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\EditActivite;
 use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\ListActivites;
 use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\ViewActivite;
-use AcMarche\ActivityManager\Models\Activite;
+use AcMarche\ActivityManager\Models\Activity;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -28,7 +28,7 @@ beforeEach(function (): void {
 });
 
 it('renders list, create, view and edit pages', function (): void {
-    $activite = Activite::factory()->create();
+    $activite = Activity::factory()->create();
 
     livewire(ListActivites::class)->assertOk();
     livewire(CreateActivite::class)->assertOk();
@@ -37,7 +37,7 @@ it('renders list, create, view and edit pages', function (): void {
 });
 
 it('lists activites', function (): void {
-    $activites = Activite::factory(3)->create();
+    $activites = Activity::factory(3)->create();
 
     livewire(ListActivites::class)
         ->loadTable()
@@ -54,21 +54,21 @@ it('creates an activite via the form', function (): void {
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    assertDatabaseHas(Activite::class, [
+    assertDatabaseHas(Activity::class, [
         'nom' => 'Yoga',
         'description' => 'Cours de yoga doux',
     ]);
 });
 
 it('updates an activite via the form', function (): void {
-    $activite = Activite::factory()->create(['nom' => 'Tricot']);
+    $activite = Activity::factory()->create(['nom' => 'Tricot']);
 
     livewire(EditActivite::class, ['record' => $activite->id])
         ->fillForm(['nom' => 'Tricot Avancé'])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(Activite::class, [
+    assertDatabaseHas(Activity::class, [
         'id' => $activite->id,
         'nom' => 'Tricot Avancé',
     ]);
