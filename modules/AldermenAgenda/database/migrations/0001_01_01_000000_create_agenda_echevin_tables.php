@@ -77,7 +77,7 @@ return new class extends Migration
                 $table->rename('aldermen_archives');
             });
             Schema::connection('maria-aldermen-agenda')->table('aldermen_archives', function (Blueprint $table): void {
-                $table->removeColumn('intitule');
+                $table->renameColumn('intitule', 'name');
                 $table->renameColumn('contenu', 'content');
                 $table->renameColumn('date_envoie', 'sent_at');
                 $table->renameColumn('destinataires', 'recipients');
@@ -88,6 +88,7 @@ return new class extends Migration
                 'aldermen_archives',
                 function (Blueprint $table): void {
                     $table->id();
+                    $table->string('name');
                     $table->text('recipients');
                     $table->dateTime('sent_at');
                     $table->text('content');
