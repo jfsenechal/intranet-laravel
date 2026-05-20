@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
     'ordre_college',
     'pv_college',
 ])]
-final class Destinataire extends Model
+final class Recipient extends Model
 {
     use HasFactory;
 

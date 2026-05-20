@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\College\Database\Factories;
 
-use AcMarche\College\Models\Destinataire;
+use AcMarche\College\Models\Recipient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends Factory<Destinataire>
+ * @extends Factory<Recipient>
  */
 final class DestinataireFactory extends Factory
 {

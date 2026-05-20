@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\College\Filament\Resources\Destinataires\Tables;
+namespace AcMarche\College\Filament\Resources\Recipients\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -14,7 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
-final class DestinatairesTable
+final class RecipientsTable
 {
     public static function configure(Table $table): Table
     {

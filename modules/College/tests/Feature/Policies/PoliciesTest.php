@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\College\Enums\RolesEnum;
-use AcMarche\College\Models\Destinataire;
+use AcMarche\College\Models\Recipient;
 use AcMarche\College\Models\Notification;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -20,15 +20,15 @@ beforeEach(function (): void {
 });
 
 it('grants viewAny on Destinataire to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('viewAny', Destinataire::class))->toBeTrue();
-    expect(Gate::forUser($this->convocation)->allows('viewAny', Destinataire::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('viewAny', Destinataire::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('viewAny', Recipient::class))->toBeTrue();
+    expect(Gate::forUser($this->convocation)->allows('viewAny', Recipient::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('viewAny', Recipient::class))->toBeFalse();
 });
 
 it('grants create on Destinataire to role holders and admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('create', Destinataire::class))->toBeTrue();
-    expect(Gate::forUser($this->convocation)->allows('create', Destinataire::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('create', Destinataire::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('create', Recipient::class))->toBeTrue();
+    expect(Gate::forUser($this->convocation)->allows('create', Recipient::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('create', Recipient::class))->toBeFalse();
 });
 
 it('grants viewAny on Notification to role holders and admins', function (): void {
@@ -44,8 +44,8 @@ it('grants create on Notification to role holders and admins', function (): void
 });
 
 it('forbids restore and forceDelete for everyone', function (): void {
-    expect(Gate::forUser($this->admin)->allows('restore', Destinataire::class))->toBeFalse();
-    expect(Gate::forUser($this->admin)->allows('forceDelete', Destinataire::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('restore', Recipient::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('forceDelete', Recipient::class))->toBeFalse();
     expect(Gate::forUser($this->admin)->allows('restore', Notification::class))->toBeFalse();
     expect(Gate::forUser($this->admin)->allows('forceDelete', Notification::class))->toBeFalse();
 });

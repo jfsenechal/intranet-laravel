@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\College\Filament\Resources\Destinataires\Pages;
+namespace AcMarche\College\Filament\Resources\Recipients\Pages;
 
-use AcMarche\College\Filament\Resources\Destinataires\DestinataireResource;
+use AcMarche\College\Filament\Resources\Recipients\RecipientResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -15,10 +15,10 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class ViewDestinataire extends ViewRecord
+final class ViewRecipient extends ViewRecord
 {
     #[Override]
-    protected static string $resource = DestinataireResource::class;
+    protected static string $resource = RecipientResource::class;
 
     public function getTitle(): string
     {

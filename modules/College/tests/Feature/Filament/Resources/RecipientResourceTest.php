@@ -7,7 +7,7 @@ use AcMarche\College\Filament\Resources\Destinataires\Pages\CreateDestinataire;
 use AcMarche\College\Filament\Resources\Destinataires\Pages\EditDestinataire;
 use AcMarche\College\Filament\Resources\Destinataires\Pages\ListDestinataires;
 use AcMarche\College\Filament\Resources\Destinataires\Pages\ViewDestinataire;
-use AcMarche\College\Models\Destinataire;
+use AcMarche\College\Models\Recipient;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -28,7 +28,7 @@ beforeEach(function (): void {
 });
 
 it('renders list, create, view and edit pages', function (): void {
-    $destinataire = Destinataire::factory()->create();
+    $destinataire = Recipient::factory()->create();
 
     livewire(ListDestinataires::class)->assertOk();
     livewire(CreateDestinataire::class)->assertOk();
@@ -37,7 +37,7 @@ it('renders list, create, view and edit pages', function (): void {
 });
 
 it('lists destinataires', function (): void {
-    $destinataires = Destinataire::factory(3)->create();
+    $destinataires = Recipient::factory(3)->create();
 
     livewire(ListDestinataires::class)
         ->loadTable()
@@ -56,7 +56,7 @@ it('creates a destinataire via the form', function (): void {
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    assertDatabaseHas(Destinataire::class, [
+    assertDatabaseHas(Recipient::class, [
         'nom' => 'Dupont',
         'prenom' => 'Jean',
         'email' => 'jean.dupont@example.com',
@@ -74,21 +74,21 @@ it('auto-generates the slugname if left empty', function (): void {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(Destinataire::class, [
+    assertDatabaseHas(Recipient::class, [
         'nom' => 'Martin',
         'slugname' => 'martin_marie',
     ]);
 });
 
 it('updates a destinataire via the form', function (): void {
-    $destinataire = Destinataire::factory()->create(['pv_college' => false]);
+    $destinataire = Recipient::factory()->create(['pv_college' => false]);
 
     livewire(EditDestinataire::class, ['record' => $destinataire->id])
         ->fillForm(['pv_college' => true])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(Destinataire::class, [
+    assertDatabaseHas(Recipient::class, [
         'id' => $destinataire->id,
         'pv_college' => true,
     ]);

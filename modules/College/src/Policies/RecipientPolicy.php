@@ -7,7 +7,7 @@ namespace AcMarche\College\Policies;
 use AcMarche\College\Enums\RolesEnum;
 use App\Models\User;
 
-final class DestinatairePolicy
+final class RecipientPolicy
 {
     public function viewAny(User $user): bool
     {

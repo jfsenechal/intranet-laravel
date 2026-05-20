@@ -6,16 +6,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
-{
+return new class() extends Migration {
     protected $connection = 'maria-cpas-library';
 
     public function up(): void
     {
         if (Schema::connection('maria-cpas-library')->hasTable('fiche')) {
+            Schema::connection('maria-cpas-library')->table('fiche', function (Blueprint $table): void {
+                $table->rename('fiches');
+            });
+
             return;
         }
-        Schema::connection('maria-cpas-library')->create('fiche', function (Blueprint $table): void {
+        Schema::connection('maria-cpas-library')->create('fiches', function (Blueprint $table): void {
             $table->id();
             $table->integer('category_id')->nullable();
             $table->string('type', 255)->nullable();
@@ -37,7 +40,7 @@ return new class() extends Migration
             $table->date('date_end')->nullable();
 
             $table->foreign('category_id')
-                ->references('id')->on('categorie')
+                ->references('id')->on('categories')
                 ->nullOnDelete();
             $table->index('category_id');
         });
