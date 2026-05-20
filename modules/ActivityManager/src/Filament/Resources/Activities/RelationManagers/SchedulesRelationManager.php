@@ -22,7 +22,7 @@ use Override;
 final class SchedulesRelationManager extends RelationManager
 {
     #[Override]
-    protected static string $relationship = 'cours';
+    protected static string $relationship = 'schedules';
 
     #[Override]
     protected static ?string $title = 'Cours';
@@ -30,22 +30,22 @@ final class SchedulesRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('nom')
+            TextInput::make('name')
                 ->label('Nom')
                 ->required()
                 ->maxLength(200)
                 ->columnSpanFull(),
             Grid::make(2)->schema([
-                DatePicker::make('date_debut')
+                DatePicker::make('start_date')
                     ->label('Date de début')
                     ->required()
                     ->displayFormat('d/m/Y')
                     ->native(false),
-                DatePicker::make('date_fin')
+                DatePicker::make('end_date')
                     ->label('Date de fin')
                     ->displayFormat('d/m/Y')
                     ->native(false)
-                    ->afterOrEqual('date_debut'),
+                    ->afterOrEqual('start_date'),
             ]),
         ]);
     }
@@ -53,12 +53,12 @@ final class SchedulesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('nom')
+            ->recordTitleAttribute('name')
             ->columns([
-                TextColumn::make('nom')->label('Nom')->searchable()->sortable()->limit(80)->wrap(),
-                TextColumn::make('date_debut')->label('Début')->date('d/m/Y')->sortable(),
-                TextColumn::make('date_fin')->label('Fin')->date('d/m/Y')->sortable()->placeholder('—'),
-                TextColumn::make('membres_count')->counts('membres')->label('Inscrits'),
+                TextColumn::make('name')->label('Nom')->searchable()->sortable()->limit(80)->wrap(),
+                TextColumn::make('start_date')->label('Début')->date('d/m/Y')->sortable(),
+                TextColumn::make('end_date')->label('Fin')->date('d/m/Y')->sortable()->placeholder('—'),
+                TextColumn::make('members_count')->counts('members')->label('Inscrits'),
             ])
             ->headerActions([
                 CreateAction::make()

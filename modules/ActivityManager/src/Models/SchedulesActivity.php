@@ -15,11 +15,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[UseFactory(DatesCoursFactory::class)]
 #[Connection('maria-activity-manager')]
-#[Table(name: 'dates_cours')]
+#[Table(name: 'activity_schedules')]
 #[Fillable([
-    'cours_id',
-    'remarque',
-    'jour',
+    'schedule_id',
+    'comment',
+    'schedule_date',
 ])]
 final class SchedulesActivity extends Model
 {
@@ -30,9 +30,9 @@ final class SchedulesActivity extends Model
     /**
      * @return BelongsTo<Schedule, $this>
      */
-    public function cours(): BelongsTo
+    public function schedule(): BelongsTo
     {
-        return $this->belongsTo(Schedule::class, 'cours_id');
+        return $this->belongsTo(Schedule::class, 'schedule_id');
     }
 
     /**
@@ -41,7 +41,7 @@ final class SchedulesActivity extends Model
     protected function casts(): array
     {
         return [
-            'jour' => 'datetime',
+            'schedule_date' => 'datetime',
         ];
     }
 }

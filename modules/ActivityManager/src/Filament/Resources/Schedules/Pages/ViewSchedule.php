@@ -21,7 +21,7 @@ final class ViewSchedule extends ViewRecord
 
     public function getTitle(): string
     {
-        return (string) $this->record->nom;
+        return (string) $this->record->name;
     }
 
     public function infolist(Schema $schema): Schema
@@ -31,18 +31,18 @@ final class ViewSchedule extends ViewRecord
                 Section::make('Identification')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('nom')
+                        TextEntry::make('name')
                             ->label('Nom')
                             ->weight('bold')
                             ->columnSpanFull(),
-                        TextEntry::make('activite.nom')
+                        TextEntry::make('activity.name')
                             ->label('Activité')
                             ->badge()
                             ->placeholder('—'),
-                        TextEntry::make('date_debut')
+                        TextEntry::make('start_date')
                             ->label('Début')
                             ->date('d/m/Y'),
-                        TextEntry::make('date_fin')
+                        TextEntry::make('end_date')
                             ->label('Fin')
                             ->date('d/m/Y')
                             ->placeholder('—'),

@@ -17,13 +17,13 @@ final class ActivitiesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('nom')
+            ->defaultSort('name')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('nom')
+                TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
                     ->sortable(),
@@ -32,8 +32,8 @@ final class ActivitiesTable
                     ->limit(80)
                     ->wrap()
                     ->toggleable(),
-                TextColumn::make('cours_count')
-                    ->counts('cours')
+                TextColumn::make('schedules_count')
+                    ->counts('schedules')
                     ->label('Cours')
                     ->sortable(),
             ])

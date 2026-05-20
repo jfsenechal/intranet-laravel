@@ -21,7 +21,7 @@ use Override;
 final class SchedulesActivityRelationManager extends RelationManager
 {
     #[Override]
-    protected static string $relationship = 'datesSchedules';
+    protected static string $relationship = 'activitySchedules';
 
     #[Override]
     protected static ?string $title = 'Séances';
@@ -29,13 +29,13 @@ final class SchedulesActivityRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            DateTimePicker::make('jour')
+            DateTimePicker::make('schedule_date')
                 ->label('Date et heure')
                 ->required()
                 ->displayFormat('d/m/Y H:i')
                 ->seconds(false)
                 ->native(false),
-            Textarea::make('remarque')
+            Textarea::make('comment')
                 ->label('Remarque')
                 ->rows(3)
                 ->columnSpanFull(),
@@ -45,14 +45,14 @@ final class SchedulesActivityRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->defaultSort('jour')
-            ->recordTitleAttribute('jour')
+            ->defaultSort('schedule_date')
+            ->recordTitleAttribute('schedule_date')
             ->columns([
-                TextColumn::make('jour')
+                TextColumn::make('schedule_date')
                     ->label('Date')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                TextColumn::make('remarque')
+                TextColumn::make('comment')
                     ->label('Remarque')
                     ->limit(80)
                     ->wrap()

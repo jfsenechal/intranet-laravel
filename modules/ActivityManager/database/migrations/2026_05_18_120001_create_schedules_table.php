@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     protected $connection = 'maria-activity-manager';
 
     public function up(): void
@@ -14,6 +15,7 @@ return new class() extends Migration {
         if (Schema::connection('maria-activity-manager')->hasTable('cours')) {
             Schema::connection('maria-activity-manager')->table('cours', function (Blueprint $table): void {
                 $table->rename('schedules');
+                $table->renameColumn('nom', 'name');
                 $table->renameColumn('date_debut', 'start_date');
                 $table->renameColumn('date_fin', 'end_date');
                 $table->renameColumn('activite_id', 'activity_id');

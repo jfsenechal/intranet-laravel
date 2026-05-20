@@ -44,13 +44,13 @@ final class MembersResource extends Resource
     protected static ?string $pluralModelLabel = 'membres';
 
     #[Override]
-    protected static ?string $recordTitleAttribute = 'nom';
+    protected static ?string $recordTitleAttribute = 'last_name';
 
     public static function getGloballySearchableAttributes(): array
     {
         return [
-            'nom',
-            'prenom',
+            'last_name',
+            'first_name',
             'email',
         ];
     }

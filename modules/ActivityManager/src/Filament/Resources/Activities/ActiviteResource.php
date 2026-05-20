@@ -44,12 +44,12 @@ final class ActivityResource extends Resource
     protected static ?string $pluralModelLabel = 'activités';
 
     #[Override]
-    protected static ?string $recordTitleAttribute = 'nom';
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getGloballySearchableAttributes(): array
     {
         return [
-            'nom',
+            'name',
             'description',
         ];
     }

@@ -19,7 +19,7 @@ use Override;
 final class MembersRelationManager extends RelationManager
 {
     #[Override]
-    protected static string $relationship = 'membres';
+    protected static string $relationship = 'members';
 
     #[Override]
     protected static ?string $title = 'Inscrits';
@@ -32,11 +32,11 @@ final class MembersRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('nom')
+            ->recordTitleAttribute('last_name')
             ->columns([
-                TextColumn::make('nom')->label('Nom')->searchable()->sortable(),
-                TextColumn::make('prenom')->label('Prénom')->searchable()->sortable(),
-                TextColumn::make('civilite')->label('Civilité')->badge()->toggleable(),
+                TextColumn::make('last_name')->label('Nom')->searchable()->sortable(),
+                TextColumn::make('first_name')->label('Prénom')->searchable()->sortable(),
+                TextColumn::make('civility')->label('Civilité')->badge()->toggleable(),
                 TextColumn::make('email')->label('Email')->copyable()->toggleable(),
                 IconColumn::make('enabled')->label('Actif')->boolean(),
             ])

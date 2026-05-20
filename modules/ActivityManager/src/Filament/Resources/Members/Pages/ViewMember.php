@@ -22,7 +22,7 @@ final class ViewMember extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->nom.' '.$this->record->prenom;
+        return $this->record->last_name.' '.$this->record->first_name;
     }
 
     public function infolist(Schema $schema): Schema
@@ -32,33 +32,33 @@ final class ViewMember extends ViewRecord
                 Section::make('Identité')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('civilite')->label('Civilité')->badge()->placeholder('—'),
+                        TextEntry::make('civility')->label('Civilité')->badge()->placeholder('—'),
                         IconEntry::make('enabled')->label('Actif')->boolean(),
-                        TextEntry::make('nom')->label('Nom')->weight('bold'),
-                        TextEntry::make('prenom')->label('Prénom'),
-                        TextEntry::make('inscrit_le')->label('Inscrit le')->date('d/m/Y')->placeholder('—'),
+                        TextEntry::make('last_name')->label('Nom')->weight('bold'),
+                        TextEntry::make('first_name')->label('Prénom'),
+                        TextEntry::make('registered_at')->label('Inscrit le')->date('d/m/Y')->placeholder('—'),
                     ]),
 
                 Section::make('Adresse')
                     ->columns(4)
                     ->schema([
-                        TextEntry::make('rue')->label('Rue')->columnSpan(2)->placeholder('—'),
-                        TextEntry::make('numero')->label('N°')->placeholder('—'),
-                        TextEntry::make('codepostal')->label('Code postal')->placeholder('—'),
-                        TextEntry::make('localite')->label('Localité')->columnSpan(2)->placeholder('—'),
+                        TextEntry::make('street')->label('Rue')->columnSpan(2)->placeholder('—'),
+                        TextEntry::make('number')->label('N°')->placeholder('—'),
+                        TextEntry::make('postal_code')->label('Code postal')->placeholder('—'),
+                        TextEntry::make('city')->label('Localité')->columnSpan(2)->placeholder('—'),
                     ]),
 
                 Section::make('Contact')
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('gsm')->label('GSM')->copyable()->placeholder('—'),
-                        TextEntry::make('telephone')->label('Téléphone')->copyable()->placeholder('—'),
+                        TextEntry::make('mobile')->label('GSM')->copyable()->placeholder('—'),
+                        TextEntry::make('phone')->label('Téléphone')->copyable()->placeholder('—'),
                         TextEntry::make('email')->label('Email')->copyable()->placeholder('—'),
                     ]),
 
                 Section::make('Notes')
                     ->schema([
-                        TextEntry::make('remarque')->label('Remarque')->columnSpanFull()->placeholder('—'),
+                        TextEntry::make('remark')->label('Remarque')->columnSpanFull()->placeholder('—'),
                     ]),
             ]);
     }

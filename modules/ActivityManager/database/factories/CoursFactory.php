@@ -18,13 +18,13 @@ final class CoursFactory extends Factory
      */
     public function definition(): array
     {
-        $dateDebut = fake()->dateTimeBetween('-2 years', 'now');
+        $startDate = fake()->dateTimeBetween('-2 years', 'now');
 
         return [
-            'nom' => fake()->sentence(6),
-            'date_debut' => $dateDebut,
-            'date_fin' => fake()->dateTimeBetween($dateDebut, '+1 year'),
-            'activite_id' => Activity::factory(),
+            'name' => fake()->sentence(6),
+            'start_date' => $startDate,
+            'end_date' => fake()->dateTimeBetween($startDate, '+1 year'),
+            'activity_id' => Activity::factory(),
         ];
     }
 }

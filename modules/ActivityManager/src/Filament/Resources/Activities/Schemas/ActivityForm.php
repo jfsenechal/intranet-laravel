@@ -14,7 +14,7 @@ final class ActivityForm
     {
         return $schema
             ->components([
-                TextInput::make('nom')
+                TextInput::make('name')
                     ->label('Nom')
                     ->required()
                     ->maxLength(150)

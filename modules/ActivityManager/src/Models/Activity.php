@@ -15,9 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[UseFactory(ActiviteFactory::class)]
 #[Connection('maria-activity-manager')]
-#[Table(name: 'activite')]
+#[Table(name: 'activities')]
 #[Fillable([
-    'nom',
+    'name',
     'description',
 ])]
 final class Activity extends Model
@@ -29,8 +29,8 @@ final class Activity extends Model
     /**
      * @return HasMany<Schedule, $this>
      */
-    public function cours(): HasMany
+    public function schedules(): HasMany
     {
-        return $this->hasMany(Schedule::class, 'activite_id');
+        return $this->hasMany(Schedule::class, 'activity_id');
     }
 }

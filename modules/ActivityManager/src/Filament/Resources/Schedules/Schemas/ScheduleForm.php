@@ -17,34 +17,34 @@ final class ScheduleForm
     {
         return $schema
             ->components([
-                TextInput::make('nom')
+                TextInput::make('name')
                     ->label('Nom')
                     ->required()
                     ->maxLength(200)
                     ->columnSpanFull(),
 
-                Select::make('activite_id')
+                Select::make('activity_id')
                     ->label('Activité')
-                    ->relationship('activite', 'nom')
+                    ->relationship('activity', 'name')
                     ->searchable()
                     ->preload()
                     ->createOptionForm([
-                        TextInput::make('nom')->label('Nom')->required()->maxLength(150),
+                        TextInput::make('name')->label('Nom')->required()->maxLength(150),
                         Textarea::make('description')->label('Description')->rows(3),
                     ])
                     ->columnSpanFull(),
 
                 Grid::make(2)->schema([
-                    DatePicker::make('date_debut')
+                    DatePicker::make('start_date')
                         ->label('Date de début')
                         ->required()
                         ->displayFormat('d/m/Y')
                         ->native(false),
-                    DatePicker::make('date_fin')
+                    DatePicker::make('end_date')
                         ->label('Date de fin')
                         ->displayFormat('d/m/Y')
                         ->native(false)
-                        ->afterOrEqual('date_debut'),
+                        ->afterOrEqual('start_date'),
                 ]),
             ]);
     }

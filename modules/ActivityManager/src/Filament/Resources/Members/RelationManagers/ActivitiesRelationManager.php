@@ -18,7 +18,7 @@ use Override;
 final class ActivitiesRelationManager extends RelationManager
 {
     #[Override]
-    protected static string $relationship = 'cours';
+    protected static string $relationship = 'schedules';
 
     #[Override]
     protected static ?string $title = 'Cours suivis';
@@ -31,12 +31,12 @@ final class ActivitiesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('nom')
+            ->recordTitleAttribute('name')
             ->columns([
-                TextColumn::make('nom')->label('Nom')->searchable()->sortable()->limit(80)->wrap(),
-                TextColumn::make('activite.nom')->label('Activité')->badge()->toggleable(),
-                TextColumn::make('date_debut')->label('Début')->date('d/m/Y')->sortable(),
-                TextColumn::make('date_fin')->label('Fin')->date('d/m/Y')->sortable()->placeholder('—'),
+                TextColumn::make('name')->label('Nom')->searchable()->sortable()->limit(80)->wrap(),
+                TextColumn::make('activity.name')->label('Activité')->badge()->toggleable(),
+                TextColumn::make('start_date')->label('Début')->date('d/m/Y')->sortable(),
+                TextColumn::make('end_date')->label('Fin')->date('d/m/Y')->sortable()->placeholder('—'),
             ])
             ->headerActions([
                 AttachAction::make()

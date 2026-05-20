@@ -16,21 +16,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[UseFactory(MembreFactory::class)]
 #[Connection('maria-activity-manager')]
-#[Table(name: 'membre')]
+#[Table(name: 'members')]
 #[Fillable([
-    'civilite',
-    'nom',
-    'prenom',
-    'rue',
-    'numero',
-    'codepostal',
-    'localite',
-    'gsm',
-    'telephone',
+    'civility',
+    'last_name',
+    'first_name',
+    'street',
+    'number',
+    'postal_code',
+    'city',
+    'mobile',
+    'phone',
     'email',
     'enabled',
-    'remarque',
-    'inscrit_le',
+    'remark',
+    'registered_at',
 ])]
 final class Member extends Model
 {
@@ -41,9 +41,9 @@ final class Member extends Model
     /**
      * @return BelongsToMany<Schedule, $this>
      */
-    public function cours(): BelongsToMany
+    public function schedules(): BelongsToMany
     {
-        return $this->belongsToMany(Schedule::class, 'inscription', 'membre_id', 'cours_id');
+        return $this->belongsToMany(Schedule::class, 'registrations', 'member_id', 'schedule_id');
     }
 
     /**
@@ -52,9 +52,9 @@ final class Member extends Model
     protected function casts(): array
     {
         return [
-            'civilite' => CiviliteEnum::class,
+            'civility' => CiviliteEnum::class,
             'enabled' => 'boolean',
-            'inscrit_le' => 'date',
+            'registered_at' => 'date',
         ];
     }
 }

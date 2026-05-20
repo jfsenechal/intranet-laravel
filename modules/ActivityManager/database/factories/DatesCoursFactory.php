@@ -19,9 +19,9 @@ final class DatesCoursFactory extends Factory
     public function definition(): array
     {
         return [
-            'cours_id' => Schedule::factory(),
-            'remarque' => fake()->optional()->sentence(),
-            'jour' => fake()->dateTimeBetween('-1 year', '+1 year'),
+            'schedule_id' => Schedule::factory(),
+            'comment' => fake()->optional()->sentence(),
+            'schedule_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
         ];
     }
 }

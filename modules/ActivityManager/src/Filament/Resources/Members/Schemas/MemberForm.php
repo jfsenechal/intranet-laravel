@@ -23,22 +23,22 @@ final class MemberForm
                 Section::make('Identité')
                     ->schema([
                         Grid::make(2)->schema([
-                            Select::make('civilite')
+                            Select::make('civility')
                                 ->label('Civilité')
                                 ->options(CiviliteEnum::class)
                                 ->native(false),
                             Toggle::make('enabled')
                                 ->label('Actif')
                                 ->default(true),
-                            TextInput::make('nom')
+                            TextInput::make('last_name')
                                 ->label('Nom')
                                 ->required()
                                 ->maxLength(50),
-                            TextInput::make('prenom')
+                            TextInput::make('first_name')
                                 ->label('Prénom')
                                 ->required()
                                 ->maxLength(50),
-                            DatePicker::make('inscrit_le')
+                            DatePicker::make('registered_at')
                                 ->label('Inscrit le')
                                 ->displayFormat('d/m/Y')
                                 ->native(false),
@@ -48,17 +48,17 @@ final class MemberForm
                 Section::make('Adresse')
                     ->schema([
                         Grid::make(4)->schema([
-                            TextInput::make('rue')
+                            TextInput::make('street')
                                 ->label('Rue')
                                 ->maxLength(150)
                                 ->columnSpan(2),
-                            TextInput::make('numero')
+                            TextInput::make('number')
                                 ->label('N°')
                                 ->maxLength(50),
-                            TextInput::make('codepostal')
+                            TextInput::make('postal_code')
                                 ->label('Code postal')
                                 ->numeric(),
-                            TextInput::make('localite')
+                            TextInput::make('city')
                                 ->label('Localité')
                                 ->maxLength(50)
                                 ->columnSpan(2),
@@ -68,11 +68,11 @@ final class MemberForm
                 Section::make('Contact')
                     ->schema([
                         Grid::make(3)->schema([
-                            TextInput::make('gsm')
+                            TextInput::make('mobile')
                                 ->label('GSM')
                                 ->tel()
                                 ->maxLength(50),
-                            TextInput::make('telephone')
+                            TextInput::make('phone')
                                 ->label('Téléphone')
                                 ->tel()
                                 ->maxLength(50),
@@ -85,7 +85,7 @@ final class MemberForm
 
                 Section::make('Notes')
                     ->schema([
-                        Textarea::make('remarque')
+                        Textarea::make('remark')
                             ->label('Remarque')
                             ->rows(4)
                             ->columnSpanFull(),

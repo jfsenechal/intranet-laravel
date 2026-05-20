@@ -24,25 +24,25 @@ final class MembersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('nom')
+            ->defaultSort('last_name')
             ->columns([
-                TextColumn::make('civilite')
+                TextColumn::make('civility')
                     ->label('Civilité')
                     ->badge()
                     ->toggleable(),
-                TextColumn::make('nom')
+                TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('prenom')
+                TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('localite')
+                TextColumn::make('city')
                     ->label('Localité')
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('gsm')
+                TextColumn::make('mobile')
                     ->label('GSM')
                     ->toggleable()
                     ->copyable(),
@@ -55,30 +55,30 @@ final class MembersTable
                     ->label('Actif')
                     ->boolean()
                     ->sortable(),
-                TextColumn::make('cours_count')
-                    ->counts('cours')
+                TextColumn::make('schedules_count')
+                    ->counts('schedules')
                     ->label('Cours')
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('inscrit_le')
+                TextColumn::make('registered_at')
                     ->label('Inscrit le')
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('civilite')
+                SelectFilter::make('civility')
                     ->label('Civilité')
                     ->options(CiviliteEnum::class),
                 TernaryFilter::make('enabled')
                     ->label('Actif'),
-                Filter::make('localite')
+                Filter::make('city')
                     ->schema([
-                        TextInput::make('localite')->label('Localité'),
+                        TextInput::make('city')->label('Localité'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
-                        $data['localite'] ?? null,
-                        fn (Builder $q, string $value): Builder => $q->where('localite', 'like', "%{$value}%"),
+                        $data['city'] ?? null,
+                        fn (Builder $q, string $value): Builder => $q->where('city', 'like', "%{$value}%"),
                     )),
             ])
             ->recordActions([

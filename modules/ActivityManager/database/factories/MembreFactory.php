@@ -19,19 +19,19 @@ final class MembreFactory extends Factory
     public function definition(): array
     {
         return [
-            'civilite' => fake()->randomElement(CiviliteEnum::cases())->value,
-            'nom' => fake()->lastName(),
-            'prenom' => fake()->firstName(),
-            'rue' => fake()->streetName(),
-            'numero' => fake()->buildingNumber(),
-            'codepostal' => 6900,
-            'localite' => 'Marche-en-Famenne',
-            'gsm' => fake()->numerify('04## ## ## ##'),
-            'telephone' => fake()->numerify('084 ## ## ##'),
+            'civility' => fake()->randomElement(CiviliteEnum::cases())->value,
+            'last_name' => fake()->lastName(),
+            'first_name' => fake()->firstName(),
+            'street' => fake()->streetName(),
+            'number' => fake()->buildingNumber(),
+            'postal_code' => 6900,
+            'city' => 'Marche-en-Famenne',
+            'mobile' => fake()->numerify('04## ## ## ##'),
+            'phone' => fake()->numerify('084 ## ## ##'),
             'email' => fake()->unique()->safeEmail(),
             'enabled' => true,
-            'remarque' => fake()->optional()->sentence(),
-            'inscrit_le' => fake()->dateTimeBetween('-5 years', 'now'),
+            'remark' => fake()->optional()->sentence(),
+            'registered_at' => fake()->dateTimeBetween('-5 years', 'now'),
         ];
     }
 }

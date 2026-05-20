@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Filament\Resources\Schedules;
 
-use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\CreateSchedules;
-use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\EditSchedules;
+use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\CreateSchedule;
+use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\EditSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ListSchedules;
-use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedules;
-use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\DatesSchedulesRelationManager;
+use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\MembersRelationManager;
-use AcMarche\ActivityManager\Filament\Resources\Schedules\Schemas\SchedulesForm;
+use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\SchedulesActivityRelationManager;
+use AcMarche\ActivityManager\Filament\Resources\Schedules\Schemas\ScheduleForm;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Tables\SchedulesTable;
 use AcMarche\ActivityManager\Models\Schedule;
 use BackedEnum;
@@ -45,18 +45,18 @@ final class SchedulesResource extends Resource
     protected static ?string $pluralModelLabel = 'cours';
 
     #[Override]
-    protected static ?string $recordTitleAttribute = 'nom';
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getGloballySearchableAttributes(): array
     {
         return [
-            'nom',
+            'name',
         ];
     }
 
     public static function form(Schema $schema): Schema
     {
-        return SchedulesForm::configure($schema);
+        return ScheduleForm::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -67,7 +67,7 @@ final class SchedulesResource extends Resource
     public static function getRelations(): array
     {
         return [
-            DatesSchedulesRelationManager::class,
+            SchedulesActivityRelationManager::class,
             MembersRelationManager::class,
         ];
     }
@@ -76,9 +76,9 @@ final class SchedulesResource extends Resource
     {
         return [
             'index' => ListSchedules::route('/'),
-            'create' => CreateSchedules::route('/create'),
-            'view' => ViewSchedules::route('/{record}'),
-            'edit' => EditSchedules::route('/{record}/edit'),
+            'create' => CreateSchedule::route('/create'),
+            'view' => ViewSchedule::route('/{record}'),
+            'edit' => EditSchedule::route('/{record}/edit'),
         ];
     }
 }

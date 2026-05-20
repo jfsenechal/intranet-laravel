@@ -17,12 +17,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[UseFactory(CoursFactory::class)]
 #[Connection('maria-activity-manager')]
-#[Table(name: 'cours')]
+#[Table(name: 'schedules')]
 #[Fillable([
-    'nom',
-    'date_debut',
-    'date_fin',
-    'activite_id',
+    'name',
+    'start_date',
+    'end_date',
+    'activity_id',
 ])]
 final class Schedule extends Model
 {
@@ -33,25 +33,25 @@ final class Schedule extends Model
     /**
      * @return BelongsTo<Activity, $this>
      */
-    public function activite(): BelongsTo
+    public function activity(): BelongsTo
     {
-        return $this->belongsTo(Activity::class, 'activite_id');
+        return $this->belongsTo(Activity::class, 'activity_id');
     }
 
     /**
      * @return HasMany<SchedulesActivity, $this>
      */
-    public function datesCours(): HasMany
+    public function activitySchedules(): HasMany
     {
-        return $this->hasMany(SchedulesActivity::class, 'cours_id');
+        return $this->hasMany(SchedulesActivity::class, 'schedule_id');
     }
 
     /**
      * @return BelongsToMany<Member, $this>
      */
-    public function membres(): BelongsToMany
+    public function members(): BelongsToMany
     {
-        return $this->belongsToMany(Member::class, 'inscription', 'cours_id', 'membre_id');
+        return $this->belongsToMany(Member::class, 'registrations', 'schedule_id', 'member_id');
     }
 
     /**
@@ -60,8 +60,8 @@ final class Schedule extends Model
     protected function casts(): array
     {
         return [
-            'date_debut' => 'date',
-            'date_fin' => 'date',
+            'start_date' => 'date',
+            'end_date' => 'date',
         ];
     }
 }

@@ -20,14 +20,14 @@ final class ViewActivity extends ViewRecord
 
     public function getTitle(): string
     {
-        return (string) $this->record->nom;
+        return (string) $this->record->name;
     }
 
     public function infolist(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextEntry::make('nom')
+                TextEntry::make('name')
                     ->label('Nom')
                     ->weight('bold'),
                 TextEntry::make('description')

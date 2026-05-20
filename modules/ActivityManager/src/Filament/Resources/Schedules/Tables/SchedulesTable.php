@@ -20,41 +20,41 @@ final class SchedulesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('date_debut', 'desc')
+            ->defaultSort('start_date', 'desc')
             ->columns([
-                TextColumn::make('nom')
+                TextColumn::make('name')
                     ->label('Nom')
                     ->searchable()
                     ->sortable()
                     ->wrap()
                     ->limit(80),
-                TextColumn::make('activite.nom')
+                TextColumn::make('activity.name')
                     ->label('Activité')
                     ->sortable()
                     ->toggleable()
                     ->badge(),
-                TextColumn::make('date_debut')
+                TextColumn::make('start_date')
                     ->label('Début')
                     ->date('d/m/Y')
                     ->sortable(),
-                TextColumn::make('date_fin')
+                TextColumn::make('end_date')
                     ->label('Fin')
                     ->date('d/m/Y')
                     ->sortable()
                     ->placeholder('—'),
-                TextColumn::make('membres_count')
-                    ->counts('membres')
+                TextColumn::make('members_count')
+                    ->counts('members')
                     ->label('Inscrits')
                     ->sortable(),
-                TextColumn::make('dates_cours_count')
-                    ->counts('datesSchedules')
+                TextColumn::make('activity_schedules_count')
+                    ->counts('activitySchedules')
                     ->label('Séances')
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('activite_id')
+                SelectFilter::make('activity_id')
                     ->label('Activité')
-                    ->relationship('activite', 'nom')
+                    ->relationship('activity', 'name')
                     ->searchable()
                     ->preload(),
                 TernaryFilter::make('en_cours')
@@ -62,13 +62,13 @@ final class SchedulesTable
                     ->nullable()
                     ->queries(
                         true: fn (Builder $query): Builder => $query
-                            ->whereDate('date_debut', '<=', now())
+                            ->whereDate('start_date', '<=', now())
                             ->where(fn (Builder $q): Builder => $q
-                                ->whereNull('date_fin')
-                                ->orWhereDate('date_fin', '>=', now())),
+                                ->whereNull('end_date')
+                                ->orWhereDate('end_date', '>=', now())),
                         false: fn (Builder $query): Builder => $query
-                            ->whereNotNull('date_fin')
-                            ->whereDate('date_fin', '<', now()),
+                            ->whereNotNull('end_date')
+                            ->whereDate('end_date', '<', now()),
                         blank: fn (Builder $query): Builder => $query,
                     ),
             ])
