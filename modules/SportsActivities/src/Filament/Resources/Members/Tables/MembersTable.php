@@ -26,7 +26,8 @@ final class MembersTable
                 TextColumn::make('registrations_count')
                     ->counts('registrations')
                     ->label('Inscriptions')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->defaultSort('last_name')
             ->filters([

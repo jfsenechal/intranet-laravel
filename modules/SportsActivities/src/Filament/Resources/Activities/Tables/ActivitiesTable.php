@@ -34,7 +34,8 @@ final class ActivitiesTable
                     ->sortable(),
                 IconColumn::make('archived')
                     ->label('Archivée')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Mise à jour')
                     ->date()

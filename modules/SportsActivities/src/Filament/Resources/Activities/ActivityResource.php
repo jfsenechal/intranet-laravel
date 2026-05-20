@@ -9,7 +9,6 @@ use AcMarche\SportsActivities\Filament\Resources\Activities\Pages\EditActivity;
 use AcMarche\SportsActivities\Filament\Resources\Activities\Pages\ListActivities;
 use AcMarche\SportsActivities\Filament\Resources\Activities\Pages\ViewActivity;
 use AcMarche\SportsActivities\Filament\Resources\Activities\RelationManagers\GroupsRelationManager;
-use AcMarche\SportsActivities\Filament\Resources\Activities\RelationManagers\RegistrationsRelationManager;
 use AcMarche\SportsActivities\Filament\Resources\Activities\Schemas\ActivityForm;
 use AcMarche\SportsActivities\Filament\Resources\Activities\Tables\ActivitiesTable;
 use AcMarche\SportsActivities\Models\Activity;
@@ -64,7 +63,6 @@ final class ActivityResource extends Resource
     {
         return [
             GroupsRelationManager::class,
-            RegistrationsRelationManager::class,
         ];
     }
 
