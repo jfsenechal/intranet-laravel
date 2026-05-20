@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\SportsActivities\Filament\Resources\Groups\Tables;
 
+use AcMarche\SportsActivities\Filament\Exports\GroupRegistrationsPdfExport;
 use AcMarche\SportsActivities\Filament\Resources\Registrations\Schemas\RegistrationInfoList;
 use AcMarche\SportsActivities\Models\Group;
 use Filament\Actions\Action;
@@ -15,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class GroupsTable
 {
@@ -48,6 +50,11 @@ final class GroupsTable
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer')
                     ->schema(fn (Schema $schema): Schema => RegistrationInfoList::configure($schema)),
+                Action::make('exportPdf')
+                    ->label('Exporter en PDF')
+                    ->icon(Heroicon::ArrowDownTray)
+                    ->color('info')
+                    ->action(fn (Group $record): StreamedResponse => GroupRegistrationsPdfExport::download($record)),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
