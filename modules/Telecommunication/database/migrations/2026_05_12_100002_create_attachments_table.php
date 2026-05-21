@@ -12,10 +12,30 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::connection('maria-telecommunication')->hasTable('telecommunication_attachments')) {
+        $schema = Schema::connection('maria-telecommunication');
+
+        if ($schema->hasTable('attachments')) {
+            $schema->table('attachments', function (Blueprint $table): void {
+                $table->rename('telecommunication_attachments');
+            });
+            $schema->table('telecommunication_attachments', function (Blueprint $table): void {
+                $table->renameColumn('updatedAt', 'updated_at');
+            });
+
+            if (! $schema->hasColumn('telecommunication_attachments', 'created_at')) {
+                $schema->table('telecommunication_attachments', function (Blueprint $table): void {
+                    $table->timestamp('created_at')->nullable();
+                });
+            }
+
             return;
         }
-        Schema::create('telecommunication_attachments', function (Blueprint $table): void {
+
+        if ($schema->hasTable('telecommunication_attachments')) {
+            return;
+        }
+
+        $schema->create('telecommunication_attachments', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('telephone_id')
                 ->constrained('telephones')
@@ -23,5 +43,10 @@ return new class() extends Migration
             $table->string('file_name');
             $table->timestamps();
         });
+    }
+
+    public function down(): void
+    {
+        Schema::connection('maria-telecommunication')->dropIfExists('telecommunication_attachments');
     }
 };

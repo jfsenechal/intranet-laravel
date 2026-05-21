@@ -12,10 +12,29 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::connection('maria-telecommunication')->hasTable('telephones')) {
+        $schema = Schema::connection('maria-telecommunication');
+
+        if ($schema->hasTable('telephones')) {
+            if ($schema->hasColumn('telephones', 'slugname')) {
+                $schema->table('telephones', function (Blueprint $table): void {
+                    $table->renameColumn('ligne_id', 'line_type_id');
+                    $table->renameColumn('slugname', 'slug');
+                    $table->renameColumn('utilisateur', 'user_name');
+                    $table->renameColumn('numero', 'number');
+                    $table->renameColumn('archive', 'archived');
+                    $table->renameColumn('departement', 'department');
+                    $table->renameColumn('art_budg', 'budget_article');
+                    $table->renameColumn('localisation', 'location');
+                    $table->renameColumn('cout_fixe', 'fixed_cost');
+                    $table->renameColumn('created', 'created_at');
+                    $table->renameColumn('updated', 'updated_at');
+                });
+            }
+
             return;
         }
-        Schema::create('telephones', function (Blueprint $table): void {
+
+        $schema->create('telephones', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('line_type_id')
                 ->nullable()
@@ -35,5 +54,10 @@ return new class() extends Migration
             $table->longText('note')->nullable();
             $table->timestamps();
         });
+    }
+
+    public function down(): void
+    {
+        Schema::connection('maria-telecommunication')->dropIfExists('telephones');
     }
 };

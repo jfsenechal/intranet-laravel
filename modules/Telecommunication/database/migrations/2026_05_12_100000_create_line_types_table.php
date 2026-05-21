@@ -12,13 +12,26 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::connection('maria-telecommunication')->hasTable('line_types')) {
-            return;
+        $schema = Schema::connection('maria-telecommunication');
+
+        if ($schema->hasTable('type_ligne')) {
+            $schema->table('type_ligne', function (Blueprint $table): void {
+                $table->rename('line_types');
+            });
+            $schema->table('line_types', function (Blueprint $table): void {
+                $table->renameColumn('slugname', 'slug');
+            });
+        } elseif (! $schema->hasTable('line_types')) {
+            $schema->create('line_types', function (Blueprint $table): void {
+                $table->id();
+                $table->string('slug', 70)->unique();
+                $table->string('name');
+            });
         }
-        Schema::create('line_types', function (Blueprint $table): void {
-            $table->id();
-            $table->string('slug', 70)->unique();
-            $table->string('name');
-        });
+    }
+
+    public function down(): void
+    {
+        Schema::connection('maria-telecommunication')->dropIfExists('line_types');
     }
 };
