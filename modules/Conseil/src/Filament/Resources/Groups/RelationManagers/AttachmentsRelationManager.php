@@ -24,6 +24,11 @@ final class AttachmentsRelationManager extends RelationManager
     #[Override]
     protected static ?string $title = 'Pièces jointes';
 
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema

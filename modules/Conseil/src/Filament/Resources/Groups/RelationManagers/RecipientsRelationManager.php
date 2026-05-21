@@ -23,6 +23,11 @@ final class RecipientsRelationManager extends RelationManager
     #[Override]
     protected static ?string $title = 'Destinataires';
 
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components([]);
