@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Override;
+use UnitEnum;
 
 final class RecipientResource extends Resource
 {
@@ -26,6 +27,9 @@ final class RecipientResource extends Resource
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    #[Override]
+    protected static string|UnitEnum|null $navigationGroup = 'Paramètres';
 
     #[Override]
     protected static ?int $navigationSort = 1;

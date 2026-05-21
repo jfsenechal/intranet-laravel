@@ -26,11 +26,6 @@ final class AgendasTable
                     ->label('Date de l\'ordre du jour')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('distribution_end_date')
-                    ->label('Date de fin de diffusion')
-                    ->date()
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('file_name')
                     ->label('Fichier')
                     ->searchable()

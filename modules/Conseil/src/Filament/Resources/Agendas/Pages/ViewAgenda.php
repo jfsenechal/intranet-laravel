@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace AcMarche\Conseil\Filament\Resources\Agendas\Pages;
 
 use AcMarche\Conseil\Filament\Resources\Agendas\AgendaResource;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Storage;
 use Override;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ViewAgenda extends ViewRecord
 {
@@ -31,10 +35,13 @@ final class ViewAgenda extends ViewRecord
                 Section::make('Informations')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('name')->label('Nom'),
-                        TextEntry::make('agenda_date')->label('Date de l\'ordre du jour')->dateTime(),
-                        TextEntry::make('distribution_end_date')->label('Date de fin de diffusion')->date()->placeholder('—'),
-                        TextEntry::make('file_name')->label('Fichier')->placeholder('—'),
+                        TextEntry::make('agenda_date')
+                            ->label('Date de l\'ordre du jour')
+                            ->dateTime(),
+                        TextEntry::make('distribution_end_date')
+                            ->label('Date de fin de diffusion')
+                            ->date()
+                            ->placeholder('—'),
                     ]),
             ]);
     }
@@ -42,6 +49,15 @@ final class ViewAgenda extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('download')
+                ->label('Télécharger le fichier')
+                ->icon(Heroicon::ArrowDownTray)
+                ->color(Color::Yellow)
+                ->visible(fn (): bool => filled($this->record->file_name)
+                    && Storage::disk('public')->exists($this->record->file_name))
+                ->action(fn (): StreamedResponse => Storage::disk('public')->download(
+                    $this->record->file_name,
+                )),
             EditAction::make()
                 ->label('Modifier')
                 ->icon(Heroicon::PencilSquare),

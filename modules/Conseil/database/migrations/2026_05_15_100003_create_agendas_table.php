@@ -19,7 +19,7 @@ return new class extends Migration
             Schema::connection('maria-conseil')->table('agendas', function (Blueprint $table): void {
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('date_ordre', 'agenda_date');
-                $table->renameColumn('date_fin_diffusion', 'distribution_end_date');
+                $table->removeColumn('date_fin_diffusion');
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');
             });
@@ -28,7 +28,6 @@ return new class extends Migration
                 $table->id();
                 $table->string('name', 150);
                 $table->dateTime('agenda_date');
-                $table->date('distribution_end_date')->nullable();
                 $table->string('file_name', 120);
                 $table->timestamps();
             });

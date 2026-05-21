@@ -15,6 +15,8 @@ final class ListAgendas extends ListRecords
     #[Override]
     protected static string $resource = AgendaResource::class;
 
+    protected static ?string $title = 'Ordres du jour';
+
     protected function getHeaderActions(): array
     {
         return [

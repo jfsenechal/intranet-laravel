@@ -13,6 +13,8 @@ final class CreateAgenda extends CreateRecord
     #[Override]
     protected static string $resource = AgendaResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     public function getTitle(): string
     {
         return 'Nouvel ordre du jour';

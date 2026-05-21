@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable([
     'name',
     'agenda_date',
-    'distribution_end_date',
     'file_name',
 ])]
 final class Agenda extends Model
@@ -28,6 +27,5 @@ final class Agenda extends Model
      */
     protected $casts = [
         'agenda_date' => 'datetime',
-        'distribution_end_date' => 'date',
     ];
 }
