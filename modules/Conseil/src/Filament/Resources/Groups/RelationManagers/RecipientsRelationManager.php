@@ -32,6 +32,8 @@ final class RecipientsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('last_name')
+            ->defaultSort('last_name')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')

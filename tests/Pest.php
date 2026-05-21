@@ -50,7 +50,7 @@ uses(
 );
 
 uses(
-    Tests\TestCase::class,
+    AcMarche\Conseil\Tests\ConseilTestCase::class,
 )->in(
     '../modules/Conseil/tests/Feature',
 );

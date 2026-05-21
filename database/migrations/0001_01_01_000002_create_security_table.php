@@ -51,7 +51,6 @@ return new class extends Migration
                 $table->id();
                 $table->string('name')->unique();
                 $table->string('url')->nullable();
-                $table->string('url')->nullable();
                 $table->text('description')->nullable();
                 $table->text('role_description')->nullable();
                 $table->boolean('is_external')->default(false);

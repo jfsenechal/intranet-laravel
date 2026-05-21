@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\SportsActivities\Filament\Resources\Activities\Schemas;
+namespace AcMarche\SportsActivities\Filament\Resources\Groups\Schemas;
 
 use AcMarche\SportsActivities\Models\Group;
 use Filament\Infolists\Components\RepeatableEntry;
