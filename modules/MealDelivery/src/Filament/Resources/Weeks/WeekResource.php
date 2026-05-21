@@ -13,7 +13,7 @@ use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\RouteSheets;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ViewWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\RelationManagers\OrdersRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas\WeekForm;
-use AcMarche\MealDelivery\Filament\Resources\Weeks\Tables\WeekInfoList;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas\WeekInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Tables\WeekTables;
 use AcMarche\MealDelivery\Models\Week;
 use Filament\Resources\Resource;

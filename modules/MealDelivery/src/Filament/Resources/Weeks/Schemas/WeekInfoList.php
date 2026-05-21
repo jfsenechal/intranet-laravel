@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Tables;
+namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas;
 
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Meal;
