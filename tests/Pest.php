@@ -48,3 +48,9 @@ uses(
     '../modules/StreetWatch/tests/Feature',
     '../modules/StreetWatch/tests/Unit',
 );
+
+uses(
+    Tests\TestCase::class,
+)->in(
+    '../modules/Conseil/tests/Feature',
+);
