@@ -21,6 +21,9 @@ final class Category extends Model
     #[Override]
     public $timestamps = false;
 
+    #[Override]
+    protected $table = 'news_categories';
+
     /**
      * @return HasMany<News>
      */

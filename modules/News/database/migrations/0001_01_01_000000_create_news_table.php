@@ -47,7 +47,7 @@ return new class extends Migration
             }*/
         });
 
-        Schema::create('categories', function (Blueprint $table): void {
+        Schema::create('news_categories', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('color');

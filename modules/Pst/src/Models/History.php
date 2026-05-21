@@ -20,6 +20,8 @@ final class History extends Model
 {
     use HasFactory;
 
+    protected $table = 'pst_histories';
+
     /**
      * Get the action that owns the followup
      */

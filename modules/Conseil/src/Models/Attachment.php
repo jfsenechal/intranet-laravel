@@ -25,6 +25,8 @@ final class Attachment extends Model
 
     public $timestamps = false;
 
+    protected $table = 'conseil_attachments';
+
     /**
      * @return BelongsTo<Group, $this>
      */

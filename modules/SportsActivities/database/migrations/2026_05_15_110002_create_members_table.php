@@ -6,16 +6,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     protected $connection = 'maria-rescam';
 
     public function up(): void
     {
         if (Schema::connection('maria-rescam')->hasTable('sportif')) {
             Schema::connection('maria-rescam')->table('sportif', function (Blueprint $table): void {
-                $table->rename('members');
+                $table->rename('sports_members');
             });
-            Schema::connection('maria-rescam')->table('members', function (Blueprint $table): void {
+            Schema::connection('maria-rescam')->table('sports_members', function (Blueprint $table): void {
                 $table->renameColumn('nom', 'last_name');
                 $table->renameColumn('prenom', 'first_name');
                 $table->renameColumn('ne_le', 'birth_date');
@@ -30,7 +31,7 @@ return new class() extends Migration {
                 $table->renameColumn('updatedAt', 'updated_at');
             });
         } else {
-            Schema::connection('maria-rescam')->create('members', function (Blueprint $table): void {
+            Schema::connection('maria-rescam')->create('sports_members', function (Blueprint $table): void {
                 $table->id();
                 $table->string('last_name', 255);
                 $table->string('first_name', 255);

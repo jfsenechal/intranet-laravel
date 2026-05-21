@@ -30,6 +30,8 @@ final class Member extends Model
 {
     use HasFactory;
 
+    protected $table = 'sports_members';
+
     /**
      * @var array<string, string>
      */

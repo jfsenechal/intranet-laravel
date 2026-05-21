@@ -82,7 +82,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('services', function (Blueprint $table): void {
+        Schema::create('pst_services', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('initials')->nullable();
@@ -109,7 +109,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('histories', function (Blueprint $table): void {
+        Schema::create('pst_histories', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Action::class)->constrained()->cascadeOnDelete();
             $table->string('property')->nullable();
@@ -120,7 +120,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('media', function (Blueprint $table): void {
+        Schema::create('pst_media', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Action::class)->constrained()->cascadeOnDelete();
             $table->uuid()->nullable()->unique();
@@ -156,14 +156,14 @@ return new class extends Migration
         Schema::create('action_service_leader', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Action::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Service::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Service::class)->constrained('pst_services')->cascadeOnDelete();
             $table->unique(['action_id', 'service_id']);
         });
 
         Schema::create('action_service_partner', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Action::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Service::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Service::class)->constrained('pst_services')->cascadeOnDelete();
             $table->unique(['action_id', 'service_id']);
         });
 
@@ -184,7 +184,7 @@ return new class extends Migration
         Schema::create('service_user', function (Blueprint $table): void {
             $table->id();
             $table->string('username');
-            $table->foreignIdFor(Service::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Service::class)->constrained('pst_services')->cascadeOnDelete();
             $table->unique(['username', 'service_id']);
         });
     }

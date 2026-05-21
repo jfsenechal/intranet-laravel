@@ -26,7 +26,7 @@ return new class extends Migration
                     ->constrained('groups')
                     ->cascadeOnDelete();
                 $table->foreignId('recipient_id')
-                    ->constrained('recipients')
+                    ->constrained('conseil_recipients')
                     ->cascadeOnDelete();
                 $table->primary(['group_id', 'recipient_id']);
             });

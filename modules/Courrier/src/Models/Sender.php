@@ -33,6 +33,8 @@ final class Sender extends Model
     #[Override]
     public $timestamps = false;
 
+    protected $table = 'courrier_senders';
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()

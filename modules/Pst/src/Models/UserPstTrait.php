@@ -32,12 +32,12 @@ trait UserPstTrait
      */
     public function actionsFromServices(): Builder
     {
-        $serviceIds = $this->services()->select('services.id');
+        $serviceIds = $this->services()->select('pst_services.id');
 
         return Action::query()->where(
             static function (Builder $query) use ($serviceIds): void {
-                $query->whereHas('leaderServices', fn ($q) => $q->whereIn('services.id', $serviceIds))
-                    ->orWhereHas('partnerServices', fn ($q) => $q->whereIn('services.id', $serviceIds));
+                $query->whereHas('leaderServices', fn ($q) => $q->whereIn('pst_services.id', $serviceIds))
+                    ->orWhereHas('partnerServices', fn ($q) => $q->whereIn('pst_services.id', $serviceIds));
             }
         );
     }

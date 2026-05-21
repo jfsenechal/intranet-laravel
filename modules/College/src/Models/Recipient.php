@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\College\Models;
 
-use AcMarche\College\Database\Factories\DestinataireFactory;
+use AcMarche\College\Database\Factories\RecipientFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -23,12 +23,12 @@ use Illuminate\Support\Str;
  * @property bool $ordre_college
  * @property bool $pv_college
  */
-#[UseFactory(DestinataireFactory::class)]
+#[UseFactory(RecipientFactory::class)]
 #[Connection('maria-college')]
 #[Fillable([
     'slugname',
-    'nom',
-    'prenom',
+    'last_name',
+    'first_name',
     'email',
     'pv_service',
     'ordre_service',
@@ -41,14 +41,16 @@ final class Recipient extends Model
 
     public $timestamps = false;
 
+    protected $table = 'college_recipients';
+
     protected static function booted(): void
     {
-        $assignSlug = function (self $destinataire): void {
-            if (! empty($destinataire->slugname)) {
+        $assignSlug = function (self $recipient): void {
+            if (! empty($recipient->slugname)) {
                 return;
             }
-            $base = mb_trim((string) $destinataire->nom).'_'.mb_trim((string) $destinataire->prenom);
-            $destinataire->slugname = Str::slug($base, '_');
+            $base = mb_trim((string) $recipient->last_name).'_'.mb_trim((string) $recipient->first_name);
+            $recipient->slugname = Str::slug($base, '_');
         };
 
         self::creating($assignSlug);

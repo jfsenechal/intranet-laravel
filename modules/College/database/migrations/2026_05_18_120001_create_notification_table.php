@@ -14,12 +14,12 @@ return new class() extends Migration
     {
         if (Schema::connection('maria-college')->hasTable('notification')) {
             Schema::connection('maria-college')->table('notification', function (Blueprint $table): void {
-                $table->rename('notifications');
+                $table->rename('college_notifications');
             });
 
             return;
         }
-        Schema::connection('maria-college')->create('notifications', function (Blueprint $table): void {
+        Schema::connection('maria-college')->create('college_notifications', function (Blueprint $table): void {
             $table->id();
             $table->string('file_name', 255);
             $table->string('mime', 255);

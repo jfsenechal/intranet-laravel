@@ -243,8 +243,8 @@ final class ActionTables
                     $data['values'],
                     fn (Builder $query, array $services): Builder => $query->where(
                         fn (Builder $query) => $query
-                            ->whereHas('leaderServices', fn (Builder $q) => $q->whereIn('services.id', $services))
-                            ->orWhereHas('partnerServices', fn (Builder $q) => $q->whereIn('services.id', $services))
+                            ->whereHas('leaderServices', fn (Builder $q) => $q->whereIn('pst_services.id', $services))
+                            ->orWhereHas('partnerServices', fn (Builder $q) => $q->whereIn('pst_services.id', $services))
                     )
                 )),
             TrashedFilter::make()

@@ -54,8 +54,8 @@ final class EditActionPst extends EditRecord
 
         $this->oldRelationshipIds = [
             'users' => $record->users()->pluck('users.username')->toArray(),
-            'leaderServices' => $record->leaderServices()->pluck('services.id')->toArray(),
-            'partnerServices' => $record->partnerServices()->pluck('services.id')->toArray(),
+            'leaderServices' => $record->leaderServices()->pluck('pst_services.id')->toArray(),
+            'partnerServices' => $record->partnerServices()->pluck('pst_services.id')->toArray(),
             'mandataries' => $record->mandataries()->pluck('users.username')->toArray(),
         ];
     }
@@ -73,13 +73,13 @@ final class EditActionPst extends EditRecord
             ],
             'leaderServices' => [
                 'old' => $this->oldRelationshipIds['leaderServices'],
-                'new' => $record->leaderServices()->pluck('services.id')->toArray(),
+                'new' => $record->leaderServices()->pluck('pst_services.id')->toArray(),
                 'label' => 'service porteur',
                 'getDisplayName' => $this->getServiceDisplayName(...),
             ],
             'partnerServices' => [
                 'old' => $this->oldRelationshipIds['partnerServices'],
-                'new' => $record->partnerServices()->pluck('services.id')->toArray(),
+                'new' => $record->partnerServices()->pluck('pst_services.id')->toArray(),
                 'label' => 'service partenaire',
                 'getDisplayName' => $this->getServiceDisplayName(...),
             ],

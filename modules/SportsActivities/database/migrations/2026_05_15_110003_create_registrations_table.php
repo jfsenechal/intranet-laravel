@@ -6,16 +6,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     protected $connection = 'maria-rescam';
 
     public function up(): void
     {
         if (Schema::connection('maria-rescam')->hasTable('inscription')) {
             Schema::connection('maria-rescam')->table('inscription', function (Blueprint $table): void {
-                $table->rename('registrations');
+                $table->rename('sports_registrations');
             });
-            Schema::connection('maria-rescam')->table('registrations', function (Blueprint $table): void {
+            Schema::connection('maria-rescam')->table('sports_registrations', function (Blueprint $table): void {
                 $table->renameColumn('activite_id', 'activity_id');
                 $table->renameColumn('groupe_id', 'group_id');
                 $table->renameColumn('sportif_id', 'member_id');
@@ -26,11 +27,11 @@ return new class() extends Migration {
             return;
         }
 
-        Schema::connection('maria-rescam')->create('registrations', function (Blueprint $table): void {
+        Schema::connection('maria-rescam')->create('sports_registrations', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('activity_id')->constrained('activities');
-            $table->foreignId('group_id')->constrained('groups');
-            $table->foreignId('member_id')->constrained('members');
+            $table->foreignId('activity_id')->constrained('sports_activities');
+            $table->foreignId('group_id')->constrained('sports_groups');
+            $table->foreignId('member_id')->constrained('sports_members');
             $table->double('price')->nullable();
             $table->longText('comment')->nullable();
             $table->string('user_add', 255);

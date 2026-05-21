@@ -11,20 +11,20 @@ use Illuminate\Support\Str;
 /**
  * @extends Factory<Recipient>
  */
-final class DestinataireFactory extends Factory
+final class RecipientFactory extends Factory
 {
     /**
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $nom = fake()->lastName();
-        $prenom = fake()->firstName();
+        $lastName = fake()->lastName();
+        $firstName = fake()->firstName();
 
         return [
-            'slugname' => Str::slug($nom.'_'.$prenom, '_').'_'.fake()->unique()->numberBetween(1, 99999),
-            'nom' => $nom,
-            'prenom' => $prenom,
+            'slugname' => Str::slug($lastName.'_'.$firstName, '_').'_'.fake()->unique()->numberBetween(1, 99999),
+            'last_name' => $lastName,
+            'first_name' => $firstName,
             'email' => fake()->unique()->safeEmail(),
             'pv_service' => fake()->boolean(),
             'ordre_service' => fake()->boolean(),

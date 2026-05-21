@@ -29,6 +29,8 @@ final class Group extends Model
 {
     use HasFactory;
 
+    protected $table = 'sports_groups';
+
     /**
      * @var array<string, string>
      */

@@ -22,6 +22,8 @@ final class Attachment extends Model
 {
     use HasFactory;
 
+    protected $table = 'telecommunication_attachments';
+
     /**
      * @return BelongsTo<Telephone, $this>
      */

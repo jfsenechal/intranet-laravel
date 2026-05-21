@@ -26,6 +26,8 @@ final class Notification extends Model
 
     public const UPDATED_AT = 'updatedAt';
 
+    protected $table = 'college_notifications';
+
     /**
      * @return array<string, string>
      */

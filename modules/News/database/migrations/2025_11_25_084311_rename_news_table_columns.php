@@ -44,11 +44,11 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::connection('maria-news')->hasTable('categories')) {
+        if (! Schema::connection('maria-news')->hasTable('news_categories')) {
             Schema::connection('maria-news')->table('categorie', function (Blueprint $table): void {
-                $table->rename('categories');
+                $table->rename('news_categories');
             });
-            Schema::connection('maria-news')->table('categories', function (Blueprint $table): void {
+            Schema::connection('maria-news')->table('news_categories', function (Blueprint $table): void {
                 $table->renameColumn('nom', 'name');
                 $table->renameColumn('couleur', 'color');
                 $table->renameColumn('icone', 'icon');

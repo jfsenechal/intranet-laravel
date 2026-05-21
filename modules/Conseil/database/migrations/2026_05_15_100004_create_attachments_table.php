@@ -14,14 +14,14 @@ return new class extends Migration
     {
         if (Schema::connection('maria-conseil')->hasTable('PieceJointe')) {
             Schema::connection('maria-conseil')->table('PieceJointe', function (Blueprint $table): void {
-                $table->rename('attachments');
+                $table->rename('conseil_attachments');
             });
-            Schema::connection('maria-conseil')->table('attachments', function (Blueprint $table): void {
+            Schema::connection('maria-conseil')->table('conseil_attachments', function (Blueprint $table): void {
                 $table->renameColumn('groupe_id', 'group_id');
                 $table->renameColumn('nom', 'name');
             });
-        } elseif (! Schema::connection('maria-conseil')->hasTable('attachments')) {
-            Schema::connection('maria-conseil')->create('attachments', function (Blueprint $table): void {
+        } elseif (! Schema::connection('maria-conseil')->hasTable('conseil_attachments')) {
+            Schema::connection('maria-conseil')->create('conseil_attachments', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('group_id')
                     ->nullable()
@@ -35,6 +35,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-conseil')->dropIfExists('attachments');
+        Schema::connection('maria-conseil')->dropIfExists('conseil_attachments');
     }
 };

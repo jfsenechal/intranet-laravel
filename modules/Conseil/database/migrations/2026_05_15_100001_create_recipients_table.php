@@ -14,14 +14,14 @@ return new class extends Migration
     {
         if (Schema::connection('maria-conseil')->hasTable('destinataire')) {
             Schema::connection('maria-conseil')->table('destinataire', function (Blueprint $table): void {
-                $table->rename('recipients');
+                $table->rename('conseil_recipients');
             });
-            Schema::connection('maria-conseil')->table('recipients', function (Blueprint $table): void {
+            Schema::connection('maria-conseil')->table('conseil_recipients', function (Blueprint $table): void {
                 $table->renameColumn('nom', 'last_name');
                 $table->renameColumn('prenom', 'first_name');
             });
-        } elseif (! Schema::connection('maria-conseil')->hasTable('recipients')) {
-            Schema::connection('maria-conseil')->create('recipients', function (Blueprint $table): void {
+        } elseif (! Schema::connection('maria-conseil')->hasTable('conseil_recipients')) {
+            Schema::connection('maria-conseil')->create('conseil_recipients', function (Blueprint $table): void {
                 $table->id();
                 $table->string('last_name', 255);
                 $table->string('first_name', 255);
@@ -32,6 +32,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection('maria-conseil')->dropIfExists('recipients');
+        Schema::connection('maria-conseil')->dropIfExists('conseil_recipients');
     }
 };

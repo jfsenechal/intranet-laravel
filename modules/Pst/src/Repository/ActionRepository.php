@@ -25,7 +25,7 @@ final class ActionRepository
             ->whereHas('user', fn ($q) => $q->where('id', $userId));
 
         return Action::query()
-            ->whereHas('leaderServices', fn ($q) => $q->whereIn('services.id', $serviceIds))
-            ->orWhereHas('partnerServices', fn ($q) => $q->whereIn('services.id', $serviceIds));
+            ->whereHas('leaderServices', fn ($q) => $q->whereIn('pst_services.id', $serviceIds))
+            ->orWhereHas('partnerServices', fn ($q) => $q->whereIn('pst_services.id', $serviceIds));
     }
 }

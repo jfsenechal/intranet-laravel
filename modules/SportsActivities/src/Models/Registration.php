@@ -27,6 +27,8 @@ final class Registration extends Model
     use HasFactory;
     use HasUserAdd;
 
+    protected $table = 'sports_registrations';
+
     /**
      * @var array<string, string>
      */

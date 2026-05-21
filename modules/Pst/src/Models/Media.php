@@ -28,6 +28,8 @@ final class Media extends Model
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'pst_media';
+
     /**
      * @return BelongsTo<Action>
      */

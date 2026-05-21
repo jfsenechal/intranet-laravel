@@ -12,10 +12,10 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::connection('maria-telecommunication')->hasTable('attachments')) {
+        if (Schema::connection('maria-telecommunication')->hasTable('telecommunication_attachments')) {
             return;
         }
-        Schema::create('attachments', function (Blueprint $table): void {
+        Schema::create('telecommunication_attachments', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('telephone_id')
                 ->constrained('telephones')

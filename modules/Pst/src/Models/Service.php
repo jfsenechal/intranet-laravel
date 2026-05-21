@@ -28,6 +28,8 @@ final class Service extends Model
     use HasFactory, Notifiable;
     use Searchable;
 
+    protected $table = 'pst_services';
+
     /**
      * Get the indexable data array for the model.
      *
@@ -97,8 +99,8 @@ final class Service extends Model
         return Action::query()
             ->forSelectedDepartment()
             ->where(function ($query) use ($serviceId): void {
-                $query->whereHas('leaderServices', fn ($q) => $q->where('services.id', $serviceId))
-                    ->orWhereHas('partnerServices', fn ($q) => $q->where('services.id', $serviceId));
+                $query->whereHas('leaderServices', fn ($q) => $q->where('pst_services.id', $serviceId))
+                    ->orWhereHas('partnerServices', fn ($q) => $q->where('pst_services.id', $serviceId));
             });
     }
 }

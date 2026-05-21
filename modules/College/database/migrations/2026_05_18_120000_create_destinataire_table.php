@@ -14,15 +14,16 @@ return new class() extends Migration
     {
         if (Schema::connection('maria-college')->hasTable('destinataire')) {
             Schema::connection('maria-college')->table('destinataire', function (Blueprint $table): void {
-                $table->rename('recipients');
+                $table->rename('college_recipients');
             });
-            Schema::connection('maria-college')->table('recipients', function (Blueprint $table): void {
+            Schema::connection('maria-college')->table('college_recipients', function (Blueprint $table): void {
                 $table->renameColumn('nom', 'last_name');
                 $table->renameColumn('prenom', 'first_name');
             });
-        } elseif (! Schema::connection('maria-college')->hasTable('recipients')) {
-            Schema::connection('maria-college')->create('recipients', function (Blueprint $table): void {
+        } elseif (! Schema::connection('maria-college')->hasTable('college_recipients')) {
+            Schema::connection('maria-college')->create('college_recipients', function (Blueprint $table): void {
                 $table->id();
+                $table->string('slugname', 70)->nullable();
                 $table->string('last_name', 255);
                 $table->string('first_name', 255);
                 $table->string('email', 255);

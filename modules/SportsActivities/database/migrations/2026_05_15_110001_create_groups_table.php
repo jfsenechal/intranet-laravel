@@ -6,16 +6,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     protected $connection = 'maria-rescam';
 
     public function up(): void
     {
         if (Schema::connection('maria-rescam')->hasTable('groupe')) {
             Schema::connection('maria-rescam')->table('groupe', function (Blueprint $table): void {
-                $table->rename('groups');
+                $table->rename('sports_groups');
             });
-            Schema::connection('maria-rescam')->table('groups', function (Blueprint $table): void {
+            Schema::connection('maria-rescam')->table('sports_groups', function (Blueprint $table): void {
                 $table->renameColumn('jour', 'day');
                 $table->renameColumn('heure', 'time');
                 $table->renameColumn('lieux', 'location');
@@ -24,10 +25,10 @@ return new class() extends Migration {
                 $table->renameColumn('activite_id', 'activity_id');
             });
         } else {
-            Schema::connection('maria-rescam')->create('groups', function (Blueprint $table): void {
+            Schema::connection('maria-rescam')->create('sports_groups', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('activity_id')
-                    ->constrained('activities');
+                    ->constrained('sports_activities');
                 $table->string('day', 255);
                 $table->string('time', 255);
                 $table->string('location', 255);

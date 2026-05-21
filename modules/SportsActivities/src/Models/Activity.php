@@ -23,6 +23,8 @@ final class Activity extends Model
 {
     use HasFactory;
 
+    protected $table = 'sports_activities';
+
     /**
      * @var array<string, string>
      */

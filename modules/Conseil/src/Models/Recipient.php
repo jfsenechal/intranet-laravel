@@ -25,6 +25,8 @@ final class Recipient extends Model
 
     public $timestamps = false;
 
+    protected $table = 'conseil_recipients';
+
     /**
      * @return BelongsToMany<Group, $this>
      */

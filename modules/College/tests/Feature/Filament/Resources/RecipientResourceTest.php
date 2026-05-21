@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use AcMarche\College\Enums\RolesEnum;
-use AcMarche\College\Filament\Resources\Destinataires\Pages\CreateDestinataire;
-use AcMarche\College\Filament\Resources\Destinataires\Pages\EditDestinataire;
-use AcMarche\College\Filament\Resources\Destinataires\Pages\ListDestinataires;
-use AcMarche\College\Filament\Resources\Destinataires\Pages\ViewDestinataire;
+use AcMarche\College\Filament\Resources\Recipients\Pages\CreateRecipient;
+use AcMarche\College\Filament\Resources\Recipients\Pages\EditRecipient;
+use AcMarche\College\Filament\Resources\Recipients\Pages\ListRecipients;
+use AcMarche\College\Filament\Resources\Recipients\Pages\ViewRecipient;
 use AcMarche\College\Models\Recipient;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -28,27 +28,27 @@ beforeEach(function (): void {
 });
 
 it('renders list, create, view and edit pages', function (): void {
-    $destinataire = Recipient::factory()->create();
+    $recipient = Recipient::factory()->create();
 
-    livewire(ListDestinataires::class)->assertOk();
-    livewire(CreateDestinataire::class)->assertOk();
-    livewire(ViewDestinataire::class, ['record' => $destinataire->id])->assertOk();
-    livewire(EditDestinataire::class, ['record' => $destinataire->id])->assertOk();
+    livewire(ListRecipients::class)->assertOk();
+    livewire(CreateRecipient::class)->assertOk();
+    livewire(ViewRecipient::class, ['record' => $recipient->id])->assertOk();
+    livewire(EditRecipient::class, ['record' => $recipient->id])->assertOk();
 });
 
-it('lists destinataires', function (): void {
-    $destinataires = Recipient::factory(3)->create();
+it('lists recipients', function (): void {
+    $recipients = Recipient::factory(3)->create();
 
-    livewire(ListDestinataires::class)
+    livewire(ListRecipients::class)
         ->loadTable()
-        ->assertCanSeeTableRecords($destinataires);
+        ->assertCanSeeTableRecords($recipients);
 });
 
-it('creates a destinataire via the form', function (): void {
-    livewire(CreateDestinataire::class)
+it('creates a recipient via the form', function (): void {
+    livewire(CreateRecipient::class)
         ->fillForm([
-            'nom' => 'Dupont',
-            'prenom' => 'Jean',
+            'last_name' => 'Dupont',
+            'first_name' => 'Jean',
             'email' => 'jean.dupont@example.com',
             'pv_college' => true,
         ])
@@ -57,58 +57,58 @@ it('creates a destinataire via the form', function (): void {
         ->assertNotified();
 
     assertDatabaseHas(Recipient::class, [
-        'nom' => 'Dupont',
-        'prenom' => 'Jean',
+        'last_name' => 'Dupont',
+        'first_name' => 'Jean',
         'email' => 'jean.dupont@example.com',
         'pv_college' => true,
     ]);
 });
 
 it('auto-generates the slugname if left empty', function (): void {
-    livewire(CreateDestinataire::class)
+    livewire(CreateRecipient::class)
         ->fillForm([
-            'nom' => 'Martin',
-            'prenom' => 'Marie',
+            'last_name' => 'Martin',
+            'first_name' => 'Marie',
             'email' => 'marie.martin@example.com',
         ])
         ->call('create')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(Recipient::class, [
-        'nom' => 'Martin',
+        'last_name' => 'Martin',
         'slugname' => 'martin_marie',
     ]);
 });
 
-it('updates a destinataire via the form', function (): void {
-    $destinataire = Recipient::factory()->create(['pv_college' => false]);
+it('updates a recipient via the form', function (): void {
+    $recipient = Recipient::factory()->create(['pv_college' => false]);
 
-    livewire(EditDestinataire::class, ['record' => $destinataire->id])
+    livewire(EditRecipient::class, ['record' => $recipient->id])
         ->fillForm(['pv_college' => true])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(Recipient::class, [
-        'id' => $destinataire->id,
+        'id' => $recipient->id,
         'pv_college' => true,
     ]);
 });
 
 it('validates required fields', function (array $data, array $errors): void {
-    livewire(CreateDestinataire::class)
+    livewire(CreateRecipient::class)
         ->fillForm($data)
         ->call('create')
         ->assertHasFormErrors($errors)
         ->assertNotNotified();
 })->with([
-    '`nom` required' => [['nom' => null, 'prenom' => 'X', 'email' => 'x@x.be'], ['nom' => 'required']],
-    '`prenom` required' => [['nom' => 'X', 'prenom' => null, 'email' => 'x@x.be'], ['prenom' => 'required']],
-    '`email` required' => [['nom' => 'X', 'prenom' => 'Y', 'email' => null], ['email' => 'required']],
-    '`email` must be valid' => [['nom' => 'X', 'prenom' => 'Y', 'email' => 'not-an-email'], ['email' => 'email']],
+    '`last_name` required' => [['last_name' => null, 'first_name' => 'X', 'email' => 'x@x.be'], ['last_name' => 'required']],
+    '`first_name` required' => [['last_name' => 'X', 'first_name' => null, 'email' => 'x@x.be'], ['first_name' => 'required']],
+    '`email` required' => [['last_name' => 'X', 'first_name' => 'Y', 'email' => null], ['email' => 'required']],
+    '`email` must be valid' => [['last_name' => 'X', 'first_name' => 'Y', 'email' => 'not-an-email'], ['email' => 'email']],
 ]);
 
 it('forbids a stranger from listing', function (): void {
     $this->actingAs(User::factory()->create());
 
-    livewire(ListDestinataires::class)->assertForbidden();
+    livewire(ListRecipients::class)->assertForbidden();
 });

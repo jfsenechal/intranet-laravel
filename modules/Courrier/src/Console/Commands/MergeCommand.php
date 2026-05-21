@@ -158,14 +158,14 @@ final class MergeCommand extends Command
     {
         $this->info('  - Merging senders...');
 
-        $senders = DB::select("SELECT * FROM {$source}.senders");
+        $senders = DB::select("SELECT * FROM {$source}.courrier_senders");
 
         foreach ($senders as $sender) {
             $oldId = $sender->id;
 
             if (! $this->dryRun) {
                 DB::insert(
-                    "INSERT INTO {$target}.senders (slug, name, department) VALUES (?, ?, ?)",
+                    "INSERT INTO {$target}.courrier_senders (slug, name, department) VALUES (?, ?, ?)",
                     [
                         $sender->slug.'-'.$department,
                         $sender->name,
@@ -391,7 +391,7 @@ final class MergeCommand extends Command
         if (! $this->dryRun) {
             DB::update("UPDATE {$target}.incoming_mails SET department = ? WHERE department IS NULL", [$department]);
             DB::update("UPDATE {$target}.services SET department = ? WHERE department IS NULL", [$department]);
-            DB::update("UPDATE {$target}.senders SET department = ? WHERE department IS NULL", [$department]);
+            DB::update("UPDATE {$target}.courrier_senders SET department = ? WHERE department IS NULL", [$department]);
         }
 
         $this->info('  Existing records updated with VILLE department');
