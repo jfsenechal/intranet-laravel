@@ -1,0 +1,35 @@
+[Unit]
+Description=Laravel queue worker (mailing-lists)
+After=network.target mariadb.service
+Wants=mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/mailing-lists
+ExecStart=/bin/php /var/www/mailing-lists/artisan queue:work --queue=default --sleep=3 --tries=3 --max-time=3600
+Restart=always
+RestartSec=5
+# Stop gracefully: let the current job finish before killing
+ExecStop=/bin/php /var/www/mailing-lists/artisan queue:restart
+
+[Install]
+WantedBy=multi-user.target
+
+#
+#  ┌───────────────────────┬────────────────────────────────────────────────────────────────────────────────┐
+#  │         Part          │                                     Reason                                     │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ Restart=always        │ Worker comes back if it crashes or the box reboots                             │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ --max-time=3600       │ Worker exits cleanly every hour; systemd restarts it — frees any leaked memory │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ --tries=3             │ A failing job retries 3× then lands in failed_jobs instead of looping forever  │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ --sleep=3             │ When the queue is empty, poll every 3 s instead of hammering MariaDB           │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ After=mariadb.service │ Your queue is the jobs table — don't start before the DB is up                 │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ User=www-data         │ Matches the owner of storage/ so the worker can write logs/cache               │
+#  └───────────────────────┴────────────────────────────────────────────────────────────────────────────────┘

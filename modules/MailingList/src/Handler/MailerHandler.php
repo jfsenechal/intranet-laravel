@@ -40,8 +40,15 @@ final class MailerHandler
             ->where('status', RecipientStatus::Pending)
             ->get();
 
-        $jobs = $pendingRecipients->map(
-            fn ($recipient): SendEmailJob => new SendEmailJob($email, $recipient)
+        $perWindow = max(1, (int) config('mailing-list.throttle.per_window'));
+        $windowMinutes = max(0, (int) config('mailing-list.throttle.window_minutes'));
+        $secondsPerEmail = $windowMinutes > 0
+            ? ($windowMinutes * 60) / $perWindow
+            : 0;
+
+        $jobs = $pendingRecipients->values()->map(
+            fn ($recipient, int $index): SendEmailJob => (new SendEmailJob($email, $recipient))
+                ->delay(now()->addSeconds((int) round($index * $secondsPerEmail)))
         )->all();
 
         $batch = Bus::batch($jobs)
@@ -59,9 +66,15 @@ final class MailerHandler
             'batch_id' => $batch->id,
         ]);
 
+        $body = "Dispatched {$pendingRecipients->count()} emails to the queue.";
+
+        if ($secondsPerEmail > 0) {
+            $body .= " Throttled to {$perWindow} every {$windowMinutes} min.";
+        }
+
         Notification::make()
             ->title('Sending started')
-            ->body("Dispatched {$pendingRecipients->count()} emails to the queue.")
+            ->body($body)
             ->success()
             ->send();
     }
