@@ -11,8 +11,15 @@ return new class() extends Migration {
 
     public function up(): void
     {
-        if (Schema::connection('maria-rescam')->hasTable('inscriptions')) {
-            Schema::connection('maria-rescam')->table('inscriptions', function (Blueprint $table): void {
+        if (Schema::connection('maria-rescam')->hasTable('inscription')) {
+            Schema::connection('maria-rescam')->table('inscription', function (Blueprint $table): void {
+                $table->rename('registrations');
+            });
+            Schema::connection('maria-rescam')->table('registrations', function (Blueprint $table): void {
+                $table->renameColumn('activite_id', 'activity_id');
+                $table->renameColumn('groupe_id', 'group_id');
+                $table->renameColumn('sportif_id', 'member_id');
+                $table->renameColumn('remarque', 'comment');
                 $table->renameColumn('user', 'user_add');
             });
 

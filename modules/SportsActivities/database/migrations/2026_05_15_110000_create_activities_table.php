@@ -6,28 +6,30 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
-{
+return new class() extends Migration {
     protected $connection = 'maria-rescam';
 
     public function up(): void
     {
-        $schema = Schema::connection('maria-rescam');
-        $schema->dropIfExists('inscriptions');
-        $schema->dropIfExists('groupes');
-        $schema->dropIfExists('sportifs');
-        $schema->dropIfExists('activites');
-
-        if (Schema::connection('maria-rescam')->hasTable('activities')) {
-            return;
+        if (Schema::connection('maria-rescam')->hasTable('activite')) {
+            Schema::connection('maria-rescam')->table('activite', function (Blueprint $table): void {
+                $table->rename('activities');
+            });
+            Schema::connection('maria-rescam')->table('activities', function (Blueprint $table): void {
+                $table->renameColumn('nom', 'name');
+                $table->renameColumn('archive', 'archived');
+                $table->renameColumn('user', 'user_add');
+                $table->renameColumn('createdAt', 'created_at');
+                $table->renameColumn('updatedAt', 'updated_at');
+            });
+        } else {
+            Schema::connection('maria-rescam')->create('activities', function (Blueprint $table): void {
+                $table->id();
+                $table->string('name', 255);
+                $table->longText('description')->nullable();
+                $table->boolean('archived')->default(false);
+                $table->timestamps();
+            });
         }
-
-        Schema::connection('maria-rescam')->create('activities', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name', 255);
-            $table->longText('description')->nullable();
-            $table->boolean('archived')->default(false);
-            $table->timestamps();
-        });
     }
 };
