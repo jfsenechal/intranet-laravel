@@ -7,15 +7,24 @@ namespace AcMarche\College\Models;
 use AcMarche\College\Database\Factories\DestinataireFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property string $slugname
+ * @property string $last_name
+ * @property string $first_name
+ * @property string $email
+ * @property bool $pv_service
+ * @property bool $ordre_service
+ * @property bool $ordre_college
+ * @property bool $pv_college
+ */
 #[UseFactory(DestinataireFactory::class)]
 #[Connection('maria-college')]
-#[Table(name: 'destinataire')]
 #[Fillable([
     'slugname',
     'nom',

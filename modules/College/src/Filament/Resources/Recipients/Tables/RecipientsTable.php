@@ -19,12 +19,13 @@ final class RecipientsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('nom')
+                TextColumn::make('last_name')
                     ->label('Nom')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('prenom')
+                TextColumn::make('first_name')
                     ->label('Prénom')
                     ->sortable()
                     ->searchable(),

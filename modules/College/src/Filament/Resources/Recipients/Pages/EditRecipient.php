@@ -15,6 +15,11 @@ final class EditRecipient extends EditRecord
     #[Override]
     protected static string $resource = RecipientResource::class;
 
+    public function getTitle(): string
+    {
+        return $this->record->last_name.' '.$this->record->first_name;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

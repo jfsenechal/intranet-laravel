@@ -30,7 +30,7 @@ final class RecipientResource extends Resource
     protected static ?int $navigationSort = 1;
 
     #[Override]
-    protected static ?string $navigationLabel = 'Recipients';
+    protected static ?string $navigationLabel = 'Destinataires';
 
     #[Override]
     protected static ?string $modelLabel = 'destinataire';
@@ -39,7 +39,7 @@ final class RecipientResource extends Resource
     protected static ?string $pluralModelLabel = 'destinataires';
 
     #[Override]
-    protected static ?string $recordTitleAttribute = 'nom';
+    protected static ?string $recordTitleAttribute = 'last_name';
 
     public static function getGloballySearchableAttributes(): array
     {

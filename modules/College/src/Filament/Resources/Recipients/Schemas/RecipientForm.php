@@ -19,12 +19,12 @@ final class RecipientForm
                 Section::make('Identification')
                     ->schema([
                         Grid::make(2)->schema([
-                            TextInput::make('nom')
+                            TextInput::make('last_name')
                                 ->label('Nom')
                                 ->required()
                                 ->maxLength(255)
                                 ->columnSpan(1),
-                            TextInput::make('prenom')
+                            TextInput::make('first_name')
                                 ->label('Prénom')
                                 ->required()
                                 ->maxLength(255)
@@ -34,11 +34,6 @@ final class RecipientForm
                                 ->email()
                                 ->required()
                                 ->maxLength(255)
-                                ->columnSpan(1),
-                            TextInput::make('slugname')
-                                ->label('Slug')
-                                ->maxLength(70)
-                                ->helperText('Auto-généré si vide')
                                 ->columnSpan(1),
                         ]),
                     ]),
