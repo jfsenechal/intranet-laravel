@@ -30,10 +30,12 @@ final class NotificationSendForm
                             ->required()
                             ->live()
                             ->inline(),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
 
                 Section::make('Message')
                     ->columns(2)
+                    ->columnSpanFull()
                     ->schema([
                         DatePicker::make('date_college')
                             ->label('Date du Collège')
@@ -53,7 +55,6 @@ final class NotificationSendForm
                     ]),
 
                 Section::make('Documents')
-                    ->description('Au moins un document est requis. Chaque destinataire reçoit le(s) document(s) correspondant à ses cases cochées.')
                     ->columns(2)
                     ->schema([
                         FileUpload::make('file_college')

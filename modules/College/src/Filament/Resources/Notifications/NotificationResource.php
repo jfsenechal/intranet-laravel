@@ -30,7 +30,7 @@ final class NotificationResource extends Resource
     protected static ?int $navigationSort = 2;
 
     #[Override]
-    protected static ?string $navigationLabel = 'Notifications';
+    protected static ?string $navigationLabel = 'Notifier';
 
     #[Override]
     protected static ?string $modelLabel = 'notification';
