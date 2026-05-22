@@ -120,6 +120,8 @@ final class CreateNotification extends CreateRecord
 
         $dateCollege = Carbon::parse($data['date_college']);
 
+        $sender = auth()->user();
+
         foreach ($recipients as $recipient) {
             $attachments = [];
 
@@ -140,6 +142,8 @@ final class CreateNotification extends CreateRecord
                 body: $data['message'],
                 dateCollege: $dateCollege,
                 files: $attachments,
+                fromAddress: $sender->email,
+                fromName: $sender->full_name,
             ));
         }
     }

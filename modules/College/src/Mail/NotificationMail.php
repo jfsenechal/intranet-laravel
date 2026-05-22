@@ -25,12 +25,14 @@ final class NotificationMail extends Mailable
         public readonly string $body,
         public readonly Carbon $dateCollege,
         public readonly array $files,
+        public readonly string $fromAddress,
+        public readonly string $fromName,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), config('mail.from.name')),
+            from: new Address($this->fromAddress, $this->fromName),
             subject: $this->sujet,
         );
     }

@@ -18,9 +18,11 @@ return new class() extends Migration
             $schema->table('attachments', function (Blueprint $table): void {
                 $table->rename('telecommunication_attachments');
             });
-            $schema->table('telecommunication_attachments', function (Blueprint $table): void {
-                $table->renameColumn('updatedAt', 'updated_at');
-            });
+            if ($schema->hasColumn('telecommunication_attachments', 'updatedAt')) {
+                $schema->table('telecommunication_attachments', function (Blueprint $table): void {
+                    $table->renameColumn('updatedAt', 'updated_at');
+                });
+            }
 
             if (! $schema->hasColumn('telecommunication_attachments', 'created_at')) {
                 $schema->table('telecommunication_attachments', function (Blueprint $table): void {

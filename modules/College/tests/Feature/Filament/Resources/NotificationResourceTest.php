@@ -123,6 +123,30 @@ it('attaches both documents when a recipient is flagged for college and service'
     );
 });
 
+it('sends the notification from the current user', function (): void {
+    Mail::fake();
+    Storage::fake('local');
+
+    $recipient = makeRecipient(['ordre_college' => true]);
+
+    livewire(CreateNotification::class)
+        ->fillForm([
+            'type' => NotificationType::Ordre->value,
+            'date_college' => '2026-05-21',
+            'sujet' => 'Convocation du Collège',
+            'message' => '<p>Bonjour</p>',
+            'file_college' => UploadedFile::fake()->create('oj-college.pdf', 50, 'application/pdf'),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    Mail::assertQueued(
+        fn (NotificationMail $mail): bool => $mail->hasTo($recipient->email)
+            && $mail->fromAddress === $this->admin->email
+            && $mail->fromName === $this->admin->full_name,
+    );
+});
+
 it('requires at least one document', function (): void {
     livewire(CreateNotification::class)
         ->fillForm([
