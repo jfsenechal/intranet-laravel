@@ -19,7 +19,7 @@ final class DeadlinesRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return 'Echeances';
+        return 'Echéances';
     }
 
     public function isReadOnly(): bool

@@ -20,7 +20,6 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Storage;
 
 final class EmployeeInfolist
 {
@@ -294,44 +293,6 @@ final class EmployeeInfolist
                                     ->state('Aucun profil informatique pour cet agent.')
                                     ->visible(fn (Employee $record): bool => $record->profile === null)
                                     ->suffixAction(RequestProfileAction::make()),
-                            ]),
-                        Tab::make('Candidat')
-                            ->icon('heroicon-o-identification')
-                            ->columns(2)
-                            ->schema([
-                                TextEntry::make('diploma_level')
-                                    ->label('Niveau de diplôme'),
-                                TextEntry::make('diploma_nature')
-                                    ->label('Nature du diplôme'),
-                            ]),
-                        Tab::make('Stagiaire')
-                            ->icon('heroicon-o-clipboard-document-check')
-                            ->columns(2)
-                            ->schema([
-                                TextEntry::make('intern_type')
-                                    ->label('Demande de stage'),
-                                TextEntry::make('diploma_level_simplified')
-                                    ->label('Niveau de diplôme'),
-                                TextEntry::make('candidate_file_name')
-                                    ->label('Document du stagiaire')
-                                    ->placeholder('—')
-                                    ->icon('heroicon-o-arrow-down-tray')
-                                    ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
-                                    ->url(
-                                        fn (?string $state): ?string => $state ? Storage::disk('public')->url(
-                                            $state
-                                        ) : null
-                                    )
-                                    ->openUrlInNewTab(),
-                            ]),
-                        Tab::make('Etudiant')
-                            ->icon('heroicon-o-academic-cap')
-                            ->columns(2)
-                            ->schema([
-                                TextEntry::make('diploma_nature')
-                                    ->label('Nature du diplôme'),
-                                TextEntry::make('diploma_level')
-                                    ->label('Niveau de diplôme'),
                             ]),
                     ]),
             ]);
