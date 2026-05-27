@@ -6,6 +6,8 @@ namespace AcMarche\Hrm\Filament\Resources\Absences\Tables;
 
 use AcMarche\Hrm\Enums\ReasonsEnum;
 use AcMarche\Hrm\Filament\Filters\ContractActiveFilter;
+use AcMarche\Hrm\Filament\Filters\EmployerFilter;
+use AcMarche\Hrm\Filament\Filters\ServiceFilter;
 use AcMarche\Hrm\Models\Absence;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -95,6 +97,8 @@ final class AbsenceTables
                     ->trueLabel('Clôturées')
                     ->falseLabel('En cours')
                     ->default(false),
+                ServiceFilter::makeWithContracts(),
+                EmployerFilter::makeThrough('employee.contracts'),
                 ContractActiveFilter::makeWithContracts(),
             ], layout: FiltersLayout::Modal)
             ->recordActions([
