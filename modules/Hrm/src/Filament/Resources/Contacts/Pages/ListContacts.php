@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Contacts\Pages;
 
+use AcMarche\Hrm\Filament\Exports\ContactExport;
 use AcMarche\Hrm\Filament\Resources\Contacts\ContactResource;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +23,11 @@ final class ListContacts extends ListRecords
             CreateAction::make()
                 ->label('Nouveau contact')
                 ->icon(Heroicon::Plus),
+            Action::make('export')
+                ->label('Exporter en XLSX')
+                ->icon(Heroicon::ArrowDownTray)
+                ->color('warning')
+                ->action(fn () => new ContactExport($this->getFilteredTableQuery())->downloadXlsx('contacts.xlsx')),
         ];
     }
 }

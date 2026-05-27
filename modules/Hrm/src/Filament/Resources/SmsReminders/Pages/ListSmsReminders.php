@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\SmsReminders\Pages;
 
+use AcMarche\Hrm\Filament\Exports\SmsReminderExport;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -44,6 +45,11 @@ final class ListSmsReminders extends ListRecords
                 ->color('gray')
                 ->url(SmsReminderResource::getUrl('history')),
             CreateAction::make(),
+            Action::make('export')
+                ->label('Exporter en XLSX')
+                ->icon(Heroicon::ArrowDownTray)
+                ->color('warning')
+                ->action(fn () => new SmsReminderExport($this->getFilteredTableQuery())->downloadXlsx('sms_reminders.xlsx')),
         ];
     }
 }
