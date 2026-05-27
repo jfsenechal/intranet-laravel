@@ -90,6 +90,30 @@ describe('crud operations', function (): void {
             'name' => $newData->name,
         ]);
     });
+
+    it('can replicate a deadline from the view page', function (): void {
+        $record = Deadline::factory()->create([
+            'name' => 'Original Deadline',
+            'is_closed' => true,
+            'closed_date' => now(),
+        ]);
+
+        Livewire::test(ViewDeadline::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate')
+            ->assertHasNoActionErrors();
+
+        expect(Deadline::query()->where('name', 'Original Deadline')->count())->toBe(2);
+
+        $replica = Deadline::query()
+            ->where('name', 'Original Deadline')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica->is_closed)->not->toBeTrue();
+        expect($replica->closed_date)->toBeNull();
+    });
 });
 
 describe('form validation', function (): void {

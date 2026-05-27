@@ -73,6 +73,30 @@ describe('crud operations', function (): void {
             'name' => 'Updated Training Name',
         ]);
     });
+
+    it('can replicate a training from the view page', function (): void {
+        $record = Training::factory()->create([
+            'name' => 'Original Training',
+            'is_closed' => true,
+            'certificate_received' => true,
+        ]);
+
+        Livewire::test(ViewTraining::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate')
+            ->assertHasNoActionErrors();
+
+        expect(Training::query()->where('name', 'Original Training')->count())->toBe(2);
+
+        $replica = Training::query()
+            ->where('name', 'Original Training')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica->is_closed)->not->toBeTrue();
+        expect($replica->certificate_received)->not->toBeTrue();
+    });
 });
 
 describe('form validation', function (): void {
