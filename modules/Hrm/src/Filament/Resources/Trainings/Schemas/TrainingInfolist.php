@@ -84,7 +84,8 @@ final class TrainingInfolist
                             ->boolean(),
                         TextEntry::make('training_type')
                             ->label('Type de formation')
-                            ->badge(),
+                            ->badge()
+                            ->helperText(fn (Training $record): ?string => $record->training_type?->getDescription()),
                         TextEntry::make('duration_minutes')
                             ->label('Durée')
                             ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state)),

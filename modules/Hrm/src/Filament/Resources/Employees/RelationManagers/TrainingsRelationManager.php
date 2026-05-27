@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Resources\Trainings\Tables\TrainingTables;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Override;
 
 final class TrainingsRelationManager extends RelationManager
@@ -27,6 +29,9 @@ final class TrainingsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return TrainingTables::relation($table);
+        return TrainingTables::relation($table)
+            ->description(new HtmlString(collect(TrainingTypeEnum::cases())
+                ->map(fn (TrainingTypeEnum $case): string => '<p><strong>'.e($case->getLabel()).'</strong>: '.e($case->getDescription()).'</p>')
+                ->implode('')));
     }
 }

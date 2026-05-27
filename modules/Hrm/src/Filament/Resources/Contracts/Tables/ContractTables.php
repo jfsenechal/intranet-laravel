@@ -12,7 +12,6 @@ use AcMarche\Hrm\Filament\Filters\EmployerFilter;
 use AcMarche\Hrm\Filament\Filters\PayScaleFilter;
 use AcMarche\Hrm\Filament\Filters\ServiceFilter;
 use AcMarche\Hrm\Models\Contract;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -36,7 +35,7 @@ final class ContractTables
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
-                        fn (Contract $record): string => $record->employee->last_name.' '.$record->employee->first_name
+                        fn(Contract $record): string => $record->employee->last_name.' '.$record->employee->first_name
                     )
                     ->searchable(['last_name', 'first_name'])
                     ->sortable(),
@@ -115,9 +114,9 @@ final class ContractTables
                     ->trueLabel('Dépassée')
                     ->falseLabel('À venir ou sans fin')
                     ->queries(
-                        true: fn (Builder $query): Builder => $query->whereDate('end_date', '<', today()),
-                        false: fn (Builder $query): Builder => $query->where(
-                            fn (Builder $query) => $query
+                        true: fn(Builder $query): Builder => $query->whereDate('end_date', '<', today()),
+                        false: fn(Builder $query): Builder => $query->where(
+                            fn(Builder $query) => $query
                                 ->whereDate('end_date', '>=', today())
                                 ->orWhereNull('end_date'),
                         ),
@@ -178,9 +177,7 @@ final class ContractTables
                     ->default(false),
             ])
             ->recordActions([
-                Action::make('view')
-                    ->label('Voir')
-                    ->icon('heroicon-o-eye'),
+                ViewAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

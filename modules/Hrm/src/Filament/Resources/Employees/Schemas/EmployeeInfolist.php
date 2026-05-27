@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Employees\Schemas;
 use AcMarche\Hrm\Filament\Actions\RequestProfileAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileChangeAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileDeletionAction;
+use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\IconEntry;
@@ -119,6 +120,25 @@ final class EmployeeInfolist
                         Tab::make('Emploi')
                             ->icon('heroicon-o-briefcase')
                             ->schema([
+                                Fieldset::make('Contrats actifs')
+                                    ->columns(1)
+                                    ->schema([
+                                        TextEntry::make('activeContracts')
+                                            ->hiddenLabel()
+                                            ->state(
+                                                fn (Employee $record): array => $record->activeContracts
+                                                    ->map(fn (Contract $contract): string => implode(' • ', array_filter([
+                                                        $contract->service?->name,
+                                                        $contract->payScale?->name,
+                                                        $contract->job_title,
+                                                        $contract->contractType?->name,
+                                                        $contract->hourly_regime,
+                                                    ])))
+                                                    ->all()
+                                            )
+                                            ->listWithLineBreaks()
+                                            ->placeholder('—'),
+                                    ]),
                                 Fieldset::make('Situation')
                                     ->columns(3)
                                     ->schema([
