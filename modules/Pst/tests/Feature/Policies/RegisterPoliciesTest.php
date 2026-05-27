@@ -11,13 +11,13 @@ use AcMarche\Pst\Models\Service;
 use AcMarche\Pst\Models\StrategicObjective;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 final class RegisterPoliciesTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private User $adminUser;
 

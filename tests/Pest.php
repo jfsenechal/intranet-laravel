@@ -6,7 +6,7 @@ uses(PHPUnit\Framework\TestCase::class)->in('Sms');
 
 uses(
     AcMarche\Hrm\Tests\HrmTestCase::class,
-    Illuminate\Foundation\Testing\RefreshDatabase::class,
+    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
 )->in(
     '../modules/Hrm/tests/Feature',
     '../modules/Hrm/tests/Unit',
@@ -16,7 +16,7 @@ uses(
 
 uses(
     Tests\TestCase::class,
-    Illuminate\Foundation\Testing\RefreshDatabase::class,
+    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
 )->in(
     'Feature',
     'Unit',

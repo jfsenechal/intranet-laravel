@@ -230,7 +230,7 @@ None for v1.
 
 ## 6. Tests
 
-Pest feature tests under `modules/Offenses/tests/Feature/`. Use `RefreshDatabase` only on the `maria-offenses` connection (the test should explicitly run migrations against that connection — see `modules/Mediation/tests` for the project pattern when adding tests in a future iteration).
+Pest feature tests under `modules/Offenses/tests/Feature/`. Use `LazilyRefreshDatabase` only on the `maria-offenses` connection (the test should explicitly run migrations against that connection — see `modules/Mediation/tests` for the project pattern when adding tests in a future iteration).
 
 | Test | Asserts |
 | --- | --- |

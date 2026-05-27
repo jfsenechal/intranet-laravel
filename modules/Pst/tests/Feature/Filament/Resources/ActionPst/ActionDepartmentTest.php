@@ -18,7 +18,7 @@ use AcMarche\Security\Models\Role;
 use AcMarche\Security\Repository\UserRepository;
 use App\Models\User;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -42,7 +42,7 @@ use Tests\TestCase;
  */
 final class ActionDepartmentTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private Role $adminRole;
 
