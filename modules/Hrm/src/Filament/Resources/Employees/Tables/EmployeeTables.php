@@ -73,13 +73,6 @@ final class EmployeeTables
                 TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        StatusEnum::AGENT->value => 'success',
-                        StatusEnum::RETIRED->value => 'info',
-                        StatusEnum::TERMINATED->value, StatusEnum::RESIGNED->value, StatusEnum::ENDED->value, StatusEnum::CONTRACT_ENDED->value => 'danger',
-                        StatusEnum::APPLICATION->value, StatusEnum::STUDENT->value, StatusEnum::INTERN->value => 'warning',
-                        default => 'gray',
-                    })
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('hired_at')
                     ->label('Entré')

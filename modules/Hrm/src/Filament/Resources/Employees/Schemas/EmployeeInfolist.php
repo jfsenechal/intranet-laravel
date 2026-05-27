@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\Schemas;
 
-use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Actions\RequestProfileAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileChangeAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileDeletionAction;
@@ -127,14 +126,7 @@ final class EmployeeInfolist
                                             ->label('Fonction'),
                                         TextEntry::make('status')
                                             ->label('Statut')
-                                            ->badge()
-                                            ->color(fn (?StatusEnum $state): string => match ($state) {
-                                                StatusEnum::AGENT => 'success',
-                                                StatusEnum::RETIRED => 'info',
-                                                StatusEnum::TERMINATED, StatusEnum::RESIGNED, StatusEnum::ENDED, StatusEnum::CONTRACT_ENDED => 'danger',
-                                                StatusEnum::APPLICATION, StatusEnum::INTERN, StatusEnum::STUDENT => 'warning',
-                                                default => 'gray',
-                                            }),
+                                            ->badge(),
                                         IconEntry::make('is_archived')
                                             ->label('Archivé')
                                             ->boolean(),
