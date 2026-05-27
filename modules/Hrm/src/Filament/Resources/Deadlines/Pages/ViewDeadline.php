@@ -6,8 +6,10 @@ namespace AcMarche\Hrm\Filament\Resources\Deadlines\Pages;
 
 use AcMarche\Hrm\Filament\Actions\BackToEmployeeAction;
 use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
+use AcMarche\Hrm\Models\Deadline;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -33,6 +35,18 @@ final class ViewDeadline extends ViewRecord
             BackToEmployeeAction::make(),
             EditAction::make()
                 ->icon(Heroicon::Pencil),
+            ReplicateAction::make()
+                ->icon(Heroicon::Square2Stack)
+                ->excludeAttributes([
+                    'id',
+                    'created_at',
+                    'updated_at',
+                    'user_add',
+                    'updated_by',
+                    'is_closed',
+                    'closed_date',
+                ])
+                ->successRedirectUrl(fn (Deadline $replica): string => DeadlineResource::getUrl('edit', ['record' => $replica])),
             DeleteAction::make()
                 ->icon(Heroicon::Trash),
         ];
