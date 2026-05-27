@@ -153,7 +153,7 @@ final class ContractTables
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('start_date')
-                    ->label('Debut')
+                    ->label('Début')
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('end_date')
@@ -161,18 +161,18 @@ final class ContractTables
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('work_regime')
-                    ->label('Regime')
+                    ->label('Régime')
                     ->sortable()
                     ->toggleable(),
                 IconColumn::make('is_closed')
-                    ->label('Cloture')
+                    ->label('Clôturé')
                     ->boolean(),
             ])
             ->filters([
                 TernaryFilter::make('is_closed')
-                    ->label('Cloture')
+                    ->label('Clôturé')
                     ->placeholder('Tous')
-                    ->trueLabel('Clotures')
+                    ->trueLabel('Clôturés')
                     ->falseLabel('En cours')
                     ->default(false),
             ])

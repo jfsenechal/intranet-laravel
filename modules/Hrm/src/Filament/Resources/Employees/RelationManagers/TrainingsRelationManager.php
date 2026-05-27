@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
+use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingInfolist;
 use AcMarche\Hrm\Filament\Resources\Trainings\Tables\TrainingTables;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
@@ -25,6 +27,11 @@ final class TrainingsRelationManager extends RelationManager
     public function isReadOnly(): bool
     {
         return true;
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return TrainingInfolist::configure($schema);
     }
 
     public function table(Table $table): Table

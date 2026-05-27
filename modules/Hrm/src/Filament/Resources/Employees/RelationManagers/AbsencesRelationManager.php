@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use AcMarche\Hrm\Filament\Resources\Absences\Tables\AbsenceTables;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -23,6 +25,11 @@ final class AbsencesRelationManager extends RelationManager
     public function isReadOnly(): bool
     {
         return true;
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return AbsenceInfolist::configure($schema);
     }
 
     public function table(Table $table): Table
