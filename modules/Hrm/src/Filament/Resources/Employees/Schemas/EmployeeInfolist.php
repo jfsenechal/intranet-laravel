@@ -40,10 +40,10 @@ final class EmployeeInfolist
                                             ->disk('public')
                                             ->imageHeight(260)
                                             ->defaultImageUrl(
-                                                fn (Employee $record
+                                                fn(Employee $record
                                                 ): string => 'https://ui-avatars.com/api/?size=256&name='.urlencode(
-                                                    mb_trim($record->first_name.' '.$record->last_name)
-                                                )
+                                                        mb_trim($record->first_name.' '.$record->last_name)
+                                                    )
                                             )
                                             ->columnSpan(3),
                                         Fieldset::make('Coordonnées')
@@ -53,7 +53,7 @@ final class EmployeeInfolist
                                                 TextEntry::make('address')
                                                     ->label('Adresse')
                                                     ->state(
-                                                        fn (Employee $record): string => mb_trim(
+                                                        fn(Employee $record): string => mb_trim(
                                                             $record->address.' '.$record->postal_code.' '.$record->city
                                                         )
                                                     )
@@ -81,7 +81,7 @@ final class EmployeeInfolist
                                                             ->label('Téléphone')
                                                             ->icon('heroicon-o-phone')
                                                             ->state(
-                                                                fn (Employee $record
+                                                                fn(Employee $record
                                                                 ): ?string => $record->professional_phone === null ? null : mb_trim(
                                                                     $record->professional_phone.($record->professional_phone_extension !== null ? ' (ext. '.$record->professional_phone_extension.')' : '')
                                                                 )
@@ -125,14 +125,16 @@ final class EmployeeInfolist
                                         TextEntry::make('activeContracts')
                                             ->hiddenLabel()
                                             ->state(
-                                                fn (Employee $record): array => $record->activeContracts
-                                                    ->map(fn (Contract $contract): string => implode(' • ', array_filter([
-                                                        $contract->service?->name,
-                                                        $contract->payScale?->name,
-                                                        $contract->job_title,
-                                                        $contract->contractType?->name,
-                                                        $contract->hourly_regime,
-                                                    ])))
+                                                fn(Employee $record): array => $record->activeContracts
+                                                    ->map(
+                                                        fn(Contract $contract): string => implode(' • ', array_filter([
+                                                            $contract->service?->name,
+                                                            $contract->payScale?->name,
+                                                            $contract->job_title,
+                                                            $contract->contractType?->name,
+                                                            $contract->hourly_regime,
+                                                        ]))
+                                                    )
                                                     ->all()
                                             )
                                             ->listWithLineBreaks()
@@ -142,7 +144,8 @@ final class EmployeeInfolist
                                     ->columns(3)
                                     ->schema([
                                         TextEntry::make('job_title')
-                                            ->label('Fonction'),
+                                            ->label('Fonction')
+                                            ->helperText('Fonction encodée sur la fiche'),
                                         TextEntry::make('status')
                                             ->label('Statut')
                                             ->badge(),
@@ -189,25 +192,25 @@ final class EmployeeInfolist
                                                     ->modalSubmitAction(false)
                                                     ->modalCancelActionLabel('Fermer')
                                                     ->visible(
-                                                        fn (Employee $record): bool => $record->prerequisite !== null
+                                                        fn(Employee $record): bool => $record->prerequisite !== null
                                                     )
                                                     ->schema([
                                                         TextEntry::make('prerequisite_name')
                                                             ->label('Nom')
                                                             ->state(
-                                                                fn (Employee $record
+                                                                fn(Employee $record
                                                                 ): ?string => $record->prerequisite?->name
                                                             ),
                                                         TextEntry::make('prerequisite_profession')
                                                             ->label('Profession')
                                                             ->state(
-                                                                fn (Employee $record
+                                                                fn(Employee $record
                                                                 ): ?string => $record->prerequisite?->profession
                                                             ),
                                                         TextEntry::make('prerequisite_employer')
                                                             ->label('Employeur')
                                                             ->state(
-                                                                fn (Employee $record
+                                                                fn(Employee $record
                                                                 ): ?string => $record->prerequisite?->employer?->name
                                                             ),
                                                         TextEntry::make('prerequisite_description')
@@ -216,7 +219,7 @@ final class EmployeeInfolist
                                                             ->prose()
                                                             ->columnSpanFull()
                                                             ->state(
-                                                                fn (Employee $record
+                                                                fn(Employee $record
                                                                 ): ?string => $record->prerequisite?->description
                                                             ),
                                                     ])
@@ -252,14 +255,14 @@ final class EmployeeInfolist
                             ->icon(Heroicon::OutlinedUserCircle)
                             ->schema([
                                 Section::make('Données partagées avec le module Agent')
-                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
+                                    ->visible(fn(Employee $record): bool => $record->profile !== null)
                                     ->description('Informations que le module Agent connaît de cet employé.')
                                     ->columns(2)
                                     ->schema([
                                         TextEntry::make('full_name')
                                             ->label('Nom complet')
                                             ->state(
-                                                fn (Employee $record): string => mb_trim(
+                                                fn(Employee $record): string => mb_trim(
                                                     $record->last_name.' '.$record->first_name
                                                 )
                                             ),
@@ -268,10 +271,10 @@ final class EmployeeInfolist
                                             ->disk('public')
                                             ->imageHeight(120)
                                             ->defaultImageUrl(
-                                                fn (Employee $record
+                                                fn(Employee $record
                                                 ): string => 'https://ui-avatars.com/api/?size=128&name='.urlencode(
-                                                    mb_trim($record->first_name.' '.$record->last_name)
-                                                )
+                                                        mb_trim($record->first_name.' '.$record->last_name)
+                                                    )
                                             ),
                                         TextEntry::make('activeContracts.service.name')
                                             ->label('Services (contrats actifs)')
@@ -280,18 +283,18 @@ final class EmployeeInfolist
                                     ]),
                                 TextEntry::make('profile.username')
                                     ->label('Nom utilisateur')
-                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
+                                    ->visible(fn(Employee $record): bool => $record->profile !== null)
                                     ->placeholder('—')
                                     ->suffixAction(RequestProfileChangeAction::make()),
                                 TextEntry::make('delete_profile')
                                     ->label('Suppression')
                                     ->state('Demander la suppression du compte informatique.')
-                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
+                                    ->visible(fn(Employee $record): bool => $record->profile !== null)
                                     ->suffixAction(RequestProfileDeletionAction::make()),
                                 TextEntry::make('no_profile')
                                     ->label('Compte informatique')
                                     ->state('Aucun profil informatique pour cet agent.')
-                                    ->visible(fn (Employee $record): bool => $record->profile === null)
+                                    ->visible(fn(Employee $record): bool => $record->profile === null)
                                     ->suffixAction(RequestProfileAction::make()),
                             ]),
                     ]),
