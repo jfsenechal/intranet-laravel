@@ -27,6 +27,10 @@ return new class() extends Migration
             return;
         }
 
+        if(Schema::connection('maria-rescam')->hasTable('sports_registrations')) {
+            return;
+        }
+
         Schema::connection('maria-rescam')->create('sports_registrations', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('activity_id')->constrained('sports_activities');
