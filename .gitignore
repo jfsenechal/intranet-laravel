@@ -27,3 +27,7 @@ tests/Browser/Screenshots
 *.sql
 /data
 .idea
+
+**/caddy
+frankenphp
+frankenphp-worker.php
