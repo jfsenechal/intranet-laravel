@@ -71,6 +71,7 @@ use Spatie\Sluggable\SlugOptions;
     'user_add',
     'updated_by',
     'is_new_hire',
+    'is_new_hire_updated_at',
 ])]
 #[Table(name: 'employees')]
 #[UseFactory(EmployeeFactory::class)]
@@ -245,6 +246,16 @@ final class Employee extends Model
                 $employee->uuid = (string) Str::uuid();
             }
         });
+
+        self::saving(function (Employee $employee): void {
+            if (
+                $employee->isDirty('is_new_hire')
+                && $employee->is_new_hire
+                && ! $employee->isDirty('is_new_hire_updated_at')
+            ) {
+                $employee->is_new_hire_updated_at = now();
+            }
+        });
     }
 
     protected function getFullNameAttribute(): string
@@ -266,6 +277,7 @@ final class Employee extends Model
             'show_birthday' => 'boolean',
             'is_archived' => 'boolean',
             'is_new_hire' => 'boolean',
+            'is_new_hire_updated_at' => 'datetime',
             'status' => StatusEnum::class,
             'intern_type' => InternTypeEnum::class,
         ];

@@ -13,7 +13,7 @@ final class ExpireNewHiresCommand extends Command
 {
     protected $signature = 'hrm:expire-new-hires';
 
-    protected $description = 'Clear the is_new_hire flag for employees hired more than one month ago';
+    protected $description = 'Clear the is_new_hire flag for employees marked as new hires more than one month ago';
 
     public function handle(): int
     {
@@ -21,8 +21,8 @@ final class ExpireNewHiresCommand extends Command
 
         $updated = Employee::query()
             ->where('is_new_hire', true)
-            ->whereNotNull('hired_at')
-            ->whereDate('hired_at', '<=', $threshold)
+            ->whereNotNull('is_new_hire_updated_at')
+            ->whereDate('is_new_hire_updated_at', '<=', $threshold)
             ->update(['is_new_hire' => false]);
 
         $this->info("Expired is_new_hire flag on {$updated} employee(s).");
