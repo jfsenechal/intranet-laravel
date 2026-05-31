@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Exports\SmsReminderExport;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -49,7 +50,16 @@ final class ListSmsReminders extends ListRecords
                 ->label('Exporter en XLSX')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('warning')
-                ->action(fn () => new SmsReminderExport($this->getFilteredTableQuery())->downloadXlsx('sms_reminders.xlsx')),
+                ->schema([
+                    CheckboxList::make('columns')
+                        ->label('Colonnes à exporter')
+                        ->options(SmsReminderExport::columns())
+                        ->default(array_keys(SmsReminderExport::columns()))
+                        ->columns(2)
+                        ->bulkToggleable()
+                        ->required(),
+                ])
+                ->action(fn (array $data) => new SmsReminderExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('sms_reminders.xlsx')),
         ];
     }
 }

@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Exports\DeadlineExport;
 use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -33,7 +34,16 @@ final class ListDeadlines extends ListRecords
                 ->label('Exporter en XLSX')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('warning')
-                ->action(fn () => new DeadlineExport($this->getFilteredTableQuery())->downloadXlsx('echeances.xlsx')),
+                ->schema([
+                    CheckboxList::make('columns')
+                        ->label('Colonnes à exporter')
+                        ->options(DeadlineExport::columns())
+                        ->default(array_keys(DeadlineExport::columns()))
+                        ->columns(2)
+                        ->bulkToggleable()
+                        ->required(),
+                ])
+                ->action(fn (array $data) => new DeadlineExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('echeances.xlsx')),
         ];
     }
 }

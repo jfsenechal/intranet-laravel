@@ -9,6 +9,7 @@ use AcMarche\Hrm\Filament\Exports\EmployeeExport;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -38,7 +39,16 @@ final class ListEmployees extends ListRecords
                 ->label('Exporter en CSV')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('warning')
-                ->action(fn () => new EmployeeExport($this->getFilteredTableQuery())->downloadCsv('agents.csv')),
+                ->schema([
+                    CheckboxList::make('columns')
+                        ->label('Colonnes à exporter')
+                        ->options(EmployeeExport::columns())
+                        ->default(array_keys(EmployeeExport::columns()))
+                        ->columns(2)
+                        ->bulkToggleable()
+                        ->required(),
+                ])
+                ->action(fn (array $data) => new EmployeeExport($this->getFilteredTableQuery(), $data['columns'])->downloadCsv('agents.csv')),
         ];
     }
 }

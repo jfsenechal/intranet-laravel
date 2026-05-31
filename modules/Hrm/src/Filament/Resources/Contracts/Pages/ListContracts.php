@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Contracts\Pages;
 use AcMarche\Hrm\Filament\Exports\ContractExport;
 use AcMarche\Hrm\Filament\Resources\Contracts\ContractResource;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -29,7 +30,16 @@ final class ListContracts extends ListRecords
                 ->label('Exporter en XLSX')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('warning')
-                ->action(fn () => new ContractExport($this->getFilteredTableQuery())->downloadXlsx('contrats.xlsx')),
+                ->schema([
+                    CheckboxList::make('columns')
+                        ->label('Colonnes à exporter')
+                        ->options(ContractExport::columns())
+                        ->default(array_keys(ContractExport::columns()))
+                        ->columns(2)
+                        ->bulkToggleable()
+                        ->required(),
+                ])
+                ->action(fn (array $data) => new ContractExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('contrats.xlsx')),
         ];
     }
 }
