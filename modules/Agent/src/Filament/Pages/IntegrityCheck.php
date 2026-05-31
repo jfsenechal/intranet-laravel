@@ -75,7 +75,7 @@ final class IntegrityCheck extends Page
                 $issues[] = [
                     'profile' => $profile,
                     'issue' => sprintf(
-                        'Aucun employé trouvé dans la table HRM pour employee_id = %d.',
+                        'Aucun employé trouvé dans la table GRH pour employee_id = %d.',
                         $profile->employee_id,
                     ),
                     'employee' => null,

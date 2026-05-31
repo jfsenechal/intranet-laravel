@@ -6,14 +6,14 @@
     <x-filament::section>
         <x-slot name="heading">Résultat de la vérification</x-slot>
         <x-slot name="description">
-            Vérification de la correspondance entre les profils informatiques et la table des employés (HRM)
+            Vérification de la correspondance entre les profils informatiques et la table des employés (GRH)
             sur base de l'attribut <code>employee_id</code> et des nom et prénom.
         </x-slot>
 
         @if ($issues === [])
             <div class="flex items-center gap-2 text-success-600 dark:text-success-400">
                 <x-filament::icon icon="heroicon-o-check-circle" class="h-5 w-5"/>
-                <span>Tous les profils sont cohérents avec la table HRM.</span>
+                <span>Tous les profils sont cohérents avec la table GRH.</span>
             </div>
         @else
             <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
@@ -27,7 +27,7 @@
                             <th class="px-3 py-2 text-left font-semibold">Profil</th>
                             <th class="px-3 py-2 text-left font-semibold">Nom / Prénom (profil)</th>
                             <th class="px-3 py-2 text-left font-semibold">employee_id</th>
-                            <th class="px-3 py-2 text-left font-semibold">Nom / Prénom (HRM)</th>
+                            <th class="px-3 py-2 text-left font-semibold">Nom / Prénom (GRH)</th>
                             <th class="px-3 py-2 text-left font-semibold">Anomalie</th>
                         </tr>
                     </thead>
