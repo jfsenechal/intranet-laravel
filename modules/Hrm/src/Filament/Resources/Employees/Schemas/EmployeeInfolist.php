@@ -9,7 +9,6 @@ use AcMarche\Hrm\Filament\Actions\RequestProfileChangeAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileDeletionAction;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
-use Filament\Actions\Action;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -182,52 +181,29 @@ final class EmployeeInfolist
                                             ->label('Echelle'),
                                         TextEntry::make('pay_scale_code')
                                             ->label('Code barème'),
-                                        TextEntry::make('prerequisite.name')
-                                            ->label('Prérequis')
-                                            ->suffixAction(
-                                                Action::make('viewPrerequisite')
-                                                    ->label('Voir')
-                                                    ->icon(Heroicon::OutlinedEye)
-                                                    ->modalHeading('Prérequis')
-                                                    ->modalSubmitAction(false)
-                                                    ->modalCancelActionLabel('Fermer')
-                                                    ->visible(
-                                                        fn (Employee $record): bool => $record->prerequisite !== null
-                                                    )
-                                                    ->schema([
-                                                        TextEntry::make('prerequisite_name')
-                                                            ->label('Nom')
-                                                            ->state(
-                                                                fn (Employee $record
-                                                                ): ?string => $record->prerequisite?->name
-                                                            ),
-                                                        TextEntry::make('prerequisite_profession')
-                                                            ->label('Profession')
-                                                            ->state(
-                                                                fn (Employee $record
-                                                                ): ?string => $record->prerequisite?->profession
-                                                            ),
-                                                        TextEntry::make('prerequisite_employer')
-                                                            ->label('Employeur')
-                                                            ->state(
-                                                                fn (Employee $record
-                                                                ): ?string => $record->prerequisite?->employer?->name
-                                                            ),
-                                                        TextEntry::make('prerequisite_description')
-                                                            ->label('Description')
-                                                            ->html()
-                                                            ->prose()
-                                                            ->columnSpanFull()
-                                                            ->state(
-                                                                fn (Employee $record
-                                                                ): ?string => $record->prerequisite?->description
-                                                            ),
-                                                    ])
-                                            ),
                                         TextEntry::make('allowance')
                                             ->label('Indemnité'),
                                         TextEntry::make('local_unit')
                                             ->label('Unite locale'),
+                                    ]),
+                                Fieldset::make('Prérequis pour l\'évolution de carrière')
+                                    ->columns(3)
+                                    ->schema([
+                                        TextEntry::make('prerequisite.name')
+                                            ->label('Nom')
+                                            ->placeholder('—'),
+                                        TextEntry::make('prerequisite.profession')
+                                            ->label('Profession')
+                                            ->placeholder('—'),
+                                        TextEntry::make('prerequisite.employer.name')
+                                            ->label('Employeur')
+                                            ->placeholder('—'),
+                                        TextEntry::make('prerequisite.description')
+                                            ->label('Description')
+                                            ->html()
+                                            ->prose()
+                                            ->columnSpanFull()
+                                            ->placeholder('—'),
                                     ]),
                             ]),
                         Tab::make('Santé')

@@ -9,6 +9,7 @@ use AcMarche\Hrm\Filament\Resources\Employees\Pages\EditEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Prerequisite;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -145,6 +146,21 @@ describe('table', function (): void {
         Livewire::test(ListEmployees::class)
             ->loadTable()
             ->assertCanSeeTableRecords($records);
+    });
+});
+
+describe('emploi tab', function (): void {
+    it('displays the prerequisite details inline on the view page', function (): void {
+        $prerequisite = Prerequisite::factory()->create([
+            'name' => 'Prérequis A1',
+            'profession' => 'Ingénieur civil',
+        ]);
+        $record = Employee::factory()->create(['prerequisite_id' => $prerequisite->id]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertSee('Prérequis A1')
+            ->assertSee('Ingénieur civil');
     });
 });
 
