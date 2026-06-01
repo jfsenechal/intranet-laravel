@@ -38,8 +38,8 @@ final class CategoryTables
                 ColorColumn::make('color')
                     ->searchable()
                     ->label('Couleur'),
-                TextColumn::make('news_count')
-                    ->label('Actus')
+                TextColumn::make('ad_count')
+                    ->label('Annonces')
                     ->sortable(),
             ])
             ->filters([

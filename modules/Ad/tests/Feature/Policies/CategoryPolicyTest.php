@@ -24,8 +24,8 @@ it('allows an administrator to create a category', function (): void {
     expect(auth()->user()->can('create', Category::class))->toBeTrue();
 });
 
-it('allows a user with ROLE_NEWS_ADMIN to create a category', function (): void {
-    $role = Role::create(['name' => RolesEnum::ROLE_NEWS_ADMIN->value]);
+it('allows a user with ROLE_AD_ADMIN to create a category', function (): void {
+    $role = Role::create(['name' => RolesEnum::ROLE_AD_ADMIN->value]);
     auth()->user()->roles()->attach($role);
 
     expect(auth()->user()->can('create', Category::class))->toBeTrue();

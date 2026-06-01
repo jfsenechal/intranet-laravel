@@ -33,7 +33,6 @@ use Spatie\Sluggable\SlugOptions;
     'archive',
     'resolved',
     'user_add',
-    'department',
     'category_id',
     'medias',
 ])]

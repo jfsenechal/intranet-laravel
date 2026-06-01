@@ -32,7 +32,6 @@ final class ClassifiedAdFactory extends Factory
             'slug' => Str::slug($name),
             'content' => fake()->randomHtml(),
             'end_date' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
-            'department' => 'common',
             'category_id' => Category::factory(),
             'archive' => false,
         ];

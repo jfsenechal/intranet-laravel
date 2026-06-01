@@ -6,31 +6,22 @@ use AcMarche\Ad\Filament\Resources\Categories\Pages\CreateCategory;
 use AcMarche\Ad\Filament\Resources\Categories\Pages\EditCategory;
 use AcMarche\Ad\Filament\Resources\Categories\Pages\ListCategory;
 use AcMarche\Ad\Filament\Resources\Categories\Pages\ViewCategory;
-use AcMarche\Ad\Filament\Resources\Categories\RelationManagers\NewsRelationManager;
-use AcMarche\Ad\Models\Ad;
+use AcMarche\Ad\Filament\Resources\Categories\RelationManagers\ClassifiedAdRelationManager;
 use AcMarche\Ad\Models\Category;
+use AcMarche\Ad\Models\ClassifiedAd;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Mail::fake();
-    Filament::setCurrentPanel(Filament::getPanel('ad'));
+    Filament::setCurrentPanel(Filament::getPanel('ad-panel'));
     auth()->user()->update(['is_administrator' => true]);
-
-    // Register dummy routes to prevent URL generation errors in tests
-    if (! Route::getRoutes()->getByName('filament.ad.resources.categories.index')) {
-        Route::get('/categories', fn (): string => '')->name('filament.ad.resources.categories.index');
-        Route::get('/categories/create', fn (): string => '')->name('filament.ad.resources.categories.create');
-        Route::get('/categories/{record}/edit', fn (): string => '')->name('filament.ad.resources.categories.edit');
-        Route::get('/categories/{record}', fn (): string => '')->name('filament.ad.resources.categories.view');
-    }
 });
 
 it('can render the index page', function (): void {
@@ -67,7 +58,7 @@ it('can render the view page', function (): void {
 it('has column', function (string $column): void {
     livewire(ListCategory::class)
         ->assertTableColumnExists($column);
-})->with(['name', 'color', 'news_count']);
+})->with(['name', 'color', 'ad_count']);
 
 it('can render column', function (string $column): void {
     livewire(ListCategory::class)
@@ -149,18 +140,18 @@ it('displays delete action on view page', function (): void {
 
 it('displays ad count on list page', function (): void {
     $category = Category::factory()->create();
-    Ad::factory(3)->create(['category_id' => $category->id]);
+    ClassifiedAd::factory(3)->create(['category_id' => $category->id]);
 
     livewire(ListCategory::class)
         ->loadTable()
         ->assertCanSeeTableRecords([$category])
-        ->assertTableColumnStateSet('news_count', 3, $category);
+        ->assertTableColumnStateSet('ad_count', 3, $category);
 });
 
 it('can render the ad relation manager on view page', function (): void {
     $category = Category::factory()->create();
 
-    livewire(NewsRelationManager::class, [
+    livewire(ClassifiedAdRelationManager::class, [
         'ownerRecord' => $category,
         'pageClass' => ViewCategory::class,
     ])
@@ -169,16 +160,16 @@ it('can render the ad relation manager on view page', function (): void {
 
 it('lists related ad in the relation manager', function (): void {
     $category = Category::factory()->create();
-    $classifiedAd = Ad::factory(2)->create(['category_id' => $category->id]);
-    $otherNews = Ad::factory()->create();
+    $classifiedAds = ClassifiedAd::factory(2)->create(['category_id' => $category->id]);
+    $otherAd = ClassifiedAd::factory()->create();
 
-    livewire(NewsRelationManager::class, [
+    livewire(ClassifiedAdRelationManager::class, [
         'ownerRecord' => $category,
         'pageClass' => ViewCategory::class,
     ])
         ->loadTable()
-        ->assertCanSeeTableRecords($classifiedAd)
-        ->assertCanNotSeeTableRecords([$otherNews]);
+        ->assertCanSeeTableRecords($classifiedAds)
+        ->assertCanNotSeeTableRecords([$otherAd]);
 });
 
 it('denies create action for regular user', function (): void {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use AcMarche\Ad\Filament\Resources\Ad\Pages\CreateClassifiedAd;
-use AcMarche\Ad\Filament\Resources\Ad\Pages\EditClassifiedAd;
-use AcMarche\Ad\Filament\Resources\Ad\Pages\ListClassifiedAd;
-use AcMarche\Ad\Filament\Resources\Ad\Pages\ViewClassifiedAd;
+use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\CreateClassifiedAd;
+use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\EditClassifiedAd;
+use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\ListClassifiedAd;
+use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\ViewClassifiedAd;
 use AcMarche\Ad\Models\Category;
 use AcMarche\Ad\Models\ClassifiedAd;
 use Filament\Actions\DeleteAction;
@@ -13,7 +13,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseMissing;
@@ -21,17 +20,9 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Mail::fake();
-    Filament::setCurrentPanel(Filament::getPanel('ad'));
+    Filament::setCurrentPanel(Filament::getPanel('ad-panel'));
     auth()->user()->update(['is_administrator' => true]);
     $this->category = Category::factory()->create();
-
-    // Register dummy routes to prevent URL generation errors in tests
-    if (! Route::getRoutes()->getByName('filament.ad.resources.ad.index')) {
-        Route::get('/ad', fn (): string => '')->name('filament.ad.resources.ad.index');
-        Route::get('/ad/create', fn (): string => '')->name('filament.ad.resources.ad.create');
-        Route::get('/ad/{record}/edit', fn (): string => '')->name('filament.ad.resources.ad.edit');
-        Route::get('/ad/{record}', fn (): string => '')->name('filament.ad.resources.ad.view');
-    }
 });
 
 it('can render the index page', function (): void {
@@ -162,7 +153,6 @@ it('validates the form data', function (array $data, array $errors): void {
             'name' => $newsData->name,
             'content' => $newsData->content,
             'category_id' => $this->category->id,
-            'department' => 'common',
             'end_date' => '2026-04-14',
             ...$data,
         ])
@@ -173,6 +163,5 @@ it('validates the form data', function (array $data, array $errors): void {
     '`name` is required' => [['name' => null], ['name' => 'required']],
     '`name` is max 255 characters' => [['name' => Str::random(256)], ['name' => 'max']],
     '`category_id` is required' => [['category_id' => null], ['category_id' => 'required']],
-    '`department` is required' => [['department' => null], ['department' => 'required']],
     '`end_date` is required' => [['end_date' => null], ['end_date' => 'required']],
 ]);

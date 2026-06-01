@@ -23,13 +23,17 @@ final class ClassifiedAdObserver
      */
     public function created(ClassifiedAd $classifiedAd): void
     {
-        $users = User::query()->get();
-        foreach ($users as $user) {
+        foreach (User::query()->cursor() as $user) {
             try {
-                Mail::to(new Address('jf@marche.be'))
-                    ->send(new ClassifiedAdEmail($classifiedAd));
-            } catch (Exception $e) {
-                dd($e->getMessage());
+                Mail::to(new Address(
+                    (string) $user->email,
+                    mb_trim($user->first_name.' '.$user->last_name),
+                ))->send(new ClassifiedAdEmail($classifiedAd));
+            } catch (Exception $exception) {
+                Log::warning('ClassifiedAd user mail failed', [
+                    'user_id' => $user->id,
+                    'error' => $exception->getMessage(),
+                ]);
             }
         }
 

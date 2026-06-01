@@ -14,7 +14,7 @@ use function Pest\Laravel\post;
 it('shows the public subscription page', function (): void {
     $this->get(route('ad.subscription.show'))
         ->assertOk()
-        ->assertSee("S'abonner");
+        ->assertSeeText("S'abonner");
 });
 
 it('subscribes a valid agent through the public route', function (): void {
