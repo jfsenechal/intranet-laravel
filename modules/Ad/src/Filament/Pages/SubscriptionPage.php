@@ -29,7 +29,7 @@ final class SubscriptionPage extends Page implements HasForms
     protected static string|null|BackedEnum $navigationIcon = Heroicon::Bell;
 
     #[Override]
-    protected static ?string $navigationLabel = 'Abonnement aux annonces';
+    protected static ?string $navigationLabel = 'Je m\'abonne';
 
     #[Override]
     protected static ?int $navigationSort = 50;

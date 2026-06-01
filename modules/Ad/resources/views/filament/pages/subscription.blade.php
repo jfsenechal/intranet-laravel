@@ -4,14 +4,13 @@
             <x-slot name="heading">S'abonner</x-slot>
             <x-slot name="description">
                 Renseignez votre email professionnel ou privé.
-                Seuls les agents en contrat actif peuvent s'abonner.
             </x-slot>
 
             <form wire:submit="subscribe" class="space-y-4">
                 {{ $this->subscribeForm }}
 
                 <div class="flex justify-end">
-                    <x-filament::button type="submit">
+                    <x-filament::button type="submit" icon="heroicon-o-envelope">
                         S'abonner
                     </x-filament::button>
                 </div>
@@ -28,7 +27,7 @@
                 {{ $this->unsubscribeForm }}
 
                 <div class="flex justify-end">
-                    <x-filament::button type="submit" color="danger">
+                    <x-filament::button type="submit" color="danger" icon="heroicon-o-envelope">
                         Se désabonner
                     </x-filament::button>
                 </div>
