@@ -13,24 +13,37 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class TeleworkExport
 {
-    public function __construct(private Builder $query) {}
+    /**
+     * @param  list<string>  $columns  Selected column keys; empty = all.
+     */
+    public function __construct(private Builder $query, private array $columns = []) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function columns(): array
+    {
+        return [
+            'user_add' => 'Agent',
+            'full_name' => 'Nom complet',
+            'location_type' => 'Lieu',
+            'day_type' => 'Type de jour',
+            'fixed_day' => 'Jour fixe',
+            'manager_validated' => 'Validé direction',
+            'manager_validated_at' => 'Validé le',
+            'hr_validator_name' => 'Validation Grh par',
+            'created_at' => 'Créé le',
+        ];
+    }
 
     /**
      * @return list<string>
      */
     public function headings(): array
     {
-        return [
-            'Agent',
-            'Nom complet',
-            'Lieu',
-            'Type de jour',
-            'Jour fixe',
-            'Validé direction',
-            'Validé le',
-            'Validation Grh par',
-            'Créé le',
-        ];
+        $labels = self::columns();
+
+        return array_map(fn (string $key): string => $labels[$key], $this->selectedColumns());
     }
 
     /**
@@ -38,21 +51,9 @@ final readonly class TeleworkExport
      */
     public function map(Telework $row): array
     {
-        $fullName = $row->employee
-            ? mb_trim(($row->employee->last_name ?? '').' '.($row->employee->first_name ?? ''))
-            : '';
+        $data = $this->row($row);
 
-        return [
-            $row->user_add,
-            $fullName,
-            $row->location_type?->getLabel(),
-            $row->day_type?->getLabel(),
-            $row->fixed_day?->getLabel(),
-            $row->manager_validated ? 'Oui' : 'Non',
-            $row->manager_validated_at?->format('d/m/Y'),
-            $row->hr_validator_name,
-            $row->created_at?->format('d/m/Y'),
-        ];
+        return array_map(fn (string $key) => $data[$key], $this->selectedColumns());
     }
 
     public function downloadXlsx(string $filename): StreamedResponse
@@ -75,5 +76,40 @@ final readonly class TeleworkExport
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function selectedColumns(): array
+    {
+        $all = array_keys(self::columns());
+        if ($this->columns === []) {
+            return $all;
+        }
+
+        return array_values(array_filter($all, fn (string $key): bool => in_array($key, $this->columns, true)));
+    }
+
+    /**
+     * @return array<string, null|string>
+     */
+    private function row(Telework $row): array
+    {
+        $fullName = $row->employee
+            ? mb_trim(($row->employee->last_name ?? '').' '.($row->employee->first_name ?? ''))
+            : '';
+
+        return [
+            'user_add' => $row->user_add,
+            'full_name' => $fullName,
+            'location_type' => $row->location_type?->getLabel(),
+            'day_type' => $row->day_type?->getLabel(),
+            'fixed_day' => $row->fixed_day?->getLabel(),
+            'manager_validated' => $row->manager_validated ? 'Oui' : 'Non',
+            'manager_validated_at' => $row->manager_validated_at?->format('d/m/Y'),
+            'hr_validator_name' => $row->hr_validator_name,
+            'created_at' => $row->created_at?->format('d/m/Y'),
+        ];
     }
 }

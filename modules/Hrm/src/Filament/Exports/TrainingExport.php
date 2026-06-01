@@ -13,23 +13,39 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class TrainingExport
 {
-    public function __construct(private Builder $query) {}
+    /**
+     * @param  list<string>  $columns
+     */
+    public function __construct(private Builder $query, private array $columns) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function columns(): array
+    {
+        return [
+            'employee' => 'Agent',
+            'name' => 'Intitulé',
+            'training_type' => 'Type',
+            'start_date' => 'Début',
+            'end_date' => 'Fin',
+            'duration_minutes' => 'Durée',
+            'certificate_received' => 'Attestation',
+            'is_closed' => 'Clôturée',
+        ];
+    }
 
     /**
      * @return list<string>
      */
     public function headings(): array
     {
-        return [
-            'Agent',
-            'Intitulé',
-            'Type',
-            'Début',
-            'Fin',
-            'Durée',
-            'Attestation',
-            'Clôturée',
-        ];
+        $columns = self::columns();
+
+        return array_values(array_map(
+            fn (string $key): string => $columns[$key],
+            $this->columns,
+        ));
     }
 
     /**
@@ -37,16 +53,21 @@ final readonly class TrainingExport
      */
     public function map(Training $row): array
     {
-        return [
-            mb_trim(($row->employee?->last_name ?? '').' '.($row->employee?->first_name ?? '')),
-            $row->name,
-            $row->training_type?->getLabel(),
-            $row->start_date?->format('d/m/Y'),
-            $row->end_date?->format('d/m/Y'),
-            Training::formatDuration($row->duration_minutes),
-            $row->certificate_received ? 'Oui' : 'Non',
-            $row->is_closed ? 'Oui' : 'Non',
+        $values = [
+            'employee' => mb_trim(($row->employee?->last_name ?? '').' '.($row->employee?->first_name ?? '')),
+            'name' => $row->name,
+            'training_type' => $row->training_type?->getLabel(),
+            'start_date' => $row->start_date?->format('d/m/Y'),
+            'end_date' => $row->end_date?->format('d/m/Y'),
+            'duration_minutes' => Training::formatDuration($row->duration_minutes),
+            'certificate_received' => $row->certificate_received ? 'Oui' : 'Non',
+            'is_closed' => $row->is_closed ? 'Oui' : 'Non',
         ];
+
+        return array_values(array_map(
+            fn (string $key) => $values[$key],
+            $this->columns,
+        ));
     }
 
     public function downloadXlsx(string $filename): StreamedResponse

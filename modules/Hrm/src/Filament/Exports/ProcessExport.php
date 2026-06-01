@@ -13,19 +13,32 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class ProcessExport
 {
-    public function __construct(private Builder $query) {}
+    /**
+     * @param  list<string>  $columns  Selected column keys; empty = all.
+     */
+    public function __construct(private Builder $query, private array $columns = []) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function columns(): array
+    {
+        return [
+            'name' => 'Nom',
+            'description' => 'Description',
+            'created_at' => 'Créé le',
+            'updated_at' => 'Modifié le',
+        ];
+    }
 
     /**
      * @return list<string>
      */
     public function headings(): array
     {
-        return [
-            'Nom',
-            'Description',
-            'Créé le',
-            'Modifié le',
-        ];
+        $labels = self::columns();
+
+        return array_map(fn (string $key): string => $labels[$key], $this->selectedColumns());
     }
 
     /**
@@ -33,12 +46,9 @@ final readonly class ProcessExport
      */
     public function map(Process $row): array
     {
-        return [
-            $row->name,
-            $row->description,
-            $row->created_at?->format('d/m/Y H:i'),
-            $row->updated_at?->format('d/m/Y H:i'),
-        ];
+        $data = $this->row($row);
+
+        return array_map(fn (string $key) => $data[$key], $this->selectedColumns());
     }
 
     public function downloadXlsx(string $filename): StreamedResponse
@@ -59,5 +69,31 @@ final readonly class ProcessExport
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function selectedColumns(): array
+    {
+        $all = array_keys(self::columns());
+        if ($this->columns === []) {
+            return $all;
+        }
+
+        return array_values(array_filter($all, fn (string $key): bool => in_array($key, $this->columns, true)));
+    }
+
+    /**
+     * @return array<string, null|string>
+     */
+    private function row(Process $row): array
+    {
+        return [
+            'name' => $row->name,
+            'description' => $row->description,
+            'created_at' => $row->created_at?->format('d/m/Y H:i'),
+            'updated_at' => $row->updated_at?->format('d/m/Y H:i'),
+        ];
     }
 }
