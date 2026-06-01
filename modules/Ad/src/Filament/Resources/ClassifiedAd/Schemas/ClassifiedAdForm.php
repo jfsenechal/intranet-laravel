@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Date;
+use TangoDevIt\FilamentEmojiPicker\EmojiPickerAction;
 
 final class ClassifiedAdForm
 {
@@ -28,7 +29,8 @@ final class ClassifiedAdForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->suffixAction(EmojiPickerAction::make('emoji-title')),
                         RichEditor::make('content')
                             ->label('Contenu')
                             ->required()
