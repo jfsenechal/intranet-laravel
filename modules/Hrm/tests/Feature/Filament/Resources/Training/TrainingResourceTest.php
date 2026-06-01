@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
+use AcMarche\Hrm\Filament\Exports\TrainingExport;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\CreateTraining;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\EditTraining;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ListTrainings;
@@ -136,5 +137,34 @@ describe('model behavior', function (): void {
         $training = Training::factory()->create(['is_closed' => true]);
 
         expect($training->is_closed)->toBeTrue();
+    });
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListTrainings::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Training::factory(2)->create();
+
+        Livewire::test(ListTrainings::class)
+            ->callAction('export', data: ['columns' => array_keys(TrainingExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Training::factory(2)->create();
+
+        Livewire::test(ListTrainings::class)
+            ->callAction('export', data: ['columns' => ['employee', 'name', 'start_date']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListTrainings::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

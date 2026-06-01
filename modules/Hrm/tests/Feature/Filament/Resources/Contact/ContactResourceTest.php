@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Exports\ContactExport;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\EditContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\ListContacts;
@@ -103,4 +104,33 @@ describe('form validation', function (): void {
         '`email_1` must be a valid email' => [['email_1' => 'not-an-email'], ['email_1' => 'email']],
         '`email_2` must be a valid email' => [['email_2' => 'not-an-email'], ['email_2' => 'email']],
     ]);
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListContacts::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Contact::factory(2)->create();
+
+        Livewire::test(ListContacts::class)
+            ->callAction('export', data: ['columns' => array_keys(ContactExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Contact::factory(2)->create();
+
+        Livewire::test(ListContacts::class)
+            ->callAction('export', data: ['columns' => ['last_name', 'first_name', 'email_1']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListContacts::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
+    });
 });

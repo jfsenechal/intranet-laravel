@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Exports\ContractExport;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\CreateContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\EditContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ListContracts;
@@ -100,5 +101,34 @@ describe('model behavior', function (): void {
 
         expect($contracts->pluck('id'))->toContain($active->id);
         expect($contracts->where('is_closed', true))->toBeEmpty();
+    });
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListContracts::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Contract::factory(2)->create();
+
+        Livewire::test(ListContracts::class)
+            ->callAction('export', data: ['columns' => array_keys(ContractExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Contract::factory(2)->create();
+
+        Livewire::test(ListContracts::class)
+            ->callAction('export', data: ['columns' => ['agent', 'employer', 'start_date']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListContracts::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

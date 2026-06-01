@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Enums\StatusEnum;
+use AcMarche\Hrm\Filament\Exports\EmployeeExport;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\CreateEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\EditEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
@@ -195,5 +196,34 @@ describe('export pdf action', function (): void {
 
         Pdf::assertRespondedWithPdf(fn (Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'hrm::pdf.employee'
             && ($pdf->viewData['selectedRelations'] ?? null) === ['contracts', 'absences']);
+    });
+});
+
+describe('export csv action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListEmployees::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Employee::factory(2)->create();
+
+        Livewire::test(ListEmployees::class)
+            ->callAction('export', data: ['columns' => array_keys(EmployeeExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Employee::factory(2)->create();
+
+        Livewire::test(ListEmployees::class)
+            ->callAction('export', data: ['columns' => ['last_name', 'first_name', 'private_email']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListEmployees::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

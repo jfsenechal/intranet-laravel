@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Exports\SmsReminderExport;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\CreateSmsReminder;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\EditSmsReminder;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\ListSmsReminders;
@@ -101,5 +102,34 @@ describe('form validation', function (): void {
             ->call('create')
             ->assertHasFormErrors(['reminder_date' => 'required'])
             ->assertNotNotified();
+    });
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListSmsReminders::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        SmsReminder::factory(2)->create();
+
+        Livewire::test(ListSmsReminders::class)
+            ->callAction('export', data: ['columns' => array_keys(SmsReminderExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        SmsReminder::factory(2)->create();
+
+        Livewire::test(ListSmsReminders::class)
+            ->callAction('export', data: ['columns' => ['agent', 'phone_number', 'reminder_date']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListSmsReminders::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

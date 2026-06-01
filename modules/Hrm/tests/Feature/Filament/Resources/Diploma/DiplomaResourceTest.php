@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Exports\DiplomaExport;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\CreateDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\EditDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ListDiplomas;
@@ -93,4 +94,33 @@ describe('form validation', function (): void {
         '`name` is required' => [['name' => null], ['name' => 'required']],
         '`name` is max 150 characters' => [['name' => Str::random(151)], ['name' => 'max']],
     ]);
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListDiplomas::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Diploma::factory(2)->create();
+
+        Livewire::test(ListDiplomas::class)
+            ->callAction('export', data: ['columns' => array_keys(DiplomaExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Diploma::factory(2)->create();
+
+        Livewire::test(ListDiplomas::class)
+            ->callAction('export', data: ['columns' => ['agent', 'name']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListDiplomas::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
+    });
 });

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Exports\ProcessExport;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\CreateProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\EditProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\ListProcesses;
@@ -109,5 +110,34 @@ describe('table', function (): void {
             ->loadTable()
             ->searchTable($searchRecord->name)
             ->assertCanSeeTableRecords($records->where('name', $searchRecord->name));
+    });
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListProcesses::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Process::factory(2)->create();
+
+        Livewire::test(ListProcesses::class)
+            ->callAction('export', data: ['columns' => array_keys(ProcessExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Process::factory(2)->create();
+
+        Livewire::test(ListProcesses::class)
+            ->callAction('export', data: ['columns' => ['name', 'description']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListProcesses::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

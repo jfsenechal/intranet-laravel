@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\ReasonsEnum;
+use AcMarche\Hrm\Filament\Exports\AbsenceExport;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\CreateAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\EditAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ListAbsences;
@@ -84,5 +85,34 @@ describe('model behavior', function (): void {
         $absence = Absence::factory()->create(['is_closed' => true]);
 
         expect($absence->is_closed)->toBeTrue();
+    });
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListAbsences::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Absence::factory(2)->create();
+
+        Livewire::test(ListAbsences::class)
+            ->callAction('export', data: ['columns' => array_keys(AbsenceExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Absence::factory(2)->create();
+
+        Livewire::test(ListAbsences::class)
+            ->callAction('export', data: ['columns' => ['agent', 'start_date', 'end_date']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListAbsences::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

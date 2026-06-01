@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\Hrm\Enums\DayTypeEnum;
 use AcMarche\Hrm\Enums\LocationTypeEnum;
 use AcMarche\Hrm\Enums\RolesEnum;
+use AcMarche\Hrm\Filament\Exports\TeleworkExport;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\EditTelework;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\HrValidateTelework;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\ListTeleworks;
@@ -100,5 +101,34 @@ describe('model behavior', function (): void {
 
         expect($telework->regulation_agreement)->toBeTrue();
         expect($telework->it_agreement)->toBeTrue();
+    });
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListTeleworks::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Telework::factory(2)->create();
+
+        Livewire::test(ListTeleworks::class)
+            ->callAction('export', data: ['columns' => array_keys(TeleworkExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Telework::factory(2)->create();
+
+        Livewire::test(ListTeleworks::class)
+            ->callAction('export', data: ['columns' => ['user_add', 'full_name', 'created_at']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListTeleworks::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
     });
 });

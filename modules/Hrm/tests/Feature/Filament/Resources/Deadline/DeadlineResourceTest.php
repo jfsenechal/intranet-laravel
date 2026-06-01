@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Exports\DeadlineExport;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\CreateDeadline;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\EditDeadline;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ListDeadlines;
@@ -132,4 +133,33 @@ describe('form validation', function (): void {
         '`name` is required' => [['name' => null], ['name' => 'required']],
         '`name` is max 250 characters' => [['name' => Str::random(251)], ['name' => 'max']],
     ]);
+});
+
+describe('export action', function (): void {
+    it('renders the export action on the index page', function (): void {
+        Livewire::test(ListDeadlines::class)
+            ->assertActionExists('export');
+    });
+
+    it('can trigger the export action with all columns', function (): void {
+        Deadline::factory(2)->create();
+
+        Livewire::test(ListDeadlines::class)
+            ->callAction('export', data: ['columns' => array_keys(DeadlineExport::columns())])
+            ->assertHasNoActionErrors();
+    });
+
+    it('can trigger the export action with a subset of columns', function (): void {
+        Deadline::factory(2)->create();
+
+        Livewire::test(ListDeadlines::class)
+            ->callAction('export', data: ['columns' => ['name', 'agent', 'end_date']])
+            ->assertHasNoActionErrors();
+    });
+
+    it('requires at least one column to be selected', function (): void {
+        Livewire::test(ListDeadlines::class)
+            ->callAction('export', data: ['columns' => []])
+            ->assertHasActionErrors(['columns']);
+    });
 });
