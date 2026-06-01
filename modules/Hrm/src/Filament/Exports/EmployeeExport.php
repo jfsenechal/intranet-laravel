@@ -12,22 +12,38 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class EmployeeExport
 {
-    public function __construct(private Builder $query) {}
+    /**
+     * @param  list<string>  $columns
+     */
+    public function __construct(private Builder $query, private array $columns) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function columns(): array
+    {
+        return [
+            'last_name' => 'Nom',
+            'first_name' => 'Prenom',
+            'job_title' => 'Fonction',
+            'status' => 'Statut',
+            'hired_at' => 'Entree',
+            'private_email' => 'Email',
+            'is_archived' => 'Archive',
+        ];
+    }
 
     /**
      * @return list<string>
      */
     public function headings(): array
     {
-        return [
-            'Nom',
-            'Prenom',
-            'Fonction',
-            'Statut',
-            'Entree',
-            'Email',
-            'Archive',
-        ];
+        $columns = self::columns();
+
+        return array_values(array_map(
+            fn (string $key): string => $columns[$key],
+            $this->columns,
+        ));
     }
 
     /**
@@ -35,15 +51,20 @@ final readonly class EmployeeExport
      */
     public function map(Employee $row): array
     {
-        return [
-            $row->last_name,
-            $row->first_name,
-            $row->job_title,
-            $row->status?->getLabel(),
-            $row->hired_at?->format('d/m/Y'),
-            $row->private_email,
-            $row->is_archived ? 'Oui' : 'Non',
+        $values = [
+            'last_name' => $row->last_name,
+            'first_name' => $row->first_name,
+            'job_title' => $row->job_title,
+            'status' => $row->status?->getLabel(),
+            'hired_at' => $row->hired_at?->format('d/m/Y'),
+            'private_email' => $row->private_email,
+            'is_archived' => $row->is_archived ? 'Oui' : 'Non',
         ];
+
+        return array_values(array_map(
+            fn (string $key) => $values[$key],
+            $this->columns,
+        ));
     }
 
     public function downloadCsv(string $filename): StreamedResponse
