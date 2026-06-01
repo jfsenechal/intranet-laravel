@@ -1,0 +1,38 @@
+[Unit]
+Description=Laravel scheduler (intranet)
+After=network.target mariadb.service
+Wants=mariadb.service
+
+[Service]
+Type=simple
+User=frankenphp
+Group=frankenphp
+WorkingDirectory=/var/www/intranet
+ExecStart=/bin/php /var/www/intranet/artisan schedule:work
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+#
+#  ┌───────────────────────┬────────────────────────────────────────────────────────────────────────────────┐
+#  │         Part          │                                     Reason                                     │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ schedule:work         │ Long-running process that calls schedule:run every minute — replaces system cron │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ Restart=always        │ Scheduler comes back if it crashes or the box reboots                          │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ After=mariadb.service │ Scheduled commands hit the DB — don't start before MariaDB is up               │
+#  ├───────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+#  │ User=frankenphp       │ Matches the owner of storage/ so scheduled commands can write logs/cache       │
+#  └───────────────────────┴────────────────────────────────────────────────────────────────────────────────┘
+#
+# Install:
+#   sudo cp deploy/laravel-schedule.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now laravel-schedule.service
+#
+# Inspect:
+#   systemctl status laravel-schedule.service
+#   journalctl -u laravel-schedule.service -f
