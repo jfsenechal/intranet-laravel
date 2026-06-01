@@ -1,18 +1,18 @@
 [Unit]
-Description=Laravel queue worker (mailing-lists)
+Description=Laravel queue worker (intranet)
 After=network.target mariadb.service
 Wants=mariadb.service
 
 [Service]
 Type=simple
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/mailing-lists
-ExecStart=/bin/php /var/www/mailing-lists/artisan queue:work --queue=default --sleep=3 --tries=3 --max-time=3600
+User=frankenphp
+Group=frankenphp
+WorkingDirectory=/var/www/intranet
+ExecStart=/bin/php /var/www/intranet/artisan queue:work --queue=default --sleep=3 --tries=3 --max-time=3600
 Restart=always
 RestartSec=5
 # Stop gracefully: let the current job finish before killing
-ExecStop=/bin/php /var/www/mailing-lists/artisan queue:restart
+ExecStop=/bin/php /var/www/intranet/artisan queue:restart
 
 [Install]
 WantedBy=multi-user.target
