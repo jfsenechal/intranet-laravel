@@ -78,6 +78,8 @@ php artisan intranet:migration-role
 echo "Migration role done."
 php artisan mileage:migration
 echo "Migration done."
+php artisan hrm:migration
+echo "Hrm done."
 exit
 php artisan pst:migration
 echo "Pst done."
