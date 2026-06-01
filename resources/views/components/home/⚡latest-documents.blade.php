@@ -70,8 +70,8 @@ new class extends Component
                     </p>
                     <p class="mt-0.5  text-gray-500">
                         {{ $document->created_at?->translatedFormat('d F Y') }}
-                        @if ($document->file_name)
-                            — {{ $document->file_name }}
+                        @if ($document->category)
+                            — {{ $document->category->name }}
                         @endif
                     </p>
                 </div>
