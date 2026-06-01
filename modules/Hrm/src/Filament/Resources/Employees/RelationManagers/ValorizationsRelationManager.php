@@ -22,6 +22,16 @@ final class ValorizationsRelationManager extends RelationManager
         return 'Valorisations';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'valorisation';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'valorisations';
+    }
+
     public function isReadOnly(): bool
     {
         return true;
