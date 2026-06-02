@@ -1,0 +1,15 @@
+[Unit]
+Description=Laravel Nightwatch Agent (intranet)
+After=network.target
+
+[Service]
+User=frankenphp
+Group=frankenphp
+Restart=always
+RestartSec=5
+WorkingDirectory=/var/www/intranet
+
+ExecStart=/usr/bin/php artisan nightwatch:agent
+
+[Install]
+WantedBy=multi-user.target

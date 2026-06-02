@@ -58,6 +58,33 @@ After deploying new code, tell the worker to pick it up (the unit's `ExecStop` a
 php artisan queue:restart
 ```
 
+## Install the Laravel Nightwatch agent service
+
+The unit file lives at `deploy/laravel-nightwatch.service`. It runs `php artisan nightwatch:agent` as a long-running process that ships application telemetry (requests, queries, jobs, exceptions) to Laravel Nightwatch.
+
+```bash
+sudo cp deploy/laravel-nightwatch.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now laravel-nightwatch.service
+```
+
+Verify it came up:
+
+```bash
+systemctl status laravel-nightwatch.service
+journalctl -u laravel-nightwatch.service -f
+```
+
+After editing the unit file, reload and restart:
+
+```bash
+sudo cp deploy/laravel-nightwatch.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl restart laravel-nightwatch.service
+```
+
+> The agent runs as the `frankenphp` user/group from `WorkingDirectory=/var/www/intranet`. Make sure `NIGHTWATCH_TOKEN` is set in the app's `.env` so the agent can authenticate.
+
 ## List systemd services
 
 ```bash
