@@ -33,7 +33,7 @@ final readonly class PdfFactory
 
         $path = $directory.'/'.$name;
 
-        Pdf::view('mileage::declaration-pdf', [
+        Pdf::view('mileage::filament.export.declaration-pdf', [
             'declaration' => $declaration,
             'declarationSummary' => $declarationSummary,
         ])

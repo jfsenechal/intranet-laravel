@@ -22,9 +22,19 @@ final class TripAmountCalculator
      */
     public const string SUM_EXPRESSION = 'distance * (COALESCE(rate, 0) - COALESCE(omnium, 0))';
 
+    /**
+     * Net amount for a number of kilometers: `kilometers * (rate - omnium)`.
+     *
+     * Pass `omnium` as `0.0` (the default) to obtain the gross mileage allowance.
+     */
+    public function amount(int $kilometers, float $rate, float $omnium = 0.0): float
+    {
+        return round($kilometers * ($rate - $omnium), 2);
+    }
+
     public function forTrip(Trip $trip): float
     {
-        return round($trip->distance * ((float) $trip->rate - (float) $trip->omnium), 2);
+        return $this->amount((int) $trip->distance, (float) $trip->rate, (float) $trip->omnium);
     }
 
     /**

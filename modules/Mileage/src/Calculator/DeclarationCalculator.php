@@ -11,6 +11,7 @@ final readonly class DeclarationCalculator
 {
     public function __construct(
         private Declaration $declaration,
+        private TripAmountCalculator $amountCalculator = new TripAmountCalculator(),
     ) {}
 
     public function calculate(): DeclarationSummary
@@ -41,7 +42,7 @@ final readonly class DeclarationCalculator
 
     public function calculateTotalMileageAllowance(int $totalKilometers): float
     {
-        return round($totalKilometers * (float) $this->declaration->rate, 2);
+        return $this->amountCalculator->amount($totalKilometers, (float) $this->declaration->rate);
     }
 
     public function calculateTotalOmnium(int $totalKilometers): float
@@ -50,7 +51,7 @@ final readonly class DeclarationCalculator
             return 0.0;
         }
 
-        return round($totalKilometers * (float) $this->declaration->rate_omnium, 2);
+        return $this->amountCalculator->amount($totalKilometers, (float) $this->declaration->rate_omnium);
     }
 
     public function calculateTotalRefund(float $totalMileageAllowance, float $totalOmnium): float
