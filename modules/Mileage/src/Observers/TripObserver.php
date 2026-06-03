@@ -21,10 +21,19 @@ final readonly class TripObserver
     }
 
     /**
-     * Handle the Trip "updated" event.
+     * Handle the Trip "updating" event.
+     *
+     * Recompute the rate when the departure date moves into a different
+     * period, and keep the type of movement in sync with the arrival date.
      */
-    public function updated(): void
+    public function updating(Trip $trip): void
     {
-        // ...
+        if ($trip->isDirty('departure_date')) {
+            $this->tripAttributeResolver->setRate($trip);
+        }
+
+        if ($trip->isDirty('arrival_date')) {
+            $this->tripAttributeResolver->setTypeOfMovement($trip);
+        }
     }
 }

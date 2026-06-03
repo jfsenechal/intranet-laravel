@@ -174,6 +174,69 @@ describe('setRate', function (): void {
     });
 });
 
+describe('recompute on update', function (): void {
+    test('recomputes rate when departure_date moves into another period', function (): void {
+        Rate::factory()->create([
+            'amount' => 0.35,
+            'omnium' => 0.02,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-06-30',
+        ]);
+        Rate::factory()->create([
+            'amount' => 0.45,
+            'omnium' => 0.04,
+            'start_date' => '2024-07-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $trip = Trip::factory()->create([
+            'user_id' => $this->user->id,
+            'departure_date' => '2024-03-15',
+        ]);
+
+        expect($trip->rate)->toBe('0.35')
+            ->and($trip->omnium)->toBe('0.02');
+
+        $trip->update(['departure_date' => '2024-08-15']);
+
+        expect($trip->fresh()->rate)->toBe('0.45')
+            ->and($trip->fresh()->omnium)->toBe('0.04');
+    });
+
+    test('does not change rate when departure_date is unchanged', function (): void {
+        Rate::factory()->create([
+            'amount' => 0.40,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $trip = Trip::factory()->create([
+            'user_id' => $this->user->id,
+            'departure_date' => '2024-05-10',
+        ]);
+
+        $trip->update(['content' => 'Updated content']);
+
+        expect($trip->fresh()->rate)->toBe('0.40')
+            ->and($trip->fresh()->omnium)->toBe('0.03');
+    });
+
+    test('recomputes type of movement when arrival_date is updated', function (): void {
+        $trip = Trip::factory()->create([
+            'user_id' => $this->user->id,
+            'departure_date' => '2024-06-15',
+            'arrival_date' => null,
+        ]);
+
+        expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
+
+        $trip->update(['arrival_date' => '2024-06-16']);
+
+        expect($trip->fresh()->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
+    });
+});
+
 describe('setTypeOfMovement', function (): void {
     test('sets type to EXTERNAL when arrival_date is present', function (): void {
         $trip = Trip::factory()->create([

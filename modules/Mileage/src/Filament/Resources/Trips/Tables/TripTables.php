@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace AcMarche\Mileage\Filament\Resources\Trips\Tables;
 
-use AcMarche\Mileage\Filament\CreateDeclarationAction;
+use AcMarche\Mileage\Calculator\TripAmountCalculator;
+use AcMarche\Mileage\Filament\Actions\CreateDeclarationAction;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Repository\TripRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 final class TripTables
 {
@@ -43,6 +46,23 @@ final class TripTables
                     ->label('Distance')
                     ->sortable()
                     ->suffix(' km'),
+                TextColumn::make('rate')
+                    ->label('Taux')
+                    ->money('EUR')
+                    ->suffix('/km')
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('amount')
+                    ->label('Montant')
+                    ->money('EUR')
+                    ->toggleable()
+                    ->state(fn (Trip $record): float => app(TripAmountCalculator::class)->forTrip($record))
+                    ->summarize(
+                        Summarizer::make('total')
+                            ->label('Total')
+                            ->money('EUR')
+                            ->using(fn (QueryBuilder $query): float => app(TripAmountCalculator::class)->forQuery($query)),
+                    ),
                 TextColumn::make('type_movement')
                     ->label('Type')
                     ->searchable()

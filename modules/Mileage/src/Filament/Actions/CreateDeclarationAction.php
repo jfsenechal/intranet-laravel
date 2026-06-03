@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Mileage\Filament;
+namespace AcMarche\Mileage\Filament\Actions;
 
 use AcMarche\Mileage\Factory\DeclarationFactory;
 use AcMarche\Mileage\Models\BudgetArticle;

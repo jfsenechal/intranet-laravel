@@ -55,7 +55,21 @@ it('can list trips', function (): void {
 it('has table columns', function (string $column): void {
     livewire(ListTrips::class)
         ->assertTableColumnExists($column);
-})->with(['departure_date', 'departure_location', 'distance', 'type_movement']);
+})->with(['departure_date', 'departure_location', 'distance', 'rate', 'amount', 'type_movement']);
+
+it('displays the trip amount and total summary', function (): void {
+    $trips = collect([
+        Trip::factory()->create(['user_add' => 'jdupont', 'distance' => 10, 'rate' => 0.40, 'omnium' => 0.03]),
+        Trip::factory()->create(['user_add' => 'jdupont', 'distance' => 25, 'rate' => 0.40, 'omnium' => 0.03]),
+    ]);
+
+    $expectedTotal = $trips->sum(fn (Trip $trip): float => $trip->distance * ((float) $trip->rate - (float) $trip->omnium));
+
+    livewire(ListTrips::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords($trips)
+        ->assertTableColumnSummarySet('amount', 'total', $expectedTotal);
+});
 
 it('can sort column', function (string $column): void {
     $trips = Trip::factory(5)->create(['user_add' => 'jdupont']);
