@@ -15,7 +15,7 @@
         <tr>
             <td class="border border-gray-300 p-3">
                 Administration communale<br/>
-                @php $logo = public_path('vendor/app/images/Marche_logo.png'); @endphp
+                @php $logo = public_path('images/Marche_logo.png'); @endphp
                 @inlinedImage($logo)
             </td>
             <td class="border border-gray-300 p-3 text-center align-middle">
