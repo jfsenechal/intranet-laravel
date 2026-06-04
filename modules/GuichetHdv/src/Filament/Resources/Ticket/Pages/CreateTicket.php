@@ -26,7 +26,11 @@ final class CreateTicket extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['user_add'] = Auth::user()?->username ?? Auth::user()?->name ?? '';
+        $username = Auth::user()?->username ?? Auth::user()?->name ?? '';
+
+        $data['user_add'] = $username;
+        $data['assigned_by'] = $username;
+        $data['assigned_date'] = now();
 
         return $data;
     }

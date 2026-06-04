@@ -6,8 +6,8 @@ namespace AcMarche\GuichetHdv\Filament\Resources\Ticket\Schemas;
 
 use AcMarche\GuichetHdv\Enums\ServicesEnum;
 use AcMarche\GuichetHdv\Models\Reason;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -27,37 +27,28 @@ final class TicketForm
                             ->label('Numéro')
                             ->required()
                             ->maxLength(255),
-                        Select::make('reason')
+                        Textarea::make('reason')
                             ->label('Motif')
-                            ->options(fn (): array => Reason::query()->orderBy('content')->pluck('content', 'content')->all())
+                            ->required(),
+                        Select::make('suggest_reason')
+                            ->label('Suggestion de motif')
+                            ->options(
+                                fn (): array => Reason::query()->orderBy('content')->pluck('content', 'content')->all()
+                            )
                             ->searchable()
-                            ->required()
                             ->columnSpan(1),
                         Select::make('service')
                             ->label('Service')
                             ->options(ServicesEnum::class)
                             ->required(),
-                        Select::make('office_id')
-                            ->label('Guichet')
-                            ->relationship('office', 'name')
-                            ->searchable()
-                            ->nullable(),
                     ]),
                 ])->heading('Informations'),
-                Section::make([
-                    Grid::make(2)->schema([
-                        DateTimePicker::make('assigned_date')
-                            ->label('Date d\'assignation')
-                            ->nullable(),
-                        TextInput::make('assigned_by')
-                            ->label('Assigné par')
-                            ->maxLength(255)
-                            ->nullable(),
-                        Toggle::make('archive')
-                            ->label('Archivé')
-                            ->default(false),
-                    ]),
-                ])->heading('Assignation'),
+
+                Grid::make(2)->schema([
+                    Toggle::make('archive')
+                        ->label('Archiver')
+                        ->default(false),
+                ]),
             ]);
     }
 }

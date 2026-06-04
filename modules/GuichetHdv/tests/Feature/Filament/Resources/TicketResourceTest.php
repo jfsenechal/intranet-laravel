@@ -82,6 +82,28 @@ it('can create a ticket', function (): void {
     ]);
 });
 
+it('auto-fills assignment fields on create with the current user', function (): void {
+    Reason::factory()->create(['content' => 'Carte d\'identité (DEMANDE/RETRAIT)']);
+    $username = auth()->user()->username ?? auth()->user()->name;
+
+    livewire(CreateTicket::class)
+        ->fillForm([
+            'number' => '42',
+            'reason' => 'Carte d\'identité (DEMANDE/RETRAIT)',
+            'service' => 'Population',
+        ])
+        ->call('create')
+        ->assertNotified()
+        ->assertHasNoFormErrors();
+
+    $ticket = Ticket::query()->where('number', '42')->sole();
+
+    expect($ticket->assigned_by)->toBe($username)
+        ->and($ticket->user_add)->toBe($username)
+        ->and($ticket->assigned_date)->not->toBeNull()
+        ->and($ticket->assigned_date->isToday())->toBeTrue();
+});
+
 it('can update a ticket', function (): void {
     $ticket = Ticket::factory()->create();
     Reason::factory()->create(['content' => $ticket->reason]);
