@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages;
 
+use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,11 @@ final class CreateTicket extends CreateRecord
     public function getTitle(): string
     {
         return 'Ajouter un ticket';
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return TicketsOfTheDay::getUrl();
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

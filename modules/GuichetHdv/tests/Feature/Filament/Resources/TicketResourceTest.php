@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\GuichetHdv\Enums\ServicesEnum;
+use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\CreateTicket;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\EditTicket;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\ListTicket;
@@ -74,7 +75,8 @@ it('can create a ticket', function (): void {
             'office_id' => $office->id,
         ])
         ->call('create')
-        ->assertNotified();
+        ->assertNotified()
+        ->assertRedirect(TicketsOfTheDay::getUrl());
 
     assertDatabaseHas(Ticket::class, [
         'number' => '42',
