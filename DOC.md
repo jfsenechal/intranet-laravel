@@ -85,6 +85,33 @@ sudo systemctl restart laravel-nightwatch.service
 
 > The agent runs as the `frankenphp` user/group from `WorkingDirectory=/var/www/intranet`. Make sure `NIGHTWATCH_TOKEN` is set in the app's `.env` so the agent can authenticate.
 
+## Install the Laravel Reverb websocket service
+
+The unit file lives at `deploy/laravel-reverb.service`. It runs `php artisan reverb:start` as a long-running websocket server that relays broadcast events (real-time ticket updates and notifications) to the browsers.
+
+```bash
+sudo cp deploy/laravel-reverb.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now laravel-reverb.service
+```
+
+Verify it came up:
+
+```bash
+systemctl status laravel-reverb.service
+journalctl -u laravel-reverb.service -f
+```
+
+After editing the unit file, reload and restart:
+
+```bash
+sudo cp deploy/laravel-reverb.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl restart laravel-reverb.service
+```
+
+> The server binds `0.0.0.0:8080` and must match `REVERB_PORT` / `VITE_REVERB_PORT` in the app's `.env`. On HTTPS, browsers require `wss://`, so proxy `wss://your-domain/app/...` to `127.0.0.1:8080` and set `REVERB_SCHEME=https`. Restart this service after changing any `BROADCAST_*` or `REVERB_*` env values.
+
 ## List systemd services
 
 ```bash

@@ -1,0 +1,39 @@
+[Unit]
+Description=Laravel Reverb websocket server (intranet)
+After=network.target
+
+[Service]
+Type=simple
+User=frankenphp
+Group=frankenphp
+WorkingDirectory=/var/www/intranet
+ExecStart=/bin/php /var/www/intranet/artisan reverb:start --host=0.0.0.0 --port=8080
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+#
+#  ┌────────────────────────┬───────────────────────────────────────────────────────────────────────────────┐
+#  │          Part          │                                    Reason                                     │
+#  ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+#  │ reverb:start           │ Long-running websocket server that relays broadcast events to the browsers     │
+#  ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+#  │ --host=0.0.0.0         │ Bind on all interfaces so the reverse proxy can reach it (overrides config)    │
+#  ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+#  │ --port=8080            │ Must match REVERB_PORT / VITE_REVERB_PORT used by the Filament Echo client     │
+#  ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+#  │ Restart=always         │ Server comes back if it crashes or the box reboots                            │
+#  ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+#  │ User=frankenphp        │ Matches the owner of storage/ so the process can read config/cache            │
+#  └────────────────────────┴───────────────────────────────────────────────────────────────────────────────┘
+#
+#  Install:
+#    sudo cp deploy/laravel-reverb.service /etc/systemd/system/laravel-reverb.service
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable --now laravel-reverb.service
+#    sudo systemctl status laravel-reverb.service
+#
+#  After changing BROADCAST/REVERB env values, restart it:
+#    sudo systemctl restart laravel-reverb.service
