@@ -64,4 +64,83 @@
             @endforelse
         </x-filament::section>
     </div>
+
+    @script
+    <script>
+        const VAPID_PUBLIC_KEY = @js(config('webpush.vapid.public_key'));
+        const SOUND_URL = @js(asset('storage/456966__funwithsound__success-fanfare-trumpets.mp3'));
+        const LOGO_URL = '/images/Marche_logo.png';
+
+        const playSound = () => {
+            try {
+                new Audio(SOUND_URL).play().catch(() => {});
+            } catch (e) {}
+        };
+
+        const showNotification = (title, body) => {
+            if (! ('Notification' in window) || Notification.permission !== 'granted') {
+                return;
+            }
+            new Notification(title, { body, icon: LOGO_URL });
+        };
+
+        // 1. Real-time updates while the tab is open (Reverb / Echo).
+        const subscribeEcho = () => {
+            if (! window.Echo) {
+                setTimeout(subscribeEcho, 500);
+                return;
+            }
+
+            window.Echo.private('guichet-hdv.tickets')
+                .listen('.ticket.assigned', (e) => {
+                    playSound();
+                    showNotification(
+                        'Ticket assigné',
+                        `Ticket #${e.number} (${e.service}) → guichet ${e.office ?? '—'}`,
+                    );
+                    $wire.dispatch('tickets-updated');
+                })
+                .listen('.ticket.cancelled', () => {
+                    $wire.dispatch('tickets-updated');
+                });
+        };
+
+        // 2. Web Push registration for closed-tab delivery.
+        const urlBase64ToUint8Array = (base64String) => {
+            const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const raw = atob(base64);
+            return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
+        };
+
+        const registerPush = async () => {
+            if (! ('serviceWorker' in navigator) || ! ('PushManager' in window) || ! VAPID_PUBLIC_KEY) {
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                const permission = await Notification.requestPermission();
+
+                if (permission !== 'granted') {
+                    return;
+                }
+
+                let subscription = await registration.pushManager.getSubscription();
+
+                if (! subscription) {
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+                    });
+                }
+
+                $wire.storePushSubscription(subscription.toJSON());
+            } catch (e) {}
+        };
+
+        subscribeEcho();
+        registerPush();
+    </script>
+    @endscript
 </x-filament-panels::page>

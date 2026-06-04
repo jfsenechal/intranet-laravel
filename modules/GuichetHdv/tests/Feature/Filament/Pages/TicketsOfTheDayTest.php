@@ -3,11 +3,17 @@
 declare(strict_types=1);
 
 use AcMarche\GuichetHdv\Enums\RolesEnum;
+use AcMarche\GuichetHdv\Events\TicketAssigned;
+use AcMarche\GuichetHdv\Events\TicketCancelled;
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\GuichetHdv\Models\Office;
 use AcMarche\GuichetHdv\Models\Ticket;
+use AcMarche\GuichetHdv\Notifications\TicketAssignedPush;
 use AcMarche\Security\Models\Role;
+use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 
 use function Pest\Livewire\livewire;
 
@@ -141,4 +147,59 @@ it('excludes tickets from other days', function (): void {
 
     expect($page->instance()->getPendingTickets()->pluck('id'))->not->toContain($yesterdayPending->id);
     expect($page->instance()->getProcessingTickets()->pluck('id'))->not->toContain($yesterdayProcessing->id);
+});
+
+it('broadcasts TicketAssigned when assigning an office', function (): void {
+    Event::fake([TicketAssigned::class, TicketCancelled::class]);
+    actingAsGuichetAgent();
+    $office = Office::factory()->create();
+    $ticket = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
+
+    livewire(TicketsOfTheDay::class)
+        ->callAction('assignOffice', data: ['office_id' => $office->id], arguments: ['ticket' => $ticket->id]);
+
+    Event::assertDispatched(TicketAssigned::class, fn (TicketAssigned $event): bool => $event->ticket->is($ticket));
+});
+
+it('broadcasts TicketCancelled when cancelling a ticket', function (): void {
+    Event::fake([TicketAssigned::class, TicketCancelled::class]);
+    actingAsGuichetAgent();
+    $ticket = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
+
+    livewire(TicketsOfTheDay::class)
+        ->callAction('cancelTicket', arguments: ['ticket' => $ticket->id]);
+
+    Event::assertDispatched(TicketCancelled::class, fn (TicketCancelled $event): bool => $event->ticket->is($ticket));
+});
+
+it('sends a web push notification to other guichet agents on assignment', function (): void {
+    Notification::fake();
+    actingAsGuichetAgent();
+    $office = Office::factory()->create();
+    $ticket = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
+
+    $role = Role::firstOrCreate(['name' => RolesEnum::ROLE_GUICHET->value]);
+    $colleague = User::factory()->create();
+    $colleague->roles()->attach($role);
+
+    livewire(TicketsOfTheDay::class)
+        ->callAction('assignOffice', data: ['office_id' => $office->id], arguments: ['ticket' => $ticket->id]);
+
+    Notification::assertSentTo($colleague, TicketAssignedPush::class);
+    Notification::assertNotSentTo(auth()->user(), TicketAssignedPush::class);
+});
+
+it('stores the browser push subscription for the current user', function (): void {
+    $endpoint = 'https://push.example.com/sub/abc123';
+
+    livewire(TicketsOfTheDay::class)
+        ->call('storePushSubscription', [
+            'endpoint' => $endpoint,
+            'keys' => ['p256dh' => 'public-key', 'auth' => 'auth-token'],
+        ]);
+
+    $this->assertDatabaseHas('push_subscriptions', [
+        'subscribable_id' => auth()->id(),
+        'endpoint' => $endpoint,
+    ]);
 });

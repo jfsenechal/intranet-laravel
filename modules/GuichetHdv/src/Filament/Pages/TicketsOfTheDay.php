@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace AcMarche\GuichetHdv\Filament\Pages;
 
 use AcMarche\GuichetHdv\Enums\RolesEnum;
+use AcMarche\GuichetHdv\Events\TicketAssigned;
+use AcMarche\GuichetHdv\Events\TicketCancelled;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use AcMarche\GuichetHdv\Models\Office;
 use AcMarche\GuichetHdv\Models\Ticket;
+use AcMarche\GuichetHdv\Notifications\TicketAssignedPush;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -18,6 +22,8 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Livewire\Attributes\On;
 use Override;
 
 final class TicketsOfTheDay extends Page
@@ -96,6 +102,11 @@ final class TicketsOfTheDay extends Page
                     'assigned_date' => now(),
                 ]);
 
+                $ticket->load('office');
+
+                TicketAssigned::dispatch($ticket);
+                $this->sendAssignmentPush($ticket);
+
                 Notification::make()
                     ->title('Guichet assigné')
                     ->success()
@@ -126,11 +137,43 @@ final class TicketsOfTheDay extends Page
 
                 $ticket->update(['archive' => true]);
 
+                TicketCancelled::dispatch($ticket);
+
                 Notification::make()
                     ->title('Ticket archivé')
                     ->success()
                     ->send();
             });
+    }
+
+    /**
+     * Re-render the page (and re-run getViewData) when a ticket changes elsewhere.
+     * The browser dispatches this Livewire event after receiving an Echo broadcast.
+     */
+    #[On('tickets-updated')]
+    public function refreshTickets(): void
+    {
+        // Intentionally empty: Livewire re-renders after handling the event.
+    }
+
+    /**
+     * Persist the browser's Web Push subscription for the current user.
+     *
+     * @param  array{endpoint?: string, keys?: array{p256dh?: string, auth?: string}}  $subscription
+     */
+    public function storePushSubscription(array $subscription): void
+    {
+        $endpoint = $subscription['endpoint'] ?? null;
+
+        if ($endpoint === null) {
+            return;
+        }
+
+        Auth::user()?->updatePushSubscription(
+            $endpoint,
+            $subscription['keys']['p256dh'] ?? null,
+            $subscription['keys']['auth'] ?? null,
+        );
     }
 
     /**
@@ -156,6 +199,24 @@ final class TicketsOfTheDay extends Page
             'pending' => $this->getPendingTickets(),
             'processing' => $this->getProcessingTickets(),
         ];
+    }
+
+    /**
+     * Send a Web Push notification to guichet agents (used for closed-tab delivery).
+     */
+    private function sendAssignmentPush(Ticket $ticket): void
+    {
+        $recipients = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->whereIn('name', [
+                RolesEnum::ROLE_GUICHET_AGENT->value,
+                RolesEnum::ROLE_GUICHET->value,
+            ]))
+            ->when(Auth::id(), fn (Builder $query, int|string $id) => $query->whereKeyNot($id))
+            ->get();
+
+        if ($recipients->isNotEmpty()) {
+            NotificationFacade::send($recipients, new TicketAssignedPush($ticket));
+        }
     }
 
     private function userIsGuichetAgent(): bool

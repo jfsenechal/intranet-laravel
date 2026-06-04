@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 
 #[UseFactory(UserFactory::class)]
 #[Fillable([
@@ -61,7 +62,7 @@ use Laravel\Scout\Searchable;
 ])]
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasName
 {
-    use HasApiTokens, HasFactory, Notifiable, Searchable;
+    use HasApiTokens, HasFactory, HasPushSubscriptions, Notifiable, Searchable;
     use UserCourrierTrait, UserMailingListTrait,UserPstTrait;
 
     public static function generateDataFromLdap(UserLdap $userLdap): array
