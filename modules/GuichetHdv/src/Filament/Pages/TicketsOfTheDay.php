@@ -7,6 +7,7 @@ namespace AcMarche\GuichetHdv\Filament\Pages;
 use AcMarche\GuichetHdv\Enums\RolesEnum;
 use AcMarche\GuichetHdv\Events\TicketAssigned;
 use AcMarche\GuichetHdv\Events\TicketCancelled;
+use AcMarche\GuichetHdv\Filament\Concerns\InteractsWithWebPush;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use AcMarche\GuichetHdv\Models\Office;
 use AcMarche\GuichetHdv\Models\Ticket;
@@ -28,6 +29,8 @@ use Override;
 
 final class TicketsOfTheDay extends Page
 {
+    use InteractsWithWebPush;
+
     #[Override]
     protected static string|null|BackedEnum $navigationIcon = Heroicon::CalendarDays;
 
@@ -154,26 +157,6 @@ final class TicketsOfTheDay extends Page
     public function refreshTickets(): void
     {
         // Intentionally empty: Livewire re-renders after handling the event.
-    }
-
-    /**
-     * Persist the browser's Web Push subscription for the current user.
-     *
-     * @param  array{endpoint?: string, keys?: array{p256dh?: string, auth?: string}}  $subscription
-     */
-    public function storePushSubscription(array $subscription): void
-    {
-        $endpoint = $subscription['endpoint'] ?? null;
-
-        if ($endpoint === null) {
-            return;
-        }
-
-        Auth::user()?->updatePushSubscription(
-            $endpoint,
-            $subscription['keys']['p256dh'] ?? null,
-            $subscription['keys']['auth'] ?? null,
-        );
     }
 
     /**
