@@ -110,7 +110,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart laravel-reverb.service
 ```
 
-> The server binds `0.0.0.0:8080` and must match `REVERB_PORT` / `VITE_REVERB_PORT` in the app's `.env`. On HTTPS, browsers require `wss://`, so proxy `wss://your-domain/app/...` to `127.0.0.1:8080` and set `REVERB_SCHEME=https`. Restart this service after changing any `BROADCAST_*` or `REVERB_*` env values.
+> The server binds `0.0.0.0:8080` and must match `REVERB_PORT` / `VITE_REVERB_PORT` in the app's `.env`. On HTTPS, browsers require `wss://`, so proxy `wss://your-domain/app/...` to `127.0.0.1:8080` and set `VITE_REVERB_SCHEME=https` (keep the internal `REVERB_SCHEME=http`). See `REVERB.md` for the full reverse-proxy setup. Restart this service after changing any `BROADCAST_*` or `REVERB_*` env values.
 
 ## List systemd services
 
