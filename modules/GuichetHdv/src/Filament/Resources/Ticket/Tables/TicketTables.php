@@ -31,20 +31,24 @@ final class TicketTables
                 TextColumn::make('reason')
                     ->label('Motif')
                     ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->limit(60),
                 TextColumn::make('service')
                     ->label('Service')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('office.name')
                     ->label('Guichet')
                     ->sortable()
                     ->placeholder('—'),
                 TextColumn::make('user_add')
                     ->label('Créé par')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 TextColumn::make('assigned_by')
                     ->label('Assigné par')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
                 TextColumn::make('createdAt')
                     ->label('Créé le')
@@ -52,6 +56,7 @@ final class TicketTables
                     ->sortable(),
                 IconColumn::make('archive')
                     ->label('Archivé')
+                    ->falseIcon(null)
                     ->boolean(),
             ])
             ->filters([
@@ -60,6 +65,7 @@ final class TicketTables
                     ->boolean()
                     ->trueLabel('Archivés seulement')
                     ->falseLabel('Non archivés seulement')
+                    ->default(false)
                     ->native(false),
                 SelectFilter::make('office_id')
                     ->label('Guichet')

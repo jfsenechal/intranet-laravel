@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Override;
+use UnitEnum;
 
 final class OfficeResource extends Resource
 {
@@ -22,6 +23,9 @@ final class OfficeResource extends Resource
 
     #[Override]
     protected static ?int $navigationSort = 2;
+
+    #[Override]
+    protected static string|UnitEnum|null $navigationGroup = 'Paramètres';
 
     public static function getNavigationIcon(): string
     {

@@ -12,22 +12,14 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('guichet-hdv'));
+    Filament::setCurrentPanel(Filament::getPanel('guichet-hdv-panel'));
     auth()->user()->update(['is_administrator' => true]);
-
-    if (! Route::getRoutes()->getByName('filament.guichet-hdv.resources.tickets.index')) {
-        Route::get('/guichet-hdv/tickets', fn (): string => '')->name('filament.guichet-hdv.resources.tickets.index');
-        Route::get('/guichet-hdv/tickets/create', fn (): string => '')->name('filament.guichet-hdv.resources.tickets.create');
-        Route::get('/guichet-hdv/tickets/{record}/edit', fn (): string => '')->name('filament.guichet-hdv.resources.tickets.edit');
-        Route::get('/guichet-hdv/tickets/{record}', fn (): string => '')->name('filament.guichet-hdv.resources.tickets.view');
-    }
 });
 
 it('can render the index page', function (): void {
@@ -154,6 +146,16 @@ it('can filter tickets by archive status', function (): void {
         ->filterTable('archive', true)
         ->assertCanSeeTableRecords([$archived])
         ->assertCanNotSeeTableRecords([$active]);
+});
+
+it('hides archived tickets by default', function (): void {
+    $active = Ticket::factory()->create(['archive' => false]);
+    $archived = Ticket::factory()->create(['archive' => true]);
+
+    livewire(ListTicket::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords([$active])
+        ->assertCanNotSeeTableRecords([$archived]);
 });
 
 it('can search tickets by number', function (): void {

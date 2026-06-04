@@ -15,6 +15,7 @@ final class ReasonTables
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('id')
                     ->label('#')
