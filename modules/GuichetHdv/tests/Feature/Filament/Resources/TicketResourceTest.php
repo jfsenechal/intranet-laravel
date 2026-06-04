@@ -7,6 +7,7 @@ use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\EditTicket;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\ListTicket;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\ViewTicket;
 use AcMarche\GuichetHdv\Models\Office;
+use AcMarche\GuichetHdv\Models\Reason;
 use AcMarche\GuichetHdv\Models\Ticket;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -62,6 +63,7 @@ it('has columns', function (string $column): void {
 
 it('can create a ticket', function (): void {
     $office = Office::factory()->create();
+    Reason::factory()->create(['content' => 'Carte d\'identité (DEMANDE/RETRAIT)']);
 
     livewire(CreateTicket::class)
         ->fillForm([
@@ -81,6 +83,7 @@ it('can create a ticket', function (): void {
 
 it('can update a ticket', function (): void {
     $ticket = Ticket::factory()->create();
+    Reason::factory()->create(['content' => $ticket->reason]);
 
     livewire(EditTicket::class, [
         'record' => $ticket->id,
