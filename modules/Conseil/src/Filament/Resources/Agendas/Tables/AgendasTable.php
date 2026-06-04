@@ -17,6 +17,7 @@ final class AgendasTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('name')
                     ->label('Nom')
