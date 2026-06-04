@@ -10,21 +10,14 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('guichet-hdv'));
+    Filament::setCurrentPanel(Filament::getPanel('guichet-hdv-panel'));
     auth()->user()->update(['is_administrator' => true]);
-
-    if (! Route::getRoutes()->getByName('filament.guichet-hdv.resources.reasons.index')) {
-        Route::get('/guichet-hdv/reasons', fn (): string => '')->name('filament.guichet-hdv.resources.reasons.index');
-        Route::get('/guichet-hdv/reasons/create', fn (): string => '')->name('filament.guichet-hdv.resources.reasons.create');
-        Route::get('/guichet-hdv/reasons/{record}/edit', fn (): string => '')->name('filament.guichet-hdv.resources.reasons.edit');
-    }
 });
 
 it('can render the index page', function (): void {

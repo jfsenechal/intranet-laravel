@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Filament\Resources\Ticket\Schemas;
 
+use AcMarche\GuichetHdv\Enums\ServicesEnum;
 use AcMarche\GuichetHdv\Models\Reason;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -32,10 +33,10 @@ final class TicketForm
                             ->searchable()
                             ->required()
                             ->columnSpan(1),
-                        TextInput::make('service')
+                        Select::make('service')
                             ->label('Service')
-                            ->required()
-                            ->maxLength(255),
+                            ->options(ServicesEnum::class)
+                            ->required(),
                         Select::make('office_id')
                             ->label('Guichet')
                             ->relationship('office', 'name')

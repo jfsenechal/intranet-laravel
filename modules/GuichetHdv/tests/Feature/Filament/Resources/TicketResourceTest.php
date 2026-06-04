@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\GuichetHdv\Enums\ServicesEnum;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\CreateTicket;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\EditTicket;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\Pages\ListTicket;
@@ -52,7 +53,7 @@ it('can render the edit page', function (): void {
         ->assertSchemaStateSet([
             'number' => $ticket->number,
             'reason' => $ticket->reason,
-            'service' => $ticket->service,
+            'service' => ServicesEnum::from($ticket->service),
         ]);
 });
 

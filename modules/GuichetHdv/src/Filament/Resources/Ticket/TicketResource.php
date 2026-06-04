@@ -31,7 +31,7 @@ final class TicketResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Tickets';
+        return 'Tous les Tickets';
     }
 
     public static function form(Schema $schema): Schema

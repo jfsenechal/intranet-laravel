@@ -18,7 +18,7 @@ use AcMarche\Conseil\Filament\Resources\Agendas\AgendaResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
-use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
+use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\AddressBookResource;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
@@ -82,7 +82,7 @@ final class MigrationHandler
             52 => FicheResource::getUrl('index', panel: 'cpas-library-panel'),
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
-            59 => TicketResource::getUrl('index', panel: 'guichet-hdv-panel'),
+            59 => TicketsOfTheDay::getUrl(panel: 'guichet-hdv-panel'),
             60 => IncidentResource::getUrl('index', panel: 'street-watch-panel'),
             61 => AddressBookResource::getUrl('index', panel: 'mailing-list-panel'),
             62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
