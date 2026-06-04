@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use AcMarche\GuichetHdv\Enums\RolesEnum;
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\GuichetHdv\Models\Office;
 use AcMarche\GuichetHdv\Models\Ticket;
+use AcMarche\Security\Models\Role;
 use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
@@ -14,6 +16,13 @@ beforeEach(function (): void {
     auth()->user()->update(['is_administrator' => true]);
 });
 
+function actingAsGuichetAgent(): void
+{
+    $role = Role::create(['name' => RolesEnum::ROLE_GUICHET_AGENT->value]);
+    auth()->user()->roles()->attach($role);
+    auth()->user()->unsetRelation('roles');
+}
+
 it('can render the page', function (): void {
     livewire(TicketsOfTheDay::class)
         ->assertOk();
@@ -22,6 +31,56 @@ it('can render the page', function (): void {
 it('has a header action to add a ticket', function (): void {
     livewire(TicketsOfTheDay::class)
         ->assertActionExists('createTicket');
+});
+
+it('hides agent actions from non-agents', function (): void {
+    Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
+
+    livewire(TicketsOfTheDay::class)
+        ->assertActionHidden('assignOffice')
+        ->assertActionHidden('cancelTicket');
+});
+
+it('lets a guichet agent assign an office to a pending ticket', function (): void {
+    actingAsGuichetAgent();
+    $office = Office::factory()->create();
+    $ticket = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
+    $username = auth()->user()->username ?? auth()->user()->name;
+
+    livewire(TicketsOfTheDay::class)
+        ->callAction('assignOffice', data: ['office_id' => $office->id], arguments: ['ticket' => $ticket->id])
+        ->assertHasNoActionErrors()
+        ->assertNotified();
+
+    $ticket->refresh();
+
+    expect($ticket->office_id)->toBe($office->id)
+        ->and($ticket->assigned_by)->toBe($username)
+        ->and($ticket->assigned_date)->not->toBeNull()
+        ->and($ticket->assigned_date->isToday())->toBeTrue();
+});
+
+it('lets a guichet agent cancel (archive) a pending ticket', function (): void {
+    actingAsGuichetAgent();
+    $ticket = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
+
+    livewire(TicketsOfTheDay::class)
+        ->callAction('cancelTicket', arguments: ['ticket' => $ticket->id])
+        ->assertNotified();
+
+    expect($ticket->refresh()->archive)->toBeTrue();
+});
+
+it('lets a guichet agent cancel (archive) a processing ticket', function (): void {
+    actingAsGuichetAgent();
+    $office = Office::factory()->create();
+    $ticket = Ticket::factory()->create(['office_id' => $office->id, 'archive' => false, 'createdAt' => now()]);
+
+    livewire(TicketsOfTheDay::class)
+        ->callAction('cancelTicket', arguments: ['ticket' => $ticket->id])
+        ->assertNotified();
+
+    expect($ticket->refresh()->archive)->toBeTrue();
 });
 
 it('lists today pending tickets (no office, not archived)', function (): void {

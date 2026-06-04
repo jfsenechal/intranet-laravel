@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Filament\Pages;
 
+use AcMarche\GuichetHdv\Enums\RolesEnum;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
+use AcMarche\GuichetHdv\Models\Office;
 use AcMarche\GuichetHdv\Models\Ticket;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Override;
 
 final class TicketsOfTheDay extends Page
@@ -59,6 +64,73 @@ final class TicketsOfTheDay extends Page
     }
 
     /**
+     * Assign a counter to a pending ticket (sets office, assignee and date).
+     */
+    public function assignOfficeAction(): Action
+    {
+        return Action::make('assignOffice')
+            ->label('Assigner un guichet')
+            ->icon('heroicon-o-building-office-2')
+            ->color('info')
+            ->modalHeading('Assigner un guichet')
+            ->visible(fn (): bool => $this->userIsGuichetAgent())
+            ->schema([
+                Select::make('office_id')
+                    ->label('Guichet')
+                    ->options(fn (): array => Office::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->searchable()
+                    ->required(),
+            ])
+            ->action(function (array $arguments, array $data): void {
+                $ticket = Ticket::query()->find($arguments['ticket'] ?? null);
+
+                if (! $ticket instanceof Ticket) {
+                    return;
+                }
+
+                $ticket->update([
+                    'office_id' => $data['office_id'],
+                    'assigned_by' => $this->currentUsername(),
+                    'assigned_date' => now(),
+                ]);
+
+                Notification::make()
+                    ->title('Guichet assigné')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * Cancel a ticket by archiving it.
+     */
+    public function cancelTicketAction(): Action
+    {
+        return Action::make('cancelTicket')
+            ->label('Annuler')
+            ->icon('heroicon-o-x-circle')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Annuler le ticket')
+            ->modalDescription('Le ticket sera archivé.')
+            ->visible(fn (): bool => $this->userIsGuichetAgent())
+            ->action(function (array $arguments): void {
+                $ticket = Ticket::query()->find($arguments['ticket'] ?? null);
+
+                if (! $ticket instanceof Ticket) {
+                    return;
+                }
+
+                $ticket->update(['archive' => true]);
+
+                Notification::make()
+                    ->title('Ticket annulé')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
      * @return array<int, Action>
      */
     protected function getHeaderActions(): array
@@ -81,6 +153,16 @@ final class TicketsOfTheDay extends Page
             'pending' => $this->getPendingTickets(),
             'processing' => $this->getProcessingTickets(),
         ];
+    }
+
+    private function userIsGuichetAgent(): bool
+    {
+        return Auth::user()?->hasRole(RolesEnum::ROLE_GUICHET_AGENT->value) ?? false;
+    }
+
+    private function currentUsername(): string
+    {
+        return Auth::user()?->username ?? Auth::user()?->name ?? '';
     }
 
     /**

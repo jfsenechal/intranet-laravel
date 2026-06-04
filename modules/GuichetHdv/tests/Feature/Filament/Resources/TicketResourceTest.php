@@ -148,6 +148,14 @@ it('can bulk delete tickets', function (): void {
     $tickets->each(fn (Ticket $ticket) => assertDatabaseMissing(Ticket::class, ['id' => $ticket->id]));
 });
 
+it('copies the suggested reason into the reason field', function (): void {
+    Reason::factory()->create(['content' => 'Passeport (DEMANDE ou RETRAIT)']);
+
+    livewire(CreateTicket::class)
+        ->fillForm(['suggest_reason' => 'Passeport (DEMANDE ou RETRAIT)'])
+        ->assertFormSet(['reason' => 'Passeport (DEMANDE ou RETRAIT)']);
+});
+
 it('validates required fields', function (): void {
     livewire(CreateTicket::class)
         ->fillForm([
