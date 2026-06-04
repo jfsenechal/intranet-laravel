@@ -13,6 +13,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -72,6 +73,7 @@ final class TicketsOfTheDay extends Page
             ->label('Assigner un guichet')
             ->icon('heroicon-o-building-office-2')
             ->color('info')
+            ->size(Size::Small)
             ->modalHeading('Assigner un guichet')
             ->visible(fn (): bool => $this->userIsGuichetAgent())
             ->schema([
@@ -107,11 +109,12 @@ final class TicketsOfTheDay extends Page
     public function cancelTicketAction(): Action
     {
         return Action::make('cancelTicket')
-            ->label('Annuler')
+            ->label('Archiver')
             ->icon('heroicon-o-x-circle')
             ->color('danger')
+            ->size(Size::Small)
             ->requiresConfirmation()
-            ->modalHeading('Annuler le ticket')
+            ->modalHeading('Archiver le ticket')
             ->modalDescription('Le ticket sera archivé.')
             ->visible(fn (): bool => $this->userIsGuichetAgent())
             ->action(function (array $arguments): void {
@@ -124,7 +127,7 @@ final class TicketsOfTheDay extends Page
                 $ticket->update(['archive' => true]);
 
                 Notification::make()
-                    ->title('Ticket annulé')
+                    ->title('Ticket archivé')
                     ->success()
                     ->send();
             });
