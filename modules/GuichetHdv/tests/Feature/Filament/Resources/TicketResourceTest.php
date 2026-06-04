@@ -156,6 +156,35 @@ it('copies the suggested reason into the reason field', function (): void {
         ->assertFormSet(['reason' => 'Passeport (DEMANDE ou RETRAIT)']);
 });
 
+it('rejects a duplicate ticket number for the same day', function (): void {
+    Reason::factory()->create(['content' => 'Carte d\'identité (DEMANDE/RETRAIT)']);
+    Ticket::factory()->create(['number' => '77', 'createdAt' => now()]);
+
+    livewire(CreateTicket::class)
+        ->fillForm([
+            'number' => '77',
+            'reason' => 'Carte d\'identité (DEMANDE/RETRAIT)',
+            'service' => 'Population',
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['number' => 'unique'])
+        ->assertNotNotified();
+});
+
+it('allows the same ticket number on a different day', function (): void {
+    Reason::factory()->create(['content' => 'Carte d\'identité (DEMANDE/RETRAIT)']);
+    Ticket::factory()->create(['number' => '88', 'createdAt' => now()->subDay()]);
+
+    livewire(CreateTicket::class)
+        ->fillForm([
+            'number' => '88',
+            'reason' => 'Carte d\'identité (DEMANDE/RETRAIT)',
+            'service' => 'Population',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+});
+
 it('validates required fields', function (): void {
     livewire(CreateTicket::class)
         ->fillForm([

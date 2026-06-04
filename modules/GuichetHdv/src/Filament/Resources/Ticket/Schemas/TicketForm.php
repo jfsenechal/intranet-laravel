@@ -14,6 +14,8 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Unique;
 
 final class TicketForm
 {
@@ -27,7 +29,21 @@ final class TicketForm
                         TextInput::make('number')
                             ->label('Numéro')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->unique(
+                                table: 'maria-guichet.tickets',
+                                column: 'number',
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule, ?Model $record): Unique => $rule->where(
+                                    fn ($query) => $query->whereDate(
+                                        'createdAt',
+                                        ($record?->createdAt ?? now())->toDateString(),
+                                    ),
+                                ),
+                            )
+                            ->validationMessages([
+                                'unique' => 'Un ticket portant ce numéro existe déjà pour aujourd\'hui.',
+                            ]),
                         Select::make('service')
                             ->label('Service')
                             ->options(ServicesEnum::class)

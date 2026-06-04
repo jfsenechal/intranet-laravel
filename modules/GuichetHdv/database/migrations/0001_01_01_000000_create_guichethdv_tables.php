@@ -52,7 +52,7 @@ return new class extends Migration
                 $table->datetime('updatedAt')->nullable();
                 $table->boolean('archive')->default(false);
                 $table->string('service');
-                $table->date('created_date')->storedAs('CAST(`createdAt` AS DATE)')->nullable();
+                $table->date('created_date')->storedAs('date(`createdAt`)')->nullable();
             });
 
             Schema::connection('maria-guichet')->table('tickets', function (Blueprint $table): void {
