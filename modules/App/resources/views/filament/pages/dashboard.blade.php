@@ -80,7 +80,8 @@
                             {{ $document->name }}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ $document->created_at?->translatedFormat('d/m/Y') }}
+                            {{ $document->category?->name }}
+                            - {{ $document->created_at?->translatedFormat('d/m/Y') }}
                         </p>
                     </div>
                 </div>
