@@ -39,6 +39,7 @@ final class UserFactory extends Factory
             'is_administrator' => false,
             'color_primary' => null,
             'color_secondary' => null,
+            'avatar_url' => null,
         ];
     }
 
