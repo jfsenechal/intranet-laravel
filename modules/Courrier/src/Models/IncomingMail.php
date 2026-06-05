@@ -90,6 +90,10 @@ final class IncomingMail extends Model
         self::created(function (IncomingMail $model): void {
             IndexIncomingMailJob::dispatch($model->id)->afterCommit();
         });
+
+        self::deleted(function (IncomingMail $model): void {
+            IndexIncomingMailJob::dispatch($model->id)->afterCommit();
+        });
     }
 
     protected static function newFactory(): IncomingMailFactory

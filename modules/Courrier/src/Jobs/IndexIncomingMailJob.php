@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Jobs;
 
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Search\MeiliIndexer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -38,8 +39,11 @@ final class IndexIncomingMailJob implements ShouldQueue
         }
 
         try {
+            // Drop the department restriction (irrelevant in a queue context),
+            // but keep soft-delete scoping so trashed mail resolves to null and
+            // is removed from the index rather than re-indexed.
             $incomingMail = IncomingMail::query()
-                ->withoutGlobalScopes()
+                ->withoutGlobalScope(DepartmentScope::class)
                 ->with(['recipients', 'services', 'attachments'])
                 ->find($this->incomingMailId);
 
