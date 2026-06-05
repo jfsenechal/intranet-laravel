@@ -17,6 +17,7 @@ use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
@@ -38,6 +39,13 @@ final class AppServiceProvider extends ServiceProvider
             PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
             fn (): View => view('filament.login_form'),
         );
+
+        if (app()->environment('local')) {
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): HtmlString => new HtmlString('<script src="http://localhost:8400/live.js"></script>'),
+            );
+        }
     }
 
     private function translatableComponents(): void
