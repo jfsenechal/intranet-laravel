@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
+use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\Connection;
@@ -84,6 +85,10 @@ final class IncomingMail extends Model
                     $model->department = $departments[0]->value;
                 }
             }
+        });
+
+        self::created(function (IncomingMail $model): void {
+            IndexIncomingMailJob::dispatch($model->id)->afterCommit();
         });
     }
 
