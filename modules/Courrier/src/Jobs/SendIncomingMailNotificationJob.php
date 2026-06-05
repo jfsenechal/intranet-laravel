@@ -8,7 +8,7 @@ use AcMarche\Courrier\Mail\IncomingMailNotification;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use App\Models\User;
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +23,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        public readonly Carbon $mailDate,
+        public readonly CarbonInterface $mailDate,
     ) {}
 
     public function handle(): void
