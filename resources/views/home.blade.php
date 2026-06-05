@@ -120,7 +120,9 @@
 
     @livewireScripts
 <!-- impeccable-live-start -->
+@if (app()->environment('local'))
 <script src="http://localhost:8400/live.js"></script>
+@endif
 <!-- impeccable-live-end -->
 </body>
 </html>
