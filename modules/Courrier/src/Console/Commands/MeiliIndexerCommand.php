@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Console\Commands;
 
-use AcMarche\App\Meilisearch\MeiliTrait;
+use AcMarche\App\Meilisearch\MeiliServer;
+use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Search\MeiliIndexer;
-use DateTimeImmutable;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
 use Override;
 
 final class MeiliIndexerCommand extends Command
 {
-    use MeiliTrait;
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
     #[Override]
-    protected $signature = 'courrier:meili-indexer {date?}';
+    protected $signature = 'courrier:meili-indexer {--fresh : Recreate the index and reapply its settings before indexing}';
 
     /**
      * The console command description.
@@ -28,29 +27,39 @@ final class MeiliIndexerCommand extends Command
      * @var string
      */
     #[Override]
-    protected $description = 'Update index';
+    protected $description = 'Index every incoming mail in Meilisearch';
 
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
-        $date = $this->argument('date');
         $indexName = config('courrier.meilisearch.index_name');
-        $meiliServer = new MeiliIndexer($indexName);
-        foreach (range(2010, date('Y')) as $year) {
-            $meiliServer->addCourriersByYear($year);
-        }
-        if ($year && $year > 2010) {
-            $meiliServer->addCourriersByYear($year);
-        } elseif ($date) {
-            $dateTime = DateTimeImmutable::createFromFormat('Y-m-d', $date);
-            if ($dateTime instanceof DateTimeImmutable) {
-                $meiliServer->addCourriersByDate($dateTime);
-            } else {
-                $this->error('Invalid date format : '.$date);
-            }
+
+        if ($this->option('fresh')) {
+            $server = new MeiliServer($indexName);
+            $server->createIndex($indexName, 'id');
+            $server->settings(
+                config('courrier.meilisearch.filterable_attributes'),
+                config('courrier.meilisearch.sortable_attributes'),
+            );
+            $this->info(sprintf('Index "%s" recreated and configured.', $indexName));
         }
 
+        $indexer = new MeiliIndexer();
+        $count = 0;
+
+        IncomingMail::query()
+            ->withoutGlobalScopes()
+            ->with(['recipients', 'services'])
+            ->chunkById(500, function (Collection $incomingMails) use ($indexer, &$count): void {
+                $indexer->indexMails($incomingMails);
+                $count += $incomingMails->count();
+                $this->info(sprintf('Indexed %d incoming mails…', $count));
+            });
+
+        $this->info(sprintf('Done. %d incoming mails indexed.', $count));
+
+        return self::SUCCESS;
     }
 }
