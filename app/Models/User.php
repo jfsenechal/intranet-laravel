@@ -161,6 +161,9 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     {
         if (! $this->hasRole($role->name)) {
             $this->roles()->attach($role);
+            // hasRole() above cached the (then empty) relation; drop it so the
+            // newly attached role is reflected on subsequent reads.
+            $this->unsetRelation('roles');
         }
     }
 
@@ -173,6 +176,9 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     {
         if (! $this->hasModule($module->name)) {
             $this->modules()->attach($module);
+            // hasModule() above cached the (then empty) relation; drop it so the
+            // newly attached module is reflected on subsequent reads.
+            $this->unsetRelation('modules');
         }
     }
 
