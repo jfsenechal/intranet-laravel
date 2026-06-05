@@ -15,8 +15,11 @@ final class MeiliIndexer
 
     private const PRIMARY_KEY = 'id';
 
-    public function __construct()
+    private readonly AttachmentOcr $ocr;
+
+    public function __construct(?AttachmentOcr $ocr = null)
     {
+        $this->ocr = $ocr ?? new AttachmentOcr();
         $this->init(config('courrier.meilisearch.index_name'));
     }
 
@@ -66,7 +69,7 @@ final class MeiliIndexer
      */
     public function createDocument(IncomingMail $incomingMail): array
     {
-        $incomingMail->loadMissing(['recipients', 'services']);
+        $incomingMail->loadMissing(['recipients', 'services', 'attachments']);
 
         $original = [];
         $copie = [];
@@ -99,6 +102,23 @@ final class MeiliIndexer
             'recommande' => (bool) $incomingMail->is_registered,
             'date_courrier' => $incomingMail->mail_date?->format('Y-m-d'),
             'date_courrier_timestamp' => $incomingMail->mail_date?->getTimestamp(),
+            'content' => $this->attachmentsText($incomingMail),
         ];
+    }
+
+    /**
+     * Concatenate the OCR/extracted text of every attachment.
+     */
+    private function attachmentsText(IncomingMail $incomingMail): string
+    {
+        $texts = [];
+        foreach ($incomingMail->attachments as $attachment) {
+            $text = $this->ocr->textFor($attachment);
+            if ($text !== '') {
+                $texts[] = $text;
+            }
+        }
+
+        return self::cleandata(implode(' ', $texts));
     }
 }

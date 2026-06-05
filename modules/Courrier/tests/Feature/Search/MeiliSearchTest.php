@@ -65,7 +65,10 @@ describe('MeiliIndexer document', function (): void {
         $mail->recipients()->attach($copy->id, ['is_primary' => false]);
         $mail->services()->attach($service->id, ['is_primary' => true]);
 
-        $document = app(MeiliIndexer::class)->createDocument($mail->fresh());
+        $mail->load(['recipients', 'services']);
+        $mail->setRelation('attachments', collect());
+
+        $document = app(MeiliIndexer::class)->createDocument($mail);
 
         expect($document)
             ->id->toBe($mail->id)

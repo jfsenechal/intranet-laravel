@@ -59,6 +59,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Attachment OCR
+    |--------------------------------------------------------------------------
+    |
+    | Text extraction settings for the Meilisearch indexer. PDFs with a text
+    | layer are read with `pdftotext`; scanned PDFs and images fall back to
+    | Tesseract OCR. Requires the poppler-utils and tesseract-ocr binaries
+    | (with the configured language pack). Indexing degrades gracefully when
+    | a binary is missing.
+    |
+    */
+    'ocr' => [
+        'enabled' => env('COURRIER_OCR_ENABLED', true),
+        'language' => env('COURRIER_OCR_LANGUAGE', 'fra'),
+        'max_pages' => env('COURRIER_OCR_MAX_PAGES', 15),
+        'dpi' => env('COURRIER_OCR_DPI', 200),
+        'timeout' => env('COURRIER_OCR_TIMEOUT', 120),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Allowed File Types
     |--------------------------------------------------------------------------
     |
