@@ -14,7 +14,11 @@ return new class() extends Migration
     {
         $schema = Schema::connection('maria-telecommunication');
 
-        if ($schema->hasTable('attachments')) {
+        // Only adopt a legacy `attachments` table that is actually this module's
+        // (identified by its `telephone_id` column). Guards against clobbering a
+        // same-named table from another connection when databases are shared,
+        // e.g. the single in-memory SQLite connection used in the test suite.
+        if ($schema->hasTable('attachments') && $schema->hasColumn('attachments', 'telephone_id')) {
             $schema->table('attachments', function (Blueprint $table): void {
                 $table->rename('telecommunication_attachments');
             });
