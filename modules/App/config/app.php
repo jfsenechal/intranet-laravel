@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'meilisearch' => [
-        'master_key' => env('MEILI_MASTER_KEY'),
+        'master_key' => env('MEILISEARCH_KEY'),
     ],
     'webmaster_email' => env('WEBMASTER_EMAIL'),
     'sms' => [

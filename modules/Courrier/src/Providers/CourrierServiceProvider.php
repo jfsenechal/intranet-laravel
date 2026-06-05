@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
+use AcMarche\Courrier\Console\Commands\MeiliIndexerCommand;
 use AcMarche\Courrier\Console\Commands\MergeCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
 use AcMarche\Courrier\Policies\RegisterPolicies;
@@ -27,6 +28,7 @@ final class CourrierServiceProvider extends ServiceProvider
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
+                MeiliIndexerCommand::class,
                 MergeCommand::class,
                 SyncCommand::class,
             ]);
@@ -50,6 +52,20 @@ final class CourrierServiceProvider extends ServiceProvider
      */
     private function registerImapMailboxes(): void
     {
+        Imap::register('imap_bgm', [
+            'host' => config('courrier.imap.bgm.host'),
+            'port' => config('courrier.imap.bgm.port', 993),
+            'username' => config('courrier.imap.bgm.username'),
+            'password' => config('courrier.imap.bgm.password'),
+            'encryption' => config('courrier.imap.bgm.encryption', 'ssl'),
+        ]);
+        Imap::register('imap_cpas', [
+            'host' => config('courrier.imap.cpas.host'),
+            'port' => config('courrier.imap.cpas.port', 993),
+            'username' => config('courrier.imap.cpas.username'),
+            'password' => config('courrier.imap.cpas.password'),
+            'encryption' => config('courrier.imap.cpas.encryption', 'ssl'),
+        ]);
         Imap::register('imap_ville', [
             'host' => config('courrier.imap.ville.host'),
             'port' => config('courrier.imap.ville.port', 993),

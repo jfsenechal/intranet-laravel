@@ -27,6 +27,22 @@ return [
         ],
     ],
     'imap' => [
+        'bgm' => [
+            'host' => env('IMAP_INDICATEUR_BGM_HOST'),
+            'port' => 993,
+            'encryption' => 'ssl',
+            'email' => env('IMAP_INDICATEUR_BGM_EMAIL'),
+            'username' => env('IMAP_INDICATEUR_BGM_USER'),
+            'password' => env('IMAP_INDICATEUR_BGM_PWD'),
+        ],
+        'cpas' => [
+            'host' => env('IMAP_INDICATEUR_CPAS_HOST'),
+            'port' => 993,
+            'encryption' => 'ssl',
+            'email' => env('IMAP_INDICATEUR_CPAS_EMAIL'),
+            'username' => env('IMAP_INDICATEUR_CPAS_USER'),
+            'password' => env('IMAP_INDICATEUR_CPAS_PWD'),
+        ],
         'ville' => [
             'host' => env('IMAP_INDICATEUR_VILLE_HOST'),
             'port' => 993,
