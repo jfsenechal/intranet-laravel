@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\App\Providers\Filament;
 
 use AcMarche\App\Filament\Pages\Auth\EditProfile;
-use AcMarche\App\Filament\Pages\DashboardPage;
-use AcMarche\App\Filament\Pages\TeleworkPage;
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
 use App\Filament\Pages\Auth\Login;
@@ -54,8 +52,7 @@ final class AppPanelProvider extends PanelProvider
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\App\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\App\\Filament\\Pages')
             ->pages([
-                DashboardPage::class,
-                TeleworkPage::class,
+
             ])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\App\\Filament\\Widgets')
             ->widgets([
