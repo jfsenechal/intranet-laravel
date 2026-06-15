@@ -15,6 +15,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/nightwatch (NIGHTWATCH) - v1
 - laravel/octane (OCTANE) - v2
 - laravel/prompts (PROMPTS) - v0
+- laravel/reverb (REVERB) - v1
 - laravel/sanctum (SANCTUM) - v4
 - laravel/scout (SCOUT) - v10
 - livewire/livewire (LIVEWIRE) - v4

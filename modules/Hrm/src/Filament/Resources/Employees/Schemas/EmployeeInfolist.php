@@ -22,7 +22,7 @@ use Filament\Support\Icons\Heroicon;
 
 final class EmployeeInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Schema $schema, bool $includeComputerAccountTab = true): Schema
     {
         return $schema
             ->columns(1)
@@ -229,6 +229,7 @@ final class EmployeeInfolist
                             ]),
                         Tab::make('Compte informatique')
                             ->icon(Heroicon::OutlinedUserCircle)
+                            ->visible($includeComputerAccountTab)
                             ->schema([
                                 Section::make('Données partagées avec le module Agent')
                                     ->visible(fn (Employee $record): bool => $record->profile !== null)
