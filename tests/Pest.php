@@ -47,6 +47,8 @@ uses(
     '../modules/ActivityManager/tests/Unit',
     '../modules/StreetWatch/tests/Feature',
     '../modules/StreetWatch/tests/Unit',
+    '../modules/MealDelivery/tests/Feature',
+    '../modules/MealDelivery/tests/Unit',
     '../modules/Conseil/tests/Filament',
 );
 
