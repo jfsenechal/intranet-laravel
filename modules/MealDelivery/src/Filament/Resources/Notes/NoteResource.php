@@ -35,7 +35,7 @@ final class NoteResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Liste des notes';
+        return 'Notes';
     }
 
     public static function form(Schema $schema): Schema

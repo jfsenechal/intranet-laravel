@@ -34,7 +34,7 @@ final class AbsenceResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Liste des absences';
+        return 'Absences';
     }
 
     public static function form(Schema $schema): Schema
