@@ -23,7 +23,7 @@ return new class() extends Migration
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');
             });
-        } elseif( !Schema::connection('maria-rescam')->hasTable('sports_activities')) {
+        } elseif (! Schema::connection('maria-rescam')->hasTable('sports_activities')) {
             Schema::connection('maria-rescam')->create('sports_activities', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name', 255);

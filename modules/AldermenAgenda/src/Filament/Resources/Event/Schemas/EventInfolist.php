@@ -14,7 +14,7 @@ final class EventInfolist
     {
         return $schema
             ->schema([
-               TextEntry::make('event_type')
+                TextEntry::make('event_type')
                     ->label('Type d\'événement'),
                 TextEntry::make('organizer')
                     ->label('Organisateur'),

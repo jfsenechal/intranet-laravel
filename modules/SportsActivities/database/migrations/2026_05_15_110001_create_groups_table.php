@@ -24,7 +24,7 @@ return new class() extends Migration
                 $table->renameColumn('remarque', 'comment');
                 $table->renameColumn('activite_id', 'activity_id');
             });
-        } elseif (!Schema::connection('maria-rescam')->hasTable('sports_groups')) {
+        } elseif (! Schema::connection('maria-rescam')->hasTable('sports_groups')) {
             Schema::connection('maria-rescam')->create('sports_groups', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('activity_id')

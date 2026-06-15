@@ -15,6 +15,7 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +101,7 @@ final class ModuleForm
                     ->columnSpanFull();
         }
 
+        $components[] = self::roleDescriptionText($module);
         $components[] = self::rolesField($module, $user);
 
         $schema
@@ -107,6 +109,26 @@ final class ModuleForm
             ->columns(1);
 
         return $schema;
+    }
+
+    /**
+     * Informational helper displaying the module's role description so admins
+     * understand the roles they are about to assign.
+     */
+    public static function roleDescriptionText(?Module $module): Text
+    {
+        $resolve = function (callable $get) use ($module): ?Module {
+            if ($module instanceof Module) {
+                return $module;
+            }
+
+            $moduleId = $get('module');
+
+            return $moduleId ? ModuleRepository::find((int) $moduleId) : null;
+        };
+
+        return Text::make(fn (callable $get): ?string => $resolve($get)?->role_description)
+            ->visible(fn (callable $get): bool => filled($resolve($get)?->role_description));
     }
 
     public static function rolesField(?Module $module, User|Model|null $user = null): CheckboxList|Radio

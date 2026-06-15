@@ -185,7 +185,8 @@
         "spatie/laravel-sluggable": "^3.8",
         "stechstudio/filament-impersonate": "^5.3",
         "symfony/process": "^7.4",
-        "tangodev-it/filament-emoji-picker": "^3.0"
+        "tangodev-it/filament-emoji-picker": "^3.0",
+        "ext-intl": "*"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.2",

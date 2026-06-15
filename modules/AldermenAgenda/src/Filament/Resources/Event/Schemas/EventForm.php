@@ -57,7 +57,7 @@ final class EventForm
                             ->maxSize(7168)
                             ->nullable(),
                     ])
-                    ->columns(2),
+                        ->columns(2),
                     Section::make([
                         DateTimePicker::make('start_at')
                             ->label('Date de début')

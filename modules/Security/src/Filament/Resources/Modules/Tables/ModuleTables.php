@@ -33,6 +33,7 @@ final class ModuleTables
                 IconColumn::make('is_public')
                     ->label('Accessible à tous')
                     ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::CheckCircle : null)
+                    ->falseIcon( false)
                     ->color('success')
                     ->toggleable(),
                 IconColumn::make('is_external')

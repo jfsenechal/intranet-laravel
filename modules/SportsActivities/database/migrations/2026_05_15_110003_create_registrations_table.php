@@ -27,7 +27,7 @@ return new class() extends Migration
             return;
         }
 
-        if(Schema::connection('maria-rescam')->hasTable('sports_registrations')) {
+        if (Schema::connection('maria-rescam')->hasTable('sports_registrations')) {
             return;
         }
 

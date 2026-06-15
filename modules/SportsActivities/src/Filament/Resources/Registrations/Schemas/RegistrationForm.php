@@ -26,7 +26,7 @@ final class RegistrationForm
     {
         return [
             self::memberSelect(),
-            ...self::baseSchema(fn(Group $record): ?float => $record->price),
+            ...self::baseSchema(fn (Group $record): ?float => $record->price),
         ];
     }
 
@@ -45,7 +45,7 @@ final class RegistrationForm
     }
 
     /**
-     * @param Closure|null $priceDefault Resolves the default price (e.g. from the group).
+     * @param  Closure|null  $priceDefault  Resolves the default price (e.g. from the group).
      * @return array<int, mixed>
      */
     public static function baseSchema(?Closure $priceDefault = null): array
@@ -71,13 +71,13 @@ final class RegistrationForm
             ->label('Sportif')
             ->searchable()
             ->required()
-            ->getSearchResultsUsing(fn(string $search): array => Member::query()
+            ->getSearchResultsUsing(fn (string $search): array => Member::query()
                 ->where('last_name', 'like', "%{$search}%")
                 ->orWhere('first_name', 'like', "%{$search}%")
                 ->orderBy('last_name')
                 ->limit(50)
                 ->get()
-                ->mapWithKeys(fn(Member $member): array => [
+                ->mapWithKeys(fn (Member $member): array => [
                     $member->id => "{$member->last_name} {$member->first_name}",
                 ])
                 ->toArray())
@@ -92,14 +92,14 @@ final class RegistrationForm
     {
         return Select::make('activity_id')
             ->label('Activité')
-            ->options(fn(): array => Activity::query()
+            ->options(fn (): array => Activity::query()
                 ->orderBy('name')
                 ->pluck('name', 'id')
                 ->toArray())
             ->searchable()
             ->required()
             ->live()
-            ->afterStateUpdated(fn(Set $set) => $set('group_id', null));
+            ->afterStateUpdated(fn (Set $set) => $set('group_id', null));
     }
 
     private static function groupSelect(): Select
@@ -109,14 +109,14 @@ final class RegistrationForm
             ->required()
             ->options(function (Get $get): array {
                 $activityId = $get('activity_id');
-                if (!$activityId) {
+                if (! $activityId) {
                     return [];
                 }
 
                 return Group::query()
                     ->where('activity_id', $activityId)
                     ->get()
-                    ->mapWithKeys(fn(Group $group): array => [
+                    ->mapWithKeys(fn (Group $group): array => [
                         $group->id => "{$group->day} — {$group->time} — {$group->location}",
                     ])
                     ->toArray();

@@ -12,7 +12,7 @@ use AcMarche\Security\Enums\RolesEnum;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
-use Database\Factories\UserFactory;
+use AcMarche\EmailManagement\Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
