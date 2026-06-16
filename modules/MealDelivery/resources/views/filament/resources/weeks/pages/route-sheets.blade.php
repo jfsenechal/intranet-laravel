@@ -71,7 +71,7 @@
                 </button>
             </div>
 
-            <h3 class="text-success" style="font-size:18px; font-weight:600;">{{ $sheet['name'] }} : {{ $formattedDate }}</h3>
+            <h3 class="text-success" style="font-size:18px; font-weight:600;">{{ $sheet['name'] }} : {{ $formattedDate }} - {{ $sheet['totals']['clients'] }} {{ \Illuminate\Support\Str::plural('client', $sheet['totals']['clients']) }}</h3>
 
             @include('meal-delivery::filament.resources.weeks.pages._route-sheet-table', ['sheet' => $sheet])
         </div>
@@ -95,7 +95,7 @@
             </button>
         </div>
 
-        <h3 class="text-success" style="font-size:18px; font-weight:600;">Cafétéria : {{ $formattedDate }}</h3>
+        <h3 class="text-success" style="font-size:18px; font-weight:600;">Cafétéria : {{ $formattedDate }} - {{ $sheets['cafeteria']['totals']['clients'] }} {{ \Illuminate\Support\Str::plural('client', $sheets['cafeteria']['totals']['clients']) }}</h3>
 
         @include('meal-delivery::filament.resources.weeks.pages._route-sheet-table', ['sheet' => $sheets['cafeteria']])
     </div>

@@ -11,6 +11,7 @@ use AcMarche\MealDelivery\Service\RouteSheetsAggregator;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 use Override;
 use Spatie\Browsershot\Browsershot;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -46,6 +47,11 @@ final class RouteSheets extends Page
         return $user instanceof User && self::canAccessStatic($user);
     }
 
+    public function getSubheading(): string|Htmlable|null
+    {
+        return 'Retrouvez la tournée 3 et la cafétéria plus bas sur la page.';
+    }
+
     public function mount(Week $record, string $date): void
     {
         $this->record = $record;
@@ -62,7 +68,8 @@ final class RouteSheets extends Page
     {
         return [
             WeekResource::getUrl() => 'Semaines',
-            WeekResource::getUrl('view', ['record' => $this->record->id]) => 'Semaine du '.$this->record->formattedFirstDay(),
+            WeekResource::getUrl('view', ['record' => $this->record->id]
+            ) => 'Semaine du '.$this->record->formattedFirstDay(),
             $this->getTitle(),
         ];
     }
