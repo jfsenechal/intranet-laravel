@@ -1,13 +1,36 @@
 <?php
 
+use AcMarche\App\Handler\FavoriteModuleHandler;
 use AcMarche\Security\Handler\MigrationHandler;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 
 new class extends Component {
+    /**
+     * @var list<int>
+     */
+    public array $favoriteModuleIds = [];
+
+    public function mount(): void
+    {
+        $this->favoriteModuleIds = FavoriteModuleHandler::favoriteIds();
+    }
+
     public function getModules(): Collection
     {
         return MigrationHandler::getAllModules();
+    }
+
+    public function toggleFavorite(int $moduleId): void
+    {
+        $user = auth()->user();
+        if ($user === null) {
+            return;
+        }
+
+        $user->toggleFavoriteModule($moduleId);
+        $this->favoriteModuleIds = FavoriteModuleHandler::favoriteIds($user);
+        $this->dispatch('favorites-updated');
     }
 };
 ?>
@@ -110,12 +133,30 @@ new class extends Component {
                         <li
                             x-show="search === '' || @js($searchKey).includes(search.toLowerCase())"
                             x-transition.opacity
+                            class="relative"
                         >
                             @if ($module->migrated)
+                                @php($isFavorite = in_array($module->id, $favoriteModuleIds, true))
+                                <button
+                                    type="button"
+                                    wire:click="toggleFavorite({{ $module->id }})"
+                                    aria-label="{{ $isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+                                    aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
+                                    class="absolute right-2 top-2 z-10 rounded-full p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:bg-gray-700"
+                                >
+                                    <x-filament::icon
+                                        :icon="$isFavorite ? 'heroicon-s-star' : 'heroicon-o-star'"
+                                        @class([
+                                            'h-5 w-5',
+                                            'text-amber-400' => $isFavorite,
+                                            'text-gray-300 dark:text-gray-600' => ! $isFavorite,
+                                        ])
+                                    />
+                                </button>
                                 <a
                                     href="{{ $module->is_external ? $module->url : url($module->url) }}"
                                     @if ($module->is_external) target="_blank" rel="noopener noreferrer" @endif
-                                    class="group flex h-full items-start gap-3 rounded-xl border border-transparent p-3 transition hover:border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:border-gray-700 dark:hover:bg-gray-800/60"
+                                    class="group flex h-full items-start gap-3 rounded-xl border border-transparent p-3 pr-10 transition hover:border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:border-gray-700 dark:hover:bg-gray-800/60"
                                 >
                                     <span
                                         class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm transition group-hover:scale-105"

@@ -4,44 +4,49 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Models;
 
+use AcMarche\EmailManagement\Database\Factories\EmployeFactory;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Attributes\Connection;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 
+#[Connection('maria-email-management')]
+#[Fillable([
+    'givenName',
+    'sn',
+    'l',
+    'mail',
+    'uid',
+    'dn',
+    'description',
+    'postalAddress',
+    'employeeNumber',
+    'postalCode',
+    'homeDirectory',
+    'employeNumber',
+    'gosaMailQuota',
+    'gosaMailForwardingAddress',
+    'gosaMailAlternateAddress',
+    'last_connection',
+    'protocol_connection',
+    'port_connection',
+    'secure_connection',
+    'auth_token',
+    'recovery_email',
+    'recovery_phone',
+    'charter_accepted_at',
+    'password_changed_at',
+])]
+#[UseFactory(EmployeFactory::class)]
 final class Employe extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory;
-
-    protected $fillable = [
-        'givenName',
-        'sn',
-        'l',
-        'mail',
-        'uid',
-        'dn',
-        'description',
-        'postalAddress',
-        'employeeNumber',
-        'postalCode',
-        'homeDirectory',
-        'employeNumber',
-        'gosaMailQuota',
-        'gosaMailForwardingAddress',
-        'gosaMailAlternateAddress',
-        'last_connection',
-        'protocol_connection',
-        'port_connection',
-        'secure_connection',
-        'auth_token',
-        'recovery_email',
-        'recovery_phone',
-        'charter_accepted_at',
-        'password_changed_at',
-    ];
 
     protected $hidden = [
         'auth_token',

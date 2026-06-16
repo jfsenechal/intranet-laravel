@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\EmailManagement\Database\factories;
+namespace AcMarche\EmailManagement\Database\Factories;
 
+use AcMarche\EmailManagement\Models\Hand;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\EmailManagement\Models\Hand>
- */
+#[UseModel(Hand::class)]
 final class HandFactory extends Factory
 {
     /**

@@ -98,9 +98,10 @@
 
             <div class="space-y-6">
                 <livewire:home.birthdays />
-                <livewire:home.sport-activities />
+                <livewire:home.favorites />
                 <livewire:home.classified-ads />
                 <livewire:home.latest-employees />
+                <livewire:home.sport-activities />
             </div>
         </div>
 

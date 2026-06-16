@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\EmailManagement\Database\factories;
+namespace AcMarche\EmailManagement\Database\Factories;
 
+use AcMarche\EmailManagement\Models\Employe;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AcMarche\EmailManagement\Models\Employe>
- */
-final class CitoyenFactory extends Factory
+
+#[UseModel(Employe::class)]
+final class EmployeFactory extends Factory
 {
     /**
      * Define the model's default state.
