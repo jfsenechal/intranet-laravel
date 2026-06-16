@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks\RelationManagers;
 
 use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
+use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Override;
@@ -89,9 +94,34 @@ final class OrdersRelationManager extends RelationManager
             ->defaultSort('clients.last_name')
             ->paginated(false)
             ->columns($columns)
+            ->headerActions([
+                Action::make('clientsWithoutOrder')
+                    ->label(fn (): string => 'Clients sans commande ('.self::clientsWithoutOrder($week)->count().')')
+                    ->icon(Heroicon::ExclamationTriangle)
+                    ->color('warning')
+                    ->modalHeading('Clients actifs sans commande cette semaine')
+                    ->modalContent(fn (): View => view('meal-delivery::filament.resources.weeks.relation-managers.clients-without-order', [
+                        'week' => $week,
+                        'clients' => self::clientsWithoutOrder($week),
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Fermer'),
+            ])
             ->recordActions([
                 EditAction::make(),
             ]);
+    }
+
+    /**
+     * Active clients that have no order for the given week.
+     *
+     * @return Collection<int, Client>
+     */
+    private static function clientsWithoutOrder(Week $week): Collection
+    {
+        return Client::query()
+            ->activeWithoutOrderForWeek($week)
+            ->get();
     }
 
     private static function mealForDay(Order $order, string $day): ?Meal
