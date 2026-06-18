@@ -38,6 +38,7 @@ final class MealDeliveryPanelProvider extends PanelProvider
                 'primary' => Color::Pink,
             ])
             ->maxContentWidth(Width::Full)
+            ->sidebarWidth('17rem')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->unsavedChangesAlerts()
             ->resourceCreatePageRedirect('view')
