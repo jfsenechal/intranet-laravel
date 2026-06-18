@@ -7,9 +7,9 @@ namespace AcMarche\Hrm\Mail;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\HrValidateTelework;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Telework;
+use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -17,6 +17,7 @@ use Illuminate\Queue\SerializesModels;
 final class TeleworkHrValidationMail extends Mailable
 {
     use Queueable;
+    use ResolvesSenderAddress;
     use SerializesModels;
 
     public ?string $logo = null;
@@ -31,7 +32,7 @@ final class TeleworkHrValidationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), (string) config('app.name')),
+            from: $this->senderAddress(),
             subject: $this->subject,
         );
     }

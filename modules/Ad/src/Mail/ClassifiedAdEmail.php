@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\Ad\Mail;
 
 use AcMarche\Ad\Models\ClassifiedAd;
+use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -15,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
 
 final class ClassifiedAdEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, ResolvesSenderAddress, SerializesModels;
 
     public ?string $logo = null;
 
@@ -27,7 +27,7 @@ final class ClassifiedAdEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), config('APP_NAME')),
+            from: $this->senderAddress(),
             subject: $this->subject,
         );
     }

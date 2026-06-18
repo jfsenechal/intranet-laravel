@@ -6,9 +6,9 @@ namespace AcMarche\Pst\Mail;
 
 use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
 use AcMarche\Pst\Models\Action;
+use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -18,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
  */
 final class ActionNewMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, ResolvesSenderAddress, SerializesModels;
 
     public ?string $logo = null;
 
@@ -33,7 +33,7 @@ final class ActionNewMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), config('APP_NAME')),
+            from: $this->senderAddress(),
             subject: $this->subject,
         );
     }

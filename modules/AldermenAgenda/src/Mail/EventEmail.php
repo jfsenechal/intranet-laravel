@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\AldermenAgenda\Mail;
 
 use AcMarche\AldermenAgenda\Models\Event;
+use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -15,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
 
 final class EventEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, ResolvesSenderAddress, SerializesModels;
 
     public ?string $logo = null;
 
@@ -33,7 +33,7 @@ final class EventEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), config('app.name')),
+            from: $this->senderAddress(),
             subject: $this->subject,
         );
     }

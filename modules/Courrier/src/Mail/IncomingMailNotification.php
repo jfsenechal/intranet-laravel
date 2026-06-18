@@ -6,9 +6,9 @@ namespace AcMarche\Courrier\Mail;
 
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
+use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 
 final class IncomingMailNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, ResolvesSenderAddress, SerializesModels;
 
     /**
      * @param  Collection<int, IncomingMail>  $incomingMails
@@ -32,7 +32,7 @@ final class IncomingMailNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), config('app.name')),
+            from: $this->senderAddress(),
             subject: 'Notification de courriers entrants',
         );
     }

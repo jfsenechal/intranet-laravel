@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Mail;
 
+use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -15,6 +15,7 @@ use Illuminate\Queue\SerializesModels;
 final class ReminderMail extends Mailable
 {
     use Queueable;
+    use ResolvesSenderAddress;
     use SerializesModels;
 
     public ?string $logo = null;
@@ -31,7 +32,7 @@ final class ReminderMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(config('mail.from.address'), (string) config('app.name')),
+            from: $this->senderAddress(),
             subject: $this->subject,
         );
     }
