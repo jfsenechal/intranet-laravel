@@ -56,7 +56,7 @@ final class JobFunctionResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
-        return JobFunctionInfolist::configure($schema);
+        return JobFunctionInfoList::configure($schema);
     }
 
     public static function table(Table $table): Table

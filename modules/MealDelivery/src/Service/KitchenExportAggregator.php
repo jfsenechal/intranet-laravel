@@ -31,6 +31,7 @@ final class KitchenExportAggregator
 
         $meals = Meal::query()
             ->whereDate('date', $dateCarbon->format('Y-m-d'))
+            ->where('at_cafeteria', false)
             ->whereHas('order', fn (Builder $query) => $query->where('week_id', $week->id))
             ->with(['menus.diets:id,name'])
             ->get();

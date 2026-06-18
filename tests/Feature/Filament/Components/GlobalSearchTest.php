@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use App\Filament\Resources\Users\UserResource;
 use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Livewire\GlobalSearch;
 

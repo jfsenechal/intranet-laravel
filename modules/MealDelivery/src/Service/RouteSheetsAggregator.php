@@ -30,6 +30,7 @@ final class RouteSheetsAggregator
      *             menu2: int,
      *             menu2_diets: list<string>,
      *             notes: ?string,
+     *             client_notes: ?string,
      *         }>,
      *         totals: array{clients: int, soup: int, menu1: int, menu2: int, menus_total: int},
      *     }>,
@@ -46,6 +47,7 @@ final class RouteSheetsAggregator
      *             menu2: int,
      *             menu2_diets: list<string>,
      *             notes: ?string,
+     *             client_notes: ?string,
      *         }>,
      *         totals: array{clients: int, soup: int, menu1: int, menu2: int, menus_total: int},
      *     }
@@ -145,6 +147,7 @@ final class RouteSheetsAggregator
      *     menu2: int,
      *     menu2_diets: list<string>,
      *     notes: ?string,
+     *     client_notes: ?string,
      * }
      */
     private static function buildRow(Meal $meal): array
@@ -171,6 +174,7 @@ final class RouteSheetsAggregator
             'menu2' => $menu2['quantity'],
             'menu2_diets' => $menu2['diets'],
             'notes' => $meal->notes !== null && mb_trim((string) $meal->notes) !== '' ? (string) $meal->notes : null,
+            'client_notes' => $client->notes !== null && mb_trim((string) $client->notes) !== '' ? (string) $client->notes : null,
         ];
     }
 

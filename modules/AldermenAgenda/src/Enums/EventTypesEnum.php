@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\AldermenAgenda\Enums;
 
 use Filament\Support\Contracts\HasLabel;

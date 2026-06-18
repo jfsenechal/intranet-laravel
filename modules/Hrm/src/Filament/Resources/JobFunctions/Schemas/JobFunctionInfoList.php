@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\Hrm\Filament\Resources\JobFunctions\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class JobFunctionInfoList
+final class JobFunctionInfoList
 {
     public static function configure(Schema $schema): Schema
     {

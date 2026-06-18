@@ -1,0 +1,58 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AcMarche\EmailManagement\Filament\Resources\Employes;
+
+use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\CreateEmploye;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Schemas\EmployeForm;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Schemas\EmployeInfolist;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Tables\EmployesTable;
+use AcMarche\EmailManagement\Models\Employe;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+
+final class EmployeResource extends Resource
+{
+    protected static ?string $model = Employe::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function form(Schema $schema): Schema
+    {
+        return EmployeForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return EmployeInfolist::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return EmployesTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListEmployes::route('/'),
+            'create' => CreateEmploye::route('/create'),
+            'view' => ViewEmploye::route('/{record}'),
+            'edit' => EditEmploye::route('/{record}/edit'),
+        ];
+    }
+}

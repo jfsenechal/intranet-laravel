@@ -9,7 +9,6 @@ use AcMarche\AldermenAgenda\Filament\Resources\Archive\Pages\ViewArchive;
 use AcMarche\AldermenAgenda\Filament\Resources\Archive\Tables\ArchiveTables;
 use AcMarche\AldermenAgenda\Models\Archive;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Override;
 

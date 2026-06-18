@@ -138,6 +138,31 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
         return $this->belongsToMany(Module::class);
     }
 
+    /**
+     * The modules the user has marked as favorites.
+     */
+    public function favoriteModules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'module_user_favorites');
+    }
+
+    public function hasFavoriteModule(int $moduleId): bool
+    {
+        return $this->favoriteModules()->whereKey($moduleId)->exists();
+    }
+
+    /**
+     * Toggle a module in the user's favorites. Returns true when the module
+     * is now a favorite, false when it was removed.
+     */
+    public function toggleFavoriteModule(int $moduleId): bool
+    {
+        $changes = $this->favoriteModules()->toggle($moduleId);
+        $this->unsetRelation('favoriteModules');
+
+        return in_array($moduleId, $changes['attached'], true);
+    }
+
     public function rolesByModule(int $moduleId): array|Collection
     {
         return $this->roles()

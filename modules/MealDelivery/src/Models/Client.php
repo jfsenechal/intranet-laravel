@@ -6,6 +6,8 @@ namespace AcMarche\MealDelivery\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -41,6 +43,20 @@ final class Client extends Model
     public function __toString(): string
     {
         return $this->last_name.' '.$this->first_name;
+    }
+
+    /**
+     * Active clients that have no order for the given week, ordered by name.
+     *
+     * @param  Builder<Client>  $query
+     */
+    #[Scope]
+    public static function activeWithoutOrderForWeek(Builder $query, Week $week): void
+    {
+        $query->where('is_active', true)
+            ->whereDoesntHave('orders', fn (Builder $orders) => $orders->where('week_id', $week->id))
+            ->orderBy('last_name')
+            ->orderBy('first_name');
     }
 
     /**

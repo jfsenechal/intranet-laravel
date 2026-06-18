@@ -38,6 +38,12 @@
                     @endif
                 </td>
                 <td style="text-align:left;">
+                    @if ($row['client_notes'])
+                        <span>{!! nl2br(e($row['client_notes'])) !!}</span>
+                    @endif
+                    @if ($row['client_notes'] && $row['notes'])
+                        <br>
+                    @endif
                     @if ($row['notes'])
                         <span>{!! nl2br(e($row['notes'])) !!}</span>
                     @endif

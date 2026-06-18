@@ -28,15 +28,34 @@
             box-shadow: 0 20px 40px -10px rgb(0 0 0 / 0.15);
         }
 
-        .gradient-sport { background: linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%); }
-        .gradient-birthday { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ef4444 100%); }
-        .gradient-news { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); }
-        .gradient-documents { background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); }
-        .gradient-classified { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
-        .gradient-employee { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
-        .gradient-rss { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); }
-        .gradient-press { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        .gradient-hero { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%); }
+        /*
+         * Semantic wayfinding palette — colour encodes the *kind* of content,
+         * applied consistently so staff learn the mapping. Four families:
+         *   Info / communications  → blue–indigo
+         *   Resources              → teal
+         *   People / HR            → warm orange
+         *   Community / social     → rose
+         * Each header uses a single-hue gradient (light → dark of the same hue)
+         * for depth without a multi-colour "marketing" sweep. All start stops are
+         * dark enough for white header text (WCAG AA, large text ≥ 3:1).
+         */
+
+        /* Info / communications */
+        .gradient-hero { background: linear-gradient(135deg, #1e40af 0%, #312e81 100%); }
+        .gradient-news { background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); }
+        .gradient-press { background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); }
+        .gradient-rss { background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); }
+
+        /* Resources */
+        .gradient-documents { background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); }
+
+        /* People / HR */
+        .gradient-birthday { background: linear-gradient(135deg, #c2410c 0%, #7c2d12 100%); }
+        .gradient-employee { background: linear-gradient(135deg, #c2410c 0%, #7c2d12 100%); }
+
+        /* Community / social */
+        .gradient-classified { background: linear-gradient(135deg, #be123c 0%, #881337 100%); }
+        .gradient-sport { background: linear-gradient(135deg, #be123c 0%, #881337 100%); }
 
         [style*="--delay"] { animation-delay: var(--delay); }
 
@@ -98,9 +117,10 @@
 
             <div class="space-y-6">
                 <livewire:home.birthdays />
-                <livewire:home.sport-activities />
+                <livewire:home.favorites />
                 <livewire:home.classified-ads />
                 <livewire:home.latest-employees />
+                <livewire:home.sport-activities />
             </div>
         </div>
 
@@ -119,10 +139,5 @@
     </footer>
 
     @livewireScripts
-<!-- impeccable-live-start -->
-@if (app()->environment('local'))
-<script src="http://localhost:8400/live.js"></script>
-@endif
-<!-- impeccable-live-end -->
 </body>
 </html>
