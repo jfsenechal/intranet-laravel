@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c71543e11296a085c415ba453201fe07",
+    "content-hash": "10df206f87d056a0a55d3578d6450682",
     "packages": [
         {
             "name": "acmarche/activity-manager",
@@ -19513,7 +19513,8 @@
     "prefer-lowest": false,
     "platform": {
         "php": "^8.5",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "ext-intl": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"
