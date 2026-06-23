@@ -2,14 +2,45 @@
 
 declare(strict_types=1);
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Security\Models\Role;
 
-it('allows any user to view any incoming mails', function (): void {
+it('denies viewAny to a user without any courrier department', function (): void {
+    expect(auth()->user()->can('viewAny', IncomingMail::class))->toBeFalse();
+});
+
+it('allows viewAny to a user with an index role', function (): void {
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+    auth()->user()->roles()->attach($role);
+
     expect(auth()->user()->can('viewAny', IncomingMail::class))->toBeTrue();
+});
+
+it('allows viewAny to a user with an admin role', function (): void {
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
+    auth()->user()->roles()->attach($role);
+
+    expect(auth()->user()->can('viewAny', IncomingMail::class))->toBeTrue();
+});
+
+it('allows an index user to view a mail of their department', function (): void {
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+    auth()->user()->roles()->attach($role);
+    $mail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+
+    expect(auth()->user()->can('view', $mail))->toBeTrue();
+});
+
+it('denies an index user to view a mail of another department', function (): void {
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+    auth()->user()->roles()->attach($role);
+    $mail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+
+    expect(auth()->user()->can('view', $mail))->toBeFalse();
 });
 
 it('allows an administrator to view an incoming mail', function (): void {

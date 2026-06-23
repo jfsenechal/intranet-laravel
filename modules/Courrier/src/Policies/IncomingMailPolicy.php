@@ -24,15 +24,20 @@ final class IncomingMailPolicy
     }
 
     /**
-     * Determine whether the user can view any models.
+     * Determine whether the user can view the listing.
+     *
+     * Restricted to users who administer or index at least one department.
      */
-    public function viewAny(): bool
+    public function viewAny(User $user): bool
     {
-        return true;
+        return count($user->getCourrierViewableDepartments()) > 0;
     }
 
     /**
      * Determine whether the user can view the model.
+     *
+     * Recipients and linked-service members may view their mail. Users who
+     * administer or index the mail's department may view it as well.
      */
     public function view(User $user, IncomingMail $incomingMail): bool
     {
@@ -40,7 +45,11 @@ final class IncomingMailPolicy
             return true;
         }
 
-        return $this->isMemberOfLinkedService($user, $incomingMail);
+        if ($this->isMemberOfLinkedService($user, $incomingMail)) {
+            return true;
+        }
+
+        return $this->hasViewableDepartment($user, $incomingMail);
     }
 
     /**
@@ -92,6 +101,24 @@ final class IncomingMailPolicy
                 RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value,
             ]
         );
+    }
+
+    /**
+     * Check if the user administers or indexes the mail's department.
+     */
+    private function hasViewableDepartment(User $user, IncomingMail $incomingMail): bool
+    {
+        if ($incomingMail->department === null) {
+            return false;
+        }
+
+        foreach ($user->getCourrierViewableDepartments() as $department) {
+            if ($department->value === $incomingMail->department) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

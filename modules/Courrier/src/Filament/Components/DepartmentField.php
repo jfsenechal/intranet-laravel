@@ -14,7 +14,7 @@ final class DepartmentField
 {
     public static function make(): Select|Hidden
     {
-        $departments = DepartmentScope::getCurrentUserDepartments();
+        $departments = DepartmentScope::getAssignableDepartments();
         if (count($departments) === 0) {
             throw ValidationException::withMessages([
                 'department' => "Vous n'êtes associé à aucun département.",

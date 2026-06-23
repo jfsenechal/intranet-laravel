@@ -44,6 +44,15 @@ enum RolesEnum: string
         ];
     }
 
+    public static function getIndexRoles(): array
+    {
+        return [
+            self::ROLE_INDICATEUR_BOURGMESTRE_INDEX,
+            self::ROLE_INDICATEUR_VILLE_INDEX,
+            self::ROLE_INDICATEUR_CPAS_INDEX,
+        ];
+    }
+
     public function getDepartmentAdmin(): ?DepartmentCourrierEnum
     {
         return match ($this) {

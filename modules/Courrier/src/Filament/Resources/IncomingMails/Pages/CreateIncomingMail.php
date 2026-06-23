@@ -48,7 +48,7 @@ final class CreateIncomingMail extends CreateRecord
     {
         parent::mount();
 
-        if (count(DepartmentScope::getCurrentUserDepartments()) === 0) {
+        if (count(DepartmentScope::getAssignableDepartments()) === 0) {
             Notification::make()
                 ->danger()
                 ->title('Accès refusé')

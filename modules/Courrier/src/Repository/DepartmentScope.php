@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Scope;
 final class DepartmentScope implements Scope
 {
     /**
+     * Departments the current user administers. Used for the create auto-fill.
+     *
      * @return DepartmentCourrierEnum[]
      */
     public static function getCurrentUserDepartments(): array
@@ -26,14 +28,53 @@ final class DepartmentScope implements Scope
     }
 
     /**
+     * Departments the current user may assign when creating or editing mail.
+     *
+     * Global administrators may assign any department; department admins are
+     * limited to the departments they administer.
+     *
+     * @return DepartmentCourrierEnum[]
+     */
+    public static function getAssignableDepartments(): array
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return [];
+        }
+
+        if ($user->isAdministrator()) {
+            return DepartmentCourrierEnum::cases();
+        }
+
+        return $user->getCourrierDepartments();
+    }
+
+    /**
+     * Departments the current user may see. Used to scope read queries.
+     *
+     * @return DepartmentCourrierEnum[]
+     */
+    public static function getViewableDepartments(): array
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return [];
+        }
+
+        return $user->getCourrierViewableDepartments();
+    }
+
+    /**
      * Apply the scope to a given Eloquent query builder.
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $departments = self::getCurrentUserDepartments();
+        $departments = self::getViewableDepartments();
         if (count($departments) > 0) {
             $values = array_map(fn (DepartmentCourrierEnum $d) => $d->value, $departments);
-            $builder->whereIn('department', $values);
+            $builder->whereIn($model->getTable().'.department', $values);
         }
     }
 }

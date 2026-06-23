@@ -37,19 +37,11 @@ final class EditIncomingMail extends EditRecord
         return 'Modifier le courrier';
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
-    }
-
     public function mount(int|string $record): void
     {
         parent::mount($record);
 
-        if (count(DepartmentScope::getCurrentUserDepartments()) === 0) {
+        if (count(DepartmentScope::getAssignableDepartments()) === 0) {
             Notification::make()
                 ->danger()
                 ->title('Accès refusé')
@@ -59,6 +51,14 @@ final class EditIncomingMail extends EditRecord
 
             $this->redirect(IncomingMailResource::getUrl('index'));
         }
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

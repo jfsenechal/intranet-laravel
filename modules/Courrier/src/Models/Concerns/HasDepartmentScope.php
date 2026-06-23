@@ -17,7 +17,7 @@ trait HasDepartmentScope
     public static function bootHasDepartmentScope(): void
     {
         static::addGlobalScope('department', function (Builder $query): void {
-            $departments = DepartmentScope::getCurrentUserDepartments();
+            $departments = DepartmentScope::getViewableDepartments();
             if (count($departments) > 0) {
                 $values = array_map(fn (DepartmentCourrierEnum $d) => $d->value, $departments);
                 $query->whereIn($query->getModel()->getTable().'.department', $values);

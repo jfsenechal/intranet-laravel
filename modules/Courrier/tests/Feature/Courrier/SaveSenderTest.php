@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\CreateIncomingMail;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\EditIncomingMail;
 use AcMarche\Courrier\Models\IncomingMail;
@@ -82,6 +83,7 @@ describe('Save Sender from IncomingMail form', function (): void {
 
         $mail = IncomingMail::factory()->create([
             'sender' => 'Edited Sender SA',
+            'department' => DepartmentCourrierEnum::VILLE->value,
         ]);
 
         livewire(EditIncomingMail::class, ['record' => $mail->getRouteKey()])
