@@ -17,7 +17,7 @@ trait UserCourrierTrait
         $departments = [];
         foreach (RolesEnum::getAdminRoles() as $role) {
             if ($this->hasRole($role->value)) {
-                $departments[] = $role->getDepartment();
+                $departments[] = $role->getDepartmentAdmin();
             }
         }
 

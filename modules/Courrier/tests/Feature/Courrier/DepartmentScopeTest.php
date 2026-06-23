@@ -11,18 +11,18 @@ use App\Models\User;
 
 describe('RolesEnum department mapping', function (): void {
     test('maps admin roles to correct departments', function (): void {
-        expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartment())
+        expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartmentAdmin())
             ->toBe(DepartmentCourrierEnum::BGM)
-            ->and(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->getDepartment())
+            ->and(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->getDepartmentAdmin())
             ->toBe(DepartmentCourrierEnum::VILLE)
-            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->getDepartment())
+            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->getDepartmentAdmin())
             ->toBe(DepartmentCourrierEnum::CPAS);
     });
 
     test('non-admin roles return null department', function (): void {
-        expect(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartment())->toBeNull()
-            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartment())->toBeNull()
-            ->and(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->getDepartment())->toBeNull();
+        expect(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartmentAdmin())->toBeNull()
+            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartmentAdmin())->toBeNull()
+            ->and(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->getDepartmentAdmin())->toBeNull();
     });
 
     test('getAdminRoles returns only admin roles', function (): void {

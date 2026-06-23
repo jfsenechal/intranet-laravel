@@ -44,12 +44,32 @@ enum RolesEnum: string
         ];
     }
 
-    public function getDepartment(): ?DepartmentCourrierEnum
+    public function getDepartmentAdmin(): ?DepartmentCourrierEnum
     {
         return match ($this) {
             self::ROLE_INDICATEUR_BOURGMESTRE_ADMIN => DepartmentCourrierEnum::BGM,
             self::ROLE_INDICATEUR_VILLE_ADMIN => DepartmentCourrierEnum::VILLE,
             self::ROLE_INDICATEUR_CPAS_ADMIN => DepartmentCourrierEnum::CPAS,
+            default => null,
+        };
+    }
+
+    public function getDepartmentIndex(): ?DepartmentCourrierEnum
+    {
+        return match ($this) {
+            self::ROLE_INDICATEUR_BOURGMESTRE_INDEX => DepartmentCourrierEnum::BGM,
+            self::ROLE_INDICATEUR_VILLE_INDEX => DepartmentCourrierEnum::VILLE,
+            self::ROLE_INDICATEUR_CPAS_INDEX => DepartmentCourrierEnum::CPAS,
+            default => null,
+        };
+    }
+
+    public function getDepartmentRead(): ?DepartmentCourrierEnum
+    {
+        return match ($this) {
+            self::ROLE_INDICATEUR_BOURGMESTRE_READ => DepartmentCourrierEnum::BGM,
+            self::ROLE_INDICATEUR_VILLE_READ => DepartmentCourrierEnum::VILLE,
+            self::ROLE_INDICATEUR_CPAS_READ => DepartmentCourrierEnum::CPAS,
             default => null,
         };
     }
