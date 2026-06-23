@@ -76,6 +76,12 @@ final class IncomingMailForm
         }
 
         // Add the form
+        // Add department field
+       /* $departmentFields = DepartmentField::make();
+        if ($departmentFields !== []) {
+            //$components[] = Section::make('Département')
+             //   ->schema($departmentFields);
+        }*/
         $components[] = Flex::make([
             Section::make('Informations du courrier')
                 ->schema([
@@ -119,16 +125,10 @@ final class IncomingMailForm
                     Toggle::make('is_notified')
                         ->label('Notifié')
                         ->default(false),
+                    DepartmentField::make()
                 ])
                 ->grow(false),
         ])->from('md');
-
-        // Add department field
-        $departmentFields = DepartmentField::make();
-        if ($departmentFields !== []) {
-            $components[] = Section::make('Département')
-                ->schema($departmentFields);
-        }
 
         // Add services and recipients
         $components[] = Section::make('Affectation')

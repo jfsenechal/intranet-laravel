@@ -7,6 +7,8 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\Sender;
+use AcMarche\Courrier\Repository\DepartmentScope;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -40,6 +42,22 @@ final class CreateIncomingMail extends CreateRecord
     public function getTitle(): string
     {
         return 'Ajouter un courrier';
+    }
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (count(DepartmentScope::getCurrentUserDepartments()) === 0) {
+            Notification::make()
+                ->danger()
+                ->title('Accès refusé')
+                ->body("Vous n'êtes associé à aucun département.")
+                ->persistent()
+                ->send();
+
+            $this->redirect(IncomingMailResource::getUrl('index'));
+        }
     }
 
     /**

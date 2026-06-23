@@ -27,7 +27,7 @@ final class ServiceForm
                 TextInput::make('initials')
                     ->label('Initiales')
                     ->maxLength(255),
-                ...DepartmentField::make(),
+                DepartmentField::make(),
                 Section::make('Membres du service')
                     ->description('Sélectionnez les destinataires qui font partie de ce service')
                     ->schema([

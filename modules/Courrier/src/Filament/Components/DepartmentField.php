@@ -8,36 +8,35 @@ use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
+use Illuminate\Validation\ValidationException;
 
 final class DepartmentField
 {
-    /**
-     * @return array<Select|Hidden>
-     */
-    public static function make(): array
+    public static function make(): Select|Hidden
     {
         $departments = DepartmentScope::getCurrentUserDepartments();
-
-        if (count($departments) > 1) {
-            return [
-                Select::make('department')
-                    ->label('Département')
-                    ->options(
-                        collect($departments)
-                            ->mapWithKeys(fn (DepartmentCourrierEnum $d): array => [$d->value => $d->value])
-                            ->all()
-                    )
-                    ->required(),
-            ];
+        if (count($departments) === 0) {
+            throw ValidationException::withMessages([
+                'department' => "Vous n'êtes associé à aucun département.",
+            ]);
         }
 
         if (count($departments) === 1) {
-            return [
+            return
                 Hidden::make('department')
-                    ->default($departments[0]->value),
-            ];
+                    ->default($departments[0]->value);
         }
 
-        return [];
+        return
+            Select::make('department')
+                ->label('Département')
+                ->options(
+                    collect($departments)
+                        ->mapWithKeys(fn (DepartmentCourrierEnum $d): array => [$d->value => $d->value])
+                        ->all()
+                )
+                ->default($departments[0]->value)
+                ->required();
+
     }
 }
