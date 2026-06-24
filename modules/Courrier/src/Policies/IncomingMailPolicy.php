@@ -25,12 +25,10 @@ final class IncomingMailPolicy
 
     /**
      * Determine whether the user can view the listing.
-     *
-     * Restricted to users who administer or index at least one department.
      */
     public function viewAny(User $user): bool
     {
-        return count($user->getCourrierViewableDepartments()) > 0;
+        return true;
     }
 
     /**
@@ -49,6 +47,7 @@ final class IncomingMailPolicy
             return true;
         }
 
+        //for admin or index users
         return $this->hasViewableDepartment($user, $incomingMail);
     }
 
