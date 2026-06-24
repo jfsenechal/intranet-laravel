@@ -6,11 +6,13 @@ namespace AcMarche\Courrier\Policies;
 
 use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\IncomingMail;
-use AcMarche\Courrier\Models\Recipient;
+use AcMarche\Courrier\Policies\Concerns\ChecksMailAccess;
 use App\Models\User;
 
 final class AttachmentPolicy
 {
+    use ChecksMailAccess;
+
     /**
      * Perform pre-authorization checks.
      */
@@ -64,32 +66,5 @@ final class AttachmentPolicy
         }
 
         return false;
-    }
-
-    /**
-     * Check if the user is a recipient of the incoming mail.
-     */
-    private function isRecipientOfMail(User $user, IncomingMail $incomingMail): bool
-    {
-        return $incomingMail->recipients()
-            ->where('recipients.username', $user->username)
-            ->exists();
-    }
-
-    /**
-     * Check if the user is a member of a service linked to the incoming mail.
-     */
-    private function isMemberOfLinkedService(User $user, IncomingMail $incomingMail): bool
-    {
-        $serviceIds = $incomingMail->services()->pluck('courrier_services.id');
-
-        if ($serviceIds->isEmpty()) {
-            return false;
-        }
-
-        return Recipient::query()
-            ->where('recipients.username', $user->username)
-            ->whereHas('services', fn($query) => $query->whereIn('courrier_services.id', $serviceIds))
-            ->exists();
     }
 }
