@@ -57,7 +57,7 @@ final class IncomingMailPolicy
      */
     public function create(User $user): bool
     {
-        return $this->isAdministrator($user);
+        return $this->isAdministratorIndicateur($user);
     }
 
     /**
@@ -67,15 +67,15 @@ final class IncomingMailPolicy
      */
     public function update(User $user, IncomingMail $incomingMail): bool
     {
-        return $this->isAdministrator($user) && $this->hasViewableDepartment($user, $incomingMail);
+        return $this->isAdministratorIndicateur($user) && $this->hasViewableDepartment($user, $incomingMail);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user): bool
+    public function delete(User $user, IncomingMail $incomingMail): bool
     {
-        return $this->isAdministrator($user);
+        return $this->isAdministratorIndicateur($user) && $this->hasViewableDepartment($user, $incomingMail);
     }
 
     /**
@@ -94,7 +94,7 @@ final class IncomingMailPolicy
         return false;
     }
 
-    private function isAdministrator(User $user): bool
+    private function isAdministratorIndicateur(User $user): bool
     {
         return $user->hasOneOfThisRoles(
             [
@@ -146,7 +146,7 @@ final class IncomingMailPolicy
 
         return Recipient::query()
             ->where('recipients.username', $user->username)
-            ->whereHas('services', fn ($query) => $query->whereIn('courrier_services.id', $serviceIds))
+            ->whereHas('services', fn($query) => $query->whereIn('courrier_services.id', $serviceIds))
             ->exists();
     }
 }
