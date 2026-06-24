@@ -61,10 +61,7 @@ final class AttachmentPolicy
         }
 
         $department = $user->getCourrierAdminDepartment();
-        if ($department->value === $incomingMail->department) {
-            return true;
-        }
 
-        return false;
+        return $department !== null && $department->value === $incomingMail->department;
     }
 }
