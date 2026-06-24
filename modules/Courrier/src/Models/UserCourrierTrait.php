@@ -43,7 +43,7 @@ trait UserCourrierTrait
     }
 
     /**
-     * Every department the user may see (admin and index combined, de-duplicated).
+     * Every department the user may see (admin and index combined, deduplicated).
      *
      * @return DepartmentCourrierEnum[]
      */

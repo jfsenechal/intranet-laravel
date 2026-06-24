@@ -62,10 +62,12 @@ final class IncomingMailPolicy
 
     /**
      * Determine whether the user can update the model.
+     *
+     * The user must be an administrator and administer or index the mail's department.
      */
-    public function update(User $user): bool
+    public function update(User $user, IncomingMail $incomingMail): bool
     {
-        return $this->isAdministrator($user);
+        return $this->isAdministrator($user) && $this->hasViewableDepartment($user, $incomingMail);
     }
 
     /**

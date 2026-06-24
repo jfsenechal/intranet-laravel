@@ -99,6 +99,22 @@ it('allows an administrator to update an incoming mail', function (): void {
     expect(auth()->user()->can('update', IncomingMail::factory()->create()))->toBeTrue();
 });
 
+it('allows a courrier admin to update a mail of their department', function (): void {
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
+    auth()->user()->roles()->attach($role);
+    $mail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+
+    expect(auth()->user()->can('update', $mail))->toBeTrue();
+});
+
+it('denies a courrier admin to update a mail of another department', function (): void {
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
+    auth()->user()->roles()->attach($role);
+    $mail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+
+    expect(auth()->user()->can('update', $mail))->toBeFalse();
+});
+
 it('denies a regular user to update an incoming mail', function (): void {
     expect(auth()->user()->can('update', IncomingMail::factory()->create()))->toBeFalse();
 });
