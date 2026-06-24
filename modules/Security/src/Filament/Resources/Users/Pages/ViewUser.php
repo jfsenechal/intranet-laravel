@@ -28,6 +28,7 @@ final class ViewUser extends ViewRecord
                 ->color('success')
                 ->record($this->getRecord()),
             EditAction::make()
+                ->label('Modifier l\'agent')
                 ->icon(Heroicon::Pencil),
         ];
     }
