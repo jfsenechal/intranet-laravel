@@ -6,8 +6,10 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Courrier\Models\Sender;
+use AcMarche\Courrier\Repository\DepartmentScope;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Override;
 
@@ -33,6 +35,22 @@ final class EditIncomingMail extends EditRecord
     public function getTitle(): string
     {
         return 'Modifier le courrier';
+    }
+
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        if (count(DepartmentScope::getAssignableDepartments()) === 0) {
+            Notification::make()
+                ->danger()
+                ->title('Accès refusé')
+                ->body("Vous n'êtes associé à aucun département.")
+                ->persistent()
+                ->send();
+
+            $this->redirect(IncomingMailResource::getUrl('index'));
+        }
     }
 
     protected function getHeaderActions(): array

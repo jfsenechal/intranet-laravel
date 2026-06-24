@@ -9,6 +9,7 @@ use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -65,6 +66,8 @@ final class AttachmentController extends Controller
 
     public function download(Attachment $attachment): BinaryFileResponse|Response
     {
+        Gate::authorize('download', $attachment);
+
         $disk = Storage::disk(config('courrier.storage.disk'));
         $path = config('courrier.storage.directory')."/attachments/{$attachment->file_name}";
 
@@ -79,6 +82,8 @@ final class AttachmentController extends Controller
 
     public function previewStored(Attachment $attachment): BinaryFileResponse|Response
     {
+        Gate::authorize('download', $attachment);
+
         $disk = Storage::disk(config('courrier.storage.disk'));
         $path = config('courrier.storage.directory')."/attachments/{$attachment->file_name}";
 

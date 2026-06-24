@@ -11,18 +11,18 @@ use App\Models\User;
 
 describe('RolesEnum department mapping', function (): void {
     test('maps admin roles to correct departments', function (): void {
-        expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartment())
+        expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartmentAdmin())
             ->toBe(DepartmentCourrierEnum::BGM)
-            ->and(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->getDepartment())
+            ->and(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->getDepartmentAdmin())
             ->toBe(DepartmentCourrierEnum::VILLE)
-            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->getDepartment())
+            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->getDepartmentAdmin())
             ->toBe(DepartmentCourrierEnum::CPAS);
     });
 
     test('non-admin roles return null department', function (): void {
-        expect(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartment())->toBeNull()
-            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartment())->toBeNull()
-            ->and(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->getDepartment())->toBeNull();
+        expect(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartmentAdmin())->toBeNull()
+            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartmentAdmin())->toBeNull()
+            ->and(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->getDepartmentAdmin())->toBeNull();
     });
 
     test('getAdminRoles returns only admin roles', function (): void {
@@ -97,6 +97,32 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
     });
 });
 
+describe('UserCourrierTrait viewable departments', function (): void {
+    test('index roles produce index departments but not admin departments', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->roles()->attach($role);
+
+        expect($user->getCourrierDepartments())->toBeEmpty()
+            ->and($user->getCourrierIndexDepartments())->toBe([DepartmentCourrierEnum::VILLE])
+            ->and($user->getCourrierViewableDepartments())->toBe([DepartmentCourrierEnum::VILLE]);
+    });
+
+    test('admin and index roles merge into viewable departments without duplicates', function (): void {
+        $user = User::factory()->create();
+        $villeAdmin = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
+        $villeIndex = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $cpasIndex = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_INDEX->value]);
+        $user->roles()->attach([$villeAdmin->id, $villeIndex->id, $cpasIndex->id]);
+
+        $viewable = $user->getCourrierViewableDepartments();
+
+        expect($viewable)->toHaveCount(2)
+            ->and($viewable)->toContain(DepartmentCourrierEnum::VILLE)
+            ->and($viewable)->toContain(DepartmentCourrierEnum::CPAS);
+    });
+});
+
 describe('Department Global Scope on IncomingMail', function (): void {
     test('filters incoming mails by authenticated user department', function (): void {
         $user = User::factory()->create();
@@ -132,6 +158,22 @@ describe('Department Global Scope on IncomingMail', function (): void {
         expect($mails)->toHaveCount(2)
             ->and($mails->pluck('id')->all())->toContain($villeMail->id)
             ->and($mails->pluck('id')->all())->toContain($cpasMail->id);
+    });
+
+    test('filters incoming mails by index-only user department', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->roles()->attach($role);
+
+        $villeMail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+        IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+
+        $this->actingAs($user);
+
+        $mails = IncomingMail::all();
+
+        expect($mails)->toHaveCount(1)
+            ->and($mails->first()->id)->toBe($villeMail->id);
     });
 
     test('user without department sees all records', function (): void {

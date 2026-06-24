@@ -88,7 +88,8 @@ final class IncomingMailInfolist
                             ->columns(2)
                             ->contained(false),
                     ])
-                    ->hidden(fn ($record): bool => $record->attachments->isEmpty()),
+                    ->visible(fn ($record): bool => $record->attachments->isNotEmpty()
+                        && auth()->user()?->can('download', $record->attachments->first())),
 
                 Section::make('Métadonnées')
                     ->schema([
