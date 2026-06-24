@@ -30,6 +30,8 @@ final class ImapRepository
 
     private ?MailboxInterface $mailbox = null;
 
+    public function __construct(private readonly string $mailboxName = 'imap_ville') {}
+
     /**
      * @throws ImapException
      */
@@ -40,7 +42,7 @@ final class ImapRepository
         }
 
         try {
-            $this->mailbox = Imap::mailbox('imap_ville');
+            $this->mailbox = Imap::mailbox($this->mailboxName);
         } catch (Exception $e) {
             report($e);
             throw ImapException::connectionFailed($e->getMessage());

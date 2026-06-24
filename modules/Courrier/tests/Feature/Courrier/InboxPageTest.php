@@ -33,6 +33,26 @@ describe('Inbox Page Access', function (): void {
             ->assertSuccessful();
     });
 
+    test('user with ROLE_INDICATEUR_CPAS_ADMIN can access inbox page', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
+        $user->addRole($role);
+
+        $this->actingAs($user)
+            ->get(Inbox::getUrl())
+            ->assertSuccessful();
+    });
+
+    test('index-only user cannot access inbox page', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->addRole($role);
+
+        $this->actingAs($user)
+            ->get(Inbox::getUrl())
+            ->assertForbidden();
+    });
+
     test('regular user cannot access inbox page', function (): void {
         $user = User::factory()->create();
 

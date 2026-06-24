@@ -12,10 +12,11 @@ final class InboxForm
         int $uid,
         int $index,
         string $contentType,
-        string $filename
+        string $filename,
+        string $mailbox = 'imap_ville'
     ): array {
 
-        $previewUrl = route('courrier.attachments.preview', ['uid' => $uid, 'index' => $index]);
+        $previewUrl = route('courrier.attachments.preview', ['uid' => $uid, 'index' => $index, 'mailbox' => $mailbox]);
 
         return IncomingMailForm::getComponents([
             'url' => $previewUrl,

@@ -17,7 +17,7 @@ final class InboxInfolist
      * @param  array<string, mixed>|null  $record
      * @return array<int, mixed>
      */
-    public static function getEmailViewSchema(?array $record): array
+    public static function getEmailViewSchema(?array $record, string $mailbox = 'imap_ville'): array
     {
         if (! $record) {
             return [];
@@ -40,7 +40,7 @@ final class InboxInfolist
 
         // Add attachments section if there are any
         if (! empty($record['attachments'])) {
-            $attachmentActions = self::buildAttachmentActions($record);
+            $attachmentActions = self::buildAttachmentActions($record, $mailbox);
             $components[] = Section::make('Pièces jointes')
                 ->icon('tabler-paperclip')
                 ->description('Cliquez sur un fichier pour le traiter')
@@ -65,7 +65,7 @@ final class InboxInfolist
      * @param  array<string, mixed>  $record
      * @return array<int, Action>
      */
-    private static function buildAttachmentActions(array $record): array
+    private static function buildAttachmentActions(array $record, string $mailbox = 'imap_ville'): array
     {
         $actions = [];
         $attachments = $record['attachments'] ?? [];
@@ -105,7 +105,8 @@ final class InboxInfolist
                     $uid,
                     $index,
                     $contentType,
-                    $filename
+                    $filename,
+                    $mailbox
                 ))
                 ->action(
                     function (array $data, Action $action) use (
@@ -113,7 +114,8 @@ final class InboxInfolist
                         $attachmentCount,
                         $index,
                         $filename,
-                        $contentType
+                        $contentType,
+                        $mailbox
                     ): void {
                         IncomingMailHandler::handleIncomingMailCreation(
                             $data,
@@ -121,7 +123,8 @@ final class InboxInfolist
                             $attachmentCount,
                             $index,
                             $filename,
-                            $contentType
+                            $contentType,
+                            $mailbox
                         );
 
                         // Close parent modal if only one attachment (message will be deleted)

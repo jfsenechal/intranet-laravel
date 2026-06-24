@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Pages;
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Resources\Inbox\Tables\InboxTables;
+use App\Models\User;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -37,20 +39,51 @@ final class Inbox extends Page implements HasTable
     public static function canAccess(array $parameters = []): bool
     {
         $user = Auth::user();
-        if ($user?->isAdministrator()) {
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        if ($user->isAdministrator()) {
             return true;
         }
 
-        return $user?->hasRole(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value) ?? false;
+        return $user->hasOneOfThisRoles([
+            RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value,
+            RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value,
+            RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value,
+        ]);
     }
 
     public function getTitle(): string
     {
-        return 'Boite mail '.config('courrier.imap.ville.email');
+        $email = self::resolveDepartment()?->imapEmail();
+
+        return 'Boite mail'.($email !== null ? ' '.$email : '');
     }
 
     public function table(Table $table): Table
     {
-        return InboxTables::configure($table);
+        return InboxTables::configure($table, self::resolveDepartment()?->imapMailbox());
+    }
+
+    /**
+     * Resolve the courrier department whose mailbox the current user should see.
+     *
+     * Uses the user's first viewable department; a global administrator with no
+     * courrier department falls back to the Ville mailbox.
+     */
+    private static function resolveDepartment(): ?DepartmentCourrierEnum
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        $departments = $user->getCourrierViewableDepartments();
+        if ($departments !== []) {
+            return $departments[0];
+        }
+
+        return $user->isAdministrator() ? DepartmentCourrierEnum::VILLE : null;
     }
 }

@@ -24,9 +24,10 @@ final class IncomingMailHandler
         int $attachmentCount,
         int $attachmentIndex,
         string $attachmentFilename,
-        string $attachmentMime
+        string $attachmentMime,
+        string $mailbox = 'imap_ville'
     ): void {
-        $imapRepository = new ImapRepository();
+        $imapRepository = new ImapRepository($mailbox);
 
         try {
             // Create the incoming mail

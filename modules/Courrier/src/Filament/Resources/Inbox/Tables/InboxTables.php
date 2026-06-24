@@ -22,9 +22,9 @@ use Illuminate\Support\Collection;
 
 final class InboxTables
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, ?string $mailbox = null): Table
     {
-        $imapRepository = new ImapRepository();
+        $imapRepository = $mailbox !== null ? new ImapRepository($mailbox) : null;
 
         return $table
             ->records(fn (): array => self::getRecords($imapRepository))
@@ -56,7 +56,7 @@ final class InboxTables
                     ->visible(fn (array $record): bool => ($record['attachment_count'] ?? 0) !== 1)
                     ->modalHeading(fn (array $record): string => $record['subject'] ?? 'Sans objet')
                     ->modalWidth(Width::FiveExtraLarge)
-                    ->schema(fn (?array $record): array => InboxInfolist::getEmailViewSchema($record))
+                    ->schema(fn (?array $record): array => InboxInfolist::getEmailViewSchema($record, $mailbox ?? 'imap_ville'))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
                 Action::make('process')
@@ -78,16 +78,18 @@ final class InboxTables
                         $record['uid'],
                         0,
                         $record['attachments'][0]['content_type'] ?? 'application/octet-stream',
-                        $record['attachments'][0]['filename'] ?? 'Sans nom'
+                        $record['attachments'][0]['filename'] ?? 'Sans nom',
+                        $mailbox ?? 'imap_ville'
                     ))
-                    ->action(function (array $data, array $record): void {
+                    ->action(function (array $data, array $record) use ($mailbox): void {
                         IncomingMailHandler::handleIncomingMailCreation(
                             $data,
                             $record['uid'],
                             1,
                             0,
                             $record['attachments'][0]['filename'] ?? 'Sans nom',
-                            $record['attachments'][0]['content_type'] ?? 'application/octet-stream'
+                            $record['attachments'][0]['content_type'] ?? 'application/octet-stream',
+                            $mailbox ?? 'imap_ville'
                         );
                     })
                     ->modalSubmitActionLabel('Enregistrer le courrier'),
@@ -99,6 +101,10 @@ final class InboxTables
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) use ($imapRepository): void {
+                        if (! $imapRepository instanceof ImapRepository) {
+                            return;
+                        }
+
                         try {
                             $imapRepository->deleteMessages($records->pluck('uid')->toArray());
 
@@ -121,8 +127,18 @@ final class InboxTables
     /**
      * @return array<int, array<string, mixed>>
      */
-    private static function getRecords(ImapRepository $imapRepository): array
+    private static function getRecords(?ImapRepository $imapRepository): array
     {
+        if (! $imapRepository instanceof ImapRepository) {
+            Notification::make()
+                ->title('Aucune boîte mail configurée')
+                ->body('Aucun service courrier ne vous est attribué pour accéder à une boîte mail.')
+                ->danger()
+                ->send();
+
+            return [];
+        }
+
         try {
             return array_map(
                 fn (EmailMessage $message): array => $message->toArray(),

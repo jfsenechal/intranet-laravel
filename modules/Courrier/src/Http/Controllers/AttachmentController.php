@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Http\Controllers;
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Exception\ImapException;
 use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Repository\ImapRepository;
@@ -23,9 +24,10 @@ final class AttachmentController extends Controller
     public function show(int $uid, int $index): StreamedResponse|Response
     {
         try {
-            $attachment = $this->imapRepository->getAttachment($uid, $index);
+            $imapRepository = $this->resolveImapRepository();
+            $attachment = $imapRepository->getAttachment($uid, $index);
 
-            return $this->imapRepository->createAttachmentDownloadResponse($attachment);
+            return $imapRepository->createAttachmentDownloadResponse($attachment);
         } catch (ImapException $e) {
             return response($e->getMessage(), 404);
         }
@@ -34,7 +36,7 @@ final class AttachmentController extends Controller
     public function preview(int $uid, int $index): StreamedResponse|Response
     {
         try {
-            $attachment = $this->imapRepository->getAttachment($uid, $index);
+            $attachment = $this->resolveImapRepository()->getAttachment($uid, $index);
             $stream = $attachment->contentStream();
             $mimeType = $attachment->contentType() ?? 'application/octet-stream';
 
@@ -94,5 +96,26 @@ final class AttachmentController extends Controller
         return response()->file($disk->path($path), [
             'Content-Type' => $attachment->mime,
         ]);
+    }
+
+    /**
+     * Resolve the IMAP repository for the mailbox requested via the `mailbox`
+     * query parameter, validated against the known department mailboxes. Falls
+     * back to the default (injected) repository when absent or unrecognized.
+     */
+    private function resolveImapRepository(): ImapRepository
+    {
+        $mailbox = (string) request()->query('mailbox', '');
+
+        $allowed = array_map(
+            static fn (DepartmentCourrierEnum $department): string => $department->imapMailbox(),
+            DepartmentCourrierEnum::cases(),
+        );
+
+        if (in_array($mailbox, $allowed, true)) {
+            return new ImapRepository($mailbox);
+        }
+
+        return $this->imapRepository;
     }
 }

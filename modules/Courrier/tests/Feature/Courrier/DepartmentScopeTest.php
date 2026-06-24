@@ -9,6 +9,14 @@ use AcMarche\Courrier\Models\Service;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 
+describe('DepartmentCourrierEnum mailbox mapping', function (): void {
+    test('maps departments to their registered IMAP mailbox name', function (): void {
+        expect(DepartmentCourrierEnum::BGM->imapMailbox())->toBe('imap_bgm')
+            ->and(DepartmentCourrierEnum::VILLE->imapMailbox())->toBe('imap_ville')
+            ->and(DepartmentCourrierEnum::CPAS->imapMailbox())->toBe('imap_cpas');
+    });
+});
+
 describe('RolesEnum department mapping', function (): void {
     test('maps admin roles to correct departments', function (): void {
         expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartmentAdmin())
