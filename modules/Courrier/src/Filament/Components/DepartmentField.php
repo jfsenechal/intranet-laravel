@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Components;
 
-use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Repository\DepartmentScope;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Validation\ValidationException;
 
 final class DepartmentField
 {
-    public static function make(): Select|Hidden
+    public static function make(): TextInput
     {
         $departments = DepartmentScope::getAssignableDepartments();
         if (count($departments) === 0) {
@@ -20,23 +18,19 @@ final class DepartmentField
                 'department' => "Vous n'êtes associé à aucun département.",
             ]);
         }
-
-        if (count($departments) === 1) {
-            return
-                Hidden::make('department')
-                    ->default($departments[0]->value);
+        if (count($departments) > 1) {
+            throw ValidationException::withMessages([
+                'department' => 'Vous êtes associés à plusieurs départements.',
+            ]);
         }
 
         return
-            Select::make('department')
+            TextInput::make('department')
                 ->label('Département')
-                ->options(
-                    collect($departments)
-                        ->mapWithKeys(fn (DepartmentCourrierEnum $d): array => [$d->value => $d->value])
-                        ->all()
-                )
-                ->default($departments[0]->value)
-                ->required();
+                ->formatStateUsing(fn (): string => $departments[0]->value)
+                ->dehydrateStateUsing(fn (): string => $departments[0]->value)
+                ->required()
+                ->readOnly();
 
     }
 }

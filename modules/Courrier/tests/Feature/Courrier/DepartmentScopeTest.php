@@ -49,7 +49,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
         $user->roles()->attach($role);
 
-        $departments = $user->getCourrierDepartments();
+        $departments = $user->getCourrierAdminDepartment();
 
         expect($departments)->toHaveCount(1)
             ->and($departments[0])->toBe(DepartmentCourrierEnum::VILLE);
@@ -60,7 +60,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
         $user->roles()->attach($role);
 
-        $departments = $user->getCourrierDepartments();
+        $departments = $user->getCourrierAdminDepartment();
 
         expect($departments)->toHaveCount(1)
             ->and($departments[0])->toBe(DepartmentCourrierEnum::CPAS);
@@ -71,7 +71,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value]);
         $user->roles()->attach($role);
 
-        $departments = $user->getCourrierDepartments();
+        $departments = $user->getCourrierAdminDepartment();
 
         expect($departments)->toHaveCount(1)
             ->and($departments[0])->toBe(DepartmentCourrierEnum::BGM);
@@ -83,7 +83,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $cpasRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
         $user->roles()->attach([$villeRole->id, $cpasRole->id]);
 
-        $departments = $user->getCourrierDepartments();
+        $departments = $user->getCourrierAdminDepartment();
 
         expect($departments)->toHaveCount(2)
             ->and($departments)->toContain(DepartmentCourrierEnum::VILLE)
@@ -93,7 +93,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
     test('returns empty array for user without admin courrier roles', function (): void {
         $user = User::factory()->create();
 
-        expect($user->getCourrierDepartments())->toBeEmpty();
+        expect($user->getCourrierAdminDepartment())->toBeEmpty();
     });
 
     test('non-admin courrier roles do not produce departments', function (): void {
@@ -101,7 +101,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_READ->value]);
         $user->roles()->attach($role);
 
-        expect($user->getCourrierDepartments())->toBeEmpty();
+        expect($user->getCourrierAdminDepartment())->toBeEmpty();
     });
 });
 
@@ -111,7 +111,7 @@ describe('UserCourrierTrait viewable departments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
         $user->roles()->attach($role);
 
-        expect($user->getCourrierDepartments())->toBeEmpty()
+        expect($user->getCourrierAdminDepartment())->toBeEmpty()
             ->and($user->getCourrierIndexDepartments())->toBe([DepartmentCourrierEnum::VILLE])
             ->and($user->getCourrierViewableDepartments())->toBe([DepartmentCourrierEnum::VILLE]);
     });

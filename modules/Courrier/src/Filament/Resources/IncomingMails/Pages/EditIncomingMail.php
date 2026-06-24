@@ -6,10 +6,8 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Courrier\Models\Sender;
-use AcMarche\Courrier\Repository\DepartmentScope;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Override;
 
@@ -37,22 +35,6 @@ final class EditIncomingMail extends EditRecord
         return 'Modifier le courrier';
     }
 
-    public function mount(int|string $record): void
-    {
-        parent::mount($record);
-
-        if (count(DepartmentScope::getAssignableDepartments()) === 0) {
-            Notification::make()
-                ->danger()
-                ->title('Accès refusé')
-                ->body("Vous n'êtes associé à aucun département.")
-                ->persistent()
-                ->send();
-
-            $this->redirect(IncomingMailResource::getUrl('index'));
-        }
-    }
-
     protected function getHeaderActions(): array
     {
         return [
@@ -63,10 +45,18 @@ final class EditIncomingMail extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['primary_services'] = $this->record->services()->wherePivot('is_primary', true)->pluck('courrier_services.id')->toArray();
-        $data['secondary_services'] = $this->record->services()->wherePivot('is_primary', false)->pluck('courrier_services.id')->toArray();
-        $data['primary_recipients'] = $this->record->recipients()->wherePivot('is_primary', true)->pluck('recipients.id')->toArray();
-        $data['secondary_recipients'] = $this->record->recipients()->wherePivot('is_primary', false)->pluck('recipients.id')->toArray();
+        $data['primary_services'] = $this->record->services()->wherePivot('is_primary', true)->pluck(
+            'courrier_services.id'
+        )->toArray();
+        $data['secondary_services'] = $this->record->services()->wherePivot('is_primary', false)->pluck(
+            'courrier_services.id'
+        )->toArray();
+        $data['primary_recipients'] = $this->record->recipients()->wherePivot('is_primary', true)->pluck(
+            'recipients.id'
+        )->toArray();
+        $data['secondary_recipients'] = $this->record->recipients()->wherePivot('is_primary', false)->pluck(
+            'recipients.id'
+        )->toArray();
 
         return $data;
     }

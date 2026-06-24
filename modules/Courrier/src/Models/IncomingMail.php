@@ -80,9 +80,9 @@ final class IncomingMail extends Model
 
         self::creating(function (IncomingMail $model): void {
             if (empty($model->department)) {
-                $departments = DepartmentScope::getCurrentUserDepartments();
-                if (count($departments) === 1) {
-                    $model->department = $departments[0]->value;
+                $department = DepartmentScope::getCurrentAdminUserDepartment();
+                if ($department) {
+                    $model->department = $department->value;
                 }
             }
         });

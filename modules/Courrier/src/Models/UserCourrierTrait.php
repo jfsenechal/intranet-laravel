@@ -12,18 +12,17 @@ trait UserCourrierTrait
     /**
      * Departments the user administers (manage, create, download attachments).
      *
-     * @return DepartmentCourrierEnum[]
+     * @return DepartmentCourrierEnum|null
      */
-    public function getCourrierDepartments(): array
+    public function getCourrierAdminDepartment(): ?DepartmentCourrierEnum
     {
-        $departments = [];
         foreach (RolesEnum::getAdminRoles() as $role) {
             if ($this->hasRole($role->value)) {
-                $departments[] = $role->getDepartmentAdmin();
+                return $role->getDepartmentAdmin();
             }
         }
 
-        return $departments;
+        return null;
     }
 
     /**
@@ -51,7 +50,8 @@ trait UserCourrierTrait
     public function getCourrierViewableDepartments(): array
     {
         $departments = [];
-        foreach ([...$this->getCourrierDepartments(), ...$this->getCourrierIndexDepartments()] as $department) {
+        $departments[$this->getCourrierAdminDepartment()?->value] = $this->getCourrierAdminDepartment();
+        foreach ($this->getCourrierIndexDepartments() as $department) {
             $departments[$department->value] = $department;
         }
 

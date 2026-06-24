@@ -19,16 +19,16 @@ trait HasDepartmentScope
         static::addGlobalScope('department', function (Builder $query): void {
             $departments = DepartmentScope::getViewableDepartments();
             if (count($departments) > 0) {
-                $values = array_map(fn (DepartmentCourrierEnum $d) => $d->value, $departments);
+                $values = array_map(fn(DepartmentCourrierEnum $d) => $d->value, $departments);
                 $query->whereIn($query->getModel()->getTable().'.department', $values);
             }
         });
 
         static::creating(function (Model $model): void {
             if (empty($model->department)) {
-                $departments = DepartmentScope::getCurrentUserDepartments();
-                if (count($departments) === 1) {
-                    $model->department = $departments[0]->value;
+                $department = DepartmentScope::getCurrentAdminUserDepartment();
+                if ($department) {
+                    $model->department = $department->value;
                 }
             }
         });

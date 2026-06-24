@@ -58,10 +58,9 @@ final class AttachmentPolicy
             return false;
         }
 
-        foreach ($user->getCourrierDepartments() as $department) {
-            if ($department->value === $incomingMail->department) {
-                return true;
-            }
+        $department = $user->getCourrierAdminDepartment();
+        if ($department->value === $incomingMail->department) {
+            return true;
         }
 
         return false;
@@ -90,7 +89,7 @@ final class AttachmentPolicy
 
         return Recipient::query()
             ->where('recipients.username', $user->username)
-            ->whereHas('services', fn ($query) => $query->whereIn('courrier_services.id', $serviceIds))
+            ->whereHas('services', fn($query) => $query->whereIn('courrier_services.id', $serviceIds))
             ->exists();
     }
 }
