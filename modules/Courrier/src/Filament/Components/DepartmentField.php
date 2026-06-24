@@ -12,23 +12,18 @@ final class DepartmentField
 {
     public static function make(): TextInput
     {
-        $departments = DepartmentScope::getAssignableDepartments();
-        if (count($departments) === 0) {
+        $department = DepartmentScope::getAssignableDepartment();
+        if (!$department) {
             throw ValidationException::withMessages([
-                'department' => "Vous n'êtes associé à aucun département.",
-            ]);
-        }
-        if (count($departments) > 1) {
-            throw ValidationException::withMessages([
-                'department' => 'Vous êtes associés à plusieurs départements.',
+                'department' => "Vous n'êtes associé à aucun département. (ROLE_INDICATEUR_ADMIN)",
             ]);
         }
 
         return
             TextInput::make('department')
                 ->label('Département')
-                ->formatStateUsing(fn (): string => $departments[0]->value)
-                ->dehydrateStateUsing(fn (): string => $departments[0]->value)
+                ->formatStateUsing(fn(): string => $department->value)
+                ->dehydrateStateUsing(fn(): string => $department->value)
                 ->required()
                 ->readOnly();
 

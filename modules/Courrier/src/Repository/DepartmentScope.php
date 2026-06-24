@@ -30,16 +30,16 @@ final class DepartmentScope implements Scope
     /**
      * Departments the current user may assign when creating or editing mail.
      *
-     * Department admins are limited to the departments they administer.
+     * Department admins are limited to the department they administer.
      *
-     * @return DepartmentCourrierEnum[]
+     * @return DepartmentCourrierEnum|null
      */
-    public static function getAssignableDepartments(): array
+    public static function getAssignableDepartment(): ?DepartmentCourrierEnum
     {
         $user = auth()->user();
 
         if ($user === null) {
-            return [];
+            return null;
         }
 
         return $user->getCourrierAdminDepartment();
