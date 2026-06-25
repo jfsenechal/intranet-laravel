@@ -21,4 +21,18 @@ return [
         'email' => env('DEFAULT_USER_EMAIL', 'admin@example.com'),
         'password' => env('DEFAULT_USER_PASSWORD', 'password'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Meilisearch
+    |--------------------------------------------------------------------------
+    |
+    | Credentials for the Meilisearch server used by the modules' full-text
+    | search (e.g. the Courrier indexer and advanced search).
+    |
+    */
+
+    'meilisearch' => [
+        'master_key' => env('MEILI_MASTER_KEY'),
+    ],
 ];

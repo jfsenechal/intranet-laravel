@@ -11,7 +11,10 @@ final class MeiliServer
 {
     use MeiliTrait;
 
-    public function __construct(private readonly string $indexName) {}
+    public function __construct(string $indexName)
+    {
+        $this->init($indexName);
+    }
 
     public static function createKey(string $id): string
     {
