@@ -55,7 +55,15 @@ final class MergeCommand extends Command
             $this->newLine();
 
             try {
-                $this->mergeDatabase($sourceDatabase, $targetDatabase, $department);
+                if ($this->dryRun) {
+                    $this->mergeDatabase($sourceDatabase, $targetDatabase, $department);
+                } else {
+                    // Wrap each department in a transaction so a failure leaves no
+                    // partial data behind and the command can be safely re-run.
+                    DB::transaction(function () use ($sourceDatabase, $targetDatabase, $department): void {
+                        $this->mergeDatabase($sourceDatabase, $targetDatabase, $department);
+                    });
+                }
             } catch (Exception $e) {
                 $this->error("Error processing {$department}: ".$e->getMessage());
 
@@ -121,7 +129,7 @@ final class MergeCommand extends Command
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.courrier_categories (old_id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-                    [$oldId, $category->nom, $category->couleur ?? '#6b7280', now(), now()]
+                    [$oldId, $category->nom, $this->normalizeColor($category->couleur), now(), now()]
                 );
                 $newId = DB::getPdo()->lastInsertId();
                 $this->idMappings[$department]['categories'][$oldId] = $newId;
@@ -146,12 +154,22 @@ final class MergeCommand extends Command
         foreach ($services as $service) {
             $oldId = $service->id;
 
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.courrier_services WHERE old_id = ? AND department = ?",
+                [$oldId, $department]
+            );
+            if ($existing) {
+                $this->idMappings[$department]['services'][$oldId] = $existing->id;
+
+                continue;
+            }
+
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.courrier_services (old_id, slugname, name, initials, actif, department) VALUES (?, ?, ?, ?, ?, ?)",
                     [
                         $oldId,
-                        $service->slugname.'-'.$department,
+                        $this->makeSlug($service->slugname, $department, $oldId),
                         $service->nom,
                         $service->initials,
                         1,
@@ -181,12 +199,22 @@ final class MergeCommand extends Command
         foreach ($senders as $sender) {
             $oldId = $sender->id;
 
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.courrier_senders WHERE old_id = ? AND department = ?",
+                [$oldId, $department]
+            );
+            if ($existing) {
+                $this->idMappings[$department]['senders'][$oldId] = $existing->id;
+
+                continue;
+            }
+
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.courrier_senders (old_id, slug, name, department) VALUES (?, ?, ?, ?)",
                     [
                         $oldId,
-                        $sender->slugname.'-'.$department,
+                        $this->makeSlug($sender->slugname, $department, $oldId),
                         $sender->nom,
                         $department,
                     ]
@@ -216,6 +244,18 @@ final class MergeCommand extends Command
         foreach ($recipients as $recipient) {
             $oldId = $recipient->id;
 
+            // Recipients are produced by CPAS only, so old_id alone is unique
+            // (the `recipients` table has no department column).
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.recipients WHERE old_id = ?",
+                [$oldId]
+            );
+            if ($existing) {
+                $this->idMappings[$department]['recipients'][$oldId] = $existing->id;
+
+                continue;
+            }
+
             $newSupervisorId = null;
             if ($recipient->tuteur_id !== null) {
                 $newSupervisorId = $this->idMappings[$department]['recipients'][$recipient->tuteur_id] ?? null;
@@ -227,7 +267,7 @@ final class MergeCommand extends Command
                     [
                         $oldId,
                         $newSupervisorId,
-                        $recipient->slugname.'-'.$department,
+                        $this->makeSlug($recipient->slugname, $department, $oldId),
                         $recipient->nom,
                         $recipient->prenom ?? '',
                         $recipient->username ?? '',
@@ -258,6 +298,16 @@ final class MergeCommand extends Command
 
         foreach ($mails as $mail) {
             $oldId = $mail->id;
+
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.incoming_mails WHERE old_id = ? AND department = ?",
+                [$oldId, $department]
+            );
+            if ($existing) {
+                $this->idMappings[$department]['incoming_mails'][$oldId] = $existing->id;
+
+                continue;
+            }
 
             $newCategoryId = null;
             if (property_exists($mail, 'categorie_id') && $mail->categorie_id !== null) {
@@ -322,6 +372,16 @@ final class MergeCommand extends Command
                 continue;
             }
 
+            // No department column on attachments; the resolved (department-scoped)
+            // incoming_mail_id together with old_id uniquely identifies the row.
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.attachments WHERE old_id = ? AND incoming_mail_id = ?",
+                [$attachment->id, $newMailId]
+            );
+            if ($existing) {
+                continue;
+            }
+
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.attachments (old_id, incoming_mail_id, file_name, mime, updated_at) VALUES (?, ?, ?, ?, ?)",
@@ -366,6 +426,14 @@ final class MergeCommand extends Command
                 continue;
             }
 
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.incoming_mail_service WHERE incoming_mail_id = ? AND service_id = ?",
+                [$newMailId, $newServiceId]
+            );
+            if ($existing) {
+                continue;
+            }
+
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mail_service (incoming_mail_id, service_id, is_primary) VALUES (?, ?, ?)",
@@ -394,6 +462,14 @@ final class MergeCommand extends Command
                 continue;
             }
             if ($newRecipientId === null) {
+                continue;
+            }
+
+            $existing = DB::selectOne(
+                "SELECT id FROM {$target}.incoming_mail_recipient WHERE incoming_mail_id = ? AND recipient_id = ?",
+                [$newMailId, $newRecipientId]
+            );
+            if ($existing) {
                 continue;
             }
 
@@ -436,6 +512,45 @@ final class MergeCommand extends Command
                 $this->line("  - {$table}: ".count($mappings).' records');
             }
         }
+    }
+
+    /**
+     * Build a unique slug that fits the 70-character target columns.
+     * The legacy slug is truncated and suffixed with the department and the
+     * original id, which guarantees uniqueness across departments and against
+     * existing VILLE records without overflowing the column.
+     */
+    private function makeSlug(string $base, string $department, int $oldId): string
+    {
+        $suffix = '-'.mb_strtolower($department).'-'.$oldId;
+
+        return mb_substr($base, 0, 70 - mb_strlen($suffix)).$suffix;
+    }
+
+    /**
+     * Normalize a legacy color value into a 7-character hex code (#rrggbb).
+     * Legacy categories store either a hex code or an `rgb()/rgba()` string,
+     * but the target `color` column only holds 7 characters.
+     */
+    private function normalizeColor(?string $color): string
+    {
+        $default = '#6b7280';
+
+        if ($color === null || $color === '') {
+            return $default;
+        }
+
+        $color = mb_trim($color);
+
+        if (preg_match('/^#[0-9a-fA-F]{6}$/', $color) === 1) {
+            return mb_strtolower($color);
+        }
+
+        if (preg_match('/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/', $color, $matches) === 1) {
+            return sprintf('#%02x%02x%02x', (int) $matches[1], (int) $matches[2], (int) $matches[3]);
+        }
+
+        return $default;
     }
 
     private function tableExists(string $database, string $table): bool
