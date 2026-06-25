@@ -46,8 +46,8 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('notifie', 'is_notified');
                 $table->renameColumn('recommande', 'is_registered');
-                $table->renameColumn('suivi', 'follow_up_note');
                 $table->renameColumn('accuse', 'has_acknowledgment');
+                $table->text('follow_up_note')->nullable();
                 $table->integer('file_size')->nullable();
                 $table->foreignId('category_id')->nullable()->after('id')->constrained('courrier_categories')->nullOnDelete();
                 $table->string('file_mime')->nullable();

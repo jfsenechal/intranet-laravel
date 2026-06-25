@@ -117,6 +117,10 @@ final class IncomingMailForm
                         ->label('Description')
                         ->rows(4)
                         ->columnSpanFull(),
+                    Textarea::make('follow_up_note')
+                        ->label('Note de suivi')
+                        ->rows(4)
+                        ->columnSpanFull(),
                 ])
                 ->columns(2)
                 ->columnSpan(2),

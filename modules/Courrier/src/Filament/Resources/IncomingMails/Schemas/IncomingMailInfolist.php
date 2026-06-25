@@ -34,6 +34,11 @@ final class IncomingMailInfolist
                             ->columnSpanFull()
                             ->prose()
                             ->hidden(fn ($state): bool => blank($state)),
+                        TextEntry::make('follow_up_note')
+                            ->label('Note de suivi')
+                            ->columnSpanFull()
+                            ->prose()
+                            ->hidden(fn ($state): bool => blank($state)),
                     ])
                     ->columns(2),
 
