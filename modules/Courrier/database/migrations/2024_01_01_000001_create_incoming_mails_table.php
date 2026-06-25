@@ -46,6 +46,7 @@ return new class extends Migration
                 $table->renameColumn('updated', 'updated_at');
                 $table->renameColumn('notifie', 'is_notified');
                 $table->renameColumn('recommande', 'is_registered');
+                $table->renameColumn('suivi', 'follow_up_note');
                 $table->renameColumn('accuse', 'has_acknowledgment');
                 $table->integer('file_size')->nullable();
                 $table->foreignId('category_id')->nullable()->after('id')->constrained('courrier_categories')->nullOnDelete();
@@ -66,6 +67,7 @@ return new class extends Migration
                 $table->boolean('is_notified')->default(false);
                 $table->boolean('is_registered')->default(false);
                 $table->boolean('has_acknowledgment')->default(false);
+                $table->text('follow_up_note')->nullable();
                 $table->foreignId('category_id')->nullable()->after('id')->constrained('courrier_categories')->nullOnDelete();
                 $table->string('user_add');
                 $table->softDeletes();
@@ -76,11 +78,5 @@ return new class extends Migration
                     ->nullable();
             });
         }
-    }
-
-    public function down(): void
-    {
-        Schema::connection('maria-courrier')->dropIfExists('incoming_mails');
-        Schema::connection('maria-courrier')->dropIfExists('courrier_categories');
     }
 };
