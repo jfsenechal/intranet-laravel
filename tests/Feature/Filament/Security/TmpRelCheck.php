@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use AcMarche\Security\Filament\Resources\Users\Pages\EditUser;
@@ -6,6 +7,7 @@ use AcMarche\Security\Filament\Resources\Users\RelationManagers\ModuleRelationMa
 use AcMarche\Security\Models\Module;
 use App\Models\User;
 use Filament\Facades\Filament;
+
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {

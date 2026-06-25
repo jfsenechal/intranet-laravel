@@ -19,7 +19,7 @@ trait HasDepartmentScope
         static::addGlobalScope('department', function (Builder $query): void {
             $departments = DepartmentScope::getViewableDepartments();
             if (count($departments) > 0) {
-                $values = array_map(fn(DepartmentCourrierEnum $d) => $d->value, $departments);
+                $values = array_map(fn (DepartmentCourrierEnum $d) => $d->value, $departments);
                 $query->whereIn($query->getModel()->getTable().'.department', $values);
             }
         });

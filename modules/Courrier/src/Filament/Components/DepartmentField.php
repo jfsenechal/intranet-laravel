@@ -13,7 +13,7 @@ final class DepartmentField
     public static function make(): TextInput
     {
         $department = DepartmentScope::getAssignableDepartment();
-        if (!$department) {
+        if (! $department) {
             throw ValidationException::withMessages([
                 'department' => "Vous n'êtes associé à aucun département. (ROLE_INDICATEUR_ADMIN)",
             ]);
@@ -22,8 +22,8 @@ final class DepartmentField
         return
             TextInput::make('department')
                 ->label('Département')
-                ->formatStateUsing(fn(): string => $department->value)
-                ->dehydrateStateUsing(fn(): string => $department->value)
+                ->formatStateUsing(fn (): string => $department->value)
+                ->dehydrateStateUsing(fn (): string => $department->value)
                 ->required()
                 ->readOnly();
 

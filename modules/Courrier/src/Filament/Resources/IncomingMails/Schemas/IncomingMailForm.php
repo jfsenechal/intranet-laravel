@@ -77,11 +77,11 @@ final class IncomingMailForm
 
         // Add the form
         // Add department field
-       /* $departmentFields = DepartmentField::make();
-        if ($departmentFields !== []) {
-            //$components[] = Section::make('Département')
-             //   ->schema($departmentFields);
-        }*/
+        /* $departmentFields = DepartmentField::make();
+         if ($departmentFields !== []) {
+             //$components[] = Section::make('Département')
+              //   ->schema($departmentFields);
+         }*/
         $components[] = Flex::make([
             Section::make('Informations du courrier')
                 ->schema([
@@ -125,7 +125,7 @@ final class IncomingMailForm
                     Toggle::make('is_notified')
                         ->label('Notifié')
                         ->default(false),
-                    DepartmentField::make()
+                    DepartmentField::make(),
                 ])
                 ->grow(false),
         ])->from('md');

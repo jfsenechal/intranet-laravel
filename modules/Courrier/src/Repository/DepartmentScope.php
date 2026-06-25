@@ -13,8 +13,6 @@ final class DepartmentScope implements Scope
 {
     /**
      * Departments the current user administers. Used for the create auto-fill.
-     *
-     * @return DepartmentCourrierEnum|null
      */
     public static function getCurrentAdminUserDepartment(): ?DepartmentCourrierEnum
     {
@@ -31,8 +29,6 @@ final class DepartmentScope implements Scope
      * Departments the current user may assign when creating or editing mail.
      *
      * Department admins are limited to the department they administer.
-     *
-     * @return DepartmentCourrierEnum|null
      */
     public static function getAssignableDepartment(): ?DepartmentCourrierEnum
     {
@@ -68,7 +64,7 @@ final class DepartmentScope implements Scope
     {
         $departments = self::getViewableDepartments();
         if (count($departments) > 0) {
-            $values = array_map(fn(DepartmentCourrierEnum $d) => $d->value, $departments);
+            $values = array_map(fn (DepartmentCourrierEnum $d) => $d->value, $departments);
             $builder->whereIn($model->getTable().'.department', $values);
         }
     }

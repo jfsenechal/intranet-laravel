@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     protected $connection = 'maria-email-management';
 
     /**
@@ -15,7 +16,7 @@ return new class extends Migration {
     public function up(): void
     {
         $schema = Schema::connection('maria-email-management');
-        if (!$schema->hasTable('employes')) {
+        if (! $schema->hasTable('employes')) {
             $schema->create('employes', function (Blueprint $table) {
                 $table->id();
                 $table->string('uid')->unique();
@@ -43,7 +44,7 @@ return new class extends Migration {
             });
         }
 
-        if (!$schema->hasTable('hands')) {
+        if (! $schema->hasTable('hands')) {
             $schema->create('hands', function (Blueprint $table) {
                 $table->id();
                 $table->string('uid')->unique();

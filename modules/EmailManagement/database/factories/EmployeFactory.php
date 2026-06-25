@@ -8,7 +8,6 @@ use AcMarche\EmailManagement\Models\Employe;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-
 #[UseModel(Employe::class)]
 final class EmployeFactory extends Factory
 {

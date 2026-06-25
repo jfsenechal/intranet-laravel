@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
 use AcMarche\Security\Handler\MigrationHandler;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
+use App\Models\User;
 
 beforeEach(function (): void {
     Module::query()->delete();
