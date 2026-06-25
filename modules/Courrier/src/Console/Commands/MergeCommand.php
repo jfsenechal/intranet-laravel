@@ -18,7 +18,7 @@ final class MergeCommand extends Command
         {--target=indicateur_ville : Target database name}';
 
     #[Override]
-    protected $description = 'Merge indicateur_cpas and indicateur_bgm databases into the target database with department field';
+    protected $description = 'Merge indicateur_cpas and indicateur_bgm legacy databases into the target database with department field';
 
     private bool $dryRun = false;
 
@@ -93,29 +93,35 @@ final class MergeCommand extends Command
 
     private function mergeCategories(string $source, string $target, string $department): void
     {
+        if (! $this->tableExists($source, 'categorie')) {
+            $this->line('  - Skipping categories (no `categorie` table in source)');
+
+            return;
+        }
+
         $this->info('  - Merging categories...');
 
-        $categories = DB::select("SELECT * FROM {$source}.categories");
+        $categories = DB::select("SELECT * FROM {$source}.categorie");
 
         foreach ($categories as $category) {
             $oldId = $category->id;
 
             $existing = DB::selectOne(
-                "SELECT id FROM {$target}.categories WHERE name = ?",
-                [$category->name]
+                "SELECT id FROM {$target}.courrier_categories WHERE name = ?",
+                [$category->nom]
             );
 
             if ($existing) {
                 $this->idMappings[$department]['categories'][$oldId] = $existing->id;
-                $this->line("    Skipping duplicate category: {$category->name}");
+                $this->line("    Skipping duplicate category: {$category->nom}");
 
                 continue;
             }
 
             if (! $this->dryRun) {
                 DB::insert(
-                    "INSERT INTO {$target}.categories (name, color, created_at, updated_at) VALUES (?, ?, ?, ?)",
-                    [$category->name, $category->color ?? '#6b7280', $category->created_at, $category->updated_at]
+                    "INSERT INTO {$target}.courrier_categories (old_id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                    [$oldId, $category->nom, $category->couleur ?? '#6b7280', now(), now()]
                 );
                 $newId = DB::getPdo()->lastInsertId();
                 $this->idMappings[$department]['categories'][$oldId] = $newId;
@@ -127,22 +133,28 @@ final class MergeCommand extends Command
 
     private function mergeServices(string $source, string $target, string $department): void
     {
+        if (! $this->tableExists($source, 'service')) {
+            $this->line('  - Skipping services (no `service` table in source)');
+
+            return;
+        }
+
         $this->info('  - Merging services...');
 
-        $services = DB::select("SELECT * FROM {$source}.courrier_services");
+        $services = DB::select("SELECT * FROM {$source}.service");
 
         foreach ($services as $service) {
             $oldId = $service->id;
-            $slugField = property_exists($service, 'slugname') ? 'slugname' : 'slug';
-            $slug = $service->$slugField ?? $service->slug ?? null;
 
             if (! $this->dryRun) {
                 DB::insert(
-                    "INSERT INTO {$target}.courrier_services (slugname, name, initials, department) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO {$target}.courrier_services (old_id, slugname, name, initials, actif, department) VALUES (?, ?, ?, ?, ?, ?)",
                     [
-                        $slug.'-'.$department,
-                        $service->name,
+                        $oldId,
+                        $service->slugname.'-'.$department,
+                        $service->nom,
                         $service->initials,
+                        1,
                         $department,
                     ]
                 );
@@ -156,19 +168,26 @@ final class MergeCommand extends Command
 
     private function mergeSenders(string $source, string $target, string $department): void
     {
+        if (! $this->tableExists($source, 'expediteur')) {
+            $this->line('  - Skipping senders (no `expediteur` table in source)');
+
+            return;
+        }
+
         $this->info('  - Merging senders...');
 
-        $senders = DB::select("SELECT * FROM {$source}.courrier_senders");
+        $senders = DB::select("SELECT * FROM {$source}.expediteur");
 
         foreach ($senders as $sender) {
             $oldId = $sender->id;
 
             if (! $this->dryRun) {
                 DB::insert(
-                    "INSERT INTO {$target}.courrier_senders (slug, name, department) VALUES (?, ?, ?)",
+                    "INSERT INTO {$target}.courrier_senders (old_id, slug, name, department) VALUES (?, ?, ?, ?)",
                     [
-                        $sender->slug.'-'.$department,
-                        $sender->name,
+                        $oldId,
+                        $sender->slugname.'-'.$department,
+                        $sender->nom,
                         $department,
                     ]
                 );
@@ -182,29 +201,39 @@ final class MergeCommand extends Command
 
     private function mergeRecipients(string $source, string $target, string $department): void
     {
+        if (! $this->tableExists($source, 'destinataire')) {
+            $this->line('  - Skipping recipients (no `destinataire` table in source)');
+
+            return;
+        }
+
         $this->info('  - Merging recipients...');
 
-        $recipients = DB::select("SELECT * FROM {$source}.recipients ORDER BY supervisor_id ASC NULLS FIRST");
+        // Order supervisors (tuteur_id IS NULL) first so their new IDs are mapped
+        // before recipients that reference them.
+        $recipients = DB::select("SELECT * FROM {$source}.destinataire ORDER BY tuteur_id IS NOT NULL ASC, tuteur_id ASC");
 
         foreach ($recipients as $recipient) {
             $oldId = $recipient->id;
 
             $newSupervisorId = null;
-            if ($recipient->supervisor_id !== null) {
-                $newSupervisorId = $this->idMappings[$department]['recipients'][$recipient->supervisor_id] ?? null;
+            if ($recipient->tuteur_id !== null) {
+                $newSupervisorId = $this->idMappings[$department]['recipients'][$recipient->tuteur_id] ?? null;
             }
 
             if (! $this->dryRun) {
                 DB::insert(
-                    "INSERT INTO {$target}.recipients (supervisor_id, slug, last_name, first_name, username, email, receives_attachments) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO {$target}.recipients (old_id, supervisor_id, slug, last_name, first_name, username, email, actif, receives_attachments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [
+                        $oldId,
                         $newSupervisorId,
-                        $recipient->slug.'-'.$department,
-                        $recipient->last_name,
-                        $recipient->first_name,
-                        $recipient->username,
-                        $recipient->email,
-                        $recipient->receives_attachments,
+                        $recipient->slugname.'-'.$department,
+                        $recipient->nom,
+                        $recipient->prenom ?? '',
+                        $recipient->username ?? '',
+                        $recipient->email ?? '',
+                        $recipient->actif ?? 1,
+                        0,
                     ]
                 );
                 $newId = DB::getPdo()->lastInsertId();
@@ -217,38 +246,50 @@ final class MergeCommand extends Command
 
     private function mergeIncomingMails(string $source, string $target, string $department): void
     {
+        if (! $this->tableExists($source, 'courrier')) {
+            $this->line('  - Skipping incoming mails (no `courrier` table in source)');
+
+            return;
+        }
+
         $this->info('  - Merging incoming mails...');
 
-        $mails = DB::select("SELECT * FROM {$source}.incoming_mails");
+        $mails = DB::select("SELECT * FROM {$source}.courrier");
 
         foreach ($mails as $mail) {
             $oldId = $mail->id;
 
             $newCategoryId = null;
-            if ($mail->category_id !== null) {
-                $newCategoryId = $this->idMappings[$department]['categories'][$mail->category_id] ?? null;
+            if (property_exists($mail, 'categorie_id') && $mail->categorie_id !== null) {
+                $newCategoryId = $this->idMappings[$department]['categories'][$mail->categorie_id] ?? null;
+            }
+
+            // The new `follow_up_note` field gathers the legacy free-text notes:
+            // CPAS stores them in `suivi`, BGM in `classement`.
+            $followUpNote = property_exists($mail, 'suivi') ? $mail->suivi : null;
+            if (property_exists($mail, 'classement') && filled($mail->classement)) {
+                $followUpNote = mb_trim(($followUpNote !== null && $followUpNote !== '' ? $followUpNote."\n" : '').'Classement: '.$mail->classement);
             }
 
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mails
-                    (category_id, reference_number, sender, description, mail_date, is_notified, is_registered, has_acknowledgment, user_add, created_at, updated_at, file_size, file_mime, deleted_at, department)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (old_id, category_id, reference_number, sender, description, follow_up_note, mail_date, is_notified, is_registered, has_acknowledgment, user_add, created_at, updated_at, department)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [
+                        $oldId,
                         $newCategoryId,
-                        $mail->reference_number,
-                        $mail->sender,
+                        (string) $mail->numero,
+                        $mail->expediteur,
                         $mail->description,
-                        $mail->mail_date,
-                        $mail->is_notified,
-                        $mail->is_registered,
-                        $mail->has_acknowledgment,
-                        $mail->user_add,
-                        $mail->created_at,
-                        $mail->updated_at,
-                        $mail->file_size ?? null,
-                        $mail->file_mime ?? null,
-                        $mail->deleted_at ?? null,
+                        $followUpNote,
+                        $mail->date_courrier,
+                        $mail->notifie,
+                        $mail->recommande,
+                        $mail->accuse,
+                        $mail->user_add ?? '',
+                        $mail->created ?? now(),
+                        $mail->updated ?? now(),
                         $department,
                     ]
                 );
@@ -262,12 +303,18 @@ final class MergeCommand extends Command
 
     private function mergeAttachments(string $source, string $target, string $department): void
     {
+        if (! $this->tableExists($source, 'attachement')) {
+            $this->line('  - Skipping attachments (no `attachement` table in source)');
+
+            return;
+        }
+
         $this->info('  - Merging attachments...');
 
-        $attachments = DB::select("SELECT * FROM {$source}.attachments");
+        $attachments = DB::select("SELECT * FROM {$source}.attachement");
 
         foreach ($attachments as $attachment) {
-            $newMailId = $this->idMappings[$department]['incoming_mails'][$attachment->incoming_mail_id] ?? null;
+            $newMailId = $this->idMappings[$department]['incoming_mails'][$attachment->courrier_id] ?? null;
 
             if ($newMailId === null) {
                 $this->warn("    Skipping orphan attachment: {$attachment->file_name}");
@@ -277,12 +324,13 @@ final class MergeCommand extends Command
 
             if (! $this->dryRun) {
                 DB::insert(
-                    "INSERT INTO {$target}.attachments (incoming_mail_id, file_name, mime, created_at) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO {$target}.attachments (old_id, incoming_mail_id, file_name, mime, updated_at) VALUES (?, ?, ?, ?, ?)",
                     [
+                        $attachment->id,
                         $newMailId,
                         $attachment->file_name,
-                        $attachment->mime ?? null,
-                        $attachment->created_at ?? now(),
+                        $attachment->mime ?? '',
+                        $attachment->updatedAt ?? now(),
                     ]
                 );
             }
@@ -297,16 +345,19 @@ final class MergeCommand extends Command
 
         $this->mergeIncomingMailService($source, $target, $department);
         $this->mergeIncomingMailRecipient($source, $target, $department);
-        $this->mergeRecipientService($source, $target, $department);
     }
 
     private function mergeIncomingMailService(string $source, string $target, string $department): void
     {
-        $pivots = DB::select("SELECT * FROM {$source}.incoming_mail_service");
+        if (! $this->tableExists($source, 'courrier_service')) {
+            return;
+        }
+
+        $pivots = DB::select("SELECT * FROM {$source}.courrier_service");
         $count = 0;
 
         foreach ($pivots as $pivot) {
-            $newMailId = $this->idMappings[$department]['incoming_mails'][$pivot->incoming_mail_id] ?? null;
+            $newMailId = $this->idMappings[$department]['incoming_mails'][$pivot->courrier_id] ?? null;
             $newServiceId = $this->idMappings[$department]['services'][$pivot->service_id] ?? null;
             if ($newMailId === null) {
                 continue;
@@ -318,7 +369,7 @@ final class MergeCommand extends Command
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mail_service (incoming_mail_id, service_id, is_primary) VALUES (?, ?, ?)",
-                    [$newMailId, $newServiceId, $pivot->is_primary ?? false]
+                    [$newMailId, $newServiceId, true]
                 );
             }
             $count++;
@@ -329,12 +380,16 @@ final class MergeCommand extends Command
 
     private function mergeIncomingMailRecipient(string $source, string $target, string $department): void
     {
-        $pivots = DB::select("SELECT * FROM {$source}.incoming_mail_recipient");
+        if (! $this->tableExists($source, 'courrier_destinataire')) {
+            return;
+        }
+
+        $pivots = DB::select("SELECT * FROM {$source}.courrier_destinataire");
         $count = 0;
 
         foreach ($pivots as $pivot) {
-            $newMailId = $this->idMappings[$department]['incoming_mails'][$pivot->incoming_mail_id] ?? null;
-            $newRecipientId = $this->idMappings[$department]['recipients'][$pivot->recipient_id] ?? null;
+            $newMailId = $this->idMappings[$department]['incoming_mails'][$pivot->courrier_id] ?? null;
+            $newRecipientId = $this->idMappings[$department]['recipients'][$pivot->destinataire_id] ?? null;
             if ($newMailId === null) {
                 continue;
             }
@@ -345,40 +400,13 @@ final class MergeCommand extends Command
             if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mail_recipient (incoming_mail_id, recipient_id, is_primary) VALUES (?, ?, ?)",
-                    [$newMailId, $newRecipientId, $pivot->is_primary ?? false]
+                    [$newMailId, $newRecipientId, $pivot->principal ?? false]
                 );
             }
             $count++;
         }
 
         $this->info("    incoming_mail_recipient: {$count} processed");
-    }
-
-    private function mergeRecipientService(string $source, string $target, string $department): void
-    {
-        $pivots = DB::select("SELECT * FROM {$source}.recipient_service");
-        $count = 0;
-
-        foreach ($pivots as $pivot) {
-            $newRecipientId = $this->idMappings[$department]['recipients'][$pivot->recipient_id] ?? null;
-            $newServiceId = $this->idMappings[$department]['services'][$pivot->service_id] ?? null;
-            if ($newRecipientId === null) {
-                continue;
-            }
-            if ($newServiceId === null) {
-                continue;
-            }
-
-            if (! $this->dryRun) {
-                DB::insert(
-                    "INSERT INTO {$target}.recipient_service (recipient_id, service_id) VALUES (?, ?)",
-                    [$newRecipientId, $newServiceId]
-                );
-            }
-            $count++;
-        }
-
-        $this->info("    recipient_service: {$count} processed");
     }
 
     private function updateExistingVilleRecords(string $target): void
@@ -390,7 +418,7 @@ final class MergeCommand extends Command
 
         if (! $this->dryRun) {
             DB::update("UPDATE {$target}.incoming_mails SET department = ? WHERE department IS NULL", [$department]);
-            DB::update("UPDATE {$target}.services SET department = ? WHERE department IS NULL", [$department]);
+            DB::update("UPDATE {$target}.courrier_services SET department = ? WHERE department IS NULL", [$department]);
             DB::update("UPDATE {$target}.courrier_senders SET department = ? WHERE department IS NULL", [$department]);
         }
 
@@ -408,5 +436,15 @@ final class MergeCommand extends Command
                 $this->line("  - {$table}: ".count($mappings).' records');
             }
         }
+    }
+
+    private function tableExists(string $database, string $table): bool
+    {
+        $result = DB::selectOne(
+            'SELECT COUNT(*) AS total FROM information_schema.tables WHERE table_schema = ? AND table_name = ?',
+            [$database, $table]
+        );
+
+        return $result !== null && (int) $result->total > 0;
     }
 }
