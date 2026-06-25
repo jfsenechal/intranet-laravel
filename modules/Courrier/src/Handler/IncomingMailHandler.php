@@ -137,6 +137,7 @@ final class IncomingMailHandler
                 'incoming_mail_id' => $incomingMail->id,
                 'file_name' => $storedFilename,
                 'mime' => $mime,
+                'path' => $path,
             ]);
         } catch (ImapException $e) {
             Notification::make()

@@ -113,6 +113,7 @@ final class CreateIncomingMail extends CreateRecord
             'incoming_mail_id' => $this->record->id,
             'file_name' => $storedFilename,
             'mime' => $file->getMimeType(),
+            'path' => $path,
         ]);
     }
 }
