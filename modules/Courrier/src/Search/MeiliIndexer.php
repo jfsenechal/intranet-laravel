@@ -92,16 +92,21 @@ final class MeiliIndexer
 
         return [
             'id' => $incomingMail->id,
-            'numero' => $incomingMail->reference_number,
-            'expediteur' => self::cleandata($incomingMail->sender),
+            'reference_number' => $incomingMail->reference_number,
+            'sender' => self::cleandata($incomingMail->sender),
             'description' => self::cleandata($incomingMail->description),
-            'destinataires' => $incomingMail->recipients->pluck('id')->all(),
+            'recipients' => $incomingMail->recipients->pluck('id')->all(),
             'services' => $incomingMail->services->pluck('id')->all(),
             'original' => $original,
             'copie' => $copie,
-            'recommande' => (bool) $incomingMail->is_registered,
-            'date_courrier' => $incomingMail->mail_date?->format('Y-m-d'),
-            'date_courrier_timestamp' => $incomingMail->mail_date?->getTimestamp(),
+            'department' =>  $incomingMail->department,
+            'follow_up_note' =>  $incomingMail->follow_up_note,
+            'is_registered' =>  $incomingMail->is_registered,
+            'is_notified' =>  $incomingMail->is_notified,
+            'has_acknowledgment' =>  $incomingMail->has_acknowledgment,
+            'category_id' =>  $incomingMail->category_id,
+            'mail_date' => $incomingMail->mail_date?->format('Y-m-d'),
+            'mail_date_timestamp' => $incomingMail->mail_date?->getTimestamp(),
             'content' => $this->attachmentsText($incomingMail),
         ];
     }
