@@ -16,11 +16,6 @@ final class MeiliServer
         $this->init($indexName);
     }
 
-    public static function createKey(string $id): string
-    {
-        return self::indexName.'-'.$id;
-    }
-
     /**
      * @return array<'taskUid','indexUid','status','enqueuedAt'>
      */
