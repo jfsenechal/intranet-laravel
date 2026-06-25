@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
@@ -56,6 +57,51 @@ describe('IncomingMail Model', function (): void {
         ]);
 
         expect($mail->mail_date)->toBeInstanceOf(CarbonImmutable::class);
+    });
+
+    test('assigns first reference number for cpas department', function (): void {
+        $mail = IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        expect($mail->reference_number)->toBe('1');
+    });
+
+    test('increments reference number for cpas department, ignoring any provided value', function (): void {
+        $first = IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::CPAS->value,
+            'reference_number' => '5',
+        ]);
+
+        $second = IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        expect($first->reference_number)->toBe('1')
+            ->and($second->reference_number)->toBe('2');
+    });
+
+    test('orders cpas reference numbers numerically not lexicographically', function (): void {
+        foreach (range(1, 9) as $number) {
+            IncomingMail::factory()->create([
+                'department' => DepartmentCourrierEnum::CPAS->value,
+            ]);
+        }
+
+        $mail = IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        expect($mail->reference_number)->toBe('10');
+    });
+
+    test('does not auto-assign reference number for non-cpas departments', function (): void {
+        $mail = IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::VILLE->value,
+            'reference_number' => 'VILLE-2024-001',
+        ]);
+
+        expect($mail->reference_number)->toBe('VILLE-2024-001');
     });
 
     test('soft deletes work correctly', function (): void {

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas;
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Filament\Components\DepartmentField;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Sender;
+use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
 use Filament\Forms\Components\Checkbox;
@@ -87,7 +89,11 @@ final class IncomingMailForm
                 ->schema([
                     TextInput::make('reference_number')
                         ->label('Numéro')
-                        ->required()
+                        ->required(fn (?IncomingMail $record): bool => $record instanceof IncomingMail || ! self::isCpasDepartment())
+                        ->disabled(fn (?IncomingMail $record): bool => ! $record instanceof IncomingMail && self::isCpasDepartment())
+                        ->helperText(fn (?IncomingMail $record): ?string => (! $record instanceof IncomingMail && self::isCpasDepartment())
+                            ? 'Numéro attribué automatiquement à l\'enregistrement.'
+                            : null)
                         ->maxLength(255),
                     DatePicker::make('mail_date')
                         ->label('Date du courrier')
@@ -161,6 +167,15 @@ final class IncomingMailForm
             ->columns(2);
 
         return $components;
+    }
+
+    /**
+     * Whether the current user creates mail for the CPAS department, whose
+     * reference number is assigned automatically on save.
+     */
+    private static function isCpasDepartment(): bool
+    {
+        return DepartmentScope::getAssignableDepartment() === DepartmentCourrierEnum::CPAS;
     }
 
     /**

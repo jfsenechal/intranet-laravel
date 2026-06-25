@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Security\Models\HasUserAdd;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 #[UseFactory(IncomingMailFactory::class)]
 #[ScopedBy([DepartmentScope::class])]
@@ -33,6 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'has_acknowledgment',
     'user_add',
     'department',
+    'follow_up_note',
 ])]
 final class IncomingMail extends Model
 {
@@ -85,6 +88,10 @@ final class IncomingMail extends Model
                     $model->department = $department->value;
                 }
             }
+
+            if ($model->department === DepartmentCourrierEnum::CPAS->value) {
+                $model->reference_number = (string) self::nextCpasReferenceNumber();
+            }
         });
 
         self::created(function (IncomingMail $model): void {
@@ -109,5 +116,20 @@ final class IncomingMail extends Model
             'is_registered' => 'boolean',
             'has_acknowledgment' => 'boolean',
         ];
+    }
+
+    /**
+     * Compute the next sequential reference number for the CPAS department.
+     *
+     * Numbers are stored as strings but compared numerically so "9" is followed
+     * by "10" rather than being ordered lexicographically.
+     */
+    private static function nextCpasReferenceNumber(): int
+    {
+        $last = self::withoutGlobalScopes()
+            ->where('department', DepartmentCourrierEnum::CPAS->value)
+            ->max(DB::raw('CAST(reference_number AS UNSIGNED)'));
+
+        return (int) $last + 1;
     }
 }
