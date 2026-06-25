@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\IncomingMailSearch;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Search\MeiliIndexer;
 use AcMarche\Courrier\Search\MeiliSearcher;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
 
@@ -31,7 +34,7 @@ describe('MeiliSearcher policy filter', function (): void {
         $recipient = Recipient::factory()->create(['username' => $user->username]);
 
         expect(app(MeiliSearcher::class)->policyFilter($user))
-            ->toBe(sprintf('destinataires IN [%d]', $recipient->id));
+            ->toBe(sprintf('recipients IN [%d]', $recipient->id));
     });
 
     it('restricts a recipient with services to their mail or linked services', function (): void {
@@ -41,7 +44,26 @@ describe('MeiliSearcher policy filter', function (): void {
         $recipient->services()->attach($service->id);
 
         expect(app(MeiliSearcher::class)->policyFilter($user))
-            ->toBe(sprintf('(destinataires IN [%d] OR services IN [%d])', $recipient->id, $service->id));
+            ->toBe(sprintf('(recipients IN [%d] OR services IN [%d])', $recipient->id, $service->id));
+    });
+
+    it('scopes an index user to the mail of their department', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->roles()->attach($role);
+
+        expect(app(MeiliSearcher::class)->policyFilter($user))
+            ->toBe(sprintf('department IN ["%s"]', DepartmentCourrierEnum::VILLE->value));
+    });
+
+    it('scopes an index user by department even when they are also a recipient', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->roles()->attach($role);
+        Recipient::factory()->create(['username' => $user->username]);
+
+        expect(app(MeiliSearcher::class)->policyFilter($user))
+            ->toBe(sprintf('department IN ["%s"]', DepartmentCourrierEnum::VILLE->value));
     });
 
     it('denies a user that is not a known recipient', function (): void {
@@ -72,11 +94,11 @@ describe('MeiliIndexer document', function (): void {
 
         expect($document)
             ->id->toBe($mail->id)
-            ->numero->toBe('2026-42')
-            ->expediteur->toBe('ACME SA')
-            ->recommande->toBeTrue();
+            ->reference_number->toBe('2026-42')
+            ->sender->toBe('ACME SA')
+            ->is_registered->toBeTrue();
 
-        expect($document['destinataires'])->toEqualCanonicalizing([$primary->id, $copy->id]);
+        expect($document['recipients'])->toEqualCanonicalizing([$primary->id, $copy->id]);
         expect($document['services'])->toEqual([$service->id]);
         expect($document['original'])->toContain($primary->full_name, $service->name);
         expect($document['copie'])->toContain($copy->full_name);

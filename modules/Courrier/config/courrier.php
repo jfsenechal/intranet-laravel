@@ -14,16 +14,15 @@ return [
     'meilisearch' => [
         'index_name' => 'indicateur',
         'filterable_attributes' => [
-            'date_courrier_timestamp',
-            'recommande',
-            'destinataires',
+            'mail_date_timestamp',
+            'is_registered',
+            'recipients',
             'services',
-            'numero',
-            'expediteur',
+            'department',
         ],
         'sortable_attributes' => [
-            'date_courrier_timestamp',
-            'expediteur',
+            'mail_date_timestamp',
+            'sender',
         ],
     ],
     'imap' => [

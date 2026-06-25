@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Search;
 
 use AcMarche\App\Meilisearch\MeiliTrait;
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Models\Recipient;
 use App\Models\User;
 use DateTimeInterface;
@@ -43,7 +44,7 @@ final class MeiliSearcher
             mb_trim($query),
             [
                 'filter' => $clauses,
-                'sort' => ['date_courrier_timestamp:desc'],
+                'sort' => ['mail_date_timestamp:desc'],
                 'limit' => $limit,
             ],
         );
@@ -66,14 +67,25 @@ final class MeiliSearcher
     /**
      * Build the policy clause for the given user.
      *
-     * Returns an empty string when the user may see everything (administrator),
-     * `null` when the user may see nothing (unknown recipient), otherwise a
-     * Meilisearch filter expression scoping results to their mail.
+     * Mirrors the listing tiers: administrators may see everything (empty
+     * string), index/admin users are scoped to their department(s), and every
+     * other user only sees mail they receive or that targets one of their
+     * services. Returns `null` when the user may see nothing.
      */
     public function policyFilter(User $user): ?string
     {
         if ($user->isAdministrator()) {
             return self::NO_RESTRICTION;
+        }
+
+        $departments = $user->getCourrierViewableDepartments();
+        if ($departments !== []) {
+            $values = array_map(
+                static fn (DepartmentCourrierEnum $department): string => '"'.$department->value.'"',
+                $departments,
+            );
+
+            return sprintf('department IN [%s]', implode(', ', $values));
         }
 
         $recipient = Recipient::query()->where('username', $user->username)->first();
@@ -83,11 +95,11 @@ final class MeiliSearcher
 
         $serviceIds = $recipient->services()->pluck('courrier_services.id')->all();
         if ($serviceIds === []) {
-            return sprintf('destinataires IN [%d]', $recipient->id);
+            return sprintf('recipients IN [%d]', $recipient->id);
         }
 
         return sprintf(
-            '(destinataires IN [%d] OR services IN [%s])',
+            '(recipients IN [%d] OR services IN [%s])',
             $recipient->id,
             implode(', ', $serviceIds),
         );
@@ -112,19 +124,19 @@ final class MeiliSearcher
         }
 
         if (! empty($filters['date_from'])) {
-            $clauses[] = 'date_courrier_timestamp >= '.$filters['date_from']->getTimestamp();
+            $clauses[] = 'mail_date_timestamp >= '.$filters['date_from']->getTimestamp();
         }
         if (! empty($filters['date_to'])) {
-            $clauses[] = 'date_courrier_timestamp <= '.$filters['date_to']->getTimestamp();
+            $clauses[] = 'mail_date_timestamp <= '.$filters['date_to']->getTimestamp();
         }
         if (! empty($filters['services'])) {
             $clauses[] = sprintf('services IN [%s]', implode(', ', array_map('intval', $filters['services'])));
         }
         if (! empty($filters['destinataires'])) {
-            $clauses[] = sprintf('destinataires IN [%s]', implode(', ', array_map('intval', $filters['destinataires'])));
+            $clauses[] = sprintf('recipients IN [%s]', implode(', ', array_map('intval', $filters['destinataires'])));
         }
         if (array_key_exists('recommande', $filters) && $filters['recommande'] !== null) {
-            $clauses[] = 'recommande = '.($filters['recommande'] ? 'true' : 'false');
+            $clauses[] = 'is_registered = '.($filters['recommande'] ? 'true' : 'false');
         }
 
         return $clauses;
