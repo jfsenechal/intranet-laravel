@@ -87,9 +87,14 @@ final class EditIncomingMail extends EditRecord
 
     protected function afterSave(): void
     {
-        // Save sender to senders table if checkbox was checked
+        // Save sender to senders table if checkbox was checked. The sender
+        // inherits the mail's department so it stays visible under the
+        // department scope.
         if ($this->saveSender && $this->record->sender) {
-            Sender::firstOrCreate(['name' => $this->record->sender]);
+            Sender::firstOrCreate(
+                ['name' => $this->record->sender],
+                ['department' => $this->record->department],
+            );
         }
 
         // Sync services

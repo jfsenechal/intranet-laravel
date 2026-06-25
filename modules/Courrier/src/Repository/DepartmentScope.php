@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Scope;
 final class DepartmentScope implements Scope
 {
     /**
-     * Departments the current user administers. Used for the create auto-fill.
+     * Department the current user administers. Used for the create auto-fill.
      */
     public static function getCurrentAdminUserDepartment(): ?DepartmentCourrierEnum
     {
@@ -26,9 +26,7 @@ final class DepartmentScope implements Scope
     }
 
     /**
-     * Departments the current user may assign when creating or editing mail.
-     *
-     * Department admins are limited to the department they administer.
+     * Department the current user may assign when creating or editing mail.
      */
     public static function getAssignableDepartment(): ?DepartmentCourrierEnum
     {

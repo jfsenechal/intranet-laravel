@@ -49,10 +49,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
         $user->roles()->attach($role);
 
-        $departments = $user->getCourrierAdminDepartment();
-
-        expect($departments)->toHaveCount(1)
-            ->and($departments[0])->toBe(DepartmentCourrierEnum::VILLE);
+        expect($user->getCourrierAdminDepartment())->toBe(DepartmentCourrierEnum::VILLE);
     });
 
     test('returns CPAS department for cpas admin role', function (): void {
@@ -60,10 +57,7 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
         $user->roles()->attach($role);
 
-        $departments = $user->getCourrierAdminDepartment();
-
-        expect($departments)->toHaveCount(1)
-            ->and($departments[0])->toBe(DepartmentCourrierEnum::CPAS);
+        expect($user->getCourrierAdminDepartment())->toBe(DepartmentCourrierEnum::CPAS);
     });
 
     test('returns BGM department for bourgmestre admin role', function (): void {
@@ -71,37 +65,21 @@ describe('UserCourrierTrait getCourrierDepartments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value]);
         $user->roles()->attach($role);
 
-        $departments = $user->getCourrierAdminDepartment();
-
-        expect($departments)->toHaveCount(1)
-            ->and($departments[0])->toBe(DepartmentCourrierEnum::BGM);
+        expect($user->getCourrierAdminDepartment())->toBe(DepartmentCourrierEnum::BGM);
     });
 
-    test('returns multiple departments for user with multiple admin roles', function (): void {
-        $user = User::factory()->create();
-        $villeRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
-        $cpasRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
-        $user->roles()->attach([$villeRole->id, $cpasRole->id]);
-
-        $departments = $user->getCourrierAdminDepartment();
-
-        expect($departments)->toHaveCount(2)
-            ->and($departments)->toContain(DepartmentCourrierEnum::VILLE)
-            ->and($departments)->toContain(DepartmentCourrierEnum::CPAS);
-    });
-
-    test('returns empty array for user without admin courrier roles', function (): void {
+    test('returns null for user without admin courrier roles', function (): void {
         $user = User::factory()->create();
 
-        expect($user->getCourrierAdminDepartment())->toBeEmpty();
+        expect($user->getCourrierAdminDepartment())->toBeNull();
     });
 
-    test('non-admin courrier roles do not produce departments', function (): void {
+    test('non-admin courrier roles do not produce a department', function (): void {
         $user = User::factory()->create();
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_READ->value]);
         $user->roles()->attach($role);
 
-        expect($user->getCourrierAdminDepartment())->toBeEmpty();
+        expect($user->getCourrierAdminDepartment())->toBeNull();
     });
 });
 
@@ -111,7 +89,7 @@ describe('UserCourrierTrait viewable departments', function (): void {
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
         $user->roles()->attach($role);
 
-        expect($user->getCourrierAdminDepartment())->toBeEmpty()
+        expect($user->getCourrierAdminDepartment())->toBeNull()
             ->and($user->getCourrierIndexDepartments())->toBe([DepartmentCourrierEnum::VILLE])
             ->and($user->getCourrierViewableDepartments())->toBe([DepartmentCourrierEnum::VILLE]);
     });
@@ -147,25 +125,6 @@ describe('Department Global Scope on IncomingMail', function (): void {
 
         expect($mails)->toHaveCount(1)
             ->and($mails->first()->id)->toBe($villeMail->id);
-    });
-
-    test('user with multiple admin roles sees mails from all their departments', function (): void {
-        $user = User::factory()->create();
-        $villeRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
-        $cpasRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
-        $user->roles()->attach([$villeRole->id, $cpasRole->id]);
-
-        $villeMail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
-        $cpasMail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
-        $bgmMail = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::BGM->value]);
-
-        $this->actingAs($user);
-
-        $mails = IncomingMail::all();
-
-        expect($mails)->toHaveCount(2)
-            ->and($mails->pluck('id')->all())->toContain($villeMail->id)
-            ->and($mails->pluck('id')->all())->toContain($cpasMail->id);
     });
 
     test('filters incoming mails by index-only user department', function (): void {
@@ -235,24 +194,6 @@ describe('Department Auto-Assignment on IncomingMail', function (): void {
         expect($mail->department)->toBe(DepartmentCourrierEnum::VILLE->value);
     });
 
-    test('does not auto-assign department when user has multiple admin roles', function (): void {
-        $user = User::factory()->create();
-        $villeRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
-        $cpasRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]);
-        $user->roles()->attach([$villeRole->id, $cpasRole->id]);
-
-        $this->actingAs($user);
-
-        $mail = IncomingMail::create([
-            'reference_number' => 'TEST-002',
-            'sender' => 'Test Sender',
-            'mail_date' => now(),
-            'user_add' => $user->username,
-        ]);
-
-        expect($mail->department)->toBeNull();
-    });
-
     test('does not override explicitly set department', function (): void {
         $user = User::factory()->create();
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
@@ -288,19 +229,4 @@ describe('Department Auto-Assignment on Service', function (): void {
         expect($service->department)->toBe(DepartmentCourrierEnum::CPAS->value);
     });
 
-    test('does not auto-assign department when user has multiple admin roles', function (): void {
-        $user = User::factory()->create();
-        $villeRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
-        $bgmRole = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->value]);
-        $user->roles()->attach([$villeRole->id, $bgmRole->id]);
-
-        $this->actingAs($user);
-
-        $service = Service::create([
-            'name' => 'Test Service 2',
-            'slugname' => 'test-service-2',
-        ]);
-
-        expect($service->department)->toBeNull();
-    });
 });

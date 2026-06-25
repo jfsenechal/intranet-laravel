@@ -8,6 +8,7 @@ use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\Sender;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -68,9 +69,14 @@ final class CreateIncomingMail extends CreateRecord
 
     protected function afterCreate(): void
     {
-        // Save sender to senders table if checkbox was checked
+        // Save sender to senders table if checkbox was checked. The sender
+        // inherits the mail's department so it stays visible under the
+        // department scope.
         if ($this->saveSender && $this->record->sender) {
-            Sender::firstOrCreate(['name' => $this->record->sender]);
+            Sender::firstOrCreate(
+                ['name' => $this->record->sender],
+                ['department' => $this->record->department],
+            );
         }
 
         // Attach services and recipients via pivot tables
@@ -90,8 +96,12 @@ final class CreateIncomingMail extends CreateRecord
             $this->record->recipients()->attach($recipientId, ['is_primary' => false]);
         }
 
-        // Handle file attachment
+        // Handle file attachment. A FileUpload field keeps its state as an
+        // array of uploaded files keyed by a random id, even when not multiple.
         $file = $this->data['attachment_file'] ?? null;
+        if (is_array($file)) {
+            $file = Arr::first($file);
+        }
 
         if (! $file instanceof TemporaryUploadedFile) {
             return;

@@ -91,7 +91,7 @@ it('limits a regular user to the mail of their linked service', function (): voi
         ->assertCanNotSeeTableRecords([$other]);
 });
 
-it('shows nothing to a regular user with no recipient, service or department', function (): void {
+it('shows nothing to a user with no recipient, service or department', function (): void {
     $this->actingAs(User::factory()->create());
 
     $mail = IncomingMail::factory()->create(['mail_date' => today()]);

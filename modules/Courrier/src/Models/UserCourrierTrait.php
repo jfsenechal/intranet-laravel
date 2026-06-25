@@ -10,7 +10,8 @@ use AcMarche\Courrier\Enums\RolesEnum;
 trait UserCourrierTrait
 {
     /**
-     * Departments the user administers (manage, create, download attachments).
+     * Department the user administers (manage, create, download attachments).
+     * A user holds at most one admin role.
      */
     public function getCourrierAdminDepartment(): ?DepartmentCourrierEnum
     {

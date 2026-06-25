@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\CreateIncomingMail;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\EditIncomingMail;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Sender;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
@@ -15,13 +17,17 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+
+    // The create/edit form needs a single assignable department, so the acting
+    // user administers exactly one (VILLE).
+    $user = User::factory()->create();
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
+    $user->roles()->attach($role);
+    $this->actingAs($user);
 });
 
 describe('Save Sender from IncomingMail form', function (): void {
     test('creating incoming mail with save_sender checked saves sender to senders table', function (): void {
-        $admin = User::factory()->create(['is_administrator' => true]);
-        $this->actingAs($admin);
-
         livewire(CreateIncomingMail::class)
             ->fillForm([
                 'reference_number' => 'TEST-SENDER-001',
@@ -38,9 +44,6 @@ describe('Save Sender from IncomingMail form', function (): void {
     });
 
     test('creating incoming mail without save_sender does not save sender', function (): void {
-        $admin = User::factory()->create(['is_administrator' => true]);
-        $this->actingAs($admin);
-
         livewire(CreateIncomingMail::class)
             ->fillForm([
                 'reference_number' => 'TEST-SENDER-002',
@@ -57,10 +60,10 @@ describe('Save Sender from IncomingMail form', function (): void {
     });
 
     test('save_sender does not create duplicate if sender already exists', function (): void {
-        $admin = User::factory()->create(['is_administrator' => true]);
-        $this->actingAs($admin);
-
-        Sender::factory()->create(['name' => 'Existing Sender']);
+        Sender::factory()->create([
+            'name' => 'Existing Sender',
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
 
         livewire(CreateIncomingMail::class)
             ->fillForm([
@@ -78,9 +81,6 @@ describe('Save Sender from IncomingMail form', function (): void {
     });
 
     test('editing incoming mail with save_sender checked saves sender to senders table', function (): void {
-        $admin = User::factory()->create(['is_administrator' => true]);
-        $this->actingAs($admin);
-
         $mail = IncomingMail::factory()->create([
             'sender' => 'Edited Sender SA',
             'department' => DepartmentCourrierEnum::VILLE->value,

@@ -27,6 +27,8 @@ final class IncomingMailPolicy
 
     /**
      * Determine whether the user can view the listing.
+     *
+     * Always allowed; the listing query itself scopes which mail is shown.
      */
     public function viewAny(User $user): bool
     {
