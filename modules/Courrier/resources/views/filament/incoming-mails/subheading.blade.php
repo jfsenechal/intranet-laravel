@@ -1,0 +1,1 @@
+Cette liste n'affiche que les <strong>courriers du jour</strong>. Pour rechercher dans l'ensemble des courriers, <a href="{{ $searchUrl }}" class="font-semibold text-primary-600 underline hover:no-underline dark:text-primary-400">utilisez la recherche avancée</a>.

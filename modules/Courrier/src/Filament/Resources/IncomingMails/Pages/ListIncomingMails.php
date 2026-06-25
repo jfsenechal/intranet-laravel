@@ -19,11 +19,10 @@ final class ListIncomingMails extends ListRecords
 
     public function getSubheading(): string|Htmlable|null
     {
-        $searchUrl = IncomingMailSearch::getUrl();
-
         return new HtmlString(
-            'Cette liste n\'affiche que les <strong>courriers du jour</strong>. Pour rechercher dans l\'ensemble des courriers, '
-            .'<a href="'.e($searchUrl).'" class="font-semibold underline hover:no-underline">utilisez la recherche avancée</a>.'
+            view('courrier::filament.incoming-mails.subheading', [
+                'searchUrl' => IncomingMailSearch::getUrl(),
+            ])->render()
         );
     }
 
