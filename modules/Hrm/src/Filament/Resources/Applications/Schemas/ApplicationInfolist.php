@@ -63,7 +63,7 @@ final class ApplicationInfolist
                                     ->label('Fichier')
                                     ->placeholder('Aucun fichier')
                                     ->url(
-                                        fn (?string $state): ?string => $state ? Storage::disk('public')->url($state) : null,
+                                        fn (?string $state): ?string => $state ? Storage::disk('local')->temporaryUrl($state, now()->addMinutes(5)) : null,
                                         shouldOpenInNewTab: true,
                                     ),
                             ]),

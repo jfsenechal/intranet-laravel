@@ -64,9 +64,8 @@ final class ApplicationForm
                     ->schema([
                         FileUpload::make('file')
                             ->label('Fichier de candidature')
-                            ->disk('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.candidates'))
-                            ->visibility('public')
                             ->columnSpanFull(),
                     ]),
                 Section::make('Notes')

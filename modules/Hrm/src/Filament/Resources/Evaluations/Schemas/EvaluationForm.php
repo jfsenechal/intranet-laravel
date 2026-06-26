@@ -57,13 +57,11 @@ final class EvaluationForm
                     ->schema([
                         FileUpload::make('file1_name')
                             ->label('Document 1')
-                            ->disk('public')
-                            ->visibility('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.evaluations')),
                         FileUpload::make('file2_name')
                             ->label('Document 2')
-                            ->disk('public')
-                            ->visibility('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.evaluations')),
                     ]),
             ]);

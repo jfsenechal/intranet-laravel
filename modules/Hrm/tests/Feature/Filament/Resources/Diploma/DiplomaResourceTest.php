@@ -11,6 +11,8 @@ use AcMarche\Hrm\Models\Diploma;
 use AcMarche\Hrm\Models\Employee;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -94,6 +96,30 @@ describe('form validation', function (): void {
         '`name` is required' => [['name' => null], ['name' => 'required']],
         '`name` is max 150 characters' => [['name' => Str::random(151)], ['name' => 'max']],
     ]);
+});
+
+describe('file upload storage', function (): void {
+    it('stores the certificate on the private local disk, not the public disk', function (): void {
+        Storage::fake('local');
+        Storage::fake('public');
+
+        $record = Diploma::factory()->create(['certificate_file' => null]);
+
+        Livewire::test(EditDiploma::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'certificate_file' => UploadedFile::fake()->create('attestation.pdf', 100),
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $path = $record->refresh()->certificate_file;
+
+        expect($path)->not->toBeNull();
+        Storage::disk('local')->assertExists($path);
+        Storage::disk('public')->assertMissing($path);
+    });
 });
 
 describe('export action', function (): void {

@@ -19,8 +19,7 @@ final class HrDocumentForm
                 ->maxLength(255),
             FileUpload::make('file_name')
                 ->label('Fichier')
-                ->disk('public')
-                ->visibility('public')
+                ->disk('local')
                 ->directory(config('hrm.uploads.documents'))
                 ->required(),
             RichEditor::make('notes')

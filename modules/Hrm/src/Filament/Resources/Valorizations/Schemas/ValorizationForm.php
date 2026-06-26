@@ -44,8 +44,7 @@ final class ValorizationForm
                     ->schema([
                         FileUpload::make('file_name')
                             ->label('Fichier attestation')
-                            ->disk('public')
-                            ->visibility('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.valorizations'))
                             ->columnSpanFull(),
                     ]),

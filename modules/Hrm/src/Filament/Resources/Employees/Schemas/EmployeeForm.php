@@ -204,7 +204,7 @@ final class EmployeeForm
                                     ->options(ListOptions::getNiveauxDiplomesSimplifies()),
                                 FileUpload::make('candidate_file_name')
                                     ->label('Document du stagiaire')
-                                    ->disk('public')
+                                    ->disk('local')
                                     ->directory(config('hrm.uploads.candidates')),
                             ]),
                         Tab::make('Etudiant')

@@ -25,8 +25,7 @@ final class DiplomaForm
                             ->maxLength(150),
                         FileUpload::make('certificate_file')
                             ->label('Fichier attestation')
-                            ->disk('public')
-                            ->visibility('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.diplomas'))
                             ->columnSpanFull(),
                     ]),

@@ -117,11 +117,11 @@ final class ContractForm
                     ->schema([
                         FileUpload::make('file1_name')
                             ->label('Document 1')
-                            ->disk('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.contracts')),
                         FileUpload::make('file2_name')
                             ->label('Document 2')
-                            ->disk('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.contracts')),
                     ]),
                 RichEditor::make('college')

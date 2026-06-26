@@ -102,7 +102,7 @@ final class TrainingForm
                             ->label('Recue le'),
                         FileUpload::make('certificate_file')
                             ->label('Fichier attestation')
-                            ->disk('public')
+                            ->disk('local')
                             ->directory(config('hrm.uploads.formations'))
                             ->columnSpanFull(),
                     ]),

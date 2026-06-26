@@ -20,7 +20,7 @@ final class HrDocumentCreator
         return $employee->documents()->create([
             'name' => $data['name'],
             'file_name' => $path,
-            'mime' => $path ? (Storage::disk('public')->mimeType($path) ?: '') : '',
+            'mime' => $path ? (Storage::disk('local')->mimeType($path) ?: '') : '',
             'notes' => $data['notes'] ?? null,
         ]);
     }

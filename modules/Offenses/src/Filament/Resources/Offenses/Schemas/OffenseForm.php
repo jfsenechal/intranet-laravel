@@ -35,7 +35,7 @@ final class OffenseForm
                             ->nullable(),
                         FileUpload::make('file_name')
                             ->label('Fichier')
-                            ->disk('public')
+                            ->disk('local')
                             ->directory(config('offenses.uploads.offenses'))
                             ->previewable(false)
                             ->downloadable()

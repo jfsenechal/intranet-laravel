@@ -71,8 +71,9 @@ final class InternshipsRelationManager extends RelationManager
                         ->icon('heroicon-o-arrow-down-tray')
                         ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
                         ->url(
-                            fn (?string $state): ?string => $state ? Storage::disk('public')->url(
-                                $state
+                            fn (?string $state): ?string => $state ? Storage::disk('local')->temporaryUrl(
+                                $state,
+                                now()->addMinutes(5)
                             ) : null
                         )
                         ->openUrlInNewTab(),
