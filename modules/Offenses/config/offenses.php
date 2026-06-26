@@ -12,16 +12,7 @@ return [
     |
     */
     'storage' => [
-        'disk' => env('DOCUMENT_DISK', 'public'),
-        'directory' => env('DOCUMENT_DIRECTORY', 'offenses'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Upload Directories
-    |--------------------------------------------------------------------------
-    */
-    'uploads' => [
-        'offenses' => 'uploads/offense',
+        'disk' => env('OFFENSE_DISK', 'local'),
+        'directory' => env('OFFENSE_DIRECTORY', 'uploads/offense'),
     ],
 ];

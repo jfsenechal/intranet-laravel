@@ -52,7 +52,7 @@ return [
         ],
     ],
     'storage' => [
-        'disk' => env('COURRIER_DISK', 'private'),
+        'disk' => env('COURRIER_DISK', 'local'),
         'directory' => env('COURRIER_DIRECTORY', 'courrier'),
     ],
 
