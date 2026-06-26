@@ -1,0 +1,905 @@
+ ▐▛███▜▌   Claude Code v2.1.190
+▝▜█████▛▘  Opus 4.8 · Claude Pro
+  ▘▘ ▝▝    /var/www/intranet-laravel
+
+
+❯ refactor For all modules, uploads must be stored in app/private               
+  except for the news, ad, and document modules and photo of hrm employee       
+  list before do the work                                                       
+
+● I'll first explore the module structure and find where uploads are configured
+  before making any changes.
+
+  Searched for 1 pattern, listed 1 directory (ctrl+o to expand)
+
+● Let me get a complete picture of all FileUpload components and their
+  disk/directory settings across all modules.
+
+  Searched for 1 pattern, read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+● Default disk is local = storage/app/private. Now let me inspect every
+  FileUpload's current disk/directory across all module files.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me inspect the Hrm resource files and the Courrier attachment handling.
+
+  Ran 5 shell commands (ctrl+o to expand)
+
+● Let me find the read-side references (downloads, image columns, infolists)
+  that also use public in the affected modules, so the list is complete.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I now have a complete inventory. Here's the list before doing any work.
+
+  Disk setup
+
+  - local disk → storage/app/private (this is the default disk)
+  - public disk → storage/app/public (web-accessible via /storage)
+
+  ✅ Exceptions — stay on public (no change)
+
+  ┌────────────────┬────────────────────────────────────────────────────────┐
+  │     Module     │                          File                          │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ News           │ News/.../NewsForm.php, NewsInfolist.php                │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Ad             │ Ad/.../ClassifiedAdForm.php, ClassifiedAdTables.php    │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Document       │ Document/.../DocumentForm.php, DocumentInfolist.php    │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Hrm — employee │ Employees/Schemas/EmployeeForm.php:163 (photo),        │
+  │  photo only    │ EmployeeInfolist.php:39 & :248 (photo)                 │
+  └────────────────┴────────────────────────────────────────────────────────┘
+
+  ⏭️ Already private / special (no change)
+
+  - Courrier — uses config('courrier.storage.disk') = private ✓
+  - Conseil → NotifyRecipients (local) ✓
+  - College → Notifications (local) ✓
+  - CpasLibrary — uses its own custom cpas-library disk (separate CPAS
+  system/DB) — flagging; not touching unless you say so
+
+  🔄 To convert public → private (the actual work)
+
+  Each upload field, plus its read-side companions that currently build URLs via
+  Storage::disk('public')->url(...):
+
+  Module: Conseil
+  Upload field(s): AgendaForm file_name
+  Read-side companions to also fix: ViewAgenda.php (download/exists),
+    AgendaRemoteSender.php
+  ────────────────────────────────────────
+  Module: AldermenAgenda
+  Upload field(s): EventForm file1_name, file2_name
+  Read-side companions to also fix: —
+  ────────────────────────────────────────
+  Module: Pst
+  Upload field(s): MediaForm, OddForm icon, FollowUpForm icon
+  Read-side companions to also fix: MediaTables, PdfExport, PdfExportController
+  ────────────────────────────────────────
+  Module: Offenses
+  Upload field(s): OffenseForm file_name
+  Read-side companions to also fix: ViewOffense.php (->url)
+  ────────────────────────────────────────
+  Module: Telecommunication
+  Upload field(s): AttachmentsRelationManager file_name
+  Read-side companions to also fix: —
+  ────────────────────────────────────────
+  Module: App
+  Upload field(s): EditProfile avatar_url
+  Read-side companions to also fix: PDFHandler.php
+  ────────────────────────────────────────
+  Module: Agent
+  Upload field(s): ProfileInfolist photo (ImageEntry)
+  Read-side companions to also fix: — (display image)
+  ────────────────────────────────────────
+  Module: MailingList
+  Upload field(s): SenderForm logo, EmailForm attachments
+  Read-side companions to also fix: SendAction.php
+  ────────────────────────────────────────
+  Module: Hrm (non-photo)
+  Upload field(s): ContractForm, DiplomaForm, HrDocumentForm, EvaluationForm,
+    ApplicationForm, ValorizationForm, TrainingForm, EmployeeForm
+    candidate_file_name
+  Read-side companions to also fix: All matching *Infolist, *Tables,
+    HrDocumentCreator, InternshipsRelationManager (->url calls)
+
+  ⚠️ Key issue to decide before I code
+
+  The private disk is not web-accessible and has no url(). Many read-side files
+  do Storage::disk('public')->url($state) to show/link files in the browser.
+  Once files move to private, those ->url() calls break — files must instead be
+  served through a download route/controller (like Courrier's
+  AttachmentController).
+
+  Also note: Agent photo and App avatar are displayed images; on a private disk
+  they won't render via a plain <img src> and need a streaming route too.
+
+  How would you like me to handle serving the now-private files?
+
+● User declined to answer questions
+  ⎿  · Private files aren't web-accessible. How should the read-side (downloads 
+     + displayed images like Agent photo / App avatar) be handled when I switch 
+     these uploads to the private disk? (Download routes/controller / Filament 
+     temporaryUrl/actions / Just switch the disk now)
+
+● What would you like to clarify? I'm ready for any questions or extra context
+  you have about the refactor before I proceed.
+
+✻ Cooked for 2m 22s
+
+❯ /export                                                                       
+  ⎿  Conversation exported to: /var/www/intranet-laravel/2026-06-26-143539-refac
+     tor-for-all-modules-uploads-must-be-stored.txt
+
+❯ After reflection, I only do it for offenses and hrm non-photo                 
+
+● Understood — scope is now just Offenses and Hrm non-photo (keeping the
+  employee photo on public). Let me check how Laravel's local disk serves files
+  and look at the exact read-side code I'll need to update.
+
+  Called laravel-boost, ran 1 shell command (ctrl+o to expand)
+
+● The key finding: the local disk already has serve => true, so
+  Storage::disk('local')->temporaryUrl(...) works natively (signed, expiring
+  URLs) — no new controller needed. That's the clean read-side fix.
+
+  Plan for the narrowed scope (Offenses + Hrm non-photo, employee photo stays on
+  public):
+  - Upload fields: ->disk('public') → ->disk('local')
+  - Read-side Storage::disk('public')->url($state) →
+  Storage::disk('local')->temporaryUrl($state, now()->addMinutes(5))
+
+  Let me read the exact files to make precise edits.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now let me make the edits. Starting with Offenses:
+
+● Update(modules/Offenses/src/Filament/Resources/Offenses/Schemas/OffenseForm.ph
+        p)
+  ⎿  File must be read first
+
+● Update(modules/Offenses/src/Filament/Resources/Offenses/Pages/ViewOffense.php)  ⎿  File must be read first
+
+● I need to Read files before editing. Let me read all the files I'll edit.
+
+  Read 8 files (ctrl+o to expand)
+
+● Several forms also have ->visibility('public') which contradicts private
+  storage — I'll remove those. Let me read the read-side files too.
+
+  Read 10 files (ctrl+o to expand)
+
+● I have everything. Now making all edits — forms first.
+
+● Update(modules/Offenses/src/Filament/Resources/Offenses/Schemas/OffenseForm.ph
+        p)
+  ⎿  Added 1 line, removed 1 line
+      35                              ->nullable(),
+      36                          FileUpload::make('file_name')
+      37                              ->label('Fichier')
+      38 -                            ->disk('public')                   
+      38 +                            ->disk('local')                    
+      39                              ->directory(config('offenses.upload
+          s.offenses'))
+      40                              ->previewable(false)
+      41                              ->downloadable()
+
+● Update(modules/Hrm/src/Filament/Resources/Contracts/Schemas/ContractForm.php)
+  ⎿  Added 2 lines, removed 2 lines
+      117                      ->schema([
+      118                          FileUpload::make('file1_name')
+      119                              ->label('Document 1')
+      120 -                            ->disk('public')                  
+      120 +                            ->disk('local')                   
+      121                              ->directory(config('hrm.uploads.co
+           ntracts')),
+      122                          FileUpload::make('file2_name')
+      123                              ->label('Document 2')
+      124 -                            ->disk('public')                  
+      124 +                            ->disk('local')                   
+      125                              ->directory(config('hrm.uploads.co
+           ntracts')),
+      126                      ]),
+      127                  RichEditor::make('college')
+
+● Update(modules/Hrm/src/Filament/Resources/Diplomas/Schemas/DiplomaForm.php)
+  ⎿  Added 1 line, removed 2 lines
+      25                              ->maxLength(150),
+      26                          FileUpload::make('certificate_file')
+      27                              ->label('Fichier attestation')
+      28 -                            ->disk('public')                   
+      29 -                            ->visibility('public')             
+      28 +                            ->disk('local')                    
+      29                              ->directory(config('hrm.uploads.dip
+          lomas'))
+      30                              ->columnSpanFull(),
+      31                      ]),
+
+● Update(modules/Hrm/src/Filament/Resources/HrDocuments/Schemas/HrDocumentForm.p
+        hp)
+  ⎿  Added 1 line, removed 2 lines
+      19                  ->maxLength(255),
+      20              FileUpload::make('file_name')
+      21                  ->label('Fichier')
+      22 -                ->disk('public')                               
+      23 -                ->visibility('public')                         
+      22 +                ->disk('local')                                
+      23                  ->directory(config('hrm.uploads.documents'))
+      24                  ->required(),
+      25              RichEditor::make('notes')
+
+● Update(modules/Hrm/src/Filament/Resources/Evaluations/Schemas/EvaluationForm.p
+        hp)
+  ⎿  Added 2 lines, removed 4 lines
+      57                      ->schema([
+      58                          FileUpload::make('file1_name')
+      59                              ->label('Document 1')
+      60 -                            ->disk('public')                   
+      61 -                            ->visibility('public')             
+      60 +                            ->disk('local')                    
+      61                              ->directory(config('hrm.uploads.eva
+          luations')),
+      62                          FileUpload::make('file2_name')
+      63                              ->label('Document 2')
+      65 -                            ->disk('public')                   
+      66 -                            ->visibility('public')             
+      64 +                            ->disk('local')                    
+      65                              ->directory(config('hrm.uploads.eva
+          luations')),
+      66                      ]),
+      67              ]);
+
+● Update(modules/Hrm/src/Filament/Resources/Applications/Schemas/ApplicationForm
+        .php)
+  ⎿  Added 1 line, removed 2 lines
+      64                      ->schema([
+      65                          FileUpload::make('file')
+      66                              ->label('Fichier de candidature')
+      67 -                            ->disk('public')                   
+      67 +                            ->disk('local')                    
+      68                              ->directory(config('hrm.uploads.can
+          didates'))
+      69 -                            ->visibility('public')             
+      69                              ->columnSpanFull(),
+      70                      ]),
+      71                  Section::make('Notes')
+
+● Update(modules/Hrm/src/Filament/Resources/Valorizations/Schemas/ValorizationFo
+        rm.php)
+  ⎿  Added 1 line, removed 2 lines
+      44                      ->schema([
+      45                          FileUpload::make('file_name')
+      46                              ->label('Fichier attestation')
+      47 -                            ->disk('public')                   
+      48 -                            ->visibility('public')             
+      47 +                            ->disk('local')                    
+      48                              ->directory(config('hrm.uploads.val
+          orizations'))
+      49                              ->columnSpanFull(),
+      50                      ]),
+
+● Update(modules/Hrm/src/Filament/Resources/Trainings/Schemas/TrainingForm.php)
+  ⎿  Added 1 line, removed 1 line
+      102                              ->label('Recue le'),
+      103                          FileUpload::make('certificate_file')
+      104                              ->label('Fichier attestation')
+      105 -                            ->disk('public')                  
+      105 +                            ->disk('local')                   
+      106                              ->directory(config('hrm.uploads.fo
+           rmations'))
+      107                              ->columnSpanFull(),
+      108                      ]),
+
+● Update(modules/Hrm/src/Filament/Resources/Employees/Schemas/EmployeeForm.php)
+  ⎿  Added 1 line, removed 1 line
+      204                                      ->options(ListOptions::get
+           NiveauxDiplomesSimplifies()),
+      205                                  FileUpload::make('candidate_fi
+           le_name')
+      206                                      ->label('Document du stagi
+           aire')
+      207 -                                    ->disk('public')          
+      207 +                                    ->disk('local')           
+      208                                      ->directory(config('hrm.up
+           loads.candidates')),
+      209                              ]),
+      210                          Tab::make('Etudiant')
+
+● Now the read-side edits (download URLs → temporaryUrl):
+
+● Update(modules/Offenses/src/Filament/Resources/Offenses/Pages/ViewOffense.php)
+  ⎿  Added 1 line, removed 1 line
+      33                  ->icon('tabler-download')
+      34                  ->color(Color::Green)
+      35                  ->visible(fn (Offense $record) => $record->file
+          _name)
+      36 -                ->url(fn (Offense $record) => Storage::disk('pu
+         -blic')->url($record->file_name)),                              
+      36 +                ->url(fn (Offense $record) => Storage::disk('lo
+         +cal')->temporaryUrl($record->file_name, now()->addMinutes(5))),
+      37              EditAction::make()->icon(Heroicon::Pencil),
+      38              DeleteAction::make()->icon(Heroicon::Trash),
+      39          ];
+
+● Update(modules/Hrm/src/Filament/Resources/Contracts/Schemas/ContractInfolist.p
+        hp)
+  ⎿  Added 2 lines, removed 2 lines
+       90                              ->placeholder('—')
+       91                              ->icon('heroicon-o-arrow-down-tray
+           ')
+       92                              ->formatStateUsing(fn (?string $st
+           ate): ?string => $state ? 'Télécharger' : null)
+       93 -                            ->url(fn (?string $state): ?string
+          - => $state ? Storage::disk('public')->url($state) : null)     
+       93 +                            ->url(fn (?string $state): ?string
+          + => $state ? Storage::disk('local')->temporaryUrl($state, now(
+          +)->addMinutes(5)) : null)                                     
+       94                              ->openUrlInNewTab(),
+       95                          TextEntry::make('file2_name')
+       96                              ->label('Document 2')
+       97                              ->placeholder('—')
+       98                              ->icon('heroicon-o-arrow-down-tray
+           ')
+       99                              ->formatStateUsing(fn (?string $st
+           ate): ?string => $state ? 'Télécharger' : null)
+      100 -                            ->url(fn (?string $state): ?string
+          - => $state ? Storage::disk('public')->url($state) : null)     
+      100 +                            ->url(fn (?string $state): ?string
+          + => $state ? Storage::disk('local')->temporaryUrl($state, now(
+          +)->addMinutes(5)) : null)                                     
+      101                              ->openUrlInNewTab(),
+      102                      ]),
+      103                  Section::make('College')
+
+● Update(modules/Hrm/src/Filament/Resources/Diplomas/Schemas/DiplomaInfolist.php
+        )
+  ⎿  Added 1 line, removed 1 line
+      24                              ->placeholder('—')
+      25                              ->icon('heroicon-o-arrow-down-tray'
+          )
+      26                              ->formatStateUsing(fn (?string $sta
+          te): ?string => $state ? 'Télécharger' : null)
+      27 -                            ->url(fn (?string $state): ?string 
+         -=> $state ? Storage::disk('public')->url($state) : null)       
+      27 +                            ->url(fn (?string $state): ?string 
+         +=> $state ? Storage::disk('local')->temporaryUrl($state, now()-
+         +>addMinutes(5)) : null)                                        
+      28                              ->openUrlInNewTab(),
+      29                          TextEntry::make('user_add')
+      30                              ->label('Ajouté par'),
+
+● Update(modules/Hrm/src/Filament/Resources/Evaluations/Schemas/EvaluationInfoli
+        st.php)
+  ⎿  Added 2 lines, removed 2 lines
+      67                                      ->placeholder('—')
+      68                                      ->icon('heroicon-o-arrow-do
+          wn-tray')
+      69                                      ->formatStateUsing(fn (?str
+          ing $state): ?string => $state ? 'Télécharger' : null)
+      70 -                                    ->url(fn (?string $state): 
+         -?string => $state ? Storage::disk('public')->url($state) : null
+         -)                                                              
+      70 +                                    ->url(fn (?string $state): 
+         +?string => $state ? Storage::disk('local')->temporaryUrl($state
+         +, now()->addMinutes(5)) : null)                                
+      71                                      ->openUrlInNewTab(),
+      72                                  TextEntry::make('file2_name')
+      73                                      ->label('Document 2')
+      74                                      ->placeholder('—')
+      75                                      ->icon('heroicon-o-arrow-do
+          wn-tray')
+      76                                      ->formatStateUsing(fn (?str
+          ing $state): ?string => $state ? 'Télécharger' : null)
+      77 -                                    ->url(fn (?string $state): 
+         -?string => $state ? Storage::disk('public')->url($state) : null
+         -)                                                              
+      77 +                                    ->url(fn (?string $state): 
+         +?string => $state ? Storage::disk('local')->temporaryUrl($state
+         +, now()->addMinutes(5)) : null)                                
+      78                                      ->openUrlInNewTab(),
+      79                              ]),
+      80                      ]),
+
+● Update(modules/Hrm/src/Filament/Resources/HrDocuments/Schemas/HrDocumentInfoli
+        st.php)
+  ⎿  Added 1 line, removed 1 line
+      26                              ->placeholder('—')
+      27                              ->icon('heroicon-o-arrow-down-tray'
+          )
+      28                              ->formatStateUsing(fn (?string $sta
+          te): ?string => $state ? 'Télécharger' : null)
+      29 -                            ->url(fn (?string $state): ?string 
+         -=> $state ? Storage::disk('public')->url($state) : null)       
+      29 +                            ->url(fn (?string $state): ?string 
+         +=> $state ? Storage::disk('local')->temporaryUrl($state, now()-
+         +>addMinutes(5)) : null)                                        
+      30                              ->openUrlInNewTab(),
+      31                          TextEntry::make('notes')
+      32                              ->label('Remarques')
+
+● Update(modules/Hrm/src/Filament/Resources/HrDocuments/Tables/HrDocumentTables.
+        php)
+  ⎿  Added 1 line, removed 1 line
+      40                      ->label('Fichier')
+      41                      ->formatStateUsing(fn (?string $state): str
+          ing => $state ? '✓' : '—')
+      42                      ->url(
+      43 -                        fn (?string $state): ?string => $state 
+         -? Storage::disk('public')->url($state) : null,                 
+      43 +                        fn (?string $state): ?string => $state 
+         +? Storage::disk('local')->temporaryUrl($state, now()->addMinute
+         +s(5)) : null,                                                  
+      44                          shouldOpenInNewTab: true,
+      45                      )
+      46                      ->toggleable(),
+● Update(modules/Hrm/src/Filament/Resources/Trainings/Schemas/TrainingInfolist.p
+        hp)
+  ⎿  Added 1 line, removed 1 line
+      38                                      ->placeholder('—')
+      39                                      ->icon('heroicon-o-arrow-do
+          wn-tray')
+      40                                      ->formatStateUsing(fn (?str
+          ing $state): ?string => $state ? 'Télécharger' : null)
+      41 -                                    ->url(fn (?string $state): 
+         -?string => $state ? Storage::disk('public')->url($state) : null
+         -)                                                              
+      41 +                                    ->url(fn (?string $state): 
+         +?string => $state ? Storage::disk('local')->temporaryUrl($state
+         +, now()->addMinutes(5)) : null)                                
+      42                                      ->openUrlInNewTab(),
+      43                              ]),
+      44                          Fieldset::make('Dates')
+
+● Update(modules/Hrm/src/Filament/Resources/Applications/Schemas/ApplicationInfo
+        list.php)
+  ⎿  Added 1 line, removed 1 line
+      63                                      ->label('Fichier')
+      64                                      ->placeholder('Aucun fichie
+          r')
+      65                                      ->url(
+      66 -                                        fn (?string $state): ?s
+         -tring => $state ? Storage::disk('public')->url($state) : null, 
+      66 +                                        fn (?string $state): ?s
+         +tring => $state ? Storage::disk('local')->temporaryUrl($state, 
+         +now()->addMinutes(5)) : null,                                  
+      67                                          shouldOpenInNewTab: tru
+          e,
+      68                                      ),
+      69                              ]),
+
+● Update(modules/Hrm/src/Filament/Resources/Valorizations/Schemas/ValorizationIn
+        folist.php)
+  ⎿  Added 1 line, removed 1 line
+      49                                      ->placeholder('—')
+      50                                      ->icon('heroicon-o-arrow-do
+          wn-tray')
+      51                                      ->formatStateUsing(fn (?str
+          ing $state): ?string => $state ? 'Télécharger' : null)
+      52 -                                    ->url(fn (?string $state): 
+         -?string => $state ? Storage::disk('public')->url($state) : null
+         -)                                                              
+      52 +                                    ->url(fn (?string $state): 
+         +?string => $state ? Storage::disk('local')->temporaryUrl($state
+         +, now()->addMinutes(5)) : null)                                
+      53                                      ->openUrlInNewTab(),
+      54                              ]),
+      55                      ]),
+
+● Update(modules/Hrm/src/Filament/Resources/Employees/RelationManagers/Internshi
+        psRelationManager.php)
+  ⎿  Added 3 lines, removed 2 lines
+      71                          ->icon('heroicon-o-arrow-down-tray')
+      72                          ->formatStateUsing(fn (?string $state):
+           ?string => $state ? 'Télécharger' : null)
+      73                          ->url(
+      74 -                            fn (?string $state): ?string => $st
+         -ate ? Storage::disk('public')->url(                            
+      75 -                                $state                         
+      74 +                            fn (?string $state): ?string => $st
+         +ate ? Storage::disk('local')->temporaryUrl(                    
+      75 +                                $state,                        
+      76 +                                now()->addMinutes(5)           
+      77                              ) : null
+      78                          )
+      79                          ->openUrlInNewTab(),
+
+● Update(modules/Hrm/src/Filament/Resources/HrDocuments/HrDocumentCreator.php)
+  ⎿  Added 1 line, removed 1 line
+      20          return $employee->documents()->create([
+      21              'name' => $data['name'],
+      22              'file_name' => $path,
+      23 -            'mime' => $path ? (Storage::disk('public')->mimeTyp
+         -e($path) ?: '') : '',                                          
+      23 +            'mime' => $path ? (Storage::disk('local')->mimeType
+         +($path) ?: '') : '',                                           
+      24              'notes' => $data['notes'] ?? null,
+      25          ]);
+      26      }
+
+● Let me verify no stray public references remain (employee photo should still
+  be public) and run Pint.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Exactly right — the only remaining public refs are the employee photo (kept by
+  design). Now Pint and check for existing tests.
+
+  Ran 4 shell commands (ctrl+o to expand)
+
+● Existing tests don't cover uploads. Let me add a focused test asserting
+  uploads now land on the local disk. Let me check the Diploma form's required
+  fields first.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● I'll write a behavioral test asserting uploads land on local. Let me check the
+  Filament file-upload testing pattern.
+
+  Called laravel-boost (ctrl+o to expand)
+
+● Now I'll add a behavioral test asserting the diploma upload lands on the
+  private local disk (and not public). Let me add it to the existing Diploma
+  test.
+
+● Update(modules/Hrm/tests/Feature/Filament/Resources/Diploma/DiplomaResourceTes
+        t.php)
+  ⎿  File must be read first
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(modules/Hrm/tests/Feature/Filament/Resources/Diploma/DiplomaResourceTes
+        t.php)
+  ⎿  Added 2 lines
+      11  use AcMarche\Hrm\Models\Employee;
+      12  use App\Models\User;
+      13  use Filament\Facades\Filament;
+      14 +use Illuminate\Http\UploadedFile;                              
+      15 +use Illuminate\Support\Facades\Storage;                        
+      16  use Illuminate\Support\Str;
+      17  use Livewire\Livewire;
+      18  
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(modules/Hrm/tests/Feature/Filament/Resources/Diploma/DiplomaResourceTes
+        t.php)
+  ⎿  Added 24 lines
+       98      ]);
+       99  });
+      100  
+      101 +describe('file upload storage', function (): void {           
+      102 +    it('stores the certificate on the private local disk, not 
+          +the public disk', function (): void {                         
+      103 +        Storage::fake('local');                               
+      104 +        Storage::fake('public');                              
+      105 +                                                              
+      106 +        $record = Diploma::factory()->create(['certificate_fil
+          +e' => null]);                                                 
+      107 +                                                              
+      108 +        Livewire::test(EditDiploma::class, [                  
+      109 +            'record' => $record->id,                          
+      110 +        ])                                                    
+      111 +            ->fillForm([                                      
+      112 +                'certificate_file' => UploadedFile::fake()->cr
+          +eate('attestation.pdf', 100),                                 
+      113 +            ])                                                
+      114 +            ->call('save')                                    
+      115 +            ->assertHasNoFormErrors();                        
+      116 +                                                              
+      117 +        $path = $record->refresh()->certificate_file;         
+      118 +                                                              
+      119 +        expect($path)->not->toBeNull();                       
+      120 +        Storage::disk('local')->assertExists($path);          
+      121 +        Storage::disk('public')->assertMissing($path);        
+      122 +    });                                                       
+      123 +});                                                           
+      124 +                                                              
+      125  describe('export action', function (): void {
+      126      it('renders the export action on the index page', function
+            (): void {
+      127          Livewire::test(ListDiplomas::class)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● New test passes. Let me run the full test suites for the affected Hrm
+  resources to check for regressions.
+
+  Ran 1 shell command (ctrl+o to expand)
+● All 80 tests pass. Let me run Pint once more to format the new test code.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Done. Here's what I changed, scoped exactly to Offenses and Hrm non-photo
+  (employee photo stays on public).
+
+  Upload fields: public → local (= storage/app/private)
+
+  - Offenses: OffenseForm file_name
+  - Hrm: ContractForm (×2), DiplomaForm, HrDocumentForm, EvaluationForm (×2),
+  ApplicationForm, ValorizationForm, TrainingForm, EmployeeForm
+  candidate_file_name
+  - Also removed the now-contradictory ->visibility('public') calls on those Hrm
+  fields.
+
+  Read-side (downloads): Storage::disk('public')->url(...) → 
+  Storage::disk('local')->temporaryUrl(..., now()->addMinutes(5))
+
+  The local disk already has serve => true, so signed, expiring URLs work
+  natively — no new controller needed.
+  - ViewOffense (download action)
+  - Hrm infolists/tables/relation manager: ContractInfolist, DiplomaInfolist,
+  EvaluationInfolist, HrDocumentInfolist, HrDocumentTables, TrainingInfolist,
+  ApplicationInfolist, ValorizationInfolist, InternshipsRelationManager
+  - HrDocumentCreator — mimeType() lookup switched to local
+
+  Kept on public (per your scope)
+
+  - Employee photo: EmployeeForm:163, EmployeeInfolist:39 & :248
+
+  Test
+
+  Added a behavioral test in DiplomaResourceTest asserting an uploaded
+  certificate lands on the local disk and is absent from public. All 80 tests
+  across the affected Hrm resources pass; Pint clean.
+
+  ⚠️ One thing to flag: this changes where new uploads go. Existing files
+  already in storage/app/public/... for these modules are not moved — their
+  download links (now pointing at the private disk) won't resolve until those
+  files are migrated to storage/app/private/.... Want me to write a small
+  migration/Artisan command to move the existing Offenses + Hrm-non-photo files
+  over?
+
+✻ Cooked for 7m 8s
+
+❯ check if                                                                      
+  modules/Hrm/database/migrations/2026_05_07_111305_backfill_file_name_path.php 
+  is still correct ?                                                            
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Yes — it's still correct. My refactor only changed the disk (public → local);
+  this migration is entirely about the path string stored in each column, which
+  is independent of the disk.
+
+  Specifically:
+  - It prepends the configured directory (data/hrm/diplomas, etc.) to bare
+  filenames so each column holds the full disk-relative path. All
+  config('hrm.uploads.*') keys it references still exist and resolve (verified
+  above).
+  - The directory values are unchanged by my work, so the target path format is
+  unchanged.
+  - It never references a disk, so public vs local is irrelevant to it.
+  - The NOT LIKE 'directory/%' guard keeps it idempotent (no double-prefixing).
+
+  It's actually complementary to the refactor: my read-side now calls
+  Storage::disk('local')->temporaryUrl($state, …) and ->exists($state), which
+  require $state to be the full disk-relative path (data/hrm/diplomas/x.pdf) —
+  exactly what this migration guarantees.
+
+  One note (not a correctness issue with the migration): it normalizes the DB
+  path strings, but it does not move the physical files between disks. So for
+  existing records, the path is right, but the file still physically lives under
+  storage/app/public/data/hrm/... while the code now reads from
+  storage/app/private/data/hrm/.... The employees.photo row in this migration is
+  fine to leave as-is since photo stays on public. If you want, I can write the
+  file-move command I mentioned earlier to relocate the existing non-photo
+  files.
+
+✻ Crunched for 28s
+
+❯ does storage.disk is used modules/Offenses/config/offenses.php                
+
+  Read 1 file (ctrl+o to expand)
+
+● Let me check whether a private disk actually exists and how
+  offenses.storage.disk is used.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Interesting findings. Let me verify whether a private disk is registered
+  dynamically anywhere (Courrier also uses 'private').
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● No — offenses.storage.disk is not used anywhere. Confirmed facts:
+
+  1. config('offenses.storage.disk') has zero references in the module's code.
+  The only live config key is offenses.uploads.offenses (the directory), which
+  OffenseForm uses. The whole 'storage' => ['disk' => ..., 'directory' => ...]
+  block is dead config.
+  2. Its value 'private' isn't even a valid disk. Only local, public, s3 are
+  registered — Storage::disk('private') throws "Disk [private] does not have a 
+  configured driver." So if anything did read that key, it would crash. The disk
+  whose root is storage/app/private is local — which is what I hardcoded in the
+  form.
+
+  So my ->disk('local') is correct, and the dead storage block is harmless but
+  misleading.
+
+  Two ways to clean it up — your call:
+
+  - Wire it up (recommended): make the disk configurable instead of hardcoded —
+  change the form to ->disk(config('offenses.storage.disk')) and fix the default
+  to a real disk:
+  'disk' => env('OFFENSE_DISK', 'local'),
+  - Or delete the unused storage block entirely and keep ->disk('local')
+  hardcoded.
+
+  Side note (out of scope, but flagged): Courrier does read
+  config('courrier.storage.disk'), and that value also resolves to private —
+  meaning Courrier's file storage is likely broken too unless an env var
+  overrides it to a real disk. Worth checking separately.
+
+  Want me to wire up the Offenses config (option 1) and/or look into the
+  Courrier private disk issue?
+
+✻ Churned for 1m 7s
+
+❯ wire up offenses and why they are 2 configs storage.disk and upload.offenses  
+  and look  look into the Courrier private disk issue?                          
+
+● Let me investigate the Courrier disk situation and the history of the two
+  Offenses configs.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Now I have the complete picture. Key findings:
+
+  - Offenses: only uploads.offenses (directory) is used; the whole storage block
+  is dead copy-paste.
+  - Courrier: heavily uses config('courrier.storage.disk') which defaults to
+  'private' — a disk that doesn't exist. Tests pass only because they do
+  Storage::fake(config('courrier.storage.disk')), which fabricates a private
+  disk at test time and masks the bug. In any real environment without
+  COURRIER_DISK set, attachment storage/download throws.
+
+  Let me wire up Offenses (consolidating to one config block) and fix Courrier's
+  default.
+
+● Update(modules/Offenses/config/offenses.php)
+  ⎿  Added 2 lines, removed 11 lines
+      12      |
+      13      */
+      14      'storage' => [
+      15 -        'disk' => env('OFFENSE_DISK', 'private'),              
+      16 -        'directory' => env('OFFENSE_DIRECTORY', 'offenses'),   
+      15 +        'disk' => env('OFFENSE_DISK', 'local'),                
+      16 +        'directory' => env('OFFENSE_DIRECTORY', 'uploads/offens
+         +e'),                                                           
+      17      ],
+      18 -                                                               
+      19 -    /*                                                         
+      20 -    |----------------------------------------------------------
+         -----------------                                               
+      21 -    | Upload Directories                                       
+      22 -    |----------------------------------------------------------
+         -----------------                                               
+      23 -    */                                                         
+      24 -    'uploads' => [                                             
+      25 -        'offenses' => 'uploads/offense',                       
+      26 -    ],                                                         
+      18  ];
+
+● Update(modules/Offenses/src/Filament/Resources/Offenses/Schemas/OffenseForm.ph
+        p)
+  ⎿  Added 2 lines, removed 2 lines
+      35                              ->nullable(),
+      36                          FileUpload::make('file_name')
+      37                              ->label('Fichier')
+      38 -                            ->disk('local')                    
+      39 -                            ->directory(config('offenses.upload
+         -s.offenses'))                                                  
+      38 +                            ->disk(config('offenses.storage.dis
+         +k'))                                                           
+      39 +                            ->directory(config('offenses.storag
+         +e.directory'))                                                 
+      40                              ->previewable(false)
+      41                              ->downloadable()
+      42                              ->maxSize(10240)
+
+● Update(modules/Offenses/src/Filament/Resources/Offenses/Pages/ViewOffense.php)
+  ⎿  Added 1 line, removed 1 line
+      33                  ->icon('tabler-download')
+      34                  ->color(Color::Green)
+      35                  ->visible(fn (Offense $record) => $record->file
+          _name)
+      36 -                ->url(fn (Offense $record) => Storage::disk('lo
+         -cal')->temporaryUrl($record->file_name, now()->addMinutes(5))),
+      36 +                ->url(fn (Offense $record) => Storage::disk(con
+         +fig('offenses.storage.disk'))->temporaryUrl($record->file_name,
+         + now()->addMinutes(5))),                                       
+      37              EditAction::make()->icon(Heroicon::Pencil),
+      38              DeleteAction::make()->icon(Heroicon::Trash),
+      39          ];
+
+  Read 1 file (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+● Now fix the Courrier private → local default:
+
+● Update(modules/Courrier/config/courrier.php)  ⎿  Added 1 line, removed 1 line
+      52          ],
+      53      ],
+      54      'storage' => [
+      55 -        'disk' => env('COURRIER_DISK', 'private'),             
+      55 +        'disk' => env('COURRIER_DISK', 'local'),               
+      56          'directory' => env('COURRIER_DIRECTORY', 'courrier'),
+      57      ],
+      58  
+  ⎿  Found 2 new diagnostic issues in 1 file (ctrl+o to expand)
+
+● Run Pint and the Courrier attachment test (it fakes
+  config('courrier.storage.disk'), now local) to confirm nothing breaks:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me run the broader Courrier suite to be safe, and confirm the Offenses
+  config resolves.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● One Courrier test failed, but it's a policy test about department
+  authorization — unrelated to storage. Let me confirm it's pre-existing (fails
+  without my changes):
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Confirmed — that policy test fails without my changes too. It's a pre-existing
+  failure tied to the recent viewAny policy refactor, unrelated to storage. My
+  changes: 195/196 Courrier tests pass, Offenses config resolves correctly, Pint
+  clean.
+
+  Summary
+
+  Why there were two configs in offenses.php
+
+  There shouldn't have been — it was copy-paste drift from the Courrier module:
+  - storage.disk + storage.directory — Courrier defines this block and actually 
+  uses it everywhere (Storage::disk(config('courrier.storage.disk'))). When
+  Offenses was scaffolded from that template, the block was copied but never 
+  wired into the form, so it sat dead.
+  - uploads.offenses — the key the OffenseForm actually used, for the directory
+  only. Disk stayed hardcoded.
+
+  Result: disk was never configurable, directory came from a different key than
+  the (unused) storage.directory. I consolidated to the single storage block,
+  matching Courrier's convention.
+
+  Offenses — wired up
+
+  - config/offenses.php: fixed storage.disk default private → local (a real
+  disk), set storage.directory default to the value actually in use
+  (uploads/offense), and removed the dead uploads block.
+  - OffenseForm: ->disk(config('offenses.storage.disk'))->directory(config('offe
+  nses.storage.directory')).
+  - ViewOffense: download URL now uses config('offenses.storage.disk').
+  - Net behavior is identical to before (local disk, uploads/offense dir) — no
+  file paths change — but the disk is now configurable via OFFENSE_DISK.
+
+  Courrier — the private disk bug
+
+  courrier.storage.disk defaulted to 'private', which is not a registered disk
+  (only local, public, s3 exist). Real attachment storage/download
+  (IncomingMailHandler, AttachmentController, AttachmentOcr, CreateIncomingMail)
+  would throw "Disk [private] does not have a configured driver" unless
+  COURRIER_DISK was set. Tests hid this because they call
+  Storage::fake(config('courrier.storage.disk')), fabricating a private disk
+  in-memory.
+  - Fix: changed the default 'private' → 'local'. Tests still pass (fake now
+  targets local), and real environments without the env var now work.
+
+  You'll likely want COURRIER_DISK=local / OFFENSE_DISK=local confirmed in your
+  production .env (or just rely on the new defaults).
+
+  Two notes:
+  - The env()-in-module-config phpstan hints on offenses.php are pre-existing
+  (the original used env() the same way, identical to Courrier) — not a
+  regression.
+  - I didn't add an Offenses test (the module has no test harness/suite set up).
+  Want me to scaffold one, or set COURRIER_DISK/OFFENSE_DISK checks aside?
+
+✻ Cooked for 3m 20s
