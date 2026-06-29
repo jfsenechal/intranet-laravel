@@ -15,14 +15,14 @@ function fakeCheckDisk(): void
 
 it('passes when the stored path points at an existing file', function (): void {
     fakeCheckDisk();
-    Storage::disk('check-test')->put('data/indicateur/ville/1/doc.pdf', 'pdf');
+    Storage::disk('check-test')->put('indicateur/ville/1/doc.pdf', 'pdf');
 
     $mail = IncomingMail::factory()->create();
     $attachment = Attachment::create([
         'incoming_mail_id' => $mail->id,
         'file_name' => 'doc.pdf',
         'mime' => 'application/pdf',
-        'path' => 'data/indicateur/ville/1/doc.pdf',
+        'path' => 'indicateur/ville/1/doc.pdf',
     ]);
 
     $this->artisan('courrier:check-attachment-files', ['--id' => $attachment->id])
@@ -32,14 +32,14 @@ it('passes when the stored path points at an existing file', function (): void {
 
 it('flags an attachment whose stored file is missing and surfaces the real name', function (): void {
     fakeCheckDisk();
-    Storage::disk('check-test')->put('data/indicateur/ville/2/regenerated.pdf', 'pdf');
+    Storage::disk('check-test')->put('indicateur/ville/2/regenerated.pdf', 'pdf');
 
     $mail = IncomingMail::factory()->create();
     $attachment = Attachment::create([
         'incoming_mail_id' => $mail->id,
         'file_name' => 'stale.pdf',
         'mime' => 'application/pdf',
-        'path' => 'data/indicateur/ville/2/stale.pdf',
+        'path' => 'indicateur/ville/2/stale.pdf',
     ]);
 
     $this->artisan('courrier:check-attachment-files', ['--id' => $attachment->id])

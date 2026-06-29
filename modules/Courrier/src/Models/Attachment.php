@@ -25,13 +25,13 @@ final class Attachment extends Model
     public const UPDATED_AT = null;
 
     /**
-     * Build the legacy on-disk path of an attachment, relative to the public
-     * directory. Legacy files were stored under
-     * `public/data/indicateur/<department>/<courrier id>/<file>`.
+     * Build the legacy on-disk path of an attachment, relative to the storage
+     * disk root. Legacy files are stored under
+     * `indicateur/<department>/<courrier id>/<file>`.
      */
     public static function legacyPath(string $department, int $legacyCourrierId, string $fileName): string
     {
-        return 'data/indicateur/'.mb_strtolower($department).'/'.$legacyCourrierId.'/'.$fileName;
+        return 'indicateur/'.mb_strtolower($department).'/'.$legacyCourrierId.'/'.$fileName;
     }
 
     /**
@@ -47,7 +47,7 @@ final class Attachment extends Model
             $connection->statement(
                 "UPDATE attachments a
                  JOIN incoming_mails m ON m.id = a.incoming_mail_id
-                 SET a.path = CONCAT('data/indicateur/', LOWER(m.department), '/', COALESCE(m.old_id, m.id), '/', a.file_name)
+                 SET a.path = CONCAT('indicateur/', LOWER(m.department), '/', COALESCE(m.old_id, m.id), '/', a.file_name)
                  WHERE m.department IS NOT NULL"
             );
 
