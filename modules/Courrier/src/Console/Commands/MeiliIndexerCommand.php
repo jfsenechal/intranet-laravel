@@ -19,7 +19,9 @@ final class MeiliIndexerCommand extends Command
      * @var string
      */
     #[Override]
-    protected $signature = 'courrier:meili-indexer {--fresh : Recreate the index and reapply its settings before indexing}';
+    protected $signature = 'courrier:meili-indexer
+        {--fresh : Recreate the index and reapply its settings before indexing}
+        {--create-key : Create a scoped Meilisearch API key for the index and exit}';
 
     /**
      * The console command description.
@@ -35,9 +37,18 @@ final class MeiliIndexerCommand extends Command
     public function handle(): int
     {
         $indexName = config('courrier.meilisearch.index_name');
+        $server = new MeiliServer($indexName);
+
+        if ($this->option('create-key')) {
+            $apiKey = $server->createApiKey();
+
+            $this->info(sprintf('API key created for index "%s":', $indexName));
+            $this->line($apiKey->getKey());
+
+            return self::SUCCESS;
+        }
 
         if ($this->option('fresh')) {
-            $server = new MeiliServer($indexName);
             $server->createIndex($indexName, 'id');
             $server->settings(
                 config('courrier.meilisearch.filterable_attributes'),
