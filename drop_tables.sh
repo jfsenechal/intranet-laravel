@@ -14,7 +14,7 @@ else
 fi
 
 # List of databases to clean
-DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_ville" "grh_all" "pst" "mailinglist" "agent" "cpas_repas" "mediation" "invitation" "sanction" "telephone" "guichet" "conseil" "library" "college" "mda" "street" "rescam" "gestemail")
+DATABASES=("intranet" "actu" "document" "finance" "publication" "indicateur_bgm" "indicateur_cpas" "indicateur_ville" "grh_all" "pst" "mailinglist" "agent" "cpas_repas" "mediation" "invitation" "sanction" "telephone" "guichet" "conseil" "library" "college" "mda" "street" "rescam" "gestemail")
 
 # Function to drop all tables in a database
 drop_all_tables() {
@@ -85,4 +85,6 @@ exit
 php artisan pst:migration
 echo "Pst done."
 php artisan courrier:migration
-echo "Courrier done."
+echo "Courrier migration done."
+php artisan courrier:merge
+echo "Courrier merge done."
