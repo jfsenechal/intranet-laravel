@@ -9,8 +9,8 @@ use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Security\Models\Role;
 
-it('denies viewAny to a user without any courrier department', function (): void {
-    expect(auth()->user()->can('viewAny', IncomingMail::class))->toBeFalse();
+it('allows viewAny to any authenticated user since the listing is query-scoped', function (): void {
+    expect(auth()->user()->can('viewAny', IncomingMail::class))->toBeTrue();
 });
 
 it('allows viewAny to a user with an index role', function (): void {
