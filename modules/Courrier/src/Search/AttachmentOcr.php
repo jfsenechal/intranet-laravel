@@ -53,12 +53,12 @@ final class AttachmentOcr
 
     public function textFor(Attachment $attachment): string
     {
-        if (! $this->enabled || $attachment->file_name === null) {
+        if (! $this->enabled || $attachment->path === null) {
             return '';
         }
 
         $disk = $this->disk();
-        $relativePath = $this->relativePath($attachment->file_name);
+        $relativePath = $attachment->path;
 
         if (! $disk->exists($relativePath)) {
             return '';
@@ -181,10 +181,5 @@ final class AttachmentOcr
     private function disk(): Filesystem
     {
         return Storage::disk(config('courrier.storage.disk'));
-    }
-
-    private function relativePath(string $fileName): string
-    {
-        return config('courrier.storage.directory').'/attachments/'.$fileName;
     }
 }

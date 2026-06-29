@@ -35,12 +35,16 @@ trailer
 PDF;
 
 /**
- * Build an unsaved attachment model. AttachmentOcr only reads file_name/mime/id,
+ * Build an unsaved attachment model. AttachmentOcr only reads path/mime/id,
  * so persistence (and the colliding shared-PDO `attachments` table) is avoided.
  */
 function makeAttachment(string $fileName, string $mime, int $id = 1): Attachment
 {
-    $attachment = new Attachment(['file_name' => $fileName, 'mime' => $mime]);
+    $attachment = new Attachment([
+        'file_name' => $fileName,
+        'mime' => $mime,
+        'path' => 'courrier/attachments/'.$fileName,
+    ]);
     $attachment->id = $id;
 
     return $attachment;
@@ -125,6 +129,7 @@ it('indexes a persisted attachment through the real relation', function (): void
         'incoming_mail_id' => $mail->id,
         'file_name' => 'letter.pdf',
         'mime' => 'application/pdf',
+        'path' => 'courrier/attachments/letter.pdf',
     ]);
 
     $document = (new MeiliIndexer())->createDocument($mail->fresh());
