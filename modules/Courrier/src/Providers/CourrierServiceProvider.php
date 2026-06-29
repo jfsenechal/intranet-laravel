@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
+use AcMarche\Courrier\Console\Commands\CheckAttachmentFilesCommand;
 use AcMarche\Courrier\Console\Commands\MeiliIndexerCommand;
 use AcMarche\Courrier\Console\Commands\MergeCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
@@ -28,6 +29,7 @@ final class CourrierServiceProvider extends ServiceProvider
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
+                CheckAttachmentFilesCommand::class,
                 MeiliIndexerCommand::class,
                 MergeCommand::class,
                 SyncCommand::class,
