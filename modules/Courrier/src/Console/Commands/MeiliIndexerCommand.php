@@ -21,7 +21,8 @@ final class MeiliIndexerCommand extends Command
     #[Override]
     protected $signature = 'courrier:meili-indexer
         {--fresh : Recreate the index and reapply its settings before indexing}
-        {--create-key : Create a scoped Meilisearch API key for the index and exit}';
+        {--create-key : Create a scoped Meilisearch API key for the index and exit}
+        {--id= : Index only the incoming mail with the given id}';
 
     /**
      * The console command description.
@@ -58,6 +59,27 @@ final class MeiliIndexerCommand extends Command
         }
 
         $indexer = new MeiliIndexer();
+
+        if ($this->option('id') !== null) {
+            $id = (int) $this->option('id');
+
+            $incomingMail = IncomingMail::query()
+                ->withoutGlobalScopes()
+                ->with(['recipients', 'services'])
+                ->find($id);
+
+            if ($incomingMail === null) {
+                $this->error(sprintf('Incoming mail "%d" not found.', $id));
+
+                return self::FAILURE;
+            }
+
+            $indexer->indexMail($incomingMail);
+            $this->info(sprintf('Incoming mail "%d" indexed.', $id));
+
+            return self::SUCCESS;
+        }
+
         $count = 0;
 
         IncomingMail::query()
