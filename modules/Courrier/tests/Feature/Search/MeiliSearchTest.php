@@ -77,7 +77,7 @@ describe('MeiliIndexer document', function (): void {
     it('builds a search document from an incoming mail', function (): void {
         $mail = IncomingMail::factory()->create([
             'reference_number' => '2026-42',
-            'sender' => 'ACME <SA>',
+            'sender' => 'ACME SA',
             'is_registered' => true,
         ]);
         $primary = Recipient::factory()->create();

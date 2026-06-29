@@ -7,8 +7,6 @@ namespace AcMarche\Courrier\Search;
 use AcMarche\App\Meilisearch\MeiliTrait;
 use AcMarche\Courrier\Models\IncomingMail;
 
-use function chr;
-
 final class MeiliIndexer
 {
     use MeiliTrait;
@@ -23,21 +21,6 @@ final class MeiliIndexer
         $this->init(config('courrier.meilisearch.index_name'));
     }
 
-    public static function cleandata(?string $data): string
-    {
-        $data = preg_replace('#&nbsp;#', ' ', (string) $data);
-        $data = preg_replace('#&amp;#', ' ', (string) $data);
-        $data = preg_replace('#&#', ' ', (string) $data);
-        $data = preg_replace('#’#', "'", (string) $data);
-        $special_chars = [
-            '?', '[', ']', '/', '\\', '=', '<', '>', ':', ';', ',', '"',
-            '&', '$', '#', '*', '|', '~', '`', '!', '{', '}', '(', ')', chr(0),
-        ];
-        $data = str_replace($special_chars, ' ', (string) $data);
-
-        return mb_trim((string) preg_replace('#\s+#', ' ', $data));
-    }
-
     public function indexMail(IncomingMail $incomingMail): void
     {
         $this->client->index($this->indexName)
@@ -45,7 +28,7 @@ final class MeiliIndexer
     }
 
     /**
-     * @param  iterable<IncomingMail>  $incomingMails
+     * @param iterable<IncomingMail> $incomingMails
      */
     public function indexMails(iterable $incomingMails): void
     {
@@ -93,18 +76,18 @@ final class MeiliIndexer
         return [
             'id' => $incomingMail->id,
             'reference_number' => $incomingMail->reference_number,
-            'sender' => self::cleandata($incomingMail->sender),
-            'description' => self::cleandata($incomingMail->description),
+            'sender' => $incomingMail->sender,
+            'description' => $incomingMail->description,
             'recipients' => $incomingMail->recipients->pluck('id')->all(),
             'services' => $incomingMail->services->pluck('id')->all(),
             'original' => $original,
             'copie' => $copie,
-            'department' =>  $incomingMail->department,
-            'follow_up_note' =>  $incomingMail->follow_up_note,
-            'is_registered' =>  $incomingMail->is_registered,
-            'is_notified' =>  $incomingMail->is_notified,
-            'has_acknowledgment' =>  $incomingMail->has_acknowledgment,
-            'category_id' =>  $incomingMail->category_id,
+            'department' => $incomingMail->department,
+            'follow_up_note' => $incomingMail->follow_up_note,
+            'is_registered' => $incomingMail->is_registered,
+            'is_notified' => $incomingMail->is_notified,
+            'has_acknowledgment' => $incomingMail->has_acknowledgment,
+            'category_id' => $incomingMail->category_id,
             'mail_date' => $incomingMail->mail_date?->format('Y-m-d'),
             'mail_date_timestamp' => $incomingMail->mail_date?->getTimestamp(),
             'content' => $this->attachmentsText($incomingMail),
@@ -124,6 +107,16 @@ final class MeiliIndexer
             }
         }
 
-        return self::cleandata(implode(' ', $texts));
+        return implode(' ', $texts);
+    }
+
+    public static function cleanData(?string $data): string
+    {
+        $data = html_entity_decode((string)$data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $data = strip_tags($data);
+        // drop control chars, then collapse whitespace
+        $data = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', ' ', $data);
+
+        return mb_trim((string)preg_replace('#\s+#u', ' ', (string)$data));
     }
 }
