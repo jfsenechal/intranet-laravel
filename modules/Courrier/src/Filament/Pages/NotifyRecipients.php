@@ -46,6 +46,8 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     #[Override]
     protected string $view = 'courrier::filament.pages.notify-recipients';
 
+    private array $previewData;
+
     public static function canAccess(array $parameters = []): bool
     {
         return Gate::check('courrier-administrator');
@@ -74,7 +76,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     public function loadPreviewData(): void
     {
         if (! $this->mail_date) {
-            // $this->previewData = [];
+            $this->previewData = [];
 
             return;
         }
@@ -97,7 +99,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
             }
         }
 
-        //  $this->previewData = $preview;
+        $this->previewData = $preview;
     }
 
     protected function getHeaderActions(): array
