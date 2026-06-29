@@ -31,7 +31,7 @@ final class IncomingMailResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Courrier entrant';
+        return 'Courriers du jour';
     }
 
     public static function getModelLabel(): string

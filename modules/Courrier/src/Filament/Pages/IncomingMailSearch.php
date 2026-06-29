@@ -55,7 +55,7 @@ final class IncomingMailSearch extends Page implements HasTable
     protected static ?int $navigationSort = 2;
 
     #[Override]
-    protected static ?string $navigationLabel = 'Recherche avancée';
+    protected static ?string $navigationLabel = 'Rechercher';
 
     #[Override]
     protected static string|null|UnitEnum $navigationGroup = 'Courrier';
