@@ -13,8 +13,41 @@ use AcMarche\Courrier\Search\MeiliSearcher;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Meilisearch\Client;
+use Meilisearch\Endpoints\Indexes;
+use Meilisearch\Search\SearchResult;
 
 use function Pest\Livewire\livewire;
+
+/**
+ * Build a Meili client that returns the given hits and captures the search
+ * options (filter, sort, …) passed to the index for assertion.
+ *
+ * @param  array<int, array<string, mixed>>  $hits
+ * @return array{0: Client, 1: stdClass}
+ */
+function captureMeiliSearch(array $hits = []): array
+{
+    $captured = new stdClass();
+    $captured->options = [];
+
+    $result = Mockery::mock(SearchResult::class);
+    $result->shouldReceive('getHits')->andReturn($hits);
+
+    $index = Mockery::mock(Indexes::class);
+    $index->shouldReceive('search')
+        ->once()
+        ->andReturnUsing(function (string $query, array $options) use ($captured, $result): SearchResult {
+            $captured->options = $options;
+
+            return $result;
+        });
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('index')->andReturn($index);
+
+    return [$client, $captured];
+}
 
 beforeEach(function (): void {
     // The Meilisearch master key is provided via env in real environments;
@@ -102,6 +135,53 @@ describe('MeiliIndexer document', function (): void {
         expect($document['services'])->toEqual([$service->id]);
         expect($document['original'])->toContain($primary->full_name, $service->name);
         expect($document['copie'])->toContain($copy->full_name);
+    });
+});
+
+describe('MeiliSearcher reference and category filters', function (): void {
+    it('matches a bare reference by id or reference number', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearch([['id' => 42]]);
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $ids = $searcher->searchIds('', $user, ['reference' => '42']);
+
+        expect($ids)->toBe([42]);
+        expect($captured->options['filter'])->toContain('(id = 42 OR reference_number = "42")');
+    });
+
+    it('matches a textual reference by reference number only', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearch();
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $searcher->searchIds('', $user, ['reference' => '2026-42']);
+
+        expect($captured->options['filter'])->toContain('reference_number = "2026-42"');
+    });
+
+    it('filters by category id', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearch();
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $searcher->searchIds('', $user, ['category' => 7]);
+
+        expect($captured->options['filter'])->toContain('category_id = 7');
+    });
+
+    it('omits reference and category clauses when they are not provided', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearch();
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $searcher->searchIds('hello', $user);
+
+        expect($captured->options['filter'])->toBe([]);
     });
 });
 

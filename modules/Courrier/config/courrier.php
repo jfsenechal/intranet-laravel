@@ -14,6 +14,9 @@ return [
     'meilisearch' => [
         'index_name' => 'indicateur',
         'filterable_attributes' => [
+            'id',
+            'reference_number',
+            'category_id',
             'mail_date_timestamp',
             'recipients',
             'services',

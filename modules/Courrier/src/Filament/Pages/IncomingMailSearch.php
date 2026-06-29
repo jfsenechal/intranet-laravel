@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Pages;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use AcMarche\Courrier\Models\Category;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
@@ -15,6 +16,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -79,16 +81,29 @@ final class IncomingMailSearch extends Page implements HasTable
             ->components([
                 Section::make()
                     ->schema([
+                        TextInput::make('reference')
+                            ->label('N° / Référence')
+                            ->placeholder('Identifiant ou numéro de référence'),
                         TextInput::make('query')
-                            ->label('Recherche plein texte')
-                            ->placeholder('Référence, expéditeur, description…')
+                            ->label('Recherche par texte')
+                            ->placeholder('Expéditeur, description, contenu…'),
+                        Grid::make(3)
+                            ->schema([
+                                DatePicker::make('date_from')
+                                    ->label('Du')
+                                    ->native(false),
+                                DatePicker::make('date_to')
+                                    ->label('Au')
+                                    ->native(false),
+                                Select::make('category')
+                                    ->label('Catégorie')
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(
+                                        fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all()
+                                    ),
+                            ])
                             ->columnSpanFull(),
-                        DatePicker::make('date_from')
-                            ->label('Du')
-                            ->native(false),
-                        DatePicker::make('date_to')
-                            ->label('Au')
-                            ->native(false),
                         Select::make('services')
                             ->label('Services')
                             ->multiple()
@@ -118,6 +133,8 @@ final class IncomingMailSearch extends Page implements HasTable
             (string) ($state['query'] ?? ''),
             Auth::user(),
             [
+                'reference' => $state['reference'] ?? null,
+                'category' => $state['category'] ?? null,
                 'date_from' => filled($state['date_from'] ?? null) ? Carbon::parse($state['date_from']) : null,
                 'date_to' => filled($state['date_to'] ?? null) ? Carbon::parse($state['date_to']) : null,
                 'services' => $state['services'] ?? [],
@@ -143,6 +160,9 @@ final class IncomingMailSearch extends Page implements HasTable
             ->columns([
                 TextColumn::make('reference_number')
                     ->label('Référence'),
+                TextColumn::make('id')
+                    ->label('Numéro')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('mail_date')
                     ->date('d/m/Y')
                     ->label('Date'),
@@ -151,25 +171,30 @@ final class IncomingMailSearch extends Page implements HasTable
                 TextColumn::make('description')
                     ->label('Description')
                     ->html()
-                    ->limit(80),
+                    ->limit(80)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('services.name')
                     ->label('Services')
                     ->badge()
                     ->separator(',')
                     ->limitList(2)
-                    ->expandableLimitedList(),
+                    ->expandableLimitedList()
+                    ->toggleable(),
                 TextColumn::make('recipients.full_name')
                     ->label('Destinataires')
                     ->badge()
                     ->color('gray')
                     ->separator(',')
                     ->limitList(2)
-                    ->expandableLimitedList(),
+                    ->expandableLimitedList()
+                    ->toggleable(),
                 IconColumn::make('is_registered')
                     ->label('Recom')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->recordUrl(fn (IncomingMail $record): string => IncomingMailResource::getUrl('view', ['record' => $record]));
+            ->recordUrl(fn (IncomingMail $record): string => IncomingMailResource::getUrl('view', ['record' => $record])
+            );
     }
 
     protected function getTableQuery(): Builder

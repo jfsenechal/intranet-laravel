@@ -30,7 +30,7 @@ final class MeiliSearcher
     }
 
     /**
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int}  $filters
      * @return array<int, array<string, mixed>>
      */
     public function search(string $query, User $user, array $filters = [], int $limit = 500): array
@@ -53,7 +53,7 @@ final class MeiliSearcher
     }
 
     /**
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int}  $filters
      * @return array<int, int>
      */
     public function searchIds(string $query, User $user, array $filters = [], int $limit = 500): array
@@ -106,9 +106,27 @@ final class MeiliSearcher
     }
 
     /**
+     * Build the clause for the dedicated id / reference-number lookup field.
+     *
+     * A bare number matches either the incoming-mail id or the reference
+     * number; anything else (e.g. "2026-42") matches the reference number only.
+     */
+    private function referenceClause(string $reference): string
+    {
+        $reference = mb_trim($reference);
+        $escaped = str_replace('"', '\"', $reference);
+
+        if (ctype_digit($reference)) {
+            return sprintf('(id = %d OR reference_number = "%s")', (int) $reference, $escaped);
+        }
+
+        return sprintf('reference_number = "%s"', $escaped);
+    }
+
+    /**
      * Combine the policy clause with the optional user-provided filters.
      *
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int}  $filters
      * @return array<int, string>|null null when the user may see nothing
      */
     private function filterClauses(User $user, array $filters): ?array
@@ -123,6 +141,12 @@ final class MeiliSearcher
             $clauses[] = $policyClause;
         }
 
+        if (filled($filters['reference'] ?? null)) {
+            $clauses[] = $this->referenceClause((string) $filters['reference']);
+        }
+        if (! empty($filters['category'])) {
+            $clauses[] = 'category_id = '.(int) $filters['category'];
+        }
         if (! empty($filters['date_from'])) {
             $clauses[] = 'mail_date_timestamp >= '.$filters['date_from']->getTimestamp();
         }

@@ -96,6 +96,17 @@ final class IncomingMailInfolist
                     ->visible(fn ($record): bool => $record->attachments->isNotEmpty()
                         && auth()->user()?->can('download', $record->attachments->first())),
 
+                Section::make('Contenu (OCR)')
+                    ->icon('heroicon-o-document-text')
+                    ->schema([
+                        TextEntry::make('content')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->prose(),
+                    ])
+                    ->visible(fn ($record): bool => filled($record->content))
+                    ->collapsed(),
+
                 Section::make('Métadonnées')
                     ->schema([
                         TextEntry::make('user_add')
