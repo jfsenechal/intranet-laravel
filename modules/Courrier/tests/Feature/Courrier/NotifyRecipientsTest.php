@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\NotifyRecipients;
 use AcMarche\Courrier\Jobs\SendIncomingMailNotificationJob;
@@ -135,7 +136,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         Mail::assertNothingQueued();
     });
 
-    test('recipient with index role receives all mails', function (): void {
+    test('recipient with index role receives all mails in their department', function (): void {
         Mail::fake();
 
         $user = User::factory()->create(['username' => 'indexuser']);
@@ -147,16 +148,59 @@ describe('SendIncomingMailNotificationJob', function (): void {
             'username' => 'indexuser',
         ]);
 
-        // Create mail that is not directly assigned to the recipient
+        // Mail in the recipient's department that is not directly assigned to them.
         IncomingMail::factory()->create([
             'mail_date' => now(),
             'is_notified' => false,
+            'department' => DepartmentCourrierEnum::VILLE->value,
         ]);
 
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
         Mail::assertQueued(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($recipient->email) && $mail->incomingMails->count() === 1);
+    });
+
+    test('index recipient only receives mail from their viewable department', function (): void {
+        Mail::fake();
+
+        $user = User::factory()->create(['username' => 'villeindex']);
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->addRole($role);
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'ville-index@example.com',
+            'username' => 'villeindex',
+        ]);
+
+        $villeMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
+
+        // Mail from other departments must not reach a Ville index recipient.
+        IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::BGM->value,
+        ]);
+
+        $job = new SendIncomingMailNotificationJob(Date::now());
+        $job->handle();
+
+        Mail::assertQueued(
+            IncomingMailNotification::class,
+            fn ($mail): bool => $mail->hasTo($recipient->email)
+                && $mail->incomingMails->count() === 1
+                && $mail->incomingMails->first()->is($villeMail)
+        );
     });
 
     test('regular recipient only receives mails where they are assigned', function (): void {

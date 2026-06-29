@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Repository;
 
-use AcMarche\Courrier\Enums\RolesEnum;
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use App\Models\User;
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 
 final class IncomingMailRepository
 {
@@ -64,9 +65,20 @@ final class IncomingMailRepository
     }
 
     /**
+     * Mail the recipient should be notified about for the given date.
+     *
+     * Index-role recipients receive every unnotified mail, but only within the
+     * department(s) they may view. The department filter is derived from the
+     * recipient's own user (not the request-scoped global scope), so it is
+     * correct whether the caller is an authenticated admin previewing or the
+     * queued notification job running without an authenticated user.
+     *
+     * Other recipients receive only mail addressed to them or to one of their
+     * services.
+     *
      * @return Collection<int, IncomingMail>
      */
-    public function getIncomingMailsForRecipient(Recipient $recipient, Carbon $mailDate): Collection
+    public function getIncomingMailsForRecipient(Recipient $recipient, CarbonInterface $mailDate): Collection
     {
         $baseQuery = IncomingMail::query()
             ->where('is_notified', false)
@@ -74,7 +86,15 @@ final class IncomingMailRepository
             ->with(['services', 'recipients', 'attachments', 'category']);
 
         if ($this->recipientHasIndexRole($recipient)) {
-            return $baseQuery->get();
+            $departments = $this->viewableDepartmentValuesForRecipient($recipient);
+
+            return $baseQuery
+                ->withoutGlobalScope(DepartmentScope::class)
+                ->when(
+                    $departments !== [],
+                    fn (Builder $query): Builder => $query->whereIn('incoming_mails.department', $departments),
+                )
+                ->get();
         }
 
         return $baseQuery
@@ -92,22 +112,45 @@ final class IncomingMailRepository
 
     public function recipientHasIndexRole(Recipient $recipient): bool
     {
-        if (! $recipient->username) {
+        $user = $this->findUserForRecipient($recipient);
+
+        if (! $user instanceof User) {
             return false;
         }
 
-        $user = User::query()
+        return Gate::forUser($user)->check('courrier-index');
+    }
+
+    private function findUserForRecipient(Recipient $recipient): ?User
+    {
+        if (! $recipient->username) {
+            return null;
+        }
+
+        return User::query()
             ->where('username', $recipient->username)
             ->first();
+    }
 
-        if (! $user) {
-            return false;
+    /**
+     * Department values the recipient may view, derived from their user roles.
+     *
+     * Returns an empty array for administrators (who may view every department),
+     * which leaves the query unfiltered.
+     *
+     * @return list<string>
+     */
+    private function viewableDepartmentValuesForRecipient(Recipient $recipient): array
+    {
+        $user = $this->findUserForRecipient($recipient);
+
+        if (! $user instanceof User) {
+            return [];
         }
 
-        return $user->hasOneOfThisRoles([
-            RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value,
-            RolesEnum::ROLE_INDICATEUR_CPAS_INDEX->value,
-            RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->value,
-        ]);
+        return array_map(
+            fn (DepartmentCourrierEnum $department): string => $department->value,
+            $user->getCourrierViewableDepartments(),
+        );
     }
 }

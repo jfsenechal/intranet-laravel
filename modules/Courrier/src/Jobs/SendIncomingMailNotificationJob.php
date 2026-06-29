@@ -7,15 +7,13 @@ namespace AcMarche\Courrier\Jobs;
 use AcMarche\Courrier\Mail\IncomingMailNotification;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
-use App\Models\User;
+use AcMarche\Courrier\Repository\IncomingMailRepository;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 
 final class SendIncomingMailNotificationJob implements ShouldQueue
@@ -28,12 +26,14 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
     public function handle(): void
     {
+        $repository = new IncomingMailRepository();
+
         $recipients = Recipient::query()
             ->whereNotNull('email')
             ->get();
 
         foreach ($recipients as $recipient) {
-            $incomingMails = $this->getIncomingMailsForRecipient($recipient);
+            $incomingMails = $repository->getIncomingMailsForRecipient($recipient, $this->mailDate);
 
             if ($incomingMails->isEmpty()) {
                 continue;
@@ -54,49 +54,5 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
                 $mail->update(['is_notified' => true]);
             });
         }
-    }
-
-    /**
-     * @return Collection<int, IncomingMail>
-     */
-    private function getIncomingMailsForRecipient(Recipient $recipient): Collection
-    {
-        $baseQuery = IncomingMail::query()
-            ->where('is_notified', false)
-            ->whereDate('mail_date', $this->mailDate)
-            ->with(['services', 'recipients', 'attachments', 'category']);
-
-        if ($this->recipientHasIndexRole($recipient)) {
-            return $baseQuery->get();
-        }
-
-        return $baseQuery
-            ->where(function ($query) use ($recipient): void {
-                $query->whereHas('recipients', function ($q) use ($recipient): void {
-                    $q->where('recipients.id', $recipient->id);
-                })
-                    ->orWhereHas('services', function ($q) use ($recipient): void {
-                        $serviceIds = $recipient->services()->pluck('courrier_services.id');
-                        $q->whereIn('courrier_services.id', $serviceIds);
-                    });
-            })
-            ->get();
-    }
-
-    private function recipientHasIndexRole(Recipient $recipient): bool
-    {
-        if (! $recipient->username) {
-            return false;
-        }
-
-        $user = User::query()
-            ->where('username', $recipient->username)
-            ->first();
-
-        if (! $user) {
-            return false;
-        }
-
-        return Gate::forUser($user)->check('courrier-index');
     }
 }
