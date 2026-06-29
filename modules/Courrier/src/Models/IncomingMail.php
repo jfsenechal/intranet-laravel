@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\DB;
     'reference_number',
     'sender',
     'description',
+    'content',
     'mail_date',
     'is_notified',
     'is_registered',

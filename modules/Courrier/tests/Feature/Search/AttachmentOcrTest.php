@@ -115,6 +115,24 @@ it('includes attachment OCR text in the search document', function (): void {
     expect($document['content'])->toContain('COURRIER OCR TEST 12345');
 });
 
+it('persists the cleaned attachment text to the incoming mail content column', function (): void {
+    if ((new ExecutableFinder())->find('pdftotext') === null) {
+        $this->markTestSkipped('pdftotext binary is not available');
+    }
+
+    config()->set('app.meilisearch.master_key', 'test-master-key');
+    fakeAttachmentDisk();
+    Storage::disk('ocr-test')->put('courrier/attachments/scan.pdf', PDF_WITH_TEXT_LAYER);
+
+    $mail = IncomingMail::factory()->create(['content' => null]);
+    $mail->load(['recipients', 'services']);
+    $mail->setRelation('attachments', collect([makeAttachment('scan.pdf', 'application/pdf')]));
+
+    (new MeiliIndexer())->createDocument($mail);
+
+    expect($mail->fresh()->content)->toContain('COURRIER OCR TEST 12345');
+});
+
 it('indexes a persisted attachment through the real relation', function (): void {
     if ((new ExecutableFinder())->find('pdftotext') === null) {
         $this->markTestSkipped('pdftotext binary is not available');

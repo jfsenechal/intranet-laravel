@@ -21,6 +21,16 @@ final class MeiliIndexer
         $this->init(config('courrier.meilisearch.index_name'));
     }
 
+    public static function cleanData(?string $data): string
+    {
+        $data = html_entity_decode((string) $data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $data = strip_tags($data);
+        // drop control chars, then collapse whitespace
+        $data = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', ' ', $data);
+
+        return mb_trim((string) preg_replace('#\s+#u', ' ', (string) $data));
+    }
+
     public function indexMail(IncomingMail $incomingMail): void
     {
         $this->client->index($this->indexName)
@@ -28,7 +38,7 @@ final class MeiliIndexer
     }
 
     /**
-     * @param iterable<IncomingMail> $incomingMails
+     * @param  iterable<IncomingMail>  $incomingMails
      */
     public function indexMails(iterable $incomingMails): void
     {
@@ -73,6 +83,9 @@ final class MeiliIndexer
             }
         }
 
+        $content = self::cleanData($this->attachmentsText($incomingMail));
+        $this->persistContent($incomingMail, $content);
+
         return [
             'id' => $incomingMail->id,
             'reference_number' => $incomingMail->reference_number,
@@ -90,8 +103,23 @@ final class MeiliIndexer
             'category_id' => $incomingMail->category_id,
             'mail_date' => $incomingMail->mail_date?->format('Y-m-d'),
             'mail_date_timestamp' => $incomingMail->mail_date?->getTimestamp(),
-            'content' => $this->attachmentsText($incomingMail),
+            'content' => $content,
         ];
+    }
+
+    /**
+     * Store the extracted attachment text on the incoming mail so it is
+     * available outside the search index. Persisted quietly to avoid
+     * re-dispatching the index job and only when the value changed.
+     */
+    private function persistContent(IncomingMail $incomingMail, string $content): void
+    {
+        if (! $incomingMail->exists || $incomingMail->content === $content) {
+            return;
+        }
+
+        $incomingMail->content = $content;
+        $incomingMail->saveQuietly();
     }
 
     /**
@@ -108,15 +136,5 @@ final class MeiliIndexer
         }
 
         return implode(' ', $texts);
-    }
-
-    public static function cleanData(?string $data): string
-    {
-        $data = html_entity_decode((string)$data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $data = strip_tags($data);
-        // drop control chars, then collapse whitespace
-        $data = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', ' ', $data);
-
-        return mb_trim((string)preg_replace('#\s+#u', ' ', (string)$data));
     }
 }
