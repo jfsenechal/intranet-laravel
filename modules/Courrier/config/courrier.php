@@ -15,10 +15,12 @@ return [
         'index_name' => 'indicateur',
         'filterable_attributes' => [
             'mail_date_timestamp',
-            'is_registered',
             'recipients',
             'services',
             'department',
+            'is_notified',
+            'is_registered',
+            'has_acknowledgment',
         ],
         'sortable_attributes' => [
             'mail_date_timestamp',
