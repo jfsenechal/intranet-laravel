@@ -30,7 +30,7 @@ trait MeiliTrait
     public function init(): void
     {
         if (! $this->client) {
-            $this->client = new Client('http://127.0.0.1:7700', $this->masterKey);
+            $this->client = new Client(config('app.meilisearch.host'), $this->masterKey);
         }
 
         if (! $this->index) {

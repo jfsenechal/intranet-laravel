@@ -7,6 +7,11 @@ return [
         'email' => env('PST_VALIDATOR_EMAIL'),
     ],
 
+    'meili' => [
+        'index_name' => env('PST_MEILI_INDEX_NAME', 'pst'),
+        'key' => env('MEILISEARCH_KEY'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Upload Directories

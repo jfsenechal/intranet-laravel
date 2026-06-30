@@ -33,6 +33,7 @@ return [
     */
 
     'meilisearch' => [
-        'master_key' => env('MEILI_MASTER_KEY'),
+        'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
+        'master_key' => env('MEILISEARCH_KEY'),
     ],
 ];
