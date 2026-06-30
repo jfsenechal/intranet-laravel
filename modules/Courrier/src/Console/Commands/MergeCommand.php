@@ -44,11 +44,11 @@ final class MergeCommand extends Command
         $this->info('Source databases: '.implode(', ', $this->sourceConfigs));
         $this->newLine();
 
-        if (! $this->confirm('This will merge data from CPAS and BGM databases into the target. Continue?')) {
+       /* if (! $this->confirm('This will merge data from CPAS and BGM databases into the target. Continue?')) {
             $this->info('Operation cancelled.');
 
             return self::SUCCESS;
-        }
+        }*/
 
         foreach ($this->sourceConfigs as $department => $sourceDatabase) {
             $this->info("Processing {$department} from {$sourceDatabase}...");
