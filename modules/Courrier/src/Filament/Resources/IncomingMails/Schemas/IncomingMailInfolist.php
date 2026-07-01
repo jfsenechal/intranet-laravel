@@ -42,7 +42,7 @@ final class IncomingMailInfolist
                     ])
                     ->columns(2),
 
-                Section::make('Options')
+                Section::make('Métas données')
                     ->schema([
                         Flex::make([
                             IconEntry::make('is_notified')
@@ -54,6 +54,14 @@ final class IncomingMailInfolist
                             IconEntry::make('has_acknowledgment')
                                 ->label('Accusé de réception')
                                 ->boolean(),
+                            TextEntry::make('user_add')
+                                ->label('Créé par'),
+                            TextEntry::make('created_at')
+                                ->label('Date de création')
+                                ->dateTime('d/m/Y H:i'),
+                            TextEntry::make('updated_at')
+                                ->label('Dernière modification')
+                                ->dateTime('d/m/Y H:i'),
                         ]),
                     ]),
 
@@ -105,20 +113,6 @@ final class IncomingMailInfolist
                             ->prose(),
                     ])
                     ->visible(fn ($record): bool => filled($record->content))
-                    ->collapsed(),
-
-                Section::make('Métadonnées')
-                    ->schema([
-                        TextEntry::make('user_add')
-                            ->label('Créé par'),
-                        TextEntry::make('created_at')
-                            ->label('Date de création')
-                            ->dateTime('d/m/Y H:i'),
-                        TextEntry::make('updated_at')
-                            ->label('Dernière modification')
-                            ->dateTime('d/m/Y H:i'),
-                    ])
-                    ->columns(3)
                     ->collapsed(),
             ]);
     }
