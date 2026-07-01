@@ -32,6 +32,7 @@ final class CourrierPanelProvider extends PanelProvider
         return $panel
             ->id('courrier-panel')
             ->path('indicateur')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Indicateur')
             ->colors([
                 'primary' => Color::Pink,
