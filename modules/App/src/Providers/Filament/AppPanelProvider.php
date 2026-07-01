@@ -36,7 +36,7 @@ final class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app-panel')
             ->login(Login::class)
-            ->path('app')
+            ->path('my-space')
             ->colors([
                 'primary' => Color::Amber,
             ])
