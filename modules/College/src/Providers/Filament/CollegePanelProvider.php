@@ -32,6 +32,7 @@ final class CollegePanelProvider extends PanelProvider
         return $panel
             ->id('college-panel')
             ->path('college')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Collège')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

@@ -33,6 +33,7 @@ final class MealDeliveryPanelProvider extends PanelProvider
         return $panel
             ->id('meal-delivery-panel')
             ->path('meal-delivery')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Livraison des repas')
             ->colors([
                 'primary' => Color::Pink,

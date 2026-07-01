@@ -32,6 +32,7 @@ final class MediationPanelProvider extends PanelProvider
         return $panel
             ->id('mediation-panel')
             ->path('mediation')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Médiation')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

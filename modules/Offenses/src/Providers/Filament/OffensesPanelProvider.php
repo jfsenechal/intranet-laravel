@@ -32,6 +32,7 @@ final class OffensesPanelProvider extends PanelProvider
         return $panel
             ->id('offenses-panel')
             ->path('offenses')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Sanctions administratives')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

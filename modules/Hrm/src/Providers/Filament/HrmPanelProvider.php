@@ -38,6 +38,7 @@ final class HrmPanelProvider extends PanelProvider
         return $panel
             ->id('hrm-panel')
             ->path('hrm')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Resources Humaines')
             ->colors([
                 'primary' => Color::Amber,

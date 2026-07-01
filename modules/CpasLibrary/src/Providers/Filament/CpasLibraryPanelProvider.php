@@ -32,6 +32,7 @@ final class CpasLibraryPanelProvider extends PanelProvider
         return $panel
             ->id('cpas-library-panel')
             ->path('cpas-library')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Bibliothèque CPAS')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

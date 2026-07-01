@@ -32,6 +32,7 @@ final class NewsPanelProvider extends PanelProvider
         return $panel
             ->id('news-panel')
             ->path('news')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Pink,
             ])

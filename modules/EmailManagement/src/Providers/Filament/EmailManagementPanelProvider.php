@@ -32,6 +32,7 @@ final class EmailManagementPanelProvider extends PanelProvider
         return $panel
             ->id('email-management-panel')
             ->path('email-management')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Gestion des emails')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

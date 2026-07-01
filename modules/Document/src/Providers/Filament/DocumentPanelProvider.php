@@ -32,6 +32,7 @@ final class DocumentPanelProvider extends PanelProvider
         return $panel
             ->id('document-panel')
             ->path('document')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Documents utiles')
             ->colors([
                 'primary' => Color::Pink,

@@ -32,6 +32,7 @@ final class ConseilPanelProvider extends PanelProvider
         return $panel
             ->id('conseil-panel')
             ->path('conseil')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Conseil')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

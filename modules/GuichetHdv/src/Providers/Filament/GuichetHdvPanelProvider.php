@@ -32,6 +32,7 @@ final class GuichetHdvPanelProvider extends PanelProvider
         return $panel
             ->id('guichet-hdv-panel')
             ->path('guichet-hdv')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Teal,
             ])

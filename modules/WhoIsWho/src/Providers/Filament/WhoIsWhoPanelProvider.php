@@ -32,6 +32,7 @@ final class WhoIsWhoPanelProvider extends PanelProvider
         return $panel
             ->id('who-is-who-panel')
             ->path('who-is-who')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Qui est qui ?')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

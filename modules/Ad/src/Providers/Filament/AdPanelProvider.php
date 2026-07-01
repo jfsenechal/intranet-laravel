@@ -32,6 +32,7 @@ final class AdPanelProvider extends PanelProvider
         return $panel
             ->id('ad-panel')
             ->path('ad')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Pink,
             ])

@@ -33,6 +33,7 @@ final class AgentPanelProvider extends PanelProvider
         return $panel
             ->id('agent-panel')
             ->path('agent')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Fiches agents')
             ->colors([
                 'primary' => Color::Indigo,

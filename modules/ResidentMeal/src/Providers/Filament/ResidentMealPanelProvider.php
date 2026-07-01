@@ -32,6 +32,7 @@ final class ResidentMealPanelProvider extends PanelProvider
         return $panel
             ->id('resident-meal-panel')
             ->path('resident-meal')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Repas des résidents')
             ->colors([
                 'primary' => Color::Pink,

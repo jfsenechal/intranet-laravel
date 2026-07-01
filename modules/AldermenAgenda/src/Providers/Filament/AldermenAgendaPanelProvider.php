@@ -32,6 +32,7 @@ final class AldermenAgendaPanelProvider extends PanelProvider
         return $panel
             ->id('aldermen-agenda-panel')
             ->path('aldermen-agenda')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Agenda des Échevins')
             ->colors([
                 'primary' => Color::Pink,

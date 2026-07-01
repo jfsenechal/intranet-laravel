@@ -32,6 +32,7 @@ final class PublicationPanelProvider extends PanelProvider
         return $panel
             ->id('publication-panel')
             ->path('publication')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Publications communales')
             ->colors([
                 'primary' => Color::Pink,

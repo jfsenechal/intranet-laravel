@@ -32,6 +32,7 @@ final class QrCodePanelProvider extends PanelProvider
         return $panel
             ->id('qrcode-panel')
             ->path('qrcode')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('QrCode')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

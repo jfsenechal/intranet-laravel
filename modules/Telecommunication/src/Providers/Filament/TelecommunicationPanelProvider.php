@@ -32,6 +32,7 @@ final class TelecommunicationPanelProvider extends PanelProvider
         return $panel
             ->id('telecommunication-panel')
             ->path('telecommunication')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Télécommunications')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

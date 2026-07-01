@@ -33,6 +33,7 @@ final class SecurityPanelProvider extends PanelProvider
         return $panel
             ->id('security-panel')
             ->path('security')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Utilisateurs')
             ->colors([
                 'primary' => Color::Amber,

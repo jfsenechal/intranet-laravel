@@ -32,6 +32,7 @@ final class ActivityManagerPanelProvider extends PanelProvider
         return $panel
             ->id('activity-manager-panel')
             ->path('activity-manager')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Maison des Aînés')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

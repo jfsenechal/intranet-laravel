@@ -32,6 +32,7 @@ final class StreetWatchPanelProvider extends PanelProvider
         return $panel
             ->id('street-watch-panel')
             ->path('street-watch')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Travail de rue')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

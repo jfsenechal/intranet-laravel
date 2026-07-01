@@ -32,6 +32,7 @@ final class SportsActivitiesPanelProvider extends PanelProvider
         return $panel
             ->id('sports-activities-panel')
             ->path('sports-activities')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Sports Activities')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([

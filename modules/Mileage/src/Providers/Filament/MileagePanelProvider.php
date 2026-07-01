@@ -32,6 +32,7 @@ final class MileagePanelProvider extends PanelProvider
         return $panel
             ->id('mileage-panel')
             ->path('mileage')
+            ->sidebarCollapsibleOnDesktop()
             ->brandName('Frais de déplacement')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
