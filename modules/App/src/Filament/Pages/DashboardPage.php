@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace AcMarche\App\Filament\Pages;
 
+use AcMarche\App\Handler\FavoriteModuleHandler;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Document\Models\Document;
 use AcMarche\News\Models\News;
+use AcMarche\Security\Models\Module;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
 use Override;
 
@@ -32,6 +35,11 @@ final class DashboardPage extends BaseDashboard
 
     public Collection $ownedCourriers;
 
+    /**
+     * @var SupportCollection<int, Module>
+     */
+    public SupportCollection $favoriteModules;
+
     #[Override]
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-home';
 
@@ -52,6 +60,8 @@ final class DashboardPage extends BaseDashboard
     public function mount(): void
     {
         $username = Auth::user()?->username;
+
+        $this->favoriteModules = FavoriteModuleHandler::getFavoriteModules();
 
         $this->latestNews = News::query()
             ->latest('created_at')
