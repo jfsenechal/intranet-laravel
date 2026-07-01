@@ -41,12 +41,11 @@ describe('reference number field on the create form', function (): void {
             ->assertFormSet(['reference_number' => '2']);
     });
 
-    test('does not require a manual reference number for a cpas admin', function (): void {
+    test('a cpas admin can submit using the pre-filled number', function (): void {
         actingAsCourrierAdmin(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN);
 
         livewire(CreateIncomingMail::class)
             ->fillForm([
-                'reference_number' => '',
                 'sender' => 'Expéditeur test',
                 'mail_date' => now(),
             ])
@@ -54,11 +53,24 @@ describe('reference number field on the create form', function (): void {
             ->assertHasNoFormErrors(['reference_number']);
     });
 
-    test('leaves the field empty and required for a non-cpas admin', function (): void {
+    test('is required and empty for a non-cpas admin', function (): void {
         actingAsCourrierAdmin(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN);
 
         livewire(CreateIncomingMail::class)
             ->assertFormSet(['reference_number' => null])
+            ->fillForm([
+                'reference_number' => '',
+                'sender' => 'Expéditeur test',
+                'mail_date' => now(),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['reference_number' => 'required']);
+    });
+
+    test('is required for a cpas admin when the number is cleared', function (): void {
+        actingAsCourrierAdmin(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN);
+
+        livewire(CreateIncomingMail::class)
             ->fillForm([
                 'reference_number' => '',
                 'sender' => 'Expéditeur test',
