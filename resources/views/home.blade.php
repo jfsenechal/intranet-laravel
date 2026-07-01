@@ -97,7 +97,7 @@
                 </div>
             @else
                 <a
-                    href="{{ url('/app/login') }}"
+                    href="{{ route('filament.app-panel.auth.login') }}"
                     class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-blue-700 hover:shadow-lg"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
