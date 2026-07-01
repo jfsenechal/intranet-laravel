@@ -32,12 +32,12 @@ final class IncomingMailInfolist
                             ->html()
                             ->columnSpanFull()
                             ->prose()
-                            ->hidden(fn($state): bool => blank($state)),
+                            ->hidden(fn ($state): bool => blank($state)),
                         TextEntry::make('follow_up_note')
                             ->label('Note de suivi')
                             ->columnSpanFull()
                             ->prose()
-                            ->hidden(fn($state): bool => blank($state)),
+                            ->hidden(fn ($state): bool => blank($state)),
                     ])
                     ->columns(2),
 
@@ -72,13 +72,13 @@ final class IncomingMailInfolist
                             ->label('Services')
                             ->badge()
                             ->separator(',')
-                            ->hidden(fn($state): bool => blank($state)),
+                            ->hidden(fn ($state): bool => blank($state)),
                         TextEntry::make('recipients.full_name')
                             ->label('Destinataires')
                             ->badge()
                             ->color('gray')
                             ->separator(',')
-                            ->hidden(fn($state): bool => blank($state)),
+                            ->hidden(fn ($state): bool => blank($state)),
                     ])
                     ->columns(2),
 
@@ -90,7 +90,7 @@ final class IncomingMailInfolist
                             ->columnSpanFull()
                             ->prose(),
                     ])
-                    ->visible(fn($record): bool => filled($record->content))
+                    ->visible(fn ($record): bool => filled($record->content))
                     ->collapsed(),
             ]);
     }

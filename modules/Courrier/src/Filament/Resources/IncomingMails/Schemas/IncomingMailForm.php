@@ -34,7 +34,7 @@ final class IncomingMailForm
     }
 
     /**
-     * @param array<string, mixed>|null $imapPreview IMAP preview context: ['url', 'contentType', 'filename']
+     * @param  array<string, mixed>|null  $imapPreview  IMAP preview context: ['url', 'contentType', 'filename']
      */
     public static function getComponents(?array $imapPreview = null): array
     {
@@ -64,14 +64,14 @@ final class IncomingMailForm
             $components[] = Section::make('Pièce jointe')
                 ->schema([
                     View::make('courrier::components.attachment-preview')
-                        ->viewData(fn(?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
-                        ->visible(fn(?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
+                        ->viewData(fn (?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
+                        ->visible(fn (?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
                     FileUpload::make('attachment_file')
                         ->label(
-                            fn(?IncomingMail $record
+                            fn (?IncomingMail $record
                             ): string => $record instanceof IncomingMail ? 'Remplacer le fichier' : 'Fichier'
                         )
-                        ->required(fn(?IncomingMail $record): bool => !$record instanceof IncomingMail)
+                        ->required(fn (?IncomingMail $record): bool => ! $record instanceof IncomingMail)
                         ->acceptedFileTypes(config('courrier.allowed_mime_types'))
                         ->maxSize(config('courrier.max_file_size'))
                         ->storeFiles(false)
@@ -86,16 +86,16 @@ final class IncomingMailForm
                     TextInput::make('reference_number')
                         ->label('Numéro')
                         ->required(
-                            fn(IncomingMail|array|null $record
-                            ): bool => $record instanceof IncomingMail || !self::isCpasDepartment()
+                            fn (IncomingMail|array|null $record
+                            ): bool => $record instanceof IncomingMail || ! self::isCpasDepartment()
                         )
                         ->disabled(
-                            fn(IncomingMail|array|null $record
-                            ): bool => !$record instanceof IncomingMail && self::isCpasDepartment()
+                            fn (IncomingMail|array|null $record
+                            ): bool => ! $record instanceof IncomingMail && self::isCpasDepartment()
                         )
                         ->helperText(
-                            fn(IncomingMail|array|null $record
-                            ): ?string => (!$record instanceof IncomingMail && self::isCpasDepartment())
+                            fn (IncomingMail|array|null $record
+                            ): ?string => (! $record instanceof IncomingMail && self::isCpasDepartment())
                                 ? 'Numéro attribué automatiquement à l\'enregistrement.'
                                 : null
                         )
@@ -195,7 +195,7 @@ final class IncomingMailForm
     {
         $attachment = $record?->attachments->first();
 
-        if (!$attachment) {
+        if (! $attachment) {
             return ['url' => '', 'contentType' => '', 'filename' => ''];
         }
 

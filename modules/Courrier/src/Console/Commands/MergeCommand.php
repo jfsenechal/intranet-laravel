@@ -29,7 +29,7 @@ final class MergeCommand extends Command
 
     public function handle(): int
     {
-        $this->dryRun = (bool)$this->option('dry-run');
+        $this->dryRun = (bool) $this->option('dry-run');
         $targetDatabase = $this->option('target');
 
         if ($this->dryRun) {
@@ -79,7 +79,7 @@ final class MergeCommand extends Command
         $this->displaySummary();
 
         Attachment::backfillLegacyPaths();
-        $this->info("Courrier path done.");
+        $this->info('Courrier path done.');
 
         return self::SUCCESS;
     }
@@ -105,7 +105,7 @@ final class MergeCommand extends Command
 
     private function mergeCategories(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'categorie')) {
+        if (! $this->tableExists($source, 'categorie')) {
             $this->line('  - Skipping categories (no `categorie` table in source)');
 
             return;
@@ -130,7 +130,7 @@ final class MergeCommand extends Command
                 continue;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.courrier_categories (old_id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
                     [$oldId, $category->nom, $this->normalizeColor($category->couleur), now(), now()]
@@ -145,7 +145,7 @@ final class MergeCommand extends Command
 
     private function mergeServices(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'service')) {
+        if (! $this->tableExists($source, 'service')) {
             $this->line('  - Skipping services (no `service` table in source)');
 
             return;
@@ -168,7 +168,7 @@ final class MergeCommand extends Command
                 continue;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.courrier_services (old_id, slugname, name, initials, actif, department) VALUES (?, ?, ?, ?, ?, ?)",
                     [
@@ -190,7 +190,7 @@ final class MergeCommand extends Command
 
     private function mergeSenders(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'expediteur')) {
+        if (! $this->tableExists($source, 'expediteur')) {
             $this->line('  - Skipping senders (no `expediteur` table in source)');
 
             return;
@@ -213,7 +213,7 @@ final class MergeCommand extends Command
                 continue;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.courrier_senders (old_id, slug, name, department) VALUES (?, ?, ?, ?)",
                     [
@@ -233,7 +233,7 @@ final class MergeCommand extends Command
 
     private function mergeRecipients(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'destinataire')) {
+        if (! $this->tableExists($source, 'destinataire')) {
             $this->line('  - Skipping recipients (no `destinataire` table in source)');
 
             return;
@@ -267,7 +267,7 @@ final class MergeCommand extends Command
                 $newSupervisorId = $this->idMappings[$department]['recipients'][$recipient->tuteur_id] ?? null;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.recipients (old_id, supervisor_id, slug, last_name, first_name, username, email, actif, receives_attachments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [
@@ -292,7 +292,7 @@ final class MergeCommand extends Command
 
     private function mergeIncomingMails(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'courrier')) {
+        if (! $this->tableExists($source, 'courrier')) {
             $this->line('  - Skipping incoming mails (no `courrier` table in source)');
 
             return;
@@ -329,7 +329,7 @@ final class MergeCommand extends Command
                 );
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mails
                     (old_id, category_id, reference_number, sender, description, follow_up_note, mail_date, is_notified, is_registered, has_acknowledgment, user_add, created_at, updated_at, department)
@@ -337,7 +337,7 @@ final class MergeCommand extends Command
                     [
                         $oldId,
                         $newCategoryId,
-                        (string)$mail->numero,
+                        (string) $mail->numero,
                         $mail->expediteur,
                         $mail->description,
                         $followUpNote,
@@ -361,7 +361,7 @@ final class MergeCommand extends Command
 
     private function mergeAttachments(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'attachement')) {
+        if (! $this->tableExists($source, 'attachement')) {
             $this->line('  - Skipping attachments (no `attachement` table in source)');
 
             return;
@@ -390,7 +390,7 @@ final class MergeCommand extends Command
                 continue;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.attachments (old_id, incoming_mail_id, file_name, mime, updated_at) VALUES (?, ?, ?, ?, ?)",
                     [
@@ -417,7 +417,7 @@ final class MergeCommand extends Command
 
     private function mergeIncomingMailService(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'courrier_service')) {
+        if (! $this->tableExists($source, 'courrier_service')) {
             return;
         }
 
@@ -442,7 +442,7 @@ final class MergeCommand extends Command
                 continue;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mail_service (incoming_mail_id, service_id, is_primary) VALUES (?, ?, ?)",
                     [$newMailId, $newServiceId, true]
@@ -456,7 +456,7 @@ final class MergeCommand extends Command
 
     private function mergeIncomingMailRecipient(string $source, string $target, string $department): void
     {
-        if (!$this->tableExists($source, 'courrier_destinataire')) {
+        if (! $this->tableExists($source, 'courrier_destinataire')) {
             return;
         }
 
@@ -481,7 +481,7 @@ final class MergeCommand extends Command
                 continue;
             }
 
-            if (!$this->dryRun) {
+            if (! $this->dryRun) {
                 DB::insert(
                     "INSERT INTO {$target}.incoming_mail_recipient (incoming_mail_id, recipient_id, is_primary) VALUES (?, ?, ?)",
                     [$newMailId, $newRecipientId, $pivot->principal ?? false]
@@ -500,7 +500,7 @@ final class MergeCommand extends Command
 
         $department = DepartmentCourrierEnum::VILLE->value;
 
-        if (!$this->dryRun) {
+        if (! $this->dryRun) {
             DB::update("UPDATE {$target}.incoming_mails SET department = ? WHERE department IS NULL", [$department]);
             DB::update("UPDATE {$target}.courrier_services SET department = ? WHERE department IS NULL", [$department]);
             DB::update("UPDATE {$target}.courrier_senders SET department = ? WHERE department IS NULL", [$department]);
@@ -555,7 +555,7 @@ final class MergeCommand extends Command
         }
 
         if (preg_match('/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/', $color, $matches) === 1) {
-            return sprintf('#%02x%02x%02x', (int)$matches[1], (int)$matches[2], (int)$matches[3]);
+            return sprintf('#%02x%02x%02x', (int) $matches[1], (int) $matches[2], (int) $matches[3]);
         }
 
         return $default;
@@ -568,6 +568,6 @@ final class MergeCommand extends Command
             [$database, $table]
         );
 
-        return $result !== null && (int)$result->total > 0;
+        return $result !== null && (int) $result->total > 0;
     }
 }
