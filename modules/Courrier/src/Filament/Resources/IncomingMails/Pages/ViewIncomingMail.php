@@ -21,7 +21,7 @@ final class ViewIncomingMail extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->reference_number;
+        return 'Courrier du '.$this->record->mail_date?->translatedFormat('d F Y').' de '.$this->record->sender;
     }
 
     public function infolist(Schema $schema): Schema
