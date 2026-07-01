@@ -96,7 +96,7 @@ final class DashboardPage extends BaseDashboard
                 }
             })
             ->latest('created_at')
-            ->limit(5)
+            ->limit(15)
             ->get();
     }
 }
