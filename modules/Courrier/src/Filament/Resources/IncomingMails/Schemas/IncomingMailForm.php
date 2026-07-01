@@ -97,6 +97,8 @@ final class IncomingMailForm
      */
     private static function getFieldsColumn(): Group
     {
+        $isCpas = DepartmentScope::getAssignableDepartment() === DepartmentCourrierEnum::CPAS;
+
         return Group::make()
             ->columnSpan(['default' => 1, 'lg' => 5])
             ->schema([
@@ -104,14 +106,8 @@ final class IncomingMailForm
                     ->schema([
                         TextInput::make('reference_number')
                             ->label('Numéro')
-                            ->required(
-                                fn (IncomingMail|array|null $record
-                                ): bool => $record instanceof IncomingMail || ! self::isCpasDepartment()
-                            )
-                            ->disabled(
-                                fn (IncomingMail|array|null $record
-                                ): bool => ! $record instanceof IncomingMail && self::isCpasDepartment()
-                            )
+                            ->required()
+                            ->default(fn (): ?string => $isCpas ? (string) IncomingMail::nextCpasReferenceNumber() : null)
                             ->maxLength(255)
                             ->columnSpan(1),
                         DatePicker::make('mail_date')
@@ -186,17 +182,8 @@ final class IncomingMailForm
                             ->rows(4)
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn (?IncomingMail $record): bool => $record instanceof IncomingMail),
+                    ->visible(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
             ]);
-    }
-
-    /**
-     * Whether the current user creates mail for the CPAS department, whose
-     * reference number is assigned automatically on save.
-     */
-    private static function isCpasDepartment(): bool
-    {
-        return DepartmentScope::getAssignableDepartment() === DepartmentCourrierEnum::CPAS;
     }
 
     /**

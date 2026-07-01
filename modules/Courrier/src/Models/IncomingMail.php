@@ -44,6 +44,21 @@ final class IncomingMail extends Model
     use HasUserAdd;
     use SoftDeletes;
 
+    /**
+     * Compute the next sequential reference number for the CPAS department.
+     *
+     * Numbers are stored as strings but compared numerically so "9" is followed
+     * by "10" rather than being ordered lexicographically.
+     */
+    public static function nextCpasReferenceNumber(): int
+    {
+        $last = self::withoutGlobalScopes()
+            ->where('department', DepartmentCourrierEnum::CPAS->value)
+            ->max(DB::raw('CAST(reference_number AS UNSIGNED)'));
+
+        return (int) $last + 1;
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -117,20 +132,5 @@ final class IncomingMail extends Model
             'is_registered' => 'boolean',
             'has_acknowledgment' => 'boolean',
         ];
-    }
-
-    /**
-     * Compute the next sequential reference number for the CPAS department.
-     *
-     * Numbers are stored as strings but compared numerically so "9" is followed
-     * by "10" rather than being ordered lexicographically.
-     */
-    private static function nextCpasReferenceNumber(): int
-    {
-        $last = self::withoutGlobalScopes()
-            ->where('department', DepartmentCourrierEnum::CPAS->value)
-            ->max(DB::raw('CAST(reference_number AS UNSIGNED)'));
-
-        return (int) $last + 1;
     }
 }
