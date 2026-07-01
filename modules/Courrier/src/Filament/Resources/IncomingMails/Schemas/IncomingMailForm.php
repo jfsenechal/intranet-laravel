@@ -136,20 +136,6 @@ final class IncomingMailForm
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make('Options')
-                    ->schema([
-                        Toggle::make('is_registered')
-                            ->label('Recommandé ?')
-                            ->default(false),
-                        Toggle::make('has_acknowledgment')
-                            ->label('Accusé de réception ?')
-                            ->default(false),
-                        Toggle::make('is_notified')
-                            ->label('Notifié')
-                            ->default(false),
-                        DepartmentField::make(),
-                    ])
-                    ->columns(2),
                 Section::make('Affectation')
                     ->schema([
                         Select::make('primary_services')
@@ -178,13 +164,29 @@ final class IncomingMailForm
                             ->preload(),
                     ])
                     ->columns(2),
+
+                Section::make('Options')
+                    ->schema([
+                        Toggle::make('is_registered')
+                            ->label('Recommandé ?')
+                            ->default(false),
+                        Toggle::make('has_acknowledgment')
+                            ->label('Accusé de réception ?')
+                            ->default(false),
+                        Toggle::make('is_notified')
+                            ->label('Notifié')
+                            ->default(false),
+                        DepartmentField::make(),
+                    ])
+                    ->columns(2),
                 Section::make('Suivi')
                     ->schema([
                         Textarea::make('follow_up_note')
                             ->label('Note de suivi')
                             ->rows(4)
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->visible(fn (?IncomingMail $record): bool => $record instanceof IncomingMail),
             ]);
     }
 

@@ -19,5 +19,6 @@ it('shows the incoming mail create form with preview on the left', function (): 
     visit(route('filament.courrier-panel.resources.incoming-mails.create'))
         ->assertSee('Aperçu')
         ->assertSee('Informations du courrier')
+        ->assertDontSee('Note de suivi')
         ->screenshot(true, 'incoming-mail-create-form');
 });
