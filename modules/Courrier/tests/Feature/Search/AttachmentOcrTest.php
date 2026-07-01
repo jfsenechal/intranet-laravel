@@ -72,6 +72,14 @@ it('returns an empty string when OCR is disabled', function (): void {
     expect((new AttachmentOcr())->textFor(makeAttachment('doc.pdf', 'application/pdf')))->toBe('');
 });
 
+it('returns an empty string when OCR is disabled via the constructor', function (): void {
+    fakeAttachmentDisk();
+    config()->set('courrier.ocr.enabled', true);
+    Storage::disk('ocr-test')->put('courrier/attachments/doc.pdf', PDF_WITH_TEXT_LAYER);
+
+    expect((new AttachmentOcr(enabled: false))->textFor(makeAttachment('doc.pdf', 'application/pdf')))->toBe('');
+});
+
 it('extracts the text layer of a PDF attachment with pdftotext', function (): void {
     if ((new ExecutableFinder())->find('pdftotext') === null) {
         $this->markTestSkipped('pdftotext binary is not available');

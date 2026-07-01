@@ -42,9 +42,9 @@ final class AttachmentOcr
      */
     private array $binaries = [];
 
-    public function __construct()
+    public function __construct(?bool $enabled = null)
     {
-        $this->enabled = (bool) config('courrier.ocr.enabled', true);
+        $this->enabled = $enabled ?? (bool) config('courrier.ocr.enabled', true);
         $this->language = (string) config('courrier.ocr.language', 'fra');
         $this->maxPages = (int) config('courrier.ocr.max_pages', 15);
         $this->dpi = (int) config('courrier.ocr.dpi', 200);

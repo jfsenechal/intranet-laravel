@@ -6,6 +6,7 @@ namespace AcMarche\Courrier\Console\Commands;
 
 use AcMarche\App\Meilisearch\MeiliServer;
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Search\AttachmentOcr;
 use AcMarche\Courrier\Search\MeiliIndexer;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,6 +23,7 @@ final class MeiliIndexerCommand extends Command
     protected $signature = 'courrier:meili-indexer
         {--fresh : Recreate the index and reapply its settings before indexing}
         {--create-key : Create a scoped Meilisearch API key for the index and exit}
+        {--skip-ocr : Skip OCR text extraction from attachments while indexing}
         {--id= : Index only the incoming mail with the given id}';
 
     /**
@@ -58,7 +60,9 @@ final class MeiliIndexerCommand extends Command
             $this->info(sprintf('Index "%s" recreated and configured.', $indexName));
         }
 
-        $indexer = new MeiliIndexer();
+        $indexer = new MeiliIndexer(
+            $this->option('skip-ocr') ? new AttachmentOcr(enabled: false) : null,
+        );
 
         if ($this->option('id') !== null) {
             $id = (int) $this->option('id');
