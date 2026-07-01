@@ -34,7 +34,7 @@ final class IncomingMailForm
     }
 
     /**
-     * @param  array<string, mixed>|null  $imapPreview  IMAP preview context: ['url', 'contentType', 'filename']
+     * @param array<string, mixed>|null $imapPreview IMAP preview context: ['url', 'contentType', 'filename']
      */
     public static function getComponents(?array $imapPreview = null): array
     {
@@ -64,11 +64,14 @@ final class IncomingMailForm
             $components[] = Section::make('Pièce jointe')
                 ->schema([
                     View::make('courrier::components.attachment-preview')
-                        ->viewData(fn (?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
-                        ->visible(fn (?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
+                        ->viewData(fn(?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
+                        ->visible(fn(?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
                     FileUpload::make('attachment_file')
-                        ->label(fn (?IncomingMail $record): string => $record instanceof IncomingMail ? 'Remplacer le fichier' : 'Fichier')
-                        ->required(fn (?IncomingMail $record): bool => ! $record instanceof IncomingMail)
+                        ->label(
+                            fn(?IncomingMail $record
+                            ): string => $record instanceof IncomingMail ? 'Remplacer le fichier' : 'Fichier'
+                        )
+                        ->required(fn(?IncomingMail $record): bool => !$record instanceof IncomingMail)
                         ->acceptedFileTypes(config('courrier.allowed_mime_types'))
                         ->maxSize(config('courrier.max_file_size'))
                         ->storeFiles(false)
@@ -77,23 +80,25 @@ final class IncomingMailForm
                 ]);
         }
 
-        // Add the form
-        // Add department field
-        /* $departmentFields = DepartmentField::make();
-         if ($departmentFields !== []) {
-             //$components[] = Section::make('Département')
-              //   ->schema($departmentFields);
-         }*/
         $components[] = Flex::make([
             Section::make('Informations du courrier')
                 ->schema([
                     TextInput::make('reference_number')
                         ->label('Numéro')
-                        ->required(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail || ! self::isCpasDepartment())
-                        ->disabled(fn (IncomingMail|array|null $record): bool => ! $record instanceof IncomingMail && self::isCpasDepartment())
-                        ->helperText(fn (IncomingMail|array|null $record): ?string => (! $record instanceof IncomingMail && self::isCpasDepartment())
-                            ? 'Numéro attribué automatiquement à l\'enregistrement.'
-                            : null)
+                        ->required(
+                            fn(IncomingMail|array|null $record
+                            ): bool => $record instanceof IncomingMail || !self::isCpasDepartment()
+                        )
+                        ->disabled(
+                            fn(IncomingMail|array|null $record
+                            ): bool => !$record instanceof IncomingMail && self::isCpasDepartment()
+                        )
+                        ->helperText(
+                            fn(IncomingMail|array|null $record
+                            ): ?string => (!$record instanceof IncomingMail && self::isCpasDepartment())
+                                ? 'Numéro attribué automatiquement à l\'enregistrement.'
+                                : null
+                        )
                         ->maxLength(255),
                     DatePicker::make('mail_date')
                         ->label('Date du courrier')
@@ -115,10 +120,6 @@ final class IncomingMailForm
                         ]),
                     Textarea::make('description')
                         ->label('Description')
-                        ->rows(4)
-                        ->columnSpanFull(),
-                    Textarea::make('follow_up_note')
-                        ->label('Note de suivi')
                         ->rows(4)
                         ->columnSpanFull(),
                 ])
@@ -170,6 +171,11 @@ final class IncomingMailForm
             ])
             ->columns(2);
 
+        $components[] = Textarea::make('follow_up_note')
+            ->label('Note de suivi')
+            ->rows(4)
+            ->columnSpanFull();
+
         return $components;
     }
 
@@ -189,7 +195,7 @@ final class IncomingMailForm
     {
         $attachment = $record?->attachments->first();
 
-        if (! $attachment) {
+        if (!$attachment) {
             return ['url' => '', 'contentType' => '', 'filename' => ''];
         }
 
