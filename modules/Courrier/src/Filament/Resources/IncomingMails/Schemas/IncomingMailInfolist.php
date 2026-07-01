@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
@@ -82,29 +81,6 @@ final class IncomingMailInfolist
                             ->hidden(fn($state): bool => blank($state)),
                     ])
                     ->columns(2),
-
-                Section::make('Pièces jointes')
-                    ->icon('heroicon-o-paper-clip')
-                    ->schema([
-                        RepeatableEntry::make('attachments')
-                            ->hiddenLabel()
-                            ->schema([
-                                TextEntry::make('file_name')
-                                    ->label('Fichier')
-                                    ->url(fn($record): string => route('courrier.attachments.download', $record))
-                                    ->openUrlInNewTab()
-                                    ->icon('heroicon-o-arrow-down-tray')
-                                    ->color('primary'),
-                                TextEntry::make('mime')
-                                    ->label('Type')
-                                    ->badge()
-                                    ->color('gray'),
-                            ])
-                            ->columns(2)
-                            ->contained(false),
-                    ])
-                    ->visible(fn($record): bool => $record->attachments->isNotEmpty()
-                        && auth()->user()?->can('download', $record->attachments->first())),
 
                 Section::make('Contenu (OCR)')
                     ->icon('heroicon-o-document-text')

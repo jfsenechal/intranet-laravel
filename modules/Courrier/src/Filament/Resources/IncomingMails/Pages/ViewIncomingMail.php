@@ -6,14 +6,12 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailInfolist;
-use AcMarche\Courrier\Models\IncomingMail;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\Storage;
 use Override;
 
 final class ViewIncomingMail extends ViewRecord
@@ -38,9 +36,9 @@ final class ViewIncomingMail extends ViewRecord
                 ->label('Télécharger la pièce jointe')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-            //   ->url(fn (IncomingMail $record) => Storage::disk('public')->url($record->attachment_path))
-            //    ->visible(fn (IncomingMail $record): bool => ! blank($record->attachment_path)),
-            ,
+                ->url(fn ($record): string => route('courrier.attachments.download', $record))
+                ->visible(fn ($record): bool => $record->attachments->isNotEmpty()
+                    && auth()->user()?->can('download', $record->attachments->first())),
             Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')
