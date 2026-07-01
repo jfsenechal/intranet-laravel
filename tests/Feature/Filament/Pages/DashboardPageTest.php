@@ -23,9 +23,9 @@ it('lists recent mail the user is a recipient of', function (): void {
     $mine = IncomingMail::factory()->create();
     $mine->recipients()->attach($recipient->id);
 
-    $myCourriers = livewire(DashboardPage::class)->instance()->myCourriers;
-
-    expect($myCourriers->pluck('id'))->toContain($mine->id);
+    livewire(DashboardPage::class)
+        ->assertSee($mine->reference_number)
+        ->assertSeeHtml(route('filament.courrier-panel.resources.incoming-mails.view', ['record' => $mine]));
 });
 
 it('lists recent mail linked to a service the user belongs to', function (): void {

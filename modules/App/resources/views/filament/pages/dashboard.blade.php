@@ -37,17 +37,22 @@
             <x-slot name="heading">Mes courriers (Indicateur)</x-slot>
 
             @forelse ($this->myCourriers as $courrier)
-                <div
-                    class="flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
+                <a
+                    href="{{ route('filament.courrier-panel.resources.incoming-mails.view', ['record' => $courrier]) }}"
+                    class="group flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <div class="min-w-0">
-                        <p class="truncate font-medium text-gray-900 dark:text-gray-100">
+                        <p class="truncate font-medium text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
                             {{ $courrier->reference_number }} — {{ $courrier->sender }}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             {{ $courrier->mail_date?->translatedFormat('d/m/Y') }}
                         </p>
                     </div>
-                </div>
+                    <x-filament::icon
+                        icon="heroicon-m-chevron-right"
+                        class="h-4 w-4 flex-shrink-0 text-gray-400"
+                    />
+                </a>
             @empty
                 <p class="text-sm text-gray-500 dark:text-gray-400">Vous n'avez encore enregistré aucun courrier.</p>
             @endforelse
