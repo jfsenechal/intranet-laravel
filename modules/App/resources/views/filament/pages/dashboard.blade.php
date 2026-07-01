@@ -36,7 +36,7 @@
         <x-filament::section>
             <x-slot name="heading">Mes courriers (Indicateur)</x-slot>
 
-            @forelse ($this->ownedCourriers as $courrier)
+            @forelse ($this->myCourriers as $courrier)
                 <div
                     class="flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <div class="min-w-0">

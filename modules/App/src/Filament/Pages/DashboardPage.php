@@ -6,6 +6,7 @@ namespace AcMarche\App\Filament\Pages;
 
 use AcMarche\App\Handler\FavoriteModuleHandler;
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Document\Models\Document;
 use AcMarche\News\Models\News;
 use AcMarche\Security\Models\Module;
@@ -33,7 +34,7 @@ final class DashboardPage extends BaseDashboard
 
     public Collection $latestDocuments;
 
-    public Collection $ownedCourriers;
+    public Collection $myCourriers;
 
     /**
      * @var SupportCollection<int, Module>
@@ -73,8 +74,27 @@ final class DashboardPage extends BaseDashboard
             ->limit(5)
             ->get();
 
-        $this->ownedCourriers = IncomingMail::query()
-            ->where('user_add', $username)
+        $serviceIds = Recipient::query()
+            ->where('recipients.username', $username)
+            ->get()
+            ->flatMap(fn (Recipient $recipient): SupportCollection => $recipient->services()->pluck('courrier_services.id'))
+            ->unique()
+            ->values();
+
+        $this->myCourriers = IncomingMail::query()
+            ->where(function ($query) use ($username, $serviceIds): void {
+                $query->whereHas(
+                    'recipients',
+                    fn ($recipientQuery) => $recipientQuery->where('recipients.username', $username),
+                );
+
+                if ($serviceIds->isNotEmpty()) {
+                    $query->orWhereHas(
+                        'services',
+                        fn ($serviceQuery) => $serviceQuery->whereIn('courrier_services.id', $serviceIds),
+                    );
+                }
+            })
             ->latest('created_at')
             ->limit(5)
             ->get();
