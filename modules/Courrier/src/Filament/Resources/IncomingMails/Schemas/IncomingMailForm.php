@@ -89,9 +89,9 @@ final class IncomingMailForm
                 ->schema([
                     TextInput::make('reference_number')
                         ->label('Numéro')
-                        ->required(fn (?IncomingMail $record): bool => $record instanceof IncomingMail || ! self::isCpasDepartment())
-                        ->disabled(fn (?IncomingMail $record): bool => ! $record instanceof IncomingMail && self::isCpasDepartment())
-                        ->helperText(fn (?IncomingMail $record): ?string => (! $record instanceof IncomingMail && self::isCpasDepartment())
+                        ->required(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail || ! self::isCpasDepartment())
+                        ->disabled(fn (IncomingMail|array|null $record): bool => ! $record instanceof IncomingMail && self::isCpasDepartment())
+                        ->helperText(fn (IncomingMail|array|null $record): ?string => (! $record instanceof IncomingMail && self::isCpasDepartment())
                             ? 'Numéro attribué automatiquement à l\'enregistrement.'
                             : null)
                         ->maxLength(255),
