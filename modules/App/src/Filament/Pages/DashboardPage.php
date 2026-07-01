@@ -82,6 +82,7 @@ final class DashboardPage extends BaseDashboard
             ->values();
 
         $this->myCourriers = IncomingMail::query()
+            ->where('created_at', '>=', now()->subDays(15))
             ->where(function ($query) use ($username, $serviceIds): void {
                 $query->whereHas(
                     'recipients',
@@ -96,7 +97,7 @@ final class DashboardPage extends BaseDashboard
                 }
             })
             ->latest('created_at')
-            ->limit(15)
+            ->limit(10)
             ->get();
     }
 }

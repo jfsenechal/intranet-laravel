@@ -44,17 +44,17 @@ it('lists recent mail linked to a service the user belongs to', function (): voi
     expect($myCourriers->pluck('id'))->toContain($mine->id);
 });
 
-it('lists mail regardless of age', function (): void {
+it('excludes mail older than 15 days', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     $recipient = Recipient::factory()->create(['username' => $user->username]);
-    $old = IncomingMail::factory()->create(['created_at' => now()->subYear()]);
+    $old = IncomingMail::factory()->create(['created_at' => now()->subDays(16)]);
     $old->recipients()->attach($recipient->id);
 
     $myCourriers = livewire(DashboardPage::class)->instance()->myCourriers;
 
-    expect($myCourriers->pluck('id'))->toContain($old->id);
+    expect($myCourriers->pluck('id'))->not->toContain($old->id);
 });
 
 it('excludes mail the user is not linked to', function (): void {
