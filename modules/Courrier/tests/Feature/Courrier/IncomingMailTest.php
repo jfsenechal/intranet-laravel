@@ -95,6 +95,28 @@ describe('IncomingMail Model', function (): void {
         expect($mail->reference_number)->toBe('10');
     });
 
+    test('ignores non-numeric legacy references when computing the next cpas number', function (): void {
+        // Legacy rows carry values such as "-20180316" that wrap to a near
+        // UINT64 value under CAST(... AS UNSIGNED). Bypass the creating hook so
+        // the bogus value is persisted as-is.
+        IncomingMail::withoutEvents(function (): void {
+            IncomingMail::factory()->create([
+                'department' => DepartmentCourrierEnum::CPAS->value,
+                'reference_number' => '-20180316',
+            ]);
+            IncomingMail::factory()->create([
+                'department' => DepartmentCourrierEnum::CPAS->value,
+                'reference_number' => '42',
+            ]);
+        });
+
+        $mail = IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        expect($mail->reference_number)->toBe('43');
+    });
+
     test('does not auto-assign reference number for non-cpas departments', function (): void {
         $mail = IncomingMail::factory()->create([
             'department' => DepartmentCourrierEnum::VILLE->value,

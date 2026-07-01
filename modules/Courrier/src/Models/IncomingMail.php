@@ -48,13 +48,16 @@ final class IncomingMail extends Model
      * Compute the next sequential reference number for the CPAS department.
      *
      * Numbers are stored as strings but compared numerically so "9" is followed
-     * by "10" rather than being ordered lexicographically.
+     * by "10" rather than being ordered lexicographically. The cast is SIGNED so
+     * legacy values such as "-20180316" stay negative and never win the MAX;
+     * under UNSIGNED they would wrap to a near-UINT64 value and corrupt (and
+     * overflow) the sequence.
      */
     public static function nextCpasReferenceNumber(): int
     {
         $last = self::withoutGlobalScopes()
             ->where('department', DepartmentCourrierEnum::CPAS->value)
-            ->max(DB::raw('CAST(reference_number AS UNSIGNED)'));
+            ->max(DB::raw('CAST(reference_number AS SIGNED)'));
 
         return (int) $last + 1;
     }
