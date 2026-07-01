@@ -33,12 +33,12 @@ final class IncomingMailInfolist
                             ->html()
                             ->columnSpanFull()
                             ->prose()
-                            ->hidden(fn ($state): bool => blank($state)),
+                            ->hidden(fn($state): bool => blank($state)),
                         TextEntry::make('follow_up_note')
                             ->label('Note de suivi')
                             ->columnSpanFull()
                             ->prose()
-                            ->hidden(fn ($state): bool => blank($state)),
+                            ->hidden(fn($state): bool => blank($state)),
                     ])
                     ->columns(2),
 
@@ -54,6 +54,8 @@ final class IncomingMailInfolist
                             IconEntry::make('has_acknowledgment')
                                 ->label('Accusé de réception')
                                 ->boolean(),
+                        ]),
+                        Flex::make([
                             TextEntry::make('user_add')
                                 ->label('Créé par'),
                             TextEntry::make('created_at')
@@ -71,13 +73,13 @@ final class IncomingMailInfolist
                             ->label('Services')
                             ->badge()
                             ->separator(',')
-                            ->hidden(fn ($state): bool => blank($state)),
+                            ->hidden(fn($state): bool => blank($state)),
                         TextEntry::make('recipients.full_name')
                             ->label('Destinataires')
                             ->badge()
                             ->color('gray')
                             ->separator(',')
-                            ->hidden(fn ($state): bool => blank($state)),
+                            ->hidden(fn($state): bool => blank($state)),
                     ])
                     ->columns(2),
 
@@ -89,7 +91,7 @@ final class IncomingMailInfolist
                             ->schema([
                                 TextEntry::make('file_name')
                                     ->label('Fichier')
-                                    ->url(fn ($record): string => route('courrier.attachments.download', $record))
+                                    ->url(fn($record): string => route('courrier.attachments.download', $record))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-o-arrow-down-tray')
                                     ->color('primary'),
@@ -101,7 +103,7 @@ final class IncomingMailInfolist
                             ->columns(2)
                             ->contained(false),
                     ])
-                    ->visible(fn ($record): bool => $record->attachments->isNotEmpty()
+                    ->visible(fn($record): bool => $record->attachments->isNotEmpty()
                         && auth()->user()?->can('download', $record->attachments->first())),
 
                 Section::make('Contenu (OCR)')
@@ -112,7 +114,7 @@ final class IncomingMailInfolist
                             ->columnSpanFull()
                             ->prose(),
                     ])
-                    ->visible(fn ($record): bool => filled($record->content))
+                    ->visible(fn($record): bool => filled($record->content))
                     ->collapsed(),
             ]);
     }
