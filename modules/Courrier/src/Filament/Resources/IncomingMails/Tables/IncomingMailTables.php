@@ -46,23 +46,31 @@ final class IncomingMailTables
                     ->badge()
                     ->separator(',')
                     ->limitList(2)
-                    ->expandableLimitedList(),
+                    ->expandableLimitedList()
+                    ->toggleable(),
                 TextColumn::make('recipients.full_name')
                     ->label('Destinataires')
                     ->badge()
                     ->color('gray')
                     ->separator(',')
                     ->limitList(2)
-                    ->expandableLimitedList(),
+                    ->expandableLimitedList()
+                    ->toggleable(),
                 IconColumn::make('is_notified')
                     ->label('Notifié')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_registered')
-                    ->label('Recom')
-                    ->boolean(),
+                    ->label('Recommandé')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('has_acknowledgment')
-                    ->label('AR')
-                    ->boolean(),
+                    ->label('Accusé de réception')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('department')
+                    ->label('Département')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('services')
@@ -84,6 +92,7 @@ final class IncomingMailTables
                 TernaryFilter::make('has_acknowledgment')
                     ->label('Accusé de réception'),
             ])
+            ->persistFiltersInSession()
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

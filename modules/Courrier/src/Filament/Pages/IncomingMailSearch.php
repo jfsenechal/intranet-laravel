@@ -189,7 +189,7 @@ final class IncomingMailSearch extends Page implements HasTable
                     ->expandableLimitedList()
                     ->toggleable(),
                 IconColumn::make('is_registered')
-                    ->label('Recom')
+                    ->label('Recommandé')
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
