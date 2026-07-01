@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 
 use AcMarche\Courrier\Dto\EmailMessage;
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Exception\ImapException;
 use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxForm;
 use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxInfolist;
 use AcMarche\Courrier\Handler\IncomingMailHandler;
+use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\ImapRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -67,7 +70,7 @@ final class InboxTables
                     ->modalHeading(fn (array $record): string => $record['attachments'][0]['filename'] ?? 'Pièce jointe')
                     ->modalWidth(Width::SevenExtraLarge)
                     ->fillForm(fn (array $record): array => [
-                        'reference_number' => '',
+                        'reference_number' => self::defaultReferenceNumber(),
                         'sender' => '',
                         'mail_date' => now(),
                         'description' => $record['subject'] ?? '',
@@ -127,6 +130,17 @@ final class InboxTables
     /**
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * Suggested reference number for the process form. CPAS mail is numbered
+     * sequentially, so it is pre-filled; other departments enter it manually.
+     */
+    private static function defaultReferenceNumber(): string
+    {
+        return DepartmentScope::getAssignableDepartment() === DepartmentCourrierEnum::CPAS
+            ? (string) IncomingMail::nextCpasReferenceNumber()
+            : '';
+    }
+
     private static function getRecords(?ImapRepository $imapRepository): array
     {
         if (! $imapRepository instanceof ImapRepository) {

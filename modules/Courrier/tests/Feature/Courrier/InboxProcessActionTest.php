@@ -59,3 +59,23 @@ it('mounts the process action for a mail with a single attachment', function ():
         ->assertActionMounted(TestAction::make('process')->table('0'))
         ->assertHasNoActionErrors();
 });
+
+it('pre-fills the next cpas reference number on the process action', function (): void {
+    $fakeMailbox = new FakeMailbox(folders: [
+        new FakeFolder('inbox', messages: [fakeMailWithAttachment(1)]),
+    ]);
+
+    resolve(ImapManager::class)->swap('imap_cpas', $fakeMailbox);
+
+    AcMarche\Courrier\Models\IncomingMail::factory()->create([
+        'department' => AcMarche\Courrier\Enums\DepartmentCourrierEnum::CPAS->value,
+    ]);
+
+    $user = User::factory()->create();
+    $user->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]));
+    $this->actingAs($user);
+
+    livewire(Inbox::class)
+        ->mountAction(TestAction::make('process')->table('0'))
+        ->assertActionDataSet(['reference_number' => '2']);
+});
