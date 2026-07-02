@@ -3,12 +3,12 @@
         <img
             src="{{ $url }}"
             alt="{{ $filename }}"
-            class="mx-auto max-h-96 rounded-lg object-contain"
+            class="mx-auto max-h-[600px] rounded-lg object-contain lg:max-h-[calc(100vh-10rem)]"
         />
     @elseif ($contentType === 'application/pdf')
         <iframe
             src="{{ $url }}"
-            class="h-96 w-full rounded-lg border-0"
+            class="h-[600px] w-full rounded-lg border-0 lg:h-[calc(100vh-10rem)]"
             title="{{ $filename }}"
         ></iframe>
     @else

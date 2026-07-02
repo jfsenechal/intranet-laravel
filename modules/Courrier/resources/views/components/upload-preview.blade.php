@@ -26,7 +26,7 @@
             <template x-if="contentType === 'application/pdf'">
                 <iframe
                     :src="previewUrl"
-                    class="h-[600px] w-full rounded-lg border-0"
+                    class="h-[600px] w-full rounded-lg border-0 lg:h-[calc(100vh-10rem)]"
                     :title="fileName"
                 ></iframe>
             </template>
@@ -34,7 +34,7 @@
                 <img
                     :src="previewUrl"
                     :alt="fileName"
-                    class="mx-auto max-h-[600px] rounded-lg object-contain"
+                    class="mx-auto max-h-[600px] rounded-lg object-contain lg:max-h-[calc(100vh-10rem)]"
                 />
             </template>
         </div>
