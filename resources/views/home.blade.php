@@ -118,7 +118,7 @@
             <div class="space-y-6">
                 <livewire:home.birthdays />
                 <livewire:home.favorites />
-                <livewire:home.classified-ads />
+                {{-- <livewire:home.classified-ads /> --}}
                 <livewire:home.latest-employees />
                 <livewire:home.sport-activities />
             </div>

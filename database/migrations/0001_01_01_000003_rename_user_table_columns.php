@@ -95,6 +95,8 @@ return new class extends Migration
 
             if ($hasColumn('news_attachment')) {
                 $table->boolean('news_attachment')->nullable(false)->default(false)->change();
+            } else {
+                $table->boolean('news_attachment')->nullable(false)->default(false);
             }
         });
     }

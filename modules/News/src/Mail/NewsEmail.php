@@ -19,7 +19,14 @@ final class NewsEmail extends Mailable
 
     public ?string $logo = null;
 
-    public function __construct(public readonly News $news) {}
+    /**
+     * @param  bool  $attachMedias  When false, the news medias are not attached to the
+     *                              email and a notice with a link to the intranet is shown instead.
+     */
+    public function __construct(
+        public readonly News $news,
+        public readonly bool $attachMedias = true,
+    ) {}
 
     /**
      * Get the message envelope.
@@ -28,7 +35,7 @@ final class NewsEmail extends Mailable
     {
         return new Envelope(
             from: $this->senderAddress(),
-            subject: $this->subject,
+            subject: $this->news->name,
         );
     }
 
@@ -48,29 +55,28 @@ final class NewsEmail extends Mailable
                 'news' => $this->news,
                 'url' => url('/'),
                 'logo' => $this->logo,
+                'attachMedias' => $this->attachMedias,
+                'mediasCount' => count($this->news->medias ?? []),
             ],
         );
     }
 
     /**
+     * The logo is embedded inline in the body (see the Blade view), so it is not
+     * attached here. Only the news medias are attached, and only when the recipient
+     * has opted in to receiving attachments.
+     *
      * @return array<Attachment>
      */
     public function attachments(): array
     {
-        $attachments = [];
-
-        if ($this->logo) {
-            $attachments[] = Attachment::fromPath($this->logo)
-                ->as('logoMarcheur.jpg')
-                ->withMime('image/jpg');
-        }
-        foreach ($this->news->medias ?? [] as $path) {
-            $attachments[] =
-                Attachment::fromStorageDisk('public', $path);
-            // ->as($media->name)
-            //  ->withMime($media->mime);
+        if (! $this->attachMedias) {
+            return [];
         }
 
-        return $attachments;
+        return array_map(
+            fn (string $path): Attachment => Attachment::fromStorageDisk('public', $path),
+            $this->news->medias ?? [],
+        );
     }
 }

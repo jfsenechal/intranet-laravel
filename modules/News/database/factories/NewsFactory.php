@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Database\Factories;
 
+use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Models\Category;
 use AcMarche\News\Models\News;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -32,7 +33,7 @@ final class NewsFactory extends Factory
             'slug' => Str::slug($name),
             'content' => fake()->randomHtml(),
             'end_date' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
-            'department' => 'common',
+            'department' => DepartmentEnum::COMMON->value,
             'category_id' => Category::factory(),
             'archive' => false,
         ];

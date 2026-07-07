@@ -17,7 +17,6 @@ use AcMarche\College\Filament\Resources\Notifications\NotificationResource;
 use AcMarche\Conseil\Filament\Resources\Agendas\AgendaResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\CpasLibrary\Filament\Pages\LibraryIndex;
-use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
@@ -86,7 +85,7 @@ final class MigrationHandler
             59 => TicketsOfTheDay::getUrl(panel: 'guichet-hdv-panel'),
             60 => IncidentResource::getUrl('index', panel: 'street-watch-panel'),
             61 => AddressBookResource::getUrl('index', panel: 'mailing-list-panel'),
-            62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
+            //    62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
             default => null,
         };
     }

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Observers;
 
-use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\News;
-use App\Models\User;
-use Exception;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Seel all observers https://laravel.com/docs/12.x/eloquent#events
+ *
+ * Notifying users about a new news is handled by the NewsNotification listener,
+ * triggered by the NewsProcessed event dispatched once the news is created.
  */
 final class NewsObserver
 {
@@ -21,19 +19,7 @@ final class NewsObserver
      */
     public function created(News $news): void
     {
-        $users = User::query()->whereNotNull('email')->get();
-        foreach ($users as $user) {
-            try {
-                Mail::to($user->email)
-                    ->send(new NewsEmail($news));
-            } catch (Exception $e) {
-                Log::error('Failed to send news notification email', [
-                    'news_id' => $news->id,
-                    'user_id' => $user->id,
-                    'exception' => $e->getMessage(),
-                ]);
-            }
-        }
+        // ...
     }
 
     /**
@@ -66,5 +52,36 @@ final class NewsObserver
     public function forceDeleted(): void
     {
         // ...
+    }
+
+    /**
+     * Resolve the users who should be notified about the given news.
+     *
+     * @return Collection<int, User>
+     */
+    private function recipientsFor(News $news): Collection
+    {
+        $department = $this->departmentValue($news);
+
+        $query = User::query()->whereNotNull('email');
+
+        if ($department !== DepartmentEnum::COMMON->value) {
+            $query->whereJsonContains('departments', $department);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Normalize the news department to its enum string value, tolerating both a
+     * DepartmentEnum instance (as set by the Filament form) and a raw string.
+     */
+    private function departmentValue(News $news): string
+    {
+        if ($news->department instanceof DepartmentEnum) {
+            return $news->department->value;
+        }
+
+        return mb_strtoupper((string) $news->department);
     }
 }
