@@ -81,15 +81,19 @@ final class ViewEvent extends ViewRecord
                         return;
                     }
 
-                    foreach ($recipients as $email) {
-                        Mail::to($email)->send(new EventEmail($record));
+                    $sender = auth()->user()?->email ?? config('mail.from.address');
+
+                    foreach ($recipients->chunk(50) as $chunk) {
+                        Mail::to($sender)
+                            ->bcc($chunk->all())
+                            ->queue(new EventEmail($record));
                     }
 
                     $record->update(['sent' => true]);
 
                     Notification::make()
-                        ->title('Événement envoyé')
-                        ->body("L'événement a été envoyé à {$recipients->count()} destinataire(s).")
+                        ->title('Événement mis en file d\'attente')
+                        ->body("L'événement a été mis en file d'attente pour {$recipients->count()} destinataire(s).")
                         ->success()
                         ->send();
                 }),
