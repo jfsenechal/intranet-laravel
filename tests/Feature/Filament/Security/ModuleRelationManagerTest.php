@@ -75,7 +75,7 @@ it('syncs the user roles for the module on edit, without writing to the modules 
 
 it('attaches a module and its selected role to the user on create', function (): void {
     $user = User::factory()->create();
-    $module = Module::factory()->create();
+    $module = Module::factory()->create(['is_public' => false]);
     Role::factory()->create(['name' => 'CREATEROLE', 'module_id' => $module->id]);
 
     livewire(ModuleRelationManager::class, [
