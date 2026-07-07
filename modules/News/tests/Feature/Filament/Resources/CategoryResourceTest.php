@@ -21,15 +21,15 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Mail::fake();
-    Filament::setCurrentPanel(Filament::getPanel('news'));
+    Filament::setCurrentPanel(Filament::getPanel('news-panel'));
     auth()->user()->update(['is_administrator' => true]);
 
     // Register dummy routes to prevent URL generation errors in tests
-    if (! Route::getRoutes()->getByName('filament.news.resources.categories.index')) {
-        Route::get('/categories', fn (): string => '')->name('filament.news.resources.categories.index');
-        Route::get('/categories/create', fn (): string => '')->name('filament.news.resources.categories.create');
-        Route::get('/categories/{record}/edit', fn (): string => '')->name('filament.news.resources.categories.edit');
-        Route::get('/categories/{record}', fn (): string => '')->name('filament.news.resources.categories.view');
+    if (! Route::getRoutes()->getByName('filament.news-panel.resources.categories.index')) {
+        Route::get('/categories', fn (): string => '')->name('filament.news-panel.resources.categories.index');
+        Route::get('/categories/create', fn (): string => '')->name('filament.news-panel.resources.categories.create');
+        Route::get('/categories/{record}/edit', fn (): string => '')->name('filament.news-panel.resources.categories.edit');
+        Route::get('/categories/{record}', fn (): string => '')->name('filament.news-panel.resources.categories.view');
     }
 });
 

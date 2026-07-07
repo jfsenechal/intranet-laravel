@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Filament\Resources\News\Pages\CreateNews;
 use AcMarche\News\Filament\Resources\News\Pages\EditNews;
 use AcMarche\News\Filament\Resources\News\Pages\ListNews;
@@ -21,16 +22,16 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Mail::fake();
-    Filament::setCurrentPanel(Filament::getPanel('news'));
+    Filament::setCurrentPanel(Filament::getPanel('news-panel'));
     auth()->user()->update(['is_administrator' => true]);
     $this->category = Category::factory()->create();
 
     // Register dummy routes to prevent URL generation errors in tests
-    if (! Route::getRoutes()->getByName('filament.news.resources.news.index')) {
-        Route::get('/news', fn (): string => '')->name('filament.news.resources.news.index');
-        Route::get('/news/create', fn (): string => '')->name('filament.news.resources.news.create');
-        Route::get('/news/{record}/edit', fn (): string => '')->name('filament.news.resources.news.edit');
-        Route::get('/news/{record}', fn (): string => '')->name('filament.news.resources.news.view');
+    if (! Route::getRoutes()->getByName('filament.news-panel.resources.news.index')) {
+        Route::get('/news', fn (): string => '')->name('filament.news-panel.resources.news.index');
+        Route::get('/news/create', fn (): string => '')->name('filament.news-panel.resources.news.create');
+        Route::get('/news/{record}/edit', fn (): string => '')->name('filament.news-panel.resources.news.edit');
+        Route::get('/news/{record}', fn (): string => '')->name('filament.news-panel.resources.news.view');
     }
 });
 
@@ -63,6 +64,25 @@ it('can render the view page', function (): void {
         'record' => $news->id,
     ])
         ->assertOk();
+});
+
+it('renders legacy plain-text content with line breaks', function (): void {
+    $news = News::factory()->create(['content' => "Première ligne\nDeuxième ligne"]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->assertSeeHtml('Première ligne<br');
+});
+
+it('renders html content without adding extra line breaks', function (): void {
+    $news = News::factory()->create(['content' => "<p>Première ligne</p>\n<p>Deuxième ligne</p>"]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->assertSeeHtml('<p>Première ligne</p>')
+        ->assertDontSeeHtml('<p>Première ligne</p><br');
 });
 
 it('has column', function (string $column): void {
@@ -152,6 +172,24 @@ it('archive action exists on view page', function (): void {
         'record' => $news->id,
     ])
         ->assertActionExists('archive');
+});
+
+it('can create a news item without medias', function (): void {
+    $newsData = News::factory()->make();
+
+    livewire(CreateNews::class)
+        ->fillForm([
+            'name' => $newsData->name,
+            'content' => $newsData->content,
+            'category_id' => $this->category->id,
+            'department' => DepartmentEnum::COMMON->value,
+            'end_date' => '2026-04-14',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    expect(News::query()->where('name', $newsData->name)->exists())->toBeTrue();
 });
 
 it('validates the form data', function (array $data, array $errors): void {

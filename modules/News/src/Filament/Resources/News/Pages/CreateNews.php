@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\News\Pages;
 
-use AcMarche\News\Events\ClassifiedAdProcessed;
+use AcMarche\News\Events\NewsProcessed;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
@@ -26,6 +26,6 @@ final class CreateNews extends CreateRecord
 
     protected function afterCreate(): void
     {
-        event(new ClassifiedAdProcessed($this->record));
+        event(new NewsProcessed($this->record));
     }
 }

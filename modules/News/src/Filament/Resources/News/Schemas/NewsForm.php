@@ -36,7 +36,6 @@ final class NewsForm
                             ->columnSpanFull(),
                         FileUpload::make('medias')
                             ->label('Pièces jointes')
-                            ->required()
                             ->maxFiles(5)
                             ->disk('public')
                             ->directory(config('news.uploads.medias'))
