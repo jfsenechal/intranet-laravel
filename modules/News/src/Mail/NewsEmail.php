@@ -64,7 +64,7 @@ final class NewsEmail extends Mailable
                 ->as('logoMarcheur.jpg')
                 ->withMime('image/jpg');
         }
-        foreach ($this->news->medias as $path) {
+        foreach ($this->news->medias ?? [] as $path) {
             $attachments[] =
                 Attachment::fromStorageDisk('public', $path);
             // ->as($media->name)

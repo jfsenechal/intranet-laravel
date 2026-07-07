@@ -59,7 +59,7 @@ new class extends Component
     <div class="divide-y divide-gray-100">
         @forelse ($latestNews as $index => $news)
             <a
-                href="{{ NewsResource::getUrl('view', ['record' => $news->id], panel: 'news-panel') }}"
+                href="{{ auth()->check() ? NewsResource::getUrl('view', ['record' => $news->id], panel: 'news-panel') : route('news.show', $news) }}"
                 class="group flex items-start gap-3 p-4 transition hover:bg-gray-50 animate-fade-in-up"
                 style="--delay: {{ 0.15 + ($index * 0.05) }}s"
             >

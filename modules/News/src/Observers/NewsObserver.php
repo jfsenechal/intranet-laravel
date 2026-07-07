@@ -8,8 +8,8 @@ use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\News;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Symfony\Component\Mime\Address;
 
 /**
  * Seel all observers https://laravel.com/docs/12.x/eloquent#events
@@ -21,13 +21,17 @@ final class NewsObserver
      */
     public function created(News $news): void
     {
-        $users = User::query()->get();
+        $users = User::query()->whereNotNull('email')->get();
         foreach ($users as $user) {
             try {
-                Mail::to(new Address('jf@marche.be'))
+                Mail::to($user->email)
                     ->send(new NewsEmail($news));
             } catch (Exception $e) {
-                dd($e->getMessage());
+                Log::error('Failed to send news notification email', [
+                    'news_id' => $news->id,
+                    'user_id' => $user->id,
+                    'exception' => $e->getMessage(),
+                ]);
             }
         }
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\News\Schemas;
 
-use AcMarche\Security\Enums\DepartmentWithCommonEnum;
+use AcMarche\News\Enums\DepartmentEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -54,8 +54,8 @@ final class NewsForm
                             ->required(),
                         Select::make('department')
                             ->label('Pour qui ?')
-                            ->default(DepartmentWithCommonEnum::COMMON->value)
-                            ->options(DepartmentWithCommonEnum::class)
+                            ->default(DepartmentEnum::COMMON->value)
+                            ->options(DepartmentEnum::class)
                             ->required()
                             ->suffixIcon('tabler-ladder'),
                         DatePicker::make('end_date')

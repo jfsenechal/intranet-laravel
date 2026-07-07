@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Security\Enums;
+namespace AcMarche\News\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum DepartmentWithCommonEnum: string implements HasColor, HasIcon, HasLabel
+enum DepartmentEnum: string implements HasColor, HasIcon, HasLabel
 {
     case COMMON = 'COMMON';
     case CPAS = 'CPAS';
