@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Http\UploadedFile;
@@ -48,7 +49,8 @@ final class FicheForm
                         Select::make('type')
                             ->label('Type')
                             ->options(FicheTypeEnum::class)
-                            ->default(FicheTypeEnum::DEFAULT->value),
+                            ->default(FicheTypeEnum::DEFAULT->value)
+                            ->live(),
                         Select::make('tags')
                             ->label('Tags')
                             ->relationship('tags', 'name')
@@ -84,7 +86,7 @@ final class FicheForm
                                 $set('mimeType', $state->getMimeType());
                             })
                             ->columnSpanFull(),
-                        Grid::make(2)->schema([
+                        Grid::make(3)->schema([
                             TextInput::make('fileName')
                                 ->label('Nom du fichier')
                                 ->maxLength(190),
@@ -94,32 +96,65 @@ final class FicheForm
                             TextInput::make('fileSize')
                                 ->label('Taille (octets)')
                                 ->numeric(),
-                            TextInput::make('source')
-                                ->label('Source')
-                                ->url()
-                                ->maxLength(255),
-                            TextInput::make('type_document')
-                                ->label('Type de document')
-                                ->maxLength(255),
                         ]),
                     ]),
 
-                Section::make('Dates')
-                    ->columns(3)
+                Section::make('Rappel')
                     ->schema([
+                        DatePicker::make('date_rappel')
+                            ->label('Date de rappel')
+                            ->helperText('Un mail sera envoyé aux utilisateurs ayant accès à la librairie à cette date choisie'),
+                    ]),
+
+                Section::make('Absence')
+                    ->key('absence-section')
+                    ->columns(2)
+                    ->visible(fn (Get $get): bool => self::isType($get, FicheTypeEnum::ABSENCE))
+                    ->schema([
+                        DatePicker::make('date_begin')
+                            ->label('Date de début')
+                            ->required()
+                            ->beforeOrEqual('date_end'),
+                        DatePicker::make('date_end')
+                            ->label('Date de fin')
+                            ->required()
+                            ->afterOrEqual('date_begin'),
+                    ]),
+
+                Section::make('Législation')
+                    ->key('legislation-section')
+                    ->columns(2)
+                    ->visible(fn (Get $get): bool => self::isType($get, FicheTypeEnum::LEGISLATION))
+                    ->schema([
+                        TextInput::make('type_document')
+                            ->label('Type de document')
+                            ->helperText('(circulaire - arrêté - loi…)')
+                            ->maxLength(255),
+                        TextInput::make('source')
+                            ->label('Source')
+                            ->helperText('SPP - SPW - CWB…')
+                            ->maxLength(255),
                         DatePicker::make('date_promulgation')
                             ->label('Date de promulgation'),
                         DatePicker::make('date_publication')
                             ->label('Date de publication'),
-                        DatePicker::make('date_rappel')
-                            ->label('Date de rappel'),
-                        DatePicker::make('date_begin')
-                            ->label('Date de début')
-                            ->beforeOrEqual('date_end'),
-                        DatePicker::make('date_end')
-                            ->label('Date de fin')
-                            ->afterOrEqual('date_begin'),
                     ]),
             ]);
+    }
+
+    /**
+     * Filament casts the `type` Select state to a FicheTypeEnum instance, but a
+     * record loaded from the database exposes it as a raw string. Normalise both
+     * before comparing so the conditional sections resolve in every context.
+     */
+    private static function isType(Get $get, FicheTypeEnum $type): bool
+    {
+        $state = $get('type');
+
+        if ($state instanceof FicheTypeEnum) {
+            return $state === $type;
+        }
+
+        return $state === $type->value;
     }
 }

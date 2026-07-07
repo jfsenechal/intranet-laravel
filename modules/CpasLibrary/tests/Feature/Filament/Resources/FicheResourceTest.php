@@ -17,6 +17,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
@@ -125,7 +126,7 @@ it('attaches tags via the form', function (): void {
 });
 
 it('validates date_begin must be before_or_equal date_end', function (): void {
-    $fiche = Fiche::factory()->create();
+    $fiche = Fiche::factory()->create(['type' => 'absence']);
 
     livewire(EditFiche::class, ['record' => $fiche->id])
         ->fillForm([
@@ -135,6 +136,36 @@ it('validates date_begin must be before_or_equal date_end', function (): void {
         ->call('save')
         ->assertHasFormErrors(['date_begin'])
         ->assertNotNotified();
+});
+
+it('shows the absence section only for the absence type', function (): void {
+    livewire(CreateFiche::class)
+        ->fillForm(['type' => 'absence'])
+        ->assertSchemaComponentVisible('absence-section')
+        ->assertSchemaComponentHidden('legislation-section')
+        ->fillForm(['type' => 'legislation'])
+        ->assertSchemaComponentHidden('absence-section')
+        ->assertSchemaComponentVisible('legislation-section');
+});
+
+it('exposes a create action for each fiche type in the header', function (string $type): void {
+    livewire(ListFiches::class)
+        ->assertActionExists('create_'.$type);
+})->with(['default', 'absence', 'legislation']);
+
+it('pre-fills the type from the query string on the create page', function (): void {
+    Livewire::withQueryParams(['type' => 'absence']);
+
+    livewire(CreateFiche::class)
+        ->assertSchemaComponentVisible('absence-section')
+        ->assertSchemaComponentHidden('legislation-section');
+});
+
+it('hides both subtype sections for the default type', function (): void {
+    livewire(CreateFiche::class)
+        ->fillForm(['type' => 'default'])
+        ->assertSchemaComponentHidden('absence-section')
+        ->assertSchemaComponentHidden('legislation-section');
 });
 
 it('validates the form data', function (array $data, array $errors): void {

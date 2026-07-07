@@ -85,37 +85,39 @@ it('creates a categorie via the form', function (): void {
     livewire(CreateCategory::class)
         ->fillForm([
             'name' => 'Aide sociale',
-            'slug' => 'aide-sociale',
-            'departments' => [DepartmentEnum::CPAS->value],
-            'public' => true,
         ])
         ->call('create')
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    assertDatabaseHas(Category::class, [
-        'name' => 'Aide sociale',
-        'slug' => 'aide-sociale',
-        'public' => true,
-    ]);
+    $categorie = Category::query()->where('name', 'Aide sociale')->first();
+
+    expect($categorie->departments)->toBe([DepartmentEnum::CPAS->value]);
 });
 
 it('updates a categorie via the form', function (): void {
-    $categorie = Category::factory()->create(['public' => false]);
+    $categorie = Category::factory()->create();
 
     livewire(EditCategory::class, ['record' => $categorie->id])
-        ->fillForm([
-            'name' => 'Renamed',
-            'public' => true,
-        ])
+        ->fillForm(['name' => 'Renamed'])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(Category::class, [
         'id' => $categorie->id,
         'name' => 'Renamed',
-        'public' => true,
     ]);
+});
+
+it('forces the departments to CPAS', function (): void {
+    $categorie = Category::factory()->create(['departments' => [DepartmentEnum::VILLE->value]]);
+
+    livewire(EditCategory::class, ['record' => $categorie->id])
+        ->fillForm(['name' => 'Kept'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($categorie->refresh()->departments)->toBe([DepartmentEnum::CPAS->value]);
 });
 
 it('deletes a categorie from the view page', function (): void {
@@ -134,7 +136,6 @@ it('validates the form data', function (array $data, array $errors): void {
     livewire(EditCategory::class, ['record' => $categorie->id])
         ->fillForm([
             'name' => 'Valid name',
-            'departments' => [DepartmentEnum::CPAS->value],
             ...$data,
         ])
         ->call('save')
@@ -143,7 +144,6 @@ it('validates the form data', function (array $data, array $errors): void {
 })->with([
     '`name` is required' => [['name' => null], ['name' => 'required']],
     '`name` is max 255 characters' => [['name' => Str::random(256)], ['name' => 'max']],
-    '`departments` is required' => [['departments' => []], ['departments' => 'required']],
 ]);
 
 it('excludes the current record from the parent_id options', function (): void {
@@ -153,6 +153,22 @@ it('excludes the current record from the parent_id options', function (): void {
         ->fillForm(['parent_id' => $categorie->id])
         ->call('save')
         ->assertHasFormErrors(['parent_id']);
+});
+
+it('only offers root categories as a parent', function (): void {
+    $root = Category::factory()->create();
+    $child = Category::factory()->create(['parent_id' => $root->id]);
+    $categorie = Category::factory()->create();
+
+    livewire(EditCategory::class, ['record' => $categorie->id])
+        ->fillForm(['parent_id' => $child->id])
+        ->call('save')
+        ->assertHasFormErrors(['parent_id']);
+
+    livewire(EditCategory::class, ['record' => $categorie->id])
+        ->fillForm(['parent_id' => $root->id])
+        ->call('save')
+        ->assertHasNoFormErrors();
 });
 
 it('forbids a user without a library role from listing categories', function (): void {

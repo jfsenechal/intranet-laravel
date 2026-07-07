@@ -6,12 +6,11 @@ namespace AcMarche\CpasLibrary\Filament\Resources\Categories\Schemas;
 
 use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\CpasLibrary\Models\Category;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,32 +32,28 @@ final class CategoryForm
                         'slug',
                         Str::slug($state ?? ''),
                     )),
-                TextInput::make('slug')
-                    ->label('Slug')
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
                 Select::make('parent_id')
                     ->label('Catégorie parente')
                     ->relationship(
                         name: 'parent',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query, ?Category $record) => $record
-                            ? $query->where('id', '!=', $record->id)
-                            : $query,
+                        modifyQueryUsing: fn (Builder $query, ?Category $record) => $query
+                            ->whereNull('parent_id')
+                            ->when($record, fn (Builder $query) => $query->where('id', '!=', $record->id)),
                     )
                     ->searchable()
                     ->preload(),
-                TextInput::make('description')
+                Textarea::make('description')
                     ->label('Description')
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Select::make('icon')
                     ->label('Icône')
                     ->native(false)
+                    ->helperText('Recherchez par mot clef en anglais')
                     ->searchable()
                     ->allowHtml()
                     ->placeholder('Rechercher une icône…')
-                    ->helperText('Icône Heroicon (compatible Filament)')
                     ->getSearchResultsUsing(fn (?string $search): array => self::heroiconOptions($search))
                     ->getOptionLabelUsing(fn (?string $value): ?string => $value === null
                         ? null
@@ -66,19 +61,10 @@ final class CategoryForm
                 ColorPicker::make('color')
                     ->label('Couleur')
                     ->hex(),
-                CheckboxList::make('departments')
-                    ->label('Départements')
-                    ->options(DepartmentEnum::class)
-                    ->columns(2)
-                    ->required()
-                    ->columnSpanFull(),
-                TagsInput::make('users')
-                    ->label('Utilisateurs autorisés')
-                    ->helperText('Usernames autorisés (laisser vide pour tous)')
-                    ->columnSpanFull(),
-                Toggle::make('public')
-                    ->label('Public')
-                    ->default(false),
+                // Forced to CPAS for now; will become a user-selectable field later.
+                Hidden::make('departments')
+                    ->default([DepartmentEnum::CPAS->value])
+                    ->dehydrateStateUsing(fn (): array => [DepartmentEnum::CPAS->value]),
             ]);
     }
 
