@@ -7,6 +7,7 @@ namespace AcMarche\CpasLibrary\Filament\Resources\Fiches\Schemas;
 use AcMarche\CpasLibrary\Enums\FicheTypeEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -38,19 +39,16 @@ final class FicheForm
                                 'slug',
                                 Str::slug($state ?? ''),
                             )),
-                        TextInput::make('slug')
-                            ->label('Slug')
-                            ->maxLength(255),
                         Select::make('category_id')
                             ->label('Catégorie')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload(),
-                        Select::make('type')
-                            ->label('Type')
-                            ->options(FicheTypeEnum::class)
-                            ->default(FicheTypeEnum::DEFAULT->value)
-                            ->live(),
+                        // Type is chosen by the user from the "Nouvelle fiche" dropdown
+                        // (pre-filled from the query string in CreateFiche); it is carried
+                        // in the form but hidden rather than editable here.
+                        Hidden::make('type')
+                            ->default(FicheTypeEnum::DEFAULT->value),
                         Select::make('tags')
                             ->label('Tags')
                             ->relationship('tags', 'name')
