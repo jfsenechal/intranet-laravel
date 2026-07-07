@@ -5,71 +5,94 @@ declare(strict_types=1);
 namespace AcMarche\College\Filament\Resources\Notifications\Pages;
 
 use AcMarche\College\Enums\NotificationType;
-use AcMarche\College\Filament\Resources\Notifications\NotificationResource;
 use AcMarche\College\Filament\Resources\Notifications\Schemas\NotificationSendForm;
 use AcMarche\College\Mail\NotificationMail;
 use AcMarche\College\Models\Notification;
 use AcMarche\College\Models\Recipient;
-use Filament\Resources\Pages\CreateRecord;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification as FilamentNotification;
+use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Override;
 
-final class CreateNotification extends CreateRecord
+final class CreateNotification extends Page implements HasForms
 {
+    use InteractsWithForms;
+
+    /** @var array<string, mixed> */
+    public array $data = [];
+
     #[Override]
-    protected static string $resource = NotificationResource::class;
+    protected string $view = 'college::filament.pages.create-notification';
+
+    #[Override]
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBell;
+
+    #[Override]
+    protected static ?int $navigationSort = 2;
+
+    #[Override]
+    protected static ?string $navigationLabel = 'Notifier';
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        return Gate::check('create', Notification::class);
+    }
 
     public function getTitle(): string
     {
         return 'Envoyer une notification';
     }
 
-    #[Override]
+    public function mount(): void
+    {
+        $this->form->fill();
+    }
+
     public function form(Schema $schema): Schema
     {
-        return NotificationSendForm::configure($schema);
+        return NotificationSendForm::configure($schema->statePath('data'));
     }
 
-    #[Override]
-    protected function getRedirectUrl(): string
+    public function send(): void
     {
-        return $this->getResource()::getUrl('index');
-    }
+        $data = $this->form->getState();
 
-    #[Override]
-    protected function getCreatedNotificationTitle(): string
-    {
-        return 'Notification envoyée aux destinataires';
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    #[Override]
-    protected function handleRecordCreation(array $data): Model
-    {
         $type = $data['type'] instanceof NotificationType
             ? $data['type']
             : NotificationType::from((string) $data['type']);
 
         $files = $this->collectFiles($data);
 
-        $notifications = collect($files)->map(
-            fn (array $file): Notification => Notification::create([
-                'file_name' => $file['name'],
-                'mime' => $file['mime'],
-                'updatedAt' => now(),
-            ]),
-        );
+        $count = $this->sendNotifications($type, $data, $files);
 
-        $this->sendNotifications($type, $data, $files);
+        FilamentNotification::make()
+            ->title('Notification envoyée')
+            ->body(sprintf('%d destinataire(s) notifié(s).', $count))
+            ->success()
+            ->send();
+    }
 
-        return $notifications->first();
+    /**
+     * @return array<int, Action>
+     */
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('send')
+                ->label('Envoyer la notification')
+                ->icon(Heroicon::PaperAirplane)
+                ->submit('send'),
+        ];
     }
 
     /**
@@ -106,8 +129,9 @@ final class CreateNotification extends CreateRecord
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, array{path: string, name: string, mime: string}>  $files
+     * @return int Number of recipients actually notified.
      */
-    private function sendNotifications(NotificationType $type, array $data, array $files): void
+    private function sendNotifications(NotificationType $type, array $data, array $files): int
     {
         $recipients = Recipient::query()
             ->whereNotNull('email')
@@ -121,6 +145,7 @@ final class CreateNotification extends CreateRecord
         $dateCollege = Carbon::parse($data['date_college']);
 
         $sender = auth()->user();
+        $count = 0;
 
         foreach ($recipients as $recipient) {
             $attachments = [];
@@ -145,6 +170,10 @@ final class CreateNotification extends CreateRecord
                 fromAddress: $sender->email,
                 fromName: $sender->full_name,
             ));
+
+            $count++;
         }
+
+        return $count;
     }
 }

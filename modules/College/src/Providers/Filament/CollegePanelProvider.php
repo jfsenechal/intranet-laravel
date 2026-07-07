@@ -6,6 +6,7 @@ namespace AcMarche\College\Providers\Filament;
 
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
+use AcMarche\College\Filament\Resources\Notifications\Pages\CreateNotification;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -45,7 +46,7 @@ final class CollegePanelProvider extends PanelProvider
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\College\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\College\\Filament\\Pages')
             ->pages([
-
+                CreateNotification::class,
             ])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\College\\Filament\\Widgets')
             ->widgets([

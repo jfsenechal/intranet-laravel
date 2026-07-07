@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\College\Enums\NotificationType;
 use AcMarche\College\Filament\Resources\Notifications\Pages\CreateNotification;
-use AcMarche\College\Filament\Resources\Notifications\Pages\EditNotification;
-use AcMarche\College\Filament\Resources\Notifications\Pages\ListNotifications;
-use AcMarche\College\Filament\Resources\Notifications\Pages\ViewNotification;
 use AcMarche\College\Mail\NotificationMail;
-use AcMarche\College\Models\Notification;
 use AcMarche\College\Models\Recipient;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -17,7 +13,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -44,21 +39,8 @@ function makeRecipient(array $flags = []): Recipient
     ], $flags));
 }
 
-it('renders list, create, view and edit pages', function (): void {
-    $notification = Notification::factory()->create();
-
-    livewire(ListNotifications::class)->assertOk();
+it('renders the notify page', function (): void {
     livewire(CreateNotification::class)->assertOk();
-    livewire(ViewNotification::class, ['record' => $notification->id])->assertOk();
-    livewire(EditNotification::class, ['record' => $notification->id])->assertOk();
-});
-
-it('lists notifications', function (): void {
-    $notifications = Notification::factory(3)->create();
-
-    livewire(ListNotifications::class)
-        ->loadTable()
-        ->assertCanSeeTableRecords($notifications);
 });
 
 it('sends an ordre notification only to recipients flagged for the uploaded document', function (): void {
@@ -77,7 +59,7 @@ it('sends an ordre notification only to recipients flagged for the uploaded docu
             'message' => '<p>Bonjour</p>',
             'file_college' => UploadedFile::fake()->create('oj-college.pdf', 50, 'application/pdf'),
         ])
-        ->call('create')
+        ->call('send')
         ->assertHasNoFormErrors()
         ->assertNotified();
 
@@ -91,11 +73,6 @@ it('sends an ordre notification only to recipients flagged for the uploaded docu
         fn (NotificationMail $mail): bool => $mail->hasTo($serviceOnlyRecipient->email)
             || $mail->hasTo($unrelatedRecipient->email),
     );
-
-    assertDatabaseHas(Notification::class, [
-        'file_name' => 'oj-college.pdf',
-        'mime' => 'application/pdf',
-    ]);
 });
 
 it('attaches both documents when a recipient is flagged for college and service', function (): void {
@@ -113,7 +90,7 @@ it('attaches both documents when a recipient is flagged for college and service'
             'file_college' => UploadedFile::fake()->create('pv-college.pdf', 50, 'application/pdf'),
             'file_service' => UploadedFile::fake()->create('pv-service.pdf', 50, 'application/pdf'),
         ])
-        ->call('create')
+        ->call('send')
         ->assertHasNoFormErrors()
         ->assertNotified();
 
@@ -137,7 +114,7 @@ it('sends the notification from the current user', function (): void {
             'message' => '<p>Bonjour</p>',
             'file_college' => UploadedFile::fake()->create('oj-college.pdf', 50, 'application/pdf'),
         ])
-        ->call('create')
+        ->call('send')
         ->assertHasNoFormErrors();
 
     Mail::assertQueued(
@@ -155,12 +132,12 @@ it('requires at least one document', function (): void {
             'sujet' => 'Sans document',
             'message' => '<p>Rien</p>',
         ])
-        ->call('create')
+        ->call('send')
         ->assertHasFormErrors(['file_college', 'file_service']);
 });
 
-it('forbids a stranger from listing', function (): void {
+it('forbids a stranger from accessing the page', function (): void {
     $this->actingAs(User::factory()->create());
 
-    livewire(ListNotifications::class)->assertForbidden();
+    expect(CreateNotification::canAccess())->toBeFalse();
 });
