@@ -38,14 +38,6 @@ systemctl status laravel-schedule.service
 journalctl -u laravel-schedule.service -f
 ```
 
-After editing the unit file, reload and restart:
-
-```bash
-sudo cp deploy/laravel-schedule.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl restart laravel-schedule.service
-```
-
 > Do **not** also add `* * * * * php artisan schedule:run` to crontab — with `schedule:work` running, scheduled tasks would fire twice.
 
 ## Install the Laravel queue worker service
@@ -63,14 +55,6 @@ Verify it came up:
 ```bash
 systemctl status laravel-queue.service
 journalctl -u laravel-queue.service -f
-```
-
-After editing the unit file, reload and restart:
-
-```bash
-sudo cp deploy/laravel-queue.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl restart laravel-queue.service
 ```
 
 After deploying new code, tell the worker to pick it up (the unit's `ExecStop` already calls this on stop, but you can trigger it any time):
@@ -96,14 +80,6 @@ systemctl status laravel-nightwatch.service
 journalctl -u laravel-nightwatch.service -f
 ```
 
-After editing the unit file, reload and restart:
-
-```bash
-sudo cp deploy/laravel-nightwatch.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl restart laravel-nightwatch.service
-```
-
 > The agent runs as the `frankenphp` user/group from `WorkingDirectory=/var/www/intranet`. Make sure `NIGHTWATCH_TOKEN` is set in the app's `.env` so the agent can authenticate.
 
 ## Install the Laravel Reverb websocket service
@@ -124,12 +100,6 @@ journalctl -u laravel-reverb.service -f
 ```
 
 After editing the unit file, reload and restart:
-
-```bash
-sudo cp deploy/laravel-reverb.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl restart laravel-reverb.service
-```
 
 > The server binds `0.0.0.0:8080` and must match `REVERB_PORT` / `VITE_REVERB_PORT` in the app's `.env`. On HTTPS, browsers require `wss://`, so proxy `wss://your-domain/app/...` to `127.0.0.1:8080` and set `VITE_REVERB_SCHEME=https` (keep the internal `REVERB_SCHEME=http`). See `REVERB.md` for the full reverse-proxy setup. Restart this service after changing any `BROADCAST_*` or `REVERB_*` env values.
 
