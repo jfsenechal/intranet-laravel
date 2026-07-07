@@ -16,6 +16,7 @@ use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\College\Filament\Resources\Notifications\NotificationResource;
 use AcMarche\Conseil\Filament\Resources\Agendas\AgendaResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use AcMarche\CpasLibrary\Filament\Pages\LibraryIndex;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
 use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
@@ -79,7 +80,7 @@ final class MigrationHandler
             42 => WhoIsWhoSearch::getUrl(panel: 'who-is-who-panel'),
             44 => PublicationResource::getUrl('index', panel: 'publication-panel'),
             50 => TeleworkPage::getUrl(panel: 'app-panel'),
-            52 => FicheResource::getUrl('index', panel: 'cpas-library-panel'),
+            52 => LibraryIndex::getUrl(panel: 'cpas-library-panel'),
             56 => QrCodeResource::getUrl('index', panel: 'qrcode-panel'),
             58 => ActionPstResource::getUrl('index', panel: 'pst-panel'),
             59 => TicketsOfTheDay::getUrl(panel: 'guichet-hdv-panel'),
