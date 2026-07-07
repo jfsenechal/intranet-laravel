@@ -28,9 +28,6 @@ final class ArchiveTables
                     ->label('Date d\'envoi')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                TextColumn::make('recipients')
-                    ->label('Destinataires')
-                    ->limit(80),
             ])
             ->recordActions([
                 ViewAction::make(),

@@ -23,7 +23,7 @@ final class EventEmail extends Mailable
         public readonly Event $event,
         public readonly bool $isPreview = false,
     ) {
-        $prefix = $this->isPreview ? '[Aperçu] ' : '';
+        $prefix = $this->isPreview ? '[Aperçu] ' : '[Rappel manifestation]';
         $this->subject = $prefix.$this->event->name;
     }
 
@@ -59,16 +59,20 @@ final class EventEmail extends Mailable
     }
 
     /**
+     * The logo is embedded inline in the template via `$message->embed()`,
+     * so only the event's uploaded files are attached here.
+     *
      * @return array<Attachment>
      */
     public function attachments(): array
     {
         $attachments = [];
 
-        if ($this->logo) {
-            $attachments[] = Attachment::fromPath($this->logo)
-                ->as('logoMarche.jpg')
-                ->withMime('image/jpg');
+        foreach ([$this->event->file1_name, $this->event->file2_name] as $file) {
+            if (! empty($file)) {
+                $attachments[] = Attachment::fromStorageDisk('public', $file)
+                    ->as(basename($file));
+            }
         }
 
         return $attachments;

@@ -47,7 +47,7 @@ final class Event extends Model
         return SlugOptions::create()
             ->generateSlugsFrom(['name'])
             ->saveSlugsTo('slug')
-            ->allowSlugReuse();
+            ->allowDuplicateSlugs();
     }
 
     protected function casts(): array

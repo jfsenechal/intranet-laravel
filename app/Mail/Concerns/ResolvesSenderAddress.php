@@ -21,7 +21,7 @@ trait ResolvesSenderAddress
         $user = Auth::user();
 
         if ($user instanceof User) {
-            return new Address($user->email, $user->name ?: $user->fullNameAsString());
+            return new Address($user->email, $user->fullNameAsString());
         }
 
         return new Address(config('mail.from.address'), (string) config('app.name'));

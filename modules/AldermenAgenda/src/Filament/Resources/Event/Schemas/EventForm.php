@@ -47,13 +47,13 @@ final class EventForm
                         FileUpload::make('file1_name')
                             ->label('Pièce jointe 1')
                             ->disk('public')
-                            ->directory(config('agenda_echevin.uploads.files'))
+                            ->directory(config('aldermen-agenda.uploads.files'))
                             ->maxSize(7168)
                             ->nullable(),
                         FileUpload::make('file2_name')
                             ->label('Pièce jointe 2')
                             ->disk('public')
-                            ->directory(config('agenda_echevin.uploads.files'))
+                            ->directory(config('aldermen-agenda.uploads.files'))
                             ->maxSize(7168)
                             ->nullable(),
                     ])
