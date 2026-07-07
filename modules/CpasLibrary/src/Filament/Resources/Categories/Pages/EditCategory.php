@@ -10,7 +10,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class EditCategorie extends EditRecord
+final class EditCategory extends EditRecord
 {
     #[Override]
     protected static string $resource = CategorieResource::class;

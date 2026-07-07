@@ -13,9 +13,13 @@ return new class() extends Migration
     public function up(): void
     {
         if (Schema::connection('maria-cpas-library')->hasTable('Preference')) {
+            Schema::connection('maria-cpas-library')->table('Preference', function (Blueprint $table): void {
+                $table->rename('preferences');
+            });
+
             return;
         }
-        Schema::connection('maria-cpas-library')->create('Preference', function (Blueprint $table): void {
+        Schema::connection('maria-cpas-library')->create('preferences', function (Blueprint $table): void {
             $table->id();
             $table->string('name', 255);
             $table->string('value', 255);

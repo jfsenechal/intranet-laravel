@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
+use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\CpasLibrary\Enums\RolesEnum;
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\CreateCategorie;
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\EditCategorie;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\CreateCategory;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\EditCategory;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\ListCategories;
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\ViewCategorie;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\ViewCategory;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\RelationManagers\ChildrenRelationManager;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\RelationManagers\FichesRelationManager;
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\CpasLibrary\Models\Category;
 use AcMarche\CpasLibrary\Models\Fiche;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -37,16 +38,16 @@ beforeEach(function (): void {
 });
 
 it('renders the list, create, view and edit pages for an admin', function (): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
 
     livewire(ListCategories::class)->assertOk();
-    livewire(CreateCategorie::class)->assertOk();
-    livewire(ViewCategorie::class, ['record' => $categorie->id])->assertOk();
-    livewire(EditCategorie::class, ['record' => $categorie->id])->assertOk();
+    livewire(CreateCategory::class)->assertOk();
+    livewire(ViewCategory::class, ['record' => $categorie->id])->assertOk();
+    livewire(EditCategory::class, ['record' => $categorie->id])->assertOk();
 });
 
 it('lists categories', function (): void {
-    $categories = Categorie::factory(3)->create();
+    $categories = Category::factory(3)->create();
 
     livewire(ListCategories::class)
         ->loadTable()
@@ -58,7 +59,7 @@ it('has the expected table columns', function (string $column): void {
 })->with(['name', 'parent.name', 'public', 'fiches_count']);
 
 it('searches by name', function (): void {
-    $categories = Categorie::factory(3)->create();
+    $categories = Category::factory(3)->create();
     $needle = $categories->first()->name;
 
     livewire(ListCategories::class)
@@ -69,9 +70,9 @@ it('searches by name', function (): void {
 });
 
 it('filters by parent', function (): void {
-    $parent = Categorie::factory()->create();
-    $children = Categorie::factory(2)->create(['parent_id' => $parent->id]);
-    $orphans = Categorie::factory(2)->create();
+    $parent = Category::factory()->create();
+    $children = Category::factory(2)->create(['parent_id' => $parent->id]);
+    $orphans = Category::factory(2)->create();
 
     livewire(ListCategories::class)
         ->loadTable()
@@ -81,18 +82,18 @@ it('filters by parent', function (): void {
 });
 
 it('creates a categorie via the form', function (): void {
-    livewire(CreateCategorie::class)
+    livewire(CreateCategory::class)
         ->fillForm([
             'name' => 'Aide sociale',
             'slug' => 'aide-sociale',
-            'departments' => ['Cpas'],
+            'departments' => [DepartmentEnum::CPAS->value],
             'public' => true,
         ])
         ->call('create')
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    assertDatabaseHas(Categorie::class, [
+    assertDatabaseHas(Category::class, [
         'name' => 'Aide sociale',
         'slug' => 'aide-sociale',
         'public' => true,
@@ -100,9 +101,9 @@ it('creates a categorie via the form', function (): void {
 });
 
 it('updates a categorie via the form', function (): void {
-    $categorie = Categorie::factory()->create(['public' => false]);
+    $categorie = Category::factory()->create(['public' => false]);
 
-    livewire(EditCategorie::class, ['record' => $categorie->id])
+    livewire(EditCategory::class, ['record' => $categorie->id])
         ->fillForm([
             'name' => 'Renamed',
             'public' => true,
@@ -110,7 +111,7 @@ it('updates a categorie via the form', function (): void {
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(Categorie::class, [
+    assertDatabaseHas(Category::class, [
         'id' => $categorie->id,
         'name' => 'Renamed',
         'public' => true,
@@ -118,9 +119,9 @@ it('updates a categorie via the form', function (): void {
 });
 
 it('deletes a categorie from the view page', function (): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
 
-    livewire(ViewCategorie::class, ['record' => $categorie->id])
+    livewire(ViewCategory::class, ['record' => $categorie->id])
         ->callAction(DeleteAction::class)
         ->assertNotified();
 
@@ -128,12 +129,12 @@ it('deletes a categorie from the view page', function (): void {
 });
 
 it('validates the form data', function (array $data, array $errors): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
 
-    livewire(EditCategorie::class, ['record' => $categorie->id])
+    livewire(EditCategory::class, ['record' => $categorie->id])
         ->fillForm([
             'name' => 'Valid name',
-            'departments' => ['Cpas'],
+            'departments' => [DepartmentEnum::CPAS->value],
             ...$data,
         ])
         ->call('save')
@@ -146,9 +147,9 @@ it('validates the form data', function (array $data, array $errors): void {
 ]);
 
 it('excludes the current record from the parent_id options', function (): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
 
-    livewire(EditCategorie::class, ['record' => $categorie->id])
+    livewire(EditCategory::class, ['record' => $categorie->id])
         ->fillForm(['parent_id' => $categorie->id])
         ->call('save')
         ->assertHasFormErrors(['parent_id']);
@@ -164,7 +165,7 @@ it('forbids a user without a library role from listing categories', function ():
 it('forbids a ROLE_LIBRARY user from creating a categorie', function (): void {
     $this->actingAs($this->member);
 
-    livewire(CreateCategorie::class)->assertForbidden();
+    livewire(CreateCategory::class)->assertForbidden();
 });
 
 it('hides the create header action for a ROLE_LIBRARY user', function (): void {
@@ -175,19 +176,19 @@ it('hides the create header action for a ROLE_LIBRARY user', function (): void {
 
 it('hides the delete action on view page for a ROLE_LIBRARY user', function (): void {
     $this->actingAs($this->member);
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
 
-    livewire(ViewCategorie::class, ['record' => $categorie->id])
+    livewire(ViewCategory::class, ['record' => $categorie->id])
         ->assertActionHidden(DeleteAction::class);
 });
 
 it('renders the fiches relation manager with the categorys fiches', function (): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
     $fiches = Fiche::factory(2)->create(['category_id' => $categorie->id]);
 
     livewire(FichesRelationManager::class, [
         'ownerRecord' => $categorie,
-        'pageClass' => ViewCategorie::class,
+        'pageClass' => ViewCategory::class,
     ])
         ->assertOk()
         ->loadTable()
@@ -195,12 +196,12 @@ it('renders the fiches relation manager with the categorys fiches', function ():
 });
 
 it('renders the children relation manager with subcategories', function (): void {
-    $parent = Categorie::factory()->create();
-    $children = Categorie::factory(2)->create(['parent_id' => $parent->id]);
+    $parent = Category::factory()->create();
+    $children = Category::factory(2)->create(['parent_id' => $parent->id]);
 
     livewire(ChildrenRelationManager::class, [
         'ownerRecord' => $parent,
-        'pageClass' => ViewCategorie::class,
+        'pageClass' => ViewCategory::class,
     ])
         ->assertOk()
         ->loadTable()

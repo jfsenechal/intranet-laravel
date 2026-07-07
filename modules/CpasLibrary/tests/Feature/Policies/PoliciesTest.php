@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\CpasLibrary\Enums\RolesEnum;
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\CpasLibrary\Models\Category;
 use AcMarche\CpasLibrary\Models\Fiche;
 use AcMarche\CpasLibrary\Models\Tag;
 use AcMarche\Security\Models\Role;
@@ -23,14 +23,14 @@ beforeEach(function (): void {
 });
 
 it('grants viewAny on Categorie to library users', function (): void {
-    expect(Gate::forUser($this->admin)->allows('viewAny', Categorie::class))->toBeTrue();
-    expect(Gate::forUser($this->member)->allows('viewAny', Categorie::class))->toBeTrue();
-    expect(Gate::forUser($this->stranger)->allows('viewAny', Categorie::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('viewAny', Category::class))->toBeTrue();
+    expect(Gate::forUser($this->member)->allows('viewAny', Category::class))->toBeTrue();
+    expect(Gate::forUser($this->stranger)->allows('viewAny', Category::class))->toBeFalse();
 });
 
 it('grants create on Categorie only to admins', function (): void {
-    expect(Gate::forUser($this->admin)->allows('create', Categorie::class))->toBeTrue();
-    expect(Gate::forUser($this->member)->allows('create', Categorie::class))->toBeFalse();
+    expect(Gate::forUser($this->admin)->allows('create', Category::class))->toBeTrue();
+    expect(Gate::forUser($this->member)->allows('create', Category::class))->toBeFalse();
 });
 
 it('grants viewAny on Tag to library users', function (): void {

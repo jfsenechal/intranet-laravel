@@ -7,6 +7,7 @@ namespace AcMarche\CpasLibrary\Filament\Resources\Fiches\Tables;
 use AcMarche\CpasLibrary\Models\Fiche;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -109,6 +110,9 @@ final class FichesTable
                         'fiches/'.$record->fileName,
                         $record->fileName,
                     )),
+                DeleteAction::make()
+                    ->label('Supprimer')
+                    ->icon(Heroicon::Trash),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -193,16 +193,16 @@ Model: Preference
 
 No Filament resource. Keep the table only for compatibility (read-only).
 
-### 3.2 Model: Categorie
+### 3.2 Model: Category
 
 ```
-Model: Categorie
+Model: Category
   Connection: maria-cpas-library
-  Table: categorie
+  Table: categories
   Timestamps: false
   Attributes:
     - id: bigint, primary
-    - parent_id: bigint, foreign(categorie.id), nullable, onDelete: setNull
+    - parent_id: bigint, foreign(categories.id), nullable, onDelete: setNull
     - name: string(255), required
     - description: string(255), nullable
     - slug: string(255), nullable, unique
@@ -216,8 +216,8 @@ Model: Categorie
     - users => array
     - public => boolean
   Relationships:
-    - belongsTo: Categorie via parent_id  (alias: parent)
-    - hasMany: Categorie via parent_id    (alias: children)
+    - belongsTo: Category via parent_id  (alias: parent)
+    - hasMany: Category via parent_id    (alias: children)
     - hasMany: Fiche via category_id      (alias: fiches)
   Traits: none
   Fillable:
@@ -249,7 +249,7 @@ Model: Fiche
   Timestamps: false                     // use legacy createdAt/updatedAt manually
   Attributes:
     - id: bigint, primary
-    - category_id: bigint, foreign(categorie.id), nullable, onDelete: setNull
+    - category_id: bigint, foreign(categories.id), nullable, onDelete: setNull
     - type: string(255), nullable
     - source: string(255), nullable
     - date_promulgation: date, nullable
@@ -279,7 +279,7 @@ Model: Fiche
     - updatedAt => datetime
     - fileSize => integer
   Relationships:
-    - belongsTo: Categorie via category_id   (alias: category)
+    - belongsTo: Category via category_id   (alias: category)
     - belongsToMany: Tag via fiche_tag (foreign: fiche_id, related: tag_id)  (alias: tags)
   Fillable:
     [category_id, type, source, date_promulgation, date_publication, name,
@@ -313,13 +313,13 @@ Order (timestamps):
 2. `2026_05_16_120001_create_tag_table.php` — per Model 3.3.
 3. `2026_05_16_120002_create_fiche_table.php` — per Model 3.4. Use the legacy
    column names exactly (camelCase preserved). FK `category_id` references
-   `categorie.id` with `onDelete: setNull`.
+   `categories.id` with `onDelete: setNull`.
 4. `2026_05_16_120003_create_fiche_tag_table.php`:
-   - `$table->foreignId('fiche_id')->constrained('fiche')->cascadeOnDelete();`
-   - `$table->foreignId('tag_id')->constrained('tag')->cascadeOnDelete();`
+   - `$table->foreignId('fiche_id')->constrained('fiches')->cascadeOnDelete();`
+   - `$table->foreignId('tag_id')->constrained('tags')->cascadeOnDelete();`
    - `$table->primary(['fiche_id', 'tag_id']);`
 5. `2026_05_16_120004_add_parent_fk_to_categorie_table.php` — add self-FK
-   `parent_id -> categorie.id` (setNull on delete).
+   `parent_id -> categories.id` (setNull on delete).
 6. `2026_05_16_120005_create_preference_table.php`:
    - Columns per Model 3.1; `$table->unique(['username', 'name']);`
 7. `2026_05_16_120006_create_document_table.php` — legacy untouched table:
@@ -331,9 +331,9 @@ Order (timestamps):
 
 ### 5.1 Factories (under `database/factories/`)
 
-- `CategorieFactory` — `name => fake()->words(3, true)`, `slug => Str::slug($name).'-'.uniqid()`, `departments => ['Cpas']`, `public => false`.
+- `CategoryFactory` — `name => fake()->words(3, true)`, `slug => Str::slug($name).'-'.uniqid()`, `departments => [DepartmentEnum::CPAS->value]`, `public => false`.
 - `TagFactory` — `name => fake()->unique()->word()`, `slug => Str::slug($name)`.
-- `FicheFactory` — `name`, `userAdd => fake()->userName()`, `createdAt`/`updatedAt => now()`, `category_id => CategorieFactory::new()`, `type => 'default'`.
+- `FicheFactory` — `name`, `userAdd => fake()->userName()`, `createdAt`/`updatedAt => now()`, `category_id => CategoryFactory::new()`, `type => 'default'`.
 
 ### 5.2 Seeders (under `database/seeders/`)
 
@@ -347,7 +347,7 @@ Order (timestamps):
 Location: `src/Policies/`. Mirror `modules/Conseil/src/Policies/GroupePolicy.php`.
 Three policies (one per resource model):
 
-- `CategoriePolicy`
+- `CategoryPolicy`
 - `FichePolicy`
 - `TagPolicy`
 
@@ -356,8 +356,8 @@ hasRole(User $user)` method in each policy — match Conseil's style, no shared
 trait).
 
 ```
-Policy: CategoriePolicy
-  Location: AcMarche\CpasLibrary\Policies\CategoriePolicy
+Policy: CategoryPolicy
+  Location: AcMarche\CpasLibrary\Policies\CategoryPolicy
   Docs: https://filamentphp.com/docs/5.x/panels/resources/overview#authorization
 
   Abilities (all delegate to hasRole($user) unless noted):
@@ -444,7 +444,7 @@ Resource: CategorieResource
       Component: Filament\Forms\Components\Select
       Docs: https://filamentphp.com/docs/5.x/forms/select
       Validation: nullable
-      Config: ->relationship('parent', 'name', fn ($query, ?Categorie $record) =>
+      Config: ->relationship('parent', 'name', fn ($query, ?Category $record) =>
                 $record ? $query->where('id', '!=', $record->id) : $query),
               ->searchable(), ->preload(), ->label('Catégorie parente')
 
@@ -455,10 +455,14 @@ Resource: CategorieResource
       Config: ->maxLength(255), ->columnSpanFull()
 
     Field: icon
-      Component: Filament\Forms\Components\TextInput
-      Docs: https://filamentphp.com/docs/5.x/forms/text-input
-      Validation: nullable, max:255
-      Config: ->placeholder('fa-solid fa-folder'), ->helperText('FontAwesome class')
+      Component: Filament\Forms\Components\Select
+      Docs: https://filamentphp.com/docs/5.x/forms/select
+      Validation: nullable
+      Config: searchable Heroicon picker — ->native(false), ->searchable(), ->allowHtml(),
+        ->getSearchResultsUsing() scans the installed blade-heroicons outline set and
+        returns `heroicon-o-*` names with a rendered SVG preview label,
+        ->getOptionLabelUsing() previews the saved value. Stores a Filament-compatible
+        `heroicon-o-*` string.
 
     Field: color
       Component: Filament\Forms\Components\ColorPicker
@@ -561,7 +565,7 @@ Resource: CategorieResource
     - FichesRelationManager  (see Section 7.4)
     - ChildrenRelationManager (see Section 7.5)
 
-  Authorization: see CategoriePolicy (Section 6)
+  Authorization: see CategoryPolicy (Section 6)
 ```
 
 ### 7.2 Resource: FicheResource
@@ -896,7 +900,7 @@ Resource: TagResource
     Entry: slug
       Component: Filament\Infolists\Components\TextEntry
 
-  Authorization: TagPolicy (same shape as CategoriePolicy)
+  Authorization: TagPolicy (same shape as CategoryPolicy)
 ```
 
 ### 7.4 RelationManager: FichesRelationManager (on CategorieResource)
@@ -931,7 +935,7 @@ RelationManager: FichesRelationManager
 RelationManager: ChildrenRelationManager
   Command: php artisan make:filament-relation-manager CategorieResource children name --associate --no-interaction
   Location: AcMarche\CpasLibrary\Filament\Resources\Categories\RelationManagers\ChildrenRelationManager
-  Relationship: children (hasMany Categorie via parent_id)
+  Relationship: children (hasMany Category via parent_id)
   Title attribute: name
   Can create: yes (sets parent_id automatically via relation)
   Can edit: yes
@@ -1018,7 +1022,7 @@ Authorization:
 Validation (use dataset pattern):
   - name is required
   - name max 255 characters
-  - category_id must exist in categorie.id when set
+  - category_id must exist in categories.id when set
   - date_begin must be before_or_equal date_end
   - date_end must be after_or_equal date_begin
 
@@ -1070,7 +1074,7 @@ ChildrenRelationManager:
 
 ### 9.5 Policy tests
 
-Plain feature tests (no Livewire) for `Gate::allows('create', Categorie::class)`
+Plain feature tests (no Livewire) for `Gate::allows('create', Category::class)`
 and friends — one test per role × ability matrix.
 
 ---

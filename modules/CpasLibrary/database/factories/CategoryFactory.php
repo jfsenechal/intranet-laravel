@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace AcMarche\CpasLibrary\Database\Factories;
 
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\App\Enums\DepartmentEnum;
+use AcMarche\CpasLibrary\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends Factory<Categorie>
+ * @extends Factory<Category>
  */
-final class CategorieFactory extends Factory
+final class CategoryFactory extends Factory
 {
-    protected $model = Categorie::class;
+    protected $model = Category::class;
 
     /**
      * @return array<string, mixed>
@@ -29,7 +30,7 @@ final class CategorieFactory extends Factory
             'slug' => Str::slug($name).'-'.uniqid(),
             'icon' => null,
             'color' => null,
-            'departments' => ['Cpas'],
+            'departments' => [DepartmentEnum::CPAS->value],
             'public' => false,
             'users' => null,
         ];

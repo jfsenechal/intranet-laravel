@@ -7,7 +7,7 @@ namespace AcMarche\CpasLibrary\Policies;
 use AcMarche\CpasLibrary\Enums\RolesEnum;
 use App\Models\User;
 
-final class CategoriePolicy
+final class CategoryPolicy
 {
     public function viewAny(User $user): bool
     {

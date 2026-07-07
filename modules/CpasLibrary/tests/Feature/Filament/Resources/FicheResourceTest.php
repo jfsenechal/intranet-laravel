@@ -7,7 +7,7 @@ use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\CreateFiche;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\EditFiche;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ListFiches;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ViewFiche;
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\CpasLibrary\Models\Category;
 use AcMarche\CpasLibrary\Models\Fiche;
 use AcMarche\CpasLibrary\Models\Tag;
 use AcMarche\Security\Models\Role;
@@ -58,8 +58,8 @@ it('has the expected table columns', function (string $column): void {
 })->with(['name', 'category.name', 'tags.name', 'userAdd', 'createdAt']);
 
 it('filters fiches by category', function (): void {
-    $categoryA = Categorie::factory()->create();
-    $categoryB = Categorie::factory()->create();
+    $categoryA = Category::factory()->create();
+    $categoryB = Category::factory()->create();
     $fichesA = Fiche::factory(2)->create(['category_id' => $categoryA->id]);
     $fichesB = Fiche::factory(2)->create(['category_id' => $categoryB->id]);
 
@@ -82,7 +82,7 @@ it('filters fiches by has_rappel', function (): void {
 });
 
 it('creates a fiche and sets userAdd from auth user', function (): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
 
     livewire(CreateFiche::class)
         ->fillForm([
@@ -108,7 +108,7 @@ it('regenerates a slug from name + id after save when slug is empty', function (
 });
 
 it('attaches tags via the form', function (): void {
-    $categorie = Categorie::factory()->create();
+    $categorie = Category::factory()->create();
     $tag = Tag::factory()->create();
 
     livewire(CreateFiche::class)

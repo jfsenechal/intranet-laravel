@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Override;
 
-final class ViewCategorie extends ViewRecord
+final class ViewCategory extends ViewRecord
 {
     #[Override]
     protected static string $resource = CategorieResource::class;

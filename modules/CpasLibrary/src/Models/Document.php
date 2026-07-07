@@ -6,11 +6,9 @@ namespace AcMarche\CpasLibrary\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 #[Connection('maria-cpas-library')]
-#[Table(name: 'document')]
 #[Fillable([
     'name',
 ])]

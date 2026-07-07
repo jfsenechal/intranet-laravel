@@ -7,7 +7,6 @@ namespace AcMarche\CpasLibrary\Models;
 use AcMarche\CpasLibrary\Database\Factories\FicheFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +16,6 @@ use Illuminate\Support\Str;
 
 #[UseFactory(FicheFactory::class)]
 #[Connection('maria-cpas-library')]
-#[Table(name: 'fiche')]
 #[Fillable([
     'category_id',
     'type',
@@ -47,11 +45,11 @@ final class Fiche extends Model
     public const UPDATED_AT = 'updatedAt';
 
     /**
-     * @return BelongsTo<Categorie, $this>
+     * @return BelongsTo<Category, $this>
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Categorie::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     /**

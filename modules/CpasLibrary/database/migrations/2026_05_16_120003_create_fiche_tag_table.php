@@ -17,10 +17,10 @@ return new class() extends Migration
         }
         Schema::connection('maria-cpas-library')->create('fiche_tag', function (Blueprint $table): void {
             $table->foreignId('fiche_id')
-                ->constrained('fiche')
+                ->constrained('fiches')
                 ->cascadeOnDelete();
             $table->foreignId('tag_id')
-                ->constrained('tag')
+                ->constrained('tags')
                 ->cascadeOnDelete();
             $table->primary(['fiche_id', 'tag_id']);
         });

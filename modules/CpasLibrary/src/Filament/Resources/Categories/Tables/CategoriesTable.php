@@ -32,7 +32,7 @@ final class CategoriesTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('parent.name')
-                    ->label('Parente')
+                    ->label('Parent')
                     ->placeholder('—')
                     ->toggleable(),
                 IconColumn::make('icon')

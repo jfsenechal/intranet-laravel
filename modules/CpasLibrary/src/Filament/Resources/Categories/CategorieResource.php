@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace AcMarche\CpasLibrary\Filament\Resources\Categories;
 
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\CreateCategorie;
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\EditCategorie;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\CreateCategory;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\EditCategory;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\ListCategories;
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\ViewCategorie;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Pages\ViewCategory;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\RelationManagers\ChildrenRelationManager;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\RelationManagers\FichesRelationManager;
-use AcMarche\CpasLibrary\Filament\Resources\Categories\Schemas\CategorieForm;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Schemas\CategoryForm;
 use AcMarche\CpasLibrary\Filament\Resources\Categories\Tables\CategoriesTable;
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\CpasLibrary\Models\Category;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -24,7 +24,7 @@ use UnitEnum;
 final class CategorieResource extends Resource
 {
     #[Override]
-    protected static ?string $model = Categorie::class;
+    protected static ?string $model = Category::class;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
@@ -57,7 +57,7 @@ final class CategorieResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return CategorieForm::configure($schema);
+        return CategoryForm::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -77,9 +77,9 @@ final class CategorieResource extends Resource
     {
         return [
             'index' => ListCategories::route('/'),
-            'create' => CreateCategorie::route('/create'),
-            'view' => ViewCategorie::route('/{record}'),
-            'edit' => EditCategorie::route('/{record}/edit'),
+            'create' => CreateCategory::route('/create'),
+            'view' => ViewCategory::route('/{record}'),
+            'edit' => EditCategory::route('/{record}/edit'),
         ];
     }
 }

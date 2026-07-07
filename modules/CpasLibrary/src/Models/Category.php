@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\CpasLibrary\Models;
 
-use AcMarche\CpasLibrary\Database\Factories\CategorieFactory;
+use AcMarche\CpasLibrary\Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -15,9 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
-#[UseFactory(CategorieFactory::class)]
+#[UseFactory(CategoryFactory::class)]
 #[Connection('maria-cpas-library')]
-#[Table(name: 'categorie')]
 #[Fillable([
     'parent_id',
     'name',
@@ -29,7 +28,7 @@ use Override;
     'public',
     'users',
 ])]
-final class Categorie extends Model
+final class Category extends Model
 {
     use HasFactory;
 
@@ -37,7 +36,7 @@ final class Categorie extends Model
     public $timestamps = false;
 
     /**
-     * @return BelongsTo<Categorie, $this>
+     * @return BelongsTo<Category, $this>
      */
     public function parent(): BelongsTo
     {
@@ -45,7 +44,7 @@ final class Categorie extends Model
     }
 
     /**
-     * @return HasMany<Categorie, $this>
+     * @return HasMany<Category, $this>
      */
     public function children(): HasMany
     {

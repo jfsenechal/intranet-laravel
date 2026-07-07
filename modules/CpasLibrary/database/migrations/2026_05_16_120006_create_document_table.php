@@ -13,9 +13,16 @@ return new class() extends Migration
     public function up(): void
     {
         if (Schema::connection('maria-cpas-library')->hasTable('document')) {
+            Schema::connection('maria-cpas-library')->table('document', function (Blueprint $table): void {
+                $table->rename('documents');
+            });
+
             return;
         }
-        Schema::connection('maria-cpas-library')->create('document', function (Blueprint $table): void {
+        if (Schema::connection('maria-cpas-library')->hasTable('documents')) {
+            return;
+        }
+        Schema::connection('maria-cpas-library')->create('documents', function (Blueprint $table): void {
             $table->id();
             $table->string('name', 255);
             $table->dateTime('createdAt')->nullable();

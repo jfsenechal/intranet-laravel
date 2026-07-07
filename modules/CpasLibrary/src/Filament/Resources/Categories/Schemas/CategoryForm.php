@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\CpasLibrary\Filament\Resources\Categories\Schemas;
 
 use AcMarche\App\Enums\DepartmentEnum;
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\CpasLibrary\Models\Category;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
@@ -17,7 +17,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-final class CategorieForm
+final class CategoryForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -42,7 +42,7 @@ final class CategorieForm
                     ->relationship(
                         name: 'parent',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query, ?Categorie $record) => $record
+                        modifyQueryUsing: fn (Builder $query, ?Category $record) => $record
                             ? $query->where('id', '!=', $record->id)
                             : $query,
                     )
@@ -52,11 +52,17 @@ final class CategorieForm
                     ->label('Description')
                     ->maxLength(255)
                     ->columnSpanFull(),
-                TextInput::make('icon')
+                Select::make('icon')
                     ->label('Icône')
-                    ->maxLength(255)
-                    ->placeholder('fa-solid fa-folder')
-                    ->helperText('Classe FontAwesome'),
+                    ->native(false)
+                    ->searchable()
+                    ->allowHtml()
+                    ->placeholder('Rechercher une icône…')
+                    ->helperText('Icône Heroicon (compatible Filament)')
+                    ->getSearchResultsUsing(fn (?string $search): array => self::heroiconOptions($search))
+                    ->getOptionLabelUsing(fn (?string $value): ?string => $value === null
+                        ? null
+                        : self::heroiconLabel($value)),
                 ColorPicker::make('color')
                     ->label('Couleur')
                     ->hex(),
@@ -74,5 +80,38 @@ final class CategorieForm
                     ->label('Public')
                     ->default(false),
             ]);
+    }
+
+    /**
+     * Search the installed Heroicon outline set, returning Filament-compatible
+     * icon names mapped to an HTML label that previews the rendered SVG.
+     *
+     * @return array<string, string>
+     */
+    private static function heroiconOptions(?string $search): array
+    {
+        $files = glob(base_path('vendor/blade-ui-kit/blade-heroicons/resources/svg/o-*.svg')) ?: [];
+        $needle = Str::lower(mb_trim((string) $search));
+
+        $options = [];
+        foreach ($files as $file) {
+            $name = 'heroicon-'.basename($file, '.svg');
+            if ($needle !== '' && ! str_contains($name, $needle)) {
+                continue;
+            }
+            $options[$name] = self::heroiconLabel($name);
+            if (count($options) >= 50) {
+                break;
+            }
+        }
+
+        return $options;
+    }
+
+    private static function heroiconLabel(string $name): string
+    {
+        return '<span class="flex items-center gap-2">'
+            .svg($name, 'w-5 h-5')->toHtml()
+            .'<span>'.e($name).'</span></span>';
     }
 }

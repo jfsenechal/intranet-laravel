@@ -8,7 +8,7 @@ use AcMarche\CpasLibrary\Filament\Resources\Categories\CategorieResource;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
 
-final class CreateCategorie extends CreateRecord
+final class CreateCategory extends CreateRecord
 {
     #[Override]
     protected static string $resource = CategorieResource::class;

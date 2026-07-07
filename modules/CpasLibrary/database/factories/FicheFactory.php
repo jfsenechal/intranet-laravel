@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\CpasLibrary\Database\Factories;
 
-use AcMarche\CpasLibrary\Models\Categorie;
+use AcMarche\CpasLibrary\Models\Category;
 use AcMarche\CpasLibrary\Models\Fiche;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +21,7 @@ final class FicheFactory extends Factory
     public function definition(): array
     {
         return [
-            'category_id' => CategorieFactory::new(),
+            'category_id' => CategoryFactory::new(),
             'type' => 'default',
             'source' => null,
             'date_promulgation' => null,
@@ -42,7 +42,7 @@ final class FicheFactory extends Factory
         ];
     }
 
-    public function withCategory(Categorie $categorie): self
+    public function withCategory(Category $categorie): self
     {
         return $this->state(['category_id' => $categorie->id]);
     }
