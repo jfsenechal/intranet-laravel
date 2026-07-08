@@ -13,6 +13,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -33,6 +34,8 @@ final class CourrierPanelProvider extends PanelProvider
             ->id('courrier-panel')
             ->path('indicateur')
             ->sidebarCollapsibleOnDesktop()
+            ->maxContentWidth(Width::Full)
+            ->sidebarWidth('16rem')
             ->brandName('Indicateur')
             ->colors([
                 'primary' => Color::Pink,
