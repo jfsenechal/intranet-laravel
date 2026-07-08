@@ -8,6 +8,11 @@
   - [Install the Laravel Nightwatch agent service](#install-the-laravel-nightwatch-agent-service)
   - [Install the Laravel Reverb websocket service](#install-the-laravel-reverb-websocket-service)
 - [Mail configuration (local vs production)](#mail-configuration-local-vs-production)
+- [Mail sending inventory (modules & app)](#mail-sending-inventory-modules--app)
+  - [Delivery mode: queued vs synchronous](#delivery-mode-queued-vs-synchronous)
+  - [Queue infrastructure](#queue-infrastructure)
+  - [Queue monitoring UI](#queue-monitoring-ui)
+  - [Other useful notes](#other-useful-notes)
 - [List systemd services](#list-systemd-services)
 
 ## systemd services overview
@@ -130,6 +135,67 @@ if (! app()->environment('production') && config('mail.redirect_to')) {
 ```
 
 This does not change the transport — it just prevents non-prod environments from emailing real users. It is inactive while `MAIL_REDIRECT_TO` is unset.
+
+## Mail sending inventory (modules & app)
+
+All outgoing business mail is sent **from the modules**, never from `app/`. Every Mailable lives under `modules/*/src/Mail/` and is sent through `Illuminate\Support\Facades\Mail`. The `app/` layer only holds the shared sender trait (`App\Mail\Concerns\ResolvesSenderAddress`) and the `Mail::alwaysTo()` redirect (see [Mail configuration](#mail-configuration-local-vs-production)); it dispatches no business email of its own.
+
+### Delivery mode: queued vs synchronous
+
+Queue connection is `database` (see [Queue infrastructure](#queue-infrastructure)). A mailable is delivered **asynchronously** when it implements `ShouldQueue`, is sent with `->queue(...)`, or is sent from inside a queued `Job`; otherwise `Mail::to()->send(...)` blocks the current request/command until the SMTP server responds.
+
+| Module | Mailable | Triggered from | Delivery |
+|--------|----------|----------------|----------|
+| Conseil | `ConseilNotificationMail` | `NotifyRecipients` Filament page | Queue — `ShouldQueue` |
+| Pst | `ActionReminderMail` | `ReminderAction` (Filament action) | Queue — `ShouldQueue` |
+| Agent | `ProfileRequestMail` | Hrm `RequestProfileAction` | Queue — `ShouldQueue` |
+| Agent | `ProfileChangeRequestMail` | Hrm `RequestProfileChangeAction` | Queue — `ShouldQueue` |
+| Agent | `ProfileDeleteRequestMail` | Hrm `RequestProfileDeletionAction` | Queue — `ShouldQueue` |
+| Hrm | `TeleworkManagerValidationMail` | `TeleworkNotifier` (Telework pages) | Queue — `ShouldQueue` |
+| Hrm | `TeleworkEmployeeManagerResultMail` | `TeleworkNotifier` | Queue — `ShouldQueue` |
+| Hrm | `TeleworkHrValidationMail` | `TeleworkNotifier` | Queue — `ShouldQueue` |
+| Hrm | `TeleworkEmployeeHrResultMail` | `TeleworkNotifier` | Queue — `ShouldQueue` |
+| College | `NotificationMail` | `CreateNotification` page | Queue — `->queue()` |
+| AldermenAgenda | `EventEmail` | `ViewEvent` page | Queue (`->queue()`) for the real send; **Sync** for the preview (`->send(..., isPreview: true)`) |
+| Courrier | `IncomingMailNotification` | `SendIncomingMailNotificationJob` (dispatched from `NotifyRecipients` page) | Queue — via `ShouldQueue` job |
+| MailingList | `NewsletterMail` | `SendEmailJob` batch (`MailerHandler`) | Queue — via batched `ShouldQueue` job; **Sync** for the preview (`PreviewAction`) |
+| Ad | `ClassifiedAdEmail` | `ClassifiedAdObserver` (model saved) | **Sync** — runs inside the web request |
+| News | `NewsEmail` | `NewsNotification` event listener | **Sync** |
+| Pst | `ActionNewMail` | `SendActionNewNotification` listener | **Sync** |
+| Pst | `ExceptionMail` | `Pst\Exceptions\Handler` | **Sync** |
+| CpasLibrary | `ReminderMail` | `ReminderCommand` (console) | **Sync** (console — fine) |
+| CpasLibrary | `ResumeMail` | `ResumeCommand` (console) | **Sync** (console — fine) |
+| Hrm | `ReminderMail` | `ReminderCommand` (console) | **Sync** (console — fine) |
+| Hrm | `PurgedApplicationsMail` | `PurgeCommand` (console) | **Sync** (console — fine) |
+| EmailManagement | `CitoyenMessage` | — | **Unused** — no send site (dead code) |
+| Pst | `ContactMessage` | — | **Unused** — no send site (dead code) |
+
+> Sync sends triggered from **console commands** are intentional (a worker adds no value there). Sync sends still triggered from listeners/observers (Ad, News, Pst) block the originating request and are candidates for future queuing.
+
+### Queue infrastructure
+
+- `QUEUE_CONNECTION=database`. Tables `jobs`, `failed_jobs`, `job_batches` live on the default (intranet) connection.
+- **A worker must be running** for queued mail to leave — `php artisan queue:work` (see [Install the Laravel queue worker service](#install-the-laravel-queue-worker-service)). Without it, queued mail simply accumulates in `jobs`.
+- Queued failures land in `failed_jobs` and are **not** surfaced in the UI (unlike a sync send, which throws in the request). Retry them from the UI or with `php artisan queue:retry`.
+- Non-mail `ShouldQueue` jobs in the app: `Courrier\SendIncomingMailNotificationJob`, `Courrier\IndexIncomingMailJob` (Meilisearch indexing), `MailingList\SendEmailJob`.
+- **MailingList** uses `Bus::batch()` (the `job_batches` table) with a per-email delay to throttle the newsletter blast, and `then` / `catch` callbacks that update the campaign status (`EmailStatus::Sent` / `Failed`).
+- **Sender preservation:** `ResolvesSenderAddress` caches the resolved `Address`; every queued mailable that uses it calls `captureSenderAddress()` in its constructor so the acting user's `from` is serialized into the job and survives to the worker (where there is no authenticated user). See [Default sender](#default-sender-from).
+
+### Queue monitoring UI
+
+Read-only queue views in the **admin panel** (`/admin`), restricted to administrators (`User::isAdministrator()`):
+
+- `/admin/jobs` — pending / reserved jobs (`App\Filament\Resources\Jobs\JobResource`), with payload viewer and delete.
+- `/admin/failed-jobs` — failed jobs (`App\Filament\Resources\FailedJobs\FailedJobResource`), with exception viewer, retry, delete, and bulk retry / flush.
+- Dashboard widget `App\Filament\Widgets\QueueStatsWidget` — pending and failed counts (each links to its resource).
+
+These read the queue tables through the lightweight `App\Models\Job` and `App\Models\FailedJob` models.
+
+### Other useful notes
+
+- `app/` sends only Filament **database notifications** (`AdminPanelProvider::databaseNotifications()`, `User` is `Notifiable`) and **web-push** subscriptions (`HasPushSubscriptions`) — not email.
+- `GuichetHdv\TicketAssignedPush` is a **WebPush** notification, not an email.
+- SMTP credentials live in `.env` (`MAIL_PASSWORD` in plaintext) — rotate/secret-store candidates.
 
 ## List systemd services
 
