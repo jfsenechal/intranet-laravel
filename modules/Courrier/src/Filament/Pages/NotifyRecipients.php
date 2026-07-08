@@ -116,7 +116,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                     count($this->previewData)
                 ))
                 ->modalSubmitActionLabel('Envoyer')
-                ->disabled(fn (): bool => empty($this->previewData))
+               // ->disabled(fn (): bool => empty($this->previewData))
                 ->action(function (): void {
                     if (! $this->mail_date) {
                         Notification::make()
