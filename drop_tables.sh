@@ -1,6 +1,7 @@
 #!/bin/bash
 # DB_HOST=127.0.0.1 DB_USER=root DB_PASS=your-password ./drop_tables.sh
 # Database credentials - update these with your actual credentials
+exit
 DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-3306}"
 DB_USER="${DB_USER:-root}"
