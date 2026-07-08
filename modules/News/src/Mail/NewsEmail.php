@@ -7,13 +7,14 @@ namespace AcMarche\News\Mail;
 use AcMarche\News\Models\News;
 use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-final class NewsEmail extends Mailable
+final class NewsEmail extends Mailable implements ShouldQueue
 {
     use Queueable, ResolvesSenderAddress, SerializesModels;
 
@@ -26,7 +27,9 @@ final class NewsEmail extends Mailable
     public function __construct(
         public readonly News $news,
         public readonly bool $attachMedias = true,
-    ) {}
+    ) {
+        $this->captureSenderAddress();
+    }
 
     /**
      * Get the message envelope.

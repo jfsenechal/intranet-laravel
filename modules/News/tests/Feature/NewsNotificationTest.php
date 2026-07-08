@@ -38,10 +38,10 @@ it('sends a common news notification to every user with an email', function (): 
     notifyNews($news);
 
     $expectedCount = User::query()->whereNotNull('email')->count();
-    Mail::assertSent(NewsEmail::class, $expectedCount);
+    Mail::assertQueued(NewsEmail::class, $expectedCount);
 
     foreach ($recipients as $recipient) {
-        Mail::assertSent(
+        Mail::assertQueued(
             NewsEmail::class,
             fn (NewsEmail $mail): bool => $mail->hasTo($recipient->email) && $mail->news->is($news),
         );
@@ -56,12 +56,12 @@ it('sends a department news notification only to users of that department', func
 
     notifyNews($news);
 
-    Mail::assertSent(
+    Mail::assertQueued(
         NewsEmail::class,
         fn (NewsEmail $mail): bool => $mail->hasTo($cpasUser->email),
     );
 
-    Mail::assertNotSent(
+    Mail::assertNotQueued(
         NewsEmail::class,
         fn (NewsEmail $mail): bool => $mail->hasTo($villeUser->email),
     );
@@ -77,7 +77,7 @@ it('attaches the medias for a user who opted in to attachments', function (): vo
 
     notifyNews($news);
 
-    Mail::assertSent(
+    Mail::assertQueued(
         NewsEmail::class,
         fn (NewsEmail $mail): bool => $mail->attachMedias === true
             && $mail->attachments() !== [],
@@ -94,7 +94,7 @@ it('does not attach the medias for a user who opted out of attachments', functio
 
     notifyNews($news);
 
-    Mail::assertSent(
+    Mail::assertQueued(
         NewsEmail::class,
         fn (NewsEmail $mail): bool => $mail->attachMedias === false
             && $mail->attachments() === [],
