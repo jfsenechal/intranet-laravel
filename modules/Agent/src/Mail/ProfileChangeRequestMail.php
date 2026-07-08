@@ -8,12 +8,13 @@ use AcMarche\Agent\Filament\Resources\Profiles\Pages\EditProfile;
 use AcMarche\Hrm\Models\Employee;
 use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-final class ProfileChangeRequestMail extends Mailable
+final class ProfileChangeRequestMail extends Mailable implements ShouldQueue
 {
     use Queueable;
     use ResolvesSenderAddress;
@@ -28,6 +29,7 @@ final class ProfileChangeRequestMail extends Mailable
         $this->subject = '[GRH] Changement de compte informatique - '.mb_trim(
             $employee->first_name.' '.$employee->last_name
         );
+        $this->captureSenderAddress();
     }
 
     public function envelope(): Envelope

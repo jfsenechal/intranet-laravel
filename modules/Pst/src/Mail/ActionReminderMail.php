@@ -8,6 +8,7 @@ use AcMarche\Pst\Filament\Resources\ActionPst\ActionPstResource;
 use AcMarche\Pst\Models\Action;
 use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -16,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 /**
  * https://maizzle.com/docs/components // todo
  */
-final class ActionReminderMail extends Mailable
+final class ActionReminderMail extends Mailable implements ShouldQueue
 {
     use Queueable, ResolvesSenderAddress, SerializesModels;
 
@@ -28,6 +29,7 @@ final class ActionReminderMail extends Mailable
     {
         $this->subject = '[PST] '.$data['subject'];
         $this->content = $data['content'];
+        $this->captureSenderAddress();
     }
 
     /**

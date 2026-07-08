@@ -3,8 +3,15 @@
 declare(strict_types=1);
 
 use AcMarche\Conseil\Mail\ConseilNotificationMail;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Support\Facades\Storage;
+
+it('is queued so it does not block the sending request', function (): void {
+    $mail = new ConseilNotificationMail('Sujet', 'Corps');
+
+    expect($mail)->toBeInstanceOf(ShouldQueue::class);
+});
 
 it('uses the given subject and renders the body', function (): void {
     $mail = new ConseilNotificationMail(

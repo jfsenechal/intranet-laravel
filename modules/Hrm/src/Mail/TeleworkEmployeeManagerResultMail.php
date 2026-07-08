@@ -9,12 +9,13 @@ use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Telework;
 use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-final class TeleworkEmployeeManagerResultMail extends Mailable
+final class TeleworkEmployeeManagerResultMail extends Mailable implements ShouldQueue
 {
     use Queueable;
     use ResolvesSenderAddress;
@@ -29,6 +30,7 @@ final class TeleworkEmployeeManagerResultMail extends Mailable
         $this->subject = $telework->manager_validated
             ? '[GRH] Votre télétravail a été validé par votre direction'
             : '[GRH] Votre télétravail a été refusé par votre direction';
+        $this->captureSenderAddress();
     }
 
     public function envelope(): Envelope
