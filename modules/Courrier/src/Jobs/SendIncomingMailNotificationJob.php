@@ -12,6 +12,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
@@ -41,7 +42,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
             $includeAttachments = $recipient->receives_attachments;
 
-            Mail::to($recipient->email)
+            Mail::to(new Address('jf@marche.be',$recipient->email))
                 ->queue(
                     new IncomingMailNotification(
                         $recipient,
