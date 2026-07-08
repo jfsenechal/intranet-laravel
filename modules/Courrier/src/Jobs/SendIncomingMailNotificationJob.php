@@ -42,7 +42,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
             $includeAttachments = $recipient->receives_attachments;
 
-            Mail::to(new Address('jf@marche.be',$recipient->email))
+            Mail::to(new Address($recipient->email))
                 ->bcc(new Address('jf@marche.be',$recipient->email))
                 ->queue(
                     new IncomingMailNotification(
