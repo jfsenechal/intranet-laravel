@@ -15,6 +15,7 @@ final class NotifyRecipientsTables
     public static function configure(Table $table, ?string $mailDate): Table
     {
         return $table
+            ->defaultPaginationPageOption(25)
             ->query(IncomingMailRepository::findByDateAndNotNotified($mailDate))
             ->columns([
                 TextColumn::make('reference_number')
