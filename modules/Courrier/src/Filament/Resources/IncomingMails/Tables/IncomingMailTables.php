@@ -40,7 +40,7 @@ final class IncomingMailTables
                     ->searchable()
                     ->label('Description')
                     ->html()
-                    ->limit(80),
+                    ->limit(50),
                 TextColumn::make('services.name')
                     ->label('Services')
                     ->badge()
