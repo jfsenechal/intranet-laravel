@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\NotifyRecipients\Schemas;
 
+use AcMarche\Courrier\Filament\Pages\NotifyRecipients;
 use Filament\Forms\Components\DatePicker;
 use Filament\Schemas\Schema;
 
@@ -20,7 +21,7 @@ final class NotifyRecipientsForm
                     ->native(false)
                     ->displayFormat('d/m/Y')
                     ->live()
-                    ->afterStateUpdated(fn () => $this->loadPreviewData()),
+                    ->afterStateUpdated(fn (NotifyRecipients $livewire) => $livewire->loadPreviewData()),
             ]);
     }
 }

@@ -46,7 +46,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     #[Override]
     protected string $view = 'courrier::filament.pages.notify-recipients';
 
-    private array $previewData;
+    private array $previewData = [];
 
     public static function canAccess(array $parameters = []): bool
     {
@@ -56,6 +56,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     public function mount(): void
     {
         $this->mail_date = now()->format('Y-m-d');
+        $this->loadPreviewData();
     }
 
     public function getTitle(): string
@@ -111,10 +112,14 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                 ->color('primary')
                 ->requiresConfirmation()
                 ->modalHeading('Confirmer l\'envoi')
-                ->modalDescription(fn (): string => sprintf(
-                    'Vous allez envoyer des notifications a %d destinataire(s). Cette action est irreversible.',
-                    count($this->previewData)
-                ))
+                ->modalDescription(function (): string {
+                    $this->loadPreviewData();
+
+                    return sprintf(
+                        'Vous allez envoyer des notifications a %d destinataire(s). Cette action est irreversible.',
+                        count($this->previewData)
+                    );
+                })
                 ->modalSubmitActionLabel('Envoyer')
                // ->disabled(fn (): bool => empty($this->previewData))
                 ->action(function (): void {

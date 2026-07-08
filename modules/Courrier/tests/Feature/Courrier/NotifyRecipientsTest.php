@@ -96,6 +96,47 @@ describe('NotifyRecipients Page Display', function (): void {
             ->loadTable()
             ->assertCanNotSeeTableRecords([$notifiedMail]);
     });
+
+    test('send notifications confirmation modal opens without error', function (): void {
+        $admin = User::factory()->create(['is_administrator' => true]);
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'preview@example.com',
+        ]);
+
+        $mail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+        ]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $this->actingAs($admin);
+
+        livewire(NotifyRecipients::class)
+            ->mountAction('sendNotifications')
+            ->assertActionMounted('sendNotifications')
+            ->assertHasNoErrors();
+    });
+
+    test('reloading the preview does not error', function (): void {
+        $admin = User::factory()->create(['is_administrator' => true]);
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'reload@example.com',
+        ]);
+
+        $mail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+        ]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $this->actingAs($admin);
+
+        livewire(NotifyRecipients::class)
+            ->call('loadPreviewData')
+            ->assertHasNoErrors();
+    });
 });
 
 describe('SendIncomingMailNotificationJob', function (): void {
