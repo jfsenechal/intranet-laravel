@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 #[Connection('maria-aldermen-agenda')]
@@ -18,7 +17,6 @@ use Spatie\Sluggable\SlugOptions;
 final class Recipient extends Model
 {
     use HasFactory;
-    use HasSlug;
 
     public function __toString(): string
     {
