@@ -33,7 +33,7 @@ final class CourrierPanelProvider extends PanelProvider
         return $panel
             ->id('courrier-panel')
             ->path('indicateur')
-            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth(Width::Full)
             ->sidebarWidth('16rem')
             ->brandName('Indicateur')
