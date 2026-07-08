@@ -14,24 +14,11 @@ return new class extends Migration
     {
         Schema::connection('maria-aldermen-agenda')->table('events', function (Blueprint $table): void {
             if (Schema::connection('maria-aldermen-agenda')->hasColumn('events', 'slugname')) {
-                $table->renameColumn('slugname', 'slug');
+                $table->removeColumn('slugname');
             }
 
             if (Schema::connection('maria-aldermen-agenda')->hasColumn('events', 'object')) {
                 $table->renameColumn('object', 'description');
-            }
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::connection('maria-aldermen-agenda')->table('events', function (Blueprint $table): void {
-            if (Schema::connection('maria-aldermen-agenda')->hasColumn('events', 'slug')) {
-                $table->renameColumn('slug', 'slugname');
-            }
-
-            if (Schema::connection('maria-aldermen-agenda')->hasColumn('events', 'description')) {
-                $table->renameColumn('description', 'object');
             }
         });
     }

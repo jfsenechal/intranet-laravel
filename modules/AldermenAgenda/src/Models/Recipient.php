@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Sluggable\SlugOptions;
 
 #[Connection('maria-aldermen-agenda')]
-#[Fillable(['slug', 'last_name', 'first_name', 'email', 'ics'])]
+#[Fillable(['last_name', 'first_name', 'email', 'ics'])]
 #[Table(name: 'aldermen_recipients')]
 final class Recipient extends Model
 {
@@ -23,13 +22,6 @@ final class Recipient extends Model
     public function __toString(): string
     {
         return $this->last_name.' '.$this->first_name;
-    }
-
-    public function getSlugOptions(): SlugOptions
-    {
-        return SlugOptions::create()
-            ->generateSlugsFrom(['last_name', 'first_name'])
-            ->saveSlugsTo('slug');
     }
 
     protected function casts(): array

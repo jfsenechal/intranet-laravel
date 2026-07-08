@@ -21,6 +21,7 @@ return new class extends Migration
                 function (Blueprint $table): void {
                     $table->renameColumn('nom', 'last_name');
                     $table->renameColumn('prenom', 'first_name');
+                    $table->removeColumn('slug');
                 }
             );
         } elseif (! Schema::connection('maria-aldermen-agenda')->hasTable('aldermen_recipients')) {
@@ -28,7 +29,6 @@ return new class extends Migration
                 'aldermen_recipients',
                 function (Blueprint $table): void {
                     $table->id();
-                    $table->string('slug', 70)->unique();
                     $table->string('last_name');
                     $table->string('first_name');
                     $table->string('email');
@@ -55,7 +55,6 @@ return new class extends Migration
         } elseif (! Schema::connection('maria-aldermen-agenda')->hasTable('events')) {
             Schema::connection('maria-aldermen-agenda')->create('events', function (Blueprint $table): void {
                 $table->id();
-                $table->string('slug', 70)->unique();
                 $table->string('event_type');
                 $table->string('name');
                 $table->text('description');

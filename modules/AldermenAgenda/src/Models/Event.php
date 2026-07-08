@@ -11,12 +11,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Sluggable\HasSlug;
-use Spatie\Sluggable\SlugOptions;
 
 #[Connection('maria-aldermen-agenda')]
 #[Fillable([
-    'slug',
     'event_type',
     'name',
     'description',
@@ -35,19 +32,10 @@ use Spatie\Sluggable\SlugOptions;
 final class Event extends Model
 {
     use HasFactory;
-    use HasSlug;
 
     public function __toString(): string
     {
         return $this->name;
-    }
-
-    public function getSlugOptions(): SlugOptions
-    {
-        return SlugOptions::create()
-            ->generateSlugsFrom(['name'])
-            ->saveSlugsTo('slug')
-            ->allowDuplicateSlugs();
     }
 
     protected function casts(): array
