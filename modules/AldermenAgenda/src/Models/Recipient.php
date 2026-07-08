@@ -18,6 +18,8 @@ final class Recipient extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     public function __toString(): string
     {
         return $this->last_name.' '.$this->first_name;
