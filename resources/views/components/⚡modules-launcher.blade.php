@@ -1,7 +1,7 @@
 <?php
 
 use AcMarche\App\Handler\FavoriteModuleHandler;
-use AcMarche\Security\Handler\MigrationHandler;
+use AcMarche\Security\Models\Module;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 
@@ -18,7 +18,12 @@ new class extends Component {
 
     public function getModules(): Collection
     {
-        return MigrationHandler::getAllModules();
+        $user = auth()->user();
+        if ($user === null) {
+            return collect();
+        }
+
+        return Module::accessibleTo($user)->get();
     }
 
     public function toggleFavorite(int $moduleId): void

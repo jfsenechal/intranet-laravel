@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\Security\Handler;
+namespace AcMarche\Security\Console\Commands;
 
 use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource as ActivityManagerResource;
-use AcMarche\Ad\Filament\Resources\ClassifiedAd\ClassifiedAdResource;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\AldermenAgenda\Filament\Resources\Event\EventResource;
 use AcMarche\App\Filament\Pages\ClaimRequestPage;
@@ -35,24 +34,86 @@ use AcMarche\SportsActivities\Filament\Resources\Activities\ActivityResource as 
 use AcMarche\StreetWatch\Filament\Resources\Incidents\IncidentResource;
 use AcMarche\Telecommunication\Filament\Resources\Telephones\TelephoneResource;
 use AcMarche\WhoIsWho\Filament\Pages\Search as WhoIsWhoSearch;
-use App\Models\User;
-use Illuminate\Support\Collection;
+use Illuminate\Console\Command;
+use Override;
+use Symfony\Component\Console\Command\Command as SfCommand;
 
-final class MigrationHandler
+final class SetModuleUrlCommand extends Command
 {
-    public const array modules_to_skip = [1, 2, 23, 49];
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    #[Override]
+    protected $signature = 'intranet:module-set-url {--dry-run : Show what would change without writing to the database}';
 
-    public static function urlModule(Module $module): ?string
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    #[Override]
+    protected $description = 'Persist the resolved Filament URL of each internal module into the modules.url column';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
     {
-        $resource = self::findTheResource($module);
-        if ($resource) {
-            return $resource;
+        $dryRun = (bool) $this->option('dry-run');
+
+        $updated = 0;
+        $externalSkipped = 0;
+
+        /** @var list<Module> $withoutUrl */
+        $withoutUrl = [];
+
+        foreach (Module::query()->orderBy('id')->get() as $module) {
+            // External modules already hold their real destination URL, leave them untouched.
+            if ($module->is_external) {
+                $externalSkipped++;
+
+                continue;
+            }
+
+            $url = $this->resolveUrl($module);
+
+            if ($url === null) {
+                // No Filament destination yet: clear the legacy route name so the module
+                // is reported as not migrated.
+                $withoutUrl[] = $module;
+                $url = '';
+            }
+
+            if ($module->url !== $url) {
+                if (! $dryRun) {
+                    $module->update(['url' => $url]);
+                }
+
+                $updated++;
+            }
         }
 
-        return null;
+        $this->newLine();
+        $this->info($dryRun ? '✓ Dry run complete (no changes written).' : '✓ Module URLs updated.');
+        $this->line("  Updated: {$updated}");
+        $this->line("  External (skipped): {$externalSkipped}");
+        $this->line('  Without URL: '.count($withoutUrl));
+
+        if ($withoutUrl !== []) {
+            $this->newLine();
+            $this->warn('Modules without a URL:');
+            $this->table(
+                ['ID', 'Name'],
+                array_map(fn (Module $module): array => [$module->id, $module->name], $withoutUrl),
+            );
+        }
+
+        return SfCommand::SUCCESS;
     }
 
-    public static function findTheResource(Module $module): ?string
+    private function resolveUrl(Module $module): ?string
     {
         return match ($module->id) {
             3 => EventResource::getUrl('index', panel: 'aldermen-agenda-panel'),
@@ -85,53 +146,7 @@ final class MigrationHandler
             59 => TicketsOfTheDay::getUrl(panel: 'guichet-hdv-panel'),
             60 => IncidentResource::getUrl('index', panel: 'street-watch-panel'),
             61 => AddressBookResource::getUrl('index', panel: 'mailing-list-panel'),
-            //    62 => ClassifiedAdResource::getUrl('index', panel: 'ad-panel'),
             default => null,
         };
-    }
-
-    /**
-     * Get modules accessible to the given user, sorted by name ASC, with migration status resolved.
-     *
-     * Public modules are always included; non-public modules require the user to hold
-     * at least one role belonging to that module.
-     *
-     * @return Collection<int,Module>
-     */
-    public static function getAllModules(?User $user = null): Collection
-    {
-        $user ??= auth()->user();
-        if (! $user instanceof User) {
-            return collect();
-        }
-
-        $query = Module::query()
-            ->whereNotIn('id', self::modules_to_skip);
-
-        if (! $user->isAdministrator()) {
-            $query->where(function ($query) use ($user): void {
-                $query->where('is_public', true)
-                    ->orWhereHas('roles.users', function ($subQuery) use ($user): void {
-                        $subQuery->where('users.id', $user->id);
-                    });
-            });
-        }
-
-        return $query
-            ->orderBy('name')
-            ->get()
-            ->each(function (Module $module): void {
-                if ($module->is_external) {
-                    $module->migrated = true;
-
-                    return;
-                }
-                if ($url = self::urlModule($module)) {
-                    $module->url = $url;
-                    $module->migrated = true;
-                } else {
-                    $module->migrated = false;
-                }
-            });
     }
 }

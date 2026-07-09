@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\App\Handler;
 
-use AcMarche\Security\Handler\MigrationHandler;
 use AcMarche\Security\Models\Module;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -37,7 +36,7 @@ final class FavoriteModuleHandler
             $favoriteIds = self::DEFAULT_FAVORITE_IDS;
         }
 
-        return MigrationHandler::getAllModules($user)
+        return Module::accessibleTo($user)->get()
             ->whereIn('id', $favoriteIds)
             ->sortBy(fn (Module $module): int|false => array_search($module->id, $favoriteIds, true))
             ->values();
