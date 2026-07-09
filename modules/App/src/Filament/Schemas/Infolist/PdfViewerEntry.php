@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Filament\Schema\Infolists;
+namespace AcMarche\App\Filament\Schemas\Infolist;
 
 use Closure;
 use Filament\Infolists\Components\ViewEntry;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Document\Filament\Resources\Documents\Schemas;
 
-use AcMarche\App\Filament\Schema\Infolists\PdfViewerEntry;
+use AcMarche\App\Filament\Schemas\Infolist\PdfViewerEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
