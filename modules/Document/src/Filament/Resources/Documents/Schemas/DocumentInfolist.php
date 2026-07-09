@@ -18,8 +18,7 @@ final class DocumentInfolist
             ->schema([
                 TextEntry::make('category.name')
                     ->label('Catégorie')
-                    ->badge()
-                    ->columnSpanFull(),
+                    ->badge(),
                 TextEntry::make('content')
                     ->label('Description')
                     ->hiddenLabel()
@@ -28,16 +27,6 @@ final class DocumentInfolist
                     ->prose()
                     ->extraAttributes(['class' => 'prose-lg'])
                     ->hidden(fn ($state): bool => blank($state)),
-                Flex::make([
-                    TextEntry::make('file_size')
-                        ->label('Taille')
-                        ->formatStateUsing(fn ($state): string => $state ? number_format($state / 1024, 2).' KB' : '-')
-                        ->grow(false),
-                    TextEntry::make('file_mime')
-                        ->label('Type')
-                        ->grow(false),
-                ])
-                    ->columnSpanFull(),
                 PdfViewerEntry::make('file_name')
                     ->label('Aperçu')
                     ->state(fn (Document $record): ?string => $record->filePathOnDisk())
