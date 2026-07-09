@@ -14,8 +14,9 @@ final class RecipientRepository
     {
         return Recipient::query()
             ->orderBy('last_name')
+            ->orderBy('first_name')
             ->get()
-            ->mapWithKeys(fn (Recipient $r): array => [$r->id => "{$r->first_name} {$r->last_name}"]);
+            ->mapWithKeys(fn (Recipient $r): array => [$r->id => "{$r->last_name} {$r->first_name}"]);
     }
 
     public static function getWithEmail(): Collection
