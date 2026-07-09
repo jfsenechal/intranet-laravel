@@ -41,7 +41,8 @@ final class SmsReminderForm
                             ->label('Message')
                             ->helperText('Max 160 caractères. caractères')
                             ->hiddenLabel()
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->maxLength(160),
                     ]),
             ]);
     }
