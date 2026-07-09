@@ -92,6 +92,24 @@ describe('crud operations', function (): void {
         ]);
     });
 
+    it('accepts a deeply nested rich editor note without hitting the livewire nesting limit', function (): void {
+        // The RichEditor syncs its value as a TipTap document tree. Deeply nested
+        // lists produce a property path deeper than Livewire's default limit of 10,
+        // which previously threw MaxNestingDepthExceededException on save.
+        // See config/livewire.php -> payload.max_nesting_depth.
+        $record = Deadline::factory()->create();
+
+        // A property path of 12 segments, deeper than the default 10, matching the
+        // shape produced by nested bullet lists (data.note.content...text).
+        $deepPath = 'data.note.content.0.content.0.content.0.content.0.content.0.text';
+
+        Livewire::test(EditDeadline::class, [
+            'record' => $record->id,
+        ])
+            ->set($deepPath, 'Nested list item')
+            ->assertOk();
+    });
+
     it('can replicate a deadline from the view page', function (): void {
         $record = Deadline::factory()->create([
             'name' => 'Original Deadline',
