@@ -47,7 +47,7 @@ final class RssResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id', Auth::id());
+        return parent::getEloquentQuery()->where('username', Auth::user()?->username);
     }
 
     public static function form(Schema $schema): Schema

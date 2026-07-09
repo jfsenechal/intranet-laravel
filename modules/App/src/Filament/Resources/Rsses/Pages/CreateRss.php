@@ -25,7 +25,7 @@ final class CreateRss extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['usernme'] = Auth::user()->username;
+        $data['username'] = Auth::user()->username;
 
         return $data;
     }

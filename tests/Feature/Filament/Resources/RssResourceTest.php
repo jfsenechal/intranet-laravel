@@ -36,13 +36,13 @@ it('only shows current user\'s feeds', function () {
     $otherUser = User::factory()->create();
 
     $mine = Rss::query()->create([
-        'user_id' => auth()->id(),
+        'username' => auth()->user()->username,
         'name' => 'Mine',
         'url' => 'https://example.com/mine.xml',
     ]);
 
     $theirs = Rss::query()->create([
-        'user_id' => $otherUser->id,
+        'username' => $otherUser->username,
         'name' => 'Theirs',
         'url' => 'https://example.com/theirs.xml',
     ]);
@@ -62,7 +62,7 @@ it('assigns the authenticated user when creating', function () {
         ->call('create');
 
     assertDatabaseHas(Rss::class, [
-        'user_id' => auth()->id(),
+        'username' => auth()->user()->username,
         'name' => 'Custom feed',
         'url' => 'https://example.com/feed.xml',
     ]);
@@ -83,7 +83,7 @@ it('requires name and url', function () {
 
 it('can render the edit page for an owned feed', function () {
     $rss = Rss::query()->create([
-        'user_id' => auth()->id(),
+        'username' => auth()->user()->username,
         'name' => 'Feed',
         'url' => 'https://example.com/feed.xml',
     ]);
