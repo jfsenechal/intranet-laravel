@@ -27,11 +27,11 @@ final class Attachment extends Model
     /**
      * Build the legacy on-disk path of an attachment, relative to the storage
      * disk root. Legacy files are stored under
-     * `indicateur/<department>/<courrier id>/<file>`.
+     * `<storage directory>/<department>/<courrier id>/<file>`.
      */
     public static function legacyPath(string $department, int $legacyCourrierId, string $fileName): string
     {
-        return 'indicateur/'.mb_strtolower($department).'/'.$legacyCourrierId.'/'.$fileName;
+        return config('courrier.storage.directory').'/'.mb_strtolower($department).'/'.$legacyCourrierId.'/'.$fileName;
     }
 
     /**
@@ -42,13 +42,15 @@ final class Attachment extends Model
     public static function backfillLegacyPaths(): void
     {
         $connection = DB::connection('maria-courrier');
+        $directory = config('courrier.storage.directory');
 
         if (in_array($connection->getDriverName(), ['mysql', 'mariadb'], true)) {
             $connection->statement(
                 "UPDATE attachments a
                  JOIN incoming_mails m ON m.id = a.incoming_mail_id
-                 SET a.path = CONCAT('indicateur/', LOWER(m.department), '/', COALESCE(m.old_id, m.id), '/', a.file_name)
-                 WHERE m.department IS NOT NULL"
+                 SET a.path = CONCAT(?, '/', LOWER(m.department), '/', COALESCE(m.old_id, m.id), '/', a.file_name)
+                 WHERE m.department IS NOT NULL",
+                [$directory]
             );
 
             return;

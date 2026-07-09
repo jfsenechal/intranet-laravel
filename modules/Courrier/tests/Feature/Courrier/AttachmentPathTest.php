@@ -22,9 +22,11 @@ function attachmentPath(int $id): ?string
     return DB::connection('maria-courrier')->table('attachments')->where('id', $id)->value('path');
 }
 
-it('builds the legacy relative path', function (): void {
+it('builds the legacy relative path under the configured storage directory', function (): void {
+    config()->set('courrier.storage.directory', 'courrier');
+
     expect(Attachment::legacyPath('Cpas', 123, 'file.pdf'))
-        ->toBe('indicateur/cpas/123/file.pdf');
+        ->toBe('courrier/cpas/123/file.pdf');
 });
 
 it('backfills VILLE attachments using the in-place mail id', function (): void {
@@ -37,7 +39,7 @@ it('backfills VILLE attachments using the in-place mail id', function (): void {
     Attachment::backfillLegacyPaths();
 
     expect(attachmentPath($attachmentId))
-        ->toBe('indicateur/ville/'.$mail->id.'/rapport.pdf');
+        ->toBe('courrier/ville/'.$mail->id.'/rapport.pdf');
 });
 
 it('backfills migrated CPAS attachments using the legacy old_id', function (): void {
@@ -53,7 +55,7 @@ it('backfills migrated CPAS attachments using the legacy old_id', function (): v
     Attachment::backfillLegacyPaths();
 
     expect(attachmentPath($attachmentId))
-        ->toBe('indicateur/cpas/98765/scan.pdf');
+        ->toBe('courrier/cpas/98765/scan.pdf');
 });
 
 it('leaves the path null when the mail has no department', function (): void {

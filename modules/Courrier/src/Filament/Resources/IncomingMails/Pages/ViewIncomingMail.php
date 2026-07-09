@@ -36,7 +36,9 @@ final class ViewIncomingMail extends ViewRecord
                 ->label('Télécharger la pièce jointe')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-                ->url(fn ($record): string => route('courrier.attachments.download', $record))
+                ->url(fn ($record): ?string => $record->attachments->isNotEmpty()
+                    ? route('courrier.attachments.download', $record->attachments->first())
+                    : null)
                 ->visible(fn ($record): bool => $record->attachments->isNotEmpty()
                     && auth()->user()?->can('download', $record->attachments->first())),
             Action::make('back')

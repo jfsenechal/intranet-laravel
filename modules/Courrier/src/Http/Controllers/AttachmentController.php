@@ -71,13 +71,12 @@ final class AttachmentController extends Controller
         Gate::authorize('download', $attachment);
 
         $disk = Storage::disk(config('courrier.storage.disk'));
-        $path = config('courrier.storage.directory')."/attachments/{$attachment->file_name}";
 
-        if (! $disk->exists($path)) {
+        if ($attachment->path === null || ! $disk->exists($attachment->path)) {
             return response('Fichier non trouvé', 404);
         }
 
-        return response()->download($disk->path($path), $attachment->file_name, [
+        return response()->download($disk->path($attachment->path), $attachment->file_name, [
             'Content-Type' => $attachment->mime,
         ]);
     }
@@ -87,13 +86,12 @@ final class AttachmentController extends Controller
         Gate::authorize('download', $attachment);
 
         $disk = Storage::disk(config('courrier.storage.disk'));
-        $path = config('courrier.storage.directory')."/attachments/{$attachment->file_name}";
 
-        if (! $disk->exists($path)) {
+        if ($attachment->path === null || ! $disk->exists($attachment->path)) {
             return response('Fichier non trouvé', 404);
         }
 
-        return response()->file($disk->path($path), [
+        return response()->file($disk->path($attachment->path), [
             'Content-Type' => $attachment->mime,
         ]);
     }
