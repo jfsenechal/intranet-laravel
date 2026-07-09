@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Policies;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Policies\Concerns\HrmAuthorization;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 final class EmployeePolicy
 {
@@ -15,6 +16,15 @@ final class EmployeePolicy
     public function viewAny(User $user): bool
     {
         return $this->hasAnyHrmRole($user);
+    }
+
+    /**
+     * @param  Builder<Employee>  $query
+     * @return Builder<Employee>
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $this->scopeVisibleEmployees($query, $user);
     }
 
     public function view(User $user, Employee $employee): bool

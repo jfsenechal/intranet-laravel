@@ -150,6 +150,91 @@ describe('table', function (): void {
     });
 });
 
+describe('table scoping by role', function (): void {
+    it('shows a direction head only the employees of their direction', function (): void {
+        $directionRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($directionRole);
+
+        $direction = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'director1']);
+        $otherDirection = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'someone-else']);
+
+        $visible = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $visible->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        $hidden = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $hidden->id,
+            'direction_id' => $otherDirection->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        $this->actingAs($director);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$visible])
+            ->assertCanNotSeeTableRecords([$hidden]);
+    });
+
+    it('shows no employees to a direction head without a direction', function (): void {
+        $directionRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'orphan']);
+        $director->roles()->attach($directionRole);
+
+        $employee = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        $this->actingAs($director);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanNotSeeTableRecords([$employee]);
+    });
+
+    it('shows a ville reader only employees under the ville employer tree', function (): void {
+        $readRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_VILLE_READ->value]);
+        $reader = User::factory()->create(['is_administrator' => false, 'username' => 'villereader']);
+        $reader->roles()->attach($readRole);
+
+        $ville = AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'ville', 'parent_id' => null]);
+        $villeChild = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => $ville->id]);
+        $cpas = AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'cpas', 'parent_id' => null]);
+
+        $visible = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $visible->id,
+            'employer_id' => $villeChild->id,
+        ]);
+
+        $hidden = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $hidden->id,
+            'employer_id' => $cpas->id,
+        ]);
+
+        $this->actingAs($reader);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$visible])
+            ->assertCanNotSeeTableRecords([$hidden]);
+    });
+});
+
 describe('emploi tab', function (): void {
     it('displays the prerequisite details inline on the view page', function (): void {
         $prerequisite = Prerequisite::factory()->create([

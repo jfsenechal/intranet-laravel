@@ -10,6 +10,7 @@ use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 trait HrmAuthorization
 {
@@ -78,6 +79,70 @@ trait HrmAuthorization
         return false;
     }
 
+    /**
+     * Restrict an Employee query to the records the user is allowed to read.
+     *
+     * Mirrors {@see canViewEmployee()} at the query level so listings, counts
+     * and global search never expose employees the user cannot open.
+     *
+     * @param  Builder<Employee>  $query
+     * @return Builder<Employee>
+     */
+    protected function scopeVisibleEmployees(Builder $query, User $user): Builder
+    {
+        if ($this->isAdmin($user)) {
+            return $query;
+        }
+
+        /** @var array<int, callable(Builder<Employee>): Builder<Employee>> $conditions */
+        $conditions = [];
+
+        if ($user->username !== null) {
+            $username = $user->username;
+            $conditions[] = fn (Builder $query): Builder => $query->where('username', $username);
+        }
+
+        if ($this->canReadCpas($user)) {
+            $employerIds = $this->employerIdsForTopSlug('cpas');
+            if ($employerIds !== []) {
+                $conditions[] = fn (Builder $query): Builder => $query->whereHas(
+                    'contracts',
+                    fn (Builder $query) => $query->whereIn('employer_id', $employerIds),
+                );
+            }
+        }
+
+        if ($this->canReadVille($user)) {
+            $employerIds = $this->employerIdsForTopSlug('ville');
+            if ($employerIds !== []) {
+                $conditions[] = fn (Builder $query): Builder => $query->whereHas(
+                    'contracts',
+                    fn (Builder $query) => $query->whereIn('employer_id', $employerIds),
+                );
+            }
+        }
+
+        if ($this->isDirectionHead($user)) {
+            $directionIds = $this->directionIdsForUser($user);
+            if ($directionIds !== []) {
+                $conditions[] = fn (Builder $query): Builder => $query->whereHas(
+                    'contracts',
+                    fn (Builder $query) => $query->active()->whereIn('direction_id', $directionIds),
+                );
+            }
+        }
+
+        if ($conditions === []) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $query) use ($conditions): void {
+            foreach ($conditions as $condition) {
+                $query->orWhere($condition);
+            }
+        });
+    }
+
     protected function canViewContract(User $user, Contract $contract): bool
     {
         if ($this->isAdmin($user)) {
@@ -127,6 +192,30 @@ trait HrmAuthorization
         }
 
         return $employer->slug;
+    }
+
+    /**
+     * Employer ids whose top-level ancestor resolves to the given slug.
+     *
+     * @return array<int, int>
+     */
+    private function employerIdsForTopSlug(string $slug): array
+    {
+        $employers = Employer::query()->get(['id', 'parent_id', 'slug']);
+        $byId = $employers->keyBy('id');
+
+        return $employers
+            ->filter(function (Employer $employer) use ($byId, $slug): bool {
+                $current = $employer;
+
+                while ($current->parent_id !== null && $byId->has($current->parent_id)) {
+                    $current = $byId->get($current->parent_id);
+                }
+
+                return $current->slug === $slug;
+            })
+            ->pluck('id')
+            ->all();
     }
 
     /**

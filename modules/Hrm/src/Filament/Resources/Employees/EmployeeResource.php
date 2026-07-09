@@ -22,11 +22,15 @@ use AcMarche\Hrm\Filament\Resources\Employees\Schemas\EmployeeForm;
 use AcMarche\Hrm\Filament\Resources\Employees\Schemas\EmployeeInfolist;
 use AcMarche\Hrm\Filament\Resources\Employees\Tables\EmployeeTables;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Policies\EmployeePolicy;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
@@ -90,6 +94,21 @@ final class EmployeeResource extends Resource
     public static function table(Table $table): Table
     {
         return EmployeeTables::configure($table);
+    }
+
+    /**
+     * @return Builder<Employee>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user instanceof User) {
+            return app(EmployeePolicy::class)->scopeVisibleTo($query, $user);
+        }
+
+        return $query;
     }
 
     public static function getRelations(): array
