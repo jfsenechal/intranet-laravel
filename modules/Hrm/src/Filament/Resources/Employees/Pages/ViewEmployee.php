@@ -29,6 +29,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Gate;
 use Override;
 
 final class ViewEmployee extends ViewRecord
@@ -43,6 +44,10 @@ final class ViewEmployee extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        if (! Gate::forUser(auth()->user())->check('hrm-administrator')) {
+            return [];
+        }
+
         $employeeId = ['employee_id' => $this->record->id];
 
         return [

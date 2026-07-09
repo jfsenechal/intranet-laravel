@@ -199,6 +199,29 @@ describe('export pdf action', function (): void {
     });
 });
 
+describe('header actions authorization', function (): void {
+    it('shows the header actions to an hrm administrator', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertActionExists('edit')
+            ->assertActionExists('delete');
+    });
+
+    it('hides the header actions from a non-administrator hrm user', function (): void {
+        $readRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_VILLE_READ->value]);
+        $user = User::factory()->create(['is_administrator' => false, 'username' => 'jdoe']);
+        $user->roles()->attach($readRole);
+        $record = Employee::factory()->create(['username' => 'jdoe']);
+        $this->actingAs($user);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertActionDoesNotExist('edit')
+            ->assertActionDoesNotExist('delete');
+    });
+});
+
 describe('export csv action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListEmployees::class)
