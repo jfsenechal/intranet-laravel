@@ -18,7 +18,10 @@ use AcMarche\Hrm\Filament\Resources\Internships\Schemas\InternshipForm;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
 use AcMarche\Hrm\Filament\Resources\Trainings\TrainingResource;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationForm;
+use AcMarche\Hrm\Models\Application;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Evaluation;
+use AcMarche\Hrm\Models\Internship;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -93,7 +96,7 @@ final class ViewEmployee extends ViewRecord
                     CreateAction::make('addEvaluation')
                         ->label('Ajouter une évaluation')
                         ->icon('tabler-plus')->modal()
-                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema))
+                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema)->model(Evaluation::class))
                         ->action(function (array $data, Employee $record): void {
                             $record->evaluations()->create($data);
                         }),
@@ -114,7 +117,7 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter un stage')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn (Schema $schema) => InternshipForm::configure($schema))
+                    ->schema(fn (Schema $schema) => InternshipForm::configure($schema)->model(Internship::class))
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
                     })
@@ -125,9 +128,9 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter une candidature')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn (Schema $schema) => ApplicationForm::configure($schema))
+                    ->schema(fn (Schema $schema) => ApplicationForm::configure($schema)->model(Application::class))
                     ->mountUsing(function (Schema $schema, Employee $employee): void {
-                        $schema->fill($employee ? ['employee_id' => $employee->id] : []);
+                        $schema->fill(['employee_id' => $employee->id]);
                     })
                     ->modalHeading(function (Employee $employee): string {
                         return 'Ajouter une candidature pour '.$employee->last_name.' '.$employee->first_name;

@@ -222,6 +222,50 @@ describe('header actions authorization', function (): void {
     });
 });
 
+describe('create actions with relationship selects', function (): void {
+    it('can mount the add evaluation action modal', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->mountAction('addEvaluation')
+            ->assertActionMounted('addEvaluation')
+            ->assertHasNoActionErrors();
+    });
+
+    it('can create an evaluation for the employee', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->callAction('addEvaluation', [
+                'result' => AcMarche\Hrm\Enums\EvaluationResultEnum::cases()[0]->value,
+                'evaluation_date' => now()->toDateString(),
+            ])
+            ->assertHasNoActionErrors();
+
+        assertDatabaseHas(AcMarche\Hrm\Models\Evaluation::class, [
+            'employee_id' => $record->id,
+        ]);
+    });
+
+    it('can mount the add internship action modal', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->mountAction('addInternship')
+            ->assertActionMounted('addInternship')
+            ->assertHasNoActionErrors();
+    });
+
+    it('can mount the add application action modal', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->mountAction('addApplication')
+            ->assertActionMounted('addApplication')
+            ->assertHasNoActionErrors();
+    });
+});
+
 describe('export csv action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListEmployees::class)
