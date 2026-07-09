@@ -29,6 +29,9 @@
         <testsuite name="MealDelivery">
             <directory>modules/MealDelivery/tests</directory>
         </testsuite>
+        <testsuite name="Agent">
+            <directory>modules/Agent/tests</directory>
+        </testsuite>
         <testsuite name="Conseil">
             <directory>modules/Conseil/tests</directory>
         </testsuite>

@@ -49,6 +49,8 @@ uses(
     '../modules/StreetWatch/tests/Unit',
     '../modules/MealDelivery/tests/Feature',
     '../modules/MealDelivery/tests/Unit',
+    '../modules/Agent/tests/Feature',
+    '../modules/Agent/tests/Unit',
     '../modules/Conseil/tests/Filament',
 );
 

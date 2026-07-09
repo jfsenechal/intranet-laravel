@@ -52,8 +52,12 @@ final class PruneProfilesCommand extends Command
 
     private function existsInDbHrm(?int $employeeId): bool
     {
+        if ($employeeId === null) {
+            return false;
+        }
+
         return Employee::query()
-            ->find($employeeId)
+            ->whereKey($employeeId)
             ->exists();
     }
 }
