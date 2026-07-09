@@ -78,8 +78,8 @@ final class ReminderCommand extends Command
         $this->sendEvaluations($today, $employerIds, $recipients);
         $this->sendEvolutions($today, $employerIds, $recipients);
         $this->sendTrainings($today, $employerIds, $recipients);
-        $this->sendSmsReminders($today, $employerIds, $recipients);
         $this->sendInternships($today, $employerIds, $recipients);
+        $this->sendSmsReminders($today, $employerIds, $recipients);
 
         return SfCommand::SUCCESS;
     }
