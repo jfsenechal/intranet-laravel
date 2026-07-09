@@ -101,6 +101,7 @@ final class CreateOrder extends CreateRecord
                     'date' => $mealData['date'] ?? null,
                     'soup_count' => (int) ($mealData['soup_count'] ?? 0),
                     'notes' => $mealData['notes'] ?? null,
+                    'at_cafeteria' => false,
                 ]);
 
                 Menu::query()->create([
