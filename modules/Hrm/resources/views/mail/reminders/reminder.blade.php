@@ -1,4 +1,4 @@
-@component('hrm::mail.telework._layout', ['title' => 'Rappel : '.$reminderType, 'logo' => $logo])
+@component('hrm::mail.telework._layout', ['title' => 'Rappel : '.$reminderType, 'logo' => $logo, 'message' => $message ?? null])
     <p>Bonjour,</p>
 
     <p>

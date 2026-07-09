@@ -1,4 +1,4 @@
-@component('hrm::mail.telework._layout', ['title' => 'Candidats supprimés', 'logo' => $logo])
+@component('hrm::mail.telework._layout', ['title' => 'Candidats supprimés', 'logo' => $logo, 'message' => $message ?? null])
     <p>Bonjour,</p>
 
     <p>

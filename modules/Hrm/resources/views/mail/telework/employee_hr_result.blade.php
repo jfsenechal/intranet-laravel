@@ -1,4 +1,4 @@
-@component('hrm::mail.telework._layout', ['title' => 'Votre télétravail a été traité', 'logo' => $logo])
+@component('hrm::mail.telework._layout', ['title' => 'Votre télétravail a été traité', 'logo' => $logo, 'message' => $message ?? null])
     <p>Bonjour {{ $employee->first_name }},</p>
 
     <p>

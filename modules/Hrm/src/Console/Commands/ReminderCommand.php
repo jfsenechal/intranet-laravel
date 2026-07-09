@@ -21,6 +21,7 @@ use AcMarche\Hrm\Models\Evaluation;
 use AcMarche\Hrm\Models\Internship;
 use AcMarche\Hrm\Models\SmsReminder;
 use AcMarche\Hrm\Models\Training;
+use Filament\Facades\Filament;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,11 @@ final class ReminderCommand extends Command
 
             return SfCommand::FAILURE;
         }
+
+        // Filament resource URLs are panel-scoped. There is no "current panel"
+        // in a console context, so resolve them against the HRM panel that owns
+        // these resources instead of the default panel.
+        Filament::setCurrentPanel('hrm-panel');
 
         $employerIds = $this->employerIdsFor($department);
 
