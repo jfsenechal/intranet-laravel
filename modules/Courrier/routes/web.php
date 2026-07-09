@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web', 'auth'])->prefix('courrier')->name('courrier.')->group(function (): void {
     // IMAP attachment routes (for inbox preview)
     Route::get('attachments/{uid}/{index}', [AttachmentController::class, 'show'])
+        ->whereNumber('uid')
+        ->whereNumber('index')
         ->name('attachments.show');
 
     Route::get('attachments/{uid}/{index}/preview', [AttachmentController::class, 'preview'])
+        ->whereNumber('uid')
+        ->whereNumber('index')
         ->name('attachments.preview');
 
     // Saved attachment download route
