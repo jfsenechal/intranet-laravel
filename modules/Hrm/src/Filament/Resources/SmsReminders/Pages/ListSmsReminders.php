@@ -45,7 +45,9 @@ final class ListSmsReminders extends ListRecords
                 ->icon(Heroicon::Clock)
                 ->color('gray')
                 ->url(SmsReminderResource::getUrl('history')),
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Ajouter un rappel SMS')
+                ->icon(Heroicon::Plus),
             Action::make('export')
                 ->label('Exporter en XLSX')
                 ->icon(Heroicon::ArrowDownTray)
@@ -59,7 +61,11 @@ final class ListSmsReminders extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new SmsReminderExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('sms_reminders.xlsx')),
+                ->action(
+                    fn(array $data) => new SmsReminderExport(
+                        $this->getFilteredTableQuery(), $data['columns']
+                    )->downloadXlsx('sms_reminders.xlsx')
+                ),
         ];
     }
 }
