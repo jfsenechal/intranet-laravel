@@ -27,7 +27,9 @@ return new class extends Migration
                 $table->foreignId('incoming_mail_id')->constrained('incoming_mails')->cascadeOnDelete();
                 $table->string('file_name');
                 $table->string('mime');
-                $table->timestamps();
+                // The legacy `attachement` table only ever had an `updated_at`
+                // column (renamed from `updatedAt`); there is no `created_at`.
+                $table->dateTime('updated_at')->nullable();
             });
         }
     }

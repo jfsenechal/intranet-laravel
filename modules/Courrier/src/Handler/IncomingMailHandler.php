@@ -97,8 +97,6 @@ final class IncomingMailHandler
                 }
             }
         } catch (Exception $e) {
-            report($e);
-
             Notification::make()
                 ->title('Erreur lors de la création du courrier')
                 ->body($e->getMessage())

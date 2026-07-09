@@ -22,7 +22,7 @@ final class Attachment extends Model
 {
     use HasFactory;
 
-    public const UPDATED_AT = null;
+    public $timestamps = false;
 
     /**
      * Build the legacy on-disk path of an attachment, relative to the storage
