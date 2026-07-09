@@ -9,7 +9,6 @@ use AcMarche\MealDelivery\Models\Client;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 
 final class ExportMonthlyOrdersAction
@@ -47,7 +46,7 @@ final class ExportMonthlyOrdersAction
                     ->default($currentYear)
                     ->required(),
             ])
-            ->action(fn (array $data, Client $record): RedirectResponse => redirect()->to(
+            ->action(fn (array $data, Client $record) => redirect()->to(
                 ClientResource::getUrl('monthly-orders', [
                     'record' => $record->id,
                     'month' => (int) $data['month'],
