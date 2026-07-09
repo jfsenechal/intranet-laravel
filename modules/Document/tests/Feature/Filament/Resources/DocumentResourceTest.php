@@ -117,7 +117,7 @@ it('can create a document', function (): void {
             'name' => 'My Document',
             'content' => '<p>Some content</p>',
             'category_id' => $category->id,
-            'file_path' => $file,
+            'file_name' => $file,
         ])
         ->call('create')
         ->assertNotified();
@@ -126,11 +126,29 @@ it('can create a document', function (): void {
         'name' => 'My Document',
         'category_id' => $category->id,
     ]);
+
+    $document = Document::query()->where('name', 'My Document')->sole();
+    expect($document->filePathOnDisk())->toStartWith('documents/');
+    Storage::disk('public')->assertExists($document->filePathOnDisk());
+});
+
+it('resolves the stored file path from the file name', function (): void {
+    $document = Document::factory()->create(['file_name' => 'foo.pdf']);
+
+    expect($document->filePathOnDisk())->toBe('documents/foo.pdf');
+});
+
+it('exposes a download url pointing to the stored document', function (): void {
+    $document = Document::factory()->create();
+    Storage::disk('public')->put($document->filePathOnDisk(), 'dummy content');
+
+    livewire(ViewDocument::class, ['record' => $document->id])
+        ->assertActionHasUrl('download', Storage::disk('public')->url($document->filePathOnDisk()));
 });
 
 it('can update a document', function (): void {
     $document = Document::factory()->create();
-    Storage::disk('public')->put($document->file_path, 'dummy content');
+    Storage::disk('public')->put($document->filePathOnDisk(), 'dummy content');
     $newCategory = Category::factory()->create();
 
     livewire(EditDocument::class, ['record' => $document->id])
@@ -228,7 +246,7 @@ it('allows a document creator to edit their own document', function (): void {
     $creator = User::factory()->create();
     $this->actingAs($creator);
     $document = Document::factory()->create(['user_add' => $creator->username]);
-    Storage::disk('public')->put($document->file_path, 'dummy content');
+    Storage::disk('public')->put($document->filePathOnDisk(), 'dummy content');
 
     livewire(EditDocument::class, ['record' => $document->id])
         ->assertOk()

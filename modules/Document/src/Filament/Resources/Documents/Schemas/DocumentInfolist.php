@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Document\Filament\Resources\Documents\Schemas;
 
 use AcMarche\App\Filament\Schemas\Infolist\PdfViewerEntry;
+use AcMarche\Document\Models\Document;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
@@ -37,8 +38,9 @@ final class DocumentInfolist
                         ->grow(false),
                 ])
                     ->columnSpanFull(),
-                PdfViewerEntry::make('file_path')
+                PdfViewerEntry::make('file_name')
                     ->label('Aperçu')
+                    ->state(fn (Document $record): ?string => $record->filePathOnDisk())
                     ->minHeight('80svh')
                     ->columnSpanFull()
                     ->disk('public'),

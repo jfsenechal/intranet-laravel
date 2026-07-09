@@ -27,8 +27,8 @@ final class DocumentFactory extends Factory
         return [
             'name' => fake()->name(),
             'content' => fake()->randomHtml(),
-            'file_path' => 'uploads/document/'.fake()->uuid().'.pdf',
-            'file_name' => fake()->word().'.pdf',
+            'file_path' => null,
+            'file_name' => 'documents/'.fake()->uuid().'.pdf',
             'file_size' => fake()->numberBetween(1024, 10240),
             'file_mime' => 'application/pdf',
             'category_id' => Category::factory(),

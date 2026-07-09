@@ -38,7 +38,8 @@ final class ViewDocument extends ViewRecord
                 ->label('Télécharger le document')
                 ->icon('tabler-download')
                 ->color(Color::Green)
-                ->url(fn (Document $record) => Storage::disk('public')->url($record->file_path)),
+                ->url(fn (Document $record) => Storage::disk('public')->url($record->filePathOnDisk()))
+                ->visible(fn (Document $record): bool => filled($record->filePathOnDisk())),
             Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')

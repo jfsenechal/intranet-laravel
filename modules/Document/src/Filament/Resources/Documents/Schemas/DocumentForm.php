@@ -32,20 +32,18 @@ final class DocumentForm
                         RichEditor::make('content')
                             ->label('Description')
                             ->columnSpanFull(),
-                        Hidden::make('file_name'),
                         Hidden::make('file_mime'),
                         Hidden::make('file_size'),
-                        FileUpload::make('file_path')
+                        FileUpload::make('file_name')
                             ->label('Pièce jointe')
                             ->required()
                             ->disk('public')
-                            ->directory(config('document.uploads.documents'))
+                            ->directory(config('document.storage.directory'))
                             ->previewable(false)
                             ->downloadable()
                             ->maxSize(10240)
                             ->afterStateUpdated(function ($state, Set $set): void {
                                 if ($state instanceof TemporaryUploadedFile) {
-                                    $set('file_name', $state->getFilename());
                                     $set('file_mime', $state->getMimeType());
                                     $set('file_size', $state->getSize());
                                 }

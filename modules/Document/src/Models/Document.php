@@ -41,6 +41,25 @@ final class Document extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Disk-relative path to the stored file, resolved from the file name.
+     *
+     * Historical records only store the bare file name, while files live in
+     * the configured storage directory (e.g. "documents/foo.pdf").
+     */
+    public function filePathOnDisk(): ?string
+    {
+        if (blank($this->file_name)) {
+            return null;
+        }
+
+        if (str_contains((string) $this->file_name, '/')) {
+            return $this->file_name;
+        }
+
+        return config('document.storage.directory').'/'.$this->file_name;
+    }
+
     protected static function booted(): void
     {
         self::bootHasUser();
