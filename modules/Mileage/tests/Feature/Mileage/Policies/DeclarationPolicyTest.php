@@ -61,9 +61,7 @@ describe('view', function (): void {
         $user->roles()->attach($role);
 
         $declaration = Declaration::factory()->create(['user_add' => 'owner']);
-
-        // Add username accessor to declaration for testing
-        $declaration->username = $user->username;
+        $declaration->user_add = $user->username;
 
         expect($this->policy->view($user, $declaration))->toBeTrue();
     });
@@ -74,9 +72,7 @@ describe('view', function (): void {
         $user->roles()->attach($role);
 
         $declaration = Declaration::factory()->create(['user_add' => 'user2']);
-
-        // Add username accessor to declaration for testing
-        $declaration->username = 'user2';
+        $declaration->user_add = 'user2';
 
         expect($this->policy->view($user, $declaration))->toBeFalse();
     });
@@ -131,9 +127,7 @@ describe('update', function (): void {
         $user->roles()->attach($role);
 
         $declaration = Declaration::factory()->create(['user_add' => 'owner']);
-
-        // Add username accessor to declaration for testing
-        $declaration->username = $user->username;
+        $declaration->user_add = $user->username;
 
         expect($this->policy->update($user, $declaration))->toBeTrue();
     });
@@ -144,9 +138,7 @@ describe('update', function (): void {
         $user->roles()->attach($role);
 
         $declaration = Declaration::factory()->create(['user_add' => 'user2']);
-
-        // Add username accessor to declaration for testing
-        $declaration->username = 'user2';
+        $declaration->user_add = 'user2';
 
         expect($this->policy->update($user, $declaration))->toBeFalse();
     });
@@ -170,9 +162,6 @@ describe('delete', function (): void {
 
         $declaration = Declaration::factory()->create(['user_add' => 'owner']);
 
-        // Add username accessor to declaration for testing
-        $declaration->username = $user->username;
-
         expect($this->policy->delete($user, $declaration))->toBeFalse();
     });
 
@@ -182,9 +171,6 @@ describe('delete', function (): void {
         $user->roles()->attach($role);
 
         $declaration = Declaration::factory()->create(['user_add' => 'user2']);
-
-        // Add username accessor to declaration for testing
-        $declaration->username = 'user2';
 
         expect($this->policy->delete($user, $declaration))->toBeFalse();
     });

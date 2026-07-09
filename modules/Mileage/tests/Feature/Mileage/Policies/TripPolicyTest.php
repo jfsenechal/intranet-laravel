@@ -73,9 +73,7 @@ describe('view', function (): void {
             'user_id' => $user->id,
             'user_add' => 'owner',
         ]);
-
-        // Add username accessor to trip for testing
-        $trip->username = $user->username;
+        $trip->user_add = $user->username;
 
         expect($this->policy->view($user, $trip))->toBeTrue();
     });
@@ -92,9 +90,7 @@ describe('view', function (): void {
             'user_id' => $otherUser->id,
             'user_add' => 'user2',
         ]);
-
-        // Add username accessor to trip for testing
-        $trip->username = 'user2';
+        $trip->user_add = 'user2';
 
         expect($this->policy->view($user, $trip))->toBeFalse();
     });
@@ -109,9 +105,6 @@ describe('view', function (): void {
             'user_id' => $otherUser->id,
             'user_add' => 'owner',
         ]);
-
-        // Add username accessor to trip for testing
-        $trip->username = 'owner';
 
         expect($this->policy->view($user, $trip))->toBeFalse();
     });
@@ -178,9 +171,6 @@ describe('update', function (): void {
             'user_add' => 'owner',
         ]);
 
-        // Add username accessor to trip for testing
-        $trip->username = $user->username;
-
         expect($this->policy->update($user, $trip))->toBeFalse();
     });
 
@@ -196,9 +186,6 @@ describe('update', function (): void {
             'user_id' => $otherUser->id,
             'user_add' => 'user2',
         ]);
-
-        // Add username accessor to trip for testing
-        $trip->username = 'user2';
 
         expect($this->policy->update($user, $trip))->toBeFalse();
     });
@@ -233,9 +220,6 @@ describe('delete', function (): void {
             'user_add' => 'owner',
         ]);
 
-        // Add username accessor to trip for testing
-        $trip->username = $user->username;
-
         expect($this->policy->delete($user, $trip))->toBeFalse();
     });
 
@@ -248,9 +232,7 @@ describe('delete', function (): void {
             'user_id' => $user->id,
             'user_add' => 'owner',
         ]);
-
-        // Add username accessor to trip for testing
-        $trip->username = $user->username;
+        $trip->user_add = $user->username;
 
         expect($this->policy->delete($user, $trip))->toBeTrue();
     });
@@ -267,9 +249,7 @@ describe('delete', function (): void {
             'user_id' => $otherUser->id,
             'user_add' => 'user2',
         ]);
-
-        // Add username accessor to trip for testing
-        $trip->username = 'user2';
+        $trip->user_add = 'user2';
 
         expect($this->policy->delete($user, $trip))->toBeFalse();
     });

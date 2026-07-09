@@ -35,7 +35,7 @@ final class DeclarationPolicy
             return true;
         }
 
-        return $declaration->username === $user->username;
+        return $declaration->user_add === $user->username;
     }
 
     /**
@@ -58,7 +58,7 @@ final class DeclarationPolicy
             return true;
         }
 
-        return $declaration->username === $user->username;
+        return $declaration->user_add === $user->username;
     }
 
     /**

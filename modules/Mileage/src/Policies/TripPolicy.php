@@ -34,7 +34,7 @@ final class TripPolicy
             return true;
         }
 
-        return $trip->username === $user->username;
+        return $trip->user_add === $user->username;
     }
 
     /**
@@ -73,7 +73,7 @@ final class TripPolicy
             return false;
         }
 
-        return $trip->username === $user->username;
+        return $trip->user_add === $user->username;
     }
 
     /**

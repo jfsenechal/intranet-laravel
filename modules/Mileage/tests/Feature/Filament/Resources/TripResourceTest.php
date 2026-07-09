@@ -131,6 +131,22 @@ it('validates the form data', function (array $data, array $errors): void {
     '`content` is required' => [['content' => null], ['content' => 'required']],
 ]);
 
+it('renders the table for a non-admin owner without missing attribute error', function (): void {
+    $owner = User::factory()->create(['username' => 'rhoubrechts', 'is_administrator' => false]);
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
+    $owner->roles()->attach($role);
+    PersonalInformation::factory()->create(['username' => 'rhoubrechts']);
+
+    $this->actingAs($owner);
+
+    $trips = Trip::factory(3)->create(['user_add' => 'rhoubrechts']);
+
+    livewire(ListTrips::class)
+        ->loadTable()
+        ->assertOk()
+        ->assertCanSeeTableRecords($trips);
+});
+
 it('can bulk delete trips', function (): void {
     $trips = Trip::factory(3)->create(['user_add' => 'jdupont']);
 
