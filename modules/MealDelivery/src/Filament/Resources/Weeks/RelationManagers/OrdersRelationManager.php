@@ -57,7 +57,11 @@ final class OrdersRelationManager extends RelationManager
                     ($record->client?->last_name ?? '').' '.($record->client?->first_name ?? ''),
                 ))
                 ->url(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record->id]))
-                ->searchable(['client.last_name', 'client.first_name'])
+                ->searchable(query: fn (Builder $query, string $search): Builder => $query->where(
+                    fn (Builder $query) => $query
+                        ->where('clients.last_name', 'like', "%{$search}%")
+                        ->orWhere('clients.first_name', 'like', "%{$search}%"),
+                ))
                 ->sortable(['clients.last_name', 'clients.first_name']),
         ];
 

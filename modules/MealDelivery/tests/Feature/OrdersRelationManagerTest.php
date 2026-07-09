@@ -62,6 +62,24 @@ it('ignores orders that belong to another week', function (): void {
     expect($clients->pluck('id')->all())->toBe([$client->id]);
 });
 
+it('searches orders by client last and first name', function (): void {
+    $piette = createMealDeliveryClient('Piette', isActive: true);
+    $dupont = createMealDeliveryClient('Dupont', isActive: true);
+
+    $pietteOrder = Order::create(['week_id' => $this->week->id, 'client_id' => $piette->id]);
+    $dupontOrder = Order::create(['week_id' => $this->week->id, 'client_id' => $dupont->id]);
+
+    livewire(OrdersRelationManager::class, [
+        'ownerRecord' => $this->week,
+        'pageClass' => ViewWeek::class,
+    ])
+        ->call('loadTable')
+        ->assertCanSeeTableRecords([$pietteOrder, $dupontOrder])
+        ->searchTable('Piett')
+        ->assertCanSeeTableRecords([$pietteOrder])
+        ->assertCanNotSeeTableRecords([$dupontOrder]);
+});
+
 it('shows the count of clients without an order in the header action', function (): void {
     createMealDeliveryClient('First', isActive: true);
     createMealDeliveryClient('Second', isActive: true);
