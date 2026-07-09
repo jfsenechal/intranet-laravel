@@ -67,7 +67,7 @@ final class SmsReminderTables
                     ->label('Date de rappel')
                     ->schema([
                         DatePicker::make('reminder_from')
-                            ->label('Du'),
+                            ->label('Rappel - Du'),
                         DatePicker::make('reminder_until')
                             ->label('Au'),
                     ])

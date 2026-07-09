@@ -51,6 +51,24 @@ describe('page rendering', function (): void {
                 'phone_number' => $record->phone_number,
             ]);
     });
+
+    it('can render the view page without an employee', function (): void {
+        $record = SmsReminder::factory()->create(['employee_id' => null]);
+
+        Livewire::test(ViewSmsReminder::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk();
+    });
+
+    it('can render the edit page without an employee', function (): void {
+        $record = SmsReminder::factory()->create(['employee_id' => null]);
+
+        Livewire::test(EditSmsReminder::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk();
+    });
 });
 
 describe('crud operations', function (): void {
@@ -69,6 +87,26 @@ describe('crud operations', function (): void {
 
         assertDatabaseHas(SmsReminder::class, [
             'phone_number' => $newData->phone_number,
+        ]);
+    });
+
+    it('can create a sms reminder without an employee', function (): void {
+        $newData = SmsReminder::factory()->make();
+
+        Livewire::test(CreateSmsReminder::class)
+            ->fillForm([
+                'employee_id' => null,
+                'phone_number' => $newData->phone_number,
+                'message' => $newData->message,
+                'reminder_date' => $newData->reminder_date->format('Y-m-d'),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(SmsReminder::class, [
+            'phone_number' => $newData->phone_number,
+            'employee_id' => null,
         ]);
     });
 

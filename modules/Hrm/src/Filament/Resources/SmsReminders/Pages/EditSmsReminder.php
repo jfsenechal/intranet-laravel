@@ -18,7 +18,13 @@ final class EditSmsReminder extends EditRecord
 
     public function getTitle(): string|Htmlable
     {
-        return 'Rappel SMS de '.$this->record->employee->last_name.' '.$this->record->employee->first_name;
+        $employee = $this->record->employee;
+
+        if ($employee === null) {
+            return 'Rappel SMS';
+        }
+
+        return 'Rappel SMS de '.$employee->last_name.' '.$employee->first_name;
     }
 
     protected function getHeaderActions(): array
