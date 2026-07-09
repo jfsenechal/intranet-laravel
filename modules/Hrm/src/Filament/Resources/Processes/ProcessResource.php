@@ -33,13 +33,13 @@ final class ProcessResource extends Resource
     protected static ?int $navigationSort = 7;
 
     #[Override]
-    protected static ?string $navigationLabel = 'Processus';
+    protected static ?string $navigationLabel = 'Procédures';
 
     #[Override]
-    protected static ?string $modelLabel = 'processus';
+    protected static ?string $modelLabel = 'procédure';
 
     #[Override]
-    protected static ?string $pluralModelLabel = 'processus';
+    protected static ?string $pluralModelLabel = 'procédures';
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'name';
