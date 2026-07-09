@@ -18,7 +18,7 @@ final class UserRepository
             ->orderBy('last_name')
             ->get()
             ->mapWithKeys(fn (User $user): array => [
-                $user->username => "{$user->last_name} $user->first_name",
+                $user->id => "{$user->last_name} $user->first_name",
             ])
             ->all();
     }

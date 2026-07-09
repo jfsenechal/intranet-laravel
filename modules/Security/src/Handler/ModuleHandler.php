@@ -71,7 +71,7 @@ final class ModuleHandler
 
     private static function addModuleAndRoles(Module $module, User $user, array $data): void
     {
-        foreach ($data['roles'] as $roleName) {
+        foreach ((array) ($data['roles'] ?? []) as $roleName) {
             if (($role = RoleRepository::findByName($roleName)) instanceof Role) {
                 $user->addRole($role);
             }
