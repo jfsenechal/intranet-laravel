@@ -6,7 +6,6 @@ return [
     'meilisearch' => [
         'master_key' => env('MEILISEARCH_KEY'),
     ],
-    'webmaster_email' => env('WEBMASTER_EMAIL'),
     'sms' => [
         'host' => env('SMS_HOST', 'https://ecom.inforius.be/Api/'),
         'user' => env('SMS_USER'),

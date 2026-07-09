@@ -38,6 +38,7 @@ final class NewsEmail extends Mailable implements ShouldQueue
     {
         return new Envelope(
             from: $this->senderAddress(),
+            replyTo: config('mail.noreply_email'),
             subject: $this->news->name,
         );
     }
