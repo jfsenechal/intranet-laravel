@@ -7,13 +7,18 @@ namespace AcMarche\App\Filament\Pages;
 use AcMarche\App\Filament\Schemas\ClaimRequestForm;
 use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use BackedEnum;
+use Carbon\CarbonImmutable;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use NumberFormatter;
 use Override;
+use Spatie\Browsershot\Browsershot;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+use function Spatie\LaravelPdf\Support\pdf;
 
 final class ClaimRequestPage extends Page implements HasForms
 {
@@ -58,52 +63,56 @@ final class ClaimRequestPage extends Page implements HasForms
         return ClaimRequestForm::configure($schema)->statePath('data');
     }
 
-    public function save(): void
+    public function save(): StreamedResponse
     {
         $data = $this->form->getState();
-        /**
-         * generate a pdf with text belows
-         */
-        Notification::make()
-            ->title('Enregistré')
-            ->success()
-            ->send();
+        $amount = (float) $data['amount'];
+
+        $viewData = [
+            'last_name' => $data['last_name'],
+            'first_name' => $data['first_name'],
+            'street' => $data['street'],
+            'postal_code' => $data['postal_code'],
+            'city' => $data['city'],
+            'iban' => $data['iban'],
+            'content' => $data['content'],
+            'amount' => number_format($amount, 2, ',', '.'),
+            'amount_in_words' => $this->amountInWords($amount),
+            'filing_date' => CarbonImmutable::parse($data['filing_date'])->format('d-m-Y'),
+        ];
+
+        $filename = sprintf('declaration-de-creance-%s.pdf', now()->format('Y-m-d'));
+
+        $pdf = pdf()
+            ->view('app::pdf.claim-request', $viewData)
+            ->withBrowsershot(function (Browsershot $browsershot): void {
+                if ($path = config('pdf.node_modules_path')) {
+                    $browsershot->setNodeModulePath($path);
+                }
+                if ($path = config('pdf.chrome_path')) {
+                    $browsershot->setChromePath($path);
+                }
+            })
+            ->name($filename)
+            ->download();
+
+        return response()->streamDownload(
+            function () use ($pdf): void {
+                echo $pdf->toResponse(request())->getContent();
+            },
+            $filename,
+            ['Content-Type' => 'application/pdf'],
+        );
     }
 
     /**
-<div class="container">
-
-    <div class="card">
-        <h3 class="card-header"> DECLARATION DE CREANCE</h3>
-    </div>
-
-    <div class="card-body">
-        <br/><br/>
-        Je soussigné, <strong>{{ data.nom | upper }} {{ data.prenom }}</strong><br/>
-        <br/> domicilié {{ data.rue }} à {{ data.code_postal }} {{ data.localite }}
-        <br/>
-        <br/>
-        déclare qu’il est dû par la Ville de Marche-en-Famenne<br/><br/>
-        <h3 class="text-center">
-            la somme de {{ data.montant|number_format(2, ',', '.') }} €.<br/><br/>
-        </h3>
-        pour {{ data.description | nl2br }}<br/><br/>
-        <br/><br/>
-
-        A verser au compte n° {{ data.iban }}<br/><br/>
-
-        Certifié sincère et véritable à la somme de <strong>{{ data.montant_fr }} euros</strong>
-
-        <br/><br/>
-        <br/><br/><br/><br/>
-        <p class="text-right" style="margin-right: 70px;"> Fait à Marche-en-Famenne,
-            le {{ data.date | date('d-m-Y') }}</p>
-        <br/><br/>
-        <br/><br/><br/><br/><br/><br/>
-        <p class="text-right" style="margin-right: 70px;"> Signature</p>
-        <br/><br/>
-    </div>
-
-</div>
+     * Spell out the given amount in French (e.g. 1234.5 => "mille deux cent
+     * trente-quatre virgule cinq").
      */
+    private function amountInWords(float $amount): string
+    {
+        $formatter = new NumberFormatter('fr_BE', NumberFormatter::SPELLOUT);
+
+        return (string) $formatter->format($amount);
+    }
 }

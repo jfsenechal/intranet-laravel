@@ -52,6 +52,8 @@ uses(
     '../modules/Agent/tests/Feature',
     '../modules/Agent/tests/Unit',
     '../modules/Conseil/tests/Filament',
+    '../modules/App/tests/Feature',
+    '../modules/App/tests/Unit',
 );
 
 uses(

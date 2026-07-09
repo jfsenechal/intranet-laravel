@@ -35,6 +35,9 @@
         <testsuite name="Conseil">
             <directory>modules/Conseil/tests</directory>
         </testsuite>
+        <testsuite name="App">
+            <directory>modules/App/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
