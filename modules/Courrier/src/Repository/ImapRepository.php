@@ -115,15 +115,22 @@ final class ImapRepository
     }
 
     /**
-     * @param  array<int, string>  $uids
+     * @param  array<int, int|string>  $uids
      *
      * @throws ImapException
      */
     public function deleteMessages(array $uids): void
     {
-        foreach ($uids as $uid) {
-            $this->deleteMessage($uid);
+        if ($uids === []) {
+            return;
         }
+
+        $this->ensureConnected();
+
+        $this->mailbox
+            ->inbox()
+            ->messages()
+            ->destroy(array_map('intval', $uids), expunge: true);
     }
 
     /**

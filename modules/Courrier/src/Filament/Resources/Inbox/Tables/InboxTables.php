@@ -20,6 +20,7 @@ use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 
@@ -103,13 +104,16 @@ final class InboxTables
                     ->icon('tabler-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function (Collection $records) use ($imapRepository): void {
+                    ->action(function (Collection $records, HasTable $livewire) use ($imapRepository): void {
                         if (! $imapRepository instanceof ImapRepository) {
                             return;
                         }
 
                         try {
                             $imapRepository->deleteMessages($records->pluck('uid')->toArray());
+
+                            $livewire->deselectAllTableRecords();
+                            $livewire->flushCachedTableRecords();
 
                             Notification::make()
                                 ->title('Messages supprimés')
