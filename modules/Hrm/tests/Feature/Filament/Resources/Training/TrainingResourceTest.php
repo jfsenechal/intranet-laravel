@@ -100,6 +100,28 @@ describe('crud operations', function (): void {
     });
 });
 
+describe('crud create', function (): void {
+    it('persists the employee_id from the query string', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Livewire::withQueryParams(['employee_id' => $employee->id])
+            ->test(CreateTraining::class)
+            ->assertSchemaStateSet(['employee_id' => $employee->id])
+            ->fillForm([
+                'name' => 'English course',
+                'training_type' => TrainingTypeEnum::TYPE1->value,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertNotified();
+
+        assertDatabaseHas(Training::class, [
+            'name' => 'English course',
+            'employee_id' => $employee->id,
+        ]);
+    });
+});
+
 describe('form validation', function (): void {
     it('validates the form data on create', function (array $data, array $errors): void {
         Livewire::test(CreateTraining::class)

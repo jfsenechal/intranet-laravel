@@ -27,6 +27,7 @@ final class TrainingForm
         return $schema
             ->columns(1)
             ->components([
+                Hidden::make('employee_id'),
                 Section::make('Formation')
                     ->columns(2)
                     ->schema([
