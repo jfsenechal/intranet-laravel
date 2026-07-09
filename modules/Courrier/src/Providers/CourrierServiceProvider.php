@@ -7,7 +7,6 @@ namespace AcMarche\Courrier\Providers;
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Courrier\Console\Commands\CheckAttachmentFilesCommand;
 use AcMarche\Courrier\Console\Commands\MeiliIndexerCommand;
-use AcMarche\Courrier\Console\Commands\MergeCommand;
 use AcMarche\Courrier\Console\Commands\RecipientDedupeCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
 use AcMarche\Courrier\Policies\RegisterPolicies;
@@ -32,7 +31,6 @@ final class CourrierServiceProvider extends ServiceProvider
             $this->commands([
                 CheckAttachmentFilesCommand::class,
                 MeiliIndexerCommand::class,
-                MergeCommand::class,
                 RecipientDedupeCommand::class,
                 SyncCommand::class,
             ]);

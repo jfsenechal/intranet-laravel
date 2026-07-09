@@ -6,7 +6,6 @@ namespace AcMarche\Hrm\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Hrm\Console\Commands\ExpireNewHiresCommand;
-use AcMarche\Hrm\Console\Commands\MigrationCommand;
 use AcMarche\Hrm\Console\Commands\PurgeCommand;
 use AcMarche\Hrm\Console\Commands\ReminderCommand;
 use AcMarche\Hrm\Console\Commands\SyncEmployeeCommand;
@@ -32,7 +31,6 @@ final class HrmServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ExpireNewHiresCommand::class,
-                MigrationCommand::class,
                 PurgeCommand::class,
                 ReminderCommand::class,
                 SyncEmployeeCommand::class,
