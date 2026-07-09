@@ -2,11 +2,23 @@
 
 declare(strict_types=1);
 
+use AcMarche\Courrier\Handler\RecipientDeduplicator;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+
+// The username unique index is added by migration; drop it so each test can
+// seed the duplicate rows it needs to exercise the deduplication itself.
+beforeEach(function (): void {
+    if (RecipientDeduplicator::hasUniqueUsernameIndex()) {
+        Schema::connection('maria-courrier')->table('recipients', function (Blueprint $table): void {
+            $table->dropUnique('recipients_username_unique');
+        });
+    }
+});
 
 it('merges duplicate recipients onto the lowest id and repoints references', function (): void {
     $canonical = Recipient::factory()->create([

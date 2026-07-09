@@ -27,7 +27,7 @@ final class RecipientFactory extends Factory
             'slug' => Str::slug($lastName.'_'.$firstName),
             'last_name' => $lastName,
             'first_name' => $firstName,
-            'username' => Str::lower($firstName[0].$lastName),
+            'username' => Str::lower($firstName[0].$lastName).fake()->unique()->numberBetween(1, 1_000_000),
             'email' => fake()->unique()->safeEmail(),
             'receives_attachments' => fake()->boolean(30),
         ];
