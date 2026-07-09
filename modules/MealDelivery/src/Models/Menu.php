@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['position', 'quantity', 'meal_id'])]
 final class Menu extends Model
 {
+    public $timestamps = false;
+
     /**
      * @return BelongsTo<Meal, Menu>
      */

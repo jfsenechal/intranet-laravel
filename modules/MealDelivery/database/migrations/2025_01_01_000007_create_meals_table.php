@@ -32,7 +32,6 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->boolean('at_cafeteria')->default(false);
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->timestamps();
         });
     }
 

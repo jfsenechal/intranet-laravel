@@ -28,7 +28,6 @@ return new class extends Migration
             $table->integer('position');
             $table->integer('quantity')->default(0);
             $table->foreignId('meal_id')->constrained('meals')->cascadeOnDelete();
-            $table->timestamps();
         });
     }
 

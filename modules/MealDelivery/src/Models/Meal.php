@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['date', 'soup_count', 'notes', 'order_id', 'at_cafeteria'])]
 final class Meal extends Model
 {
+    public $timestamps = false;
+
     public function __toString(): string
     {
         return $this->date?->format('d-m-Y') ?? '';
