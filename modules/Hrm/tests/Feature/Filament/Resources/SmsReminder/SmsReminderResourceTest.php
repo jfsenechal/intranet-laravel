@@ -105,6 +105,42 @@ describe('form validation', function (): void {
     });
 });
 
+describe('reminder date filter', function (): void {
+    it('filters records matching reminder_date within the range', function (): void {
+        $inRange = SmsReminder::factory()->create(['reminder_date' => '2026-03-15']);
+        $outOfRange = SmsReminder::factory()->create(['reminder_date' => '2026-05-20']);
+
+        Livewire::test(ListSmsReminders::class)
+            ->loadTable()
+            ->filterTable('reminder_date', [
+                'reminder_from' => '2026-03-01',
+                'reminder_until' => '2026-03-31',
+            ])
+            ->assertCanSeeTableRecords([$inRange])
+            ->assertCanNotSeeTableRecords([$outOfRange]);
+    });
+
+    it('filters records matching other_reminder_date within the range', function (): void {
+        $inRange = SmsReminder::factory()->create([
+            'reminder_date' => '2026-05-20',
+            'other_reminder_date' => '2026-03-10',
+        ]);
+        $outOfRange = SmsReminder::factory()->create([
+            'reminder_date' => '2026-05-20',
+            'other_reminder_date' => '2026-06-10',
+        ]);
+
+        Livewire::test(ListSmsReminders::class)
+            ->loadTable()
+            ->filterTable('reminder_date', [
+                'reminder_from' => '2026-03-01',
+                'reminder_until' => '2026-03-31',
+            ])
+            ->assertCanSeeTableRecords([$inRange])
+            ->assertCanNotSeeTableRecords([$outOfRange]);
+    });
+});
+
 describe('export action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListSmsReminders::class)
