@@ -88,6 +88,7 @@ final class DiplomaTables
             ])
             ->recordActions([
                 ViewAction::make(),
+                EditAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

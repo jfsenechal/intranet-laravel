@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingForm;
 use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingInfolist;
 use AcMarche\Hrm\Filament\Resources\Trainings\Tables\TrainingTables;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -16,6 +18,8 @@ use Override;
 
 final class TrainingsRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'trainings';
 
@@ -24,9 +28,9 @@ final class TrainingsRelationManager extends RelationManager
         return 'Formations';
     }
 
-    public function isReadOnly(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return TrainingForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema

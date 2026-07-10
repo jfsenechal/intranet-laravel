@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Diplomas\Schemas\DiplomaForm;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Schemas\DiplomaInfolist;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Tables\DiplomaTables;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -14,6 +16,8 @@ use Override;
 
 final class DiplomasRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'diplomas';
 
@@ -22,9 +26,9 @@ final class DiplomasRelationManager extends RelationManager
         return 'Diplômes';
     }
 
-    public function isReadOnly(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return DiplomaForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema

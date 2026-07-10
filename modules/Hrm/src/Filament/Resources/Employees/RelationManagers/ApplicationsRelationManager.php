@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Applications\Schemas\ApplicationForm;
 use AcMarche\Hrm\Filament\Resources\Applications\Schemas\ApplicationInfolist;
 use AcMarche\Hrm\Filament\Resources\Applications\Tables\ApplicationTables;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
 use AcMarche\Hrm\Models\Employee;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -20,6 +22,8 @@ use Override;
 
 final class ApplicationsRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'applications';
 
@@ -28,9 +32,9 @@ final class ApplicationsRelationManager extends RelationManager
         return 'Candidatures';
     }
 
-    public function isReadOnly(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return ApplicationForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema

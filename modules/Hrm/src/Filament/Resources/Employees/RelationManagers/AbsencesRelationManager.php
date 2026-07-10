@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use AcMarche\Hrm\Filament\Resources\Absences\Tables\AbsenceTables;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -14,6 +16,8 @@ use Override;
 
 final class AbsencesRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'absences';
 
@@ -22,9 +26,9 @@ final class AbsencesRelationManager extends RelationManager
         return 'Absences';
     }
 
-    public function isReadOnly(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return AbsenceForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema

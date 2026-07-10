@@ -9,7 +9,6 @@ use AcMarche\Hrm\Filament\Filters\DirectionFilter;
 use AcMarche\Hrm\Filament\Filters\EmployerFilter;
 use AcMarche\Hrm\Filament\Filters\ServiceFilter;
 use AcMarche\Hrm\Models\Deadline;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -152,7 +151,8 @@ final class DeadlineTables
                     ->boolean(),
             ])
             ->recordActions([
-                Action::make('view'),
+                ViewAction::make(),
+                EditAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

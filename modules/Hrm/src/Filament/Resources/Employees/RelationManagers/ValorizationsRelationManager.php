@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationForm;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationInfolist;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Tables\ValorizationTables;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -14,6 +16,8 @@ use Override;
 
 final class ValorizationsRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'valorizations';
 
@@ -32,9 +36,9 @@ final class ValorizationsRelationManager extends RelationManager
         return 'valorisations';
     }
 
-    public function isReadOnly(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return ValorizationForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema

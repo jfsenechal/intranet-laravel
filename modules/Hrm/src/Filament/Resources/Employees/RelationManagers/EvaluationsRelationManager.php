@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Evaluations\Schemas\EvaluationForm;
 use AcMarche\Hrm\Filament\Resources\Evaluations\Schemas\EvaluationInfolist;
 use AcMarche\Hrm\Filament\Resources\Evaluations\Tables\EvaluationTables;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -14,6 +16,8 @@ use Override;
 
 final class EvaluationsRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'evaluations';
 
@@ -22,9 +26,9 @@ final class EvaluationsRelationManager extends RelationManager
         return 'Evaluations';
     }
 
-    public function isReadOnly22(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return EvaluationForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema

@@ -141,6 +141,7 @@ final class AbsenceTables
             ])
             ->recordActions([
                 ViewAction::make(),
+                EditAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

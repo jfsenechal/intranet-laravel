@@ -178,6 +178,7 @@ final class ContractTables
             ])
             ->recordActions([
                 ViewAction::make(),
+                EditAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

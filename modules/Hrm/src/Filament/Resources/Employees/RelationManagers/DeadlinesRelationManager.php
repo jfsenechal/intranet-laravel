@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Deadlines\Schemas\DeadlineForm;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Schemas\DeadlineInfolist;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Tables\DeadlineTables;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -14,6 +16,8 @@ use Override;
 
 final class DeadlinesRelationManager extends RelationManager
 {
+    use ReadOnlyUnlessGrhAdmin;
+
     #[Override]
     protected static string $relationship = 'deadlines';
 
@@ -22,9 +26,9 @@ final class DeadlinesRelationManager extends RelationManager
         return 'Echéances';
     }
 
-    public function isReadOnly(): bool
+    public function form(Schema $schema): Schema
     {
-        return true;
+        return DeadlineForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema
