@@ -56,12 +56,12 @@ final class DeadlineTables
                     ->label('Fin')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('reminder_date')
-                    ->label('Rappel')
+                    ->label('Date de rappel')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('closed_date')
                     ->label('Clôture')
                     ->date('d/m/Y')
