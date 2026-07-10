@@ -34,7 +34,7 @@ final class IncomingMailForm
     }
 
     /**
-     * @param  array<string, mixed>|null  $imapPreview  IMAP preview context: ['url', 'contentType', 'filename']
+     * @param array<string, mixed>|null $imapPreview IMAP preview context: ['url', 'contentType', 'filename']
      */
     public static function getComponents(?array $imapPreview = null): array
     {
@@ -51,7 +51,7 @@ final class IncomingMailForm
      * Left column: document preview that stays visible (sticky) while the
      * user fills in the fields on the right.
      *
-     * @param  array<string, mixed>|null  $imapPreview
+     * @param array<string, mixed>|null $imapPreview
      */
     private static function getPreviewColumn(?array $imapPreview): Section
     {
@@ -70,17 +70,17 @@ final class IncomingMailForm
             $schema = [
                 FileUpload::make('attachment_file')
                     ->label(
-                        fn (?IncomingMail $record
+                        fn(?IncomingMail $record
                         ): string => $record instanceof IncomingMail ? 'Remplacer le fichier' : 'Fichier'
                     )
-                    ->required(fn (?IncomingMail $record): bool => ! $record instanceof IncomingMail)
+                    ->required(fn(?IncomingMail $record): bool => !$record instanceof IncomingMail)
                     ->acceptedFileTypes(config('courrier.allowed_mime_types'))
                     ->maxSize(config('courrier.max_file_size'))
                     ->storeFiles(false)
                     ->previewable(false),
                 View::make('courrier::components.attachment-preview')
-                    ->viewData(fn (?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
-                    ->visible(fn (?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
+                    ->viewData(fn(?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
+                    ->visible(fn(?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
                 View::make('courrier::components.upload-preview'),
             ];
         }
@@ -107,7 +107,7 @@ final class IncomingMailForm
                         TextInput::make('reference_number')
                             ->label('Numéro')
                             ->required()
-                            ->default(fn (): ?string => $isCpas ? (string) IncomingMail::nextCpasReferenceNumber() : null)
+                            ->default(fn(): ?string => $isCpas ? (string)IncomingMail::nextCpasReferenceNumber() : null)
                             ->maxLength(255)
                             ->columnSpan(1),
                         DatePicker::make('mail_date')
@@ -126,9 +126,8 @@ final class IncomingMailForm
                             ->label('Enregistrer l\'expéditeur')
                             ->inline()
                             ->columnSpan(1),
-                        Textarea::make('description')
+                        TextInput::make('description')
                             ->label('Description')
-                            ->rows(4)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
@@ -182,7 +181,7 @@ final class IncomingMailForm
                             ->rows(4)
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
+                    ->visible(fn(IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
             ]);
     }
 
@@ -193,7 +192,7 @@ final class IncomingMailForm
     {
         $attachment = $record?->attachments->first();
 
-        if (! $attachment) {
+        if (!$attachment) {
             return ['url' => '', 'contentType' => '', 'filename' => ''];
         }
 
