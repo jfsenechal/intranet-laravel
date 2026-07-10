@@ -26,7 +26,9 @@ final class ReminderMail extends Mailable
         public readonly string $url,
         public readonly ?string $employeeName = null,
     ) {
-        $this->subject = "[GRH] Rappel - {$reminderType}";
+        $this->subject = $employeeName !== null && $employeeName !== ''
+            ? "[GRH] Rappel - {$reminderType} - {$employeeName}"
+            : "[GRH] Rappel - {$reminderType}";
     }
 
     public function envelope(): Envelope
