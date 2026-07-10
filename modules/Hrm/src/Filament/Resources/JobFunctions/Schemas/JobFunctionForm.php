@@ -12,7 +12,7 @@ final class JobFunctionForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $schema->components([
+        return $schema->components([
             Section::make()
                 ->schema([
                     TextInput::make('name')
