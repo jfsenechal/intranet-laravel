@@ -25,13 +25,13 @@ describe('admin authorization', function (): void {
     });
 
     it('grants viewAny only when user has an HRM role', function (): void {
-        $adminWithoutRole = User::factory()->create(['is_administrator' => true]);
+        $userWithoutRole = User::factory()->create(['is_administrator' => false]);
         $hrmAdminRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_ADMIN->value]);
-        $adminWithRole = User::factory()->create(['is_administrator' => true]);
-        $adminWithRole->roles()->attach($hrmAdminRole);
+        $userWithRole = User::factory()->create(['is_administrator' => false]);
+        $userWithRole->roles()->attach($hrmAdminRole);
 
-        expect($this->policy->viewAny($adminWithoutRole))->toBeFalse()
-            ->and($this->policy->viewAny($adminWithRole))->toBeTrue();
+        expect($this->policy->viewAny($userWithoutRole))->toBeFalse()
+            ->and($this->policy->viewAny($userWithRole))->toBeTrue();
     });
 
     it('always denies forceDelete', function (): void {
