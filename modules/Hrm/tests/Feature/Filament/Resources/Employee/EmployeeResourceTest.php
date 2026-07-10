@@ -148,6 +148,29 @@ describe('table', function (): void {
             ->loadTable()
             ->assertCanSeeTableRecords($records);
     });
+
+    it('filters employees by employer through their contracts', function (): void {
+        $employer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
+        $otherEmployer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
+
+        $matching = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $matching->id,
+            'employer_id' => $employer->id,
+        ]);
+
+        $nonMatching = Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $nonMatching->id,
+            'employer_id' => $otherEmployer->id,
+        ]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('employer_id', $employer->id)
+            ->assertCanSeeTableRecords([$matching])
+            ->assertCanNotSeeTableRecords([$nonMatching]);
+    });
 });
 
 describe('table scoping by role', function (): void {

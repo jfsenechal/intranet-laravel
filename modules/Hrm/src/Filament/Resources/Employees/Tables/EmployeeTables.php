@@ -95,7 +95,7 @@ final class EmployeeTables
                     ->label('Statut')
                     ->options(StatusEnum::class)
                     ->default(StatusEnum::AGENT->value),
-                EmployerFilter::make(),
+                EmployerFilter::makeThrough('contracts'),
                 SelectFilter::make('pay_scale_id')
                     ->label('Echelle')
                     ->options(fn (): array => PayScale::query()
