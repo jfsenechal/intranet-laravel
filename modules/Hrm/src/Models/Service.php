@@ -89,14 +89,6 @@ final class Service extends Model
         return $this->hasMany(Contract::class);
     }
 
-    /**
-     * @return HasMany<Operator>
-     */
-    public function operators(): HasMany
-    {
-        return $this->hasMany(Operator::class);
-    }
-
     protected static function booted(): void
     {
         self::bootHasUser();
