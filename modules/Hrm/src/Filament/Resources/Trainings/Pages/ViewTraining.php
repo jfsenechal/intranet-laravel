@@ -6,10 +6,12 @@ namespace AcMarche\Hrm\Filament\Resources\Trainings\Pages;
 
 use AcMarche\Hrm\Filament\Actions\BackToEmployeeAction;
 use AcMarche\Hrm\Filament\Resources\Trainings\TrainingResource;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Training;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -33,6 +35,17 @@ final class ViewTraining extends ViewRecord
                 ->icon(Heroicon::Pencil),
             ReplicateAction::make()
                 ->icon(Heroicon::Square2Stack)
+                ->schema([
+                    Select::make('employee_id')
+                        ->label('Agent')
+                        ->relationship('employee', 'last_name')
+                        ->getOptionLabelFromRecordUsing(
+                            fn (Employee $record): string => $record->last_name.' '.$record->first_name
+                        )
+                        ->searchable()
+                        ->preload()
+                        ->required(),
+                ])
                 ->excludeAttributes([
                     'id',
                     'created_at',

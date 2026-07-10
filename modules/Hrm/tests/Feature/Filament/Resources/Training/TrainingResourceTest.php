@@ -11,6 +11,7 @@ use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Training;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -75,17 +76,18 @@ describe('crud operations', function (): void {
         ]);
     });
 
-    it('can replicate a training from the view page', function (): void {
+    it('can replicate a training to another employee from the view page', function (): void {
         $record = Training::factory()->create([
             'name' => 'Original Training',
             'is_closed' => true,
             'certificate_received' => true,
         ]);
+        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
 
         Livewire::test(ViewTraining::class, [
             'record' => $record->id,
         ])
-            ->callAction('replicate')
+            ->callAction('replicate', ['employee_id' => $targetEmployee->id])
             ->assertHasNoActionErrors();
 
         expect(Training::query()->where('name', 'Original Training')->count())->toBe(2);
@@ -95,8 +97,36 @@ describe('crud operations', function (): void {
             ->where('id', '!=', $record->id)
             ->first();
 
+        expect($replica->employee_id)->toBe($targetEmployee->id);
         expect($replica->is_closed)->not->toBeTrue();
         expect($replica->certificate_received)->not->toBeTrue();
+    });
+
+    it('does not copy the certificate file when replicating', function (): void {
+        Storage::fake('local');
+
+        $originalFile = config('hrm.uploads.formations').'/original-certificate.pdf';
+        Storage::disk('local')->put($originalFile, 'certificate contents');
+
+        $record = Training::factory()->create([
+            'name' => 'Certified Training',
+            'certificate_file' => $originalFile,
+        ]);
+        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Livewire::test(ViewTraining::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate', ['employee_id' => $targetEmployee->id])
+            ->assertHasNoActionErrors();
+
+        $replica = Training::query()
+            ->where('name', 'Certified Training')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica->certificate_file)->toBeNull();
+        expect(Storage::disk('local')->allFiles())->toBe([$originalFile]);
     });
 });
 

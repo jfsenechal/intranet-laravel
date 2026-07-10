@@ -7,9 +7,11 @@ namespace AcMarche\Hrm\Filament\Resources\Deadlines\Pages;
 use AcMarche\Hrm\Filament\Actions\BackToEmployeeAction;
 use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
 use AcMarche\Hrm\Models\Deadline;
+use AcMarche\Hrm\Models\Employee;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -37,6 +39,16 @@ final class ViewDeadline extends ViewRecord
                 ->icon(Heroicon::Pencil),
             ReplicateAction::make()
                 ->icon(Heroicon::Square2Stack)
+                ->schema([
+                    Select::make('employee_id')
+                        ->label('Agent')
+                        ->relationship('employee', 'last_name')
+                        ->getOptionLabelFromRecordUsing(
+                            fn (Employee $record): string => $record->last_name.' '.$record->first_name
+                        )
+                        ->searchable()
+                        ->preload(),
+                ])
                 ->excludeAttributes([
                     'id',
                     'created_at',

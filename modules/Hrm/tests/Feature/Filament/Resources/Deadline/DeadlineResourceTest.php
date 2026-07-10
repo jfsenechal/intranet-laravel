@@ -117,10 +117,12 @@ describe('crud operations', function (): void {
             'closed_date' => now(),
         ]);
 
+        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+
         Livewire::test(ViewDeadline::class, [
             'record' => $record->id,
         ])
-            ->callAction('replicate')
+            ->callAction('replicate', ['employee_id' => $targetEmployee->id])
             ->assertHasNoActionErrors();
 
         expect(Deadline::query()->where('name', 'Original Deadline')->count())->toBe(2);
@@ -130,6 +132,7 @@ describe('crud operations', function (): void {
             ->where('id', '!=', $record->id)
             ->first();
 
+        expect($replica->employee_id)->toBe($targetEmployee->id);
         expect($replica->is_closed)->not->toBeTrue();
         expect($replica->closed_date)->toBeNull();
     });
