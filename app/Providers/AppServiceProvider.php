@@ -74,7 +74,7 @@ final class AppServiceProvider extends ServiceProvider
                 ['bold', 'italic', 'strike', 'textColor', 'link', 'h2', 'h3'],
                 ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
                 ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
-                ['table', 'grid', 'attachFiles'],
+                ['table', 'grid'],
                 ['clearFormatting', 'undo', 'redo'],
             ]);
         });
