@@ -8,7 +8,6 @@ use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Courrier\Console\Commands\CheckAttachmentFilesCommand;
 use AcMarche\Courrier\Console\Commands\ListPendingNotificationsCommand;
 use AcMarche\Courrier\Console\Commands\MeiliIndexerCommand;
-use AcMarche\Courrier\Console\Commands\RecipientDedupeCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
 use AcMarche\Courrier\Policies\RegisterPolicies;
 use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
@@ -33,7 +32,6 @@ final class CourrierServiceProvider extends ServiceProvider
                 CheckAttachmentFilesCommand::class,
                 ListPendingNotificationsCommand::class,
                 MeiliIndexerCommand::class,
-                RecipientDedupeCommand::class,
                 SyncCommand::class,
             ]);
         }
