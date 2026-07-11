@@ -36,6 +36,46 @@ test('it reports when nothing would be sent for the given date', function (): vo
         ->assertExitCode(Command::SUCCESS);
 });
 
+test('force includes mail already marked as notified', function (): void {
+    $recipient = Recipient::factory()->create([
+        'email' => 'forced@example.com',
+    ]);
+
+    $mail = IncomingMail::factory()->create([
+        'mail_date' => now(),
+        'is_notified' => true,
+    ]);
+    $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+    // Without force the notified mail is hidden.
+    $this->artisan('courrier:notifications:list')
+        ->expectsOutputToContain('No notification would be sent for this date.')
+        ->assertExitCode(Command::SUCCESS);
+
+    // With force it is listed again.
+    $this->artisan('courrier:notifications:list', ['--force' => true])
+        ->expectsOutputToContain('forced@example.com')
+        ->expectsOutputToContain('1 recipient(s) would be notified about 1 incoming mail(s).')
+        ->assertExitCode(Command::SUCCESS);
+});
+
+test('force does not mark mail as notified', function (): void {
+    $recipient = Recipient::factory()->create([
+        'email' => 'forced-noop@example.com',
+    ]);
+
+    $mail = IncomingMail::factory()->create([
+        'mail_date' => now(),
+        'is_notified' => true,
+    ]);
+    $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+    $this->artisan('courrier:notifications:list', ['--force' => true])
+        ->assertExitCode(Command::SUCCESS);
+
+    expect($mail->fresh()->is_notified)->toBeTrue();
+});
+
 test('it does not mark mail as notified', function (): void {
     $recipient = Recipient::factory()->create([
         'email' => 'noop@example.com',

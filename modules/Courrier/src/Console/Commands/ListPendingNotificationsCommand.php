@@ -22,7 +22,8 @@ final class ListPendingNotificationsCommand extends Command
 {
     #[Override]
     protected $signature = 'courrier:notifications:list
-        {--date= : The mail date to inspect (Y-m-d), defaults to today}';
+        {--date= : The mail date to inspect (Y-m-d), defaults to today}
+        {--force : Include mail already marked as notified, mirroring a forced re-notification}';
 
     #[Override]
     protected $description = 'List the pending incoming-mail notifications (subject and recipients) without sending them';
@@ -33,7 +34,13 @@ final class ListPendingNotificationsCommand extends Command
             ? Date::parse((string) $this->option('date'))
             : Date::now();
 
-        $this->info(sprintf('Pending notifications for %s', $mailDate->format('Y-m-d')));
+        $force = (bool) $this->option('force');
+
+        $this->info(sprintf(
+            'Pending notifications for %s%s',
+            $mailDate->format('Y-m-d'),
+            $force ? ' (forced: including already notified mail)' : '',
+        ));
         $this->newLine();
 
         $repository = new IncomingMailRepository();
@@ -47,7 +54,7 @@ final class ListPendingNotificationsCommand extends Command
         $totalMails = 0;
 
         foreach ($recipients as $recipient) {
-            $incomingMails = $repository->getIncomingMailsForRecipient($recipient, $mailDate);
+            $incomingMails = $repository->getIncomingMailsForRecipient($recipient, $mailDate, $force);
 
             if ($incomingMails->isEmpty()) {
                 continue;
