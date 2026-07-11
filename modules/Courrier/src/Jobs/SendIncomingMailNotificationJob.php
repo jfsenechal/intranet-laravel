@@ -23,10 +23,17 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
     public function __construct(
         public readonly CarbonInterface $mailDate,
+        public readonly bool $force = false,
     ) {}
 
     public function handle(): void
     {
+        if ($this->force) {
+            IncomingMail::query()
+                ->whereDate('mail_date', $this->mailDate)
+                ->update(['is_notified' => false]);
+        }
+
         $repository = new IncomingMailRepository();
 
         $recipients = Recipient::query()

@@ -76,12 +76,15 @@ final class IncomingMailRepository
      * Other recipients receive only mail addressed to them or to one of their
      * services.
      *
+     * When $includeNotified is true, the is_notified filter is dropped so the
+     * result mirrors a forced re-notification (which resets that flag first).
+     *
      * @return Collection<int, IncomingMail>
      */
-    public function getIncomingMailsForRecipient(Recipient $recipient, CarbonInterface $mailDate): Collection
+    public function getIncomingMailsForRecipient(Recipient $recipient, CarbonInterface $mailDate, bool $includeNotified = false): Collection
     {
         $baseQuery = IncomingMail::query()
-            ->where('is_notified', false)
+            ->when(! $includeNotified, fn (Builder $query): Builder => $query->where('is_notified', false))
             ->whereDate('mail_date', $mailDate)
             ->with(['services', 'recipients', 'attachments', 'category']);
 

@@ -11,10 +11,13 @@ use AcMarche\Courrier\Repository\IncomingMailRepository;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -103,6 +106,27 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
         $this->previewData = $preview;
     }
 
+    /**
+     * Number of recipients that would receive a notification for the selected
+     * date. When $includeNotified is true, the count reflects a forced send
+     * (already notified mail is counted too).
+     */
+    public function countRecipientsToNotify(bool $includeNotified): int
+    {
+        if (! $this->mail_date) {
+            return 0;
+        }
+
+        $incomingMailRepository = new IncomingMailRepository();
+        $mailDate = Date::parse($this->mail_date);
+
+        return RecipientRepository::getWithEmail()
+            ->filter(fn ($recipient): bool => $incomingMailRepository
+                ->getIncomingMailsForRecipient($recipient, $mailDate, $includeNotified)
+                ->isNotEmpty())
+            ->count();
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -112,17 +136,20 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                 ->color('primary')
                 ->requiresConfirmation()
                 ->modalHeading('Confirmer l\'envoi')
-                ->modalDescription(function (): string {
-                    $this->loadPreviewData();
-
-                    return sprintf(
-                        'Vous allez envoyer des notifications a %d destinataire(s). Cette action est irreversible.',
-                        count($this->previewData)
-                    );
-                })
+                ->modalDescription('Cette action est irreversible.')
                 ->modalSubmitActionLabel('Envoyer')
+                ->schema([
+                    Checkbox::make('force_notify')
+                        ->label('Forcer la notification')
+                        ->helperText('Renvoie aussi les courriers deja notifies pour cette date.')
+                        ->live(),
+                    Text::make(fn (Get $get): string => sprintf(
+                        'Vous allez envoyer des notifications a %d destinataire(s).',
+                        $this->countRecipientsToNotify((bool) $get('force_notify')),
+                    )),
+                ])
                // ->disabled(fn (): bool => empty($this->previewData))
-                ->action(function (): void {
+                ->action(function (array $data): void {
                     if (! $this->mail_date) {
                         Notification::make()
                             ->title('Erreur')
@@ -133,7 +160,10 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                         return;
                     }
 
-                    dispatch(new SendIncomingMailNotificationJob(Date::parse($this->mail_date)));
+                    dispatch(new SendIncomingMailNotificationJob(
+                        Date::parse($this->mail_date),
+                        (bool) ($data['force_notify'] ?? false),
+                    ));
 
                     Notification::make()
                         ->title('Notifications en cours d\'envoi')

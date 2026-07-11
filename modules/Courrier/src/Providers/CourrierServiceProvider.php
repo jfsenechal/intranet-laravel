@@ -6,6 +6,7 @@ namespace AcMarche\Courrier\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Courrier\Console\Commands\CheckAttachmentFilesCommand;
+use AcMarche\Courrier\Console\Commands\ListPendingNotificationsCommand;
 use AcMarche\Courrier\Console\Commands\MeiliIndexerCommand;
 use AcMarche\Courrier\Console\Commands\RecipientDedupeCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
@@ -30,6 +31,7 @@ final class CourrierServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CheckAttachmentFilesCommand::class,
+                ListPendingNotificationsCommand::class,
                 MeiliIndexerCommand::class,
                 RecipientDedupeCommand::class,
                 SyncCommand::class,

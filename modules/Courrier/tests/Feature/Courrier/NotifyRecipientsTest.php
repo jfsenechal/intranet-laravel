@@ -296,6 +296,45 @@ describe('SendIncomingMailNotificationJob', function (): void {
         Mail::assertQueued(IncomingMailNotification::class, fn ($mailable) => $mailable->hasTo($recipient->email));
     });
 
+    test('force re-notifies mail that was already notified', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'force@example.com',
+        ]);
+
+        $mail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => true,
+        ]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $job = new SendIncomingMailNotificationJob(Date::now(), force: true);
+        $job->handle();
+
+        Mail::assertQueued(IncomingMailNotification::class, fn ($mailable): bool => $mailable->hasTo($recipient->email));
+        expect($mail->fresh()->is_notified)->toBeTrue();
+    });
+
+    test('without force, already notified mail is not re-sent', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'noforce@example.com',
+        ]);
+
+        $mail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => true,
+        ]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $job = new SendIncomingMailNotificationJob(Date::now());
+        $job->handle();
+
+        Mail::assertNothingQueued();
+    });
+
     test('mail is marked as notified after sending', function (): void {
         Mail::fake();
 
@@ -352,6 +391,29 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job->handle();
 
         Mail::assertQueued(IncomingMailNotification::class, fn ($mailable): bool => $mailable->includeAttachments === false);
+    });
+});
+
+describe('NotifyRecipients preview count', function (): void {
+    test('count excludes already notified mail by default and includes it when forced', function (): void {
+        $admin = User::factory()->create(['is_administrator' => true]);
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'count@example.com',
+        ]);
+
+        $notifiedMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => true,
+        ]);
+        $notifiedMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $this->actingAs($admin);
+
+        $component = livewire(NotifyRecipients::class)->instance();
+
+        expect($component->countRecipientsToNotify(false))->toBe(0)
+            ->and($component->countRecipientsToNotify(true))->toBe(1);
     });
 });
 
