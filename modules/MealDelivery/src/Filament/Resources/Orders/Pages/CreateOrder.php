@@ -12,6 +12,7 @@ use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Override;
@@ -105,6 +106,22 @@ final class CreateOrder extends CreateRecord
     {
         $meals = $data['meals'] ?? [];
         unset($data['meals']);
+
+        $existingOrder = Order::query()
+            ->where('week_id', $data['week_id'])
+            ->where('client_id', $data['client_id'])
+            ->first();
+
+        if ($existingOrder instanceof Order) {
+            Notification::make()
+                ->warning()
+                ->title('Une commande existe déjà pour ce client et cette semaine.')
+                ->send();
+
+            $this->redirect(OrderResource::getUrl('edit', ['record' => $existingOrder]));
+
+            throw new Halt;
+        }
 
         return DB::connection('maria-meal-delivery')->transaction(function () use ($data, $meals): Order {
             $order = Order::query()->create($data);
