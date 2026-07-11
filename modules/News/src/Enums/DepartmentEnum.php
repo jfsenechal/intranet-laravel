@@ -36,7 +36,7 @@ enum DepartmentEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::COMMON => 'success',
+            self::COMMON => 'warning',
             self::CPAS => 'primary',
             self::VILLE => 'danger',
         };
