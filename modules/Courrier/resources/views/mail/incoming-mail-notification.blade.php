@@ -102,7 +102,9 @@
                 <tr>
                     <td>{{ $courrier->reference_number }}</td>
                     <td>{{ $courrier->sender }}</td>
-                    <td>{{ $courrier->description }}</td>
+                    <td>
+                        <a href="{{ route('filament.courrier-panel.resources.incoming-mails.view', ['record' => $courrier->id]) }}">{{ $courrier->description }}</a>
+                    </td>
                     <td>
                         @php
                             $primaryServices = $courrier->services->where('pivot.is_primary', true)->pluck('name')->implode(', ');

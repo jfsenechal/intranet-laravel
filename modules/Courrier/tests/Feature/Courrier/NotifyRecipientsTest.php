@@ -523,6 +523,18 @@ describe('IncomingMailNotification Mailable', function (): void {
         expect($mailable->content()->html)->toBe('courrier::mail.incoming-mail-notification');
     });
 
+    test('mailable links each courrier description to its view page', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mail = IncomingMail::factory()->create();
+        $mails = collect([$mail]);
+
+        $mailable = new IncomingMailNotification($recipient, $mails);
+
+        $url = route('filament.courrier-panel.resources.incoming-mails.view', ['record' => $mail->id]);
+
+        $mailable->assertSeeInHtml('href="'.$url.'"', false);
+    });
+
     test('mailable returns empty attachments when includeAttachments is false', function (): void {
         $recipient = Recipient::factory()->create();
         $mails = collect([IncomingMail::factory()->create()]);
