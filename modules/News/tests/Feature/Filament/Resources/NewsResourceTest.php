@@ -109,6 +109,17 @@ it('can filter by category', function (): void {
         ->assertCanNotSeeTableRecords([$news2]);
 });
 
+it('can filter by name', function (): void {
+    $news1 = News::factory()->create(['name' => 'Réunion importante']);
+    $news2 = News::factory()->create(['name' => 'Autre sujet']);
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->filterTable('name', ['name' => 'Réunion'])
+        ->assertCanSeeTableRecords([$news1])
+        ->assertCanNotSeeTableRecords([$news2]);
+});
+
 it('can filter archived news', function (): void {
     $archived = News::factory()->create(['archive' => true]);
     $notArchived = News::factory()->create(['archive' => false]);

@@ -9,9 +9,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Flex;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -55,6 +55,15 @@ final class NewsTables
                     ->label('Catégorie'),
             ])
             ->filters([
+                Filter::make('name')
+                    ->label('Intitulé')
+                    ->schema([
+                        TextInput::make('name')->label('Intitulé'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['name'],
+                        fn (Builder $query, string $name): Builder => $query->where('name', 'like', "%{$name}%"),
+                    )),
                 SelectFilter::make('category_id')
                     ->label('Catégorie')
                     ->relationship('category', 'name'),
@@ -65,21 +74,23 @@ final class NewsTables
                     ->falseLabel('Non archivés seulement')
                     ->native(false),
                 Filter::make('created_at')
-                    ->label('Ajouté le')->schema([
+                    ->label('Ajouté le')
+                    ->columnSpan(2)
+                    ->schema([
                         Flex::make([
                             DatePicker::make('created_from')->label('Entre le'),
                             DatePicker::make('created_until')->label('Et le'),
                         ]),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
-                    ->when(
-                        $data['created_from'],
-                        fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-                    )
-                    ->when(
-                        $data['created_until'],
-                        fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-                    )),
+                        ->when(
+                            $data['created_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['created_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                        )),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 ViewAction::make(),
