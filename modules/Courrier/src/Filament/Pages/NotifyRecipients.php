@@ -9,6 +9,7 @@ use AcMarche\Courrier\Filament\Resources\NotifyRecipients\Tables\NotifyRecipient
 use AcMarche\Courrier\Jobs\SendIncomingMailNotificationJob;
 use AcMarche\Courrier\Repository\IncomingMailRepository;
 use AcMarche\Courrier\Repository\RecipientRepository;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -20,6 +21,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 use Override;
@@ -159,6 +162,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                     dispatch(new SendIncomingMailNotificationJob(
                         Date::parse($this->mail_date),
                         $this->force_notify,
+                        $this->senderAddress(),
                     ));
 
                     Notification::make()
@@ -170,5 +174,20 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                     $this->loadPreviewData();
                 }),
         ];
+    }
+
+    /**
+     * The address of the admin triggering the send, used as the mail sender.
+     *
+     * Resolved here in the web request because the queued job runs without an
+     * authenticated user; null falls back to the configured default address.
+     */
+    private function senderAddress(): ?Address
+    {
+        $user = Auth::user();
+
+        return $user instanceof User
+            ? new Address($user->email, $user->fullNameAsString())
+            : null;
     }
 }

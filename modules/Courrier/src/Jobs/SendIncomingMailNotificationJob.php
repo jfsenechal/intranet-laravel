@@ -28,6 +28,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
     public function __construct(
         public readonly CarbonInterface $mailDate,
         public readonly bool $force = false,
+        public readonly ?Address $sender = null,
     ) {}
 
     public function handle(): void
@@ -58,15 +59,19 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
                 continue;
             }
 
+            $notification = new IncomingMailNotification(
+                $recipient,
+                $incomingMails,
+                $recipient->receives_attachments,
+            );
+
+            // Use the admin who triggered the job as the sender when available;
+            // resolvedSender is null on a console/scheduled run and the mailable
+            // then falls back to the configured default address.
+            $notification->resolvedSender = $this->sender;
+
             try {
-                Mail::to(new Address($recipient->email))
-                    ->send(
-                        new IncomingMailNotification(
-                            $recipient,
-                            $incomingMails,
-                            $recipient->receives_attachments,
-                        )
-                    );
+                Mail::to(new Address($recipient->email))->send($notification);
             } catch (Throwable $throwable) {
                 Log::error(sprintf(
                     'Courrier notification failed for %s: %s',

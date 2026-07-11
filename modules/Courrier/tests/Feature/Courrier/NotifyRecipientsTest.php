@@ -367,6 +367,52 @@ describe('SendIncomingMailNotificationJob', function (): void {
         Mail::assertNothingSent();
     });
 
+    test('the triggering admin is used as the sender when provided', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'sender@example.com',
+        ]);
+
+        $mail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+        ]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $sender = new Illuminate\Mail\Mailables\Address('admin@example.com', 'Acting Admin');
+
+        $job = new SendIncomingMailNotificationJob(Date::now(), sender: $sender);
+        $job->handle();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mailable): bool => $mailable->hasFrom('admin@example.com', 'Acting Admin')
+        );
+    });
+
+    test('mail falls back to the configured sender when no admin is provided', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'fallback@example.com',
+        ]);
+
+        $mail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+        ]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $job = new SendIncomingMailNotificationJob(Date::now());
+        $job->handle();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mailable): bool => $mailable->hasFrom(config('mail.from.address'))
+        );
+    });
+
     test('mail is marked as notified after sending', function (): void {
         Mail::fake();
 
@@ -456,7 +502,7 @@ describe('IncomingMailNotification Mailable', function (): void {
 
         $mailable = new IncomingMailNotification($recipient, $mails);
 
-        expect($mailable->envelope()->subject)->toBe('Notification de courriers entrants');
+        expect($mailable->envelope()->subject)->toBe('[Indicateur] Notification de courriers entrants');
     });
 
     test('mailable uses correct view', function (): void {
