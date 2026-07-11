@@ -24,7 +24,8 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
     public function __construct(
         public readonly CarbonInterface $mailDate,
         public readonly bool $force = false,
-    ) {}
+    ) {
+    }
 
     public function handle(): void
     {
@@ -49,7 +50,8 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
 
             $includeAttachments = $recipient->receives_attachments;
 
-            Mail::to(new Address($recipient->email))
+            // Mail::to(new Address($recipient->email))
+            Mail::to(new Address('jf@marche.be', $recipient->email))
                 ->queue(
                     new IncomingMailNotification(
                         $recipient,
