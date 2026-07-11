@@ -13,6 +13,7 @@ final class NotifyRecipientsForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(4)
             ->schema([
                 DatePicker::make('mail_date')
                     ->label('Date du courrier')
@@ -21,7 +22,7 @@ final class NotifyRecipientsForm
                     ->native(false)
                     ->displayFormat('d/m/Y')
                     ->live()
-                    ->columnSpan(2)
+                    ->columnSpan(1)
                     ->afterStateUpdated(fn (NotifyRecipients $livewire) => $livewire->loadPreviewData()),
             ]);
     }
