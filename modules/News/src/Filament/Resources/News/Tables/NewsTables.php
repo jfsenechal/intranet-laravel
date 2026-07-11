@@ -70,7 +70,8 @@ final class NewsTables
                             DatePicker::make('created_from')->label('Entre le'),
                             DatePicker::make('created_until')->label('Et le'),
                         ]),
-                    ])->query(fn (Builder $query, array $data): Builder => $query
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
                     ->when(
                         $data['created_from'],
                         fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
@@ -79,7 +80,7 @@ final class NewsTables
                         $data['created_until'],
                         fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                     )),
-            ], layout: FiltersLayout::AboveContent)->filtersFormWidth(Width::FourExtraLarge)
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 ViewAction::make(),
             ])
