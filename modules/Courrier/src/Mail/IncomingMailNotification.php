@@ -33,7 +33,7 @@ final class IncomingMailNotification extends Mailable
     {
         return new Envelope(
             from: $this->senderAddress(),
-            subject: 'Notification de courriers entrants',
+            subject: '[Indicateur] Notification de courriers entrants',
         );
     }
 
