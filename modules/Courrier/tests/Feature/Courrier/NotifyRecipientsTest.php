@@ -174,7 +174,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
     });
 
     test('recipient with index role receives all mails in their department', function (): void {
@@ -199,7 +199,39 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertQueued(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($recipient->email) && $mail->incomingMails->count() === 1);
+        Mail::assertSent(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($recipient->email) && $mail->incomingMails->count() === 1);
+    });
+
+    test('every index recipient in a department receives the mail, not only the first', function (): void {
+        Mail::fake();
+
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+
+        $firstUser = User::factory()->create(['username' => 'firstindex']);
+        $firstUser->addRole($role);
+        $firstRecipient = Recipient::factory()->create([
+            'email' => 'first-index@example.com',
+            'username' => 'firstindex',
+        ]);
+
+        $secondUser = User::factory()->create(['username' => 'secondindex']);
+        $secondUser->addRole($role);
+        $secondRecipient = Recipient::factory()->create([
+            'email' => 'second-index@example.com',
+            'username' => 'secondindex',
+        ]);
+
+        IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
+
+        $job = new SendIncomingMailNotificationJob(Date::now());
+        $job->handle();
+
+        Mail::assertSent(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($firstRecipient->email));
+        Mail::assertSent(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($secondRecipient->email));
     });
 
     test('index recipient only receives mail from their viewable department', function (): void {
@@ -236,7 +268,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertQueued(
+        Mail::assertSent(
             IncomingMailNotification::class,
             fn ($mail): bool => $mail->hasTo($recipient->email)
                 && $mail->incomingMails->count() === 1
@@ -272,7 +304,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertQueued(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($recipient->email) && $mail->incomingMails->count() === 1);
+        Mail::assertSent(IncomingMailNotification::class, fn ($mail): bool => $mail->hasTo($recipient->email) && $mail->incomingMails->count() === 1);
     });
 
     test('recipient receives mails through service membership', function (): void {
@@ -293,7 +325,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertQueued(IncomingMailNotification::class, fn ($mailable) => $mailable->hasTo($recipient->email));
+        Mail::assertSent(IncomingMailNotification::class, fn ($mailable) => $mailable->hasTo($recipient->email));
     });
 
     test('force re-notifies mail that was already notified', function (): void {
@@ -312,7 +344,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now(), force: true);
         $job->handle();
 
-        Mail::assertQueued(IncomingMailNotification::class, fn ($mailable): bool => $mailable->hasTo($recipient->email));
+        Mail::assertSent(IncomingMailNotification::class, fn ($mailable): bool => $mailable->hasTo($recipient->email));
         expect($mail->fresh()->is_notified)->toBeTrue();
     });
 
@@ -332,7 +364,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
     });
 
     test('mail is marked as notified after sending', function (): void {
@@ -370,7 +402,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertQueued(IncomingMailNotification::class, fn ($mailable): bool => $mailable->includeAttachments === true);
+        Mail::assertSent(IncomingMailNotification::class, fn ($mailable): bool => $mailable->includeAttachments === true);
     });
 
     test('attachments are not included when recipient does not have receives_attachments flag', function (): void {
@@ -390,7 +422,7 @@ describe('SendIncomingMailNotificationJob', function (): void {
         $job = new SendIncomingMailNotificationJob(Date::now());
         $job->handle();
 
-        Mail::assertQueued(IncomingMailNotification::class, fn ($mailable): bool => $mailable->includeAttachments === false);
+        Mail::assertSent(IncomingMailNotification::class, fn ($mailable): bool => $mailable->includeAttachments === false);
     });
 });
 

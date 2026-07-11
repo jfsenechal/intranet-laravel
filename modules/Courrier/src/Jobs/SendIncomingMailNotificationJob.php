@@ -15,17 +15,20 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 final class SendIncomingMailNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $timeout = 300;
+
     public function __construct(
         public readonly CarbonInterface $mailDate,
         public readonly bool $force = false,
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
@@ -41,6 +44,13 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
             ->whereNotNull('email')
             ->get();
 
+        // Mail is marked as notified only after the whole loop completes, using
+        // the ids of successfully delivered mail. Marking inside the loop would
+        // flip is_notified before later recipients are evaluated and starve every
+        // recipient of the same mail after the first one (they query is_notified
+        // = false and find nothing).
+        $notifiedMailIds = [];
+
         foreach ($recipients as $recipient) {
             $incomingMails = $repository->getIncomingMailsForRecipient($recipient, $this->mailDate);
 
@@ -48,21 +58,32 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
                 continue;
             }
 
-            $includeAttachments = $recipient->receives_attachments;
+            try {
+                Mail::to(new Address($recipient->email))
+                    ->send(
+                        new IncomingMailNotification(
+                            $recipient,
+                            $incomingMails,
+                            $recipient->receives_attachments,
+                        )
+                    );
+            } catch (Throwable $throwable) {
+                Log::error(sprintf(
+                    'Courrier notification failed for %s: %s',
+                    $recipient->email,
+                    $throwable->getMessage(),
+                ));
 
-            // Mail::to(new Address($recipient->email))
-            Mail::to(new Address('jf@marche.be', $recipient->email))
-                ->queue(
-                    new IncomingMailNotification(
-                        $recipient,
-                        $incomingMails,
-                        $includeAttachments,
-                    )
-                );
+                continue;
+            }
 
-            $incomingMails->each(function (IncomingMail $mail): void {
-                $mail->update(['is_notified' => true]);
-            });
+            $notifiedMailIds = [...$notifiedMailIds, ...$incomingMails->pluck('id')->all()];
+        }
+
+        if ($notifiedMailIds !== []) {
+            IncomingMail::query()
+                ->whereIn('id', array_unique($notifiedMailIds))
+                ->update(['is_notified' => true]);
         }
     }
 }
