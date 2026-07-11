@@ -108,6 +108,11 @@ final class Profile extends Model
     {
         self::deleting(function (self $profile): void {
             $profile->histories()->delete();
+            $profile->shares()->delete();
+            $profile->hardware()->delete();
+            $profile->phone()->delete();
+            $profile->externalApplications()->detach();
+            $profile->folders()->detach();
         });
     }
 
