@@ -11,13 +11,11 @@ use AcMarche\Courrier\Repository\IncomingMailRepository;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Text;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -33,6 +31,8 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     use InteractsWithTable;
 
     public ?string $mail_date = null;
+
+    public bool $force_notify = false;
 
     #[Override]
     protected static string|null|BackedEnum $navigationIcon = 'tabler-mail-forward';
@@ -139,17 +139,13 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                 ->modalDescription('Cette action est irreversible.')
                 ->modalSubmitActionLabel('Envoyer')
                 ->schema([
-                    Checkbox::make('force_notify')
-                        ->label('Forcer la notification')
-                        ->helperText('Renvoie aussi les courriers deja notifies pour cette date.')
-                        ->live(),
-                    Text::make(fn (Get $get): string => sprintf(
+                    Text::make(fn (): string => sprintf(
                         'Vous allez envoyer des notifications a %d destinataire(s).',
-                        $this->countRecipientsToNotify((bool) $get('force_notify')),
+                        $this->countRecipientsToNotify($this->force_notify),
                     )),
                 ])
                // ->disabled(fn (): bool => empty($this->previewData))
-                ->action(function (array $data): void {
+                ->action(function (): void {
                     if (! $this->mail_date) {
                         Notification::make()
                             ->title('Erreur')
@@ -162,7 +158,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
 
                     dispatch(new SendIncomingMailNotificationJob(
                         Date::parse($this->mail_date),
-                        (bool) ($data['force_notify'] ?? false),
+                        $this->force_notify,
                     ));
 
                     Notification::make()

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\NotifyRecipients\Schemas;
 
 use AcMarche\Courrier\Filament\Pages\NotifyRecipients;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Schemas\Schema;
 
@@ -24,6 +25,11 @@ final class NotifyRecipientsForm
                     ->live()
                     ->columnSpan(1)
                     ->afterStateUpdated(fn (NotifyRecipients $livewire) => $livewire->loadPreviewData()),
+                Checkbox::make('force_notify')
+                    ->label('Forcer la notification')
+                    ->helperText('Renvoie aussi les courriers deja notifies pour cette date.')
+                    ->live()
+                    ->columnSpan(1),
             ]);
     }
 }
