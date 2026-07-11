@@ -21,6 +21,7 @@ final class NotifyRecipientsForm
                     ->native(false)
                     ->displayFormat('d/m/Y')
                     ->live()
+                    ->columnSpan(2)
                     ->afterStateUpdated(fn (NotifyRecipients $livewire) => $livewire->loadPreviewData()),
             ]);
     }

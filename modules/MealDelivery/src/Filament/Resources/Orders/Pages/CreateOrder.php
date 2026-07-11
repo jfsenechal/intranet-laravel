@@ -10,6 +10,7 @@ use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Menu;
 use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,22 @@ final class CreateOrder extends CreateRecord
         parent::mount();
 
         if ($this->weekId === null || $this->clientId === null) {
+            return;
+        }
+
+        $existingOrder = Order::query()
+            ->where('week_id', $this->weekId)
+            ->where('client_id', $this->clientId)
+            ->first();
+
+        if ($existingOrder instanceof Order) {
+            Notification::make()
+                ->warning()
+                ->title('Une commande existe déjà pour ce client et cette semaine.')
+                ->send();
+
+            $this->redirect(OrderResource::getUrl('edit', ['record' => $existingOrder]));
+
             return;
         }
 
