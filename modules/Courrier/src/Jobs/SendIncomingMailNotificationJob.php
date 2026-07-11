@@ -63,6 +63,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
                 $recipient,
                 $incomingMails,
                 $recipient->receives_attachments,
+                $this->mailDate,
             );
 
             // Use the admin who triggered the job as the sender when available;

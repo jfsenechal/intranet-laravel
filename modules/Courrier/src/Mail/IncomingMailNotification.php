@@ -7,6 +7,7 @@ namespace AcMarche\Courrier\Mail;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use App\Mail\Concerns\ResolvesSenderAddress;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -27,14 +28,21 @@ final class IncomingMailNotification extends Mailable
         public readonly Recipient $recipient,
         public readonly Collection $incomingMails,
         public readonly bool $includeAttachments = false,
+        public readonly ?CarbonInterface $mailDate = null,
     ) {}
 
     public function envelope(): Envelope
     {
+        $subject = '[Indicateur] Notification de courriers entrants';
+
+        if ($this->mailDate instanceof CarbonInterface) {
+            $subject .= ' du '.$this->mailDate->format('d/m/Y');
+        }
+
         return new Envelope(
             from: $this->senderAddress(),
             replyTo: config('mail.noreply_email'),
-            subject: '[Indicateur] Notification de courriers entrants',
+            subject: $subject,
         );
     }
 

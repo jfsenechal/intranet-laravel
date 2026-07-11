@@ -505,6 +505,15 @@ describe('IncomingMailNotification Mailable', function (): void {
         expect($mailable->envelope()->subject)->toBe('[Indicateur] Notification de courriers entrants');
     });
 
+    test('mailable subject includes the mail date when provided', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mails = collect([IncomingMail::factory()->create()]);
+
+        $mailable = new IncomingMailNotification($recipient, $mails, false, Date::parse('2026-03-15'));
+
+        expect($mailable->envelope()->subject)->toBe('[Indicateur] Notification de courriers entrants du 15/03/2026');
+    });
+
     test('mailable uses correct view', function (): void {
         $recipient = Recipient::factory()->create();
         $mails = collect([IncomingMail::factory()->create()]);
