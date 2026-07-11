@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\News\Models;
 
 use AcMarche\News\Database\Factories\NewsFactory;
+use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Observers\NewsObserver;
 use AcMarche\Security\Models\HasUserAdd;
 use Illuminate\Database\Eloquent\Attributes\Connection;
@@ -79,6 +80,7 @@ final class News extends Model
             'archive' => 'boolean',
             'published_at' => 'datetime',
             'medias' => 'array',
+            'department' => DepartmentEnum::class,
         ];
     }
 }

@@ -12,6 +12,8 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Flex;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -37,8 +39,11 @@ final class NewsTables
                         ->limit(120)
                         ->weight('bold')
                         ->size('md')
-                        ->description(fn (News $record): string => Str::limit($record->content, 250, ' (...)'),
-                            position: 'below')
+                        ->description(fn (News $record): string => Str::limit(
+                            mb_trim(html_entity_decode(strip_tags($record->content))),
+                            250,
+                            ' (...)',
+                        ), position: 'below')
                         ->color(Color::Green)
                         ->tooltip(function (TextColumn $column): ?string {
                             $state = $column->getState();
@@ -50,9 +55,31 @@ final class NewsTables
                             // Only render the tooltip if the column content exceeds the length limit.
                             return $state;
                         }),
+                    Split::make([
+                        TextColumn::make('category.name')
+                            ->label('Catégorie')
+                            ->badge()
+                            ->color(Color::Green)
+                            ->grow(false),
+                        TextColumn::make('department')
+                            ->label('Service')
+                            ->badge()
+                            ->grow(false),
+                        TextColumn::make('created_at')
+                            ->label('Ajouté le')
+                            ->size('xs')
+                            ->color('gray')
+                            ->icon(Heroicon::Clock)
+                            ->dateTime('d/m/Y H:i')
+                            ->grow(false),
+                        TextColumn::make('user_add')
+                            ->label('Par')
+                            ->size('xs')
+                            ->color('gray')
+                            ->icon(Heroicon::User)
+                            ->placeholder('—'),
+                    ])->extraAttributes(['class' => 'gap-2 items-center mt-3']),
                 ]),
-                TextColumn::make('category.name')
-                    ->label('Catégorie'),
             ])
             ->filters([
                 Filter::make('name')
