@@ -98,8 +98,8 @@ describe('crud operations', function (): void {
             ->first();
 
         expect($replica->employee_id)->toBe($targetEmployee->id);
-        expect($replica->is_closed)->not->toBeTrue();
-        expect($replica->certificate_received)->not->toBeTrue();
+        expect($replica->is_closed)->toBeTrue();
+        expect($replica->certificate_received)->toBeTrue();
     });
 
     it('does not copy the certificate file when replicating', function (): void {

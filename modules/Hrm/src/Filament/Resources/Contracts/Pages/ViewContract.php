@@ -52,8 +52,6 @@ final class ViewContract extends ViewRecord
                     'updated_at',
                     'user_add',
                     'updated_by',
-                    'is_closed',
-                    'is_suspended',
                     'file1_name',
                     'file2_name',
                 ])

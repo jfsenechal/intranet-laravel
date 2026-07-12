@@ -55,8 +55,6 @@ final class ViewDeadline extends ViewRecord
                     'updated_at',
                     'user_add',
                     'updated_by',
-                    'is_closed',
-                    'closed_date',
                 ])
                 ->successRedirectUrl(fn (Deadline $replica): string => DeadlineResource::getUrl('edit', ['record' => $replica])),
             DeleteAction::make()

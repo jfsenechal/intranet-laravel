@@ -133,8 +133,8 @@ describe('crud operations', function (): void {
             ->first();
 
         expect($replica->employee_id)->toBe($targetEmployee->id);
-        expect($replica->is_closed)->not->toBeTrue();
-        expect($replica->closed_date)->toBeNull();
+        expect($replica->is_closed)->toBeTrue();
+        expect($replica->closed_date)->not->toBeNull();
     });
 });
 

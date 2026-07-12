@@ -96,8 +96,8 @@ describe('crud operations', function (): void {
             ->first();
 
         expect($replica->employee_id)->toBe($targetEmployee->id);
-        expect($replica->is_closed)->not->toBeTrue();
-        expect($replica->is_suspended)->not->toBeTrue();
+        expect($replica->is_closed)->toBeTrue();
+        expect($replica->is_suspended)->toBeTrue();
     });
 });
 

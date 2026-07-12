@@ -52,14 +52,11 @@ final class ViewTraining extends ViewRecord
                     'updated_at',
                     'user_add',
                     'updated_by',
-                    'certificate_received',
-                    'certificate_received_at',
                     'certificate_file',
-                    'granted_by',
-                    'granted_at',
-                    'is_closed',
                 ])
-                ->successRedirectUrl(fn (Training $replica): string => TrainingResource::getUrl('edit', ['record' => $replica])),
+                ->successRedirectUrl(
+                    fn (Training $replica): string => TrainingResource::getUrl('edit', ['record' => $replica])
+                ),
             DeleteAction::make()->icon(Heroicon::Trash),
 
         ];
