@@ -1,0 +1,1135 @@
+ ▐▛███▜▌   Claude Code v2.1.207
+▝▜█████▛▘  Opus 4.8 · Claude Pro
+  ▘▘ ▝▝    /var/www/intranet-laravel
+
+ ▎ Extended: Fable 5 is included in your weekly limit
+ ▎ Through July 12, you can use up to 50% of your weekly usage limit on Fable 5. If you hit your limit, you can continue on Fable 5 with usage credits. Fable 5 draws down usage faster than Opus 4.8. Run /model and select Fable to use it. Learn more
+
+❯ php artisan hrm:check-uploads                                                 
+  Checked 16475 referenced file(s).                                             
+  5243 referenced file(s) are missing:                                          
+                                                                                
+  help to resolve the lost files                                                
+  update path in db, create a script to move files                              
+  all files are in storage/app/private/hrm                                      
+  did something to ensure the paths are consistent between legacy and future    
+  files                                                                         
+
+● I'll start by examining the existing command and the HRM models to understand
+  how file paths are stored and checked.
+
+  Read 1 file, listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● Now let me look at what paths are actually stored in the DB versus what exists
+  on disk.
+
+  Searched for 2 patterns, listed 1 directory, called laravel-boost 2 times, ran 2 shell commands (ctrl+o to expand)
+
+● Connection is maria-hrm. Let me query the actual stored paths across all
+  models.
+
+  Called laravel-boost 4 times (ctrl+o to expand)
+
+● Legacy contracts are in contrats/ (French) but DB references contracts/. Let
+  me map each field's directory mismatch by checking existence.
+
+  Called laravel-boost, ran 1 shell command (ctrl+o to expand)
+
+● Key finding: DB dirs don't match physical dirs. Let me pin down each mapping,
+  especially evaluations and candidates which have no matching physical folder.
+
+  Called laravel-boost 2 times, ran 1 shell command (ctrl+o to expand)
+
+● Now the mapping is clear. Let me confirm the canonical target dirs that NEW
+  uploads use, by checking Filament FileUpload directory() configs.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Now I have the complete picture. Let me verify there are no basename
+  collisions across directories (which would make a move ambiguous).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Everything is clear now. Here's the diagnosis:
+
+  Root cause: The DB stores canonical (English) paths — the same ones new
+  Filament uploads use (config('hrm.uploads.*')). But the legacy physical files
+  sit in differently-named folders:
+
+  ┌────────────────────────────────────────────┬────────────────────────────┐
+  │       DB path (canonical, = future)        │   Legacy folder on disk    │
+  ├────────────────────────────────────────────┼────────────────────────────┤
+  │ hrm/contracts/…                            │ hrm/contrats/              │
+  ├────────────────────────────────────────────┼────────────────────────────┤
+  │ hrm/evaluations/…                          │ hrm/valorizations/         │
+  │                                            │ (shared)                   │
+  ├────────────────────────────────────────────┼────────────────────────────┤
+  │ hrm/candidates/…                           │ hrm/candidatures/          │
+  ├────────────────────────────────────────────┼────────────────────────────┤
+  │ documents, diplomas, formations,           │ already match ✓            │
+  │ valorizations                              │                            │
+  └────────────────────────────────────────────┴────────────────────────────┘
+
+  So the DB is already consistent with future files — the fix is to move the 
+  physical files to match the DB, not touch the DB. Basenames are globally
+  unique (only 2 dupes, both inside already-correct folders), so moves are
+  unambiguous.
+
+  I'll build an artisan command that relocates each missing file from its legacy
+  folder to the DB-referenced canonical path, with a dry-run mode. Let me first
+  read the local disk root and a model to match conventions.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now I'll create the relocate command. Let me write it modeled on the existing
+  check command.
+
+● Write(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Wrote 148 lines to
+     modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 namespace AcMarche\Hrm\Console\Commands;
+       6 
+       7 use AcMarche\Hrm\Models\Application;
+       8 use AcMarche\Hrm\Models\Contract;
+       9 use AcMarche\Hrm\Models\Diploma;
+      10 use AcMarche\Hrm\Models\Employee;
+     … +166 lines (ctrl+o to expand)
+
+● Now let me run a dry-run to see how many of the 5243 missing files are
+  resolvable.
+
+  Searched for 1 pattern, read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Update(modules/Hrm/src/Providers/HrmServiceProvider.php)  ⎿  Added 1 line
+      34                  CheckUploadedFilesCommand::class,
+      35                  ExpireNewHiresCommand::class,
+      36                  PurgeCommand::class,
+      37 +                RelocateUploadedFilesCommand::class,           
+      38                  ReminderCommand::class,
+      39                  SyncEmployeeCommand::class,
+      40              ]);
+
+● Update(modules/Hrm/src/Providers/HrmServiceProvider.php)
+  ⎿  Added 1 line
+       8  use AcMarche\Hrm\Console\Commands\CheckUploadedFilesCommand;
+       9  use AcMarche\Hrm\Console\Commands\ExpireNewHiresCommand;
+      10  use AcMarche\Hrm\Console\Commands\PurgeCommand;
+      11 +use AcMarche\Hrm\Console\Commands\RelocateUploadedFilesCommand;
+      12  use AcMarche\Hrm\Console\Commands\ReminderCommand;
+      13  use AcMarche\Hrm\Console\Commands\SyncEmployeeCommand;
+      14  use AcMarche\Hrm\Enums\RolesEnum;
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● 4182 recoverable, 1061 genuinely absent. Let me analyze the 1061 unresolved to
+  check whether they're truly gone or have another pattern (different
+  extension/case/subfolder).
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Some unresolved are in canonical dirs (formations, valorizations) — worth
+  checking. Notably all 291 Valorization refs are unresolved. Let me
+  investigate.
+
+  Called laravel-boost, ran 1 shell command (ctrl+o to expand)
+
+● The picture is more nuanced: legacy Valorization files (md5 names) actually
+  live in documents/. Hardcoding folder aliases is fragile. A basename index of
+  the whole disk tree is far more robust — it resolves every folder quirk
+  automatically. Let me rewrite the command around that.
+
+● Write(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 63 lines, removed 38 lines
+      22   * Legacy uploads were stored in folders whose names differ fro
+          m the canonical
+      23   * directories now used by both the database references and new
+           Filament uploads
+      24   * (see config('hrm.uploads.*')). The database already holds th
+          e canonical paths,
+      25 - * so this command moves the physical files from their legacy f
+         -older to the path                                              
+      26 - * referenced in the database, leaving future uploads untouched
+         -.                                                              
+      25 + * so this command locates each referenced file anywhere under 
+         +the HRM tree by                                                
+      26 + * its (globally unique) basename and moves it to the path refe
+         +renced in the                                                  
+      27 + * database, leaving future uploads untouched.                 
+      28   */
+      29  final class RelocateUploadedFilesCommand extends Command
+      30  {
+     ...
+      46      ];
+      47  
+      48      /**
+      48 -     * Canonical directory (as referenced in the database) mapp
+         -ed to the legacy                                               
+      49 -     * directories where the physical files may still live.    
+      49 +     * Root directory (relative to the disk) under which every 
+         +HRM upload lives.                                              
+      50 +     */                                                        
+      51 +    private const string HRM_ROOT = 'hrm';                     
+      52 +                                                               
+      53 +    /**                                                        
+      54 +     * Per-disk index of basename => list of physical paths, bu
+         +ilt lazily.                                                    
+      55       *
+      51 -     * @var array<string, list<string>>                        
+      56 +     * @var array<string, array<string, list<string>>>         
+      57       */
+      53 -    private const array LEGACY_ALIASES = [                     
+      54 -        'hrm/contracts' => ['hrm/contrats'],                   
+      55 -        'hrm/evaluations' => ['hrm/valorizations'],            
+      56 -        'hrm/candidates' => ['hrm/candidatures'],              
+      57 -    ];                                                         
+      58 +    private array $indexes = [];                               
+      59  
+      60      protected $signature = 'hrm:relocate-uploads {--dry-run : L
+          ist the planned moves without touching any file}';
+      61  
+     ...
+      64      public function handle(): int
+      65      {
+      66          $dryRun = (bool) $this->option('dry-run');
+      66 -        $moved = 0;                                            
+      67          $alreadyPresent = 0;
+      68 +        $moved = 0;                                            
+      69 +        $ambiguous = [];                                       
+      70          $unresolved = [];
+      71  
+      72          foreach (self::CHECKS as $check) {
+     ...
+      80                      ->where($field, '!=', '')
+      81                      ->select(['id', $field])
+      82                      ->lazyById()
+      81 -                    ->each(function (Model $record) use ($field
+         -, $disk, $check, $dryRun, &$moved, &$alreadyPresent, &$unresolv
+         -ed): void {                                                    
+      83 +                    ->each(function (Model $record) use ($field
+         +, $disk, $check, $dryRun, &$alreadyPresent, &$moved, &$ambiguou
+         +s, &$unresolved): void {                                       
+      84                          $target = (string) $record->getAttribut
+          e($field);
+      85  
+      86                          if ($disk->exists($target)) {
+     ...
+       89                              return;
+       90                          }
+       91  
+       90 -                        $source = $this->resolveLegacySource($
+          -disk, $target);                                               
+       92 +                        $candidates = $this->index($disk, $che
+          +ck['disk'])[basename($target)] ?? [];                         
+       93  
+       92 -                        if ($source === null) {               
+       93 -                            $unresolved[] = [                 
+       94 -                                class_basename($check['model']
+          -),                                                            
+       95 -                                (string) $record->getKey(),   
+       96 -                                $field,                       
+       97 -                                $check['disk'],               
+       98 -                                $target,                      
+       99 -                            ];                                
+       94 +                        $row = [                              
+       95 +                            class_basename($check['model']),  
+       96 +                            (string) $record->getKey(),       
+       97 +                            $field,                           
+       98 +                            $check['disk'],                   
+       99 +                            $target,                          
+      100 +                        ];                                    
+      101  
+      102 +                        if ($candidates === []) {             
+      103 +                            $unresolved[] = $row;             
+      104 +                                                              
+      105                              return;
+      106                          }
+      107  
+      108 +                        if (count($candidates) > 1) {         
+      109 +                            $ambiguous[] = [...$row, implode('
+          + | ', $candidates)];                                          
+      110 +                                                              
+      111 +                            return;                           
+      112 +                        }                                     
+      113 +                                                              
+      114                          if (! $dryRun) {
+      105 -                            $disk->move($source, $target);    
+      115 +                            $disk->move($candidates[0], $targe
+          +t);                                                           
+      116 +                            $this->refreshIndex($check['disk']
+          +, basename($target), $candidates[0], $target);                
+      117                          }
+      118  
+      119                          $moved++;
+     ...
+      125          $this->info("{$alreadyPresent} file(s) already in plac
+           e.");
+      126          $this->info("{$moved} file(s) {$verb} from a legacy fo
+           lder.");
+      127  
+      128 +        if ($ambiguous !== []) {                              
+      129 +            $this->warn(count($ambiguous).' referenced file(s)
+          + match several source files and were skipped:');              
+      130 +            $this->table(['Model', 'ID', 'Field', 'Disk', 'Tar
+          +get', 'Candidates'], $ambiguous);                             
+      131 +        }                                                     
+      132 +                                                              
+      133          if ($unresolved !== []) {
+      134              $this->error(count($unresolved).' referenced file(
+           s) could not be located anywhere:');
+      135              $this->table(['Model', 'ID', 'Field', 'Disk', 'Pat
+           h'], $unresolved);
+      120 -                                                              
+      121 -            return SfCommand::FAILURE;                        
+      136          }
+      137  
+      124 -        $this->info('All referenced files are resolved.');    
+      125 -                                                              
+      126 -        return SfCommand::SUCCESS;                            
+      138 +        return $ambiguous === [] && $unresolved === [] ? SfCom
+          +mand::SUCCESS : SfCommand::FAILURE;                           
+      139      }
+      140  
+      141      /**
+      130 -     * Return the legacy path holding the file for a canonical
+          - target, or null                                              
+      131 -     * when no legacy copy exists.                            
+      142 +     * Build (once per disk) an index of basename => physical 
+          +paths under the HRM root.                                     
+      143 +     *                                                        
+      144 +     * @return array<string, list<string>>                    
+      145       */
+      133 -    private function resolveLegacySource(Filesystem $disk, str
+          -ing $target): ?string                                         
+      146 +    private function index(Filesystem $disk, string $diskName)
+          +: array                                                       
+      147      {
+      135 -        $canonicalDir = dirname($target);                     
+      136 -        $basename = basename($target);                        
+      148 +        if (isset($this->indexes[$diskName])) {               
+      149 +            return $this->indexes[$diskName];                 
+      150 +        }                                                     
+      151  
+      138 -        foreach (self::LEGACY_ALIASES[$canonicalDir] ?? [] as 
+          -$legacyDir) {                                                 
+      139 -            $candidate = $legacyDir.'/'.$basename;            
+      152 +        $index = [];                                          
+      153  
+      141 -            if ($disk->exists($candidate)) {                  
+      142 -                return $candidate;                            
+      143 -            }                                                 
+      154 +        foreach ($disk->allFiles(self::HRM_ROOT) as $path) {  
+      155 +            $index[basename($path)][] = $path;                
+      156          }
+      157  
+      146 -        return null;                                          
+      158 +        return $this->indexes[$diskName] = $index;            
+      159      }
+      160 +                                                              
+      161 +    /**                                                       
+      162 +     * Keep the in-memory index in sync after a file has been 
+          +moved.                                                        
+      163 +     */                                                       
+      164 +    private function refreshIndex(string $diskName, string $ba
+          +sename, string $from, string $to): void                       
+      165 +    {                                                         
+      166 +        $paths = array_values(array_filter(                   
+      167 +            $this->indexes[$diskName][$basename] ?? [],       
+      168 +            static fn (string $path): bool => $path !== $from,
+      169 +        ));                                                   
+      170 +        $paths[] = $to;                                       
+      171 +        $this->indexes[$diskName][$basename] = $paths;        
+      172 +    }                                                         
+      173  }
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Progress: 4471 movable (index caught the documents/ valorization case), 2
+  ambiguous, 770 truly gone. Let me inspect the 2 ambiguous cases.
+
+  Called laravel-boost, ran 2 shell commands (ctrl+o to expand)
+
+● Both ambiguous files are byte-identical and the formations/ copies are orphans
+  (no Training references them). Evaluations legacy home is valorizations/.
+  I'll add a legacy-alias tie-breaker so these resolve deterministically.
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 14 lines
+      51      private const string HRM_ROOT = 'hrm';
+      52  
+      53      /**
+      54 +     * Canonical directory (as referenced in the database) mapp
+         +ed to the legacy                                               
+      55 +     * directories that historically held its files. Used to br
+         +eak ties when a                                                
+      56 +     * basename exists in more than one folder.                
+      57 +     *                                                         
+      58 +     * @var array<string, list<string>>                        
+      59 +     */                                                        
+      60 +    private const array LEGACY_ALIASES = [                     
+      61 +        'hrm/contracts' => ['hrm/contrats'],                   
+      62 +        'hrm/evaluations' => ['hrm/valorizations'],            
+      63 +        'hrm/valorizations' => ['hrm/documents'],              
+      64 +        'hrm/candidates' => ['hrm/candidatures'],              
+      65 +    ];                                                         
+      66 +                                                               
+      67 +    /**                                                        
+      68       * Per-disk index of basename => list of physical paths, bu
+          ilt lazily.
+      69       *
+      70       * @var array<string, array<string, list<string>>>
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 5 lines, removed 3 lines
+      119                              return;
+      120                          }
+      121  
+      122 -                        if (count($candidates) > 1) {         
+      122 +                        $source = $this->pickSource($target, $
+          +candidates);                                                  
+      123 +                                                              
+      124 +                        if ($source === null) {               
+      125                              $ambiguous[] = [...$row, implode('
+            | ', $candidates)];
+      126  
+      127                              return;
+      128                          }
+      129  
+      130                          if (! $dryRun) {
+      129 -                            $disk->move($candidates[0], $targe
+          -t);                                                           
+      130 -                            $this->refreshIndex($check['disk']
+          -, basename($target), $candidates[0], $target);                
+      131 +                            $disk->move($source, $target);    
+      132 +                            $this->refreshIndex($check['disk']
+          +, basename($target), $source, $target);                       
+      133                          }
+      134  
+      135                          $moved++;
+
+● Now add the pickSource method:
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 22 lines
+      155      }
+      156  
+      157      /**
+      158 +     * Choose the single source file for a target among the in
+          +dexed candidates.                                             
+      159 +     * A lone candidate is used as-is; ties are broken toward 
+          +the target's known                                            
+      160 +     * legacy folder, and anything still ambiguous returns nul
+          +l to be reported.                                             
+      161 +     *                                                        
+      162 +     * @param  list<string>  $candidates                      
+      163 +     */                                                       
+      164 +    private function pickSource(string $target, array $candida
+          +tes): ?string                                                 
+      165 +    {                                                         
+      166 +        if (count($candidates) === 1) {                       
+      167 +            return $candidates[0];                            
+      168 +        }                                                     
+      169 +                                                              
+      170 +        $legacyDirs = self::LEGACY_ALIASES[dirname($target)] ?
+          +? [];                                                         
+      171 +        $preferred = array_values(array_filter(               
+      172 +            $candidates,                                      
+      173 +            static fn (string $path): bool => in_array(dirname
+          +($path), $legacyDirs, true),                                  
+      174 +        ));                                                   
+      175 +                                                              
+      176 +        return count($preferred) === 1 ? $preferred[0] : null;
+      177 +    }                                                         
+      178 +                                                              
+      179 +    /**                                                       
+      180       * Build (once per disk) an index of basename => physical 
+           paths under the HRM root.
+      181       *
+      182       * @return array<string, list<string>>
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● 770 files are genuinely not on disk anywhere. Before finalizing, let me check
+  whether any are recoverable under a different extension/case (a last-chance
+  sweep).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● The 770 are genuinely lost — none exist on disk under any extension (backup
+  restore territory). The command is working correctly. Now let me write tests.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Write(modules/Hrm/tests/Feature/Console/RelocateUploadedFilesCommandTest.php)
+  ⎿  Wrote 79 lines to
+     modules/Hrm/tests/Feature/Console/RelocateUploadedFilesCommandTest.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 use AcMarche\Hrm\Models\Contract;
+       7 use AcMarche\Hrm\Models\HrDocument;
+       8 use Illuminate\Support\Facades\Storage;
+       9 
+      10 it('moves a legacy file to the canonical path referenced by the 
+         database', function (): void {
+     … +85 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+● All 5 tests pass. The dry-run is clean and moves are within the same disk tree
+  (recoverable). Since you asked to resolve the files, I'll run the real
+  relocation now and then verify with hrm:check-uploads.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Relocation done — 4317 files moved. Let me verify with the check command.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Reduced from 5243 → 770 missing. The 770 are genuinely lost (not on disk under
+  any name/extension — backup restore territory). Let me check the now-empty
+  legacy folders.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Consistency achieved: every referenced file now sits in the canonical
+  config-driven dirs (contracts, evaluations, candidates, …) — the same paths
+  new Filament uploads use. The leftover candidatures/ (25) and contrats/ (7)
+  files are orphans (not referenced by any DB row), so I'm leaving them rather
+  than deleting production files. Let me run the console test suite to confirm
+  nothing regressed.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● All 14 console tests pass. Let me format the modified provider.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Done. Here's the summary.
+
+  What was wrong
+
+  The 5243 "missing" files weren't lost — they were in wrongly-named folders.
+  The database already stores canonical paths (hrm/contracts/…,
+  hrm/evaluations/…, hrm/candidates/…) — the exact paths new Filament uploads
+  use via config('hrm.uploads.*'). But legacy physical files sat in
+  differently-named folders:
+
+  ┌────────────────────────────┬─────────────────────────────────────────┐
+  │ DB path (= future uploads) │ Legacy folder(s) files were actually in │
+  ├────────────────────────────┼─────────────────────────────────────────┤
+  │ hrm/contracts/             │ hrm/contrats/                           │
+  ├────────────────────────────┼─────────────────────────────────────────┤
+  │ hrm/evaluations/           │ hrm/valorizations/                      │
+  ├────────────────────────────┼─────────────────────────────────────────┤
+  │ hrm/candidates/            │ hrm/candidatures/                       │
+  ├────────────────────────────┼─────────────────────────────────────────┤
+  │ hrm/valorizations/         │ hrm/documents/ (old md5-named files)    │
+  └────────────────────────────┴─────────────────────────────────────────┘
+
+  What I did
+
+  Created php artisan hrm:relocate-uploads
+  (modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php) + tests,
+  registered in HrmServiceProvider. It:
+
+  - Builds a per-disk basename index of the whole hrm/ tree, so it resolves any
+  folder rename automatically instead of hardcoding fragile rules.
+  - For each DB reference that's missing, moves the file to the DB path (leaving
+  the DB — already consistent with future uploads — untouched).
+  - Breaks ties toward the known legacy folder when a basename appears twice (2
+  such cases, both byte-identical).
+  - Reports anything it can't locate. Supports --dry-run.
+
+  Result
+
+  - Missing: 5243 → 770. 4317 files relocated into canonical folders.
+  - The 770 remaining are genuinely gone — not present on disk under any name or
+  extension. They'd need a backup restore.
+  - Legacy/future consistency: every referenced file now lives in the canonical
+  config-driven directory that new uploads target. No DB changes were needed.
+
+  Two things left for your call:
+  1. The 770 lost files — recover from backup, or leave the dangling references?
+  I can add a --null-missing option to blank out references with no file if you
+  want them cleaned.
+  2. Orphans: candidatures/ (25) and contrats/ (7) still hold files not
+  referenced by any DB row. I left them in place rather than delete production
+  data — say the word if you want them removed or listed.
+
+✻ Cogitated for 9m 20s
+
+❯ for 770 lost files, check if the name of file has duplicates                  
+
+● Good idea — let me pull all referenced basenames from the DB, cross-check
+  against what's on disk, and analyze duplicates among the truly-missing ones.
+
+  Called laravel-boost (ctrl+o to expand)
+
+● The full reference list came back as one big JSON file. Let me analyze it
+  against the disk with Python to find the missing basenames and their
+  duplicates.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Significant finding: the 770 missing references are only 260 distinct 
+  filenames — 54 of them are referenced by many records each (510 rows are
+  duplicates). The top file is referenced 62 times. Let me see which
+  models/fields these heavily-shared missing files belong to.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me identify which model/field the heavily-duplicated missing files belong
+  to.
+
+  Called laravel-boost (ctrl+o to expand)
+
+● Answer: yes — the lost files are heavily duplicated
+
+  The 770 missing references point to only 260 distinct filenames. The other 510
+  are repeat references to the same files:
+
+  - 54 filenames are each referenced by multiple records (up to 62×).
+  - The most-duplicated are shared contract templates in contracts.file1_name:
+    - 62ebb10cc70c4481344659.docx → referenced by 62 contracts
+    - 64ac104ebd75c997793872.docx → referenced by 56 contracts
+    - 64a40caf93ff9551915082.docx → 39 contracts, etc.
+
+  So a single lost .docx template drags 62 "missing" rows with it. The 260
+  unique lost files break down as:
+
+  ┌─────────────────────────────────┬───────────────────────────────────┐
+  │                                 │               count               │
+  ├─────────────────────────────────┼───────────────────────────────────┤
+  │ Truly-lost unique files         │ 260 (234 pdf, 22 doc/docx, 4 jpg) │
+  ├─────────────────────────────────┼───────────────────────────────────┤
+  │ …referenced once                │ 206                               │
+  ├─────────────────────────────────┼───────────────────────────────────┤
+  │ …referenced many times (shared) │ 54 → cause 564 of the 770 rows    │
+  ├─────────────────────────────────┼───────────────────────────────────┤
+  │ Naming: legacy short-hash style │ 246 / 260                         │
+  └─────────────────────────────────┴───────────────────────────────────┘
+
+  What this means
+
+  The physical files are genuinely gone from disk (not under any
+  name/extension). But because they're so duplicated, recovering a handful of 
+  shared template files from backup would fix a large share of the 770.
+  Restoring just the top 5 .docx templates would resolve ~220 references.
+
+  Want me to:
+  1. Produce the full list of 260 unique lost files (with reference counts and
+  which records point to each) — a CSV/table you can hand to whoever restores
+  from backup, prioritized by impact?
+  2. Add a --null-missing option to hrm:relocate-uploads to blank references
+  with no recoverable file (skip the shared-template ones you plan to restore)?
+
+✻ Brewed for 1m 42s
+
+❯ Produce the full list of 260 unique lost files                                
+
+● I'll pull every reference with its record id and model/field context, then
+  cross-reference against disk to build the full list.
+
+  Called laravel-boost (ctrl+o to expand)
+
+● The full dump is saved. Let me process it with Python to produce the list of
+  260 unique lost files as a CSV.
+
+  Ran 3 shell commands (ctrl+o to expand)
+● Done. The full list of 260 unique lost files is in the CSV.
+  ⎿  Invalid tool parameters
+
+● 260 unique lost HRM files, sorted by impact (ref_count). Columns: filename,
+  ext, ref_count, models, fields, record_ids.
+
+  › [file/tmp/claude-1000/-var-www-intranet-laravel/b3c9ec91-0976-4415-8 
+         05-06da0dc0fb30/scratchpad/lost_files.csv                      (21.9KB)
+
+● Summary
+
+  260 unique lost files account for all 770 missing references. CSV columns:
+  filename, ext, ref_count, models, fields, record_ids, sorted by impact.
+
+  Per model (unique files):
+
+  ┌─────────────┬─────────────────────────┬───────────────────┐
+  │    Model    │          Field          │ Unique lost files │
+  ├─────────────┼─────────────────────────┼───────────────────┤
+  │ Training    │ certificate_file        │ 169               │
+  ├─────────────┼─────────────────────────┼───────────────────┤
+  │ Contract    │ file1_name / file2_name │ 86                │
+  ├─────────────┼─────────────────────────┼───────────────────┤
+  │ Application │ file                    │ 3                 │
+  ├─────────────┼─────────────────────────┼───────────────────┤
+  │ Employee    │ candidate_file_name     │ 2                 │
+  └─────────────┴─────────────────────────┴───────────────────┘
+
+  Impact distribution:
+  - 206 files referenced exactly once
+  - 54 files shared across multiple records (up to 62×) — these are clearly
+  shared templates, e.g. one contract .docx linked to 62 contracts
+
+  High-leverage recovery targets — restoring just these 5 from backup fixes ~220
+  references:
+
+  ┌─────────────────────────────┬──────┬──────────┐
+  │            File             │ Refs │  Model   │
+  ├─────────────────────────────┼──────┼──────────┤
+  │ 62ebb10cc70c4481344659.docx │ 62   │ Contract │
+  ├─────────────────────────────┼──────┼──────────┤
+  │ 64ac104ebd75c997793872.docx │ 56   │ Contract │
+  ├─────────────────────────────┼──────┼──────────┤
+  │ 64a40caf93ff9551915082.docx │ 39   │ Contract │
+  ├─────────────────────────────┼──────┼──────────┤
+  │ 6745d01b33580442733043.pdf  │ 34   │ Training │
+  ├─────────────────────────────┼──────┼──────────┤
+  │ 64ac0fb06b344637182730.docx │ 30   │ Contract │
+  └─────────────────────────────┴──────┴──────────┘
+
+  The record_ids column lets whoever restores from backup pinpoint exactly which
+  records each file belongs to. Want me to add the --null-missing cleanup
+  option for the ones that turn out to be unrecoverable?
+
+✻ Cogitated for 1m 31s
+
+❯ add the --null-missing cleanup option                                         
+
+● I'll add the --null-missing option to null out references that can't be
+  located anywhere. Let me read the current command first.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 3 lines, removed 1 line
+      64          'hrm/candidates' => ['hrm/candidatures'],
+      65      ];
+      66  
+      67 -    protected $signature = 'hrm:relocate-uploads {--dry-run : L
+         -ist the planned moves without touching any file}';             
+      67 +    protected $signature = 'hrm:relocate-uploads               
+      68 +        {--dry-run : List the planned changes without touching 
+         +any file or record}                                            
+      69 +        {--null-missing : Null the database reference of any fi
+         +le that cannot be located anywhere}';                          
+      70  
+      71      protected $description = 'Move legacy HRM upload files into
+           the canonical path referenced by the database';
+      72  
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 2 lines
+      80      public function handle(): int
+      81      {
+      82          $dryRun = (bool) $this->option('dry-run');
+      83 +        $nullMissing = (bool) $this->option('null-missing');   
+      84          $alreadyPresent = 0;
+      85          $moved = 0;
+      86 +        $nulled = 0;                                           
+      87          $ambiguous = [];
+      88          $unresolved = [];
+      89  
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 12 lines, removed 2 lines
+       98                      ->where($field, '!=', '')
+       99                      ->select(['id', $field])
+      100                      ->lazyById()
+      101 -                    ->each(function (Model $record) use ($fiel
+          -d, $disk, $check, $dryRun, &$alreadyPresent, &$moved, &$ambigu
+          -ous, &$unresolved): void {                                    
+      101 +                    ->each(function (Model $record) use ($mode
+          +lClass, $field, $disk, $check, $dryRun, $nullMissing, &$alread
+          +yPresent, &$moved, &$nulled, &$ambiguous, &$unresolved): void 
+          +{                                                             
+      102                          $target = (string) $record->getAttribu
+           te($field);
+      103  
+      104                          if ($disk->exists($target)) {
+     ...
+      118                          ];
+      119  
+      120                          if ($candidates === []) {
+      121 -                            $unresolved[] = $row;             
+      121 +                            if (! $nullMissing) {             
+      122 +                                $unresolved[] = $row;         
+      123  
+      124 +                                return;                       
+      125 +                            }                                 
+      126 +                                                              
+      127 +                            if (! $dryRun) {                  
+      128 +                                $modelClass::query()->whereKey
+          +($record->getKey())->update([$field => null]);                
+      129 +                            }                                 
+      130 +                                                              
+      131 +                            $nulled++;                        
+      132 +                                                              
+      133                              return;
+      134                          }
+      135  
+
+● Now update the reporting section:
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 5 lines
+      155          $this->info("{$alreadyPresent} file(s) already in plac
+           e.");
+      156          $this->info("{$moved} file(s) {$verb} from a legacy fo
+           lder.");
+      157  
+      158 +        if ($nullMissing) {                                   
+      159 +            $nullVerb = $dryRun ? 'would be nulled' : 'nulled'
+          +;                                                             
+      160 +            $this->info("{$nulled} unrecoverable reference(s) 
+          +{$nullVerb}.");                                               
+      161 +        }                                                     
+      162 +                                                              
+      163          if ($ambiguous !== []) {
+      164              $this->warn(count($ambiguous).' referenced file(s)
+            match several source files and were skipped:');
+      165              $this->table(['Model', 'ID', 'Field', 'Disk', 'Tar
+           get', 'Candidates'], $ambiguous);
+
+● Now let me add tests for the new option.
+
+● Update(modules/Hrm/tests/Feature/Console/RelocateUploadedFilesCommandTest.php)
+  ⎿  Added 26 lines
+      61          ->assertFailed();
+      62  });
+      63  
+      64 +it('nulls references that cannot be located when --null-missing
+         + is passed', function (): void {                               
+      65 +    Storage::fake('local');                                    
+      66 +    Storage::fake('public');                                   
+      67 +                                                               
+      68 +    $contract = Contract::factory()->create(['file1_name' => 'h
+         +rm/contracts/gone.pdf']);                                      
+      69 +                                                               
+      70 +    $this->artisan('hrm:relocate-uploads', ['--null-missing' =>
+         + true])                                                        
+      71 +        ->expectsOutputToContain('1 unrecoverable reference(s) 
+         +nulled.')                                                      
+      72 +        ->assertSuccessful();                                  
+      73 +                                                               
+      74 +    expect($contract->fresh()->file1_name)->toBeNull();        
+      75 +});                                                            
+      76 +                                                               
+      77 +it('does not null anything when --null-missing is combined with
+         + --dry-run', function (): void {                               
+      78 +    Storage::fake('local');                                    
+      79 +    Storage::fake('public');                                   
+      80 +                                                               
+      81 +    $contract = Contract::factory()->create(['file1_name' => 'h
+         +rm/contracts/gone.pdf']);                                      
+      82 +                                                               
+      83 +    $this->artisan('hrm:relocate-uploads', ['--null-missing' =>
+         + true, '--dry-run' => true])                                   
+      84 +        ->expectsOutputToContain('1 unrecoverable reference(s) 
+         +would be nulled.')                                             
+      85 +        ->assertSuccessful();                                  
+      86 +                                                               
+      87 +    expect($contract->fresh()->file1_name)->toBe('hrm/contracts
+         +/gone.pdf');                                                   
+      88 +});                                                            
+      89 +                                                               
+      90  it('breaks a tie toward the legacy folder when a basename exist
+          s twice', function (): void {
+      91      Storage::fake('local');
+      92      Storage::fake('public');
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● All 7 tests pass. Let me confirm the new option behaves correctly against the
+  real data with a dry-run.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The --null-missing option is added and working.
+
+  What it does
+
+  hrm:relocate-uploads --null-missing sets the DB field to NULL for any
+  reference whose file can't be located anywhere on disk. Key behaviors:
+
+  - Only nulls the truly-unrecoverable (no basename match anywhere). Files that
+  are just in a legacy folder still get moved, not nulled — so running it now
+  correctly targets exactly the 770.
+  - --dry-run compatible — --null-missing --dry-run reports "would be nulled"
+  and changes nothing.
+  - Ambiguous matches are never nulled — they're still reported for manual
+  review.
+  - Uses a keyed query update (no model events), so it only touches the one
+  column.
+
+  Confirmed against real data: dry-run reports 770 unrecoverable reference(s) 
+  would be nulled, 0 to move (already relocated earlier). Added 2 tests (7
+  total, all passing), Pint clean.
+
+  ⚠️ Before you run it for real: nulling is irreversible from this tool's side.
+  Given the 260 unique files are heavily shared (one lost template = 62 nulled
+  contracts), you may want to restore the high-impact templates from backup 
+  first, then run --null-missing to clean up only the genuinely-gone remainder.
+  Want me to add an option that skips the shared ones (e.g. --only-orphans to
+  null only single-reference files)?
+
+✻ Baked for 2m 0s
+
+❯ add --only-orphans to null single-reference files                             
+
+● I'll add --only-orphans as a modifier of --null-missing that spares files
+  referenced by more than one record. This needs a pre-pass to count how many
+  records reference each filename.
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 2 lines, removed 1 line
+      66  
+      67      protected $signature = 'hrm:relocate-uploads
+      68          {--dry-run : List the planned changes without touching 
+          any file or record}
+      69 -        {--null-missing : Null the database reference of any fi
+         -le that cannot be located anywhere}';                          
+      69 +        {--null-missing : Null the database reference of any fi
+         +le that cannot be located anywhere}                            
+      70 +        {--only-orphans : With --null-missing, only null files 
+         +referenced by a single record (spare shared files)}';          
+      71  
+      72      protected $description = 'Move legacy HRM upload files into
+           the canonical path referenced by the database';
+      73  
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 3 lines
+      82      {
+      83          $dryRun = (bool) $this->option('dry-run');
+      84          $nullMissing = (bool) $this->option('null-missing');
+      85 +        $onlyOrphans = (bool) $this->option('only-orphans');   
+      86 +        $referenceCounts = $onlyOrphans ? $this->countReference
+         +sByBasename() : [];                                            
+      87          $alreadyPresent = 0;
+      88          $moved = 0;
+      89          $nulled = 0;
+      90 +        $spared = 0;                                           
+      91          $ambiguous = [];
+      92          $unresolved = [];
+      93  
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 8 lines, removed 1 line
+      102                      ->where($field, '!=', '')
+      103                      ->select(['id', $field])
+      104                      ->lazyById()
+      105 -                    ->each(function (Model $record) use ($mode
+          -lClass, $field, $disk, $check, $dryRun, $nullMissing, &$alread
+          -yPresent, &$moved, &$nulled, &$ambiguous, &$unresolved): void 
+          -{                                                             
+      105 +                    ->each(function (Model $record) use ($mode
+          +lClass, $field, $disk, $check, $dryRun, $nullMissing, $onlyOrp
+          +hans, $referenceCounts, &$alreadyPresent, &$moved, &$nulled, &
+          +$spared, &$ambiguous, &$unresolved): void {                   
+      106                          $target = (string) $record->getAttribu
+           te($field);
+      107  
+      108                          if ($disk->exists($target)) {
+     ...
+      128                                  return;
+      129                              }
+      130  
+      131 +                            if ($onlyOrphans && ($referenceCou
+          +nts[basename($target)] ?? 0) > 1) {                           
+      132 +                                $spared++;                    
+      133 +                                $unresolved[] = $row;         
+      134 +                                                              
+      135 +                                return;                       
+      136 +                            }                                 
+      137 +                                                              
+      138                              if (! $dryRun) {
+      139                                  $modelClass::query()->whereKey
+           ($record->getKey())->update([$field => null]);
+      140                              }
+● Now update the reporting to mention spared files:
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 4 lines
+      169          if ($nullMissing) {
+      170              $nullVerb = $dryRun ? 'would be nulled' : 'nulled'
+           ;
+      171              $this->info("{$nulled} unrecoverable reference(s) 
+           {$nullVerb}.");
+      172 +                                                              
+      173 +            if ($onlyOrphans) {                               
+      174 +                $this->info("{$spared} shared reference(s) spa
+          +red (referenced by more than one record).");                  
+      175 +            }                                                 
+      176          }
+      177  
+      178          if ($ambiguous !== []) {
+
+● Now add the countReferencesByBasename method. Let me place it near the index
+  helpers:
+
+● Update(modules/Hrm/src/Console/Commands/RelocateUploadedFilesCommand.php)
+  ⎿  Added 30 lines
+      189      }
+      190  
+      191      /**
+      192 +     * Count how many records reference each filename across e
+          +very model and field,                                         
+      193 +     * so orphans (referenced exactly once) can be told apart 
+          +from shared files.                                            
+      194 +     *                                                        
+      195 +     * @return array<string, int>                             
+      196 +     */                                                       
+      197 +    private function countReferencesByBasename(): array       
+      198 +    {                                                         
+      199 +        $counts = [];                                         
+      200 +                                                              
+      201 +        foreach (self::CHECKS as $check) {                    
+      202 +            /** @var class-string<Model> $modelClass */       
+      203 +            $modelClass = $check['model'];                    
+      204 +                                                              
+      205 +            foreach ($check['fields'] as $field) {            
+      206 +                $modelClass::query()                          
+      207 +                    ->whereNotNull($field)                    
+      208 +                    ->where($field, '!=', '')                 
+      209 +                    ->select(['id', $field])                  
+      210 +                    ->lazyById()                              
+      211 +                    ->each(function (Model $record) use ($fiel
+          +d, &$counts): void {                                          
+      212 +                        $basename = basename((string) $record-
+          +>getAttribute($field));                                       
+      213 +                        $counts[$basename] = ($counts[$basenam
+          +e] ?? 0) + 1;                                                 
+      214 +                    });                                       
+      215 +            }                                                 
+      216 +        }                                                     
+      217 +                                                              
+      218 +        return $counts;                                       
+      219 +    }                                                         
+      220 +                                                              
+      221 +    /**                                                       
+      222       * Choose the single source file for a target among the in
+           dexed candidates.
+      223       * A lone candidate is used as-is; ties are broken toward 
+           the target's known
+      224       * legacy folder, and anything still ambiguous returns nul
+           l to be reported.
+
+● Now add tests for --only-orphans:
+
+● Update(modules/Hrm/tests/Feature/Console/RelocateUploadedFilesCommandTest.php)
+  ⎿  Added 18 lines
+       87      expect($contract->fresh()->file1_name)->toBe('hrm/contract
+           s/gone.pdf');
+       88  });
+       89  
+       90 +it('nulls orphan references but spares shared ones with --only
+          +-orphans', function (): void {                                
+       91 +    Storage::fake('local');                                   
+       92 +    Storage::fake('public');                                  
+       93 +                                                              
+       94 +    $orphan = Contract::factory()->create(['file1_name' => 'hr
+          +m/contracts/orphan.pdf']);                                    
+       95 +    $sharedA = Contract::factory()->create(['file1_name' => 'h
+          +rm/contracts/shared.pdf']);                                   
+       96 +    $sharedB = Contract::factory()->create(['file1_name' => 'h
+          +rm/contracts/shared.pdf']);                                   
+       97 +                                                              
+       98 +    $this->artisan('hrm:relocate-uploads', ['--null-missing' =
+          +> true, '--only-orphans' => true])                            
+       99 +        ->expectsOutputToContain('1 unrecoverable reference(s)
+          + nulled.')                                                    
+      100 +        ->expectsOutputToContain('2 shared reference(s) spared
+          +')                                                            
+      101 +        ->assertFailed();                                     
+      102 +                                                              
+      103 +    expect($orphan->fresh()->file1_name)->toBeNull();         
+      104 +    expect($sharedA->fresh()->file1_name)->toBe('hrm/contracts
+          +/shared.pdf');                                                
+      105 +    expect($sharedB->fresh()->file1_name)->toBe('hrm/contracts
+          +/shared.pdf');                                                
+      106 +});                                                           
+      107 +                                                              
+      108  it('breaks a tie toward the legacy folder when a basename exis
+           ts twice', function (): void {
+      109      Storage::fake('local');
+      110      Storage::fake('public');
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● All 8 tests pass. Let me verify against real data with a dry-run.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● --only-orphans is added and working — the numbers match the earlier analysis
+  exactly.
+
+  Result on real data
+
+  hrm:relocate-uploads --null-missing --only-orphans --dry-run:
+  - 206 orphan references would be nulled (the single-reference files)
+  - 564 shared references spared (the 54 shared files, referenced by 2+ records
+  each — your backup-restore candidates)
+  - The spared ones are still listed in the "could not be located" table for
+  review, and the command exits non-zero to flag that missing references remain.
+
+  How it works
+
+  - --only-orphans modifies --null-missing: before scanning, it counts how many
+  records reference each filename across all models/fields, then nulls only
+  those referenced exactly once.
+  - Fully --dry-run compatible.
+  - Shared files are reported separately and kept untouched.
+
+  Suggested workflow
+
+  1. --null-missing --only-orphans now → clears the 206 dead single-use
+  references.
+  2. Restore the 54 shared files (top of the CSV) from backup, then
+  hrm:check-uploads to confirm.
+  3. Anything truly unrecoverable after that: plain --null-missing to finish
+  cleanup.
+
+  The command (RelocateUploadedFilesCommand.php) now supports --dry-run,
+  --null-missing, and --only-orphans, with 8 passing tests. Pint clean.
+
+✻ Cogitated for 2m 9s
+
+❯ Run --null-missing --only-orphans for real                                    
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Done — 206 orphan references nulled. Let me verify with the check command.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Done and verified.
+
+  Result
+
+  - 206 orphan references nulled (single-use dead files removed from the DB).
+  - Referenced files dropped 16475 → 16269 (the 206 nulled references are no
+  longer counted).
+  - 564 remaining missing — these are the 54 shared files (each referenced by 2+
+  records) that were deliberately spared for backup restore.
+
+  Where things stand
+
+  ┌─────────────────────────────────────┬──────────────┐
+  │                Stage                │ Missing refs │
+  ├─────────────────────────────────────┼──────────────┤
+  │ Start                               │ 5243         │
+  ├─────────────────────────────────────┼──────────────┤
+  │ After relocating legacy files       │ 770          │
+  ├─────────────────────────────────────┼──────────────┤
+  │ After --null-missing --only-orphans │ 564          │
+  └─────────────────────────────────────┴──────────────┘
+
+  The 564 remaining all map to 54 distinct high-impact files (top of the
+  lost_files.csv). Next step is yours: restore those 54 from backup, then
+  hrm:check-uploads to confirm — anything still unrecoverable can be cleared
+  with a plain --null-missing.
+
+✻ Crunched for 21s
