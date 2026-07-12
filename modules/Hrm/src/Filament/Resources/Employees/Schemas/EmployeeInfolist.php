@@ -38,6 +38,7 @@ final class EmployeeInfolist
                                             ->label('Photo')
                                             ->disk('public')
                                             ->imageWidth('100%')
+                                            ->imageHeight('14rem')
                                             ->extraImgAttributes(['class' => 'min-h-56 h-auto rounded-lg object-contain'])
                                             ->defaultImageUrl(
                                                 fn (Employee $record
