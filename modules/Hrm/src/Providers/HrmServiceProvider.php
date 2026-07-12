@@ -8,6 +8,7 @@ use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Hrm\Console\Commands\CheckUploadedFilesCommand;
 use AcMarche\Hrm\Console\Commands\ExpireNewHiresCommand;
 use AcMarche\Hrm\Console\Commands\PurgeCommand;
+use AcMarche\Hrm\Console\Commands\RelocateUploadedFilesCommand;
 use AcMarche\Hrm\Console\Commands\ReminderCommand;
 use AcMarche\Hrm\Console\Commands\SyncEmployeeCommand;
 use AcMarche\Hrm\Enums\RolesEnum;
@@ -34,6 +35,7 @@ final class HrmServiceProvider extends ServiceProvider
                 CheckUploadedFilesCommand::class,
                 ExpireNewHiresCommand::class,
                 PurgeCommand::class,
+                RelocateUploadedFilesCommand::class,
                 ReminderCommand::class,
                 SyncEmployeeCommand::class,
             ]);
