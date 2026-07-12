@@ -64,7 +64,10 @@ final class RelocateUploadedFilesCommand extends Command
         'hrm/candidates' => ['hrm/candidatures'],
     ];
 
-    protected $signature = 'hrm:relocate-uploads {--dry-run : List the planned moves without touching any file}';
+    protected $signature = 'hrm:relocate-uploads
+        {--dry-run : List the planned changes without touching any file or record}
+        {--null-missing : Null the database reference of any file that cannot be located anywhere}
+        {--only-orphans : With --null-missing, only null files referenced by a single record (spare shared files)}';
 
     protected $description = 'Move legacy HRM upload files into the canonical path referenced by the database';
 
@@ -78,8 +81,13 @@ final class RelocateUploadedFilesCommand extends Command
     public function handle(): int
     {
         $dryRun = (bool) $this->option('dry-run');
+        $nullMissing = (bool) $this->option('null-missing');
+        $onlyOrphans = (bool) $this->option('only-orphans');
+        $referenceCounts = $onlyOrphans ? $this->countReferencesByBasename() : [];
         $alreadyPresent = 0;
         $moved = 0;
+        $nulled = 0;
+        $spared = 0;
         $ambiguous = [];
         $unresolved = [];
 
@@ -94,7 +102,7 @@ final class RelocateUploadedFilesCommand extends Command
                     ->where($field, '!=', '')
                     ->select(['id', $field])
                     ->lazyById()
-                    ->each(function (Model $record) use ($field, $disk, $check, $dryRun, &$alreadyPresent, &$moved, &$ambiguous, &$unresolved): void {
+                    ->each(function (Model $record) use ($modelClass, $field, $disk, $check, $dryRun, $nullMissing, $onlyOrphans, $referenceCounts, &$alreadyPresent, &$moved, &$nulled, &$spared, &$ambiguous, &$unresolved): void {
                         $target = (string) $record->getAttribute($field);
 
                         if ($disk->exists($target)) {
@@ -114,7 +122,24 @@ final class RelocateUploadedFilesCommand extends Command
                         ];
 
                         if ($candidates === []) {
-                            $unresolved[] = $row;
+                            if (! $nullMissing) {
+                                $unresolved[] = $row;
+
+                                return;
+                            }
+
+                            if ($onlyOrphans && ($referenceCounts[basename($target)] ?? 0) > 1) {
+                                $spared++;
+                                $unresolved[] = $row;
+
+                                return;
+                            }
+
+                            if (! $dryRun) {
+                                $modelClass::query()->whereKey($record->getKey())->update([$field => null]);
+                            }
+
+                            $nulled++;
 
                             return;
                         }
@@ -141,6 +166,15 @@ final class RelocateUploadedFilesCommand extends Command
         $this->info("{$alreadyPresent} file(s) already in place.");
         $this->info("{$moved} file(s) {$verb} from a legacy folder.");
 
+        if ($nullMissing) {
+            $nullVerb = $dryRun ? 'would be nulled' : 'nulled';
+            $this->info("{$nulled} unrecoverable reference(s) {$nullVerb}.");
+
+            if ($onlyOrphans) {
+                $this->info("{$spared} shared reference(s) spared (referenced by more than one record).");
+            }
+        }
+
         if ($ambiguous !== []) {
             $this->warn(count($ambiguous).' referenced file(s) match several source files and were skipped:');
             $this->table(['Model', 'ID', 'Field', 'Disk', 'Target', 'Candidates'], $ambiguous);
@@ -152,6 +186,36 @@ final class RelocateUploadedFilesCommand extends Command
         }
 
         return $ambiguous === [] && $unresolved === [] ? SfCommand::SUCCESS : SfCommand::FAILURE;
+    }
+
+    /**
+     * Count how many records reference each filename across every model and field,
+     * so orphans (referenced exactly once) can be told apart from shared files.
+     *
+     * @return array<string, int>
+     */
+    private function countReferencesByBasename(): array
+    {
+        $counts = [];
+
+        foreach (self::CHECKS as $check) {
+            /** @var class-string<Model> $modelClass */
+            $modelClass = $check['model'];
+
+            foreach ($check['fields'] as $field) {
+                $modelClass::query()
+                    ->whereNotNull($field)
+                    ->where($field, '!=', '')
+                    ->select(['id', $field])
+                    ->lazyById()
+                    ->each(function (Model $record) use ($field, &$counts): void {
+                        $basename = basename((string) $record->getAttribute($field));
+                        $counts[$basename] = ($counts[$basename] ?? 0) + 1;
+                    });
+            }
+        }
+
+        return $counts;
     }
 
     /**

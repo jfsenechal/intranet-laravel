@@ -61,6 +61,50 @@ it('reports files that cannot be located anywhere', function (): void {
         ->assertFailed();
 });
 
+it('nulls references that cannot be located when --null-missing is passed', function (): void {
+    Storage::fake('local');
+    Storage::fake('public');
+
+    $contract = Contract::factory()->create(['file1_name' => 'hrm/contracts/gone.pdf']);
+
+    $this->artisan('hrm:relocate-uploads', ['--null-missing' => true])
+        ->expectsOutputToContain('1 unrecoverable reference(s) nulled.')
+        ->assertSuccessful();
+
+    expect($contract->fresh()->file1_name)->toBeNull();
+});
+
+it('does not null anything when --null-missing is combined with --dry-run', function (): void {
+    Storage::fake('local');
+    Storage::fake('public');
+
+    $contract = Contract::factory()->create(['file1_name' => 'hrm/contracts/gone.pdf']);
+
+    $this->artisan('hrm:relocate-uploads', ['--null-missing' => true, '--dry-run' => true])
+        ->expectsOutputToContain('1 unrecoverable reference(s) would be nulled.')
+        ->assertSuccessful();
+
+    expect($contract->fresh()->file1_name)->toBe('hrm/contracts/gone.pdf');
+});
+
+it('nulls orphan references but spares shared ones with --only-orphans', function (): void {
+    Storage::fake('local');
+    Storage::fake('public');
+
+    $orphan = Contract::factory()->create(['file1_name' => 'hrm/contracts/orphan.pdf']);
+    $sharedA = Contract::factory()->create(['file1_name' => 'hrm/contracts/shared.pdf']);
+    $sharedB = Contract::factory()->create(['file1_name' => 'hrm/contracts/shared.pdf']);
+
+    $this->artisan('hrm:relocate-uploads', ['--null-missing' => true, '--only-orphans' => true])
+        ->expectsOutputToContain('1 unrecoverable reference(s) nulled.')
+        ->expectsOutputToContain('2 shared reference(s) spared')
+        ->assertFailed();
+
+    expect($orphan->fresh()->file1_name)->toBeNull();
+    expect($sharedA->fresh()->file1_name)->toBe('hrm/contracts/shared.pdf');
+    expect($sharedB->fresh()->file1_name)->toBe('hrm/contracts/shared.pdf');
+});
+
 it('breaks a tie toward the legacy folder when a basename exists twice', function (): void {
     Storage::fake('local');
     Storage::fake('public');
