@@ -85,7 +85,8 @@ final class TrainingTables
                     ->label('Type')
                     ->options(TrainingTypeEnum::class),
                 EmployerFilter::makeThrough('employee.contracts'),
-                ContractActiveFilter::makeWithContracts(),
+                ContractActiveFilter::makeWithContracts()
+                    ->default(true),
                 TernaryFilter::make('certificate_received')
                     ->label('Attestation recue')
                     ->placeholder('Toutes')
@@ -95,7 +96,8 @@ final class TrainingTables
                     ->label('Clôturée')
                     ->placeholder('Toutes')
                     ->trueLabel('Clôturées')
-                    ->falseLabel('En cours'),
+                    ->falseLabel('En cours')
+                    ->default(false),
             ], layout: FiltersLayout::Modal)
             ->recordActions([
                 ViewAction::make(),

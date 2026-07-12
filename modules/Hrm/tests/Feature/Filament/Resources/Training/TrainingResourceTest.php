@@ -192,6 +192,33 @@ describe('model behavior', function (): void {
     });
 });
 
+describe('default filters', function (): void {
+    it('shows only open trainings for employees with an active contract by default', function (): void {
+        $activeEmployee = AcMarche\Hrm\Models\Employee::factory()
+            ->has(AcMarche\Hrm\Models\Contract::factory()->state(['is_closed' => false, 'is_suspended' => false]))
+            ->create();
+        $inactiveEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        $visible = Training::factory()->create([
+            'is_closed' => false,
+            'employee_id' => $activeEmployee->id,
+        ]);
+        $closed = Training::factory()->create([
+            'is_closed' => true,
+            'employee_id' => $activeEmployee->id,
+        ]);
+        $withoutContract = Training::factory()->create([
+            'is_closed' => false,
+            'employee_id' => $inactiveEmployee->id,
+        ]);
+
+        Livewire::test(ListTrainings::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$visible])
+            ->assertCanNotSeeTableRecords([$closed, $withoutContract]);
+    });
+});
+
 describe('export action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListTrainings::class)
