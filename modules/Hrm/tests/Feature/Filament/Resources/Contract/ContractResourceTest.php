@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Contracts\Pages\EditContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ListContracts;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Employee;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -71,6 +72,32 @@ describe('crud operations', function (): void {
             'id' => $record->id,
             'job_title' => 'New Job Title',
         ]);
+    });
+
+    it('can replicate a contract to another employee from the view page', function (): void {
+        $record = Contract::factory()->create([
+            'job_title' => 'Original Job Title',
+            'is_closed' => true,
+            'is_suspended' => true,
+        ]);
+        $targetEmployee = Employee::factory()->create();
+
+        Livewire::test(ViewContract::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate', ['employee_id' => $targetEmployee->id])
+            ->assertHasNoActionErrors();
+
+        expect(Contract::query()->where('job_title', 'Original Job Title')->count())->toBe(2);
+
+        $replica = Contract::query()
+            ->where('job_title', 'Original Job Title')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica->employee_id)->toBe($targetEmployee->id);
+        expect($replica->is_closed)->not->toBeTrue();
+        expect($replica->is_suspended)->not->toBeTrue();
     });
 });
 
