@@ -38,7 +38,7 @@ final class EmployeeInfolist
                                             ->label('Photo')
                                             ->disk('public')
                                             ->imageWidth('100%')
-                                            ->extraImgAttributes(['class' => 'h-auto rounded-lg object-contain'])
+                                            ->extraImgAttributes(['class' => 'min-h-56 h-auto rounded-lg object-contain'])
                                             ->defaultImageUrl(
                                                 fn (Employee $record
                                                 ): string => 'https://ui-avatars.com/api/?size=256&name='.urlencode(
