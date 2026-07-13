@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks;
 
+use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\CafeteriaSheet;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\CreateWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\EditWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\KitchenExport;
@@ -71,6 +72,7 @@ final class WeekResource extends Resource
             'day' => ListDayMeals::route('/{record}/day/{date}'),
             'kitchen' => KitchenExport::route('/{record}/kitchen/{date}'),
             'routes' => RouteSheets::route('/{record}/routes/{date}'),
+            'cafeteria' => CafeteriaSheet::route('/{record}/cafeteria/{date}'),
         ];
     }
 }

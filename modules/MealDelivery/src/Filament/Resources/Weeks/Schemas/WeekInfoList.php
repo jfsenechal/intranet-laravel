@@ -37,6 +37,7 @@ final class WeekInfoList
                                 TableColumn::make('Menus 2')->alignment(Alignment::End),
                                 TableColumn::make('Cuisine')->alignment(Alignment::End),
                                 TableColumn::make('Feuilles de route')->alignment(Alignment::End),
+                                TableColumn::make('Cafétariat')->alignment(Alignment::End),
                             ])
                             ->schema([
                                 TextEntry::make('date')
@@ -71,13 +72,24 @@ final class WeekInfoList
 
                                         return is_array($row) ? ($row['routes_url'] ?? null) : null;
                                     }),
+                                TextEntry::make('cafeteria_link')
+                                    ->alignment(Alignment::End)
+                                    ->badge()
+                                    ->color('primary')
+                                    ->icon('heroicon-o-building-storefront')
+                                    ->openUrlInNewTab()
+                                    ->url(function (TextEntry $component): ?string {
+                                        $row = $component->getContainer()->getConstantState();
+
+                                        return is_array($row) ? ($row['cafeteria_url'] ?? null) : null;
+                                    }),
                             ]),
                     ]),
             ]);
     }
 
     /**
-     * @return array<int, array{date: string, date_url: string, clients_count: int, soup_count: int, menu1_count: int, menu2_count: int, kitchen_link: string, kitchen_url: string, routes_link: string, routes_url: string}>
+     * @return array<int, array{date: string, date_url: string, clients_count: int, soup_count: int, menu1_count: int, menu2_count: int, kitchen_link: string, kitchen_url: string, routes_link: string, routes_url: string, cafeteria_link: string, cafeteria_url: string}>
      */
     private static function buildDaysSummary(Week $week): array
     {
@@ -121,6 +133,11 @@ final class WeekInfoList
                     ], panel: 'meal-delivery-panel'),
                     'routes_link' => 'Feuilles',
                     'routes_url' => WeekResource::getUrl('routes', [
+                        'record' => $week->id,
+                        'date' => $day,
+                    ], panel: 'meal-delivery-panel'),
+                    'cafeteria_link' => 'Cafétariat',
+                    'cafeteria_url' => WeekResource::getUrl('cafeteria', [
                         'record' => $week->id,
                         'date' => $day,
                     ], panel: 'meal-delivery-panel'),
