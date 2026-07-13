@@ -97,6 +97,24 @@ describe('crud operations', function (): void {
             'last_name' => 'NewLastName',
         ]);
     });
+
+    it('can save the emergency contact', function (): void {
+        $record = Employee::factory()->create();
+
+        Livewire::test(EditEmployee::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'emergency_contact' => 'Jane Doe - 0470 12 34 56',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(Employee::class, [
+            'id' => $record->id,
+            'emergency_contact' => 'Jane Doe - 0470 12 34 56',
+        ]);
+    });
 });
 
 describe('form validation', function (): void {

@@ -172,6 +172,10 @@ final class EmployeeForm
                                 TextInput::make('insurance_affiliation')
                                     ->label('Affiliation mutuelle')
                                     ->maxLength(100),
+                                TextInput::make('emergency_contact')
+                                    ->label('Personne à contacter en cas d\'urgence')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
                             ]),
                         Tab::make('Notes')
                             ->icon('heroicon-o-document-text')

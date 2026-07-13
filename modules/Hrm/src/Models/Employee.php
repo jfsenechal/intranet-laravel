@@ -72,6 +72,7 @@ use Spatie\Sluggable\SlugOptions;
     'updated_by',
     'is_new_hire',
     'is_new_hire_updated_at',
+    'emergency_contact',
 ])]
 #[Table(name: 'employees')]
 #[UseFactory(EmployeeFactory::class)]
