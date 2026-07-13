@@ -98,16 +98,17 @@ final class ClientForm
 
                                 Section::make('Contact')
                                     ->schema([
+                                        TextInput::make('phone')
+                                            ->label('Téléphone')
+                                            ->helperText('Du résidant')
+                                            ->tel()
+                                            ->maxLength(50)
+                                            ->nullable(),
+
                                         TextInput::make('email')
                                             ->label('Email')
                                             ->email()
                                             ->maxLength(255)
-                                            ->nullable(),
-
-                                        TextInput::make('phone')
-                                            ->label('Téléphone')
-                                            ->tel()
-                                            ->maxLength(50)
                                             ->nullable(),
 
                                         TextInput::make('contact_name')
@@ -162,8 +163,7 @@ final class ClientForm
                                     ->relationship('deliveryRoute', 'name')
                                     ->searchable()
                                     ->required()
-                                    ->preload()
-                                    ->nullable(),
+                                    ->preload(),
 
                                 Textarea::make('recurring_order')
                                     ->label('Commande récurrente')
