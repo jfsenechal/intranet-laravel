@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\ActivityManager\Filament\Resources\Activities\Pages;
 
 use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource;
+use AcMarche\ActivityManager\Filament\Resources\Activities\Schemas\ActivityInfolist;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -20,21 +20,12 @@ final class ViewActivity extends ViewRecord
 
     public function getTitle(): string
     {
-        return (string) $this->record->name;
+        return (string)$this->record->name;
     }
 
     public function infolist(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextEntry::make('name')
-                    ->label('Nom')
-                    ->weight('bold'),
-                TextEntry::make('description')
-                    ->label('Description')
-                    ->columnSpanFull()
-                    ->placeholder('—'),
-            ]);
+        return ActivityInfolist::infolist($schema);
     }
 
     protected function getHeaderActions(): array

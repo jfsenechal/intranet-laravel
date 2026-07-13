@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Filament\Resources\Schedules\Pages;
 
+use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\SchedulesResource;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Schemas\ScheduleInfolist;
 use AcMarche\ActivityManager\Models\Member;
+use AcMarche\ActivityManager\Models\Schedule;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -60,7 +62,10 @@ final class ViewSchedule extends ViewRecord
                 ->icon(Heroicon::PencilSquare),
             DeleteAction::make()
                 ->label('Supprimer')
-                ->icon(Heroicon::Trash),
+                ->icon(Heroicon::Trash)
+                ->successRedirectUrl(fn (Schedule $record): string => $record->activity_id
+                    ? ActivityResource::getUrl('view', ['record' => $record->activity_id])
+                    : ActivityResource::getUrl('index')),
         ];
     }
 }

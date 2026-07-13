@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Filament\Resources\Schedules;
 
+use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\CreateSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\EditSchedule;
-use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ListSchedules;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\MembersRelationManager;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Schemas\ScheduleForm;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Tables\SchedulesTable;
 use AcMarche\ActivityManager\Models\Schedule;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Override;
-use UnitEnum;
 
 final class SchedulesResource extends Resource
 {
@@ -26,16 +24,7 @@ final class SchedulesResource extends Resource
     protected static ?string $model = Schedule::class;
 
     #[Override]
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
-
-    #[Override]
-    protected static string|UnitEnum|null $navigationGroup = 'cours';
-
-    #[Override]
-    protected static ?int $navigationSort = 2;
-
-    #[Override]
-    protected static ?string $navigationLabel = 'Cours';
+    protected static bool $shouldRegisterNavigation = false;
 
     #[Override]
     protected static ?string $modelLabel = 'cours';
@@ -70,10 +59,14 @@ final class SchedulesResource extends Resource
         ];
     }
 
+    public static function getIndexUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
+    {
+        return ActivityResource::getUrl('index', [], $isAbsolute, $panel, $tenant);
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => ListSchedules::route('/'),
             'create' => CreateSchedule::route('/create'),
             'view' => ViewSchedule::route('/{record}'),
             'edit' => EditSchedule::route('/{record}/edit'),

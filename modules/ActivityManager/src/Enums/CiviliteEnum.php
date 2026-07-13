@@ -10,6 +10,7 @@ enum CiviliteEnum: string implements HasLabel
 {
     case MADAME = 'Madame';
     case MONSIEUR = 'Monsieur';
+    case MADAME_AND_MONSIEUR = 'Monsieur et Madame';
 
     public function getLabel(): string
     {
