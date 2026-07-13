@@ -87,6 +87,11 @@ final class RouteSheetsAggregator
             }
 
             $row = self::buildRow($meal);
+
+            if ($row['menu1'] === 0 && $row['menu2'] === 0) {
+                continue;
+            }
+
             $sortPosition = PHP_INT_MAX;
 
             if ($meal->at_cafeteria) {
