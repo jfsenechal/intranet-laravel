@@ -13,6 +13,7 @@ use AcMarche\Hrm\Filament\Widgets\TrainingRemindersWidget;
 use AcMarche\Hrm\Filament\Widgets\UpcomingDeadlinesWidget;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
+use Illuminate\Support\Facades\Gate;
 use Override;
 
 final class HrmDashboard extends BaseDashboard
@@ -25,6 +26,11 @@ final class HrmDashboard extends BaseDashboard
 
     #[Override]
     protected static ?int $navigationSort = -10;
+
+    public static function canAccess(): bool
+    {
+        return Gate::forUser(auth()->user())->check('hrm-administrator');
+    }
 
     public function getTitle(): string
     {
