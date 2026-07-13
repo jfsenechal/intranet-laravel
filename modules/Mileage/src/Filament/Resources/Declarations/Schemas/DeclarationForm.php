@@ -78,14 +78,14 @@ final class DeclarationForm
                             ->label('Tarif (€/km)')
                             ->required()
                             ->numeric()
-                            ->step(0.01)
+                            ->step(0.0001)
                             ->prefix('€'),
 
                         TextInput::make('rate_omnium')
                             ->label('Tarif omnium (€/km)')
                             ->required()
                             ->numeric()
-                            ->step(0.01)
+                            ->step(0.0001)
                             ->prefix('€'),
 
                         TextInput::make('type_movement')

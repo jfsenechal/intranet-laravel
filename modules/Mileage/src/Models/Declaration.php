@@ -66,8 +66,8 @@ final class Declaration extends Model
     {
         return [
             'omnium' => 'boolean',
-            'rate' => 'decimal:2',
-            'rate_omnium' => 'decimal:2',
+            'rate' => 'decimal:4',
+            'rate_omnium' => 'decimal:4',
             'college_date' => 'date',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

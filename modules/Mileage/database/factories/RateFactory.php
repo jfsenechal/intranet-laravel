@@ -24,8 +24,8 @@ final class RateFactory extends Factory
     public function definition(): array
     {
         return [
-            'amount' => fake()->randomFloat(2, 0.30, 0.50),
-            'omnium' => fake()->randomFloat(2, 0.01, 0.05),
+            'amount' => fake()->randomFloat(4, 0.30, 0.50),
+            'omnium' => fake()->randomFloat(4, 0.01, 0.05),
             'start_date' => fake()->dateTimeBetween('-1 year', 'now'),
             'end_date' => fake()->dateTimeBetween('now', '+1 year'),
         ];

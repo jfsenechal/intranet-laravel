@@ -25,14 +25,14 @@ final class RateForm
                             ->label('Montant (€/km)')
                             ->required()
                             ->numeric()
-                            ->step(0.01)
+                            ->step(0.0001)
                             ->prefix('€'),
 
                         TextInput::make('omnium')
                             ->label('Omnium (€/km)')
                             ->required()
                             ->numeric()
-                            ->step(0.01)
+                            ->step(0.0001)
                             ->prefix('€'),
 
                         DatePicker::make('start_date')

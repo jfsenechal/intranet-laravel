@@ -55,10 +55,10 @@ final class DeclarationInfolist
                         Flex::make([
                             TextEntry::make('rate')
                                 ->label('Tarif (€/km)')
-                                ->money('EUR'),
+                                ->money('EUR', decimalPlaces: 4),
                             TextEntry::make('rate_omnium')
                                 ->label('Tarif omnium (€/km)')
-                                ->money('EUR')
+                                ->money('EUR', decimalPlaces: 4)
                                 ->visible(fn ($record): bool => $record->omnium),
                         ])->grow(false),
                         Flex::make([

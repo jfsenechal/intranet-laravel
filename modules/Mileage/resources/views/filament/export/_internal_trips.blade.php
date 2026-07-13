@@ -37,7 +37,7 @@
             </td>
             <td class="border border-gray-300 p-2">
                 @if($declaration->omnium)
-                    - {{ $declaration->rate_omnium }} €
+                    - {{ number_format($declaration->rate_omnium, 4, ',', '.') }} €
                 @endif
             </td>
             <td class="border border-gray-300 p-2">

@@ -94,7 +94,7 @@ describe('handleTrips', function (): void {
             ->and($interneDeclaration->street)->toBe('Rue de test')
             ->and($interneDeclaration->city)->toBe('Marche')
             ->and($interneDeclaration->iban)->toBe('BE68539007547034')
-            ->and($interneDeclaration->rate)->toBe('0.40')
+            ->and($interneDeclaration->rate)->toBe('0.4000')
             ->and($interneDeclaration->budget_article)->toBe($this->budgetArticle->name);
 
         // Verify trips are attached to declarations

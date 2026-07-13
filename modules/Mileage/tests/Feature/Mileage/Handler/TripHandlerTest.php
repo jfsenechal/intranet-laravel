@@ -31,8 +31,8 @@ describe('setRate', function (): void {
 
         $this->handler->setRate($trip);
 
-        expect($trip->rate)->toBe('0.44')
-            ->and($trip->omnium)->toBe('0.03');
+        expect($trip->rate)->toBe('0.4400')
+            ->and($trip->omnium)->toBe('0.0300');
     });
 
     test('uses most recent rate when multiple rates match', function (): void {
@@ -62,8 +62,8 @@ describe('setRate', function (): void {
         $this->handler->setRate($trip);
 
         // Should use the more recent rate
-        expect($trip->rate)->toBe('0.45')
-            ->and($trip->omnium)->toBe('0.04');
+        expect($trip->rate)->toBe('0.4500')
+            ->and($trip->omnium)->toBe('0.0400');
     });
 
     // Note: end_date is now required in the database schema, so null end_date is not supported
@@ -106,8 +106,8 @@ describe('setRate', function (): void {
 
         $this->handler->setRate($trip);
 
-        expect($trip->rate)->toBe('0.40')
-            ->and($trip->omnium)->toBe('0.03');
+        expect($trip->rate)->toBe('0.4000')
+            ->and($trip->omnium)->toBe('0.0300');
     });
 
     test('handles trip at end of rate period', function (): void {
@@ -127,8 +127,8 @@ describe('setRate', function (): void {
 
         $this->handler->setRate($trip);
 
-        expect($trip->rate)->toBe('0.40')
-            ->and($trip->omnium)->toBe('0.03');
+        expect($trip->rate)->toBe('0.4000')
+            ->and($trip->omnium)->toBe('0.0300');
     });
 
     test('does not match trip before rate start_date', function (): void {
@@ -194,13 +194,13 @@ describe('recompute on update', function (): void {
             'departure_date' => '2024-03-15',
         ]);
 
-        expect($trip->rate)->toBe('0.35')
-            ->and($trip->omnium)->toBe('0.02');
+        expect($trip->rate)->toBe('0.3500')
+            ->and($trip->omnium)->toBe('0.0200');
 
         $trip->update(['departure_date' => '2024-08-15']);
 
-        expect($trip->fresh()->rate)->toBe('0.45')
-            ->and($trip->fresh()->omnium)->toBe('0.04');
+        expect($trip->fresh()->rate)->toBe('0.4500')
+            ->and($trip->fresh()->omnium)->toBe('0.0400');
     });
 
     test('does not change rate when departure_date is unchanged', function (): void {
@@ -218,8 +218,8 @@ describe('recompute on update', function (): void {
 
         $trip->update(['content' => 'Updated content']);
 
-        expect($trip->fresh()->rate)->toBe('0.40')
-            ->and($trip->fresh()->omnium)->toBe('0.03');
+        expect($trip->fresh()->rate)->toBe('0.4000')
+            ->and($trip->fresh()->omnium)->toBe('0.0300');
     });
 
     test('recomputes type of movement when arrival_date is updated', function (): void {

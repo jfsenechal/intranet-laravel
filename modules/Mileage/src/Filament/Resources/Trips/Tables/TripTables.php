@@ -48,7 +48,7 @@ final class TripTables
                     ->suffix(' km'),
                 TextColumn::make('rate')
                     ->label('Taux')
-                    ->money('EUR')
+                    ->money('EUR', decimalPlaces: 4)
                     ->suffix('/km')
                     ->sortable()
                     ->toggleable(),

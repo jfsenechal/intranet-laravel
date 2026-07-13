@@ -28,12 +28,12 @@ final class RateTables
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Montant')
-                    ->money('EUR')
+                    ->money('EUR', decimalPlaces: 4)
                     ->sortable()
                     ->suffix(' €/km'),
                 TextColumn::make('omnium')
                     ->label('Omnium')
-                    ->money('EUR')
+                    ->money('EUR', decimalPlaces: 4)
                     ->sortable()
                     ->suffix(' €/km'),
             ])
