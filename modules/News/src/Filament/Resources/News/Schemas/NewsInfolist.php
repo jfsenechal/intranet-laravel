@@ -54,9 +54,9 @@ final class NewsInfolist
                         TextEntry::make('department')
                             ->label('Pour qui ?')
                             ->badge()
-                            ->formatStateUsing(fn ($state) => DepartmentEnum::tryFrom($state)?->getLabel() ?? 'Inconnu')
-                            ->icon(fn ($state) => DepartmentEnum::tryFrom($state)?->getIcon() ?? 'tabler-help')
-                            ->color(fn ($state) => DepartmentEnum::tryFrom($state)?->getColor() ?? 'gray'),
+                            ->formatStateUsing(fn ($state) => self::resolveDepartment($state)?->getLabel() ?? 'Inconnu')
+                            ->icon(fn ($state) => self::resolveDepartment($state)?->getIcon() ?? 'tabler-help')
+                            ->color(fn ($state) => self::resolveDepartment($state)?->getColor() ?? 'gray'),
                         TextEntry::make('end_date')
                             ->label('Fin de publication')
                             ->date()
@@ -79,5 +79,19 @@ final class NewsInfolist
                             ->icon('tabler-clock-edit'),
                     ]),
             ]);
+    }
+
+    /**
+     * Resolve a department value into its enum instance. The attribute is
+     * cast to DepartmentEnum on the model, so state arrives as an enum, but
+     * legacy rows may still surface a raw string.
+     */
+    private static function resolveDepartment(DepartmentEnum|string|null $state): ?DepartmentEnum
+    {
+        if ($state instanceof DepartmentEnum) {
+            return $state;
+        }
+
+        return $state !== null ? DepartmentEnum::tryFrom($state) : null;
     }
 }
