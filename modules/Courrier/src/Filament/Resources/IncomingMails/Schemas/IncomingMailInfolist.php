@@ -90,7 +90,9 @@ final class IncomingMailInfolist
                             ->columnSpanFull()
                             ->prose(),
                     ])
-                    ->visible(fn ($record): bool => filled($record->content))
+                    ->visible(fn ($record): bool => filled($record->content)
+                        && $record->attachments->isNotEmpty()
+                        && auth()->user()?->can('download', $record->attachments->first()))
                     ->collapsed(),
             ]);
     }
