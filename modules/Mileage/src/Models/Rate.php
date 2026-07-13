@@ -26,8 +26,8 @@ final class Rate extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
-            'omnium' => 'decimal:2',
+            'amount' => 'decimal:4',
+            'omnium' => 'decimal:4',
             'start_date' => 'date',
             'end_date' => 'date',
         ];
