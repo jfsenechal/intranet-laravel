@@ -11,8 +11,6 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -21,7 +19,7 @@ final class IncomingMailTables
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => IncomingMailRepository::scopeToTodayForCurrentUser($query)
+            ->modifyQueryUsing(fn(Builder $query): Builder => IncomingMailRepository::scopeToTodayForCurrentUser($query)
             )
             ->defaultSort('mail_date', 'desc')
             ->defaultPaginationPageOption(50)
@@ -72,27 +70,6 @@ final class IncomingMailTables
                     ->label('Département')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                SelectFilter::make('services')
-                    ->label('Service')
-                    ->relationship('services', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->multiple(),
-                SelectFilter::make('recipients')
-                    ->label('Destinataire')
-                    ->relationship('recipients', 'last_name')
-                    ->searchable()
-                    ->preload()
-                    ->multiple(),
-                TernaryFilter::make('is_notified')
-                    ->label('Notifié'),
-                TernaryFilter::make('is_registered')
-                    ->label('Recommandé'),
-                TernaryFilter::make('has_acknowledgment')
-                    ->label('Accusé de réception'),
-            ])
-            ->persistFiltersInSession()
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
