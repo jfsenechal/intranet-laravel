@@ -43,6 +43,11 @@ final class IncomingMailInfolist
 
                 Section::make('Métas données')
                     ->schema([
+                        TextEntry::make('department')
+                            ->label('Département')
+                            ->badge()
+                            ->color('info')
+                            ->hidden(fn ($state): bool => blank($state)),
                         Flex::make([
                             IconEntry::make('is_notified')
                                 ->label('Notifié')
