@@ -35,7 +35,7 @@ final class WeekInfoList
                                 TableColumn::make('Potages')->alignment(Alignment::End),
                                 TableColumn::make('Menus 1')->alignment(Alignment::End),
                                 TableColumn::make('Menus 2')->alignment(Alignment::End),
-                                TableColumn::make('Cuisine')->alignment(Alignment::End),
+                                TableColumn::make('Export cuisine')->alignment(Alignment::End),
                                 TableColumn::make('Feuilles de route')->alignment(Alignment::End),
                                 TableColumn::make('Cafétariat')->alignment(Alignment::End),
                             ])
