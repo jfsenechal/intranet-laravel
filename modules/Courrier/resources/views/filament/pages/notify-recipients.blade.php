@@ -6,6 +6,12 @@
 
         <form wire:submit.prevent="$refresh">
             {{ $this->form }}
+
+            <div class="mt-4">
+                <x-filament::button type="submit" icon="tabler-refresh">
+                    Rafraichir la liste
+                </x-filament::button>
+            </div>
         </form>
     </x-filament::section>
 

@@ -124,6 +124,13 @@ describe('NotifyRecipients Page Display', function (): void {
             ->assertCanNotSeeTableRecords([$notifiedMail]);
     });
 
+    test('the page shows a button to refresh the list', function (): void {
+        $this->actingAs(User::factory()->create(['is_administrator' => true]));
+
+        livewire(NotifyRecipients::class)
+            ->assertSee('Rafraichir la liste');
+    });
+
     test('the preview table hides already notified mail unless force_notify is set', function (): void {
         $admin = User::factory()->create(['is_administrator' => true]);
 

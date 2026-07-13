@@ -21,12 +21,10 @@ final class NotifyRecipientsForm
                     ->default(now())
                     ->native(false)
                     ->displayFormat('d/m/Y')
-                    ->live()
                     ->columnSpan(1),
                 Checkbox::make('force_notify')
                     ->label('Forcer la notification')
                     ->helperText('Renvoie aussi les courriers deja notifies pour cette date.')
-                    ->live()
                     ->columnSpan(1),
             ]);
     }
