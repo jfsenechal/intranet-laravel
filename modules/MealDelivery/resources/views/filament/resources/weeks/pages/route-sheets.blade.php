@@ -76,27 +76,4 @@
             @include('meal-delivery::filament.resources.weeks.pages._route-sheet-table', ['sheet' => $sheet])
         </div>
     @endforeach
-
-    <div class="route-sheet" id="cafeteria">
-        <div class="button-row d-print-none">
-            <button
-                type="button"
-                onclick="window.print()"
-                class="fi-btn fi-color-primary fi-btn-color-primary fi-size-md"
-            >
-                Imprimer
-            </button>
-            <button
-                type="button"
-                wire:click="downloadCafeteriaPdf"
-                class="fi-btn fi-color-primary fi-btn-color-primary fi-size-md"
-            >
-                PDF
-            </button>
-        </div>
-
-        <h3 class="text-success" style="font-size:18px; font-weight:600;">Cafétéria : {{ $formattedDate }} - {{ $sheets['cafeteria']['totals']['clients'] }} {{ \Illuminate\Support\Str::plural('client', $sheets['cafeteria']['totals']['clients']) }}</h3>
-
-        @include('meal-delivery::filament.resources.weeks.pages._route-sheet-table', ['sheet' => $sheets['cafeteria']])
-    </div>
 </x-filament-panels::page>

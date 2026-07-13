@@ -49,7 +49,7 @@ final class RouteSheets extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Retrouvez la tournée 3 et la cafétéria plus bas sur la page.';
+        return 'Retrouvez la tournée 3 plus bas sur la page.';
     }
 
     public function mount(Week $record, string $date): void
@@ -90,21 +90,6 @@ final class RouteSheets extends Page
                 'date' => $this->sheets['date'],
                 'sheet' => $sheet,
                 'heading' => $sheet['name'].' : '.$this->frenchDate(),
-            ],
-            $filename,
-        );
-    }
-
-    public function downloadCafeteriaPdf(): StreamedResponse
-    {
-        $filename = 'cafeteria-'.CarbonImmutable::parse($this->date)->format('Y-m-d').'.pdf';
-
-        return $this->streamPdf(
-            'meal-delivery::filament.resources.weeks.pages.route-sheet-pdf',
-            [
-                'date' => $this->sheets['date'],
-                'sheet' => $this->sheets['cafeteria'],
-                'heading' => 'Cafétéria : '.$this->frenchDate(),
             ],
             $filename,
         );
