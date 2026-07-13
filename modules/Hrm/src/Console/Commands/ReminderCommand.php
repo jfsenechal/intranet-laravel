@@ -164,7 +164,16 @@ final class ReminderCommand extends Command
     {
         Deadline::query()
             ->whereDate('reminder_date', $today)
-            ->tap(fn (Builder $query) => $this->whereEmployeeHasActiveContract($query, $employerIds))
+            ->where(function (Builder $query) use ($employerIds): void {
+                $this->whereEmployeeHasActiveContract($query, $employerIds);
+
+                // Deadlines without an employee still belong to a department
+                // through their own employer, so include those too.
+                $query->orWhere(function (Builder $unassigned) use ($employerIds): void {
+                    $unassigned->whereNull('employee_id')
+                        ->whereIn('employer_id', $employerIds);
+                });
+            })
             ->with('employee')
             ->get()
             ->each(function (Deadline $deadline) use ($recipients): void {
