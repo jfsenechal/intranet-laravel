@@ -68,7 +68,7 @@ final class DeadlineRemindersWidget extends BaseWidget
                     ->schema([
                         Flex::make([
                             DatePicker::make('from')
-                                ->label('Du'),
+                                ->label('Rappel Du'),
                             DatePicker::make('until')
                                 ->label('Au'),
                         ]),
