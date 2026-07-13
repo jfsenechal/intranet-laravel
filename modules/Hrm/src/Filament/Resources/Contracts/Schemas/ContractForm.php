@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Contracts\Schemas;
 use AcMarche\Hrm\Enums\ContractStatusEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -21,6 +22,7 @@ final class ContractForm
         return $schema
             ->columns(1)
             ->components([
+                Hidden::make('employee_id'),
                 Section::make('Agent et employeur')
                     ->columns(2)
                     ->schema([

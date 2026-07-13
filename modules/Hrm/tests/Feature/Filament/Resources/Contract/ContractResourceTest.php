@@ -9,6 +9,7 @@ use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ListContracts;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Employer;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -71,6 +72,28 @@ describe('crud operations', function (): void {
         assertDatabaseHas(Contract::class, [
             'id' => $record->id,
             'job_title' => 'New Job Title',
+        ]);
+    });
+
+    it('persists the employee_id passed via the query string when creating', function (): void {
+        $employee = Employee::factory()->create();
+        $employer = Employer::factory()->create();
+
+        Livewire::withQueryParams(['employee_id' => $employee->id])
+            ->test(CreateContract::class)
+            ->assertSchemaStateSet(['employee_id' => $employee->id])
+            ->fillForm([
+                'employer_id' => $employer->id,
+                'job_title' => 'Agent technique',
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(Contract::class, [
+            'employee_id' => $employee->id,
+            'employer_id' => $employer->id,
+            'job_title' => 'Agent technique',
         ]);
     });
 
