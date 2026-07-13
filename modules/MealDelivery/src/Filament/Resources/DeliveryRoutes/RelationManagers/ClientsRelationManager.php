@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\DeliveryRoutes\RelationManagers;
 
+use AcMarche\MealDelivery\Models\Client;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -25,7 +26,9 @@ final class ClientsRelationManager extends RelationManager
                     ->label('Nom'),
                 Tables\Columns\TextColumn::make('first_name')
                     ->label('Prénom'),
-                Tables\Columns\TextColumn::make('Adresse'),
+                Tables\Columns\TextColumn::make('address')
+                    ->label('Adresse')
+                    ->state(fn (Client $record): string => mb_trim("{$record->street} {$record->number}, {$record->city}")),
                 Tables\Columns\TextColumn::make('route_position')
                     ->label('Position'),
             ])
