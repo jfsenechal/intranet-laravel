@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'salutation',
     'last_name',
     'first_name',
-    'slug',
     'street',
     'number',
     'postal_code',

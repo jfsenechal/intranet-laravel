@@ -161,6 +161,7 @@ final class ClientForm
                                     ->helperText('Préférence de la tournée')
                                     ->relationship('deliveryRoute', 'name')
                                     ->searchable()
+                                    ->required()
                                     ->preload()
                                     ->nullable(),
 
