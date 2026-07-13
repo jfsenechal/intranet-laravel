@@ -32,11 +32,22 @@ final class ActivitiesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('name')->label('Nom')->searchable()->sortable()->limit(80)->wrap(),
-                TextColumn::make('activity.name')->label('Activité')->badge()->toggleable(),
-                TextColumn::make('start_date')->label('Début')->date('d/m/Y')->sortable(),
-                TextColumn::make('end_date')->label('Fin')->date('d/m/Y')->sortable()->placeholder('—'),
+                TextColumn::make('name')
+                    ->label('Nom')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(80)
+                    ->wrap(),
+                TextColumn::make('activity.name')
+                    ->label('Activité')
+                    ->badge()
+                    ->toggleable(),
+                TextColumn::make('start_date')
+                    ->label('Début')
+                    ->date('d/m/Y')
+                    ->sortable(),
             ])
             ->headerActions([
                 AttachAction::make()
