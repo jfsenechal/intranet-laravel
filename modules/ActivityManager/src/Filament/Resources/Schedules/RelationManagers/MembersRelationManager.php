@@ -31,6 +31,11 @@ final class MembersRelationManager extends RelationManager
         return $pageClass === ViewSchedule::class;
     }
 
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return self::$title.' ('.$ownerRecord->members()->count().')';
