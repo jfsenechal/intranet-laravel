@@ -15,10 +15,17 @@ use Illuminate\Support\Facades\Gate;
 
 final class IncomingMailRepository
 {
-    public static function findByDateAndNotNotified(string $mailDate): Builder
+    /**
+     * Mail for the given date, previewed the way it will be sent.
+     *
+     * By default only unnotified mail is returned. When $includeNotified is true
+     * (a forced re-send), already notified mail is included too, so the preview
+     * mirrors what a forced notification would actually deliver.
+     */
+    public static function findByDateAndNotNotified(?string $mailDate, bool $includeNotified = false): Builder
     {
         return IncomingMail::query()
-            ->where('is_notified', false)
+            ->when(! $includeNotified, fn (Builder $query): Builder => $query->where('is_notified', false))
             ->when($mailDate, function (Builder $query) use ($mailDate): void {
                 $query->whereDate('mail_date', $mailDate);
             })

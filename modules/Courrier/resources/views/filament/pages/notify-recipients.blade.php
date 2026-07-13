@@ -4,7 +4,7 @@
             Selectionner la date
         </x-slot>
 
-        <form wire:submit.prevent="loadPreviewData">
+        <form wire:submit.prevent="$refresh">
             {{ $this->form }}
         </form>
     </x-filament::section>

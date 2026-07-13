@@ -124,6 +124,29 @@ describe('NotifyRecipients Page Display', function (): void {
             ->assertCanNotSeeTableRecords([$notifiedMail]);
     });
 
+    test('the preview table hides already notified mail unless force_notify is set', function (): void {
+        $admin = User::factory()->create(['is_administrator' => true]);
+
+        $notifiedMail = IncomingMail::factory()->create([
+            'reference_number' => 'FORCE-PREVIEW-001',
+            'mail_date' => now(),
+            'is_notified' => true,
+        ]);
+
+        $this->actingAs($admin);
+
+        // Default preview: already notified mail is excluded.
+        livewire(NotifyRecipients::class)
+            ->loadTable()
+            ->assertCanNotSeeTableRecords([$notifiedMail]);
+
+        // Forced preview: already notified mail is included.
+        livewire(NotifyRecipients::class)
+            ->set('force_notify', true)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$notifiedMail]);
+    });
+
     test('send notifications confirmation modal opens without error', function (): void {
         $admin = User::factory()->create(['is_administrator' => true]);
 
@@ -145,7 +168,7 @@ describe('NotifyRecipients Page Display', function (): void {
             ->assertHasNoErrors();
     });
 
-    test('reloading the preview does not error', function (): void {
+    test('changing the date filter refreshes the table without error', function (): void {
         $admin = User::factory()->create(['is_administrator' => true]);
 
         $recipient = Recipient::factory()->create([
@@ -161,8 +184,12 @@ describe('NotifyRecipients Page Display', function (): void {
         $this->actingAs($admin);
 
         livewire(NotifyRecipients::class)
-            ->call('loadPreviewData')
-            ->assertHasNoErrors();
+            ->loadTable()
+            ->assertCanSeeTableRecords([$mail])
+            ->set('mail_date', now()->subDay()->format('Y-m-d'))
+            ->loadTable()
+            ->assertHasNoErrors()
+            ->assertCanNotSeeTableRecords([$mail]);
     });
 });
 

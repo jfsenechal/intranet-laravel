@@ -53,8 +53,6 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     #[Override]
     protected string $view = 'courrier::filament.pages.notify-recipients';
 
-    private array $previewData = [];
-
     public static function canAccess(array $parameters = []): bool
     {
         return Gate::check('courrier-administrator');
@@ -63,7 +61,6 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
     public function mount(): void
     {
         $this->mail_date = now()->format('Y-m-d');
-        $this->loadPreviewData();
     }
 
     public function getTitle(): string
@@ -78,38 +75,7 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
 
     public function table(Table $table): Table
     {
-        return NotifyRecipientsTables::configure($table, $this->mail_date);
-    }
-
-    public function loadPreviewData(): void
-    {
-        if (! $this->mail_date) {
-            $this->previewData = [];
-
-            return;
-        }
-
-        $incomingMailRepository = new IncomingMailRepository();
-        $mailDate = Date::parse($this->mail_date);
-        $recipients = RecipientRepository::getWithEmail();
-
-        $preview = [];
-
-        $department = $this->currentAdminDepartment();
-
-        foreach ($recipients as $recipient) {
-            $mails = $incomingMailRepository->getIncomingMailsForRecipient($recipient, $mailDate, false, $department);
-
-            if ($mails->isNotEmpty()) {
-                $preview[] = [
-                    'recipient' => $recipient,
-                    'mails' => $mails,
-                    'has_index_role' => $incomingMailRepository->recipientHasIndexRole($recipient),
-                ];
-            }
-        }
-
-        $this->previewData = $preview;
+        return NotifyRecipientsTables::configure($table, $this->mail_date, $this->force_notify);
     }
 
     /**
@@ -151,7 +117,6 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                         $this->countRecipientsToNotify($this->force_notify),
                     )),
                 ])
-               // ->disabled(fn (): bool => empty($this->previewData))
                 ->action(function (): void {
                     if (! $this->mail_date) {
                         Notification::make()
@@ -187,8 +152,6 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                         ->body('Les notifications seront envoyees en arriere-plan.')
                         ->success()
                         ->send();
-
-                    $this->loadPreviewData();
                 }),
         ];
     }

@@ -12,11 +12,11 @@ use Filament\Tables\Table;
 
 final class NotifyRecipientsTables
 {
-    public static function configure(Table $table, ?string $mailDate): Table
+    public static function configure(Table $table, ?string $mailDate, bool $includeNotified = false): Table
     {
         return $table
             ->defaultPaginationPageOption(25)
-            ->query(IncomingMailRepository::findByDateAndNotNotified($mailDate))
+            ->query(IncomingMailRepository::findByDateAndNotNotified($mailDate, $includeNotified))
             ->columns([
                 TextColumn::make('reference_number')
                     ->label('Numero')
