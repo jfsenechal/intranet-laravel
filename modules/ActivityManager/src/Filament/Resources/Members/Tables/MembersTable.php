@@ -25,6 +25,7 @@ final class MembersTable
     {
         return $table
             ->defaultSort('last_name')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('civility')
                     ->label('Civilité')
