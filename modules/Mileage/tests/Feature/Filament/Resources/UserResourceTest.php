@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Filament\Resources\Users\Pages\CreateUser;
+use AcMarche\Mileage\Filament\Resources\Users\Pages\EditUser;
 use AcMarche\Mileage\Filament\Resources\Users\Pages\ListUsers;
 use AcMarche\Mileage\Models\PersonalInformation;
+use AcMarche\Mileage\Providers\MileageServiceProvider;
+use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -61,4 +64,24 @@ it('can load the create form with components', function (): void {
 it('displays edit action on list page', function (): void {
     livewire(ListUsers::class)
         ->assertTableActionExists('edit');
+});
+
+it('pre-checks the agent existing roles on the edit page', function (): void {
+    $module = Module::factory()->create([
+        'id' => MileageServiceProvider::$module_id,
+        'allow_multiple_roles' => true,
+    ]);
+    $role = Role::factory()->create([
+        'name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value,
+        'module_id' => $module->id,
+    ]);
+
+    $agent = User::factory()->create();
+    PersonalInformation::factory()->create(['username' => $agent->username]);
+    $agent->roles()->attach($role);
+
+    livewire(EditUser::class, ['record' => $agent->id])
+        ->assertSchemaStateSet([
+            'roles' => [$role->name],
+        ]);
 });

@@ -57,6 +57,18 @@ final class Declaration extends Model
         return $this->hasMany(Trip::class);
     }
 
+    /**
+     * Whether this declaration belongs to the C.P.A.S. (as opposed to the Ville).
+     *
+     * When a declaration references both entities (e.g. a finance admin), the Ville takes precedence.
+     */
+    public function isCpas(): bool
+    {
+        $departments = mb_strtolower((string) $this->departments);
+
+        return str_contains($departments, 'cpas') && ! str_contains($departments, 'ville');
+    }
+
     protected static function booted(): void
     {
         self::bootHasUser();

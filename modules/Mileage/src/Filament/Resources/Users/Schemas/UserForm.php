@@ -19,6 +19,7 @@ final class UserForm
     public static function configure(Schema $schema): Schema
     {
         $mileageModule = ModuleRepository::find(MileageServiceProvider::$module_id);
+        $user = $schema->getRecord(); // null when creating, User instance when editing
 
         return $schema
             ->components([
@@ -35,7 +36,7 @@ final class UserForm
                 Checkbox::make('omnium')
                     ->label('Retenue omnium')
                     ->helperText('Cochez pour oui'),
-                ModuleForm::rolesField($mileageModule),
+                ModuleForm::rolesField($mileageModule, $user),
             ]);
     }
 }

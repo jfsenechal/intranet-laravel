@@ -14,8 +14,13 @@
     <table class="w-full border border-gray-300 border-collapse mb-6">
         <tr>
             <td class="border border-gray-300 p-3">
-                Administration communale<br/>
-                @php $logo = public_path('images/Marche_logo.png'); @endphp
+                @if($declaration->isCpas())
+                    C.P.A.S.<br/>
+                    @php $logo = public_path('images/Cpas_logo.jpg'); @endphp
+                @else
+                    Administration communale<br/>
+                    @php $logo = public_path('images/Marche_logo.png'); @endphp
+                @endif
                 @inlinedImage($logo)
             </td>
             <td class="border border-gray-300 p-3 text-center align-middle">
@@ -27,7 +32,7 @@
     <table class="w-full border border-gray-300 border-collapse mb-6">
         <tr>
             <td class="border border-gray-300 p-3">
-                <strong>La Ville de Marche doit à :</strong><br/><br/>
+                <strong>{{ $declaration->isCpas() ? 'Le C.P.A.S. doit à :' : 'La Ville de Marche doit à :' }}</strong><br/><br/>
             </td>
             <td class="border border-gray-300 p-3">
                 {{ strtoupper($declaration->last_name) }} {{ $declaration->first_name }}<br/>
@@ -73,7 +78,9 @@
         </tr>
     </table>
 
-    <p class="mb-4">Délibération du Collège Communal du {{ $declaration->college_date?->format('d-m-Y') }}</p>
+    @unless($declaration->isCpas())
+        <p class="mb-4">Délibération du Collège Communal du {{ $declaration->college_date?->format('d-m-Y') }}</p>
+    @endunless
     <p class="mb-6">Certifié exact suivant le carnet de courses ci-annexé.</p>
 
     <p class="text-center font-bold mb-4">Le chef de service</p>
