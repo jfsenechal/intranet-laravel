@@ -9,7 +9,7 @@ use AcMarche\Hrm\Filament\Resources\Absences\AbsenceResource;
 use AcMarche\Hrm\Filament\Resources\Applications\Schemas\ApplicationForm;
 use AcMarche\Hrm\Filament\Resources\Contracts\ContractResource;
 use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
-use AcMarche\Hrm\Filament\Resources\Diplomas\DiplomaResource;
+use AcMarche\Hrm\Filament\Resources\Diplomas\Schemas\DiplomaForm;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Filament\Resources\Evaluations\Schemas\EvaluationForm;
 use AcMarche\Hrm\Filament\Resources\HrDocuments\HrDocumentCreator;
@@ -19,6 +19,7 @@ use AcMarche\Hrm\Filament\Resources\SmsReminders\SmsReminderResource;
 use AcMarche\Hrm\Filament\Resources\Trainings\TrainingResource;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationForm;
 use AcMarche\Hrm\Models\Application;
+use AcMarche\Hrm\Models\Diploma;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Evaluation;
 use AcMarche\Hrm\Models\Internship;
@@ -89,10 +90,14 @@ final class ViewEmployee extends ViewRecord
                             HrDocumentCreator::createForEmployee($record, $data);
                         })
                         ->successNotificationTitle('Document ajouté'),
-                    Action::make('addDiploma')
+                    CreateAction::make('addDiploma')
                         ->label('Ajouter un diplôme')
                         ->icon('tabler-plus')
-                        ->url(DiplomaResource::getUrl('create', $employeeId)),
+                        ->modal()
+                        ->schema(fn (Schema $schema) => DiplomaForm::configure($schema)->model(Diploma::class))
+                        ->action(function (array $data, Employee $record): void {
+                            $record->diplomas()->create($data);
+                        }),
                     CreateAction::make('addEvaluation')
                         ->label('Ajouter une évaluation')
                         ->icon('tabler-plus')->modal()

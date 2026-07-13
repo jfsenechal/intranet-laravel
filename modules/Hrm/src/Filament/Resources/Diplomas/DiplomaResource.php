@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Diplomas;
 
-use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\CreateDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\EditDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ListDiplomas;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ViewDiploma;
@@ -68,7 +67,6 @@ final class DiplomaResource extends Resource
     {
         return [
             'index' => ListDiplomas::route('/'),
-            'create' => CreateDiploma::route('/create'),
             'view' => ViewDiploma::route('/{record}/view'),
             'edit' => EditDiploma::route('/{record}/edit'),
         ];

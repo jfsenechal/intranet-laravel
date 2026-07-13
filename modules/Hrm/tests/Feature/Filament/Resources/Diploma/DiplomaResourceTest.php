@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use AcMarche\Hrm\Filament\Exports\DiplomaExport;
-use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\CreateDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\EditDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ListDiplomas;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ViewDiploma;
+use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Models\Diploma;
 use AcMarche\Hrm\Models\Employee;
 use App\Models\User;
@@ -27,11 +27,6 @@ beforeEach(function (): void {
 describe('page rendering', function (): void {
     it('can render the index page', function (): void {
         Livewire::test(ListDiplomas::class)
-            ->assertOk();
-    });
-
-    it('can render the create page', function (): void {
-        Livewire::test(CreateDiploma::class)
             ->assertOk();
     });
 
@@ -79,19 +74,29 @@ describe('crud operations', function (): void {
     });
 });
 
-describe('form validation', function (): void {
+describe('creating a diploma for an employee', function (): void {
+    it('creates a diploma through the employee action with the employee_id set', function (): void {
+        $employee = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $employee->id])
+            ->callAction('addDiploma', ['name' => 'Diplôme aide-soignante'])
+            ->assertHasNoActionErrors();
+
+        assertDatabaseHas(Diploma::class, [
+            'name' => 'Diplôme aide-soignante',
+            'employee_id' => $employee->id,
+        ]);
+    });
+
     it('validates the form data on create', function (array $data, array $errors): void {
         $employee = Employee::factory()->create();
-        $newData = Diploma::factory()->make(['employee_id' => $employee->id]);
 
-        Livewire::test(CreateDiploma::class)
-            ->fillForm([
-                'name' => $newData->name,
+        Livewire::test(ViewEmployee::class, ['record' => $employee->id])
+            ->callAction('addDiploma', [
+                'name' => 'Intitulé',
                 ...$data,
             ])
-            ->call('create')
-            ->assertHasFormErrors($errors)
-            ->assertNotNotified();
+            ->assertHasActionErrors($errors);
     })->with([
         '`name` is required' => [['name' => null], ['name' => 'required']],
         '`name` is max 150 characters' => [['name' => Str::random(151)], ['name' => 'max']],
