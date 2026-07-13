@@ -15,7 +15,6 @@ function createRouteMeal(Week $week, DeliveryRoute $route, ?string $clientNotes,
     $client = Client::create([
         'last_name' => fake()->lastName(),
         'first_name' => fake()->firstName(),
-        'slug' => fake()->unique()->slug(),
         'street' => fake()->streetName(),
         'number' => (string) fake()->buildingNumber(),
         'postal_code' => 6900,

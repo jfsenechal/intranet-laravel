@@ -21,7 +21,7 @@ return new class extends Migration
                 $table->renameColumn('civilite', 'salutation');
                 $table->renameColumn('nom', 'last_name');
                 $table->renameColumn('prenom', 'first_name');
-                $table->renameColumn('slugname', 'slug');
+                $table->removeColumn('slugname');
                 $table->renameColumn('rue', 'street');
                 $table->renameColumn('numero', 'number');
                 $table->renameColumn('code_postal', 'postal_code');
@@ -48,7 +48,6 @@ return new class extends Migration
                 $table->string('salutation')->nullable();
                 $table->string('last_name');
                 $table->string('first_name');
-                $table->string('slug', 70)->unique();
                 $table->string('street');
                 $table->string('number');
                 $table->integer('postal_code');

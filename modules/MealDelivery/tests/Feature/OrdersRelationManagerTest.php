@@ -29,7 +29,6 @@ function createMealDeliveryClient(string $lastName, bool $isActive): Client
     return Client::create([
         'last_name' => $lastName,
         'first_name' => fake()->firstName(),
-        'slug' => fake()->unique()->slug(),
         'street' => fake()->streetName(),
         'number' => (string) fake()->buildingNumber(),
         'postal_code' => 6900,
