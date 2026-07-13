@@ -21,6 +21,7 @@ it('shows deadlines with an upcoming reminder date', function (): void {
     ]);
 
     livewire(DeadlineRemindersWidget::class)
+        ->loadTable()
         ->assertCanSeeTableRecords([$upcoming]);
 });
 
@@ -33,5 +34,20 @@ it('hides deadlines without a reminder date, past reminders or closed ones', fun
     ]);
 
     livewire(DeadlineRemindersWidget::class)
+        ->loadTable()
         ->assertCanNotSeeTableRecords([$noReminder, $pastReminder, $closed]);
+});
+
+it('filters deadlines by the reminder_date range', function (): void {
+    $inRange = Deadline::factory()->create(['reminder_date' => today()->addWeek()]);
+    $outOfRange = Deadline::factory()->create(['reminder_date' => today()->addMonths(2)]);
+
+    livewire(DeadlineRemindersWidget::class)
+        ->loadTable()
+        ->filterTable('reminder_date', [
+            'from' => today()->toDateString(),
+            'until' => today()->addWeeks(2)->toDateString(),
+        ])
+        ->assertCanSeeTableRecords([$inRange])
+        ->assertCanNotSeeTableRecords([$outOfRange]);
 });
