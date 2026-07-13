@@ -156,6 +156,71 @@ describe('form validation', function (): void {
     ]);
 });
 
+describe('date range filters', function (): void {
+    /**
+     * Deadlines are only visible when their employee has an active contract,
+     * because the table defaults the `has_active_contract` filter to true.
+     */
+    function deadlineWithActiveContract(array $attributes = []): Deadline
+    {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => now()->addYear(),
+        ]);
+
+        return Deadline::factory()->create([
+            'employee_id' => $employee->id,
+            ...$attributes,
+        ]);
+    }
+
+    it('filters records with end_date within the range', function (): void {
+        $inRange = deadlineWithActiveContract(['end_date' => '2026-03-15']);
+        $before = deadlineWithActiveContract(['end_date' => '2026-01-10']);
+        $after = deadlineWithActiveContract(['end_date' => '2026-05-20']);
+
+        Livewire::test(ListDeadlines::class)
+            ->loadTable()
+            ->filterTable('end_date', [
+                'end_date_from' => '2026-03-01',
+                'end_date_until' => '2026-03-31',
+            ])
+            ->assertCanSeeTableRecords([$inRange])
+            ->assertCanNotSeeTableRecords([$before, $after]);
+    });
+
+    it('filters records with reminder_date within the range', function (): void {
+        $inRange = deadlineWithActiveContract(['reminder_date' => '2026-03-15']);
+        $before = deadlineWithActiveContract(['reminder_date' => '2026-01-10']);
+        $after = deadlineWithActiveContract(['reminder_date' => '2026-05-20']);
+
+        Livewire::test(ListDeadlines::class)
+            ->loadTable()
+            ->filterTable('reminder_date', [
+                'reminder_date_from' => '2026-03-01',
+                'reminder_date_until' => '2026-03-31',
+            ])
+            ->assertCanSeeTableRecords([$inRange])
+            ->assertCanNotSeeTableRecords([$before, $after]);
+    });
+
+    it('filters records with only the lower bound of end_date set', function (): void {
+        $inRange = deadlineWithActiveContract(['end_date' => '2026-05-20']);
+        $before = deadlineWithActiveContract(['end_date' => '2026-01-10']);
+
+        Livewire::test(ListDeadlines::class)
+            ->loadTable()
+            ->filterTable('end_date', [
+                'end_date_from' => '2026-03-01',
+            ])
+            ->assertCanSeeTableRecords([$inRange])
+            ->assertCanNotSeeTableRecords([$before]);
+    });
+});
+
 describe('export action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListDeadlines::class)

@@ -33,6 +33,7 @@ final class DeadlineTables
                 TextColumn::make('name')
                     ->label('Intitulé')
                     ->searchable()
+                    ->limit(80)
                     ->sortable(),
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
@@ -78,33 +79,52 @@ final class DeadlineTables
                 EmployerFilter::make(),
                 ServiceFilter::make(),
                 DirectionFilter::make(),
-                Filter::make('end_date_from')
+                Filter::make('end_date')
                     ->label("Date de l'échéance")
+                    ->columnSpanFull()
+                    ->columns(2)
                     ->schema([
                         DatePicker::make('end_date_from')
                             ->label('Date de l\'échéance (à partir de)'),
+                        DatePicker::make('end_date_until')
+                            ->label('Date de l\'échéance (jusqu\'à)'),
                     ])
-                    ->query(fn (Builder $query, array $data): Builder => $query->when(
-                        $data['end_date_from'] ?? null,
-                        fn (Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
-                    )),
-                Filter::make('reminder_date_from')
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['end_date_from'] ?? null,
+                            fn (Builder $query, $date): Builder => $query->whereDate('end_date', '>=', $date),
+                        )
+                        ->when(
+                            $data['end_date_until'] ?? null,
+                            fn (Builder $query, $date): Builder => $query->whereDate('end_date', '<=', $date),
+                        )),
+                Filter::make('reminder_date')
                     ->label('Date de rappel')
+                    ->columnSpanFull()
+                    ->columns(2)
                     ->schema([
                         DatePicker::make('reminder_date_from')
                             ->label('Date de rappel (à partir de)'),
+                        DatePicker::make('reminder_date_until')
+                            ->label('Date de rappel (jusqu\'à)'),
                     ])
-                    ->query(fn (Builder $query, array $data): Builder => $query->when(
-                        $data['reminder_date_from'] ?? null,
-                        fn (Builder $query, $date): Builder => $query->whereDate('reminder_date', '>=', $date),
-                    )),
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['reminder_date_from'] ?? null,
+                            fn (Builder $query, $date): Builder => $query->whereDate('reminder_date', '>=', $date),
+                        )
+                        ->when(
+                            $data['reminder_date_until'] ?? null,
+                            fn (Builder $query, $date): Builder => $query->whereDate('reminder_date', '<=', $date),
+                        )),
                 TernaryFilter::make('is_closed')
                     ->label('Clôturée')
                     ->placeholder('Toutes')
                     ->trueLabel('Clôturées')
                     ->falseLabel('En cours')
                     ->default(false),
-                ContractActiveFilter::makeWithContracts(),
+                ContractActiveFilter::makeWithContracts()
+                    ->default(true),
             ], layout: FiltersLayout::Modal)
             ->recordActions([
                 ViewAction::make(),
