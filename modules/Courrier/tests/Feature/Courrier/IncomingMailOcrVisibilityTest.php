@@ -19,16 +19,17 @@ beforeEach(function (): void {
 
 function createMailWithOcr(string $department): IncomingMail
 {
-    $mail = IncomingMail::factory()->create([
-        'department' => $department,
-        'content' => 'Texte OCR extrait',
-    ]);
+    $mail = IncomingMail::factory()->create(['department' => $department]);
 
     Attachment::create([
         'incoming_mail_id' => $mail->id,
         'file_name' => 'doc.pdf',
         'mime' => 'application/pdf',
     ]);
+
+    // Set the OCR content after creation: the create hook runs the indexing job
+    // (which resets content), and there is no indexing hook on update.
+    $mail->update(['content' => 'Texte OCR extrait']);
 
     return $mail;
 }
