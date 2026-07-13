@@ -5,20 +5,16 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks\RelationManagers;
 
 use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
+use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\CreateOrder;
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use Carbon\CarbonImmutable;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -28,6 +24,13 @@ final class OrdersRelationManager extends RelationManager
 {
     #[Override]
     protected static string $relationship = 'orders';
+
+    /**
+     * Custom wrapper adding the `meal-week-grid` class so the panel theme can
+     * pin the two header rows (day groups + P/M1/M2) while scrolling.
+     */
+    #[Override]
+    protected string $view = 'meal-delivery::filament.relation-managers.orders';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -52,17 +55,15 @@ final class OrdersRelationManager extends RelationManager
         $columns = [
             TextColumn::make('client_name')
                 ->label('Client')
-                ->tooltip('Détails de la commande')
-                ->state(fn (Order $record): string => mb_trim(
-                    ($record->client?->last_name ?? '').' '.($record->client?->first_name ?? ''),
+                ->state(fn (Client $record): string => mb_trim(
+                    $record->last_name.' '.$record->first_name,
                 ))
-                ->url(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record->id]))
-                ->searchable(query: fn (Builder $query, string $search): Builder => $query->where(
-                    fn (Builder $query) => $query
-                        ->where('clients.last_name', 'like', "%{$search}%")
-                        ->orWhere('clients.first_name', 'like', "%{$search}%"),
-                ))
-                ->sortable(['clients.last_name', 'clients.first_name']),
+                ->description(fn (Client $record): string => self::orderForClient($record) instanceof Order
+                    ? 'Détails de la commande'
+                    : 'Ajouter une commande')
+                ->url(fn (Client $record): string => self::orderForClient($record) instanceof Order
+                    ? OrderResource::getUrl('view', ['record' => self::orderForClient($record)->id])
+                    : CreateOrder::getUrl(['week_id' => $week->id, 'client_id' => $record->id])),
         ];
 
         $dayBorder = ['class' => 'border-l border-amber-500 dark:border-gray-700'];
@@ -75,78 +76,78 @@ final class OrdersRelationManager extends RelationManager
                 ->columns([
                     TextColumn::make("day_{$day}_soup")
                         ->label('P')
+                        ->tooltip('Potage')
                         ->alignCenter()
-                        // ->extraHeaderAttributes($dayBorder)
                         ->extraCellAttributes($dayBorder)
-                        ->state(fn (Order $record): int => self::soupCountForDay($record, $day)),
+                        ->state(fn (Client $record): int|string => self::soupCountForDay($record, $day)),
                     TextColumn::make("day_{$day}_menu1")
                         ->label('M1')
+                        ->tooltip('Menu 1')
                         ->alignCenter()
-                        ->state(fn (Order $record): int => self::menuCountForDay($record, $day, 1)),
+                        ->state(fn (Client $record): int|string => self::menuCountForDay($record, $day, 1)),
                     TextColumn::make("day_{$day}_menu2")
                         ->label('M2')
+                        ->tooltip('Menu 2')
                         ->alignCenter()
-                        ->state(fn (Order $record): int => self::menuCountForDay($record, $day, 2)),
+                        ->state(fn (Client $record): int|string => self::menuCountForDay($record, $day, 2)),
                 ]);
         }
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query
-                ->with(['client', 'meals.menus'])
-                ->leftJoin('clients', 'clients.id', '=', 'orders.client_id')
-                ->select('orders.*'))
-            ->defaultSort('clients.last_name')
+            ->records(fn (): Collection => self::activeClientsForWeek($week))
+            ->recordClasses(fn (Client $record): ?string => self::orderForClient($record) instanceof Order
+                ? null
+                : 'bg-amber-50 dark:bg-amber-400/10')
             ->paginated(false)
-            ->columns($columns)
-            ->headerActions([
-                Action::make('clientsWithoutOrder')
-                    ->label(fn (): string => 'Clients sans commande ('.self::clientsWithoutOrder($week)->count().')')
-                    ->icon(Heroicon::ExclamationTriangle)
-                    ->color('warning')
-                    ->modalHeading('Clients actifs sans commande cette semaine')
-                    ->modalContent(fn (): View => view('meal-delivery::filament.resources.weeks.relation-managers.clients-without-order', [
-                        'week' => $week,
-                        'clients' => self::clientsWithoutOrder($week),
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Fermer'),
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ]);
+            ->columns($columns);
     }
 
     /**
-     * Active clients that have no order for the given week.
+     * Every active client, with the order (and its meals) for the given week eager loaded.
      *
      * @return Collection<int, Client>
      */
-    private static function clientsWithoutOrder(Week $week): Collection
+    private static function activeClientsForWeek(Week $week): Collection
     {
         return Client::query()
-            ->activeWithoutOrderForWeek($week)
+            ->where('is_active', true)
+            ->with(['orders' => fn ($orders) => $orders
+                ->where('week_id', $week->id)
+                ->with('meals.menus')])
+            ->orderBy('last_name')
+            ->orderBy('first_name')
             ->get();
     }
 
-    private static function mealForDay(Order $order, string $day): ?Meal
+    private static function orderForClient(Client $client): ?Order
     {
-        return $order->meals->first(
+        return $client->orders->first();
+    }
+
+    private static function mealForDay(Client $client, string $day): ?Meal
+    {
+        return self::orderForClient($client)?->meals->first(
             fn (Meal $meal): bool => $meal->date?->format('Y-m-d') === $day,
         );
     }
 
-    private static function soupCountForDay(Order $order, string $day): int
+    private static function soupCountForDay(Client $client, string $day): int|string
     {
-        return (int) (self::mealForDay($order, $day)?->soup_count ?? 0);
+        $meal = self::mealForDay($client, $day);
+
+        return $meal instanceof Meal ? (int) $meal->soup_count : '';
     }
 
-    private static function menuCountForDay(Order $order, string $day, int $position): int
+    private static function menuCountForDay(Client $client, string $day, int $position): int|string
     {
-        $meal = self::mealForDay($order, $day);
+        $meal = self::mealForDay($client, $day);
 
-        return (int) $meal?->menus
+        if (! $meal instanceof Meal) {
+            return '';
+        }
+
+        return (int) $meal->menus
             ->where('position', $position)
             ->sum('quantity');
-
     }
 }

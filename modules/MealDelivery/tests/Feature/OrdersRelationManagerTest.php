@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\CreateOrder;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\ViewWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\RelationManagers\OrdersRelationManager;
 use AcMarche\MealDelivery\Models\Client;
@@ -38,58 +39,43 @@ function createMealDeliveryClient(string $lastName, bool $isActive): Client
     ]);
 }
 
-it('scopes to active clients without an order for the week', function (): void {
-    $withoutOrder = createMealDeliveryClient('WithoutOrder', isActive: true);
+it('lists active clients with and without an order for the week in one table', function (): void {
     $withOrder = createMealDeliveryClient('WithOrder', isActive: true);
+    $withoutOrder = createMealDeliveryClient('WithoutOrder', isActive: true);
     $inactive = createMealDeliveryClient('Inactive', isActive: false);
 
     Order::create(['week_id' => $this->week->id, 'client_id' => $withOrder->id]);
-
-    $clients = Client::query()->activeWithoutOrderForWeek($this->week)->get();
-
-    expect($clients->pluck('id')->all())->toBe([$withoutOrder->id]);
-});
-
-it('ignores orders that belong to another week', function (): void {
-    $client = createMealDeliveryClient('Other', isActive: true);
-    $otherWeek = Week::create(['first_day' => '2026-06-22', 'days' => ['2026-06-22']]);
-
-    Order::create(['week_id' => $otherWeek->id, 'client_id' => $client->id]);
-
-    $clients = Client::query()->activeWithoutOrderForWeek($this->week)->get();
-
-    expect($clients->pluck('id')->all())->toBe([$client->id]);
-});
-
-it('searches orders by client last and first name', function (): void {
-    $piette = createMealDeliveryClient('Piette', isActive: true);
-    $dupont = createMealDeliveryClient('Dupont', isActive: true);
-
-    $pietteOrder = Order::create(['week_id' => $this->week->id, 'client_id' => $piette->id]);
-    $dupontOrder = Order::create(['week_id' => $this->week->id, 'client_id' => $dupont->id]);
 
     livewire(OrdersRelationManager::class, [
         'ownerRecord' => $this->week,
         'pageClass' => ViewWeek::class,
     ])
         ->call('loadTable')
-        ->assertCanSeeTableRecords([$pietteOrder, $dupontOrder])
-        ->searchTable('Piett')
-        ->assertCanSeeTableRecords([$pietteOrder])
-        ->assertCanNotSeeTableRecords([$dupontOrder]);
+        ->assertSee('WithOrder')
+        ->assertSee('WithoutOrder')
+        ->assertDontSee('Inactive')
+        ->assertSee('Détails de la commande')
+        ->assertSee('Ajouter une commande');
 });
 
-it('shows the count of clients without an order in the header action', function (): void {
-    createMealDeliveryClient('First', isActive: true);
-    createMealDeliveryClient('Second', isActive: true);
-    $withOrder = createMealDeliveryClient('Covered', isActive: true);
-    createMealDeliveryClient('Inactive', isActive: false);
+it('renders the sticky-header grid wrapper', function (): void {
+    livewire(OrdersRelationManager::class, [
+        'ownerRecord' => $this->week,
+        'pageClass' => ViewWeek::class,
+    ])
+        ->assertSee('meal-week-grid');
+});
 
-    Order::create(['week_id' => $this->week->id, 'client_id' => $withOrder->id]);
+it('links a client without an order to the create order page for the week', function (): void {
+    $withoutOrder = createMealDeliveryClient('WithoutOrder', isActive: true);
 
     livewire(OrdersRelationManager::class, [
         'ownerRecord' => $this->week,
         'pageClass' => ViewWeek::class,
     ])
-        ->assertSee('Clients sans commande (2)');
+        ->call('loadTable')
+        ->assertSee(CreateOrder::getUrl([
+            'week_id' => $this->week->id,
+            'client_id' => $withoutOrder->id,
+        ]));
 });

@@ -12,3 +12,29 @@
 .dark .fi-sidebar-nav {
     border-right: 1px solid #18181B;
 }
+
+/*
+ * Weekly meal grid (OrdersRelationManager): keep the two header rows
+ * (day groups + P/M1/M2 labels) visible while scrolling a long client list.
+ * The header scrolls horizontally with the body and sticks vertically within
+ * the table's own scroll box (the horizontal-scroll container prevents a
+ * window-relative sticky header).
+ */
+.meal-week-grid .fi-ta-content-ctn {
+    max-height: calc(100dvh - 16rem);
+    overflow-y: auto;
+}
+
+.meal-week-grid .fi-ta-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.meal-week-grid .fi-ta-table thead th {
+    background-color: var(--color-white);
+}
+
+.dark .meal-week-grid .fi-ta-table thead th {
+    background-color: var(--gray-900);
+}
