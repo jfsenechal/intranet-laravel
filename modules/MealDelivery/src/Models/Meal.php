@@ -37,6 +37,13 @@ final class Meal extends Model
         return $this->hasMany(Menu::class);
     }
 
+    protected static function booted(): void
+    {
+        self::deleting(function (Meal $meal): void {
+            $meal->menus->each(fn (Menu $menu): ?bool => $menu->delete());
+        });
+    }
+
     protected function casts(): array
     {
         return [

@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['client_id', 'note_date', 'description', 'is_done', 'done_by'])]
 final class Note extends Model
 {
+    public $timestamps = false;
+
     public function __toString(): string
     {
         return 'Note of '.($this->note_date?->format('d-m-Y') ?? '');

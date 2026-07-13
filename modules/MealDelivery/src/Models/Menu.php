@@ -32,6 +32,13 @@ final class Menu extends Model
         return $this->belongsToMany(Diet::class, 'diet_menu');
     }
 
+    protected static function booted(): void
+    {
+        self::deleting(function (Menu $menu): void {
+            $menu->diets()->detach();
+        });
+    }
+
     protected function casts(): array
     {
         return [

@@ -38,6 +38,13 @@ final class Order extends Model
         return $this->hasMany(Meal::class);
     }
 
+    protected static function booted(): void
+    {
+        self::deleting(function (Order $order): void {
+            $order->meals->each(fn (Meal $meal): ?bool => $meal->delete());
+        });
+    }
+
     protected function casts(): array
     {
         return [
