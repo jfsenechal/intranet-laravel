@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Jobs;
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Mail\IncomingMailNotification;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
@@ -11,6 +12,7 @@ use AcMarche\Courrier\Repository\IncomingMailRepository;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\InteractsWithQueue;
@@ -29,6 +31,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
         public readonly CarbonInterface $mailDate,
         public readonly bool $force = false,
         public readonly ?Address $sender = null,
+        public readonly ?DepartmentCourrierEnum $department = null,
     ) {}
 
     public function handle(): void
@@ -36,6 +39,10 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
         if ($this->force) {
             IncomingMail::query()
                 ->whereDate('mail_date', $this->mailDate)
+                ->when(
+                    $this->department instanceof DepartmentCourrierEnum,
+                    fn (Builder $query): Builder => $query->where('department', $this->department->value),
+                )
                 ->update(['is_notified' => false]);
         }
 
@@ -53,7 +60,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
         $notifiedMailIds = [];
 
         foreach ($recipients as $recipient) {
-            $incomingMails = $repository->getIncomingMailsForRecipient($recipient, $this->mailDate);
+            $incomingMails = $repository->getIncomingMailsForRecipient($recipient, $this->mailDate, false, $this->department);
 
             if ($incomingMails->isEmpty()) {
                 continue;

@@ -42,6 +42,33 @@ describe('NotifyRecipients Page Access', function (): void {
             ->assertSuccessful();
     });
 
+    test('an admin without a department cannot send notifications', function (): void {
+        Queue::fake();
+
+        // is_administrator holds no courrier admin role, so currentAdminDepartment() is null.
+        $admin = User::factory()->create(['is_administrator' => true]);
+        $this->actingAs($admin);
+
+        livewire(NotifyRecipients::class)
+            ->callAction('sendNotifications')
+            ->assertNotified('Envoi impossible');
+
+        Queue::assertNotPushed(SendIncomingMailNotificationJob::class);
+    });
+
+    test('a department admin can send notifications', function (): void {
+        Queue::fake();
+
+        $villeAdmin = User::factory()->create();
+        $villeAdmin->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]));
+        $this->actingAs($villeAdmin);
+
+        livewire(NotifyRecipients::class)
+            ->callAction('sendNotifications');
+
+        Queue::assertPushed(SendIncomingMailNotificationJob::class);
+    });
+
     test('regular user cannot access notify recipients page', function (): void {
         $user = User::factory()->create();
 
@@ -328,6 +355,103 @@ describe('SendIncomingMailNotificationJob', function (): void {
         Mail::assertSent(IncomingMailNotification::class, fn ($mailable) => $mailable->hasTo($recipient->email));
     });
 
+    test('a department admin only notifies mail of their own department', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create(['email' => 'dept@example.com']);
+
+        $cpasMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+        $cpasMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $villeMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
+        $villeMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        // Triggered by a Cpas admin: only the Cpas mail must be notified.
+        $job = new SendIncomingMailNotificationJob(Date::now(), department: DepartmentCourrierEnum::CPAS);
+        $job->handle();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mailable): bool => $mailable->hasTo($recipient->email)
+                && $mailable->incomingMails->count() === 1
+                && $mailable->incomingMails->first()->is($cpasMail)
+        );
+
+        expect($cpasMail->fresh()->is_notified)->toBeTrue()
+            ->and($villeMail->fresh()->is_notified)->toBeFalse();
+    });
+
+    test('force only resets mail of the triggering department', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create(['email' => 'force-dept@example.com']);
+
+        $cpasMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => true,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+        $cpasMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $villeMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => true,
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
+        $villeMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $job = new SendIncomingMailNotificationJob(Date::now(), force: true, department: DepartmentCourrierEnum::CPAS);
+        $job->handle();
+
+        // The Ville mail keeps its notified flag: the Cpas admin never touched it.
+        expect($cpasMail->fresh()->is_notified)->toBeTrue()
+            ->and($villeMail->fresh()->is_notified)->toBeTrue();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mailable): bool => $mailable->incomingMails->count() === 1
+                && $mailable->incomingMails->first()->is($cpasMail)
+        );
+    });
+
+    test('a global administrator notifies mail of every department', function (): void {
+        Mail::fake();
+
+        $recipient = Recipient::factory()->create(['email' => 'global@example.com']);
+
+        $cpasMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+        $cpasMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $villeMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
+        $villeMail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        // No department passed: a global admin notifies everything.
+        $job = new SendIncomingMailNotificationJob(Date::now());
+        $job->handle();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mailable): bool => $mailable->hasTo($recipient->email)
+                && $mailable->incomingMails->count() === 2
+        );
+    });
+
     test('force re-notifies mail that was already notified', function (): void {
         Mail::fake();
 
@@ -492,6 +616,29 @@ describe('NotifyRecipients preview count', function (): void {
 
         expect($component->countRecipientsToNotify(false))->toBe(0)
             ->and($component->countRecipientsToNotify(true))->toBe(1);
+    });
+
+    test('a Ville admin does not count recipients whose only mail is from another department', function (): void {
+        $villeAdmin = User::factory()->create();
+        $villeAdmin->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]));
+
+        // A Cpas index recipient with only Cpas mail: visible to them, but the
+        // Ville admin must not count them.
+        $cpasIndexUser = User::factory()->create(['username' => 'cpasindex']);
+        $cpasIndexUser->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_INDEX->value]));
+        Recipient::factory()->create(['email' => 'cpas-index@example.com', 'username' => 'cpasindex']);
+
+        IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        $this->actingAs($villeAdmin);
+
+        $component = livewire(NotifyRecipients::class)->instance();
+
+        expect($component->countRecipientsToNotify(false))->toBe(0);
     });
 });
 

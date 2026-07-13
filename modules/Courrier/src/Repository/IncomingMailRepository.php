@@ -79,13 +79,21 @@ final class IncomingMailRepository
      * When $includeNotified is true, the is_notified filter is dropped so the
      * result mirrors a forced re-notification (which resets that flag first).
      *
+     * When $department is given, the result is further restricted to that
+     * department. This mirrors the department a triggering admin administers, so
+     * a Cpas admin only notifies Cpas mail and a Ville admin only Ville mail.
+     *
      * @return Collection<int, IncomingMail>
      */
-    public function getIncomingMailsForRecipient(Recipient $recipient, CarbonInterface $mailDate, bool $includeNotified = false): Collection
+    public function getIncomingMailsForRecipient(Recipient $recipient, CarbonInterface $mailDate, bool $includeNotified = false, ?DepartmentCourrierEnum $department = null): Collection
     {
         $baseQuery = IncomingMail::query()
             ->when(! $includeNotified, fn (Builder $query): Builder => $query->where('is_notified', false))
             ->whereDate('mail_date', $mailDate)
+            ->when(
+                $department instanceof DepartmentCourrierEnum,
+                fn (Builder $query): Builder => $query->where('incoming_mails.department', $department->value),
+            )
             ->with(['services', 'recipients', 'attachments', 'category']);
 
         if ($this->recipientHasIndexRole($recipient)) {

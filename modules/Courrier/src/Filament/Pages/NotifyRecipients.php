@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Pages;
 
+use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Filament\Resources\NotifyRecipients\Schemas\NotifyRecipientsForm;
 use AcMarche\Courrier\Filament\Resources\NotifyRecipients\Tables\NotifyRecipientsTables;
 use AcMarche\Courrier\Jobs\SendIncomingMailNotificationJob;
@@ -94,8 +95,10 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
 
         $preview = [];
 
+        $department = $this->currentAdminDepartment();
+
         foreach ($recipients as $recipient) {
-            $mails = $incomingMailRepository->getIncomingMailsForRecipient($recipient, $mailDate);
+            $mails = $incomingMailRepository->getIncomingMailsForRecipient($recipient, $mailDate, false, $department);
 
             if ($mails->isNotEmpty()) {
                 $preview[] = [
@@ -122,10 +125,11 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
 
         $incomingMailRepository = new IncomingMailRepository();
         $mailDate = Date::parse($this->mail_date);
+        $department = $this->currentAdminDepartment();
 
         return RecipientRepository::getWithEmail()
             ->filter(fn ($recipient): bool => $incomingMailRepository
-                ->getIncomingMailsForRecipient($recipient, $mailDate, $includeNotified)
+                ->getIncomingMailsForRecipient($recipient, $mailDate, $includeNotified, $department)
                 ->isNotEmpty())
             ->count();
     }
@@ -159,10 +163,23 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                         return;
                     }
 
+                    $department = $this->currentAdminDepartment();
+
+                    if (! $department instanceof DepartmentCourrierEnum) {
+                        Notification::make()
+                            ->title('Envoi impossible')
+                            ->body('Aucun département administrateur ne vous est associé. Vous ne pouvez pas envoyer de notifications.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
                     dispatch(new SendIncomingMailNotificationJob(
                         Date::parse($this->mail_date),
                         $this->force_notify,
                         $this->senderAddress(),
+                        $department,
                     ));
 
                     Notification::make()
@@ -174,6 +191,19 @@ final class NotifyRecipients extends Page implements HasForms, HasTable
                     $this->loadPreviewData();
                 }),
         ];
+    }
+
+    /**
+     * The department the triggering admin administers, used to restrict the
+     * notified mail. A Cpas admin only notifies Cpas mail, a Ville admin only
+     * Ville mail. Returns null for a global administrator, who notifies every
+     * department.
+     */
+    private function currentAdminDepartment(): ?DepartmentCourrierEnum
+    {
+        $user = Auth::user();
+
+        return $user instanceof User ? $user->getCourrierAdminDepartment() : null;
     }
 
     /**
