@@ -55,12 +55,12 @@ final class ContractTables
                     ->label('Débute le')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('end_date')
                     ->label('Prend fin le')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('work_regime')
                     ->label('Regime')
                     ->sortable()
