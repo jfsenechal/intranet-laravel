@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Filament\Resources\Activities\RelationManagers;
 
+use AcMarche\ActivityManager\Filament\Resources\Schedules\SchedulesResource;
+use AcMarche\ActivityManager\Models\Schedule;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -26,6 +29,11 @@ final class SchedulesRelationManager extends RelationManager
 
     #[Override]
     protected static ?string $title = 'Cours';
+
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -54,6 +62,7 @@ final class SchedulesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->defaultSort('start_date', 'DESC')
             ->columns([
                 TextColumn::make('name')->label('Nom')->searchable()->sortable()->limit(80)->wrap(),
                 TextColumn::make('start_date')->label('Début')->date('d/m/Y')->sortable(),
@@ -66,6 +75,9 @@ final class SchedulesRelationManager extends RelationManager
                     ->icon(Heroicon::Plus),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Voir')
+                    ->url(fn(Schedule $record): string => SchedulesResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
@@ -73,6 +85,7 @@ final class SchedulesRelationManager extends RelationManager
                     ->label('Supprimer')
                     ->icon(Heroicon::Trash),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

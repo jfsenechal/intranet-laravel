@@ -9,7 +9,6 @@ use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\EditSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ListSchedules;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\MembersRelationManager;
-use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\SchedulesActivityRelationManager;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Schemas\ScheduleForm;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Tables\SchedulesTable;
 use AcMarche\ActivityManager\Models\Schedule;
@@ -30,13 +29,13 @@ final class SchedulesResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = 'Activités';
+    protected static string|UnitEnum|null $navigationGroup = 'cours';
 
     #[Override]
     protected static ?int $navigationSort = 2;
 
     #[Override]
-    protected static ?string $navigationLabel = 'Schedules';
+    protected static ?string $navigationLabel = 'Cours';
 
     #[Override]
     protected static ?string $modelLabel = 'cours';
@@ -67,7 +66,6 @@ final class SchedulesResource extends Resource
     public static function getRelations(): array
     {
         return [
-            SchedulesActivityRelationManager::class,
             MembersRelationManager::class,
         ];
     }

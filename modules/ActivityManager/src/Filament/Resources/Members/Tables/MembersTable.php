@@ -29,7 +29,7 @@ final class MembersTable
                 TextColumn::make('civility')
                     ->label('Civilité')
                     ->badge()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()
@@ -48,13 +48,14 @@ final class MembersTable
                     ->copyable(),
                 TextColumn::make('email')
                     ->label('Email')
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->copyable()
                     ->searchable(),
                 IconColumn::make('enabled')
                     ->label('Actif')
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('schedules_count')
                     ->counts('schedules')
                     ->label('Cours')
@@ -64,7 +65,7 @@ final class MembersTable
                     ->label('Inscrit le')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('civility')
@@ -76,9 +77,9 @@ final class MembersTable
                     ->schema([
                         TextInput::make('city')->label('Localité'),
                     ])
-                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                    ->query(fn(Builder $query, array $data): Builder => $query->when(
                         $data['city'] ?? null,
-                        fn (Builder $q, string $value): Builder => $q->where('city', 'like', "%{$value}%"),
+                        fn(Builder $q, string $value): Builder => $q->where('city', 'like', "%{$value}%"),
                     )),
             ])
             ->recordActions([
