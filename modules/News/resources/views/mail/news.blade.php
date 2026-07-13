@@ -1,3 +1,4 @@
+@php use AcMarche\News\Filament\Resources\News\Pages\ViewNews; @endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -77,11 +78,16 @@
                 Attention, il y a {{ $mediasCount }} pièce(s) jointe(s) dans cette actualité, pour la (les) consulter,
                 rendez-vous sur l'intranet.
                 <br/><br/>
-                <a href="{{ route('news.show', $news) }}">Consultez sur l'intranet</a>
+                <a href="{{ ViewNews::getUrl(['record' => $news], panel: 'news-panel') }}">Consultez sur l'intranet</a>
             </div>
         @endif
 
         <div class="email-footer">
+            Envoyé par {{ $resolvedSender?->name }}
+            @if ($news->created_at)
+                &middot; créée le {{ $news->created_at->format('d/m/Y à H:i') }}
+            @endif
+            <br/>
             &copy; {{ date('Y') }} {{ config('app.name') }}
         </div>
     </div>

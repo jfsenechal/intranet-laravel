@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Events\NewsProcessed;
+use AcMarche\News\Filament\Resources\News\Pages\ViewNews;
 use AcMarche\News\Listeners\NewsNotification;
 use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\News;
@@ -108,5 +109,21 @@ it('shows the intranet notice when the medias are not attached', function (): vo
 
     expect($rendered)
         ->toContain('pièce(s) jointe(s)')
-        ->toContain(route('news.show', $news));
+        ->toContain(ViewNews::getUrl(['record' => $news], panel: 'news-panel'));
+});
+
+it('sends from the application default address', function (): void {
+    $news = News::factory()->create();
+
+    $envelope = (new NewsEmail($news))->envelope();
+
+    expect($envelope->from?->address)->toBe(config('mail.from.address'));
+});
+
+it('shows the creation date in the footer', function (): void {
+    $news = News::factory()->create();
+
+    $rendered = (new NewsEmail($news))->render();
+
+    expect($rendered)->toContain($news->created_at->format('d/m/Y à H:i'));
 });
