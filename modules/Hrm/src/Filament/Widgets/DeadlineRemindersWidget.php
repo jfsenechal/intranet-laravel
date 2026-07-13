@@ -7,7 +7,10 @@ namespace AcMarche\Hrm\Filament\Widgets;
 use AcMarche\Hrm\Filament\Resources\Deadlines\DeadlineResource;
 use AcMarche\Hrm\Models\Deadline;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Flex;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,6 +62,27 @@ final class DeadlineRemindersWidget extends BaseWidget
                     ->sortable(),
             ])
             ->defaultPaginationPageOption(5)
+            ->filters([
+                Filter::make('reminder_date')
+                    ->label('Date de rappel')
+                    ->schema([
+                        Flex::make([
+                            DatePicker::make('from')
+                                ->label('Du'),
+                            DatePicker::make('until')
+                                ->label('Au'),
+                        ]),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['from'] ?? null,
+                            fn (Builder $query, $date): Builder => $query->whereDate('reminder_date', '>=', $date),
+                        )
+                        ->when(
+                            $data['until'] ?? null,
+                            fn (Builder $query, $date): Builder => $query->whereDate('reminder_date', '<=', $date),
+                        )),
+            ])
             ->recordActions([
                 ViewAction::make()
                     ->url(fn (Deadline $record): string => DeadlineResource::getUrl('view', ['record' => $record])),
