@@ -66,6 +66,16 @@ it('can render the view page', function (): void {
         ->assertOk();
 });
 
+it('renders the department badge from the enum-cast state', function (): void {
+    $news = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->assertOk()
+        ->assertSee(DepartmentEnum::VILLE->getLabel());
+});
+
 it('renders legacy plain-text content with line breaks', function (): void {
     $news = News::factory()->create(['content' => "Première ligne\nDeuxième ligne"]);
 
