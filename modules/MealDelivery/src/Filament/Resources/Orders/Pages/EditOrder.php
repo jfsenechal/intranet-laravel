@@ -80,6 +80,7 @@ final class EditOrder extends EditRecord
                     'soup_count' => (int) ($meal->soup_count ?? 0),
                     'menu_1' => (int) ($menus->firstWhere('position', 1)->quantity ?? 0),
                     'menu_2' => (int) ($menus->firstWhere('position', 2)->quantity ?? 0),
+                    'at_cafeteria' => (bool) ($meal->at_cafeteria ?? false),
                     'notes' => $meal->notes ?? null,
                 ];
             })
@@ -120,6 +121,7 @@ final class EditOrder extends EditRecord
                     'date' => $date,
                     'soup_count' => (int) ($mealData['soup_count'] ?? 0),
                     'notes' => $mealData['notes'] ?? null,
+                    'at_cafeteria' => (bool) ($mealData['at_cafeteria'] ?? false),
                 ];
 
                 if ($meal instanceof Meal) {

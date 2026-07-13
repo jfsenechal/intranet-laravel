@@ -75,3 +75,34 @@ it('does not create a duplicate when the order already exists at submit time', f
     expect(Order::query()->where('week_id', $this->week->id)->where('client_id', $this->client->id)->count())
         ->toBe(1);
 });
+
+it('exposes the at_cafeteria toggle on the meal form and binds it', function (): void {
+    livewire(CreateOrder::class)
+        ->fillForm([
+            'week_id' => $this->week->id,
+            'client_id' => $this->client->id,
+            'is_last_meal' => false,
+            'meals' => [
+                [
+                    'date' => '2026-06-15',
+                    'soup_count' => 0,
+                    'menu_1' => 1,
+                    'menu_2' => 0,
+                    'at_cafeteria' => true,
+                    'notes' => null,
+                ],
+            ],
+        ])
+        ->assertFormSet([
+            'meals' => [
+                [
+                    'date' => '2026-06-15',
+                    'soup_count' => 0,
+                    'menu_1' => 1,
+                    'menu_2' => 0,
+                    'at_cafeteria' => true,
+                    'notes' => null,
+                ],
+            ],
+        ]);
+});

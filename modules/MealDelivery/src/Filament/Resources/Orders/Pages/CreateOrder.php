@@ -64,6 +64,8 @@ final class CreateOrder extends CreateRecord
             return;
         }
 
+        $atCafeteria = (bool) (Client::find($this->clientId)?->use_cafeteria ?? false);
+
         $this->form->fill([
             'week_id' => $this->weekId,
             'client_id' => $this->clientId,
@@ -74,6 +76,7 @@ final class CreateOrder extends CreateRecord
                     'soup_count' => 0,
                     'menu_1' => 0,
                     'menu_2' => 0,
+                    'at_cafeteria' => $atCafeteria,
                     'notes' => null,
                 ])
                 ->values()
@@ -135,7 +138,7 @@ final class CreateOrder extends CreateRecord
                     'date' => $mealData['date'] ?? null,
                     'soup_count' => (int) ($mealData['soup_count'] ?? 0),
                     'notes' => $mealData['notes'] ?? null,
-                    'at_cafeteria' => false,
+                    'at_cafeteria' => (bool) ($mealData['at_cafeteria'] ?? false),
                 ]);
 
                 Menu::query()->create([

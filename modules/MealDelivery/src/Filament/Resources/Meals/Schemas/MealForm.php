@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Meals\Schemas;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -43,6 +44,10 @@ final class MealForm
                 ->numeric()
                 ->minValue(0)
                 ->default(0),
+
+            Toggle::make('at_cafeteria')
+                ->label('Cafeteria')
+                ->default(false),
 
             Textarea::make('notes')
                 ->label('Remarque')
