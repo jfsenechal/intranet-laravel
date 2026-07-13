@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Absences\Schemas;
 use AcMarche\Hrm\Enums\ReasonsEnum;
 use AcMarche\Hrm\Enums\WorkCapacityAssessmentEnum;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -21,6 +22,7 @@ final class AbsenceForm
         return $schema
             ->columns(1)
             ->components([
+                Hidden::make('employee_id'),
                 ...AbsenceCallouts::components(),
                 Section::make('Période')
                     ->columns(2)

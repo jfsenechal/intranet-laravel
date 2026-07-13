@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Absences\Pages;
 
 use AcMarche\Hrm\Filament\Resources\Absences\AbsenceResource;
+use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Models\Employee;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Override;
@@ -14,6 +16,23 @@ final class CreateAbsence extends CreateRecord
 {
     #[Override]
     protected static string $resource = AbsenceResource::class;
+
+    #[Override]
+    public function mount(): void
+    {
+        if (! $this->getEmployeeFromQuery() instanceof Employee) {
+            Notification::make()
+                ->title('Veuillez sélectionner un agent avant d\'ajouter une absence.')
+                ->warning()
+                ->send();
+
+            $this->redirect(EmployeeResource::getUrl('index'));
+
+            return;
+        }
+
+        parent::mount();
+    }
 
     public function getTitle(): string|Htmlable
     {

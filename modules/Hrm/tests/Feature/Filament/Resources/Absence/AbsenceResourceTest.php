@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Absences\Pages\CreateAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\EditAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ListAbsences;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
+use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Models\Absence;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -27,9 +28,19 @@ describe('page rendering', function (): void {
             ->assertOk();
     });
 
-    it('can render the create page', function (): void {
+    it('can render the create page with an employee in the query string', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Livewire::withQueryParams(['employee_id' => $employee->id])
+            ->test(CreateAbsence::class)
+            ->assertOk()
+            ->assertNoRedirect();
+    });
+
+    it('redirects to the employees list when no employee is provided', function (): void {
         Livewire::test(CreateAbsence::class)
-            ->assertOk();
+            ->assertRedirect(EmployeeResource::getUrl('index'))
+            ->assertNotified();
     });
 
     it('can render the view page', function (): void {
@@ -52,6 +63,23 @@ describe('page rendering', function (): void {
 });
 
 describe('crud operations', function (): void {
+    it('creates an absence for the employee passed in the query string', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Livewire::withQueryParams(['employee_id' => $employee->id])
+            ->test(CreateAbsence::class)
+            ->fillForm([
+                'reason' => ReasonsEnum::SICKNESS->value,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(Absence::class, [
+            'employee_id' => $employee->id,
+            'reason' => ReasonsEnum::SICKNESS->value,
+        ]);
+    });
+
     it('can update an absence', function (): void {
         $record = Absence::factory()->create();
 
