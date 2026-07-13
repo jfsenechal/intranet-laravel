@@ -19,7 +19,7 @@ final class ContractRemindersWidget extends BaseWidget
     protected int|string|array $columnSpan = 'full';
 
     #[Override]
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 3;
 
     public function table(Table $table): Table
     {

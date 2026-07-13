@@ -6,11 +6,10 @@ namespace AcMarche\Hrm\Filament\Pages;
 
 use AcMarche\Hrm\Filament\Widgets\AbsenceRemindersWidget;
 use AcMarche\Hrm\Filament\Widgets\ContractRemindersWidget;
+use AcMarche\Hrm\Filament\Widgets\DeadlineRemindersWidget;
 use AcMarche\Hrm\Filament\Widgets\EmployeeRemindersWidget;
-use AcMarche\Hrm\Filament\Widgets\LastAbsencesWidget;
 use AcMarche\Hrm\Filament\Widgets\SmsReminderRemindersWidget;
 use AcMarche\Hrm\Filament\Widgets\TrainingRemindersWidget;
-use AcMarche\Hrm\Filament\Widgets\UpcomingDeadlinesWidget;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Support\Facades\Gate;
@@ -48,13 +47,12 @@ final class HrmDashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            AbsenceRemindersWidget::class,
+            DeadlineRemindersWidget::class,
             TrainingRemindersWidget::class,
             ContractRemindersWidget::class,
             EmployeeRemindersWidget::class,
-            AbsenceRemindersWidget::class,
             SmsReminderRemindersWidget::class,
-            LastAbsencesWidget::class,
-            UpcomingDeadlinesWidget::class,
         ];
     }
 }

@@ -13,31 +13,32 @@ use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Override;
 
-final class UpcomingDeadlinesWidget extends BaseWidget
+final class DeadlineRemindersWidget extends BaseWidget
 {
     #[Override]
     protected int|string|array $columnSpan = 'full';
 
     #[Override]
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 1;
 
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Prochaines échéances')
-            ->description('Échéances dont la date de fin est à venir.')
+            ->heading('Échéances - rappels à venir')
             ->query(
                 fn (): Builder => Deadline::query()
                     ->with(['employee', 'employer'])
                     ->where('is_closed', false)
-                    ->whereDate('end_date', '>=', today())
-                    ->orderBy('end_date')
+                    ->whereNotNull('reminder_date')
+                    ->whereDate('reminder_date', '>=', today())
+                    ->orderBy('reminder_date')
             )
             ->columns([
                 TextColumn::make('name')
                     ->label('Intitulé')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(40),
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
@@ -50,14 +51,14 @@ final class UpcomingDeadlinesWidget extends BaseWidget
                 TextColumn::make('end_date')
                     ->label('Échéance')
                     ->date('d/m/Y')
+                    ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('reminder_date')
                     ->label('Rappel')
                     ->date('d/m/Y')
-                    ->placeholder('—')
                     ->sortable(),
             ])
-            ->defaultPaginationPageOption(10)
+            ->defaultPaginationPageOption(5)
             ->recordActions([
                 ViewAction::make()
                     ->url(fn (Deadline $record): string => DeadlineResource::getUrl('view', ['record' => $record])),

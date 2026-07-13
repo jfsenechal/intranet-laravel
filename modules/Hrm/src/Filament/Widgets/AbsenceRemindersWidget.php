@@ -19,7 +19,7 @@ final class AbsenceRemindersWidget extends BaseWidget
     protected int|string|array $columnSpan = 'full';
 
     #[Override]
-    protected static ?int $sort = 6;
+    protected static ?int $sort = 2;
 
     public function table(Table $table): Table
     {

@@ -19,7 +19,7 @@ final class SmsReminderRemindersWidget extends BaseWidget
     protected int|string|array $columnSpan = 'full';
 
     #[Override]
-    protected static ?int $sort = 7;
+    protected static ?int $sort = 6;
 
     public function table(Table $table): Table
     {
