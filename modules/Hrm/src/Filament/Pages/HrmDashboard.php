@@ -32,6 +32,11 @@ final class HrmDashboard extends BaseDashboard
         return Gate::forUser(auth()->user())->check('hrm-administrator');
     }
 
+    public function getColumns(): int|array
+    {
+        return 2;
+    }
+
     public function getTitle(): string
     {
         return 'Tableau de bord RH';
@@ -43,13 +48,13 @@ final class HrmDashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
-            LastAbsencesWidget::class,
-            UpcomingDeadlinesWidget::class,
             TrainingRemindersWidget::class,
             ContractRemindersWidget::class,
             EmployeeRemindersWidget::class,
             AbsenceRemindersWidget::class,
             SmsReminderRemindersWidget::class,
+            LastAbsencesWidget::class,
+            UpcomingDeadlinesWidget::class,
         ];
     }
 }
