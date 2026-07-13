@@ -10,6 +10,7 @@ use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Livewire\Livewire;
 
 use function Pest\Livewire\livewire;
 
@@ -74,6 +75,30 @@ it('does not create a duplicate when the order already exists at submit time', f
 
     expect(Order::query()->where('week_id', $this->week->id)->where('client_id', $this->client->id)->count())
         ->toBe(1);
+});
+
+it('defaults the at_cafeteria toggle on when the client uses the cafeteria', function (): void {
+    $this->client->update(['use_cafeteria' => true]);
+
+    Livewire::withQueryParams([
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]);
+
+    livewire(CreateOrder::class)
+        ->assertFormSet(fn (array $state): bool => $state['meals'][array_key_first($state['meals'])]['at_cafeteria'] === true);
+});
+
+it('leaves the at_cafeteria toggle off when the client does not use the cafeteria', function (): void {
+    $this->client->update(['use_cafeteria' => false]);
+
+    Livewire::withQueryParams([
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]);
+
+    livewire(CreateOrder::class)
+        ->assertFormSet(fn (array $state): bool => $state['meals'][array_key_first($state['meals'])]['at_cafeteria'] === false);
 });
 
 it('exposes the at_cafeteria toggle on the meal form and binds it', function (): void {
