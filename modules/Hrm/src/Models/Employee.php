@@ -235,7 +235,8 @@ final class Employee extends Model
     {
         return SlugOptions::create()
             ->generateSlugsFrom(['last_name', 'first_name'])
-            ->saveSlugsTo('slug');
+            ->saveSlugsTo('slug')
+            ->slugsShouldBeNoLongerThan(55);
     }
 
     protected static function booted(): void
