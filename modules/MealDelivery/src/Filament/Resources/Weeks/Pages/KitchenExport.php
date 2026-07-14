@@ -91,6 +91,7 @@ final class KitchenExport extends Page
                     ->view('meal-delivery::filament.resources.weeks.pages.kitchen-export-pdf', [
                         'summary' => $this->summary,
                     ])
+                    ->landscape()
                     ->withBrowsershot(function (Browsershot $browsershot): void {
                         if ($path = config('pdf.node_modules_path')) {
                             $browsershot->setNodeModulePath($path);
