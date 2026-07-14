@@ -16,6 +16,9 @@ beforeEach(function (): void {
         'first_name' => 'Catherine',
         'last_name' => 'Boldo',
         'username' => 'cboldo',
+        'email' => 'catherine.boldo@cpas.marche.be',
+        'phone' => '084000000',
+        'mobile' => '0492266578',
     ]);
     $this->actingAs($this->user);
 });
