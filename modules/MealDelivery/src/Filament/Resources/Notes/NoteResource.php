@@ -21,7 +21,7 @@ final class NoteResource extends Resource
     protected static ?string $model = Note::class;
 
     #[Override]
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 4;
 
     public static function getNavigationBadge(): ?string
     {
