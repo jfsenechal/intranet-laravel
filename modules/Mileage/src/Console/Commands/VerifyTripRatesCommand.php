@@ -19,7 +19,9 @@ final class VerifyTripRatesCommand extends Command
      * @var string
      */
     #[Override]
-    protected $signature = 'mileage:verify-trip-rates {--fix : Update declared trips whose stored rate does not match the applicable rate}';
+    protected $signature = 'mileage:verify-trip-rates
+        {--fix : Update declared trips whose stored rate does not match the applicable rate}
+        {--skip-omnium : Only verify the rate amount and ignore the omnium}';
 
     /**
      * The console command description.
@@ -35,6 +37,7 @@ final class VerifyTripRatesCommand extends Command
     public function handle(TripAttributeResolver $tripAttributeResolver): int
     {
         $fix = (bool) $this->option('fix');
+        $checkOmnium = ! (bool) $this->option('skip-omnium');
 
         $mismatches = [];
         $missingRate = 0;
@@ -44,7 +47,7 @@ final class VerifyTripRatesCommand extends Command
             ->whereNotNull('declaration_id')
             ->where('declaration_id', '>', 0)
             ->with('declaration')
-            ->chunkById(200, function ($trips) use ($tripAttributeResolver, $fix, &$mismatches, &$missingRate, &$checked): void {
+            ->chunkById(200, function ($trips) use ($tripAttributeResolver, $fix, $checkOmnium, &$mismatches, &$missingRate, &$checked): void {
                 foreach ($trips as $trip) {
                     $checked++;
 
@@ -57,7 +60,7 @@ final class VerifyTripRatesCommand extends Command
                         continue;
                     }
 
-                    if ($this->rateMatches($trip, $rate)) {
+                    if ($this->rateMatches($trip, $rate, $checkOmnium)) {
                         continue;
                     }
 
@@ -67,13 +70,15 @@ final class VerifyTripRatesCommand extends Command
                         $trip->departure_date->format('d-m-Y'),
                         $this->formatAmount($trip->rate),
                         $this->formatAmount($rate->amount),
-                        $this->formatAmount($trip->omnium),
-                        $this->formatAmount($rate->omnium),
+                        $checkOmnium ? $this->formatAmount($trip->omnium) : '—',
+                        $checkOmnium ? $this->formatAmount($rate->omnium) : '—',
                     ];
 
                     if ($fix) {
                         $trip->rate = $rate->amount;
-                        $trip->omnium = $rate->omnium;
+                        if ($checkOmnium) {
+                            $trip->omnium = $rate->omnium;
+                        }
                         $trip->saveQuietly();
                     }
                 }
@@ -114,10 +119,17 @@ final class VerifyTripRatesCommand extends Command
         return $mismatches !== [] && ! $fix ? SfCommand::FAILURE : SfCommand::SUCCESS;
     }
 
-    private function rateMatches(Trip $trip, Rate $rate): bool
+    private function rateMatches(Trip $trip, Rate $rate, bool $checkOmnium): bool
     {
-        return $this->formatAmount($trip->rate) === $this->formatAmount($rate->amount)
-            && $this->formatAmount($trip->omnium) === $this->formatAmount($rate->omnium);
+        if ($this->formatAmount($trip->rate) !== $this->formatAmount($rate->amount)) {
+            return false;
+        }
+
+        if (! $checkOmnium) {
+            return true;
+        }
+
+        return $this->formatAmount($trip->omnium) === $this->formatAmount($rate->omnium);
     }
 
     private function formatAmount(int|float|string|null $amount): string

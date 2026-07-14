@@ -97,6 +97,58 @@ test('--fix corrects the stored rate and omnium', function (): void {
         ->and((float) $trip->omnium)->toBe(0.0300);
 });
 
+test('--skip-omnium ignores omnium mismatches', function (): void {
+    Rate::factory()->create([
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'amount' => 0.4000,
+        'omnium' => 0.0300,
+    ]);
+
+    // Correct rate but wrong omnium.
+    declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.4000, 0.9900);
+
+    $this->artisan('mileage:verify-trip-rates', ['--skip-omnium' => true])
+        ->assertSuccessful();
+
+    // Without the flag the same trip fails on the omnium mismatch.
+    $this->artisan('mileage:verify-trip-rates')
+        ->assertFailed();
+});
+
+test('--skip-omnium still reports rate mismatches', function (): void {
+    Rate::factory()->create([
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'amount' => 0.4000,
+        'omnium' => 0.0300,
+    ]);
+
+    declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.3000, 0.9900);
+
+    $this->artisan('mileage:verify-trip-rates', ['--skip-omnium' => true])
+        ->assertFailed();
+});
+
+test('--fix with --skip-omnium corrects the rate but leaves omnium untouched', function (): void {
+    Rate::factory()->create([
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'amount' => 0.4000,
+        'omnium' => 0.0300,
+    ]);
+
+    $trip = declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.3000, 0.9900);
+
+    $this->artisan('mileage:verify-trip-rates', ['--fix' => true, '--skip-omnium' => true])
+        ->assertSuccessful();
+
+    $trip->refresh();
+
+    expect((float) $trip->rate)->toBe(0.4000)
+        ->and((float) $trip->omnium)->toBe(0.9900);
+});
+
 test('warns when no applicable rate exists for a declared trip', function (): void {
     declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.4000, 0.0300);
 
