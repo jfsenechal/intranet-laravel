@@ -73,30 +73,46 @@ final class AbsenceInfolist
     private static function side(): array
     {
         return [
-            IconEntry::make('is_closed')
-                ->label('Clôturé')
-                ->falseIcon(false)
-                ->boolean(),
-            IconEntry::make('has_resumed')
-                ->label('Reprise')
-                ->falseIcon(false)
-                ->boolean(),
-            IconEntry::make('clock_updated')
-                ->label('Pointeuse')
-                ->falseIcon(false)
-                ->boolean(),
-            IconEntry::make('acropole')
-                ->label('Acropole')
-                ->falseIcon(false)
-                ->boolean(),
-            IconEntry::make('agent_file')
-                ->label('Dossier agent')
-                ->falseIcon(false)
-                ->boolean(),
-            IconEntry::make('certimed')
-                ->label('Certimed')
-                ->falseIcon(false)
-                ->boolean(),
+            Section::make('Options')
+                ->columns(2)
+                ->schema([
+                    IconEntry::make('is_closed')
+                        ->label('Clôturé')
+                        ->boolean(),
+                    IconEntry::make('has_resumed')
+                        ->label('Reprise')
+                        ->boolean(),
+                    IconEntry::make('clock_updated')
+                        ->label('Pointeuse')
+                        ->boolean(),
+                    IconEntry::make('acropole')
+                        ->label('Acropole')
+                        ->boolean(),
+                    IconEntry::make('agent_file')
+                        ->label('Dossier agent')
+                        ->boolean(),
+                    IconEntry::make('certimed')
+                        ->label('Certimed')
+                        ->boolean(),
+                ]),
+            Section::make('Métadonnées')
+                ->columns(2)
+                ->schema([
+                    TextEntry::make('created_at')
+                        ->label('Créé le')
+                        ->dateTime('d/m/Y H:i')
+                        ->placeholder('—'),
+                    TextEntry::make('user_add')
+                        ->label('Par')
+                        ->placeholder('—'),
+                    TextEntry::make('updated_at')
+                        ->label('Modifié le')
+                        ->dateTime('d/m/Y H:i')
+                        ->placeholder('—'),
+                    TextEntry::make('updated_by')
+                        ->label('Par')
+                        ->placeholder('—'),
+                ]),
         ];
     }
 }

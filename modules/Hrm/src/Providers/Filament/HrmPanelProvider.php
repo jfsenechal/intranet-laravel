@@ -18,6 +18,7 @@ use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -38,7 +39,9 @@ final class HrmPanelProvider extends PanelProvider
         return $panel
             ->id('hrm-panel')
             ->path('hrm')
-            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
+            ->maxContentWidth(Width::Full)
+            ->sidebarWidth('17rem')
             ->brandName('Resources Humaines')
             ->colors([
                 'primary' => Color::Amber,

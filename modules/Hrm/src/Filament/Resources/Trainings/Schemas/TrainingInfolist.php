@@ -7,7 +7,6 @@ namespace AcMarche\Hrm\Filament\Resources\Trainings\Schemas;
 use AcMarche\Hrm\Models\Training;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -41,7 +40,7 @@ final class TrainingInfolist
                                     ->url(fn (?string $state): ?string => $state ? Storage::disk('local')->temporaryUrl($state, now()->addMinutes(5)) : null)
                                     ->openUrlInNewTab(),
                             ]),
-                        Fieldset::make('Dates')
+                        Section::make('Dates')
                             ->columns(4)
                             ->schema([
                                 TextEntry::make('start_date')
@@ -57,7 +56,7 @@ final class TrainingInfolist
                                     ->label('Date de rappel')
                                     ->date('d/m/Y'),
                             ]),
-                        Fieldset::make('Accord')
+                        Section::make('Accord')
                             ->columns(2)
                             ->schema([
                                 TextEntry::make('granted_by')
@@ -76,19 +75,43 @@ final class TrainingInfolist
                                     ->columnSpanFull(),
                             ]),
                     ]),
-                Section::make('Statut')
+                Grid::make()
                     ->columnSpan(1)
+                    ->columns(1)
                     ->schema([
-                        IconEntry::make('is_closed')
-                            ->label('Clôturé')
-                            ->boolean(),
-                        TextEntry::make('training_type')
-                            ->label('Type de formation')
-                            ->badge()
-                            ->helperText(fn (Training $record): ?string => $record->training_type?->getDescription()),
-                        TextEntry::make('duration_minutes')
-                            ->label('Durée')
-                            ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state)),
+                        Section::make('Statut')
+                            ->columns(2)
+                            ->schema([
+                                IconEntry::make('is_closed')
+                                    ->label('Clôturé')
+                                    ->boolean(),
+                                TextEntry::make('duration_minutes')
+                                    ->label('Durée')
+                                    ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state)),
+                                TextEntry::make('training_type')
+                                    ->label('Type de formation')
+                                    ->badge()
+                                    ->columnSpanFull()
+                                    ->helperText(fn (Training $record): ?string => $record->training_type?->getDescription()),
+                            ]),
+                        Section::make('Métadonnées')
+                            ->columns(2)
+                            ->schema([
+                                TextEntry::make('created_at')
+                                    ->label('Créé le')
+                                    ->dateTime('d/m/Y H:i')
+                                    ->placeholder('—'),
+                                TextEntry::make('user_add')
+                                    ->label('Par')
+                                    ->placeholder('—'),
+                                TextEntry::make('updated_at')
+                                    ->label('Modifié le')
+                                    ->dateTime('d/m/Y H:i')
+                                    ->placeholder('—'),
+                                TextEntry::make('updated_by')
+                                    ->label('Par')
+                                    ->placeholder('—'),
+                            ]),
                     ]),
             ]);
     }

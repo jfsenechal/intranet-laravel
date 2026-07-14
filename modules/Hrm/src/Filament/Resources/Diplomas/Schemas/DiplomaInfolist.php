@@ -26,17 +26,24 @@ final class DiplomaInfolist
                             ->formatStateUsing(fn (?string $state): ?string => $state ? 'Télécharger' : null)
                             ->url(fn (?string $state): ?string => $state ? Storage::disk('local')->temporaryUrl($state, now()->addMinutes(5)) : null)
                             ->openUrlInNewTab(),
-                        TextEntry::make('user_add')
-                            ->label('Ajouté par'),
+                    ]),
+                Section::make('Métadonnées')
+                    ->columns(2)
+                    ->schema([
                         TextEntry::make('created_at')
                             ->label('Créé le')
-                            ->date('d/m/Y'),
-                        TextEntry::make('updated_by')
-                            ->label('Modifié par')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('—'),
+                        TextEntry::make('user_add')
+                            ->label('Par')
                             ->placeholder('—'),
                         TextEntry::make('updated_at')
                             ->label('Modifié le')
-                            ->date('d/m/Y'),
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('—'),
+                        TextEntry::make('updated_by')
+                            ->label('Par')
+                            ->placeholder('—'),
                     ]),
             ]);
     }
