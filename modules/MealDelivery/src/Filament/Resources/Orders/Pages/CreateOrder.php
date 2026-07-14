@@ -26,11 +26,6 @@ final class CreateOrder extends CreateRecord
     #[Override]
     protected static string $resource = OrderResource::class;
 
-    public function canCreateAnother(): bool
-    {
-        return false;
-    }
-
     public function mount(): void
     {
         $this->weekId = (int) request()->query('week_id') ?: null;
