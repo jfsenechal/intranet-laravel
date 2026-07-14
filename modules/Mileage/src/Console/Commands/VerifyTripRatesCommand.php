@@ -60,7 +60,9 @@ final class VerifyTripRatesCommand extends Command
                         continue;
                     }
 
-                    if ($this->rateMatches($trip, $rate, $checkOmnium)) {
+                    $expectedOmnium = $this->expectedOmnium($trip, $rate);
+
+                    if ($this->rateMatches($trip, $rate, $expectedOmnium, $checkOmnium)) {
                         continue;
                     }
 
@@ -71,13 +73,13 @@ final class VerifyTripRatesCommand extends Command
                         $this->formatAmount($trip->rate),
                         $this->formatAmount($rate->amount),
                         $checkOmnium ? $this->formatAmount($trip->omnium) : '—',
-                        $checkOmnium ? $this->formatAmount($rate->omnium) : '—',
+                        $checkOmnium ? $this->formatAmount($expectedOmnium) : '—',
                     ];
 
                     if ($fix) {
                         $trip->rate = $rate->amount;
                         if ($checkOmnium) {
-                            $trip->omnium = $rate->omnium;
+                            $trip->omnium = $expectedOmnium;
                         }
                         $trip->saveQuietly();
                     }
@@ -119,7 +121,7 @@ final class VerifyTripRatesCommand extends Command
         return $mismatches !== [] && ! $fix ? SfCommand::FAILURE : SfCommand::SUCCESS;
     }
 
-    private function rateMatches(Trip $trip, Rate $rate, bool $checkOmnium): bool
+    private function rateMatches(Trip $trip, Rate $rate, float $expectedOmnium, bool $checkOmnium): bool
     {
         if ($this->formatAmount($trip->rate) !== $this->formatAmount($rate->amount)) {
             return false;
@@ -129,7 +131,22 @@ final class VerifyTripRatesCommand extends Command
             return true;
         }
 
-        return $this->formatAmount($trip->omnium) === $this->formatAmount($rate->omnium);
+        return $this->formatAmount($trip->omnium) === $this->formatAmount($expectedOmnium);
+    }
+
+    /**
+     * The omnium applicable to the trip: the rate's omnium only when the
+     * declaration is entitled to it, otherwise zero. Mirrors the legacy
+     * DeplacementManager::hasOmnium() gate, which left the omnium at 0 for
+     * beneficiaries without omnium coverage.
+     */
+    private function expectedOmnium(Trip $trip, Rate $rate): float
+    {
+        if ($trip->declaration?->omnium !== true) {
+            return 0.0;
+        }
+
+        return (float) $rate->omnium;
     }
 
     private function formatAmount(int|float|string|null $amount): string

@@ -9,7 +9,7 @@ use App\Models\User;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
-    $this->declaration = Declaration::factory()->create();
+    $this->declaration = Declaration::factory()->create(['omnium' => true]);
 });
 
 /**
@@ -147,6 +147,60 @@ test('--fix with --skip-omnium corrects the rate but leaves omnium untouched', f
 
     expect((float) $trip->rate)->toBe(0.4000)
         ->and((float) $trip->omnium)->toBe(0.9900);
+});
+
+test('passes when a non-omnium declaration carries a zero omnium', function (): void {
+    Rate::factory()->create([
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'amount' => 0.4000,
+        'omnium' => 0.0300,
+    ]);
+
+    // Beneficiary not entitled to omnium: stored omnium is 0, which is correct
+    // even though the rate carries an omnium. This must not be flagged.
+    $declaration = Declaration::factory()->create(['omnium' => false]);
+    declaredTripWithRate($this->user->id, $declaration->id, '2026-06-15', 0.4000, 0.0000);
+
+    $this->artisan('mileage:verify-trip-rates')
+        ->expectsOutputToContain('All declared trips carry the correct rate.')
+        ->assertSuccessful();
+});
+
+test('fails when a non-omnium declaration wrongly carries the rate omnium', function (): void {
+    Rate::factory()->create([
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'amount' => 0.4000,
+        'omnium' => 0.0300,
+    ]);
+
+    // Beneficiary not entitled to omnium but charged one anyway: expected 0.
+    $declaration = Declaration::factory()->create(['omnium' => false]);
+    declaredTripWithRate($this->user->id, $declaration->id, '2026-06-15', 0.4000, 0.0300);
+
+    $this->artisan('mileage:verify-trip-rates')
+        ->assertFailed();
+});
+
+test('--fix resets omnium to zero for a non-omnium declaration', function (): void {
+    Rate::factory()->create([
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'amount' => 0.4000,
+        'omnium' => 0.0300,
+    ]);
+
+    $declaration = Declaration::factory()->create(['omnium' => false]);
+    $trip = declaredTripWithRate($this->user->id, $declaration->id, '2026-06-15', 0.4000, 0.0300);
+
+    $this->artisan('mileage:verify-trip-rates', ['--fix' => true])
+        ->assertSuccessful();
+
+    $trip->refresh();
+
+    expect((float) $trip->rate)->toBe(0.4000)
+        ->and((float) $trip->omnium)->toBe(0.0000);
 });
 
 test('warns when no applicable rate exists for a declared trip', function (): void {
