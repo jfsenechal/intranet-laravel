@@ -31,7 +31,7 @@ final class OrdersByMonth extends Page
 
     protected static ?string $slug = 'orders-by-month';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     protected string $view = 'meal-delivery::filament.pages.orders-by-month';
 
