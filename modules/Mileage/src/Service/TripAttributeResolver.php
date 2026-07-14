@@ -12,7 +12,20 @@ final class TripAttributeResolver
 {
     public function setRate(Trip $trip): void
     {
-        $rate = Rate::query()
+        $rate = $this->resolveRate($trip);
+
+        if ($rate instanceof Rate) {
+            $trip->rate = $rate->amount;
+            $trip->omnium = $rate->omnium;
+        }
+    }
+
+    /**
+     * Resolve the Rate applicable to the trip's departure date, if any.
+     */
+    public function resolveRate(Trip $trip): ?Rate
+    {
+        return Rate::query()
             ->where('start_date', '<=', $trip->departure_date)
             ->where(function ($query) use ($trip): void {
                 $query->where('end_date', '>=', $trip->departure_date)
@@ -20,11 +33,6 @@ final class TripAttributeResolver
             })
             ->latest('start_date')
             ->first();
-
-        if ($rate) {
-            $trip->rate = $rate->amount;
-            $trip->omnium = $rate->omnium;
-        }
     }
 
     public function setTypeOfMovement(Trip $trip): void
