@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\CpasLibrary\Filament\Resources\Categories\RelationManagers;
 
+use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
+use AcMarche\CpasLibrary\Models\Fiche;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -50,11 +52,13 @@ final class FichesRelationManager extends RelationManager
             ->recordActions([
                 ViewAction::make()
                     ->label('Voir')
-                    ->icon(Heroicon::Eye),
+                    ->icon(Heroicon::Eye)
+                    ->url(fn (Fiche $record): string => FicheResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

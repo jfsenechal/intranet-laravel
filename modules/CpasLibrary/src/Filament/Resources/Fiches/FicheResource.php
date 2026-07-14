@@ -9,6 +9,7 @@ use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\EditFiche;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ListFiches;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ViewFiche;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Schemas\FicheForm;
+use AcMarche\CpasLibrary\Filament\Resources\Fiches\Schemas\FicheInfolist;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Tables\FichesTable;
 use AcMarche\CpasLibrary\Models\Fiche;
 use BackedEnum;
@@ -57,6 +58,11 @@ final class FicheResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return FicheForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return FicheInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

@@ -84,17 +84,6 @@ final class FicheForm
                                 $set('mimeType', $state->getMimeType());
                             })
                             ->columnSpanFull(),
-                        Grid::make(3)->schema([
-                            TextInput::make('fileName')
-                                ->label('Nom du fichier')
-                                ->maxLength(190),
-                            TextInput::make('mimeType')
-                                ->label('Type MIME')
-                                ->maxLength(255),
-                            TextInput::make('fileSize')
-                                ->label('Taille (octets)')
-                                ->numeric(),
-                        ]),
                     ]),
 
                 Section::make('Rappel')
