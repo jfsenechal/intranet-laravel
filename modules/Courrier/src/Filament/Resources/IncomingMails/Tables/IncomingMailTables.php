@@ -37,8 +37,17 @@ final class IncomingMailTables
                 TextColumn::make('description')
                     ->searchable()
                     ->label('Description')
-                    ->html()
-                    ->limit(50),
+                    ->limit(50)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+
+                        if (mb_strlen($state) <= $column->getCharacterLimit()) {
+                            return null;
+                        }
+
+                        // Only render the tooltip if the column contents exceeds the length limit.
+                        return $state;
+                    }),
                 TextColumn::make('services.name')
                     ->label('Services')
                     ->badge()
