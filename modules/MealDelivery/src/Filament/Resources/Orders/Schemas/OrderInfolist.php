@@ -43,7 +43,8 @@ final class OrderInfolist
                                 TextEntry::make('at_cafeteria'),
                                 TextEntry::make('notes'),
                             ]),
-                    ]), Section::make('Commande')
+                    ]),
+                Section::make('Commande')
                     ->schema([
                         Grid::make(2)->schema([
                             IconEntry::make('is_last_meal')

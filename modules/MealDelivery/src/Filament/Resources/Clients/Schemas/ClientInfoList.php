@@ -68,6 +68,7 @@ final class ClientInfoList
 
                                         TextEntry::make('phone')
                                             ->label('Téléphone')
+                                            ->helperText('Du résidant')
                                             ->placeholder('—')
                                             ->copyable(),
 
@@ -115,9 +116,11 @@ final class ClientInfoList
                             ->schema([
                                 Section::make('Options')
                                     ->columnSpanFull()
+                                    ->columns(2)
                                     ->schema([
                                         IconEntry::make('is_active')
-                                            ->label('Active')
+                                            ->label('Actif')
+                                            ->helperText('Si la personne ne commande plus, décochez cette case, elle ne sera plus proposée dans les futures commandes et dans les tournées')
                                             ->boolean(),
 
                                         IconEntry::make('use_cafeteria')

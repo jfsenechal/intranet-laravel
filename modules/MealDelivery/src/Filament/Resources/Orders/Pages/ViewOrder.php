@@ -48,7 +48,7 @@ final class ViewOrder extends ViewRecord
                     ->label('Retour au client')
                     ->icon(Heroicon::ArrowLeft)
                     ->visible(fn (): bool => $order->client !== null)
-                    ->url(fn (): string => ClientResource::getUrl('edit', ['record' => $order->client_id])),
+                    ->url(fn (): string => ClientResource::getUrl('view', ['record' => $order->client_id])),
 
                 Action::make('back_to_week')
                     ->label('Retour à la semaine')
