@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Tables;
 
+use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
 use AcMarche\MealDelivery\Models\Client;
+use AcMarche\MealDelivery\Models\Order;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -77,6 +79,24 @@ final class ClientTables
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function inline(Table $table): Table
+    {
+        return $table
+            ->defaultSort('week.first_day', 'desc')
+            ->recordUrl(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record]))
+            ->columns([
+                TextColumn::make('week.first_day')
+                    ->label('Semaine')
+                    ->date()
+                    ->sortable(),
+
+                TextColumn::make('meals_count')
+                    ->label('Repas')
+                    ->counts('meals')
+                    ->sortable(),
             ]);
     }
 }

@@ -7,17 +7,23 @@ namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 use AcMarche\MealDelivery\Filament\Actions\ExportMonthlyOrdersAction;
 use AcMarche\MealDelivery\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
+use AcMarche\MealDelivery\Filament\Resources\Clients\RelationManagers\OrdersRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;
+use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\CreateOrder;
 use AcMarche\MealDelivery\Models\Client;
+use AcMarche\MealDelivery\Models\Week;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Illuminate\Database\Eloquent\Builder;
 use Override;
 
 final class ViewClient extends ViewRecord
@@ -35,9 +41,38 @@ final class ViewClient extends ViewRecord
         return ClientInfoList::configure($schema);
     }
 
+    /**
+     * @return array<class-string>
+     */
+    protected function getAllRelationManagers(): array
+    {
+        return [
+            OrdersRelationManager::class,
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('addOrder')
+                ->label('Ajouter une commande')
+                ->icon('tabler-plus')
+                ->color('success')
+                ->modalSubmitActionLabel('Continuer')
+                ->hidden(fn (Client $record): bool => self::selectableWeeks($record) === [])
+                ->schema([
+                    Select::make('week_id')
+                        ->label('Semaine')
+                        ->options(fn (Client $record): array => self::selectableWeeks($record))
+                        ->native(false)
+                        ->required(),
+                ])
+                ->action(function (array $data, Client $record): void {
+                    $this->redirect(CreateOrder::getUrl([
+                        'week_id' => (int) $data['week_id'],
+                        'client_id' => $record->id,
+                    ]));
+                }),
             ExportMonthlyOrdersAction::make(),
             EditAction::make()
                 ->icon('tabler-edit'),
@@ -98,5 +133,27 @@ final class ViewClient extends ViewRecord
                 ->label('Supprimer le client')
                 ->icon('tabler-trash'),
         ];
+    }
+
+    /**
+     * Current and upcoming weeks (max 5) the client does not yet have an order for,
+     * keyed by id for a select field.
+     *
+     * @return array<int, string>
+     */
+    private static function selectableWeeks(Client $client): array
+    {
+        $startOfCurrentWeek = CarbonImmutable::now()->startOfWeek()->format('Y-m-d');
+
+        return Week::query()
+            ->whereDate('first_day', '>=', $startOfCurrentWeek)
+            ->whereDoesntHave('orders', fn (Builder $query) => $query->where('client_id', $client->id))
+            ->orderBy('first_day')
+            ->limit(5)
+            ->get()
+            ->mapWithKeys(fn (Week $week): array => [
+                $week->id => 'Semaine du '.$week->formattedFirstDay(),
+            ])
+            ->all();
     }
 }
