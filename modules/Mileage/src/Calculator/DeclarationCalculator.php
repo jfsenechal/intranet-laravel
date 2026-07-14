@@ -19,10 +19,10 @@ final readonly class DeclarationCalculator
         $totalKilometers = $this->calculateTotalKilometers();
         $totalMileageAllowance = $this->calculateTotalMileageAllowance($totalKilometers);
         $totalOmnium = $this->calculateTotalOmnium($totalKilometers);
-        $totalRefund = $this->calculateTotalRefund($totalMileageAllowance, $totalOmnium);
         $mealExpense = $this->calculateMealExpense();
         $trainExpense = $this->calculateTrainExpense();
         $totalExpense = $this->calculateTotalExpense($mealExpense, $trainExpense);
+        $totalRefund = $this->calculateTotalRefund($totalMileageAllowance, $totalOmnium, $totalExpense);
 
         return new DeclarationSummary(
             totalKilometers: $totalKilometers,
@@ -54,9 +54,14 @@ final readonly class DeclarationCalculator
         return $this->amountCalculator->amount($totalKilometers, (float) $this->declaration->rate_omnium);
     }
 
-    public function calculateTotalRefund(float $totalMileageAllowance, float $totalOmnium): float
+    /**
+     * The reimbursement certified to the beneficiary: the mileage allowance net
+     * of the omnium retention, plus the meal and train expenses. Mirrors the
+     * legacy `Declaration::totalARembourser` figure.
+     */
+    public function calculateTotalRefund(float $totalMileageAllowance, float $totalOmnium, float $totalExpense): float
     {
-        return round($totalMileageAllowance - $totalOmnium, 2);
+        return round($totalMileageAllowance - $totalOmnium + $totalExpense, 2);
     }
 
     public function calculateMealExpense(): float

@@ -70,7 +70,7 @@
         <tr class="bg-gray-100 font-bold">
             <td class="border border-gray-300 p-2">TOTAL A REMBOURSER</td>
             <td class="border border-gray-300 p-2" colspan="5"></td>
-            <td class="border border-gray-300 p-2 text-green-700">{{ number_format($declarationSummary->totalRefund + $declarationSummary->totalExpense, 2, ',', '.') }} €</td>
+            <td class="border border-gray-300 p-2 text-green-700">{{ number_format($declarationSummary->totalRefund, 2, ',', '.') }} €</td>
         </tr>
     </tbody>
 </table>

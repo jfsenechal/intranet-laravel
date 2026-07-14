@@ -45,7 +45,7 @@ final class DeclarationFactory
         // Group trips by type_movement and rate
         $groupedTrips = $trips->groupBy(function (Trip $trip) use ($rates): string {
             $rate = $rates->first(fn (Rate $rate): bool => $trip->departure_date >= $rate->start_date
-                && $trip->departure_date <= $rate->end_date);
+                && ($rate->end_date === null || $trip->departure_date <= $rate->end_date));
 
             $rateId = $rate?->id ?? 'no_rate';
             $typeMovement = $trip->type_movement ?? 'unknown';

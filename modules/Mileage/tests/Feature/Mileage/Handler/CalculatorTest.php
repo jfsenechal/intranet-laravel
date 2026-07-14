@@ -40,10 +40,53 @@ describe('calculate', function (): void {
             ->and($summary->totalKilometers)->toBe(150)
             ->and($summary->totalMileageAllowance)->toBe(60.00)
             ->and($summary->totalOmnium)->toBe(0.00)
-            ->and($summary->totalRefund)->toBe(60.00)
+            ->and($summary->totalRefund)->toBe(110.00) // 60 mileage - 0 omnium + 50 expenses
             ->and($summary->mealExpense)->toBe(25.00)
             ->and($summary->trainExpense)->toBe(25.00)
             ->and($summary->totalExpense)->toBe(50.00);
+    });
+});
+
+describe('legacy parity', function (): void {
+    test('totalRefund matches the legacy totalARembourser formula for an external declaration', function (): void {
+        // Legacy AcMarche\FinanceFrais DeclarationManager::calculDeclaration():
+        // totalARembourser = Σ(distance × tarif) + Σrepas + Σtrain
+        //                    − (omnium ? distanceTotale × tarifOmnium : 0)
+        $declaration = Declaration::factory()->create([
+            'rate' => 0.4200,
+            'rate_omnium' => 0.0300,
+            'omnium' => true,
+        ]);
+
+        Trip::factory()->create([
+            'declaration_id' => $declaration->id,
+            'distance' => 120,
+            'meal_expense' => 15.50,
+            'train_expense' => 42.00,
+        ]);
+
+        Trip::factory()->create([
+            'declaration_id' => $declaration->id,
+            'distance' => 80,
+            'meal_expense' => 10.00,
+            'train_expense' => 0.00,
+        ]);
+
+        $declaration->load('trips');
+
+        $totalKilometers = 200;
+        $mileage = round($totalKilometers * 0.42, 2);            // 84.00
+        $omnium = round($totalKilometers * 0.03, 2);             // 6.00
+        $expenses = round(15.50 + 42.00 + 10.00, 2);             // 67.50
+        $expectedTotalARembourser = round($mileage - $omnium + $expenses, 2); // 145.50
+
+        $summary = (new DeclarationCalculator($declaration))->calculate();
+
+        expect($summary->totalMileageAllowance)->toBe(84.00)
+            ->and($summary->totalOmnium)->toBe(6.00)
+            ->and($summary->totalExpense)->toBe(67.50)
+            ->and($summary->totalRefund)->toBe($expectedTotalARembourser)
+            ->and($summary->totalRefund)->toBe(145.50);
     });
 });
 
@@ -128,21 +171,21 @@ describe('calculateTotalOmnium', function (): void {
 });
 
 describe('calculateTotalRefund', function (): void {
-    test('subtracts omnium from mileage allowance', function (): void {
+    test('adds expenses to the mileage allowance net of omnium', function (): void {
         $this->declaration->load('trips');
 
         $calculator = new DeclarationCalculator($this->declaration);
 
-        expect($calculator->calculateTotalRefund(100.00, 10.00))->toBe(90.00)
-            ->and($calculator->calculateTotalRefund(50.00, 5.00))->toBe(45.00);
+        expect($calculator->calculateTotalRefund(100.00, 10.00, 50.00))->toBe(140.00)
+            ->and($calculator->calculateTotalRefund(50.00, 5.00, 0.00))->toBe(45.00);
     });
 
-    test('handles zero omnium', function (): void {
+    test('handles zero omnium and zero expenses', function (): void {
         $this->declaration->load('trips');
 
         $calculator = new DeclarationCalculator($this->declaration);
 
-        expect($calculator->calculateTotalRefund(100.00, 0.00))->toBe(100.00);
+        expect($calculator->calculateTotalRefund(100.00, 0.00, 0.00))->toBe(100.00);
     });
 });
 
