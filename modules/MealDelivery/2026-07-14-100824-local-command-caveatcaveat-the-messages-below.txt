@@ -1,0 +1,758 @@
+ ▐▛███▜▌   Claude Code v2.1.207
+▝▜█████▛▘  Opus 4.8 · Claude Pro
+  ▘▘ ▝▝    /var/www/intranet-laravel/modules/MealDelivery
+
+ ▎ Extended through July 19
+ ▎ We're extending Claude Fable 5 access on all paid plans, as well as keeping Claude Code’s weekly rate limits 50% higher, through July 19.
+ ▎
+ ▎ As before, you can use up to half of your weekly usage limit on Fable 5. After that, you can keep using Fable 5 with usage credits, or switch to another model to keep working within your remaining limits.
+ ▎
+ ▎ More details here: https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access
+
+❯ /clear                                                                        
+
+❯ in data/CpasRepas it the legacy code for MealDelivery module                  
+  in data/CpasRepas/src/Manager/ClientManager.php                               
+  check if module care about this                                               
+         /**                                                                    
+                   * Reprendre la feuille si dernier repas et que pas commander 
+  la semaine prochaine                                                          
+                   */                                                           
+                  if (!$this->repasManager->hasCommandNextWeek($repas,          
+  $client)) {                                                                   
+                      $repas->setTakeBackSheet($this->repasManager->isEqualOrGr 
+  eaterThanWednesday($repas));                                                  
+                  }                                                             
+                  /**                                                           
+                   * Donner une nouvelle feuille si premier repas de la semaine 
+                   */                                                           
+                  if ($this->repasManager->isFirstRepasOfWeek($repas)) {        
+                      $repas->setIsFirstRepasOfWeek(true);                      
+                  }                                                             
+  ⎿  ⧉ Selected 12 lines from data/CpasRepas/src/Manager/ClientManager.php in 
+     PhpStorm
+
+● I'll investigate both the legacy code and the current MealDelivery module to
+  see if this logic is handled.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● I found the module. Let me examine the legacy RepasManager logic and the
+  current MealDelivery module structure.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● The equivalent in the new module would be the RouteSheetsAggregator. Let me
+  examine it.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now let me search the entire module for any trace of these three concepts
+  (take-back sheet, first meal of week, last meal / disposable recipient).
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me check the route-sheet blade views to see if any of these markers (new
+  sheet / take-back sheet / disposable) are displayed to the driver.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● I have a clear picture. Here's the answer.
+
+  No — the new MealDelivery module does not implement this legacy logic
+
+  The three behaviors in the selected legacy code all relate to the physical
+  order sheet (la "feuille") the delivery driver hands out or takes back, plus
+  the disposable-container marker. None of the automatic computations survive in
+  the new module.
+
+  The legacy logic (from ClientManager::setRepas + RepasManager)
+
+  Three per-meal flags computed automatically when building the driver's route
+  sheet:
+
+  1. isLastRepasAndCloseClient → disposable recipient (last meal of a closing
+  client)
+  2. takeBackSheet → take the sheet back if it's the last meal, the client has
+  no order next week, AND it's Wednesday or later
+  (isEqualOrGreaterThanWednesday)
+  3. isFirstRepasOfWeek → give a new sheet on the first meal of the week
+
+  What the new module has instead
+
+  - A single manual is_last_meal boolean on the Order model (Order.php:14),
+  toggled in OrderForm.php:46 with helper text "Si oui, prendre feuille nouvelle
+  commande". It's shown as a column/filter/infolist icon, but it's
+  operator-set, not computed.
+  - RouteSheetsAggregator (the new equivalent of ClientManager::setRepas) builds
+  route-sheet rows with quantities, diets, addresses and notes — but computes
+  none of: first-meal-of-week, take-back-sheet, Wednesday cutoff, or disposable
+  recipient.
+  - The route-sheet blades (_route-sheet-table, route-sheet-pdf, route-sheets)
+  display no "nouvelle feuille" / "reprendre feuille" / "jetable" markers.
+
+  Bottom line
+
+  The automatic sheet-management logic was not ported. It was replaced by one
+  manual is_last_meal toggle, which only loosely covers case #2/#3 (and only if
+  a human remembers to set it). The "first meal of week → new sheet", the "no
+  order next week" lookahead, the Wednesday cutoff, and the disposable-recipient
+  flag have no equivalent in the current module.
+
+  Want me to port any of these into RouteSheetsAggregator (e.g. surface
+  "nouvelle feuille" / "reprendre feuille" markers on the route sheet)?
+
+✻ Crunched for 59s
+
+❯ port these into the route sheet                                               
+
+● I'll port all three markers. First let me understand the new data model
+  thoroughly.
+
+  Read 3 files (ctrl+o to expand)
+
+● Let me read the legacy CommandeManager to get the precise semantics of these
+  three computations.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now I understand the exact semantics. Let me check the Week.days structure,
+  the client route fields, and existing tests for the aggregator.
+
+  Searched for 2 patterns, read 1 file, listed 1 directory (ctrl+o to expand)
+
+● Let me check the legacy RepasRepository for
+  getFirstRepas/getLastRepas/getLastRepas and
+  findRepasByClientAndDateGreaterThan.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Now let me read the two route-sheet blade templates to see where to add the
+  markers.
+
+  Read 2 files (ctrl+o to expand)
+● The blade already has RF and DF placeholder columns (currently RF empty, DF
+  hardcoded). These map directly to the legacy concepts: RF = Reprendre Feuille
+  (take-back) and DF = Donner Feuille (new sheet). Let me confirm how the PDF is
+  rendered and check the page class.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● All clear. RF = Reprendre Feuille (take-back) and DF = Donner Feuille (new
+  sheet) columns already exist as placeholders, and PDF renders via Browsershot
+  (real Chrome, so Unicode is fine). Now I'll implement.
+
+  Let me update the aggregator first:
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 1 line
+       6  
+       7  use AcMarche\MealDelivery\Models\DeliveryRoute;
+       8  use AcMarche\MealDelivery\Models\Meal;
+       9 +use AcMarche\MealDelivery\Models\Order;                        
+      10  use AcMarche\MealDelivery\Models\Week;
+      11  use Carbon\CarbonImmutable;
+      12  use Illuminate\Database\Eloquent\Builder;
+
+● Now update the docblock row shapes (both occurrences) and build():
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 6 lines
+      32       *             menu2_diets: list<string>,
+      33       *             notes: ?string,
+      34       *             client_notes: ?string,
+      35 +     *             new_sheet: bool,                            
+      36 +     *             take_back_sheet: bool,                      
+      37 +     *             disposable_recipient: bool,                 
+      38       *         }>,
+      39       *         totals: array{clients: int, soup: int, menu1: in
+          t, menu2: int, menus_total: int},
+      40       *     }>,
+     ...
+      52       *             menu2_diets: list<string>,
+      53       *             notes: ?string,
+      54       *             client_notes: ?string,
+      55 +     *             new_sheet: bool,                            
+      56 +     *             take_back_sheet: bool,                      
+      57 +     *             disposable_recipient: bool,                 
+      58       *         }>,
+      59       *         totals: array{clients: int, soup: int, menu1: in
+          t, menu2: int, menus_total: int},
+      60       *     }
+
+● Now the build() method — add the precompute logic and pass flags to buildRow:
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 8 lines
+      73              ])
+      74              ->get();
+      75  
+      76 +        $dateString = $dateCarbon->format('Y-m-d');            
+      77 +        $orderIds = $meals->pluck('order_id')->unique()->values
+         +()->all();                                                     
+      78 +        $clientIds = $meals->pluck('order.client_id')->filter()
+         +->unique()->values()->all();                                   
+      79 +                                                               
+      80 +        $orderDateRanges = self::orderDateRanges($orderIds);   
+      81 +        $clientsWithNextWeekOrder = self::clientsWithNextWeekOr
+         +der($week, $clientIds, $dateString);                           
+      82 +        $isEqualOrGreaterThanWednesday = $dateCarbon->isoWeekda
+         +y() >= CarbonImmutable::WEDNESDAY;                             
+      83 +                                                               
+      84          $routes = DeliveryRoute::query()->orderBy('id')->get(['
+          id', 'name']);
+      85  
+      86          $routeBuckets = [];
+
+● isoWeekday() (Mon=1…Sun=7) shouldn't be compared to Carbon's WEDNESDAY
+  day-of-week constant (different numbering). Let me use a clear literal
+  matching the legacy format('N') >= 3:
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 2 lines, removed 1 line
+      79  
+      80          $orderDateRanges = self::orderDateRanges($orderIds);
+      81          $clientsWithNextWeekOrder = self::clientsWithNextWeekOr
+          der($week, $clientIds, $dateString);
+      82 -        $isEqualOrGreaterThanWednesday = $dateCarbon->isoWeekda
+         -y() >= CarbonImmutable::WEDNESDAY;                             
+      82 +        // ISO weekday: Monday = 1 … Sunday = 7, so Wednesday o
+         +r later means >= 3.                                            
+      83 +        $isEqualOrGreaterThanWednesday = $dateCarbon->isoWeekda
+         +y() >= 3;                                                      
+      84  
+      85          $routes = DeliveryRoute::query()->orderBy('id')->get(['
+          id', 'name']);
+      86  
+
+● Now update the meal loop to compute per-meal flags and pass them to buildRow:
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 9 lines, removed 1 line
+      102                  continue;
+      103              }
+      104  
+      105 -            $row = self::buildRow($meal);                     
+      105 +            $range = $orderDateRanges->get($meal->order_id);  
+      106 +            $newSheet = $range !== null && $dateString === $ra
+          +nge['min_date'];                                              
+      107 +            $disposableRecipient = (bool) $meal->order->is_las
+          +t_meal                                                        
+      108 +                && $range !== null                            
+      109 +                && $dateString === $range['max_date'];        
+      110 +            $takeBackSheet = $isEqualOrGreaterThanWednesday   
+      111 +                && ! isset($clientsWithNextWeekOrder[$client->
+          +id]);                                                         
+      112  
+      113 +            $row = self::buildRow($meal, $newSheet, $takeBackS
+          +heet, $disposableRecipient);                                  
+      114 +                                                              
+      115              if ($row['menu1'] === 0 && $row['menu2'] === 0) {
+      116                  continue;
+      117              }
+
+● Now update buildRow signature/docblock/return, and add the two helper methods.
+  Let me view the current buildRow region:
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 9 lines, removed 2 lines
+      177       *     menu2_diets: list<string>,
+      178       *     notes: ?string,
+      179       *     client_notes: ?string,
+      180 +     *     new_sheet: bool,                                   
+      181 +     *     take_back_sheet: bool,                             
+      182 +     *     disposable_recipient: bool,                        
+      183       * }
+      184       */
+      182 -    private static function buildRow(Meal $meal): array       
+      183 -    {                                                         
+      185 +    private static function buildRow(                         
+      186 +        Meal $meal,                                           
+      187 +        bool $newSheet,                                       
+      188 +        bool $takeBackSheet,                                  
+      189 +        bool $disposableRecipient,                            
+      190 +    ): array {                                                
+      191          $client = $meal->order->client;
+      192  
+      193          $menu1 = self::menuFor($meal, 1);
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 57 lines
+      211              'menu2_diets' => $menu2['diets'],
+      212              'notes' => $meal->notes !== null && mb_trim((strin
+           g) $meal->notes) !== '' ? (string) $meal->notes : null,
+      213              'client_notes' => $client->notes !== null && mb_tr
+           im((string) $client->notes) !== '' ? (string) $client->notes :
+            null,
+      214 +            'new_sheet' => $newSheet,                         
+      215 +            'take_back_sheet' => $takeBackSheet,              
+      216 +            'disposable_recipient' => $disposableRecipient,   
+      217          ];
+      218      }
+      219  
+      220      /**
+      221 +     * Earliest and latest meal date for each order, keyed by 
+          +order id.                                                     
+      222 +     *                                                        
+      223 +     * @param  list<int>  $orderIds                           
+      224 +     * @return Collection<int, array{min_date: string, max_dat
+          +e: string}>                                                   
+      225 +     */                                                       
+      226 +    private static function orderDateRanges(array $orderIds): 
+          +Collection                                                    
+      227 +    {                                                         
+      228 +        if ($orderIds === []) {                               
+      229 +            return new Collection();                          
+      230 +        }                                                     
+      231 +                                                              
+      232 +        return Meal::query()                                  
+      233 +            ->whereIn('order_id', $orderIds)                  
+      234 +            ->selectRaw('order_id, MIN(date) as min_date, MAX(
+          +date) as max_date')                                           
+      235 +            ->groupBy('order_id')                             
+      236 +            ->get()                                           
+      237 +            ->mapWithKeys(fn (Meal $meal): array => [         
+      238 +                (int) $meal->order_id => [                    
+      239 +                    'min_date' => (string) $meal->min_date,   
+      240 +                    'max_date' => (string) $meal->max_date,   
+      241 +                ],                                            
+      242 +            ]);                                               
+      243 +    }                                                         
+      244 +                                                              
+      245 +    /**                                                       
+      246 +     * Clients who already have a meal scheduled after the cur
+          +rent week, keyed by                                           
+      247 +     * client id for O(1) lookups. Mirrors the legacy `hasComm
+          +andNextWeek` check.                                           
+      248 +     *                                                        
+      249 +     * @param  list<int>  $clientIds                          
+      250 +     * @return array<int, true>                               
+      251 +     */                                                       
+      252 +    private static function clientsWithNextWeekOrder(Week $wee
+          +k, array $clientIds, string $dateString): array               
+      253 +    {                                                         
+      254 +        if ($clientIds === []) {                              
+      255 +            return [];                                        
+      256 +        }                                                     
+      257 +                                                              
+      258 +        $lastDay = collect($week->days ?? [])                 
+      259 +            ->filter()                                        
+      260 +            ->map(fn ($day): string => CarbonImmutable::parse(
+          +(string) $day)->format('Y-m-d'))                              
+      261 +            ->push(CarbonImmutable::parse($week->first_day)->f
+          +ormat('Y-m-d'))                                               
+      262 +            ->push($dateString)                               
+      263 +            ->max();                                          
+      264 +                                                              
+      265 +        return Order::query()                                 
+      266 +            ->whereIn('client_id', $clientIds)                
+      267 +            ->whereHas('meals', fn (Builder $query) => $query-
+          +>whereDate('date', '>', $lastDay))                            
+      268 +            ->pluck('client_id')                              
+      269 +            ->flip()                                          
+      270 +            ->map(fn (): bool => true)                        
+      271 +            ->all();                                          
+      272 +    }                                                         
+      273 +                                                              
+      274 +    /**                                                       
+      275       * @return array{quantity: int, diets: list<string>}
+      276       */
+      277      private static function menuFor(Meal $meal, int $position)
+           : array
+
+● Let me review the full modified aggregator to verify coherence:
+
+  Read 1 file (ctrl+o to expand)
+
+● Let me verify the meals.date column type (affects the MIN/MAX string format):
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● The column type is date, so MIN/MAX returns Y-m-d — the comparison is correct.
+  Now the blades. First the screen table partial:
+
+● Update(resources/views/filament/resources/weeks/pages/_route-sheet-table.blade
+        .php)
+  ⎿  Added 3 lines
+      16              <tr class="{{ $index % 2 === 1 ? 'alt' : '' }}">
+      17                  <td style="text-align:left;">
+      18                      <span>{{ $row['client_name'] }}</span>
+      19 +                    @if ($row['disposable_recipient'])         
+      20 +                        <br><span class="text-disposable">Récip
+         +ient jetable</span>                                            
+      21 +                    @endif                                     
+      22                      @if ($row['phone'])
+      23                          <br><span class="text-muted">{{ $row['p
+          hone'] }}</span>
+      24                      @endif
+
+● Update(resources/views/filament/resources/weeks/pages/_route-sheet-table.blade
+        .php)
+  ⎿  Added 2 lines, removed 2 lines
+      51                          <span>{!! nl2br(e($row['notes'])) !!}</
+          span>
+      52                      @endif
+      53                  </td>
+      54 -                <td></td>                                      
+      55 -                <td>DF</td>                                    
+      54 +                <td style="text-align:center;">{{ $row['take_ba
+         +ck_sheet'] ? '✔' : '' }}</td>                                  
+      55 +                <td style="text-align:center;">{{ $row['new_she
+         +et'] ? '✔' : '' }}</td>                                        
+      56              </tr>
+      57          @empty
+      58              <tr>
+
+● Now the PDF blade — same three changes:
+
+● Update(resources/views/filament/resources/weeks/pages/route-sheet-pdf.blade.ph
+        p)  ⎿  Added 3 lines
+      64                  <tr class="{{ $index % 2 === 1 ? 'alt' : '' }}"
+          >
+      65                      <td style="text-align:left;">
+      66                          <span>{{ $row['client_name'] }}</span>
+      67 +                        @if ($row['disposable_recipient'])     
+      68 +                            <br><span class="text-disposable">R
+         +écipient jetable</span>                                        
+      69 +                        @endif                                 
+      70                          @if ($row['phone'])
+      71                              <br><span class="text-muted">{{ $ro
+          w['phone'] }}</span>
+      72                          @endif
+
+● Update(resources/views/filament/resources/weeks/pages/route-sheet-pdf.blade.ph
+        p)
+  ⎿  Added 2 lines, removed 2 lines
+       99                              <span>{!! nl2br(e($row['notes'])) 
+           !!}</span>
+      100                          @endif
+      101                      </td>
+      102 -                    <td></td>                                 
+      103 -                    <td style="text-align:center;">DF</td>    
+      102 +                    <td style="text-align:center;">{{ $row['ta
+          +ke_back_sheet'] ? '✔' : '' }}</td>                            
+      103 +                    <td style="text-align:center;">{{ $row['ne
+          +w_sheet'] ? '✔' : '' }}</td>                                  
+      104                  </tr>
+      105              @empty
+      106                  <tr>
+
+● Now add the .text-disposable CSS to the PDF blade and the screen page. First
+  the PDF blade styles:
+
+● Update(resources/views/filament/resources/weeks/pages/route-sheet-pdf.blade.ph
+        p)
+  ⎿  Added 2 lines
+      39  
+      40          .text-muted { color: #6b7280; }
+      41  
+      42 +        .text-disposable { color: #b91c1c; font-weight: 600; } 
+      43 +                                                               
+      44          .totals-table th,
+      45          .totals-table td { border: none; padding: 3px 8px; }
+      46      </style>
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(resources/views/filament/resources/weeks/pages/route-sheets.blade.php)
+  ⎿  Added 1 line
+      41  
+      42          .route-sheet .text-muted { color: #6b7280; }
+      43          .route-sheet .text-success { color: #166534; }
+      44 +        .route-sheet .text-disposable { color: #b91c1c; font-we
+         +ight: 600; }                                                   
+      45  
+      46          .route-sheet .totals-table th,
+      47          .route-sheet .totals-table td { border: none; padding: 
+          4px 8px; }
+
+● Let me verify the weekdays I'll use in tests:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now let me add tests. I'll append helper functions and test cases to the
+  existing test file:
+
+● Update(tests/Unit/RouteSheetsAggregatorTest.php)
+  ⎿  Added 111 lines
+       46      return $meal;
+       47  }
+       48  
+       49 +function makeRouteClient(DeliveryRoute $route): Client        
+       50 +{                                                             
+       51 +    return Client::create([                                   
+       52 +        'last_name' => fake()->unique()->lastName(),          
+       53 +        'first_name' => fake()->firstName(),                  
+       54 +        'street' => fake()->streetName(),                     
+       55 +        'number' => (string) fake()->buildingNumber(),        
+       56 +        'postal_code' => 6900,                                
+       57 +        'city' => fake()->city(),                             
+       58 +        'route_id' => $route->id,                             
+       59 +        'is_active' => true,                                  
+       60 +    ]);                                                       
+       61 +}                                                             
+       62 +                                                              
+       63 +function addRouteMeal(Order $order, string $date): Meal       
+       64 +{                                                             
+       65 +    $meal = Meal::create([                                    
+       66 +        'date' => $date,                                      
+       67 +        'soup_count' => 1,                                    
+       68 +        'order_id' => $order->id,                             
+       69 +        'at_cafeteria' => false,                              
+       70 +    ]);                                                       
+       71 +                                                              
+       72 +    Menu::create([                                            
+       73 +        'position' => 1,                                      
+       74 +        'quantity' => 1,                                      
+       75 +        'meal_id' => $meal->id,                               
+       76 +    ]);                                                       
+       77 +                                                              
+       78 +    return $meal;                                             
+       79 +}                                                             
+       80 +                                                              
+       81 +it('flags the new sheet on the first meal of the week only', f
+          +unction (): void {                                            
+       82 +    $week = Week::create(['first_day' => '2026-06-15', 'days' 
+          +=> ['2026-06-15', '2026-06-17', '2026-06-19']]);              
+       83 +    $route = DeliveryRoute::create(['name' => 'Tournée 1']);  
+       84 +    $client = makeRouteClient($route);                        
+       85 +    $order = Order::create(['week_id' => $week->id, 'client_id
+          +' => $client->id]);                                           
+       86 +                                                              
+       87 +    addRouteMeal($order, '2026-06-15');                       
+       88 +    addRouteMeal($order, '2026-06-17');                       
+       89 +                                                              
+       90 +    $monday = (new RouteSheetsAggregator())->build($week, '202
+          +6-06-15')['routes'][0]['rows'][0];                            
+       91 +    $wednesday = (new RouteSheetsAggregator())->build($week, '
+          +2026-06-17')['routes'][0]['rows'][0];                         
+       92 +                                                              
+       93 +    expect($monday['new_sheet'])->toBeTrue()                  
+       94 +        ->and($wednesday['new_sheet'])->toBeFalse();          
+       95 +});                                                           
+       96 +                                                              
+       97 +it('flags take back sheet from Wednesday when no order exists 
+          +next week', function (): void {                               
+       98 +    $week = Week::create(['first_day' => '2026-06-15', 'days' 
+          +=> ['2026-06-15', '2026-06-17']]);                            
+       99 +    $route = DeliveryRoute::create(['name' => 'Tournée 1']);  
+      100 +    $client = makeRouteClient($route);                        
+      101 +    $order = Order::create(['week_id' => $week->id, 'client_id
+          +' => $client->id]);                                           
+      102 +                                                              
+      103 +    addRouteMeal($order, '2026-06-15');                       
+      104 +    addRouteMeal($order, '2026-06-17');                       
+      105 +                                                              
+      106 +    $monday = (new RouteSheetsAggregator())->build($week, '202
+          +6-06-15')['routes'][0]['rows'][0];                            
+      107 +    $wednesday = (new RouteSheetsAggregator())->build($week, '
+          +2026-06-17')['routes'][0]['rows'][0];                         
+      108 +                                                              
+      109 +    expect($monday['take_back_sheet'])->toBeFalse()           
+      110 +        ->and($wednesday['take_back_sheet'])->toBeTrue();     
+      111 +});                                                           
+      112 +                                                              
+      113 +it('does not take back the sheet when the client has an order 
+          +next week', function (): void {                               
+      114 +    $week = Week::create(['first_day' => '2026-06-15', 'days' 
+          +=> ['2026-06-15', '2026-06-17']]);                            
+      115 +    $nextWeek = Week::create(['first_day' => '2026-06-22', 'da
+          +ys' => ['2026-06-24']]);                                      
+      116 +    $route = DeliveryRoute::create(['name' => 'Tournée 1']);  
+      117 +    $client = makeRouteClient($route);                        
+      118 +                                                              
+      119 +    $order = Order::create(['week_id' => $week->id, 'client_id
+          +' => $client->id]);                                           
+      120 +    addRouteMeal($order, '2026-06-17');                       
+      121 +                                                              
+      122 +    $nextOrder = Order::create(['week_id' => $nextWeek->id, 'c
+          +lient_id' => $client->id]);                                   
+      123 +    addRouteMeal($nextOrder, '2026-06-24');                   
+      124 +                                                              
+      125 +    $wednesday = (new RouteSheetsAggregator())->build($week, '
+          +2026-06-17')['routes'][0]['rows'][0];                         
+      126 +                                                              
+      127 +    expect($wednesday['take_back_sheet'])->toBeFalse();       
+      128 +});                                                           
+      129 +                                                              
+      130 +it('flags a disposable recipient on the last meal of a closing
+          + order only', function (): void {                             
+      131 +    $week = Week::create(['first_day' => '2026-06-15', 'days' 
+          +=> ['2026-06-15', '2026-06-17']]);                            
+      132 +    $route = DeliveryRoute::create(['name' => 'Tournée 1']);  
+      133 +    $client = makeRouteClient($route);                        
+      134 +    $order = Order::create(['week_id' => $week->id, 'client_id
+          +' => $client->id, 'is_last_meal' => true]);                   
+      135 +                                                              
+      136 +    addRouteMeal($order, '2026-06-15');                       
+      137 +    addRouteMeal($order, '2026-06-17');                       
+      138 +                                                              
+      139 +    $monday = (new RouteSheetsAggregator())->build($week, '202
+          +6-06-15')['routes'][0]['rows'][0];                            
+      140 +    $wednesday = (new RouteSheetsAggregator())->build($week, '
+          +2026-06-17')['routes'][0]['rows'][0];                         
+      141 +                                                              
+      142 +    expect($monday['disposable_recipient'])->toBeFalse()      
+      143 +        ->and($wednesday['disposable_recipient'])->toBeTrue();
+      144 +});                                                           
+      145 +                                                              
+      146 +it('does not flag a disposable recipient when the order is not
+          + a last meal', function (): void {                            
+      147 +    $week = Week::create(['first_day' => '2026-06-15', 'days' 
+          +=> ['2026-06-15', '2026-06-17']]);                            
+      148 +    $route = DeliveryRoute::create(['name' => 'Tournée 1']);  
+      149 +    $client = makeRouteClient($route);                        
+      150 +    $order = Order::create(['week_id' => $week->id, 'client_id
+          +' => $client->id, 'is_last_meal' => false]);                  
+      151 +                                                              
+      152 +    addRouteMeal($order, '2026-06-15');                       
+      153 +    addRouteMeal($order, '2026-06-17');                       
+      154 +                                                              
+      155 +    $wednesday = (new RouteSheetsAggregator())->build($week, '
+          +2026-06-17')['routes'][0]['rows'][0];                         
+      156 +                                                              
+      157 +    expect($wednesday['disposable_recipient'])->toBeFalse();  
+      158 +});                                                           
+      159 +                                                              
+      160  it('exposes both client notes and meal notes on the route shee
+           t rows', function (): void {
+      161      $week = Week::create(['first_day' => '2026-06-15']);
+      162      $route = DeliveryRoute::create(['name' => 'Tournée 1']);
+
+● Now let me run the tests:
+
+  Read 1 file, ran 4 shell commands (ctrl+o to expand)
+
+● The test suite is slow to boot. Let me wait for completion:
+
+  Read 1 file, ran 2 shell commands (ctrl+o to expand)
+
+● I'll wait for the background test task to finish and notify me.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I'll wait for the test task to complete and notify me.
+  ⎿  Invalid tool parameters
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Multiple duplicate test runs are stuck (the tail buffers until exit). Let me
+  kill them and run once with unbuffered output to a file I can watch:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Background command "Run RouteSheetsAggregator tests" failed with exit code 144
+
+● Background command "Run tests foreground" failed with exit code 144
+
+● Now let me run the tests once cleanly in the background:
+  Ran 1 shell command (ctrl+o to expand)
+
+● I'll wait for the test run to finish and notify me.
+
+  Read 1 file (ctrl+o to expand)
+
+● Background command "Run RouteSheetsAggregator tests in background" failed with
+exit code 1
+
+● Both failures are the min_date/max_date comparison — Eloquent's date cast
+  stores Y-m-d 00:00:00, so the raw MIN/MAX string doesn't equal Y-m-d. Let me
+  normalize via Carbon:
+
+● Update(src/Service/RouteSheetsAggregator.php)
+  ⎿  Added 2 lines, removed 2 lines
+      236              ->get()
+      237              ->mapWithKeys(fn (Meal $meal): array => [
+      238                  (int) $meal->order_id => [
+      239 -                    'min_date' => (string) $meal->min_date,   
+      240 -                    'max_date' => (string) $meal->max_date,   
+      239 +                    'min_date' => CarbonImmutable::parse((stri
+          +ng) $meal->min_date)->format('Y-m-d'),                        
+      240 +                    'max_date' => CarbonImmutable::parse((stri
+          +ng) $meal->max_date)->format('Y-m-d'),                        
+      241                  ],
+      242              ]);
+      243      }
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● I'll wait for the notification on this run.
+
+  Read 1 file (ctrl+o to expand)
+
+● Background command "Re-run RouteSheetsAggregator tests" completed (exit code
+0)
+
+● All 8 pass. Now let me run the full CafeteriaSheet test too (it shares the
+  route sheet blade path) and Pint on the changed PHP:
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Background command "Run Pint on changed files" completed (exit code 0)
+
+● Pint clean. Let me run the full MealDelivery module suite to ensure nothing
+  else broke (the shared blade + row shape):
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I'll wait for the suite to complete.
+
+  Read 1 file (ctrl+o to expand)
+
+● Background command "Run full MealDelivery test suite" completed (exit code 0)
+
+● All 27 module tests pass. Done. The three legacy sheet-management behaviors
+  are now ported into the route sheet.
+
+  What was ported
+
+  Into RouteSheetsAggregator::build() (src/Service/RouteSheetsAggregator.php),
+  each route/cafeteria row now carries three computed flags mirroring the legacy
+  ClientManager/RepasManager logic:
+
+  Flag: new_sheet
+  Legacy source: isFirstRepasOfWeek
+  Rule: The delivery date is the earliest meal date of the client's order for
+  that week → give a new sheet
+  ────────────────────────────────────────
+  Flag: take_back_sheet
+  Legacy source: takeBackSheet (!hasCommandNextWeek +
+  isEqualOrGreaterThanWednesday)
+  Rule: The date is Wednesday or later (ISO weekday ≥ 3) and the client has no 
+  meal in any later week → take the sheet back
+  ────────────────────────────────────────
+  Flag: disposable_recipient
+  Legacy source: isLastRepasAndCloseClient
+  Rule: The order is flagged is_last_meal and this is the latest meal date of
+  the
+   order → disposable container
+
+  Two helper methods (orderDateRanges, clientsWithNextWeekOrder) do this with
+  just two extra aggregate queries — no N+1.
+
+  Display
+
+  The blade RF and DF placeholder columns (which were an empty cell and a
+  hardcoded "DF") now render:
+  - DF (Donner Feuille) → ✔ when new_sheet
+  - RF (Reprendre Feuille) → ✔ when take_back_sheet
+  - Récipient jetable → red badge under the client name when
+  disposable_recipient
+
+  Applied to both the on-screen table (_route-sheet-table.blade.php) and the
+  Browsershot PDF (route-sheet-pdf.blade.php), with matching CSS in both.
+
+  Tests
+
+  Added 5 cases to tests/Unit/RouteSheetsAggregatorTest.php covering each flag's
+  true/false paths (first-vs-later meal, Wednesday cutoff, next-week-order
+  suppression, closing-order last meal, non-closing order). Full module suite:
+  27 passed, Pint clean.
+
+  One decision I made for you: I mapped DF→new_sheet and RF→take_back_sheet
+  based on the French abbreviations (Donner/Reprendre Feuille). If your drivers
+  read those columns the other way around, say so and I'll swap them.
+
+✻ Brewed for 16m 3s

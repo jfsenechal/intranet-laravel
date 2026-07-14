@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\CreateOrder;
+use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\Order;
@@ -72,6 +73,65 @@ it('does not create a duplicate when the order already exists at submit time', f
         ])
         ->call('create')
         ->assertRedirect(OrderResource::getUrl('edit', ['record' => $order]));
+
+    expect(Order::query()->where('week_id', $this->week->id)->where('client_id', $this->client->id)->count())
+        ->toBe(1);
+});
+
+it('redirects to the order view after creating with the Create button', function (): void {
+    Livewire::withQueryParams([
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]);
+
+    $component = livewire(CreateOrder::class)
+        ->fillForm([
+            'week_id' => $this->week->id,
+            'client_id' => $this->client->id,
+            'is_last_meal' => false,
+            'meals' => [[
+                'date' => '2026-06-15',
+                'soup_count' => 0,
+                'menu_1' => 1,
+                'menu_2' => 0,
+                'at_cafeteria' => false,
+                'notes' => null,
+            ]],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $order = Order::query()
+        ->where('week_id', $this->week->id)
+        ->where('client_id', $this->client->id)
+        ->sole();
+
+    $component->assertRedirect(OrderResource::getUrl('view', ['record' => $order]));
+});
+
+it('redirects to the week client picker after "create and add another"', function (): void {
+    Livewire::withQueryParams([
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]);
+
+    livewire(CreateOrder::class)
+        ->fillForm([
+            'week_id' => $this->week->id,
+            'client_id' => $this->client->id,
+            'is_last_meal' => false,
+            'meals' => [[
+                'date' => '2026-06-15',
+                'soup_count' => 0,
+                'menu_1' => 1,
+                'menu_2' => 0,
+                'at_cafeteria' => false,
+                'notes' => null,
+            ]],
+        ])
+        ->call('createAnother')
+        ->assertHasNoFormErrors()
+        ->assertRedirect(WeekResource::getUrl('add-order', ['record' => $this->week->id]));
 
     expect(Order::query()->where('week_id', $this->week->id)->where('client_id', $this->client->id)->count())
         ->toBe(1);

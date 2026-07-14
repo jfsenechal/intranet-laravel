@@ -47,8 +47,6 @@ uses(
     '../modules/ActivityManager/tests/Unit',
     '../modules/StreetWatch/tests/Feature',
     '../modules/StreetWatch/tests/Unit',
-    '../modules/MealDelivery/tests/Feature',
-    '../modules/MealDelivery/tests/Unit',
     '../modules/Agent/tests/Feature',
     '../modules/Agent/tests/Unit',
     '../modules/Conseil/tests/Filament',
@@ -60,4 +58,12 @@ uses(
     AcMarche\Conseil\Tests\ConseilTestCase::class,
 )->in(
     '../modules/Conseil/tests/Feature',
+);
+
+uses(
+    Tests\MealDeliveryTestCase::class,
+    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
+)->in(
+    '../modules/MealDelivery/tests/Feature',
+    '../modules/MealDelivery/tests/Unit',
 );

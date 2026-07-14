@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks;
 
+use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\AddOrder;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\CafeteriaSheet;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\CreateWeek;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\Pages\EditWeek;
@@ -69,6 +70,7 @@ final class WeekResource extends Resource
             'create' => CreateWeek::route('/create'),
             'edit' => EditWeek::route('/{record}/edit'),
             'view' => ViewWeek::route('/{record}/view'),
+            'add-order' => AddOrder::route('/{record}/add-order'),
             'day' => ListDayMeals::route('/{record}/day/{date}'),
             'kitchen' => KitchenExport::route('/{record}/kitchen/{date}'),
             'routes' => RouteSheets::route('/{record}/routes/{date}'),

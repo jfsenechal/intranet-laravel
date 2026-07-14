@@ -17,6 +17,13 @@ use Override;
 
 final class EditOrder extends EditRecord
 {
+    /**
+     * The order, meals and menus are persisted in an explicit transaction on the
+     * meal-delivery connection inside handleRecordUpdate(), so Filament's implicit
+     * transaction on the default connection is redundant.
+     */
+    protected ?bool $hasDatabaseTransactions = false;
+
     #[Override]
     protected static string $resource = OrderResource::class;
 
