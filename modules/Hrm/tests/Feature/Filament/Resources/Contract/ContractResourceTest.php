@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Contracts\Pages\EditContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ListContracts;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\ContractNature;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
 use App\Models\User;
@@ -151,6 +152,23 @@ describe('model behavior', function (): void {
 
         expect($contracts->pluck('id'))->toContain($active->id);
         expect($contracts->where('is_closed', true))->toBeEmpty();
+    });
+});
+
+describe('nature filter', function (): void {
+    it('filters contracts by multiple selected natures', function (): void {
+        $natureA = ContractNature::factory()->create();
+        $natureB = ContractNature::factory()->create();
+        $natureC = ContractNature::factory()->create();
+
+        $contractA = Contract::factory()->create(['contract_nature_id' => $natureA->id]);
+        $contractB = Contract::factory()->create(['contract_nature_id' => $natureB->id]);
+        $contractC = Contract::factory()->create(['contract_nature_id' => $natureC->id]);
+
+        Livewire::test(ListContracts::class)
+            ->filterTable('contract_nature_id', [$natureA->id, $natureB->id])
+            ->assertCanSeeTableRecords([$contractA, $contractB])
+            ->assertCanNotSeeTableRecords([$contractC]);
     });
 });
 
