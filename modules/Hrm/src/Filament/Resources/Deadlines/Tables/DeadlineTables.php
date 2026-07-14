@@ -34,7 +34,17 @@ final class DeadlineTables
                     ->label('Intitulé')
                     ->searchable()
                     ->limit(80)
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+
+                        if (mb_strlen($state) <= $column->getCharacterLimit()) {
+                            return null;
+                        }
+
+                        // Only render the tooltip if the column contents exceeds the length limit.
+                        return $state;
+                    }),
                 TextColumn::make('employee.last_name')
                     ->label('Agent')
                     ->formatStateUsing(
@@ -147,6 +157,7 @@ final class DeadlineTables
                 TextColumn::make('name')
                     ->label('Intitulé')
                     ->searchable()
+                    ->limit(80)
                     ->sortable(),
                 TextColumn::make('employer.name')
                     ->label('Employeur')
