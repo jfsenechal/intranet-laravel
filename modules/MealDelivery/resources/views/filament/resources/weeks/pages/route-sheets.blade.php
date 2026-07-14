@@ -41,6 +41,7 @@
 
         .route-sheet .text-muted { color: #6b7280; }
         .route-sheet .text-success { color: #166534; }
+        .route-sheet .text-disposable { color: #b91c1c; font-weight: 600; }
 
         .route-sheet .totals-table th,
         .route-sheet .totals-table td { border: none; padding: 4px 8px; }

@@ -6,6 +6,7 @@ namespace AcMarche\MealDelivery\Service;
 
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\Meal;
+use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +32,9 @@ final class RouteSheetsAggregator
      *             menu2_diets: list<string>,
      *             notes: ?string,
      *             client_notes: ?string,
+     *             new_sheet: bool,
+     *             take_back_sheet: bool,
+     *             disposable_recipient: bool,
      *         }>,
      *         totals: array{clients: int, soup: int, menu1: int, menu2: int, menus_total: int},
      *     }>,
@@ -48,6 +52,9 @@ final class RouteSheetsAggregator
      *             menu2_diets: list<string>,
      *             notes: ?string,
      *             client_notes: ?string,
+     *             new_sheet: bool,
+     *             take_back_sheet: bool,
+     *             disposable_recipient: bool,
      *         }>,
      *         totals: array{clients: int, soup: int, menu1: int, menu2: int, menus_total: int},
      *     }
@@ -65,6 +72,15 @@ final class RouteSheetsAggregator
                 'menus.diets:id,name',
             ])
             ->get();
+
+        $dateString = $dateCarbon->format('Y-m-d');
+        $orderIds = $meals->pluck('order_id')->unique()->values()->all();
+        $clientIds = $meals->pluck('order.client_id')->filter()->unique()->values()->all();
+
+        $orderDateRanges = self::orderDateRanges($orderIds);
+        $clientsWithNextWeekOrder = self::clientsWithNextWeekOrder($week, $clientIds, $dateString);
+        // ISO weekday: Monday = 1 … Sunday = 7, so Wednesday or later means >= 3.
+        $isEqualOrGreaterThanWednesday = $dateCarbon->isoWeekday() >= 3;
 
         $routes = DeliveryRoute::query()->orderBy('id')->get(['id', 'name']);
 
@@ -86,7 +102,15 @@ final class RouteSheetsAggregator
                 continue;
             }
 
-            $row = self::buildRow($meal);
+            $range = $orderDateRanges->get($meal->order_id);
+            $newSheet = $range !== null && $dateString === $range['min_date'];
+            $disposableRecipient = (bool) $meal->order->is_last_meal
+                && $range !== null
+                && $dateString === $range['max_date'];
+            $takeBackSheet = $isEqualOrGreaterThanWednesday
+                && ! isset($clientsWithNextWeekOrder[$client->id]);
+
+            $row = self::buildRow($meal, $newSheet, $takeBackSheet, $disposableRecipient);
 
             if ($row['menu1'] === 0 && $row['menu2'] === 0) {
                 continue;
@@ -153,10 +177,17 @@ final class RouteSheetsAggregator
      *     menu2_diets: list<string>,
      *     notes: ?string,
      *     client_notes: ?string,
+     *     new_sheet: bool,
+     *     take_back_sheet: bool,
+     *     disposable_recipient: bool,
      * }
      */
-    private static function buildRow(Meal $meal): array
-    {
+    private static function buildRow(
+        Meal $meal,
+        bool $newSheet,
+        bool $takeBackSheet,
+        bool $disposableRecipient,
+    ): array {
         $client = $meal->order->client;
 
         $menu1 = self::menuFor($meal, 1);
@@ -180,7 +211,64 @@ final class RouteSheetsAggregator
             'menu2_diets' => $menu2['diets'],
             'notes' => $meal->notes !== null && mb_trim((string) $meal->notes) !== '' ? (string) $meal->notes : null,
             'client_notes' => $client->notes !== null && mb_trim((string) $client->notes) !== '' ? (string) $client->notes : null,
+            'new_sheet' => $newSheet,
+            'take_back_sheet' => $takeBackSheet,
+            'disposable_recipient' => $disposableRecipient,
         ];
+    }
+
+    /**
+     * Earliest and latest meal date for each order, keyed by order id.
+     *
+     * @param  list<int>  $orderIds
+     * @return Collection<int, array{min_date: string, max_date: string}>
+     */
+    private static function orderDateRanges(array $orderIds): Collection
+    {
+        if ($orderIds === []) {
+            return new Collection();
+        }
+
+        return Meal::query()
+            ->whereIn('order_id', $orderIds)
+            ->selectRaw('order_id, MIN(date) as min_date, MAX(date) as max_date')
+            ->groupBy('order_id')
+            ->get()
+            ->mapWithKeys(fn (Meal $meal): array => [
+                (int) $meal->order_id => [
+                    'min_date' => CarbonImmutable::parse((string) $meal->min_date)->format('Y-m-d'),
+                    'max_date' => CarbonImmutable::parse((string) $meal->max_date)->format('Y-m-d'),
+                ],
+            ]);
+    }
+
+    /**
+     * Clients who already have a meal scheduled after the current week, keyed by
+     * client id for O(1) lookups. Mirrors the legacy `hasCommandNextWeek` check.
+     *
+     * @param  list<int>  $clientIds
+     * @return array<int, true>
+     */
+    private static function clientsWithNextWeekOrder(Week $week, array $clientIds, string $dateString): array
+    {
+        if ($clientIds === []) {
+            return [];
+        }
+
+        $lastDay = collect($week->days ?? [])
+            ->filter()
+            ->map(fn ($day): string => CarbonImmutable::parse((string) $day)->format('Y-m-d'))
+            ->push(CarbonImmutable::parse($week->first_day)->format('Y-m-d'))
+            ->push($dateString)
+            ->max();
+
+        return Order::query()
+            ->whereIn('client_id', $clientIds)
+            ->whereHas('meals', fn (Builder $query) => $query->whereDate('date', '>', $lastDay))
+            ->pluck('client_id')
+            ->flip()
+            ->map(fn (): bool => true)
+            ->all();
     }
 
     /**

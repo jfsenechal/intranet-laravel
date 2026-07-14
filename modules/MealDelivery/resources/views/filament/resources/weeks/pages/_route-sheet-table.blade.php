@@ -16,6 +16,9 @@
             <tr class="{{ $index % 2 === 1 ? 'alt' : '' }}">
                 <td style="text-align:left;">
                     <span>{{ $row['client_name'] }}</span>
+                    @if ($row['disposable_recipient'])
+                        <br><span class="text-disposable">Récipient jetable</span>
+                    @endif
                     @if ($row['phone'])
                         <br><span class="text-muted">{{ $row['phone'] }}</span>
                     @endif
@@ -48,8 +51,8 @@
                         <span>{!! nl2br(e($row['notes'])) !!}</span>
                     @endif
                 </td>
-                <td></td>
-                <td>DF</td>
+                <td style="text-align:center;">{{ $row['take_back_sheet'] ? '✔' : '' }}</td>
+                <td style="text-align:center;">{{ $row['new_sheet'] ? '✔' : '' }}</td>
             </tr>
         @empty
             <tr>

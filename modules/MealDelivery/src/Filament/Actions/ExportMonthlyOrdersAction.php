@@ -28,7 +28,7 @@ final class ExportMonthlyOrdersAction
             ->all();
 
         return Action::make('exportMonthlyOrders')
-            ->label('Exporter les commandes du mois')
+            ->label('Factures du mois...')
             ->icon('tabler-file-export')
             ->color('info')
             ->modal()
