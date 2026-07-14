@@ -51,23 +51,24 @@ final class DeclarationInfolist
                     ]),
                 Section::make('Tarifs et classification')
                     ->icon('tabler-currency-euro')
+                    ->columns(2)
                     ->schema([
-                        Flex::make([
-                            TextEntry::make('rate')
-                                ->label('Tarif (€/km)')
-                                ->money('EUR', decimalPlaces: 4),
-                            TextEntry::make('rate_omnium')
-                                ->label('Tarif omnium (€/km)')
-                                ->money('EUR', decimalPlaces: 4)
-                                ->visible(fn ($record): bool => $record->omnium),
-                        ])->grow(false),
-                        Flex::make([
-                            TextEntry::make('budget_article')
-                                ->label('Article budgétaire'),
-                            TextEntry::make('college_date')
-                                ->label('Date de Collège')
-                                ->date(),
-                        ])->grow(false),
+                        TextEntry::make('rate')
+                            ->label('Tarif (€/km)')
+                            ->money('EUR', decimalPlaces: 4),
+                        TextEntry::make('rate_omnium')
+                            ->label('Tarif omnium (€/km)')
+                            ->money('EUR', decimalPlaces: 4)
+                            ->visible(fn($record): bool => $record->omnium),
+                        TextEntry::make('budget_article')
+                            ->label('Article budgétaire')
+                            ->columnSpanFull(),
+                        TextEntry::make('college_date')
+                            ->label('Date de Collège')
+                            ->date(),
+                        TextEntry::make('created_at')
+                            ->label('Crée le')
+                            ->date(),
                     ]),
                 Section::make('Véhicule')
                     ->icon('tabler-car')
@@ -79,7 +80,7 @@ final class DeclarationInfolist
                                 ->label('Plaque 2'),
                             TextEntry::make('omnium')
                                 ->label('Omnium')
-                                ->formatStateUsing(fn (bool $state): string => $state ? 'Oui' : 'Non'),
+                                ->formatStateUsing(fn(bool $state): string => $state ? 'Oui' : 'Non'),
                         ]),
                     ])->grow(false),
                 Section::make('Résumé des frais')
@@ -87,40 +88,49 @@ final class DeclarationInfolist
                         Flex::make([
                             TextEntry::make('totalKilometers')
                                 ->label('Total kilomètres')
-                                ->state(fn (Declaration $record): int => self::getCalculator($record)->totalKilometers)
+                                ->state(fn(Declaration $record): int => self::getCalculator($record)->totalKilometers)
                                 ->suffix(' km')
                                 ->weight(FontWeight::Bold),
                             TextEntry::make('totalMileageAllowance')
                                 ->label('Indemnité kilométrique')
-                                ->state(fn (Declaration $record): float => self::getCalculator($record)->totalMileageAllowance)
+                                ->state(
+                                    fn(Declaration $record): float => self::getCalculator(
+                                        $record
+                                    )->totalMileageAllowance
+                                )
                                 ->money('EUR'),
                         ])->grow(false),
                         Flex::make([
                             TextEntry::make('totalOmnium')
                                 ->label('Retenue omnium')
-                                ->state(fn (Declaration $record): float => self::getCalculator($record)->totalOmnium)
+                                ->state(fn(Declaration $record): float => self::getCalculator($record)->totalOmnium)
                                 ->money('EUR')
-                                ->visible(fn ($record): bool => $record->omnium),
+                                ->visible(fn($record): bool => $record->omnium),
                             TextEntry::make('mealExpense')
                                 ->label('Frais de repas')
-                                ->state(fn (Declaration $record): float => self::getCalculator($record)->mealExpense)
+                                ->state(fn(Declaration $record): float => self::getCalculator($record)->mealExpense)
                                 ->money('EUR')
-                                ->visible(fn (Declaration $record): bool => self::getCalculator($record)->mealExpense > 0),
+                                ->visible(fn(Declaration $record): bool => self::getCalculator($record)->mealExpense > 0
+                                ),
                             TextEntry::make('trainExpense')
                                 ->label('Frais de train')
-                                ->state(fn (Declaration $record): float => self::getCalculator($record)->trainExpense)
+                                ->state(fn(Declaration $record): float => self::getCalculator($record)->trainExpense)
                                 ->money('EUR')
-                                ->visible(fn (Declaration $record): bool => self::getCalculator($record)->trainExpense > 0),
+                                ->visible(
+                                    fn(Declaration $record): bool => self::getCalculator($record)->trainExpense > 0
+                                ),
                         ])->grow(false),
                         Flex::make([
                             TextEntry::make('totalExpense')
                                 ->label('Total frais annexes')
-                                ->state(fn (Declaration $record): float => self::getCalculator($record)->totalExpense)
+                                ->state(fn(Declaration $record): float => self::getCalculator($record)->totalExpense)
                                 ->money('EUR')
-                                ->visible(fn (Declaration $record): bool => self::getCalculator($record)->totalExpense > 0),
+                                ->visible(
+                                    fn(Declaration $record): bool => self::getCalculator($record)->totalExpense > 0
+                                ),
                             TextEntry::make('totalRefund')
                                 ->label('Total à rembourser')
-                                ->state(fn (Declaration $record): float => self::getCalculator($record)->totalRefund)
+                                ->state(fn(Declaration $record): float => self::getCalculator($record)->totalRefund)
                                 ->money('EUR')
                                 ->weight(FontWeight::Bold)
                                 ->color('success'),
@@ -145,7 +155,7 @@ final class DeclarationInfolist
     {
         static $cache = [];
 
-        if (! isset($cache[$record->id])) {
+        if (!isset($cache[$record->id])) {
             $record->loadMissing('trips');
             $calculator = new DeclarationCalculator($record);
             $cache[$record->id] = $calculator->calculate();
@@ -184,7 +194,7 @@ final class DeclarationInfolist
             TextEntry::make('departure_date')
                 ->date('d/m/Y'),
             TextEntry::make('trajet')
-                ->state(fn ($record): string => $record->departure_location && $record->arrival_location
+                ->state(fn($record): string => $record->departure_location && $record->arrival_location
                     ? $record->departure_location.' → '.$record->arrival_location
                     : '-'),
             TextEntry::make('content')
@@ -202,7 +212,7 @@ final class DeclarationInfolist
         if (self::canDetachTrip()) {
             $schema[] = TextEntry::make('id')
                 ->hiddenLabel()
-                ->formatStateUsing(fn (): string => '')
+                ->formatStateUsing(fn(): string => '')
                 ->afterContent(
                     Action::make('detach')
                         ->label('Détacher')
@@ -211,7 +221,9 @@ final class DeclarationInfolist
                         ->size('sm')
                         ->requiresConfirmation()
                         ->modalHeading('Détacher le déplacement')
-                        ->modalDescription('Êtes-vous sûr de vouloir détacher ce déplacement de la déclaration ? Le déplacement ne sera pas supprimé.')
+                        ->modalDescription(
+                            'Êtes-vous sûr de vouloir détacher ce déplacement de la déclaration ? Le déplacement ne sera pas supprimé.'
+                        )
                         ->action(function (Trip $record): void {
                             $record->update(['declaration_id' => null]);
 
@@ -237,6 +249,6 @@ final class DeclarationInfolist
             return true;
         }
 
-        return (bool) $user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value);
+        return (bool)$user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value);
     }
 }
