@@ -55,7 +55,8 @@ final class Direction extends Model
     {
         return SlugOptions::create()
             ->generateSlugsFrom(['name'])
-            ->saveSlugsTo('slug');
+            ->saveSlugsTo('slug')
+            ->slugsShouldBeNoLongerThan(73);
     }
 
     /**
