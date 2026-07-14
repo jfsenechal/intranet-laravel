@@ -9,6 +9,10 @@ use AcMarche\Hrm\Filament\Resources\Employees\Pages\CreateEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\EditEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\AbsencesRelationManager;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\TrainingsRelationManager;
+use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Prerequisite;
 use AcMarche\Security\Models\Role;
@@ -172,13 +176,13 @@ describe('table', function (): void {
         $otherEmployer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
 
         $matching = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $matching->id,
             'employer_id' => $employer->id,
         ]);
 
         $nonMatching = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $nonMatching->id,
             'employer_id' => $otherEmployer->id,
         ]);
@@ -201,7 +205,7 @@ describe('table scoping by role', function (): void {
         $otherDirection = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'someone-else']);
 
         $visible = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $visible->id,
             'direction_id' => $direction->id,
             'is_closed' => false,
@@ -210,7 +214,7 @@ describe('table scoping by role', function (): void {
         ]);
 
         $hidden = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $hidden->id,
             'direction_id' => $otherDirection->id,
             'is_closed' => false,
@@ -232,7 +236,7 @@ describe('table scoping by role', function (): void {
         $director->roles()->attach($directionRole);
 
         $employee = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $employee->id,
             'is_closed' => false,
             'is_suspended' => false,
@@ -256,13 +260,13 @@ describe('table scoping by role', function (): void {
         $cpas = AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'cpas', 'parent_id' => null]);
 
         $visible = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $visible->id,
             'employer_id' => $villeChild->id,
         ]);
 
         $hidden = Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        Contract::factory()->create([
             'employee_id' => $hidden->id,
             'employer_id' => $cpas->id,
         ]);
@@ -273,6 +277,73 @@ describe('table scoping by role', function (): void {
             ->loadTable()
             ->assertCanSeeTableRecords([$visible])
             ->assertCanNotSeeTableRecords([$hidden]);
+    });
+});
+
+describe('relation manager visibility', function (): void {
+    it('shows the relation manager tabs to a direction head for an employee in their direction', function (): void {
+        $directionRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($directionRole);
+
+        $direction = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'director1']);
+
+        $employee = Employee::factory()->create();
+        Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        $this->actingAs($director);
+
+        expect(ContractsRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeTrue()
+            ->and(AbsencesRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeTrue()
+            ->and(TrainingsRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeTrue();
+    });
+
+    it('hides the relation manager tabs from a direction head for an employee outside their direction', function (): void {
+        $directionRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($directionRole);
+
+        AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'director1']);
+        $otherDirection = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'someone-else']);
+
+        $employee = Employee::factory()->create();
+        Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'direction_id' => $otherDirection->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        $this->actingAs($director);
+
+        expect(ContractsRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeFalse()
+            ->and(AbsencesRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeFalse()
+            ->and(TrainingsRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeFalse();
+    });
+
+    it('shows the relation manager tabs to an hrm administrator', function (): void {
+        $employee = Employee::factory()->create();
+
+        expect(ContractsRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeTrue()
+            ->and(AbsencesRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeTrue()
+            ->and(TrainingsRelationManager::canViewForRecord($employee, ViewEmployee::class))->toBeTrue();
+    });
+
+    it('keeps the standalone related resources restricted to administrators', function (): void {
+        $directionRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($directionRole);
+
+        expect($director->can('viewAny', Contract::class))->toBeFalse()
+            ->and($director->can('viewAny', AcMarche\Hrm\Models\Absence::class))->toBeFalse()
+            ->and($director->can('viewAny', AcMarche\Hrm\Models\Training::class))->toBeFalse();
     });
 });
 

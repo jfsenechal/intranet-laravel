@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Applications\Schemas\ApplicationForm;
 use AcMarche\Hrm\Filament\Resources\Applications\Schemas\ApplicationInfolist;
 use AcMarche\Hrm\Filament\Resources\Applications\Tables\ApplicationTables;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use AcMarche\Hrm\Models\Employee;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -23,6 +24,7 @@ use Override;
 final class ApplicationsRelationManager extends RelationManager
 {
     use ReadOnlyUnlessGrhAdmin;
+    use VisibleWhenEmployeeIsViewable;
 
     #[Override]
     protected static string $relationship = 'applications';

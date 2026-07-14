@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Absences\Schemas;
 
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Models\Absence;
 use AcMarche\Hrm\Services\AbsenceNotifier;
+use App\Models\User;
 use Filament\Schemas\Components\Callout;
 use Filament\Support\Icons\Heroicon;
 
@@ -31,7 +33,8 @@ final class AbsenceCallouts
                 : null)
             ->icon(Heroicon::ExclamationTriangle)
             ->warning()
-            ->visible(fn (?Absence $record): bool => $record !== null
+            ->visible(fn (?Absence $record): bool => self::isAdmin()
+                && $record !== null
                 && app(AbsenceNotifier::class)->getProximityAlert($record) !== null);
     }
 
@@ -43,7 +46,8 @@ final class AbsenceCallouts
                 : null)
             ->icon(Heroicon::InformationCircle)
             ->info()
-            ->visible(fn (?Absence $record): bool => $record !== null
+            ->visible(fn (?Absence $record): bool => self::isAdmin()
+                && $record !== null
                 && app(AbsenceNotifier::class)->getCesiAlert($record) !== null);
     }
 
@@ -55,7 +59,16 @@ final class AbsenceCallouts
                 : null)
             ->icon(Heroicon::ShieldExclamation)
             ->danger()
-            ->visible(fn (?Absence $record): bool => $record !== null
+            ->visible(fn (?Absence $record): bool => self::isAdmin()
+                && $record !== null
                 && app(AbsenceNotifier::class)->getWorkPotentialAlert($record) !== null);
+    }
+
+    private static function isAdmin(): bool
+    {
+        $user = auth()->user();
+
+        return $user instanceof User
+            && ($user->isAdministrator() || $user->hasRole(RolesEnum::ROLE_GRH_ADMIN->value));
     }
 }

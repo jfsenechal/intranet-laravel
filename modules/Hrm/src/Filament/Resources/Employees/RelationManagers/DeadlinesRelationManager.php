@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Deadlines\Schemas\DeadlineForm;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Schemas\DeadlineInfolist;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Tables\DeadlineTables;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -17,6 +18,7 @@ use Override;
 final class DeadlinesRelationManager extends RelationManager
 {
     use ReadOnlyUnlessGrhAdmin;
+    use VisibleWhenEmployeeIsViewable;
 
     #[Override]
     protected static string $relationship = 'deadlines';

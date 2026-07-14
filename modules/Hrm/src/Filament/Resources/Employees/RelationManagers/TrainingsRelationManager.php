@@ -6,6 +6,7 @@ namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingForm;
 use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingInfolist;
 use AcMarche\Hrm\Filament\Resources\Trainings\Tables\TrainingTables;
@@ -19,6 +20,7 @@ use Override;
 final class TrainingsRelationManager extends RelationManager
 {
     use ReadOnlyUnlessGrhAdmin;
+    use VisibleWhenEmployeeIsViewable;
 
     #[Override]
     protected static string $relationship = 'trainings';

@@ -8,10 +8,12 @@ use AcMarche\Hrm\Filament\Resources\Absences\Pages\CreateAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\EditAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ListAbsences;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
+use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceCallouts;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Models\Absence;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Schemas\Components\Callout;
 use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -59,6 +61,34 @@ describe('page rendering', function (): void {
             'record' => $record->id,
         ])
             ->assertOk();
+    });
+});
+
+describe('callouts authorization', function (): void {
+    it('makes the alert callouts visible only to administrators', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $absence = Absence::factory()->create([
+            'employee_id' => $employee->id,
+            'start_date' => now()->subDays(60),
+            'end_date' => now(),
+        ]);
+
+        $visibilityFor = fn (Absence $absence): array => array_map(
+            fn (Callout $callout): bool => $callout->model($absence)->isVisible(),
+            AbsenceCallouts::components(),
+        );
+
+        // Administrator (authenticated in beforeEach): the triggered CESI and
+        // work-potential callouts are visible.
+        [, $cesiForAdmin, $workPotentialForAdmin] = $visibilityFor($absence);
+
+        expect($cesiForAdmin)->toBeTrue()
+            ->and($workPotentialForAdmin)->toBeTrue();
+
+        // Non-administrator: every callout is hidden regardless of the alerts.
+        $this->actingAs(User::factory()->create(['is_administrator' => false]));
+
+        expect($visibilityFor($absence))->each->toBeFalse();
     });
 });
 

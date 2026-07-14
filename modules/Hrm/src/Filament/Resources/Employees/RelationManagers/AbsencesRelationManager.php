@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use AcMarche\Hrm\Filament\Resources\Absences\Tables\AbsenceTables;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -17,6 +18,7 @@ use Override;
 final class AbsencesRelationManager extends RelationManager
 {
     use ReadOnlyUnlessGrhAdmin;
+    use VisibleWhenEmployeeIsViewable;
 
     #[Override]
     protected static string $relationship = 'absences';

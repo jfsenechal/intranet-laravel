@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationForm;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Schemas\ValorizationInfolist;
 use AcMarche\Hrm\Filament\Resources\Valorizations\Tables\ValorizationTables;
@@ -17,6 +18,7 @@ use Override;
 final class ValorizationsRelationManager extends RelationManager
 {
     use ReadOnlyUnlessGrhAdmin;
+    use VisibleWhenEmployeeIsViewable;
 
     #[Override]
     protected static string $relationship = 'valorizations';
