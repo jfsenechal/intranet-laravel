@@ -26,6 +26,7 @@ final class TripForm
                         DateTimePicker::make('departure_date')
                             ->label('Date du déplacement')
                             ->date()
+                            ->seconds(false)
                             ->required(),
                         Textarea::make('content')
                             ->label('Détail des courses')
@@ -48,7 +49,8 @@ final class TripForm
                             ->label('Lieu d\'arrivée')
                             ->maxLength(255),
                         DateTimePicker::make('arrival_date')
-                            ->label('Date/heure d\'arrivée'),
+                            ->label('Date/heure d\'arrivée')
+                            ->seconds(false),
                         TextInput::make('meal_expense')
                             ->label('Frais de repas')
                             ->helperText('Max 12,30 euros')
