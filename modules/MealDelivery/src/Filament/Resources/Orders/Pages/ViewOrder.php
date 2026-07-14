@@ -66,7 +66,10 @@ final class ViewOrder extends ViewRecord
 
             DeleteAction::make()
                 ->label('Supprimer la commande')
-                ->icon(Heroicon::Trash),
+                ->icon(Heroicon::Trash)
+                ->successRedirectUrl(fn (): string => $order->client_id !== null
+                    ? ClientResource::getUrl('view', ['record' => $order->client_id])
+                    : WeekResource::getUrl('view', ['record' => $order->week_id])),
         ];
     }
 }

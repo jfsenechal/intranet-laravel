@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
 use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\ViewOrder;
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
@@ -26,7 +27,7 @@ beforeEach(function (): void {
         'days' => ['2026-06-15'],
     ]);
 
-    $client = Client::create([
+    $this->client = Client::create([
         'last_name' => fake()->lastName(),
         'first_name' => fake()->firstName(),
         'street' => fake()->streetName(),
@@ -39,7 +40,7 @@ beforeEach(function (): void {
 
     $this->order = Order::create([
         'week_id' => $week->id,
-        'client_id' => $client->id,
+        'client_id' => $this->client->id,
     ]);
 
     $this->meal = Meal::create([
@@ -62,7 +63,8 @@ beforeEach(function (): void {
 it('cascades deletion to meals, menus and diet links when an order is deleted', function (): void {
     livewire(ViewOrder::class, ['record' => $this->order->id])
         ->callAction(DeleteAction::class)
-        ->assertHasNoActionErrors();
+        ->assertHasNoActionErrors()
+        ->assertRedirect(ClientResource::getUrl('view', ['record' => $this->client->id]));
 
     expect(Order::query()->whereKey($this->order->id)->exists())->toBeFalse()
         ->and(Meal::query()->whereKey($this->meal->id)->exists())->toBeFalse()
