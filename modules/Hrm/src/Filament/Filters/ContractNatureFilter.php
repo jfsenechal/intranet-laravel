@@ -14,6 +14,7 @@ final class ContractNatureFilter
         return SelectFilter::make('contract_nature_id')
             ->label('Nature')
             ->options(fn (): array => ContractNature::groupedSelectOptions())
+            ->multiple()
             ->searchable()
             ->preload();
     }
