@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Mileage\Console\Commands;
 
+use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Service\TripAttributeResolver;
@@ -66,9 +67,11 @@ final class VerifyTripRatesCommand extends Command
                         continue;
                     }
 
-                    $mismatches[] = [
+                    $declarationId = (int) $trip->declaration_id;
+                    $mismatches[$declarationId]['declaration_id'] = $declarationId;
+                    $mismatches[$declarationId]['declaration_date'] = $trip->declaration?->created_at?->format('d-m-Y') ?? '—';
+                    $mismatches[$declarationId]['trips'][] = [
                         $trip->id,
-                        $trip->declaration_id,
                         $trip->departure_date->format('d-m-Y'),
                         $this->formatAmount($trip->rate),
                         $this->formatAmount($rate->amount),
@@ -90,7 +93,7 @@ final class VerifyTripRatesCommand extends Command
     }
 
     /**
-     * @param  array<int, array<int, string|int|null>>  $mismatches
+     * @param  array<int, array{declaration_id: int, declaration_date: string, trips: array<int, array<int, string|int|null>>}>  $mismatches
      */
     private function report(int $checked, int $missingRate, array $mismatches, bool $fix): int
     {
@@ -98,17 +101,33 @@ final class VerifyTripRatesCommand extends Command
         $this->info("Checked {$checked} declared trip(s).");
 
         if ($mismatches !== []) {
+            $mismatchedTrips = 0;
+            $rows = [];
+
+            foreach ($mismatches as $mismatch) {
+                $tripCount = count($mismatch['trips']);
+                $mismatchedTrips += $tripCount;
+
+                $rows[] = [
+                    $mismatch['declaration_id'],
+                    $mismatch['declaration_date'],
+                    $tripCount,
+                    implode(', ', array_column($mismatch['trips'], 0)),
+                    DeclarationResource::getUrl('view', ['record' => $mismatch['declaration_id']], panel: 'mileage-panel'),
+                ];
+            }
+
             $this->newLine();
             $this->table(
-                ['Trip', 'Declaration', 'Departure', 'Stored rate', 'Expected rate', 'Stored omnium', 'Expected omnium'],
-                $mismatches
+                ['Declaration', 'Date', 'Trips', 'Trip IDs', 'View URL'],
+                $rows
             );
 
-            $count = count($mismatches);
+            $declarationCount = count($mismatches);
             if ($fix) {
-                $this->info("Fixed {$count} trip(s) with an incorrect rate.");
+                $this->info("Fixed {$mismatchedTrips} trip(s) across {$declarationCount} declaration(s) with an incorrect rate.");
             } else {
-                $this->error("Found {$count} trip(s) with an incorrect rate. Re-run with --fix to correct them.");
+                $this->error("Found {$mismatchedTrips} trip(s) across {$declarationCount} declaration(s) with an incorrect rate. Re-run with --fix to correct them.");
             }
         } else {
             $this->info('All declared trips carry the correct rate.');
