@@ -75,10 +75,6 @@ final class AllDeclarations extends ListRecords
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('user_add')
-                    ->label('Utilisateur')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('last_name')
                     ->label('Nom')
                     ->searchable()

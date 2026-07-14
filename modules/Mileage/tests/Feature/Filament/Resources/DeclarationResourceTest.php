@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Filament\Pages\AllDeclarations;
 use AcMarche\Mileage\Filament\Resources\Declarations\Pages\CreateDeclaration;
 use AcMarche\Mileage\Filament\Resources\Declarations\Pages\EditDeclaration;
 use AcMarche\Mileage\Filament\Resources\Declarations\Pages\ListDeclarations;
@@ -68,6 +69,27 @@ it('can list declarations', function (): void {
     livewire(ListDeclarations::class)
         ->loadTable()
         ->assertCanSeeTableRecords($declarations);
+});
+
+it('only lists the current user declarations on the index page', function (): void {
+    $mine = Declaration::factory(2)->create(['user_add' => 'jdupont']);
+    $others = Declaration::factory(3)->create();
+    Declaration::whereKey($others->modelKeys())->update(['user_add' => 'someoneelse']);
+
+    livewire(ListDeclarations::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords($mine)
+        ->assertCanNotSeeTableRecords($others);
+});
+
+it('lists every user declaration on the all declarations page', function (): void {
+    $mine = Declaration::factory(2)->create(['user_add' => 'jdupont']);
+    $others = Declaration::factory(3)->create();
+    Declaration::whereKey($others->modelKeys())->update(['user_add' => 'someoneelse']);
+
+    livewire(AllDeclarations::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords($mine->merge($others));
 });
 
 it('has table columns', function (string $column): void {

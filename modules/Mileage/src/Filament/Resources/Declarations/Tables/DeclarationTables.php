@@ -6,7 +6,6 @@ namespace AcMarche\Mileage\Filament\Resources\Declarations\Tables;
 
 use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Models\Declaration;
-use AcMarche\Mileage\Repository\DeclarationRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
@@ -21,7 +20,7 @@ final class DeclarationTables
         return $table
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
-            ->modifyQueryUsing(fn (Builder $query) => DeclarationRepository::getByUser($query)->with('trips'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('trips'))
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')
