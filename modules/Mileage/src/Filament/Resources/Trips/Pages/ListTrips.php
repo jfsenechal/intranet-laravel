@@ -25,7 +25,7 @@ final class ListTrips extends ListRecords
 
     public function getSubheading(): Htmlable
     {
-        return new HtmlString('Pour créer une nouvelle déclaration, cochez les déplacements <strong>non déclarés</strong>');
+        return new HtmlString('Pour créer une nouvelle déclaration, cochez les déplacements, cliquez sur "ouvrir les actions" puis "Déclarer"');
     }
 
     protected function getHeaderActions(): array

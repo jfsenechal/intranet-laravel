@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Filament\Actions;
 
 use AcMarche\Mileage\Factory\DeclarationFactory;
+use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Repository\PersonalInformationRepository;
 use Exception;
@@ -50,6 +51,8 @@ final class CreateDeclarationAction
                             )
                             ->success()
                             ->send();
+
+                        redirect(DeclarationResource::getUrl('index'));
                     } catch (Exception $e) {
                         Notification::make()
                             ->title('Erreur')
