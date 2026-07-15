@@ -108,6 +108,82 @@ describe('handleTrips', function (): void {
             ->and($trip1->declaration_id)->toBe($trip2->declaration_id);
     });
 
+    test('skips trips already attached to a declaration', function (): void {
+        $personalInfo = PersonalInformation::factory()->create([
+            'username' => $this->user->username,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.40,
+            'start_date' => '2030-01-01',
+            'end_date' => '2030-12-31',
+        ]);
+
+        $existingDeclaration = Declaration::factory()->create();
+
+        // Already declared trip should be skipped
+        $declaredTrip = Trip::factory()->create([
+            'user_id' => $this->user->id,
+            'type_movement' => 'interne',
+            'departure_date' => '2030-02-15',
+            'declaration_id' => $existingDeclaration->id,
+        ]);
+
+        // Fresh trip should be declared
+        $freshTrip = Trip::factory()->create([
+            'user_id' => $this->user->id,
+            'type_movement' => 'interne',
+            'departure_date' => '2030-03-15',
+            'declaration_id' => null,
+        ]);
+
+        $declarations = DeclarationFactory::handleTrips(
+            collect([$declaredTrip, $freshTrip]),
+            $this->user,
+            $personalInfo,
+            $this->budgetArticle
+        );
+
+        expect($declarations)->toHaveCount(1);
+
+        $declaredTrip->refresh();
+        $freshTrip->refresh();
+
+        // Already declared trip keeps its original declaration
+        expect($declaredTrip->declaration_id)->toBe($existingDeclaration->id)
+            ->and($freshTrip->declaration_id)->toBe($declarations->first()->id);
+    });
+
+    test('does not create a declaration when all trips are already declared', function (): void {
+        $personalInfo = PersonalInformation::factory()->create([
+            'username' => $this->user->username,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.40,
+            'start_date' => '2030-01-01',
+            'end_date' => '2030-12-31',
+        ]);
+
+        $existingDeclaration = Declaration::factory()->create();
+
+        $declaredTrip = Trip::factory()->create([
+            'user_id' => $this->user->id,
+            'type_movement' => 'interne',
+            'departure_date' => '2030-02-15',
+            'declaration_id' => $existingDeclaration->id,
+        ]);
+
+        $declarations = DeclarationFactory::handleTrips(
+            collect([$declaredTrip]),
+            $this->user,
+            $personalInfo,
+            $this->budgetArticle
+        );
+
+        expect($declarations)->toBeEmpty();
+    });
+
     test('returns empty collection when trips array is empty', function (): void {
         $personalInfo = PersonalInformation::factory()->create([
             'username' => $this->user->username,

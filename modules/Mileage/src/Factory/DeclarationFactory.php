@@ -31,7 +31,8 @@ final class DeclarationFactory
         PersonalInformation $personalInformation,
         BudgetArticle $budgetArticle
     ): Collection {
-        $trips = collect($trips);
+        // Skip trips already attached to a declaration
+        $trips = collect($trips)->reject(fn (Trip $trip): bool => $trip->isDeclared());
 
         if ($trips->isEmpty()) {
             return collect();
