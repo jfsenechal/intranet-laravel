@@ -13,6 +13,7 @@ use App\Models\User;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DateTimePicker;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -130,6 +131,71 @@ it('validates the form data', function (array $data, array $errors): void {
     '`departure_date` is required' => [['departure_date' => null], ['departure_date' => 'required']],
     '`content` is required' => [['content' => null], ['content' => 'required']],
 ]);
+
+it('does not display the departure time inputs for an internal movement', function (array $data): void {
+    livewire(CreateTrip::class)
+        ->fillForm($data)
+        ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => ! $field->hasTime());
+})->with([
+    'nothing filled' => [['departure_location' => null, 'arrival_location' => null, 'arrival_date' => null]],
+    'only arrival_date' => [['departure_location' => null, 'arrival_location' => null, 'arrival_date' => now()]],
+    'missing arrival_date' => [['departure_location' => 'Marche', 'arrival_location' => 'Namur', 'arrival_date' => null]],
+]);
+
+it('displays the departure time inputs for an external movement', function (): void {
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
+            'arrival_date' => now(),
+        ])
+        ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => $field->hasTime());
+});
+
+it('requires the three external movement fields when any one is filled', function (array $data, array $errors): void {
+    $trip = Trip::factory()->make(['user_add' => 'jdupont']);
+
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'distance' => $trip->distance,
+            'departure_date' => $trip->departure_date,
+            'content' => $trip->content,
+            ...$data,
+        ])
+        ->call('create')
+        ->assertHasFormErrors($errors)
+        ->assertNotNotified();
+})->with([
+    'only `departure_location`' => [
+        ['departure_location' => 'Marche'],
+        ['arrival_location' => 'required_with', 'arrival_date' => 'required_with'],
+    ],
+    'only `arrival_location`' => [
+        ['arrival_location' => 'Namur'],
+        ['departure_location' => 'required_with', 'arrival_date' => 'required_with'],
+    ],
+    'only `arrival_date`' => [
+        ['arrival_date' => now()],
+        ['departure_location' => 'required_with', 'arrival_location' => 'required_with'],
+    ],
+]);
+
+it('accepts the trip when all three external movement fields are filled', function (): void {
+    $trip = Trip::factory()->make(['user_add' => 'jdupont']);
+
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'distance' => $trip->distance,
+            'departure_date' => $trip->departure_date,
+            'content' => $trip->content,
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
+            'arrival_date' => now(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+});
 
 it('renders the table for a non-admin owner without missing attribute error', function (): void {
     $owner = User::factory()->create(['username' => 'rhoubrechts', 'is_administrator' => false]);

@@ -32,7 +32,7 @@ final readonly class TripObserver
             $this->tripAttributeResolver->setRate($trip);
         }
 
-        if ($trip->isDirty('arrival_date')) {
+        if ($trip->isDirty(['departure_location', 'arrival_location', 'arrival_date'])) {
             $this->tripAttributeResolver->setTypeOfMovement($trip);
         }
     }

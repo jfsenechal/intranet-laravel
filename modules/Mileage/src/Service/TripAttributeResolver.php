@@ -37,11 +37,12 @@ final class TripAttributeResolver
 
     public function setTypeOfMovement(Trip $trip): void
     {
-        if ($trip->arrival_date !== null) {
-            $trip->type_movement = TypeMovementEnum::EXTERNAL->value;
+        $isExternal = filled($trip->departure_location)
+            && filled($trip->arrival_location)
+            && $trip->arrival_date !== null;
 
-            return;
-        }
-        $trip->type_movement = TypeMovementEnum::INTERNAL->value;
+        $trip->type_movement = $isExternal
+            ? TypeMovementEnum::EXTERNAL->value
+            : TypeMovementEnum::INTERNAL->value;
     }
 }

@@ -222,26 +222,34 @@ describe('recompute on update', function (): void {
             ->and($trip->fresh()->omnium)->toBe('0.0300');
     });
 
-    test('recomputes type of movement when arrival_date is updated', function (): void {
+    test('recomputes type of movement when the external fields are completed', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
+            'departure_location' => null,
+            'arrival_location' => null,
             'arrival_date' => null,
         ]);
 
         expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
 
-        $trip->update(['arrival_date' => '2024-06-16']);
+        $trip->update([
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
+            'arrival_date' => '2024-06-16',
+        ]);
 
         expect($trip->fresh()->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
     });
 });
 
 describe('setTypeOfMovement', function (): void {
-    test('sets type to EXTERNAL when arrival_date is present', function (): void {
+    test('sets type to EXTERNAL when the three external fields are filled', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
             'arrival_date' => '2024-06-16',
             'type_movement' => null,
         ]);
@@ -251,23 +259,35 @@ describe('setTypeOfMovement', function (): void {
         expect($trip->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
     });
 
-    test('sets type to INTERNAL when arrival_date is null', function (): void {
+    test('sets type to INTERNAL when any external field is missing', function (?string $departureLocation, ?string $arrivalLocation, ?string $arrivalDate): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
-            'arrival_date' => null,
+            'departure_location' => $departureLocation,
+            'arrival_location' => $arrivalLocation,
+            'arrival_date' => $arrivalDate,
             'type_movement' => null,
         ]);
 
         $this->handler->setTypeOfMovement($trip);
 
         expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
-    });
+    })->with([
+        'nothing filled' => [null, null, null],
+        'only departure_location' => ['Marche', null, null],
+        'only arrival_location' => [null, 'Namur', null],
+        'only arrival_date' => [null, null, '2024-06-16'],
+        'missing arrival_date' => ['Marche', 'Namur', null],
+        'missing departure_location' => [null, 'Namur', '2024-06-16'],
+        'missing arrival_location' => ['Marche', null, '2024-06-16'],
+    ]);
 
-    test('overwrites existing type_movement when arrival_date is present', function (): void {
+    test('overwrites existing type_movement when the three external fields are filled', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
             'arrival_date' => '2024-06-16',
             'type_movement' => 'interne',
         ]);
@@ -277,10 +297,12 @@ describe('setTypeOfMovement', function (): void {
         expect($trip->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
     });
 
-    test('overwrites existing type_movement when arrival_date is null', function (): void {
+    test('overwrites existing type_movement when an external field is missing', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
             'arrival_date' => null,
             'type_movement' => 'externe',
         ]);

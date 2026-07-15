@@ -8,6 +8,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 final class TripForm
@@ -25,8 +26,14 @@ final class TripForm
                             ->suffix('km'),
                         DateTimePicker::make('departure_date')
                             ->label('Date du déplacement')
+                            ->helperText('')
                             ->date()
                             ->seconds(false)
+                            // The hour and minute are only relevant for external movements,
+                            // so display the time inputs when the three external fields are filled.
+                            ->time(fn (Get $get): bool => filled($get('departure_location'))
+                                && filled($get('arrival_location'))
+                                && filled($get('arrival_date')))
                             ->required(),
                         Textarea::make('content')
                             ->label('Détail des courses')
@@ -44,13 +51,21 @@ final class TripForm
                     ->schema([
                         TextInput::make('departure_location')
                             ->label('Lieu de départ')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->minLength(2)
+                            ->live(onBlur: true)
+                            ->requiredWith('arrival_location,arrival_date'),
                         TextInput::make('arrival_location')
                             ->label('Lieu d\'arrivée')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->minLength(2)
+                            ->live(onBlur: true)
+                            ->requiredWith('departure_location,arrival_date'),
                         DateTimePicker::make('arrival_date')
                             ->label('Date/heure d\'arrivée')
-                            ->seconds(false),
+                            ->seconds(false)
+                            ->live(onBlur: true)
+                            ->requiredWith('departure_location,arrival_location'),
                         TextInput::make('meal_expense')
                             ->label('Frais de repas')
                             ->helperText('Max 12,30 euros')
