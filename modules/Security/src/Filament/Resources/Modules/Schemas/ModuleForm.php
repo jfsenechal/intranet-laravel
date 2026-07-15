@@ -14,6 +14,7 @@ use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Set;
@@ -52,8 +53,7 @@ final class ModuleForm
                 TextInput::make('description')
                     ->maxLength(255)
                     ->columnSpanFull(),
-                TextInput::make('role_description')
-                    ->maxLength(255)
+                Textarea::make('role_description')
                     ->label('Description de l\'attribution des rôles')
                     ->helperText('Quelques explications sur l\'attribution des roles')
                     ->columnSpanFull(),
