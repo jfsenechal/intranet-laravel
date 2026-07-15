@@ -157,6 +157,7 @@ final class IncomingMailSearch extends Page implements HasTable
         return $table
             ->query(fn (): Builder => $this->getTableQuery())
             ->emptyStateHeading('Aucun courrier trouvé')
+            ->defaultPaginationPageOption(50)
             ->paginated([25, 50, 100])
             ->columns([
                 TextColumn::make('reference_number')
