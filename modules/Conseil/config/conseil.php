@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'uploads' => [
-        'agendas_directory' => 'conseil/agendas',
+        'agendas_directory' => 'conseil',
         'notifications_directory' => 'conseil/notifications',
     ],
 
