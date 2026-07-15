@@ -246,6 +246,16 @@ it('downloads the file from the cpas-library disk', function (): void {
         ->assertFileDownloaded('doc.pdf');
 });
 
+it('notifies instead of failing when the file is missing on disk', function (): void {
+    $fiche = Fiche::factory()->create(['fileName' => 'missing.pdf']);
+
+    livewire(ViewFiche::class, ['record' => $fiche->id])
+        ->callAction('download')
+        ->assertNotified('Fichier introuvable');
+
+    expect(Storage::disk('cpas-library')->exists('fiches/missing.pdf'))->toBeFalse();
+});
+
 it('deletes a fiche from the view page as admin', function (): void {
     $fiche = Fiche::factory()->create();
 
