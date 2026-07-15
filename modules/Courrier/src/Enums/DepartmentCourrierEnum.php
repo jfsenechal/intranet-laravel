@@ -21,6 +21,18 @@ enum DepartmentCourrierEnum: string
     }
 
     /**
+     * Human-friendly label for display in the UI.
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::BGM => 'Bourgmestre',
+            self::VILLE => 'Ville',
+            self::CPAS => 'CPAS',
+        };
+    }
+
+    /**
      * The IMAP mailbox name registered for this department (e.g. `imap_ville`).
      */
     public function imapMailbox(): string

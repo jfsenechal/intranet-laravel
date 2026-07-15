@@ -85,6 +85,7 @@ final class IncomingMailSearch extends Page implements HasTable
                 'date_to' => filled($state['date_to'] ?? null) ? Carbon::parse($state['date_to']) : null,
                 'services' => $state['services'] ?? [],
                 'destinataires' => $state['destinataires'] ?? [],
+                'department' => $state['department'] ?? null,
             ],
         );
 

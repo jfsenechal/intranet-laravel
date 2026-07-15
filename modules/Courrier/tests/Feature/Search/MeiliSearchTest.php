@@ -173,6 +173,17 @@ describe('MeiliSearcher reference and category filters', function (): void {
         expect($captured->options['filter'])->toContain('category_id = 7');
     });
 
+    it('filters by department', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearch();
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $searcher->searchIds('', $user, ['department' => DepartmentCourrierEnum::CPAS->value]);
+
+        expect($captured->options['filter'])->toContain('department = "Cpas"');
+    });
+
     it('omits reference and category clauses when they are not provided', function (): void {
         $user = User::factory()->create(['is_administrator' => true]);
         [$client, $captured] = captureMeiliSearch();

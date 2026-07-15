@@ -14,6 +14,7 @@ use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
+use App\Models\User;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -26,6 +27,7 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 final class IncomingMailForm
 {
@@ -94,10 +96,35 @@ final class IncomingMailForm
                                 ->get()
                                 ->pluck('full_name', 'id')
                                 ->all()),
+                        Select::make('department')
+                            ->label('Département')
+                            ->options(fn (): array => self::searchableDepartmentOptions())
+                            ->visible(fn (): bool => count(self::searchableDepartmentOptions()) > 1),
                     ])
                     ->columns(2),
             ])
             ->statePath('data');
+    }
+
+    /**
+     * Departments the current user may search across. Only worth offering as a
+     * filter when they can see more than one; a single-department user is
+     * already scoped by the policy clause.
+     *
+     * @return array<string, string>
+     */
+    private static function searchableDepartmentOptions(): array
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return [];
+        }
+
+        return collect($user->getCourrierViewableDepartments())
+            ->mapWithKeys(fn (DepartmentCourrierEnum $department): array => [
+                $department->value => $department->label(),
+            ])
+            ->all();
     }
 
     /**

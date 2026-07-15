@@ -30,7 +30,7 @@ final class MeiliSearcher
     }
 
     /**
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int, department?: ?string}  $filters
      * @return array<int, array<string, mixed>>
      */
     public function search(string $query, User $user, array $filters = [], int $limit = 500): array
@@ -53,7 +53,7 @@ final class MeiliSearcher
     }
 
     /**
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int, department?: ?string}  $filters
      * @return array<int, int>
      */
     public function searchIds(string $query, User $user, array $filters = [], int $limit = 500): array
@@ -126,7 +126,7 @@ final class MeiliSearcher
     /**
      * Combine the policy clause with the optional user-provided filters.
      *
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int, department?: ?string}  $filters
      * @return array<int, string>|null null when the user may see nothing
      */
     private function filterClauses(User $user, array $filters): ?array
@@ -158,6 +158,10 @@ final class MeiliSearcher
         }
         if (! empty($filters['destinataires'])) {
             $clauses[] = sprintf('recipients IN [%s]', implode(', ', array_map('intval', $filters['destinataires'])));
+        }
+        if (filled($filters['department'] ?? null)) {
+            $escaped = str_replace('"', '\"', (string) $filters['department']);
+            $clauses[] = sprintf('department = "%s"', $escaped);
         }
         if (array_key_exists('recommande', $filters) && $filters['recommande'] !== null) {
             $clauses[] = 'is_registered = '.($filters['recommande'] ? 'true' : 'false');
