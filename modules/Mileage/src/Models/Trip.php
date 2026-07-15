@@ -113,7 +113,6 @@ final class Trip extends Model
             'train_expense' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            //  'type_movement' => 'TypeMovementEnum'
         ];
     }
 }
