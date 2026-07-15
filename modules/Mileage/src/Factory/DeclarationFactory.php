@@ -10,6 +10,7 @@ use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
+use AcMarche\Mileage\Service\TripAttributeResolver;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Collection;
@@ -38,16 +39,15 @@ final class DeclarationFactory
             return collect();
         }
 
-        // Get all rates ordered by start_date
-        $rates = Rate::query()
-            ->oldest('start_date')
-            ->get();
+        // Resolve the most recent applicable rate for each trip once
+        $resolver = new TripAttributeResolver();
+        $ratesByTripId = $trips->mapWithKeys(
+            fn (Trip $trip): array => [$trip->id => $resolver->resolveRate($trip)]
+        );
 
-        // Group trips by type_movement and rate
-        $groupedTrips = $trips->groupBy(function (Trip $trip) use ($rates): string {
-            $rate = $rates->first(fn (Rate $rate): bool => $trip->departure_date >= $rate->start_date
-                && ($rate->end_date === null || $trip->departure_date <= $rate->end_date));
-
+        // Group trips by type_movement and resolved rate
+        $groupedTrips = $trips->groupBy(function (Trip $trip) use ($ratesByTripId): string {
+            $rate = $ratesByTripId->get($trip->id);
             $rateId = $rate?->id ?? 'no_rate';
             $typeMovement = $trip->type_movement ?? 'unknown';
 
@@ -57,18 +57,15 @@ final class DeclarationFactory
         $declarations = collect();
 
         // Create a declaration for each type_movement + rate combination
-        foreach ($groupedTrips as $groupKey => $tripsInGroup) {
+        foreach ($groupedTrips as $tripsInGroup) {
+            $rate = $ratesByTripId->get($tripsInGroup->first()->id);
+
             // Skip trips without a matching rate
-            if (str_ends_with($groupKey, '_no_rate')) {
+            if (! $rate instanceof Rate) {
                 continue;
             }
 
-            // Extract type_movement and rate_id from the group key
-            $parts = explode('_', $groupKey);
-            $rateId = (int) array_pop($parts);
-            $typeMovement = implode('_', $parts);
-
-            $rate = $rates->firstWhere('id', $rateId);
+            $typeMovement = $tripsInGroup->first()->type_movement;
 
             // Create the declaration with user and rate data
             $declaration = Declaration::create([
