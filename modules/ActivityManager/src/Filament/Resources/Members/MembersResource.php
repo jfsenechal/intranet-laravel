@@ -10,6 +10,7 @@ use AcMarche\ActivityManager\Filament\Resources\Members\Pages\ListMembers;
 use AcMarche\ActivityManager\Filament\Resources\Members\Pages\ViewMember;
 use AcMarche\ActivityManager\Filament\Resources\Members\RelationManagers\ActivitiesRelationManager;
 use AcMarche\ActivityManager\Filament\Resources\Members\Schemas\MemberForm;
+use AcMarche\ActivityManager\Filament\Resources\Members\Schemas\MemberInfolist;
 use AcMarche\ActivityManager\Filament\Resources\Members\Tables\MembersTable;
 use AcMarche\ActivityManager\Models\Member;
 use BackedEnum;
@@ -58,6 +59,11 @@ final class MembersResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return MemberForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return MemberInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

@@ -7,6 +7,7 @@ namespace AcMarche\Mileage\Filament\Resources\Trips\Pages;
 use AcMarche\Mileage\Filament\Resources\PersonalInformation\PersonalInformationResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use AcMarche\Mileage\Repository\PersonalInformationRepository;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
@@ -35,5 +36,19 @@ final class CreateTrip extends CreateRecord
     public function getTitle(): string
     {
         return 'Ajouter un déplacement';
+    }
+
+    #[Override]
+    protected function getCreateFormAction(): Action
+    {
+        return parent::getCreateFormAction()
+            ->label('Ajouter');
+    }
+
+    #[Override]
+    protected function getCreateAnotherFormAction(): Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Ajouter & en ajouter un autre');
     }
 }

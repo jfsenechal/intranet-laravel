@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Filament\Resources\Members\RelationManagers;
 
+use AcMarche\ActivityManager\Filament\Resources\Members\Pages\ViewMember;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -13,6 +14,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Override;
 
 final class ActivitiesRelationManager extends RelationManager
@@ -22,6 +24,12 @@ final class ActivitiesRelationManager extends RelationManager
 
     #[Override]
     protected static ?string $title = 'Cours suivis';
+
+    #[Override]
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return $pageClass === ViewMember::class;
+    }
 
     public function form(Schema $schema): Schema
     {

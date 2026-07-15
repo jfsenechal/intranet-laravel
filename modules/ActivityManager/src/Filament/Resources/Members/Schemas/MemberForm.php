@@ -41,17 +41,15 @@ final class MemberForm
                             DatePicker::make('registered_at')
                                 ->label('Inscrit le')
                                 ->displayFormat('d/m/Y')
-                                ->native(false),
                         ]),
                     ]),
 
                 Section::make('Adresse')
                     ->schema([
-                        Grid::make(4)->schema([
+                        Grid::make(2)->schema([
                             TextInput::make('street')
                                 ->label('Rue')
-                                ->maxLength(150)
-                                ->columnSpan(2),
+                                ->maxLength(150),
                             TextInput::make('number')
                                 ->label('N°')
                                 ->maxLength(50),
@@ -61,13 +59,12 @@ final class MemberForm
                             TextInput::make('city')
                                 ->label('Localité')
                                 ->maxLength(50)
-                                ->columnSpan(2),
                         ]),
                     ]),
 
                 Section::make('Contact')
                     ->schema([
-                        Grid::make(3)->schema([
+                        Grid::make(2)->schema([
                             TextInput::make('mobile')
                                 ->label('GSM')
                                 ->tel()
