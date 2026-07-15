@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 return [
     'uploads' => [
-        'agendas_directory' => 'conseil',
-        'notifications_directory' => 'conseil/notifications',
+        'agendas_directory' => 'conseil/ordre',
+        'notifications_directory' => 'conseil/pv',
     ],
 
     'remote' => [
