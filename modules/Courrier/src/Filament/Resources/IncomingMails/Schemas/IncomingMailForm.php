@@ -6,8 +6,11 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas;
 
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Filament\Components\DepartmentField;
+use AcMarche\Courrier\Models\Category;
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Sender;
+use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
@@ -23,6 +26,7 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 final class IncomingMailForm
 {
@@ -202,4 +206,55 @@ final class IncomingMailForm
             'filename' => $attachment->file_name,
         ];
     }
+
+    public static function forAdvanceSearch(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        TextInput::make('reference')
+                            ->label('N° / Référence')
+                            ->placeholder('Identifiant ou numéro de référence'),
+                        TextInput::make('query')
+                            ->label('Recherche par texte')
+                            ->placeholder('Expéditeur, description, contenu…'),
+                        Grid::make(3)
+                            ->schema([
+                                DatePicker::make('date_from')
+                                    ->label('Du')
+                                    ->native(false),
+                                DatePicker::make('date_to')
+                                    ->label('Au')
+                                    ->native(false),
+                                Select::make('category')
+                                    ->label('Catégorie')
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(
+                                        fn(): array => Category::query()->orderBy('name')->pluck('name', 'id')->all()
+                                    ),
+                            ])
+                            ->columnSpanFull(),
+                        Select::make('services')
+                            ->label('Services')
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->options(fn(): array => Service::query()->orderBy('name')->pluck('name', 'id')->all()),
+                        Select::make('destinataires')
+                            ->label('Destinataires')
+                            ->multiple()
+                            ->searchable()
+                            ->options(fn(): array => Recipient::query()
+                                ->orderBy('last_name')
+                                ->get()
+                                ->pluck('full_name', 'id')
+                                ->all()),
+                    ])
+                    ->columns(2),
+            ])
+            ->statePath('data');
+    }
+
 }
