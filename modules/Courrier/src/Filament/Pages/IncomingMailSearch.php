@@ -68,7 +68,7 @@ final class IncomingMailSearch extends Page implements HasTable
 
     public function form(Schema $schema): Schema
     {
-        return IncomingMailForm::form($schema);
+        return IncomingMailForm::forAdvanceSearch($schema);
     }
 
     public function search(): void
