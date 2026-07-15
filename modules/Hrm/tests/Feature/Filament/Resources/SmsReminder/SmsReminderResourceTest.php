@@ -141,6 +141,18 @@ describe('form validation', function (): void {
             ->assertHasFormErrors(['reminder_date' => 'required'])
             ->assertNotNotified();
     });
+
+    it('requires message on create', function (): void {
+        Livewire::test(CreateSmsReminder::class)
+            ->fillForm([
+                'phone_number' => '32476123456',
+                'message' => null,
+                'reminder_date' => '2026-08-05',
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['message' => 'required'])
+            ->assertNotNotified();
+    });
 });
 
 describe('reminder date filter', function (): void {
