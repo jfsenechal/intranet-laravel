@@ -20,6 +20,7 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 
 final class ModuleForm
 {
@@ -127,7 +128,11 @@ final class ModuleForm
             return $moduleId ? ModuleRepository::find((int) $moduleId) : null;
         };
 
-        return Text::make(fn (callable $get): ?string => $resolve($get)?->role_description)
+        return Text::make(function (callable $get) use ($resolve): ?HtmlString {
+            $description = $resolve($get)?->role_description;
+
+            return filled($description) ? new HtmlString(nl2br(e($description))) : null;
+        })
             ->visible(fn (callable $get): bool => filled($resolve($get)?->role_description));
     }
 
