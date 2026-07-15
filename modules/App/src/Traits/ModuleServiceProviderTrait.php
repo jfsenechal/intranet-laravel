@@ -33,6 +33,7 @@ trait ModuleServiceProviderTrait
         );
 
         $this->registerDatabaseConnection();
+        $this->registerFilesystemDisks();
     }
 
     protected function bootModule(): void
@@ -86,6 +87,22 @@ trait ModuleServiceProviderTrait
 
         foreach ($connections['connections'] ?? [] as $name => $config) {
             config(['database.connections.'.$name => $config]);
+        }
+    }
+
+    /**
+     * Register filesystem disks declared in the module config using dotted keys
+     * such as 'filesystems.disks.cpas-library', which mergeConfigFrom would
+     * otherwise leave as literal keys under the module namespace.
+     */
+    protected function registerFilesystemDisks(): void
+    {
+        $config = require $this->modulePath()."/config/{$this->moduleName()}.php";
+
+        foreach ($config as $key => $value) {
+            if (str_starts_with((string) $key, 'filesystems.disks.')) {
+                config([$key => $value]);
+            }
         }
     }
 }
