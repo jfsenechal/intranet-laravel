@@ -29,8 +29,9 @@ final class AttachmentPolicy
      * Determine whether the user can download the attachment.
      *
      * Recipients and linked-service members may download. Department
-     * administrators may download mail from their department. Users who only
-     * index a department may view the mail but not its attachments.
+     * administrators and department readers may download mail from their
+     * department. Users who only index a department may view the mail but not
+     * its attachments.
      */
     public function download(User $user, Attachment $attachment): bool
     {
@@ -48,7 +49,8 @@ final class AttachmentPolicy
             return true;
         }
 
-        return $this->administersDepartment($user, $incomingMail);
+        return $this->administersDepartment($user, $incomingMail)
+            || $this->readsDepartment($user, $incomingMail);
     }
 
     /**
@@ -63,5 +65,23 @@ final class AttachmentPolicy
         $department = $user->getCourrierAdminDepartment();
 
         return $department !== null && $department->value === $incomingMail->department;
+    }
+
+    /**
+     * Check if the user has read access to the mail's department.
+     */
+    private function readsDepartment(User $user, IncomingMail $incomingMail): bool
+    {
+        if ($incomingMail->department === null) {
+            return false;
+        }
+
+        foreach ($user->getCourrierReadDepartments() as $department) {
+            if ($department->value === $incomingMail->department) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

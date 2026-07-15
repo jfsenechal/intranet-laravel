@@ -17,7 +17,7 @@ trait UserCourrierTrait
     {
         foreach (RolesEnum::getAdminRoles() as $role) {
             if ($this->hasRole($role->value)) {
-                return $role->getDepartmentAdmin();
+                return $role->getDepartment();
             }
         }
 
@@ -34,7 +34,7 @@ trait UserCourrierTrait
         $departments = [];
         foreach (RolesEnum::getIndexRoles() as $role) {
             if ($this->hasRole($role->value)) {
-                $departments[] = $role->getDepartmentIndex();
+                $departments[] = $role->getDepartment();
             }
         }
 
@@ -42,7 +42,26 @@ trait UserCourrierTrait
     }
 
     /**
-     * Every department the user may see (admin and index combined, deduplicated).
+     * Departments the user may read (view mail and download attachments) but
+     * not administer.
+     *
+     * @return DepartmentCourrierEnum[]
+     */
+    public function getCourrierReadDepartments(): array
+    {
+        $departments = [];
+        foreach (RolesEnum::getReadRoles() as $role) {
+            if ($this->hasRole($role->value)) {
+                $departments[] = $role->getDepartment();
+            }
+        }
+
+        return $departments;
+    }
+
+    /**
+     * Every department the user may see (admin, index and read combined,
+     * deduplicated).
      *
      * @return DepartmentCourrierEnum[]
      */
@@ -56,6 +75,10 @@ trait UserCourrierTrait
         }
 
         foreach ($this->getCourrierIndexDepartments() as $department) {
+            $departments[$department->value] = $department;
+        }
+
+        foreach ($this->getCourrierReadDepartments() as $department) {
             $departments[$department->value] = $department;
         }
 

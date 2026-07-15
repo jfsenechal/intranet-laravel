@@ -44,33 +44,34 @@ enum RolesEnum: string
         ];
     }
 
-    public function getDepartmentAdmin(): ?DepartmentCourrierEnum
+    public static function getReadRoles(): array
     {
-        return match ($this) {
-            self::ROLE_INDICATEUR_BOURGMESTRE_ADMIN => DepartmentCourrierEnum::BGM,
-            self::ROLE_INDICATEUR_VILLE_ADMIN => DepartmentCourrierEnum::VILLE,
-            self::ROLE_INDICATEUR_CPAS_ADMIN => DepartmentCourrierEnum::CPAS,
-            default => null,
-        };
+        return [
+            self::ROLE_INDICATEUR_BOURGMESTRE_READ,
+            self::ROLE_INDICATEUR_VILLE_READ,
+            self::ROLE_INDICATEUR_CPAS_READ,
+        ];
     }
 
-    public function getDepartmentIndex(): ?DepartmentCourrierEnum
+    /**
+     * The department this role belongs to, regardless of its tier
+     * (base, admin, index or read).
+     */
+    public function getDepartment(): DepartmentCourrierEnum
     {
         return match ($this) {
-            self::ROLE_INDICATEUR_BOURGMESTRE_INDEX => DepartmentCourrierEnum::BGM,
-            self::ROLE_INDICATEUR_VILLE_INDEX => DepartmentCourrierEnum::VILLE,
-            self::ROLE_INDICATEUR_CPAS_INDEX => DepartmentCourrierEnum::CPAS,
-            default => null,
-        };
-    }
-
-    public function getDepartmentRead(): ?DepartmentCourrierEnum
-    {
-        return match ($this) {
+            self::ROLE_INDICATEUR_BOURGMESTRE,
+            self::ROLE_INDICATEUR_BOURGMESTRE_ADMIN,
+            self::ROLE_INDICATEUR_BOURGMESTRE_INDEX,
             self::ROLE_INDICATEUR_BOURGMESTRE_READ => DepartmentCourrierEnum::BGM,
+            self::ROLE_INDICATEUR_VILLE,
+            self::ROLE_INDICATEUR_VILLE_ADMIN,
+            self::ROLE_INDICATEUR_VILLE_INDEX,
             self::ROLE_INDICATEUR_VILLE_READ => DepartmentCourrierEnum::VILLE,
+            self::ROLE_INDICATEUR_CPAS,
+            self::ROLE_INDICATEUR_CPAS_ADMIN,
+            self::ROLE_INDICATEUR_CPAS_INDEX,
             self::ROLE_INDICATEUR_CPAS_READ => DepartmentCourrierEnum::CPAS,
-            default => null,
         };
     }
 }

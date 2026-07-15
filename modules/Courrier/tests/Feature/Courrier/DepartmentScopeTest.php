@@ -18,19 +18,15 @@ describe('DepartmentCourrierEnum mailbox mapping', function (): void {
 });
 
 describe('RolesEnum department mapping', function (): void {
-    test('maps admin roles to correct departments', function (): void {
-        expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartmentAdmin())
+    test('maps every role to its department regardless of tier', function (): void {
+        expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartment())
             ->toBe(DepartmentCourrierEnum::BGM)
-            ->and(RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->getDepartmentAdmin())
+            ->and(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartment())
             ->toBe(DepartmentCourrierEnum::VILLE)
-            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->getDepartmentAdmin())
-            ->toBe(DepartmentCourrierEnum::CPAS);
-    });
-
-    test('non-admin roles return null department', function (): void {
-        expect(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartmentAdmin())->toBeNull()
-            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartmentAdmin())->toBeNull()
-            ->and(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->getDepartmentAdmin())->toBeNull();
+            ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartment())
+            ->toBe(DepartmentCourrierEnum::CPAS)
+            ->and(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_INDEX->getDepartment())
+            ->toBe(DepartmentCourrierEnum::BGM);
     });
 
     test('getAdminRoles returns only admin roles', function (): void {
