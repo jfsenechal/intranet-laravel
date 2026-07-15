@@ -77,6 +77,7 @@ final class ModuleTables
                     ->label('Intitulé'),
                 TextColumn::make('user_roles')
                     ->label('Rôles attribués')
+                    ->limit(110)
                     ->state(fn (Module $record): string => $roleNamesByModule->get($record->id, '')),
             ])
             ->filters([

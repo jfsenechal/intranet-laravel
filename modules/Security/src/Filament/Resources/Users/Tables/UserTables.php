@@ -103,7 +103,8 @@ final class UserTables
                     ->label('Rôles')
                     ->state(fn (Model|User $record): string => $record->rolesByModule($owner->id)
                         ->pluck('name')->implode(', '))
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->limitList(5),
             ])
             ->headerActions([
                 CreateAction::make('create')
