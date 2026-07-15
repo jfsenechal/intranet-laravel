@@ -14,4 +14,3 @@ Route::get('/login', fn () => redirect()->route('filament.app-panel.auth.login')
 
 Route::get('/app/login', fn () => redirect()->route('filament.app-panel.auth.login'))
     ->name('app-login');
-

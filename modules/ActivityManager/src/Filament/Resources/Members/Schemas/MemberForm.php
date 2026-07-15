@@ -40,7 +40,7 @@ final class MemberForm
                                 ->maxLength(50),
                             DatePicker::make('registered_at')
                                 ->label('Inscrit le')
-                                ->displayFormat('d/m/Y')
+                                ->displayFormat('d/m/Y'),
                         ]),
                     ]),
 
@@ -58,7 +58,7 @@ final class MemberForm
                                 ->numeric(),
                             TextInput::make('city')
                                 ->label('Localité')
-                                ->maxLength(50)
+                                ->maxLength(50),
                         ]),
                     ]),
 

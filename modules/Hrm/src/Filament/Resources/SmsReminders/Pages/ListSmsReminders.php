@@ -62,7 +62,7 @@ final class ListSmsReminders extends ListRecords
                         ->required(),
                 ])
                 ->action(
-                    fn(array $data) => new SmsReminderExport(
+                    fn (array $data) => new SmsReminderExport(
                         $this->getFilteredTableQuery(), $data['columns']
                     )->downloadXlsx('sms_reminders.xlsx')
                 ),

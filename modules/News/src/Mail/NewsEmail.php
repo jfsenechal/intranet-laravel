@@ -22,7 +22,7 @@ final class NewsEmail extends Mailable implements ShouldQueue
     public ?string $logo = null;
 
     /**
-     * @param bool $attachMedias When false, the news medias are not attached to the
+     * @param  bool  $attachMedias  When false, the news medias are not attached to the
      *                              email and a notice with a link to the intranet is shown instead.
      */
     public function __construct(
@@ -37,7 +37,7 @@ final class NewsEmail extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
-        $from = new Address(config('mail.from.address'), (string)config('app.name'));
+        $from = new Address(config('mail.from.address'), (string) config('app.name'));
 
         return new Envelope(
             from: $from,
@@ -52,7 +52,7 @@ final class NewsEmail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         $this->logo = public_path('images/Marche_logo.png');
-        if (!file_exists($this->logo)) {
+        if (! file_exists($this->logo)) {
             $this->logo = null;
         }
 
@@ -77,12 +77,12 @@ final class NewsEmail extends Mailable implements ShouldQueue
      */
     public function attachments(): array
     {
-        if (!$this->attachMedias) {
+        if (! $this->attachMedias) {
             return [];
         }
 
         return array_map(
-            fn(string $path): Attachment => Attachment::fromStorageDisk('public', $path),
+            fn (string $path): Attachment => Attachment::fromStorageDisk('public', $path),
             $this->news->medias ?? [],
         );
     }

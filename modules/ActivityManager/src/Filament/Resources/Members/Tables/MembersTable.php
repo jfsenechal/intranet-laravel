@@ -78,9 +78,9 @@ final class MembersTable
                     ->schema([
                         TextInput::make('city')->label('Localité'),
                     ])
-                    ->query(fn(Builder $query, array $data): Builder => $query->when(
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['city'] ?? null,
-                        fn(Builder $q, string $value): Builder => $q->where('city', 'like', "%{$value}%"),
+                        fn (Builder $q, string $value): Builder => $q->where('city', 'like', "%{$value}%"),
                     )),
             ])
             ->recordActions([

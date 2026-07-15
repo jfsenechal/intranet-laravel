@@ -77,7 +77,7 @@ final class SchedulesRelationManager extends RelationManager
             ->recordActions([
                 ViewAction::make()
                     ->label('Voir')
-                    ->url(fn(Schedule $record): string => SchedulesResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (Schedule $record): string => SchedulesResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),

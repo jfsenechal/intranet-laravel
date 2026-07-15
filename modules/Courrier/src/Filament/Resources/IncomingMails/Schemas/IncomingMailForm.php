@@ -26,7 +26,6 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
 
 final class IncomingMailForm
 {
@@ -38,7 +37,7 @@ final class IncomingMailForm
     }
 
     /**
-     * @param array<string, mixed>|null $imapPreview IMAP preview context: ['url', 'contentType', 'filename']
+     * @param  array<string, mixed>|null  $imapPreview  IMAP preview context: ['url', 'contentType', 'filename']
      */
     public static function getComponents(?array $imapPreview = null): array
     {
@@ -51,11 +50,61 @@ final class IncomingMailForm
         ];
     }
 
+    public static function forAdvanceSearch(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        TextInput::make('reference')
+                            ->label('N° / Référence')
+                            ->placeholder('Identifiant ou numéro de référence'),
+                        TextInput::make('query')
+                            ->label('Recherche par texte')
+                            ->placeholder('Expéditeur, description, contenu…'),
+                        Grid::make(3)
+                            ->schema([
+                                DatePicker::make('date_from')
+                                    ->label('Du')
+                                    ->native(false),
+                                DatePicker::make('date_to')
+                                    ->label('Au')
+                                    ->native(false),
+                                Select::make('category')
+                                    ->label('Catégorie')
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(
+                                        fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all()
+                                    ),
+                            ])
+                            ->columnSpanFull(),
+                        Select::make('services')
+                            ->label('Services')
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->options(fn (): array => Service::query()->orderBy('name')->pluck('name', 'id')->all()),
+                        Select::make('destinataires')
+                            ->label('Destinataires')
+                            ->multiple()
+                            ->searchable()
+                            ->options(fn (): array => Recipient::query()
+                                ->orderBy('last_name')
+                                ->get()
+                                ->pluck('full_name', 'id')
+                                ->all()),
+                    ])
+                    ->columns(2),
+            ])
+            ->statePath('data');
+    }
+
     /**
      * Left column: document preview that stays visible (sticky) while the
      * user fills in the fields on the right.
      *
-     * @param array<string, mixed>|null $imapPreview
+     * @param  array<string, mixed>|null  $imapPreview
      */
     private static function getPreviewColumn(?array $imapPreview): Section
     {
@@ -74,17 +123,17 @@ final class IncomingMailForm
             $schema = [
                 FileUpload::make('attachment_file')
                     ->label(
-                        fn(?IncomingMail $record
+                        fn (?IncomingMail $record
                         ): string => $record instanceof IncomingMail ? 'Remplacer le fichier' : 'Fichier'
                     )
-                    ->required(fn(?IncomingMail $record): bool => !$record instanceof IncomingMail)
+                    ->required(fn (?IncomingMail $record): bool => ! $record instanceof IncomingMail)
                     ->acceptedFileTypes(config('courrier.allowed_mime_types'))
                     ->maxSize(config('courrier.max_file_size'))
                     ->storeFiles(false)
                     ->previewable(false),
                 View::make('courrier::components.attachment-preview')
-                    ->viewData(fn(?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
-                    ->visible(fn(?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
+                    ->viewData(fn (?IncomingMail $record): array => self::getExistingAttachmentPreviewData($record))
+                    ->visible(fn (?IncomingMail $record): bool => $record?->attachments->isNotEmpty() ?? false),
                 View::make('courrier::components.upload-preview'),
             ];
         }
@@ -111,7 +160,7 @@ final class IncomingMailForm
                         TextInput::make('reference_number')
                             ->label('Numéro')
                             ->required()
-                            ->default(fn(): ?string => $isCpas ? (string)IncomingMail::nextCpasReferenceNumber() : null)
+                            ->default(fn (): ?string => $isCpas ? (string) IncomingMail::nextCpasReferenceNumber() : null)
                             ->maxLength(255)
                             ->columnSpan(1),
                         DatePicker::make('mail_date')
@@ -185,7 +234,7 @@ final class IncomingMailForm
                             ->rows(4)
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn(IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
+                    ->visible(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
             ]);
     }
 
@@ -196,7 +245,7 @@ final class IncomingMailForm
     {
         $attachment = $record?->attachments->first();
 
-        if (!$attachment) {
+        if (! $attachment) {
             return ['url' => '', 'contentType' => '', 'filename' => ''];
         }
 
@@ -206,55 +255,4 @@ final class IncomingMailForm
             'filename' => $attachment->file_name,
         ];
     }
-
-    public static function forAdvanceSearch(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                Section::make()
-                    ->schema([
-                        TextInput::make('reference')
-                            ->label('N° / Référence')
-                            ->placeholder('Identifiant ou numéro de référence'),
-                        TextInput::make('query')
-                            ->label('Recherche par texte')
-                            ->placeholder('Expéditeur, description, contenu…'),
-                        Grid::make(3)
-                            ->schema([
-                                DatePicker::make('date_from')
-                                    ->label('Du')
-                                    ->native(false),
-                                DatePicker::make('date_to')
-                                    ->label('Au')
-                                    ->native(false),
-                                Select::make('category')
-                                    ->label('Catégorie')
-                                    ->searchable()
-                                    ->preload()
-                                    ->options(
-                                        fn(): array => Category::query()->orderBy('name')->pluck('name', 'id')->all()
-                                    ),
-                            ])
-                            ->columnSpanFull(),
-                        Select::make('services')
-                            ->label('Services')
-                            ->multiple()
-                            ->searchable()
-                            ->preload()
-                            ->options(fn(): array => Service::query()->orderBy('name')->pluck('name', 'id')->all()),
-                        Select::make('destinataires')
-                            ->label('Destinataires')
-                            ->multiple()
-                            ->searchable()
-                            ->options(fn(): array => Recipient::query()
-                                ->orderBy('last_name')
-                                ->get()
-                                ->pluck('full_name', 'id')
-                                ->all()),
-                    ])
-                    ->columns(2),
-            ])
-            ->statePath('data');
-    }
-
 }

@@ -76,7 +76,7 @@ final class IncomingMailSearch extends Page implements HasTable
         $state = $this->form->getState();
 
         $this->resultIds = app(MeiliSearcher::class)->searchIds(
-            (string)($state['query'] ?? ''),
+            (string) ($state['query'] ?? ''),
             Auth::user(),
             [
                 'reference' => $state['reference'] ?? null,

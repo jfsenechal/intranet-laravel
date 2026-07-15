@@ -20,7 +20,7 @@ final class ViewActivity extends ViewRecord
 
     public function getTitle(): string
     {
-        return (string)$this->record->name;
+        return (string) $this->record->name;
     }
 
     public function infolist(Schema $schema): Schema

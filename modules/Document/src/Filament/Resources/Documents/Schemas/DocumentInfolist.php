@@ -7,7 +7,6 @@ namespace AcMarche\Document\Filament\Resources\Documents\Schemas;
 use AcMarche\App\Filament\Schemas\Infolist\PdfViewerEntry;
 use AcMarche\Document\Models\Document;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
 
 final class DocumentInfolist
