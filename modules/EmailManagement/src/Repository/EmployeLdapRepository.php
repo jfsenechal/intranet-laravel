@@ -97,13 +97,20 @@ final class EmployeLdapRepository
     }
 
     /**
+     * Writes the address to 'mail' only.
+     *
+     * userPrincipalName is deliberately left alone: the bind account is delegated just
+     * mail, otherMailbox, otherPager and proxyAddresses on OU=AC,OU=MUSERS, and Active
+     * Directory refuses the whole ldap_modify_batch when any attribute in it is out of
+     * reach — so touching it here failed the address write itself. The UPN is the login
+     * name, owned by the directory administrators; the legacy GestEmail never wrote it.
+     *
      * @throws LdapRecordException
      * @throws ModelDoesNotExistException
      */
     public function updateEmail(EmployeLdap $ldapEntry, string $mail): void
     {
         $ldapEntry->setAttribute('mail', $mail);
-        $ldapEntry->setAttribute('userPrincipalName', $mail);
         $ldapEntry->update();
     }
 
