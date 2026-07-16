@@ -84,6 +84,10 @@ final class EmployeHandler
     /**
      * Pulls every directory entry into the mirror, keyed on sAMAccountName.
      *
+     * Entries absent from the directory are pruned, so an empty read is treated as a fault
+     * rather than as "the directory is empty" — otherwise it would wipe the mirror.
+     *
+     * @throws Exception
      * @throws LdapRecordException
      */
     public function syncFromLdap(): int
@@ -103,6 +107,10 @@ final class EmployeHandler
             );
 
             $seen[] = $samAccountName;
+        }
+
+        if ($seen === []) {
+            throw new Exception("L'annuaire n'a renvoyé aucun employé exploitable. Aucune fiche locale n'a été supprimée.");
         }
 
         Employe::whereNotIn('samaccountname', $seen)->delete();

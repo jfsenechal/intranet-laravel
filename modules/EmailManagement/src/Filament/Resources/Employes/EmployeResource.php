@@ -17,10 +17,21 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Override;
 
 final class EmployeResource extends Resource
 {
     protected static ?string $model = Employe::class;
+
+
+    #[Override]
+    protected static ?string $navigationLabel = 'Employés';
+
+    #[Override]
+    protected static ?string $modelLabel = 'employé';
+
+    #[Override]
+    protected static ?string $pluralModelLabel = 'Employés';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

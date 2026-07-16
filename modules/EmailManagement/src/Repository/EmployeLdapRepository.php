@@ -52,8 +52,14 @@ final class EmployeLdapRepository
         $this->getEntry($samAccountName)?->delete();
     }
 
+    /**
+     * The directory does not return sAMAccountName under the default '*' selection, and it is
+     * the key the local mirror is built on, so it has to be asked for by name.
+     */
     private function query(): \LdapRecord\Query\Model\Builder
     {
-        return EmployeLdap::query()->in(config('email-management.ldap.bases.employes'));
+        return EmployeLdap::query()
+            ->in(config('email-management.ldap.bases.employes'))
+            ->select(['*', 'samaccountname']);
     }
 }

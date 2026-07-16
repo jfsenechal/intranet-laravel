@@ -7,10 +7,12 @@ use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\CreateEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
+use AcMarche\EmailManagement\Ldap\EmployeLdap;
 use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use LdapRecord\Laravel\Testing\DirectoryEmulator;
 
 use function Pest\Livewire\livewire;
 
@@ -124,6 +126,42 @@ describe('create validation', function (): void {
             ->fillForm(['samaccountname' => $existing->samaccountname])
             ->call('create')
             ->assertHasFormErrors(['samaccountname' => 'unique']);
+    });
+});
+
+describe('ldap header actions', function (): void {
+    beforeEach(function (): void {
+        DirectoryEmulator::setup('default');
+    });
+
+    afterEach(function (): void {
+        DirectoryEmulator::tearDown();
+    });
+
+    it('shows the directory attributes of the employe', function (): void {
+        $employe = Employe::factory()->create(['samaccountname' => 'aaguirre']);
+
+        $ldapEntry = new EmployeLdap;
+        $ldapEntry->cn = 'Ana Aguirre';
+        $ldapEntry->samaccountname = 'aaguirre';
+        $ldapEntry->givenName = 'Ana';
+        $ldapEntry->sn = 'Aguirre';
+        $ldapEntry->mail = 'ana.aguirre@ac.marche.be';
+        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->mountAction('viewLdap')
+            ->assertSuccessful()
+            ->assertActionMounted('viewLdap');
+    });
+
+    it('reports an employe that is absent from the directory', function (): void {
+        $employe = Employe::factory()->create(['samaccountname' => 'inconnu']);
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->mountAction('viewLdap')
+            ->assertSuccessful()
+            ->assertActionMounted('viewLdap');
     });
 });
 

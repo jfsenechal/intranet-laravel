@@ -18,12 +18,8 @@ final class EmployesTable
     {
         return $table
             ->defaultPaginationPageOption(50)
-            ->defaultSort('mail', 'asc')
+            ->defaultSort('sn', 'asc')
             ->columns([
-                TextColumn::make('mail')
-                    ->label('Email')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('sn')
                     ->label('Nom')
                     ->sortable()
@@ -34,6 +30,10 @@ final class EmployesTable
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('mail')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('samaccountname')
                     ->label('Identifiant')
                     ->searchable()
