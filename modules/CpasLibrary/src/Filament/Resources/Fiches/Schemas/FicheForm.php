@@ -15,11 +15,30 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 final class FicheForm
 {
+    /**
+     * Uploads land on a `local` disk, where an unrestricted file type would allow a
+     * `.php` upload to be stored with its client extension and executed. Keep this
+     * list to formats that cannot be interpreted as code by the web server.
+     *
+     * @var list<string>
+     */
+    private const ACCEPTED_MIME_TYPES = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'image/png',
+        'image/jpeg',
+    ];
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -67,22 +86,29 @@ final class FicheForm
                         RichEditor::make('description')
                             ->label('Description')
                             ->columnSpanFull(),
-                        FileUpload::make('file_upload')
+                        FileUpload::make('fileName')
                             ->label('Fichier')
                             ->disk('cpas-library')
-                            ->directory('fiches')
                             ->visibility('private')
+                            ->acceptedFileTypes(self::ACCEPTED_MIME_TYPES)
                             ->maxSize(51200)
-                            ->dehydrated(false)
-                            ->afterStateUpdated(function ($state, Set $set): void {
-                                if (! $state instanceof UploadedFile) {
+                            ->helperText('50 Mo maximum. PDF, Word, Excel, PowerPoint ou image.')
+                            ->afterStateUpdated(function (mixed $state, Set $set): void {
+                                if ($state instanceof TemporaryUploadedFile) {
+                                    $set('fileSize', $state->getSize());
+                                    $set('mimeType', $state->getMimeType());
+
                                     return;
                                 }
-                                $set('fileName', $state->getClientOriginalName());
-                                $set('fileSize', $state->getSize());
-                                $set('mimeType', $state->getMimeType());
+
+                                if ($state === null) {
+                                    $set('fileSize', null);
+                                    $set('mimeType', null);
+                                }
                             })
                             ->columnSpanFull(),
+                        Hidden::make('fileSize'),
+                        Hidden::make('mimeType'),
                     ]),
 
                 Section::make('Rappel')

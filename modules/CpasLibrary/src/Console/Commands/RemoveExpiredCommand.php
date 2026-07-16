@@ -27,11 +27,17 @@ final class RemoveExpiredCommand extends Command
 
     public function handle(): int
     {
-        $deleted = Fiche::query()
+        $expired = Fiche::query()
             ->where('type', FicheTypeEnum::ABSENCE->value)
             ->whereNotNull('date_end')
             ->whereDate('date_end', '<', Carbon::today())
-            ->delete();
+            ->get();
+
+        // Deleted one by one rather than with a mass delete, so that the model's
+        // `deleting` hook runs and removes each fiche's file from the disk.
+        $expired->each(fn (Fiche $fiche): ?bool => $fiche->delete());
+
+        $deleted = $expired->count();
 
         $this->info("Removed {$deleted} expired absence fiche(s).");
 

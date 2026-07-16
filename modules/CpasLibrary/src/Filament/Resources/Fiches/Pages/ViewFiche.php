@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Override;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -35,7 +36,7 @@ final class ViewFiche extends ViewRecord
                 ->visible(fn (Fiche $record): bool => $record->fileName !== null)
                 ->action(function (Fiche $record): ?StreamedResponse {
                     $disk = Storage::disk('cpas-library');
-                    $path = 'fiches/'.$record->fileName;
+                    $path = (string) $record->fileName;
 
                     if (! $disk->exists($path)) {
                         Notification::make()
@@ -47,7 +48,7 @@ final class ViewFiche extends ViewRecord
                         return null;
                     }
 
-                    return $disk->download($path, $record->fileName);
+                    return $disk->download($path, self::downloadFileName($record));
                 }),
             EditAction::make()
                 ->label('Modifier')
@@ -57,5 +58,17 @@ final class ViewFiche extends ViewRecord
                 ->label('Supprimer')
                 ->icon(Heroicon::Trash),
         ];
+    }
+
+    /**
+     * Files are stored under a generated name, which is meaningless to the person
+     * downloading them. Offer the fiche name instead, keeping the stored extension.
+     */
+    private static function downloadFileName(Fiche $record): string
+    {
+        $name = Str::slug((string) $record->name) ?: 'fiche-'.$record->id;
+        $extension = pathinfo((string) $record->fileName, PATHINFO_EXTENSION);
+
+        return $extension === '' ? $name : $name.'.'.$extension;
     }
 }

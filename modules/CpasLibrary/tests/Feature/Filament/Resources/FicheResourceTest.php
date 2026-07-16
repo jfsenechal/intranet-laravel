@@ -15,6 +15,7 @@ use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -237,13 +238,13 @@ it('shows the download action when fileName is set', function (): void {
         ->assertActionVisible('download');
 });
 
-it('downloads the file from the cpas-library disk', function (): void {
-    Storage::disk('cpas-library')->put('fiches/doc.pdf', 'binary');
-    $fiche = Fiche::factory()->create(['fileName' => 'doc.pdf']);
+it('downloads the file from the cpas-library disk under the fiche name', function (): void {
+    Storage::disk('cpas-library')->put('01hq.pdf', 'binary');
+    $fiche = Fiche::factory()->create(['name' => 'Note de service', 'fileName' => '01hq.pdf']);
 
     livewire(ViewFiche::class, ['record' => $fiche->id])
         ->callAction('download')
-        ->assertFileDownloaded('doc.pdf');
+        ->assertFileDownloaded('note-de-service.pdf');
 });
 
 it('notifies instead of failing when the file is missing on disk', function (): void {
@@ -253,7 +254,55 @@ it('notifies instead of failing when the file is missing on disk', function (): 
         ->callAction('download')
         ->assertNotified('Fichier introuvable');
 
-    expect(Storage::disk('cpas-library')->exists('fiches/missing.pdf'))->toBeFalse();
+    expect(Storage::disk('cpas-library')->exists('missing.pdf'))->toBeFalse();
+});
+
+it('stores an uploaded file on the cpas-library disk and records its metadata', function (): void {
+    livewire(CreateFiche::class)
+        ->fillForm([
+            'name' => 'Fiche avec fichier',
+            'category_id' => Category::factory()->create()->id,
+            'fileName' => [UploadedFile::fake()->create('rapport.pdf', 12, 'application/pdf')],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $fiche = Fiche::query()->where('name', 'Fiche avec fichier')->sole();
+
+    expect($fiche->fileName)->not->toBeNull()
+        ->and($fiche->fileName)->not->toContain('/')
+        ->and($fiche->mimeType)->toBe('application/pdf')
+        ->and($fiche->fileSize)->toBeGreaterThan(0);
+
+    Storage::disk('cpas-library')->assertExists($fiche->fileName);
+});
+
+it('rejects a file type that is not accepted', function (): void {
+    livewire(CreateFiche::class)
+        ->fillForm([
+            'name' => 'Fiche malveillante',
+            'fileName' => [UploadedFile::fake()->create('shell.php', 1, 'application/x-php')],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['fileName']);
+});
+
+it('deletes the file from the disk when the fiche is deleted', function (): void {
+    Storage::disk('cpas-library')->put('01hq.pdf', 'binary');
+    $fiche = Fiche::factory()->create(['fileName' => '01hq.pdf']);
+
+    $fiche->delete();
+
+    Storage::disk('cpas-library')->assertMissing('01hq.pdf');
+});
+
+it('deletes the previous file from the disk when the file is replaced', function (): void {
+    Storage::disk('cpas-library')->put('old.pdf', 'binary');
+    $fiche = Fiche::factory()->create(['fileName' => 'old.pdf']);
+
+    $fiche->update(['fileName' => 'new.pdf']);
+
+    Storage::disk('cpas-library')->assertMissing('old.pdf');
 });
 
 it('deletes a fiche from the view page as admin', function (): void {

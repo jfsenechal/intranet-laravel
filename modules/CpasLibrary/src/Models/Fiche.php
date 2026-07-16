@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 #[UseFactory(FicheFactory::class)]
@@ -74,6 +75,18 @@ final class Fiche extends Model
                 $fiche->saveQuietly();
             }
         });
+
+        self::updating(function (self $fiche): void {
+            if (! $fiche->isDirty('fileName')) {
+                return;
+            }
+
+            $fiche->deleteFile((string) $fiche->getOriginal('fileName'));
+        });
+
+        self::deleting(function (self $fiche): void {
+            $fiche->deleteFile((string) $fiche->fileName);
+        });
     }
 
     /**
@@ -91,5 +104,18 @@ final class Fiche extends Model
             'updatedAt' => 'datetime',
             'fileSize' => 'integer',
         ];
+    }
+
+    /**
+     * Remove a file this fiche no longer references, so replaced and deleted
+     * fiches do not leave their uploads behind on the disk.
+     */
+    private function deleteFile(string $fileName): void
+    {
+        if ($fileName === '') {
+            return;
+        }
+
+        Storage::disk('cpas-library')->delete($fileName);
     }
 }

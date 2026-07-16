@@ -39,6 +39,17 @@ final class FichesTable
                     ->badge()
                     ->separator(',')
                     ->toggleable(),
+                TextColumn::make('userAdd')
+                    ->label('Auteur')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('—'),
+                TextColumn::make('createdAt')
+                    ->label('Créé le')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('category_id')
