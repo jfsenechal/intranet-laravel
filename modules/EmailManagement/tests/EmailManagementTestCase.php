@@ -9,7 +9,7 @@ use PDO;
 use Tests\TestCase;
 
 /**
- * Keeps EmailManagement tests off the real gestemail database.
+ * Keeps EmailManagement tests off the real gestemail database and off the live mail server.
  *
  * phpunit.xml only overrides the default connection, so without this the
  * maria-email-management connection resolves to the live MariaDB from .env and
@@ -28,6 +28,14 @@ abstract class EmailManagementTestCase extends TestCase
     protected function refreshApplication(): void
     {
         parent::refreshApplication();
+
+        // The IMAP and Sieve credentials in .env point at the production mail server, and
+        // ImapEmploye/SieveEmploye reach for it as soon as they are configured. Blanking
+        // them here makes both report themselves unconfigured, so a test renders the quota
+        // as unavailable instead of opening a socket to mail.marche.be. Tests that need
+        // these services bind their own doubles.
+        $this->app['config']->set('email-management.imap', null);
+        $this->app['config']->set('email-management.sieve', null);
 
         $this->app['config']->set('database.connections.maria-email-management', [
             'driver' => 'sqlite',

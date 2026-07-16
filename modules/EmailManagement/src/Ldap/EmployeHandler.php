@@ -4,64 +4,116 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Ldap;
 
+use AcMarche\EmailManagement\Imap\ImapEmploye;
 use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\EmailManagement\Repository\EmployeLdapRepository;
 use Exception;
 use LdapRecord\LdapRecordException;
-use LdapRecord\Models\Attributes\AccountControl;
 
 /**
- * Write-through for staff accounts: Active Directory first, then the local mirror.
+ * Keeps the local staff mirror and Active Directory in step.
  *
- * Order matters. If AD rejects a write the mirror must not be left holding a row that
- * does not exist in the directory, so nothing is persisted locally until AD has
- * accepted the change.
+ * Accounts are created and given passwords in the directory itself, not here: this class
+ * only edits attributes of entries that already exist, and pulls the directory into the
+ * mirror.
  */
 final class EmployeHandler
 {
-    public function __construct(private readonly EmployeLdapRepository $employeLdapRepository) {}
+    public function __construct(
+        private readonly EmployeLdapRepository $employeLdapRepository,
+        private readonly ImapEmploye $imapEmploye,
+    ) {}
 
     /**
-     * @param  array<string, mixed>  $data
+     * Sets the mailbox quota, in megabytes.
      *
      * @throws Exception
      * @throws LdapRecordException
      */
-    public function createEmploye(array $data): Employe
+    public function setQuota(Employe $employe, float $quotaMb): void
     {
-        $samAccountName = $data['samaccountname'];
-
-        if ($this->employeLdapRepository->getEntry($samAccountName) instanceof EmployeLdap) {
-            throw new Exception("L'identifiant {$samAccountName} existe déjà dans l'annuaire.");
+        if ($quotaMb <= 0) {
+            throw new Exception('Le quota doit être plus grand que 0.');
         }
 
-        if (Employe::where('samaccountname', $samAccountName)->exists()) {
-            throw new Exception("L'identifiant {$samAccountName} existe déjà localement.");
+        $this->employeLdapRepository->setQuota($this->requireEntry($employe), $quotaMb);
+    }
+
+    /**
+     * Replaces the account's alias addresses.
+     *
+     * @param  array<int, string>  $aliases
+     *
+     * @throws Exception
+     * @throws LdapRecordException
+     */
+    public function updateAliases(Employe $employe, array $aliases): void
+    {
+        $aliases = array_values(array_unique(array_filter(array_map(
+            static fn (string $alias): string => mb_trim($alias),
+            $aliases,
+        ))));
+
+        foreach ($aliases as $alias) {
+            if (! filter_var($alias, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("L'alias {$alias} n'a pas un format valide.");
+            }
+
+            $owner = $this->employeLdapRepository->findMailOwner($alias, $employe->samaccountname);
+
+            if ($owner !== null) {
+                throw new Exception("L'adresse {$alias} est déjà utilisée par {$owner->getFirstAttribute('samaccountname')}.");
+            }
         }
 
-        $fullName = $this->fullName($data['givenName'] ?? null, $data['sn']);
+        $this->employeLdapRepository->updateAliases($this->requireEntry($employe), $aliases);
+    }
 
-        $ldapEntry = new EmployeLdap;
-        $ldapEntry->cn = $fullName;
-        $ldapEntry->samaccountname = $samAccountName;
-        $ldapEntry->givenName = $data['givenName'] ?? null;
-        $ldapEntry->sn = $data['sn'];
-        $ldapEntry->displayName = $fullName;
-        $ldapEntry->mail = $data['mail'];
-        $ldapEntry->userPrincipalName = $data['mail'];
-        $ldapEntry->description = $data['description'] ?? null;
-        $ldapEntry->telephoneNumber = $data['telephoneNumber'] ?? null;
-        $ldapEntry->unicodepwd = $data['password'];
-        $ldapEntry->userAccountControl = (new AccountControl)
-            ->add(AccountControl::NORMAL_ACCOUNT)
-            ->getValue();
+    /**
+     * Gives the account an address: writes it to the directory, applies the default quota
+     * and creates the mailbox.
+     *
+     * The directory is written first. A mailbox without a matching directory entry is
+     * invisible to the mail server, whereas an address whose mailbox creation failed can
+     * be repaired by running this again.
+     *
+     * @return bool whether the mailbox was created — false when IMAP is not configured
+     *
+     * @throws Exception
+     * @throws LdapRecordException
+     */
+    public function createEmail(Employe $employe, string $mail, bool $force = false): bool
+    {
+        $mail = mb_trim($mail);
 
-        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
+        if (! filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("L'adresse {$mail} n'a pas un format valide.");
+        }
 
-        return Employe::create([
-            ...Employe::generateDataFromLdap($ldapEntry),
-            'sync_at' => now(),
-        ]);
+        if (! $force) {
+            $owner = $this->employeLdapRepository->findMailOwner($mail, $employe->samaccountname);
+
+            if ($owner !== null) {
+                throw new Exception(
+                    "L'adresse {$mail} est déjà utilisée par {$owner->getFirstAttribute('samaccountname')} ({$owner->getDn()})."
+                );
+            }
+        }
+
+        $ldapEntry = $this->requireEntry($employe);
+
+        $this->employeLdapRepository->updateEmail($ldapEntry, $mail);
+        $this->employeLdapRepository->setQuota($ldapEntry, (float) config('email-management.default_quota_mb'));
+
+        $employe->update(['mail' => $mail, 'sync_at' => now()]);
+
+        if (! $this->imapEmploye->isConfigured()) {
+            return false;
+        }
+
+        $this->imapEmploye->createMailBox($employe->samaccountname);
+
+        return true;
     }
 
     /**
@@ -116,6 +168,20 @@ final class EmployeHandler
         Employe::whereNotIn('samaccountname', $seen)->delete();
 
         return count($seen);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function requireEntry(Employe $employe): EmployeLdap
+    {
+        $ldapEntry = $this->employeLdapRepository->getEntry($employe->samaccountname);
+
+        if (! $ldapEntry instanceof EmployeLdap) {
+            throw new Exception("{$employe->samaccountname} est introuvable dans l'annuaire.");
+        }
+
+        return $ldapEntry;
     }
 
     private function fullName(?string $givenName, ?string $sn): string

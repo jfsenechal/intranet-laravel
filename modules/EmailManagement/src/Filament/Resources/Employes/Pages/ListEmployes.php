@@ -7,9 +7,7 @@ namespace AcMarche\EmailManagement\Filament\Resources\Employes\Pages;
 use AcMarche\EmailManagement\Filament\Actions\SyncFromLdapAction;
 use AcMarche\EmailManagement\Filament\Resources\Employes\EmployeResource;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Tables\EmployesTable;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -32,9 +30,6 @@ final class ListEmployes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Ajouter un employé')
-                ->icon(Heroicon::Plus),
             SyncFromLdapAction::make(),
         ];
     }

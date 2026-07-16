@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Employes;
 
-use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\CreateEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
@@ -22,7 +21,6 @@ use Override;
 final class EmployeResource extends Resource
 {
     protected static ?string $model = Employe::class;
-
 
     #[Override]
     protected static ?string $navigationLabel = 'Employés';
@@ -61,7 +59,6 @@ final class EmployeResource extends Resource
     {
         return [
             'index' => ListEmployes::route('/'),
-            'create' => CreateEmploye::route('/create'),
             'view' => ViewEmploye::route('/{record}'),
             'edit' => EditEmploye::route('/{record}/edit'),
         ];

@@ -9,36 +9,59 @@ use DirectoryTree\ImapEngine\Exceptions\ImapConnectionFailedException;
 use DirectoryTree\ImapEngine\Mailbox;
 use Exception;
 
+/**
+ * Cyrus mailboxes for staff accounts, reached with the admin account over proxy auth.
+ *
+ * The credentials are optional: where they are absent every call throws, and callers are
+ * expected to check isConfigured() first and degrade rather than fail.
+ */
 final class ImapEmploye
 {
+    /**
+     * Created alongside the account itself, matching what the legacy GestEmail did.
+     */
+    private const array DEFAULT_FOLDERS = ['Sent', 'Trash', 'Junk', 'Drafts', 'Templates', 'Archives'];
+
     private ?Mailbox $mailbox = null;
 
     public function __construct(
-        private string $host,
-        private string $user,
-        private string $password,
-    ) {
-        $this->host = $host ?? config('imap.employe.host');
-        $this->user = $this->user ?? config('imap.employe.user');
-        $this->password = $this->password ?? config('imap.employe.password');
+        private readonly ?string $host = null,
+        private readonly ?string $user = null,
+        private readonly ?string $password = null,
+    ) {}
+
+    public static function fromConfig(): self
+    {
+        return new self(
+            config('email-management.imap.employe.host'),
+            config('email-management.imap.employe.user'),
+            config('email-management.imap.employe.password'),
+        );
+    }
+
+    public function isConfigured(): bool
+    {
+        return $this->host !== null && $this->host !== ''
+            && $this->user !== null && $this->user !== ''
+            && $this->password !== null && $this->password !== '';
     }
 
     /**
-     * Connect as a user using admin proxy authentication.
+     * Connects as a user through the admin account (user*admin).
      *
-     * @throws ImapConnectionFailedException
      * @throws Exception
      */
     public function connect(string $user): Mailbox
     {
-        // Use proxy authentication: user*admin format
-        $username = $user.'*'.$this->user;
+        if (! $this->isConfigured()) {
+            throw new Exception('Les identifiants IMAP ne sont pas configurés (IMAP_EMPLOYE_*).');
+        }
 
         $this->mailbox = new Mailbox([
             'host' => $this->host,
             'port' => 993,
             'encryption' => 'ssl',
-            'username' => $username,
+            'username' => $user.'*'.$this->user,
             'password' => $this->password,
             'validate_cert' => false,
         ]);
@@ -95,6 +118,37 @@ final class ImapEmploye
         }
 
         return $quota;
+    }
+
+    /**
+     * Creates the account's mailbox and its default folders, skipping whatever already
+     * exists so that a partially created account can be repaired by running this again.
+     *
+     * @throws Exception
+     */
+    public function createMailBox(string $user): void
+    {
+        try {
+            $this->connect($user);
+
+            $root = 'user/'.$user;
+
+            if ($this->mailbox->folders()->find($root) === null) {
+                $this->mailbox->folders()->create($root);
+            }
+
+            foreach (self::DEFAULT_FOLDERS as $folderName) {
+                $path = $root.'/'.$folderName;
+
+                if ($this->mailbox->folders()->find($path) === null) {
+                    $this->mailbox->folders()->create($path);
+                }
+            }
+        } catch (ImapConnectionFailedException $e) {
+            throw new Exception($e->getMessage(), $e->getCode(), $e);
+        } finally {
+            $this->close();
+        }
     }
 
     public function close(): void

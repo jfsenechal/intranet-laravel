@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use AcMarche\EmailManagement\Enums\RolesEnum;
-use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\CreateEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
@@ -34,10 +33,6 @@ describe('pages render', function (): void {
             ->assertSuccessful()
             ->loadTable()
             ->assertCanSeeTableRecords($employes);
-    });
-
-    it('renders the create page', function (): void {
-        livewire(CreateEmploye::class)->assertSuccessful();
     });
 
     it('renders the view page', function (): void {
@@ -71,61 +66,6 @@ describe('table', function (): void {
             ->loadTable()
             ->searchTable($employes->first()->samaccountname)
             ->assertCanSeeTableRecords($employes->take(1));
-    });
-});
-
-describe('create validation', function (): void {
-    it('requires nom, identifiant, email and password', function (): void {
-        livewire(CreateEmploye::class)
-            ->fillForm([
-                'sn' => null,
-                'samaccountname' => null,
-                'mail' => null,
-                'password' => null,
-            ])
-            ->call('create')
-            ->assertHasFormErrors([
-                'sn' => 'required',
-                'samaccountname' => 'required',
-                'mail' => 'required',
-                'password' => 'required',
-            ]);
-    });
-
-    it('rejects a malformed email', function (): void {
-        livewire(CreateEmploye::class)
-            ->fillForm(['mail' => 'not-an-email'])
-            ->call('create')
-            ->assertHasFormErrors(['mail' => 'email']);
-    });
-
-    it('rejects a password shorter than 12 characters', function (): void {
-        livewire(CreateEmploye::class)
-            ->fillForm([
-                'password' => 'Ab1!efgh',
-                'password_confirmation' => 'Ab1!efgh',
-            ])
-            ->call('create')
-            ->assertHasFormErrors(['password']);
-    });
-
-    it('rejects a password that is not confirmed', function (): void {
-        livewire(CreateEmploye::class)
-            ->fillForm([
-                'password' => 'Str0ng!Passw0rd#2026',
-                'password_confirmation' => 'Different!Passw0rd#2026',
-            ])
-            ->call('create')
-            ->assertHasFormErrors(['password']);
-    });
-
-    it('rejects an identifiant that already exists locally', function (): void {
-        $existing = Employe::factory()->create();
-
-        livewire(CreateEmploye::class)
-            ->fillForm(['samaccountname' => $existing->samaccountname])
-            ->call('create')
-            ->assertHasFormErrors(['samaccountname' => 'unique']);
     });
 });
 
@@ -163,6 +103,22 @@ describe('ldap header actions', function (): void {
             ->assertSuccessful()
             ->assertActionMounted('viewLdap');
     });
+
+    it('mounts every mailbox action', function (string $action): void {
+        $employe = Employe::factory()->create(['samaccountname' => 'aaguirre']);
+
+        $ldapEntry = new EmployeLdap;
+        $ldapEntry->cn = 'Ana Aguirre';
+        $ldapEntry->samaccountname = 'aaguirre';
+        $ldapEntry->sn = 'Aguirre';
+        $ldapEntry->mail = 'ana.aguirre@ac.marche.be';
+        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->mountAction($action)
+            ->assertSuccessful()
+            ->assertActionMounted($action);
+    })->with(['createEmail', 'changeQuota', 'changeAlias', 'vacation']);
 });
 
 describe('authorization', function (): void {

@@ -115,8 +115,8 @@ final class EmployeInfolist
     }
 
     /**
-     * IMAP credentials (IMAP_EMPLOYE_*) are not configured, so this returns null and
-     * the quota entries degrade to "Quota indisponible" rather than throwing.
+     * Returns null when IMAP is unconfigured or unreachable, so the quota entries degrade
+     * to "Quota indisponible" rather than throwing.
      *
      * Cached in the array store rather than a static property: this application runs
      * Octane, where static state persists across requests and would leak one employe's
@@ -130,23 +130,19 @@ final class EmployeInfolist
             return null;
         }
 
-        $host = config('imap.employe.host');
-        $user = config('imap.employe.user');
-        $password = config('imap.employe.password');
+        $imap = ImapEmploye::fromConfig();
 
-        if (! is_string($host) || ! is_string($user) || ! is_string($password)) {
+        if (! $imap->isConfigured()) {
             return null;
         }
 
         return Cache::store('array')->remember(
             'employe-quota:'.$samAccountName,
             60,
-            function () use ($host, $user, $password, $samAccountName): ?array {
+            function () use ($imap, $samAccountName): ?array {
                 try {
-                    return (new ImapEmploye($host, $user, $password))->getQuota($samAccountName);
+                    return $imap->getQuota($samAccountName);
                 } catch (Throwable) {
-                    // Throwable, not Exception: a misconfigured host surfaces as a
-                    // TypeError from ImapEmploye's constructor, which Exception misses.
                     return null;
                 }
             },

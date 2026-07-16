@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Employes\Pages;
 
-use AcMarche\EmailManagement\Filament\Actions\DeleteEmployeAction;
-use AcMarche\EmailManagement\Filament\Actions\PasswordLdapAction;
+use AcMarche\EmailManagement\Filament\Actions\AliasAction;
+use AcMarche\EmailManagement\Filament\Actions\CreateEmailAction;
+use AcMarche\EmailManagement\Filament\Actions\QuotaAction;
+use AcMarche\EmailManagement\Filament\Actions\VacationAction;
 use AcMarche\EmailManagement\Filament\Actions\ViewLdapAction;
 use AcMarche\EmailManagement\Filament\Resources\Employes\EmployeResource;
 use Filament\Actions\ActionGroup;
@@ -24,14 +26,16 @@ final class ViewEmploye extends ViewRecord
     }
 
     protected function getHeaderActions(): array
-    {        return [
+    {
+        return [
+            ViewLdapAction::make($this->record),
+            EditAction::make()
+                ->icon(Heroicon::Pencil),
+            QuotaAction::make($this->record),
             ActionGroup::make([
-                ViewLdapAction::make($this->record),
-                PasswordLdapAction::make($this->record),
-                EditAction::make()
-                    ->label('Modifier')
-                    ->icon(Heroicon::Pencil),
-                DeleteEmployeAction::make($this->record),
+                CreateEmailAction::make($this->record),
+                AliasAction::make($this->record),
+                VacationAction::make($this->record),
             ])
                 ->label('Actions...')
                 ->button()
