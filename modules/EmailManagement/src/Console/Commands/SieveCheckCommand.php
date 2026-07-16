@@ -25,7 +25,7 @@ final class SieveCheckCommand extends Command
      */
     #[Override]
     protected $signature = 'email-management:sieve-check
-                            {user? : sAMAccountName to authenticate on behalf of}
+                            {user? : sAMAccountName to act on behalf of, e.g. jfsenechal (not the mail address)}
                             {--mechanism= : force a SASL mechanism, overriding config}';
 
     /**
@@ -84,8 +84,14 @@ final class SieveCheckCommand extends Command
     {
         $client = new Client($host, $port);
 
+        // The same username the vacation action authenticates with, so this exercises the real
+        // path rather than one the application never takes.
+        $username = $asUser !== null ? SieveEmploye::fromConfig()->proxyUsername($asUser) : $admin;
+
+        $this->components->twoColumnDetail('Authentification', $username);
+
         try {
-            $client->connect($admin, $password, false, $asUser ?? '', $mechanism ?: null);
+            $client->connect($username, $password, false, '', $mechanism ?: null);
         } catch (Throwable $e) {
             $this->reportCapabilities($client);
             $this->newLine();
@@ -96,10 +102,15 @@ final class SieveCheckCommand extends Command
             }
 
             $this->newLine();
-            $this->line('  Pistes : le compte admin a-t-il le droit de "proxy" vers un autre compte ?');
-            $this->line('  Essayez un autre mécanisme, par exemple :');
-            $this->line("    php artisan email-management:sieve-check {$asUser} --mechanism=PLAIN");
-            $this->line("    php artisan email-management:sieve-check {$asUser} --mechanism=LOGIN");
+            $this->line('  Pistes :');
+
+            if ($asUser !== null && str_contains($asUser, '@')) {
+                $this->line("  - Attendu ici : le sAMAccountName (par exemple jfsenechal), pas l'adresse mail.");
+            }
+
+            $this->line("  - Le compte {$admin} est-il déclaré master user côté Dovecot (auth_master_user_separator, passdb master) ?");
+            $this->line('  - Essayez un autre mécanisme :');
+            $this->line("      php artisan email-management:sieve-check {$asUser} --mechanism=LOGIN");
 
             return SfCommand::FAILURE;
         }

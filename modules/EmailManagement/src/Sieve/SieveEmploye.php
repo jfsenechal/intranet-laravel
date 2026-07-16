@@ -55,7 +55,7 @@ final class SieveEmploye
         $client = new Client($this->host, $this->port);
 
         try {
-            if (! $client->connect($this->user, $this->password, false, $asUser, $this->authMechanism())) {
+            if (! $client->connect($this->proxyUsername($asUser), $this->password, false, '', $this->authMechanism())) {
                 throw new Exception($this->describeFailure($client, $asUser));
             }
         } catch (SieveException $e) {
@@ -65,6 +65,19 @@ final class SieveEmploye
         }
 
         return $this->client = $client;
+    }
+
+    /**
+     * The account to authenticate as, in Dovecot's master user form.
+     *
+     * The library takes an authorisation id but its PLAIN and LOGIN mechanisms drop it on the
+     * floor -- only DIGEST-MD5 sends one, and this server offers neither. So the account being
+     * acted upon has to travel in the username instead, which is the same "user*admin" Dovecot
+     * accepts over IMAP and which ImapEmploye already relies on.
+     */
+    public function proxyUsername(string $asUser): string
+    {
+        return $asUser.'*'.$this->user;
     }
 
     /**
