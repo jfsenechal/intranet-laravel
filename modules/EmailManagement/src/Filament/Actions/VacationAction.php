@@ -7,13 +7,13 @@ namespace AcMarche\EmailManagement\Filament\Actions;
 use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\EmailManagement\Sieve\SieveEmploye;
 use AcMarche\EmailManagement\Sieve\VacationScript;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
+use Throwable;
 
 final class VacationAction
 {
@@ -62,7 +62,7 @@ final class VacationAction
                                 ->title("Le message d'absence a bien été désactivé")
                                 ->success()
                                 ->send();
-                        } catch (Exception $e) {
+                        } catch (Throwable $e) {
                             Notification::make()
                                 ->title("Impossible de désactiver le message d'absence")
                                 ->body($e->getMessage())
@@ -87,7 +87,10 @@ final class VacationAction
                         ->title("Le message d'absence a bien été activé")
                         ->success()
                         ->send();
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
+                    // Throwable, not Exception: the ManageSieve client is a separate package,
+                    // so an install that has not been composer install'ed surfaces as an Error
+                    // rather than an Exception, and would otherwise take the whole page down.
                     Notification::make()
                         ->title("Impossible d'activer le message d'absence")
                         ->body($e->getMessage())
