@@ -69,6 +69,50 @@ describe('table', function (): void {
     });
 });
 
+describe('edit form', function (): void {
+    it('exposes every identity field the mirror carries', function (): void {
+        $employe = Employe::factory()->create();
+
+        $component = livewire(EditEmploye::class, ['record' => $employe->id]);
+
+        foreach (Employe::LDAP_IDENTITY_ATTRIBUTES as $attribute) {
+            $component->assertFormFieldExists($attribute);
+        }
+    });
+
+    it('saves the new identity fields to the mirror', function (): void {
+        DirectoryEmulator::setup('default');
+
+        $employe = Employe::factory()->create(['samaccountname' => 'aaguirre']);
+
+        $ldapEntry = new EmployeLdap;
+        $ldapEntry->cn = 'Ana Aguirre';
+        $ldapEntry->samaccountname = 'aaguirre';
+        $ldapEntry->sn = 'Aguirre';
+        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
+
+        livewire(EditEmploye::class, ['record' => $employe->id])
+            ->fillForm([
+                'title' => 'Attachée',
+                'company' => 'AC Marche',
+                'l' => 'Marche-en-Famenne',
+                'postalCode' => '6900',
+                'mobile' => '+32477320320',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($employe->refresh())
+            ->title->toBe('Attachée')
+            ->company->toBe('AC Marche')
+            ->l->toBe('Marche-en-Famenne')
+            ->postalCode->toBe('6900')
+            ->mobile->toBe('+32477320320');
+
+        DirectoryEmulator::tearDown();
+    });
+});
+
 describe('ldap header actions', function (): void {
     beforeEach(function (): void {
         DirectoryEmulator::setup('default');

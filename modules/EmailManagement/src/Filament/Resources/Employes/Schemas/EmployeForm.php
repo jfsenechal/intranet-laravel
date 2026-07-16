@@ -25,24 +25,61 @@ final class EmployeForm
                             ->label('Nom')
                             ->required()
                             ->maxLength(64),
-                        TextInput::make('samaccountname')
-                            ->label('Identifiant')
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->helperText("L'identifiant ne peut pas être modifié après la création."),
-                        TextInput::make('mail')
-                            ->label('Email')
-                            ->email()
-                            ->required()
-                            ->maxLength(255),
+                        TextInput::make('initials')
+                            ->label('Initiales')
+                            ->maxLength(6),
+                    ]),
+                Section::make('Fonction')
+                    ->columns()
+                    ->components([
+                        TextInput::make('title')
+                            ->label('Fonction')
+                            ->maxLength(128),
+                        TextInput::make('department')
+                            ->label('Service')
+                            ->maxLength(64),
+                        TextInput::make('company')
+                            ->label('Société')
+                            ->maxLength(64)
+                            ->helperText('AC Marche, Cpas, Maison du tourisme')
+                            ->columnSpanFull(),
                     ]),
                 self::contact(),
+                Section::make('Adresse')
+                    ->columns()
+                    ->components([
+                        TextInput::make('streetAddress')
+                            ->label('Rue')
+                            ->maxLength(128)
+                            ->columnSpanFull(),
+                        TextInput::make('postalCode')
+                            ->label('Code postal')
+                            ->maxLength(40),
+                        TextInput::make('l')
+                            ->label('Localité')
+                            ->maxLength(128),
+                        TextInput::make('co')
+                            ->label('Pays')
+                            ->maxLength(128),
+                    ]),
                 Section::make('Divers')
                     ->components([
+                        TextInput::make('wWWHomePage')
+                            ->label('Site web')
+                            ->url()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('Description')
-                            ->rows(3)
+                            ->rows(2)
                             ->maxLength(1000)
+                            ->helperText("Peut être lu par l'utilisateur")
+                            ->columnSpanFull(),
+                        Textarea::make('info')
+                            ->label('Notes')
+                            ->rows(2)
+                            ->maxLength(1000)
+                            ->helperText("Peut être lu par l'utilisateur")
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -57,6 +94,29 @@ final class EmployeForm
                     ->label('Téléphone')
                     ->tel()
                     ->maxLength(64),
+                TextInput::make('ipPhone')
+                    ->label('Extension téléphone')
+                    ->maxLength(64),
+                TextInput::make('mobile')
+                    ->label('GSM')
+                    ->tel()
+                    ->maxLength(64),
+            ]);
+    }
+
+    public static function getContact(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Identité')
+                    ->columns()
+                    ->components([
+                        TextInput::make('mail')
+                            ->label('Email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                    ]),
             ]);
     }
 }

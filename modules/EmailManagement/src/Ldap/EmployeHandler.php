@@ -119,15 +119,20 @@ final class EmployeHandler
     /**
      * Pushes the mirror's current state back to the directory entry.
      *
+     * A blank field is written as an empty array rather than an empty string, which is how
+     * LdapRecord removes an attribute: Active Directory rejects an empty string value.
+     *
      * @throws LdapRecordException
      */
     public function updateEmploye(Employe $employe, EmployeLdap $ldapEntry): void
     {
-        $ldapEntry->givenName = $employe->givenName;
-        $ldapEntry->sn = $employe->sn;
+        foreach (Employe::LDAP_IDENTITY_ATTRIBUTES as $attribute) {
+            $value = $employe->{$attribute};
+
+            $ldapEntry->setAttribute($attribute, blank($value) ? [] : $value);
+        }
+
         $ldapEntry->displayName = $this->fullName($employe->givenName, $employe->sn);
-        $ldapEntry->description = $employe->description;
-        $ldapEntry->telephoneNumber = $employe->telephoneNumber;
         $ldapEntry->mail = $employe->mail;
 
         $ldapEntry->save();

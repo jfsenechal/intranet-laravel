@@ -30,7 +30,21 @@ use Illuminate\Database\Eloquent\Model;
     'mail',
     'dn',
     'description',
+    'info',
+    'title',
+    'company',
+    'department',
+    'co',
+    'initials',
+    'wWWHomePage',
+    'streetAddress',
+    'postOfficeBox',
+    'postalCode',
+    'l',
     'telephoneNumber',
+    'ipPhone',
+    'facsimileTelephoneNumber',
+    'mobile',
     'last_connection',
     'protocol_connection',
     'port_connection',
@@ -43,21 +57,53 @@ final class Employe extends Model
     use HasFactory;
 
     /**
+     * The directory attributes the mirror carries, in the casing the directory uses.
+     *
+     * Everything here is round-tripped: pulled by generateDataFromLdap and pushed back by
+     * EmployeHandler::updateEmploye. Identity attributes only -- mail, quota and aliases are
+     * handled by their own actions, and cn/displayName are derived rather than edited.
+     *
+     * @var array<int, string>
+     */
+    public const array LDAP_IDENTITY_ATTRIBUTES = [
+        'givenName',
+        'sn',
+        'initials',
+        'title',
+        'company',
+        'department',
+        'description',
+        'info',
+        'wWWHomePage',
+        'streetAddress',
+        'postOfficeBox',
+        'postalCode',
+        'l',
+        'co',
+        'telephoneNumber',
+        'ipPhone',
+        'facsimileTelephoneNumber',
+        'mobile',
+    ];
+
+    /**
      * @return array<string, mixed>
      */
     public static function generateDataFromLdap(EmployeLdap $userLdap): array
     {
-        return [
+        $data = [
             'samaccountname' => $userLdap->getFirstAttribute('samaccountname'),
-            'givenName' => $userLdap->getFirstAttribute('givenName'),
-            'sn' => $userLdap->getFirstAttribute('sn'),
             'cn' => $userLdap->getFirstAttribute('cn'),
             'displayName' => $userLdap->getFirstAttribute('displayName'),
             'dn' => $userLdap->getDn(),
             'mail' => $userLdap->getFirstAttribute('mail'),
-            'description' => $userLdap->getFirstAttribute('description'),
-            'telephoneNumber' => $userLdap->getFirstAttribute('telephoneNumber'),
         ];
+
+        foreach (self::LDAP_IDENTITY_ATTRIBUTES as $attribute) {
+            $data[$attribute] = $userLdap->getFirstAttribute($attribute);
+        }
+
+        return $data;
     }
 
     public function getFullName(): string
