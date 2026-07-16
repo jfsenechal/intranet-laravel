@@ -41,6 +41,9 @@
         <testsuite name="Hrm">
             <directory>modules/Hrm/tests</directory>
         </testsuite>
+        <testsuite name="EmailManagement">
+            <directory>modules/EmailManagement/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

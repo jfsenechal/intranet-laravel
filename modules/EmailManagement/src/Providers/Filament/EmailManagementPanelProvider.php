@@ -6,6 +6,7 @@ namespace AcMarche\EmailManagement\Providers\Filament;
 
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
+use AcMarche\EmailManagement\Http\Middleware\EnsureEmailAdmin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -65,6 +66,7 @@ final class EmailManagementPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureEmailAdmin::class,
             ]);
     }
 }

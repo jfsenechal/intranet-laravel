@@ -1,0 +1,2718 @@
+ ▐▛███▜▌   Claude Code v2.1.211
+▝▜█████▛▘  Opus 4.8 · Claude Pro
+  ▘▘ ▝▝    /var/www/intranet-laravel
+
+ ▎ Extended through July 19
+ ▎ We're extending Claude Fable 5 access on all paid plans, as well as keeping Claude Code’s weekly rate limits 50% higher, through July 19.
+ ▎
+ ▎ As before, you can use up to half of your weekly usage limit on Fable 5. After that, you can keep using Fable 5 with usage credits, or switch to another model to keep working within your remaining limits.
+ ▎
+ ▎ More details here: https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access
+
+❯ EmailManagement update and create filamentphp blueprint to manage employes    
+  and list                                                                      
+  LDAP_STAFF_LIST_BASE="OU=LISTS,OU=MUSERS,dc=ad,DC=marche,DC=be"               
+  LDAP_STAFF_SERVICES_BASE="OU=SERVICES,OU=MUSERS,dc=ad,DC=marche,DC=be"        
+  ⎿  ⧉ Selected 1 lines from modules/EmailManagement/src/Ldap/EmployeHandler.php
+     in PhpStorm
+
+● I'll look at the EmailManagement module to understand its current structure
+  before planning.
+
+  Searched for 1 pattern, ran 4 shell commands (ctrl+o to expand)
+
+● I've read the module. Before planning, I need to pin down scope — the terms
+  map onto two different things in this codebase.
+
+  What I found: the existing EmployeResource manages the employes MariaDB table
+  (citizen/gosa mail accounts synced from LDAP). Your two env vars point at
+  Active Directory OUs (OU=LISTS and OU=SERVICES under OU=MUSERS), which are
+  already read by Security\Repository\LdapRepository::lists() / services() via
+  the older LDAP_DEFAULT_LIST / LDAP_DEFAULT_SERVICES keys — so your new names
+  are duplicates of config that already exists in
+  modules/Security/config/security.php.
+
+  Also worth flagging now: modules/EmailManagement/config/ldap.php only defines
+  a citoyen connection, but EmployeLdap declares protected ?string $connection =
+  'employes' and LdapServiceProvider calls
+  Container::setDefaultConnection('employes') — that connection is never
+  registered, so any EmployeLdap query should be failing.
+
+● User answered Claude's questions:
+  ⎿  · Do you want the plan document, or the plan plus implementation? → Plan, 
+     then implement
+     · How much write access should the LDAP-backed resources have? → Full CRUD 
+     against AD
+     · What should the new blueprint cover — which "employes" and which "list"? 
+     → Both: update EmployeResource + add lists
+
+● Scope is clear. Let me read the blueprint planning conventions and the
+  remaining module files.
+
+  Ran 4 shell commands (ctrl+o to expand)
+
+● There's already a MailingList module — that's directly relevant to "list". Let
+  me check it before planning.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I have enough to see the real picture, and it changes the plan — so let me
+  report before writing it.
+
+  The EmailManagement module doesn't currently run. It's a half-finished copy of
+  a "Citoyen" module being repurposed for staff, and the rename stopped
+  partway. Concretely:
+
+  - CreateEmploye calls $citoyenHandler->createEmploye($data) and EditEmploye
+  calls updateEmploye() — EmployeHandler only defines createCitoyen() /
+  updateCitoyen(). Fatal on both pages.
+  - CreateEmploye:52 passes $body to the success notification; that variable is
+  never defined.
+  - EmployeForm::forCreating() calls PasswordInput::create() and ViewEmploye
+  calls PasswordForm::quota() — neither class exists anywhere in the repo, and
+  neither is imported.
+  - ViewEmploye uses LdapRepository->getEntry(), getEntryByEmail(), delete();
+  EmployeHandler uses createCitizen() and updateQuota(). None exist — and
+  LdapRepository's methods are all static, yet it's injected and called on an
+  instance.
+  - config/ldap.php registers only a citoyen connection, but EmployeLdap
+  declares $connection = 'employes' and LdapServiceProvider calls
+  setDefaultConnection('employes') — that connection is never registered.
+  - Employe::canAccessPanel() returns true only for panel id citoyen; the
+  panel's id is email-management-panel, so no one can enter it.
+  - The migration has no auth_token, recovery_email, recovery_phone or
+  charter_accepted_at columns, though all four are in #[Fillable] and used by
+  hasCompletedOnboarding() and the token actions.
+
+  There's also a schema mismatch at the core: your .env points at Active 
+  Directory (dc=ad,dc=marche,dc=be, AD-style sAMAccountName in
+  Security\Ldap\UserLdap), but EmployeLdap is built on OpenLDAP/GOSA object
+  classes (gosaMailAccount, posixAccount, {SSHA} password hashing, uid). Full
+  CRUD against AD can't use the GOSA schema — AD won't accept those object
+  classes. This decides the whole plan, so I won't guess.
+
+  Separately: modules/MailingList is a newsletter/campaign tool (address books,
+  contacts, senders) — unrelated to AD distribution lists, so I'll leave it
+  alone.
+
+  Two things I need from you:
+
+● User answered Claude's questions:
+  ⎿  · How should I handle the broken code found above? → Fold repairs into the 
+     plan
+     · Which directory should the employes resource actually write to? → see 
+     config ldap in .env
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Confirmed — that settles it. Your .env has exactly one LDAP server:
+  ldap.marche.be, base dc=ad,DC=marche,DC=be — Active Directory. There are no
+  LDAP_CITOYEN_* variables at all, so the module's citoyen connection currently
+  falls back to 127.0.0.1 / dc=local,dc=com. So: AD, and the GOSA schema goes.
+
+  Let me read the blueprint guideline files I need to write a compliant plan.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● One thing still unknown for full AD CRUD: the actual object classes in
+  OU=LISTS and OU=SERVICES. Let me probe the live directory rather than guess.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● LdapRecord v4 dropped use_ssl — which means LdapServiceProvider (passing
+  use_ssl/use_tls) would throw on boot regardless. Retrying with the v4 protocol
+  option:
+
+  Ran 2 shell commands (ctrl+o to expand)
+● Host resolves and 636 is open, so the failure is my URI format. Let me check
+  how v4 builds it.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Connected. OU=SERVICES holds user objects (shared service mailboxes). Now let
+  me see OU=LISTS specifically — that's the one I need for the lists feature.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Ground truth established. One last probe: a list that actually has members,
+  plus the employee base OU=AC.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Surprising: 0 of 174 lists expose a member attribute, yet the user entries
+  earlier all had memberof. That smells like a read permission limit on the bind
+  account rather than genuinely empty lists. Let me verify — this decides
+  whether "full CRUD on list members" is even possible.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● The employes table is empty (0 rows) and lacks the
+  auth_token/charter_accepted_at columns entirely — so nothing is at risk, and
+  AD (299 users in OU=AC) is the real source of truth. One last check on
+  available tooling, then I'll write the plan.
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+● I have everything I need — including ground truth from the live directory.
+  Writing the blueprint now.
+
+  Made 1 scratchpad edit +635 (ctrl+o to expand)
+
+● The blueprint is written. Before I start changing code, let me verify one
+  claim I made — whether LdapServiceProvider is actually registered, since that
+  determines whether it breaks boot for the whole intranet or only this module.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● That's an important correction to my own findings. Let me pin it down
+  precisely rather than ship a plan with a wrong premise.
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Good — that changes the fix substantially. Let me confirm the two
+  consequences.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● All confirmed. My original §2.1/§2.2 would have been wrong — let me correct
+  the blueprint before implementing.
+
+  Made 3 scratchpad edits +66 -47 (ctrl+o to expand)
+
+● Blueprint is complete and corrected. Sending it over, then starting Phase 1.
+
+● Blueprint for EmailManagement: repairs + employes on AD + new lists resource.
+  Grounded in a live probe of ldap.marche.be, not assumptions.
+
+  ›      /tmp/claude-1002/-var-www-intranet-laravel/9c32d40b-906f-4139-97 (31.2K
+  [file] ce-9abba92a9a79/scratchpad/email-management-blueprint.md        B)
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Nothing references them. Starting Phase 1 — config first, then deleting the
+  dead code.
+
+● Write(modules/EmailManagement/config/email-management.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(modules/EmailManagement/config/email-management.php)
+  ⎿  Added 7 lines, removed 1 line
+       3  declare(strict_types=1);
+       4  
+       5  return [
+       6 -                                                               
+       6 +    'ldap' => [                                                
+       7 +        'bases' => [                                           
+       8 +            'employes' => env('LDAP_DEFAULT_BASE_DN'),         
+       9 +            'lists' => env('LDAP_STAFF_LIST_BASE'),            
+      10 +            'services' => env('LDAP_STAFF_SERVICES_BASE'),     
+      11 +        ],                                                     
+      12 +    ],                                                         
+      13  ];
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Config wired and the dead code is gone; the working default connection is
+  untouched. Now the AD schema rewrite.
+
+● Write(modules/EmailManagement/src/Ldap/EmployeLdap.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Ldap/EmployeLdap.php)
+  ⎿  Added 8 lines, removed 64 lines
+       6  
+       7  use LdapRecord\Models\Model;
+       8  
+       9 +/**                                                            
+      10 + * A staff account in Active Directory, under OU=AC,OU=MUSERS. 
+      11 + *                                                             
+      12 + * Identity is carried by sAMAccountName. Passwords live in AD 
+         +only and are set                                               
+      13 + * through unicodePwd over the ldaps:// connection; they are ne
+         +ver mirrored locally.                                          
+      14 + */                                                            
+      15  final class EmployeLdap extends Model
+      16  {
+      17      /**
+      18       * The object classes of the LDAP model.
+      19       */
+      20      public static array $objectClasses = [
+      15 -        'gosaAccount',                                         
+      16 -        'gosaMailAccount',                                     
+      21          'top',
+      22          'person',
+      23          'organizationalPerson',
+      20 -        'inetOrgPerson',                                       
+      21 -        'posixAccount',                                        
+      24 +        'user',                                                
+      25      ];
+      26  
+      24 -    public static string $gosaMailDeliveryMode = '[CL]';       
+      25 -                                                               
+      26 -    public static string $gosaMailServer = 'imap://mail.marche.
+         -be';                                                           
+      27 -                                                               
+      28 -    public static string $gosaSpamMailbox = 'INBOX\Junk';      
+      29 -                                                               
+      30 -    public static int $gosaSpamSortLevel = 0;                  
+      31 -                                                               
+      32 -    public string $uid;                                        
+      33 -                                                               
+      34 -    public array $attributes = [];                             
+      35 -                                                               
+      36 -    protected ?string $connection = 'employes';                
+      37 -                                                               
+      38 -    public static function convertDataToLdapSchema(            
+      39 -        string $uid,                                           
+      40 -        string $first_name,                                    
+      41 -        string $last_name,                                     
+      42 -        string $email,                                         
+      43 -        string $password,                                      
+      44 -        string $postalAddress,                                 
+      45 -        string $localite,                                      
+      46 -        string $postCode,                                      
+      47 -        string $homeDirectory,                                 
+      48 -        string $employeNumber,                                 
+      49 -        int $uidNumber,                                        
+      50 -        int $quota = 250                                       
+      51 -    ): array {                                                 
+      52 -        return [                                               
+      53 -            'mail' => [$email],                                
+      54 -            'gidNumber' => [5000],                             
+      55 -            'uidNumber' => [$uidNumber],                       
+      56 -            'givenName' => [$first_name],                      
+      57 -            'employeeNumber' => [$employeNumber],              
+      58 -            'homeDirectory' => [$homeDirectory],               
+      59 -            'uid' => [$uid],                                   
+      60 -            'postalCode' => [$postCode],                       
+      61 -            'postalAddress' => [$postalAddress],               
+      62 -            'userPassword' => [self::cryptPassword($password)],
+      63 -            'l' => [$localite],                                
+      64 -            'sn' => [$last_name],                              
+      65 -            'cn' => [mb_trim($first_name.' '.$last_name)],     
+      66 -            'objectClass' => self::$objectClasses,             
+      67 -            'gosaMailDeliveryMode' => [self::$gosaMailDeliveryM
+         -ode],                                                          
+      68 -            'gosaMailForwardingAddress' => [$uid.'@citoyen.marc
+         -he.be'],                                                       
+      69 -            'gosaMailServer' => [self::$gosaMailServer],       
+      70 -            'gosaSpamMailbox' => [self::$gosaSpamMailbox],     
+      71 -            'gosaSpamSortLevel' => [self::$gosaSpamSortLevel], 
+      72 -            'gosaMailQuota' => [$quota],                       
+      73 -        ];                                                     
+      74 -    }                                                          
+      75 -                                                               
+      76 -    public static function cryptPassword(string $password): str
+         -ing                                                            
+      77 -    {                                                          
+      78 -        $salt = mb_substr(sha1(uniqid((string) random_int(0, mt
+         -_getrandmax()), true), true), 0, 4);                           
+      79 -        $rawHash = sha1($password.$salt, true).$salt;          
+      80 -        $method = '{SSHA}';                                    
+      81 -                                                               
+      82 -        return $method.base64_encode($rawHash);                
+      83 -    }                                                          
+      27 +    protected ?string $connection = 'default';                 
+      28  }
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● EmployeLdap now queries the live directory and returns real staff. Next: the
+  repository and handler that the broken pages call.
+
+● Write(modules/EmailManagement/src/Repository/EmployeLdapRepository.php)
+  ⎿  Wrote 59 lines to
+     modules/EmailManagement/src/Repository/EmployeLdapRepository.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 namespace AcMarche\EmailManagement\Repository;
+       6 
+       7 use AcMarche\EmailManagement\Ldap\EmployeLdap;
+       8 use LdapRecord\LdapRecordException;
+       9 use LdapRecord\Models\ModelDoesNotExistException;
+      10 use LdapRecord\Query\Collection;
+     … +53 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me run Pint on what I've changed and confirm nothing else broke.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I've delivered the blueprint and landed the first, load-bearing part of it.
+  Stopping here to flag two things that need you before I go further, because
+  both change what the rest of the work should be.
+
+  The headline finding
+
+  Your lists have no members. All 174 groups in OU=LISTS lack a member
+  attribute, and zero users in OU=AC/OU=SERVICES carry a memberOf back-link to
+  any of them. That's not an ACL artifact hiding data from the gestemail bind
+  account — if membership existed but member were hidden, the memberOf
+  back-links on the user objects would still resolve, and they return 0. These
+  groups are address objects only; mail expansion happens on mail.marche.be, not
+  in AD. So "manage lists" can't mean member management, and the blueprint
+  deliberately doesn't build it. If you believe membership should be in AD,
+  that's a data problem to settle before any UI gets built on top.
+
+  The module didn't run at all
+
+  It's a half-finished Citoyen → Employe rename. Pages call
+  createEmploye()/updateEmploye() while the handler defines
+  createCitoyen()/updateCitoyen(); PasswordInput::create() and
+  PasswordForm::quota() don't exist anywhere in the repo; CreateEmploye:52
+  passes an undefined $body. And the core mismatch: EmployeLdap was built on
+  OpenLDAP/GOSA object classes (gosaMailAccount, posixAccount, {SSHA}) pointed
+  at what is actually Active Directory, which would reject them.
+
+  I also corrected my own first read. The obvious conclusion from the code was
+  "the LDAP connection is misconfigured" — wrong.
+  modules/EmailManagement/config/ldap.php and LdapServiceProvider are never 
+  loaded (the module trait merges only email-management.php; the provider isn't
+  in bootstrap/providers.php). A working default connection already exists from
+  the ldaprecord-laravel package config. So the fix was to delete that dead
+  code, not configure it — and deleting it defuses a real trap: registering that
+  provider would have thrown on use_ssl (removed in LdapRecord v4) and
+  clobbered the default connection that intranet login depends on.
+
+  Landed and verified against the live directory
+
+  Config bases wired, dead config/provider deleted, EmployeLdap rewritten on the
+  AD schema, and a new EmployeLdapRepository. Verified by real queries, not
+  just tests: EmployeLdap now returns actual staff (jfpierard | 
+  jean-francois.pierard@ac.marche.be), and the repository's
+  getEntry/getEntryByEmail/null-guard/all() return 299. Pint passes. Nothing is
+  at risk in the mirror — the employes table has 0 rows.
+
+  Two decisions are yours:
+
+  1. Authorization. EmployePolicy currently grants every authenticated user full
+  CRUD via auth()->check(). Carrying that to the new resource means any
+  intranet user could rewrite 174 production distribution lists and 299 staff AD
+  accounts. The module already has a RolesEnum. I kept parity in the plan
+  rather than invent a permission model — tell me the rule you want.
+  2. Quota. AD has no quota attribute, and IMAP_EMPLOYE_URL/_ADMIN/_PWD aren't
+  in .env (config('imap.citoyen.host') is already NULL, so that panel is broken
+  today). The plan makes quota read-only and fail-soft. If you want quota
+  writes, I need those credentials.
+
+  Unrelated but you should know: .env holds live plaintext secrets — the
+  gestemail LDAP bind password, the doveadmin IMAP password, and four mailbox
+  passwords. I didn't touch them, but they're worth rotating and confirming .env
+  is git-ignored.
+
+  Say the word on authorization and I'll continue through the remaining Phase 1
+  repairs and the EmailList resource.
+
+✻ Baked for 11m 38s
+
+❯ only admins ROLE_EMAIL_ADMIN can manage lists and access to this module       
+  ⎿  ⧉ Selected 1 lines from modules/EmailManagement/src/Enums/RolesEnum.php in 
+     PhpStorm
+
+● Let me see the existing RolesEnum and how other modules actually check roles,
+  so I match the established pattern rather than invent one.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● User::canAccessPanel() returns true for every panel — that's the actual hole.
+  Let me find how roles are stored and checked across the app.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● There's an established pattern here (hasRole, Role model, per-module
+  RolesEnum). Let me study the Hrm module — it's the most complete example, with
+  policy and tests.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● The pattern is clear. One thing to check first — User::rolesByModule() and
+  $module_id = 5 on the module provider suggest a module-level access concept
+  already exists.
+  Searched for 1 pattern, listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● src/Http is already an established structure (Ad, Pst, Courrier, News), so a
+  module middleware fits. Implementing the role gate now — following the Hrm
+  pattern exactly.
+
+● Write(modules/EmailManagement/src/Enums/RolesEnum.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Enums/RolesEnum.php)
+  ⎿  Added 24 lines, removed 1 line
+       4  
+       5  namespace AcMarche\EmailManagement\Enums;
+       6  
+       7 -enum RolesEnum: string                                         
+       7 +use Filament\Support\Contracts\HasLabel;                       
+       8 +use Illuminate\Contracts\Support\Htmlable;                     
+       9 +                                                               
+      10 +enum RolesEnum: string implements HasLabel                     
+      11  {
+      12      case ROLE_EMAIL_ADMIN = 'ROLE_EMAIL_ADMIN';
+      13 +                                                               
+      14 +    /**                                                        
+      15 +     * @return array<string, string>                           
+      16 +     */                                                        
+      17 +    public static function getRoles(): array                   
+      18 +    {                                                          
+      19 +        $roles = [];                                           
+      20 +        foreach (self::cases() as $role) {                     
+      21 +            $roles[$role->value] = $role->value;               
+      22 +        }                                                      
+      23 +                                                               
+      24 +        return $roles;                                         
+      25 +    }                                                          
+      26 +                                                               
+      27 +    public function getLabel(): string|Htmlable|null           
+      28 +    {                                                          
+      29 +        return match ($this) {                                 
+      30 +            self::ROLE_EMAIL_ADMIN => 'Accès administrateur à l
+         +a gestion des emails',                                         
+      31 +        };                                                     
+      32 +    }                                                          
+      33  }
+
+● Now the shared authorization concern, mirroring HrmAuthorization:
+
+● Write(modules/EmailManagement/src/Policies/Concerns/EmailManagementAuthorizati
+       on.php)
+  ⎿  Wrote 27 lines to modules/EmailManagement/src/Policies/Concerns/EmailM
+     anagementAuthorization.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 namespace AcMarche\EmailManagement\Policies\Concerns;
+       6 
+       7 use AcMarche\EmailManagement\Enums\RolesEnum;
+       8 use App\Models\User;
+       9 
+      10 trait EmailManagementAuthorization
+     … +20 lines (ctrl+o to expand)
+
+● Now the panel gate. The middleware needs a static helper the policies can
+  share, so let me write the middleware and rewrite EmployePolicy against the
+  concern.
+
+● Write(modules/EmailManagement/src/Http/Middleware/EnsureEmailAdmin.php)
+  ⎿  Wrote 37 lines to
+     modules/EmailManagement/src/Http/Middleware/EnsureEmailAdmin.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 namespace AcMarche\EmailManagement\Http\Middleware;
+       6 
+       7 use AcMarche\EmailManagement\Enums\RolesEnum;
+       8 use App\Models\User;
+       9 use Closure;
+      10 use Illuminate\Http\Request;
+     … +33 lines (ctrl+o to expand)
+
+● Update(modules/EmailManagement/src/Providers/Filament/EmailManagementPanelProv
+        ider.php)
+  ⎿  Added 1 line
+      65              ])
+      66              ->authMiddleware([
+      67                  Authenticate::class,
+      68 +                EnsureEmailAdmin::class,                       
+      69              ]);
+      70      }
+      71  }
+
+● Update(modules/EmailManagement/src/Providers/Filament/EmailManagementPanelProv
+        ider.php)
+  ⎿  Added 1 line
+       6  
+       7  use AcMarche\App\Traits\HooksTrait;
+       8  use AcMarche\App\Traits\PluginTrait;
+       9 +use AcMarche\EmailManagement\Http\Middleware\EnsureEmailAdmin; 
+      10  use Filament\Http\Middleware\Authenticate;
+      11  use Filament\Http\Middleware\AuthenticateSession;
+      12  use Filament\Http\Middleware\DisableBladeIconComponents;
+
+● Now EmployePolicy — replacing the blanket auth()->check() with the role gate:
+
+● Write(modules/EmailManagement/src/Policies/EmployePolicy.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Policies/EmployePolicy.php)
+  ⎿  Added 13 lines, removed 31 lines
+       5  namespace AcMarche\EmailManagement\Policies;
+       6  
+       7  use AcMarche\EmailManagement\Models\Employe;
+       8 +use AcMarche\EmailManagement\Policies\Concerns\EmailManagementA
+         +uthorization;                                                  
+       9  use App\Models\User;
+      10  
+      11  final class EmployePolicy
+      12  {
+      12 -    /**                                                        
+      13 -     * Determine whether the user can view any models.         
+      14 -     */                                                        
+      13 +    use EmailManagementAuthorization;                          
+      14 +                                                               
+      15      public function viewAny(User $user): bool
+      16      {
+      17 -        return auth()->check();                                
+      17 +        return $this->isEmailAdmin($user);                     
+      18      }
+      19  
+      20 -    /**                                                        
+      21 -     * Determine whether the user can view the model.          
+      22 -     */                                                        
+      23 -    public function view(User $user, Employe|array $citoyen): b
+         -ool                                                            
+      20 +    public function view(User $user, Employe $employe): bool   
+      21      {
+      25 -        return auth()->check();                                
+      22 +        return $this->isEmailAdmin($user);                     
+      23      }
+      24  
+      28 -    /**                                                        
+      29 -     * Determine whether the user can create models.           
+      30 -     */                                                        
+      25      public function create(User $user): bool
+      26      {
+      33 -        return auth()->check();                                
+      27 +        return $this->isEmailAdmin($user);                     
+      28      }
+      29  
+      36 -    /**                                                        
+      37 -     * Determine whether the user can update the model.        
+      38 -     */                                                        
+      39 -    public function update(User $user, Employe|array $citoyen):
+         - bool                                                          
+      30 +    public function update(User $user, Employe $employe): bool 
+      31      {
+      41 -        return auth()->check();                                
+      32 +        return $this->isEmailAdmin($user);                     
+      33      }
+      34  
+      44 -    /**                                                        
+      45 -     * Determine whether the user can delete the model.        
+      46 -     */                                                        
+      47 -    public function delete(User $user, Employe|array $citoyen):
+         - bool                                                          
+      35 +    public function delete(User $user, Employe $employe): bool 
+      36      {
+      49 -        return auth()->check();                                
+      37 +        return $this->isEmailAdmin($user);                     
+      38      }
+      39  
+      52 -    /**                                                        
+      53 -     * Determine whether the user can restore the model.       
+      54 -     */                                                        
+      55 -    public function restore(User $user, Employe|array $citoyen)
+         -: bool                                                         
+      40 +    public function restore(User $user, Employe $employe): bool
+      41      {
+      42          return false;
+      43      }
+      44  
+      60 -    /**                                                        
+      61 -     * Determine whether the user can permanently delete the mo
+         -del.                                                           
+      62 -     */                                                        
+      63 -    public function forceDelete(User $user, Employe|array $cito
+         -yen): bool                                                     
+      45 +    public function forceDelete(User $user, Employe $employe): 
+         +bool                                                           
+      46      {
+      47          return false;
+      48      }
+
+● A policy that's never registered enforces nothing. Let me check how Hrm wires
+  its policies, since these models live outside App\Models.
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+● Policies auto-resolve — good, my blueprint's caveat about that was unfounded.
+  Now let me prove the gate works with tests.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Each module gets its own testsuite. Let me register one for EmailManagement
+  and write the authorization test.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Update(phpunit.xml)
+  ⎿  Added 3 lines
+      41          <testsuite name="Hrm">
+      42              <directory>modules/Hrm/tests</directory>
+      43          </testsuite>
+      44 +        <testsuite name="EmailManagement">                     
+      45 +            <directory>modules/EmailManagement/tests</directory
+         +>                                                              
+      46 +        </testsuite>                                           
+      47      </testsuites>
+      48      <source>
+      49          <include>
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● Update(tests/Pest.php)
+  ⎿  Added 2 lines
+      52      '../modules/Conseil/tests/Filament',
+      53      '../modules/App/tests/Feature',
+      54      '../modules/App/tests/Unit',
+      55 +    '../modules/EmailManagement/tests/Feature',                
+      56 +    '../modules/EmailManagement/tests/Unit',                   
+      57  );
+      58  
+      59  uses(
+● Now the test that proves the gate actually holds:
+
+● Write(modules/EmailManagement/tests/Feature/EmailManagementAuthorizationTest.p
+       hp)
+  ⎿  Wrote 103 lines to modules/EmailManagement/tests/Feature/EmailManageme
+     ntAuthorizationTest.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 use AcMarche\EmailManagement\Enums\RolesEnum;
+       6 use AcMarche\EmailManagement\Http\Middleware\EnsureEmailAdmin;
+       7 use AcMarche\EmailManagement\Models\Employe;
+       8 use AcMarche\Security\Models\Role;
+       9 use App\Models\User;
+      10 use Illuminate\Http\Request;
+     … +113 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● All 9 pass. Let me make sure I haven't regressed anything else, since I
+  touched shared phpunit.xml and tests/Pest.php.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Pint reformatted an unrelated file that isn't mine. Let me check and revert
+  it.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Three Mileage files are modified that aren't mine — and the session started
+  with a clean tree. Let me look before touching anything.
+
+  Ran 1 shell command (ctrl+o to expand)
+  ⎿  Found 2 new diagnostic issues in 1 file (ctrl+o to expand)
+
+● I need to stop and flag something before going further.
+
+  Three modules/Mileage files are modified in the working tree that I did not 
+  touch — and this session started with a clean tree. They contain real
+  in-progress feature work (an omnium entitlement gate in TripAttributeResolver,
+  plus matching test updates). Something else is editing this repo concurrently
+  — another session, or you.
+
+  This matters because my vendor/bin/pint --dirty run reformatted one of them:
+  it applied ordered_class_elements to TripAttributeResolver.php, reordering
+  methods in someone's uncommitted work. The logic is untouched and nothing was
+  lost, but that file now carries a cosmetic change I introduced. I have not
+  reverted it — reverting would risk destroying work I didn't write and can't
+  verify intent on. Please confirm whether that's yours and whether you want the
+  reorder kept; from now on I'll scope Pint to explicit paths instead of
+  --dirty.
+
+  What's done and verified
+
+  Your rule is implemented: ROLE_EMAIL_ADMIN gates both the module and the 
+  lists.
+
+  - RolesEnum now implements HasLabel with getRoles()/getLabel(), matching
+  Hrm\Enums\RolesEnum.
+  - A new EmailManagementAuthorization concern provides the single
+  isEmailAdmin() gate, mirroring HrmAuthorization.
+  - EnsureEmailAdmin middleware added to the panel's authMiddleware, so the
+  whole panel is closed. I gated it there rather than in canAccessPanel()
+  deliberately: App\Models\User::canAccessPanel() returns true unconditionally,
+  and editing it would have changed access for every panel in the intranet.
+  - EmployePolicy rewritten — every ability now goes through isEmailAdmin()
+  instead of the old auth()->check(), which had granted full CRUD to any
+  logged-in user.
+
+  9 tests, 19 assertions, all passing, covering role holder / super-admin /
+  no-role / guest / unrelated-role across both the middleware and the policy. I
+  registered an EmailManagement testsuite in phpunit.xml and tests/Pest.php —
+  the module previously had no tests at all. The Hrm suite still passes (371
+  tests), confirming the shared test config changes are safe.
+
+  Two things worth knowing:
+
+  - Super administrators (is_administrator = true) also pass. You said "only
+  ROLE_EMAIL_ADMIN", but every other module in this codebase lets super admins
+  through (HrmAuthorization::isAdmin), so I followed that convention. Say the
+  word if you want the role to be strictly exclusive.
+  - I checked whether the policy is actually registered rather than assuming —
+  Gate::getPolicyFor() resolves EmployePolicy correctly, so the caveat in my
+  blueprint about module policies needing manual registration was wrong. Good
+  thing it's enforced automatically.
+
+  Earlier in Phase 1 I also confirmed against the live directory that
+  EmployeLdap now works (ContainerException gone, returns real staff) and the
+  new EmployeLdapRepository resolves 299 accounts.
+
+  Still outstanding from Phase 1: the handler method renames
+  (createEmploye/updateEmploye), the missing PasswordInput class,
+  Employe::canAccessPanel/generateDataFromLdap, the migration, and the table
+  column fixes. Then the EmailList resource itself. Want me to carry on through
+  those, or sort out the Mileage situation first?
+
+✻ Cooked for 4m 59s
+
+❯ the Mileage changes are mine, keep going                                      
+
+● Mileage is yours — carrying on. Let me check one thing the plan assumed: the
+  citizen-portal bits on this model (auth_token, charter, the citoyen.auto-login
+  route) may not survive the move to AD staff.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Confirmed a real problem the blueprint got wrong: route('citoyen.auto-login') 
+  doesn't exist — no citizen route is registered anywhere. EmployeInfolist:131
+  calls it whenever auth_token is set, so that view would throw
+  RouteNotFoundException.
+
+  So the whole "Espace Citoyen" surface (auth_token, auto-login, charter,
+  recovery contacts) is vestigial from the Citoyen module, points at a portal
+  this app doesn't serve, and has no consumer. Adding columns for it — as my
+  plan said — would be wrong. Staff authenticate against AD. I'm removing it
+  instead.
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Models/Employe.php)
+  ⎿  Added 23 lines, removed 56 lines
+        6  
+        7  use AcMarche\EmailManagement\Database\Factories\EmployeFactory
+           ;
+        8  use AcMarche\EmailManagement\Ldap\EmployeLdap;
+        9 -use Filament\Models\Contracts\FilamentUser;                   
+       10 -use Filament\Models\Contracts\HasName;                        
+       11 -use Filament\Panel;                                           
+        9  use Illuminate\Database\Eloquent\Attributes\Connection;
+       10  use Illuminate\Database\Eloquent\Attributes\Fillable;
+       11  use Illuminate\Database\Eloquent\Attributes\UseFactory;
+       12  use Illuminate\Database\Eloquent\Casts\Attribute;
+       13  use Illuminate\Database\Eloquent\Factories\HasFactory;
+       17 -use Illuminate\Foundation\Auth\User as Authenticatable;       
+       14 +use Illuminate\Database\Eloquent\Model;                       
+       15  
+       16 +/**                                                           
+       17 + * Local mirror of a staff account held in Active Directory (O
+          +U=AC,OU=MUSERS).                                              
+       18 + *                                                            
+       19 + * Active Directory is the source of truth: this table is a re
+          +ad mirror kept in step                                        
+       20 + * by write-through on create/update and by the sync command. 
+          +Passwords are never                                           
+       21 + * mirrored -- they live in AD and are checked there.         
+       22 + */                                                           
+       23  #[Connection('maria-email-management')]
+       24  #[Fillable([
+       25 +    'samaccountname',                                         
+       26      'givenName',
+       27      'sn',
+       23 -    'l',                                                      
+       28 +    'cn',                                                     
+       29 +    'displayName',                                            
+       30      'mail',
+       25 -    'uid',                                                    
+       31      'dn',
+       32      'description',
+       28 -    'postalAddress',                                          
+       29 -    'employeeNumber',                                         
+       30 -    'postalCode',                                             
+       31 -    'homeDirectory',                                          
+       32 -    'employeNumber',                                          
+       33 -    'gosaMailQuota',                                          
+       34 -    'gosaMailForwardingAddress',                              
+       35 -    'gosaMailAlternateAddress',                               
+       33 +    'telephoneNumber',                                        
+       34      'last_connection',
+       35      'protocol_connection',
+       36      'port_connection',
+       37      'secure_connection',
+       40 -    'auth_token',                                             
+       41 -    'recovery_email',                                         
+       42 -    'recovery_phone',                                         
+       43 -    'charter_accepted_at',                                    
+       44 -    'password_changed_at',                                    
+       38 +    'sync_at',                                                
+       39  ])]
+       40  #[UseFactory(EmployeFactory::class)]
+       47 -final class Employe extends Authenticatable implements Filamen
+          -tUser, HasName                                                
+       41 +final class Employe extends Model                             
+       42  {
+       43      use HasFactory;
+       44  
+       51 -    protected $hidden = [                                     
+       52 -        'auth_token',                                         
+       53 -        'remember_token',                                     
+       54 -    ];                                                        
+       55 -                                                              
+       45 +    /**                                                       
+       46 +     * @return array<string, mixed>                           
+       47 +     */                                                       
+       48      public static function generateDataFromLdap(EmployeLdap $u
+           serLdap): array
+       49      {
+       50          return [
+       51 +            'samaccountname' => $userLdap->getFirstAttribute('
+          +samaccountname'),                                             
+       52              'givenName' => $userLdap->getFirstAttribute('given
+           Name'),
+       53              'sn' => $userLdap->getFirstAttribute('sn'),
+       61 -            'dn' => $userLdap->getDn(),                       
+       54              'cn' => $userLdap->getFirstAttribute('cn'),
+       63 -            'uid' => $userLdap->getFirstAttribute('uid'),     
+       55 +            'displayName' => $userLdap->getFirstAttribute('dis
+          +playName'),                                                   
+       56 +            'dn' => $userLdap->getDn(),                       
+       57              'mail' => $userLdap->getFirstAttribute('mail'),
+       65 -            'postalAddress' => $userLdap->getFirstAttribute('p
+          -ostalAddress'),                                               
+       66 -            'postalCode' => $userLdap->getFirstAttribute('post
+          -alCode'),                                                     
+       67 -            'l' => $userLdap->getFirstAttribute('l'),         
+       68 -            'userPassword' => null,                           
+       69 -            'employeeNumber' => $userLdap->getFirstAttribute('
+          -employeeNumber'),                                             
+       70 -            'gosaMailQuota' => $userLdap->getFirstAttribute('g
+          -osaMailQuota', 250),                                          
+       71 -            'gosaMailForwardingAddress' => $userLdap->getFirst
+          -Attribute('gosaMailForwardingAddress'),                       
+       72 -            'gosaMailAlternateAddress' => $userLdap->getFirstA
+          -ttribute('gosaMailAlternateAddress'),                         
+       73 -            'homeDirectory' => $userLdap->getFirstAttribute('h
+          -omeDirectory'),                                               
+       58              'description' => $userLdap->getFirstAttribute('des
+           cription'),
+       59 +            'telephoneNumber' => $userLdap->getFirstAttribute(
+          +'telephoneNumber'),                                           
+       60          ];
+       61      }
+       62  
+       78 -    public function canAccessPanel(Panel $panel): bool        
+       63 +    public function getFullName(): string                     
+       64      {
+       80 -        return $panel->getId() === 'citoyen';                 
+       81 -    }                                                         
+       82 -                                                              
+       83 -    public function getFilamentName(): string                 
+       84 -    {                                                         
+       65          return mb_trim($this->givenName.' '.$this->sn);
+       66      }
+       67  
+       88 -    public function hasCompletedOnboarding(): bool            
+       89 -    {                                                         
+       90 -        return $this->charter_accepted_at                     
+       91 -            && $this->password_changed_at                     
+       92 -            && ($this->recovery_email || $this->recovery_phone
+          -);                                                            
+       93 -    }                                                         
+       94 -                                                              
+       95 -    public function getAuthPassword(): string                 
+       96 -    {                                                         
+       97 -        return '';                                            
+       98 -    }                                                         
+       99 -                                                              
+       68      protected function email(): Attribute
+       69      {
+       70          return Attribute::get(fn (): ?string => $this->mail);
+     ...
+       76              'last_connection' => 'date',
+       77              'secure_connection' => 'boolean',
+       78              'port_connection' => 'integer',
+      111 -            'charter_accepted_at' => 'datetime',              
+      112 -            'password_changed_at' => 'datetime',              
+       79 +            'sync_at' => 'datetime',                          
+       80          ];
+       81      }
+       82  }
+
+● That removed Authenticatable/FilamentUser from Employe — I must verify nothing
+  authenticates as it before trusting that.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● No citoyen panel exists among the 20 registered panels, and Employe is not an
+  auth provider anywhere — so canAccessPanel() === 'citoyen' was unreachable
+  code and dropping Authenticatable is safe. Now the migration to align the
+  table with AD.
+
+● Write(modules/EmailManagement/database/migrations/2026_07_16_090000_align_empl
+       oyes_table_with_active_directory.php)
+  ⎿  Wrote 102 lines to modules/EmailManagement/database/migrations/2026_07
+     _16_090000_align_employes_table_with_active_directory.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 use Illuminate\Database\Migrations\Migration;
+       7 use Illuminate\Support\Facades\Schema;
+       8 
+       9 /**
+      10  * Moves the employes mirror off the OpenLDAP/GOSA schema and on
+         to Active Directory.
+     … +108 lines (ctrl+o to expand)
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● That failure is unrelated — it's GuichetHdv's unguarded create migration
+  failing on a different connection (migrate sweeps every module). Let me run
+  only mine via --path.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Table is now the AD shape, verified. For AD writes (passwords via unicodePwd,
+  userAccountControl), LdapRecord ships a dedicated AD user model — let me check
+  before hand-rolling it.
+
+  Ran 1 shell command (ctrl+o to expand)
+● ActiveDirectory\User gives HasPassword (unicodepwd + encode),
+  HasAccountControl, and the Windows date mutators — exactly what full CRUD
+  needs. Extending it instead of hand-rolling.
+
+● Write(modules/EmailManagement/src/Ldap/EmployeLdap.php)
+  ⎿  Added 6 lines, removed 14 lines
+       4  
+       5  namespace AcMarche\EmailManagement\Ldap;
+       6  
+       7 -use LdapRecord\Models\Model;                                   
+       7 +use LdapRecord\Models\ActiveDirectory\User;                    
+       8  
+       9  /**
+      10   * A staff account in Active Directory, under OU=AC,OU=MUSERS.
+      11   *
+      12 - * Identity is carried by sAMAccountName. Passwords live in AD 
+         -only and are set                                               
+      13 - * through unicodePwd over the ldaps:// connection; they are ne
+         -ver mirrored locally.                                          
+      12 + * Identity is carried by sAMAccountName. Extends LdapRecord's 
+         +Active Directory user so                                       
+      13 + * that password writes go through unicodePwd (which AD only ac
+         +cepts over the ldaps://                                        
+      14 + * connection this module uses) and userAccountControl is handl
+         +ed by HasAccountControl,                                       
+      15 + * rather than being hand-rolled here.                         
+      16   */
+      15 -final class EmployeLdap extends Model                          
+      17 +final class EmployeLdap extends User                           
+      18  {
+      17 -    /**                                                        
+      18 -     * The object classes of the LDAP model.                   
+      19 -     */                                                        
+      20 -    public static array $objectClasses = [                     
+      21 -        'top',                                                 
+      22 -        'person',                                              
+      23 -        'organizationalPerson',                                
+      24 -        'user',                                                
+      25 -    ];                                                         
+      26 -                                                               
+      19      protected ?string $connection = 'default';
+      20  }
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The date mutator works (that error is my tinker code indexing a Carbon). Now
+  the handler — this is what CreateEmploye/EditEmploye call.
+
+● Write(modules/EmailManagement/src/Ldap/EmployeHandler.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Ldap/EmployeHandler.php)
+  ⎿  Added 75 lines, removed 51 lines
+        4  
+        5  namespace AcMarche\EmailManagement\Ldap;
+        6  
+        7 -use AcMarche\EmailManagement\Models\EmailDto;                 
+        7  use AcMarche\EmailManagement\Models\Employe;
+        9 -use AcMarche\Security\Repository\LdapRepository;              
+        8 +use AcMarche\EmailManagement\Repository\EmployeLdapRepository;
+        9  use Exception;
+       11 -use Illuminate\Database\Eloquent\Model;                       
+       12 -use Illuminate\Support\Str;                                   
+       10  use LdapRecord\LdapRecordException;
+       14 -use LdapRecord\Models\ModelDoesNotExistException;             
+       11 +use LdapRecord\Models\Attributes\AccountControl;              
+       12  
+       13 +/**                                                           
+       14 + * Write-through for staff accounts: Active Directory first, t
+          +hen the local mirror.                                         
+       15 + *                                                            
+       16 + * Order matters. If AD rejects a write the mirror must not be
+          + left holding a row that                                      
+       17 + * does not exist in the directory, so nothing is persisted lo
+          +cally until AD has                                            
+       18 + * accepted the change.                                       
+       19 + */                                                           
+       20  final class EmployeHandler
+       21  {
+       18 -    public function __construct(private readonly LdapRepositor
+          -y $ldapRepository) {}                                         
+       22 +    public function __construct(private readonly EmployeLdapRe
+          +pository $repository) {}                                      
+       23  
+       24      /**
+       25 +     * @param  array<string, mixed>  $data                    
+       26 +     *                                                        
+       27       * @throws Exception
+       28 +     * @throws LdapRecordException                            
+       29       */
+       23 -    public static function createCitoyenDbFromLdap(EmployeLdap
+          - $data): ?Employe                                             
+       30 +    public function createEmploye(array $data): Employe       
+       31      {
+       25 -        if (Employe::where('uid', $data->getFirstAttribute('ui
+          -d'))->first()) {                                              
+       26 -            throw new Exception('Utilisateur déjà existant'); 
+       32 +        $samAccountName = $data['samaccountname'];            
+       33 +                                                              
+       34 +        if ($this->repository->getEntry($samAccountName) insta
+          +nceof EmployeLdap) {                                          
+       35 +            throw new Exception("L'identifiant {$samAccountNam
+          +e} existe déjà dans l'annuaire.");                            
+       36          }
+       28 -        $dataUser = Employe::generateDataFromLdap($data);     
+       29 -        $dataUser['userPassword'] = Str::password();          
+       30 -        $dataUser['auth_token'] = Str::random(64);            
+       37  
+       32 -        return Employe::create($dataUser);                    
+       33 -    }                                                         
+       38 +        if (Employe::where('samaccountname', $samAccountName)-
+          +>exists()) {                                                  
+       39 +            throw new Exception("L'identifiant {$samAccountNam
+          +e} existe déjà localement.");                                 
+       40 +        }                                                     
+       41  
+       35 -    /**                                                       
+       36 -     * @throws Exception                                      
+       37 -     * @throws LdapRecordException                            
+       38 -     */                                                       
+       39 -    public function createCitoyen(array $data): Employe       
+       40 -    {                                                         
+       41 -        $emailDto = new EmailDto;                             
+       42 -        $emailDto->givenName = $data['givenName'];            
+       43 -        $emailDto->sn = $data['sn'];                          
+       44 -        $emailDto->mail = $data['mail'];                      
+       45 -        $emailDto->postalAddress = $data['postalAddress'];    
+       46 -        $emailDto->postalCode = $data['postalCode'];          
+       47 -        $emailDto->l = $data['l'];                            
+       48 -        $emailDto->employeeNumber = $data['employeeNumber'];  
+       49 -        $emailDto->userPassword = $data['password'];          
+       50 -        $emailDto->gosaMailQuota = (int) ($data['gosaMailQuota
+          -'] ?? 350);                                                   
+       51 -        $emailDto->description = $data['description'] ?? null;
+       42 +        $fullName = $this->fullName($data['givenName'] ?? null
+          +, $data['sn']);                                               
+       43  
+       53 -        $ldapEntry = $this->ldapRepository->createCitizen($ema
+          -ilDto);                                                       
+       44 +        $ldapEntry = new EmployeLdap;                         
+       45 +        $ldapEntry->cn = $fullName;                           
+       46 +        $ldapEntry->samaccountname = $samAccountName;         
+       47 +        $ldapEntry->givenName = $data['givenName'] ?? null;   
+       48 +        $ldapEntry->sn = $data['sn'];                         
+       49 +        $ldapEntry->displayName = $fullName;                  
+       50 +        $ldapEntry->mail = $data['mail'];                     
+       51 +        $ldapEntry->userPrincipalName = $data['mail'];        
+       52 +        $ldapEntry->description = $data['description'] ?? null
+          +;                                                             
+       53 +        $ldapEntry->telephoneNumber = $data['telephoneNumber']
+          + ?? null;                                                     
+       54 +        $ldapEntry->unicodepwd = $data['password'];           
+       55 +        $ldapEntry->userAccountControl = (new AccountControl) 
+       56 +            ->add(AccountControl::NORMAL_ACCOUNT)             
+       57 +            ->getValue();                                     
+       58  
+       59 +        $ldapEntry->inside(config('email-management.ldap.bases
+          +.employes'))->save();                                         
+       60 +                                                              
+       61          return Employe::create([
+       62              ...Employe::generateDataFromLdap($ldapEntry),
+       57 -            'auth_token' => Str::random(64),                  
+       63 +            'sync_at' => now(),                               
+       64          ]);
+       65      }
+       66  
+       67      /**
+       68 +     * Pushes the mirror's current state back to the directory
+          + entry.                                                       
+       69 +     *                                                        
+       70       * @throws LdapRecordException
+       63 -     * @throws ModelDoesNotExistException                     
+       71       */
+       65 -    public function updateCitoyen(Employe|Model $employe, Empl
+          -oyeLdap $ldapEntry): void                                     
+       72 +    public function updateEmploye(Employe $employe, EmployeLda
+          +p $ldapEntry): void                                           
+       73      {
+       67 -        $ldapEntry->setAttribute('givenName', $employe->givenN
+          -ame);                                                         
+       68 -        $ldapEntry->setAttribute('sn', $employe->sn);         
+       69 -        $ldapEntry->setAttribute('cn', mb_trim($employe->given
+          -Name.' '.$employe->sn));                                      
+       70 -        $ldapEntry->setAttribute('description', $employe->desc
+          -ription);                                                     
+       71 -        $ldapEntry->setAttribute('employeeNumber', $employe->e
+          -mployeeNumber);                                               
+       72 -        $ldapEntry->setAttribute('postalAddress', $employe->po
+          -stalAddress);                                                 
+       73 -        $ldapEntry->setAttribute('postalCode', $employe->posta
+          -lCode);                                                       
+       74 -        $ldapEntry->setAttribute('l', $employe->l);           
+       74 +        $ldapEntry->givenName = $employe->givenName;          
+       75 +        $ldapEntry->sn = $employe->sn;                        
+       76 +        $ldapEntry->displayName = $this->fullName($employe->gi
+          +venName, $employe->sn);                                       
+       77 +        $ldapEntry->description = $employe->description;      
+       78 +        $ldapEntry->telephoneNumber = $employe->telephoneNumbe
+          +r;                                                            
+       79 +        $ldapEntry->mail = $employe->mail;                    
+       80  
+       76 -        $ldapEntry->update();                                 
+       81 +        $ldapEntry->save();                                   
+       82      }
+       83  
+       84      /**
+       80 -     * @throws Exception                                      
+       85 +     * Pulls every directory entry into the mirror, keyed on s
+          +AMAccountName.                                                
+       86 +     *                                                        
+       87 +     * @throws LdapRecordException                            
+       88       */
+       82 -    public function changeQuota(Employe|Model $employe, int $q
+          -uota): void                                                   
+       89 +    public function syncFromLdap(): int                       
+       90      {
+       84 -        $ldapEntry = $this->ldapRepository->findByUsername($em
+          -ploye->uid);                                                  
+       91 +        $seen = [];                                           
+       92  
+       86 -        if (! $ldapEntry) {                                   
+       87 -            throw new Exception('Utilisateur LDAP introuvable'
+          -);                                                            
+       93 +        foreach ($this->repository->all() as $ldapEntry) {    
+       94 +            $samAccountName = $ldapEntry->getFirstAttribute('s
+          +amaccountname');                                              
+       95 +                                                              
+       96 +            if ($samAccountName === null || $samAccountName ==
+          += '') {                                                       
+       97 +                continue;                                     
+       98 +            }                                                 
+       99 +                                                              
+      100 +            Employe::updateOrCreate(                          
+      101 +                ['samaccountname' => $samAccountName],        
+      102 +                [...Employe::generateDataFromLdap($ldapEntry),
+          + 'sync_at' => now()],                                         
+      103 +            );                                                
+      104 +                                                              
+      105 +            $seen[] = $samAccountName;                        
+      106          }
+      107  
+       90 -        $this->ldapRepository->updateQuota($ldapEntry, $quota)
+          -;                                                             
+       91 -        $employe->update(['gosaMailQuota' => $quota]);        
+      108 +        Employe::whereNotIn('samaccountname', $seen)->delete()
+          +;                                                             
+      109 +                                                              
+      110 +        return count($seen);                                  
+      111      }
+      112 +                                                              
+      113 +    private function fullName(?string $givenName, ?string $sn)
+          +: string                                                      
+      114 +    {                                                         
+      115 +        return mb_trim(($givenName ?? '').' '.($sn ?? ''));   
+      116 +    }                                                         
+      117  }
+
+● Now the PasswordInput class the form calls but which never existed — with your
+  12-char policy:
+
+● Write(modules/EmailManagement/src/Filament/Schemas/PasswordInput.php)
+  ⎿  Wrote 57 lines to
+     modules/EmailManagement/src/Filament/Schemas/PasswordInput.php
+       1 <?php
+       2 
+       3 declare(strict_types=1);
+       4 
+       5 namespace AcMarche\EmailManagement\Filament\Schemas;
+       6 
+       7 use Filament\Actions\Action;
+       8 use Filament\Forms\Components\TextInput;
+       9 use Filament\Schemas\Components\Utilities\Set;
+      10 use Filament\Support\Icons\Heroicon;
+     … +55 lines (ctrl+o to expand)
+
+● Now EmployeForm — reshaping the citizen fields (national number, postal
+  address, locality) to the AD attributes that actually exist:
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/EmployeF
+       orm.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/EmployeF
+       orm.php)
+  ⎿  Added 60 lines, removed 31 lines
+       4  
+       5  namespace AcMarche\EmailManagement\Filament\Resources\Employes\
+          Schemas;
+       6  
+       7 +use AcMarche\EmailManagement\Filament\Schemas\PasswordInput;   
+       8  use AcMarche\EmailManagement\Service\EmailService;
+       9  use Filament\Actions\Action;
+      10  use Filament\Forms\Components\Textarea;
+     ...
+      14  use Filament\Schemas\Components\Utilities\Set;
+      15  use Filament\Schemas\Schema;
+      16  use Filament\Support\Icons\Heroicon;
+      17 +use Illuminate\Support\Str;                                    
+      18  
+      19  final class EmployeForm
+      20  {
+     ...
+      26                      ->columns()
+      27                      ->components([
+      28                          TextInput::make('givenName')
+      27 -                            ->label('Prénom'),                 
+      29 +                            ->label('Prénom')                  
+      30 +                            ->maxLength(64),                   
+      31                          TextInput::make('sn')
+      29 -                            ->label('Nom'),                    
+      30 -                        TextInput::make('cn')                  
+      31 -                            ->label('Nom complet')             
+      32 -                            ->columnSpanFull(),                
+      32 +                            ->label('Nom')                     
+      33 +                            ->required()                       
+      34 +                            ->maxLength(64),                   
+      35 +                        TextInput::make('samaccountname')      
+      36 +                            ->label('Identifiant')             
+      37 +                            ->disabled()                       
+      38 +                            ->dehydrated(false)                
+      39 +                            ->helperText("L'identifiant ne peut
+         + pas être modifié après la création."),                        
+      40 +                        TextInput::make('mail')                
+      41 +                            ->label('Email')                   
+      42 +                            ->email()                          
+      43 +                            ->required()                       
+      44 +                            ->maxLength(255),                  
+      45                      ]),
+      34 -                self::coordinates(),                           
+      46 +                self::contact(),                               
+      47                  Section::make('Divers')
+      48                      ->components([
+      49                          Textarea::make('description')
+      50                              ->label('Description')
+      51 +                            ->rows(3)                          
+      52 +                            ->maxLength(1000)                  
+      53                              ->columnSpanFull(),
+      54                      ]),
+      55              ]);
+     ...
+       65                          TextInput::make('sn')
+       66                              ->label('Nom')
+       67                              ->required()
+       68 +                            ->maxLength(64)                   
+       69                              ->live(onBlur: true),
+       70                          TextInput::make('givenName')
+       71                              ->label('Prénom')
+       72 +                            ->maxLength(64)                   
+       73                              ->live(onBlur: true),
+       74 +                        TextInput::make('samaccountname')     
+       75 +                            ->label('Identifiant')            
+       76 +                            ->required()                      
+       77 +                            ->maxLength(20)                   
+       78 +                            ->unique('employes', 'samaccountna
+          +me')                                                          
+       79 +                            ->helperText('Identifiant de conne
+          +xion Active Directory.')                                      
+       80 +                            ->afterContent(                   
+       81 +                                Action::make('generateSamAccou
+          +ntName')                                                      
+       82 +                                    ->label('Générer')        
+       83 +                                    ->icon(Heroicon::Sparkles)
+       84 +                                    ->color('gray')           
+       85 +                                    ->action(function (Get $sc
+          +hemaGet, Set $schemaSet): void {                              
+       86 +                                        $givenName = $schemaGe
+          +t('givenName');                                               
+       87 +                                        $sn = $schemaGet('sn')
+          +;                                                             
+       88 +                                                              
+       89 +                                        if (blank($givenName) 
+          +|| blank($sn)) {                                              
+       90 +                                            return;           
+       91 +                                        }                     
+       92 +                                                              
+       93 +                                        $schemaSet(           
+       94 +                                            'samaccountname', 
+       95 +                                            Str::lower(Str::su
+          +bstr(EmailService::sanitizeForEmail($givenName), 0, 1)        
+       96 +                                                .EmailService:
+          +:sanitizeForEmail($sn))                                       
+       97 +                                        );                    
+       98 +                                    }),                       
+       99 +                            ),                                
+      100                          TextInput::make('mail')
+      101                              ->label('Email')
+      102                              ->email()
+       61 -                            ->columnSpanFull()                
+      103                              ->required()
+      104 +                            ->maxLength(255)                  
+      105 +                            ->unique('employes', 'mail')      
+      106                              ->afterContent(
+      107                                  Action::make('generateEmail')
+      108                                      ->label('Générer')
+     ...
+      120                                              'mail',
+      121                                              EmailService::sani
+           tizeForEmail(
+      122                                                  $givenName
+       80 -                                            ).'.'.EmailService
+          -::sanitizeForEmail($sn).'@marche.be'                          
+      123 +                                            ).'.'.EmailService
+          +::sanitizeForEmail($sn).'@ac.marche.be'                       
+      124                                          );
+      125                                      }),
+      126                              ),
+      127                      ]),
+       85 -                self::coordinates(),                          
+      128 +                self::contact(),                              
+      129                  Section::make('Compte')
+       87 -                    ->columns(2)                              
+      130 +                    ->columns()                               
+      131                      ->components(
+      132                          PasswordInput::create(),
+      133                      ),
+      134                  Section::make('Divers')
+      135                      ->components([
+       93 -                        TextInput::make('gosaMailQuota')      
+       94 -                            ->label('Quota mail')             
+       95 -                            ->numeric()                       
+       96 -                            ->minValue(150)                   
+       97 -                            ->maxValue(4000)                  
+       98 -                            ->default(350)                    
+       99 -                            ->suffix('MB'),                   
+      136                          Textarea::make('description')
+      137                              ->label('Description')
+      138 +                            ->rows(3)                         
+      139 +                            ->maxLength(1000)                 
+      140                              ->columnSpanFull(),
+      141                      ]),
+      142              ]);
+      143      }
+      144  
+      107 -    private static function coordinates(): Section            
+      145 +    private static function contact(): Section                
+      146      {
+      147          return Section::make('Coordonnées')
+      148              ->columns()
+      149              ->components([
+      112 -                TextInput::make('employeeNumber')             
+      113 -                    ->label('Numéro national')                
+      114 -                    ->required(),                             
+      115 -                TextInput::make('postalAddress')              
+      116 -                    ->label('Rue et numéro')                  
+      117 -                    ->required(),                             
+      118 -                TextInput::make('postalCode')                 
+      119 -                    ->label('Code postal')                    
+      120 -                    ->default('6900')                         
+      121 -                    ->required(),                             
+      122 -                TextInput::make('l')                          
+      123 -                    ->label('Localité')                       
+      124 -                    ->required(),                             
+      150 +                TextInput::make('telephoneNumber')            
+      151 +                    ->label('Téléphone')                      
+      152 +                    ->tel()                                   
+      153 +                    ->maxLength(64),                          
+      154              ]);
+      155      }
+      156  }
+
+● Now the infolist — dropping the dead citizen-portal section, the GOSA entries,
+  and fixing the Octane static-cache leak:
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/EmployeI
+       nfolist.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/EmployeI
+       nfolist.php)
+  ⎿  Added 46 lines, removed 72 lines
+      11  use Filament\Infolists\Components\TextEntry;
+      12  use Filament\Schemas\Components\Section;
+      13  use Filament\Schemas\Schema;
+      14 +use Illuminate\Support\Facades\Cache;                          
+      15  
+      16  final class EmployeInfolist
+      17  {
+      17 -    /**                                                        
+      18 -     * @var array<string, array{usage: int, limit: int, pourcen
+         -tage: string}|null>                                            
+      19 -     */                                                        
+      20 -    private static array $quotaCache = [];                     
+      21 -                                                               
+      18      public static function configure(Schema $schema): Schema
+      19      {
+      20          return $schema
+     ...
+      28                              ->label('Nom'),
+      29                          TextEntry::make('cn')
+      30                              ->label('Nom complet'),
+      35 -                        TextEntry::make('uid')                 
+      31 +                        TextEntry::make('samaccountname')      
+      32                              ->label('Identifiant'),
+      37 -                        TextEntry::make('employeeNumber')      
+      38 -                            ->label('Numéro employé'),         
+      33 +                        TextEntry::make('displayName')         
+      34 +                            ->label("Nom d'affichage"),        
+      35                      ]),
+      36                  Section::make('Coordonnées')
+      37                      ->columns()
+      38                      ->components([
+      39                          TextEntry::make('mail')
+      44 -                            ->label('Email'),                  
+      45 -                        TextEntry::make('postalAddress')       
+      46 -                            ->label('Adresse'),                
+      47 -                        TextEntry::make('postalCode')          
+      48 -                            ->label('Code postal'),            
+      49 -                        TextEntry::make('l')                   
+      50 -                            ->label('Localité'),               
+      40 +                            ->label('Email')                   
+      41 +                            ->copyable(),                      
+      42 +                        TextEntry::make('telephoneNumber')     
+      43 +                            ->label('Téléphone')               
+      44 +                            ->placeholder('-'),                
+      45                      ]),
+      52 -                Section::make('Paramètres')                    
+      53 -                    ->columns()                                
+      54 -                    ->components([                             
+      55 -                        TextEntry::make('gosaMailQuota')       
+      56 -                            ->label('Quota'),                  
+      57 -                        TextEntry::make('gosaMailForwardingAddr
+         -ess')                                                          
+      58 -                            ->label('Adresse de transfert'),   
+      59 -                        TextEntry::make('gosaMailAlternateAddre
+         -ss')                                                           
+      60 -                            ->label('Adresse alternative'),    
+      61 -                        TextEntry::make('homeDirectory')       
+      62 -                            ->label('Répertoire home'),        
+      63 -                    ]),                                        
+      46                  Section::make('Connexion')
+      47                      ->columns()
+      48                      ->components([
+     ...
+      64                          TextEntry::make('quota_usage')
+      65                              ->label('Utilisation')
+      66                              ->state(function (Employe $record):
+           string {
+      85 -                                $quotaInfo = self::getQuotaInfo
+         -($record->uid);                                                
+      67 +                                $quotaInfo = self::getQuotaInfo
+         +($record->samaccountname);                                     
+      68  
+      69                                  if ($quotaInfo === null) {
+      88 -                                    return 'Impossible de récup
+         -érer le quota';                                                
+      70 +                                    return 'Quota indisponible'
+         +;                                                              
+      71                                  }
+      72  
+      73                                  $usageMo = round($quotaInfo['us
+          age'] / 1024, 2);
+     ...
+       78                          TextEntry::make('quota_percentage')
+       79                              ->label('Pourcentage utilisé')
+       80                              ->state(function (Employe $record)
+           : string {
+       99 -                                $quotaInfo = self::getQuotaInf
+          -o($record->uid);                                              
+       81 +                                $quotaInfo = self::getQuotaInf
+          +o($record->samaccountname);                                   
+       82  
+       83                                  return $quotaInfo !== null ? $
+           quotaInfo['pourcentage'].'%' : '-';
+       84                              })
+       85                              ->badge()
+       86                              ->color(function (Employe $record)
+           : string {
+      105 -                                $quotaInfo = self::getQuotaInf
+          -o($record->uid);                                              
+       87 +                                $quotaInfo = self::getQuotaInf
+          +o($record->samaccountname);                                   
+       88  
+       89                                  if ($quotaInfo === null) {
+       90                                      return 'gray';
+       91                                  }
+       92  
+      111 -                                $percentage = (float) $quotaIn
+          -fo['pourcentage'];                                            
+      112 -                                                              
+       93                                  return match (true) {
+      114 -                                    $percentage >= 90 => 'dang
+          -er',                                                          
+      115 -                                    $percentage >= 70 => 'warn
+          -ing',                                                         
+       94 +                                    (float) $quotaInfo['pource
+          +ntage'] >= 90 => 'danger',                                    
+       95 +                                    (float) $quotaInfo['pource
+          +ntage'] >= 70 => 'warning',                                   
+       96                                      default => 'success',
+       97                                  };
+       98                              }),
+       99                      ]),
+      120 -                Section::make('Espace Employe')               
+      121 -                    ->columns()                               
+      122 -                    ->components([                            
+      123 -                        TextEntry::make('auth_token')         
+      124 -                            ->label('Jeton personnel')        
+      125 -                            ->placeholder('Aucun jeton généré'
+          -)                                                             
+      126 -                            ->copyable()                      
+      127 -                            ->fontFamily('mono'),             
+      128 -                        TextEntry::make('auto_login_url')     
+      129 -                            ->label('Lien de connexion')      
+      130 -                            ->state(fn (Employe $record): ?str
+          -ing => $record->auth_token                                    
+      131 -                                ? route('citoyen.auto-login', 
+          -$record->auth_token)                                          
+      132 -                                : null                        
+      133 -                            )                                 
+      134 -                            ->placeholder('Aucun jeton généré'
+          -)                                                             
+      135 -                            ->copyable()                      
+      136 -                            ->columnSpanFull(),               
+      137 -                        TextEntry::make('charter_accepted_at')
+      138 -                            ->label('Charte acceptée le')     
+      139 -                            ->placeholder('Non acceptée')     
+      140 -                            ->dateTime(),                     
+      141 -                    ]),                                       
+      100                  Section::make('Divers')
+      101                      ->components([
+      102                          TextEntry::make('dn')
+     ...
+      104                              ->columnSpanFull(),
+      105                          TextEntry::make('description')
+      106                              ->label('Description')
+      107 +                            ->placeholder('-')                
+      108                              ->columnSpanFull(),
+      109 +                        TextEntry::make('sync_at')            
+      110 +                            ->label('Synchronisé le')         
+      111 +                            ->dateTime()                      
+      112 +                            ->placeholder('Jamais'),          
+      113                      ]),
+      114              ]);
+      115      }
+      116  
+      117      /**
+      118 +     * IMAP credentials (IMAP_EMPLOYE_*) are not configured, s
+          +o this returns null and                                       
+      119 +     * the quota entries degrade to "Quota indisponible" rathe
+          +r than throwing.                                              
+      120 +     *                                                        
+      121 +     * Cached in the array store rather than a static property
+          +: this application runs                                       
+      122 +     * Octane, where static state persists across requests and
+          + would leak one employe's                                     
+      123 +     * quota into another's page.                             
+      124 +     *                                                        
+      125       * @return array{usage: int, limit: int, pourcentage: stri
+           ng}|null
+      126       */
+      157 -    private static function getQuotaInfo(string $uid): ?array 
+      127 +    private static function getQuotaInfo(?string $samAccountNa
+          +me): ?array                                                   
+      128      {
+      159 -        if (array_key_exists($uid, self::$quotaCache)) {      
+      160 -            return self::$quotaCache[$uid];                   
+      129 +        if ($samAccountName === null || $samAccountName === ''
+          +) {                                                           
+      130 +            return null;                                      
+      131          }
+      132  
+      163 -        try {                                                 
+      164 -            $imapEmploye = new ImapEmploye(                   
+      165 -                config('imap.citoyen.host'),                  
+      166 -                config('imap.citoyen.user'),                  
+      167 -                config('imap.citoyen.password'),              
+      168 -            );                                                
+      133 +        return Cache::store('array')->remember(               
+      134 +            'employe-quota:'.$samAccountName,                 
+      135 +            60,                                               
+      136 +            function () use ($samAccountName): ?array {       
+      137 +                try {                                         
+      138 +                    $imapEmploye = new ImapEmploye(           
+      139 +                        config('imap.employe.host'),          
+      140 +                        config('imap.employe.user'),          
+      141 +                        config('imap.employe.password'),      
+      142 +                    );                                        
+      143  
+      170 -            self::$quotaCache[$uid] = $imapEmploye->getQuota($
+          -uid);                                                         
+      171 -        } catch (Exception) {                                 
+      172 -            self::$quotaCache[$uid] = null;                   
+      173 -        }                                                     
+      174 -                                                              
+      175 -        return self::$quotaCache[$uid];                       
+      144 +                    return $imapEmploye->getQuota($samAccountN
+          +ame);                                                         
+      145 +                } catch (Exception) {                         
+      146 +                    return null;                              
+      147 +                }                                             
+      148 +            },                                                
+      149 +        );                                                    
+      150      }
+      151  }
+
+● Now the table (duplicate l, the employeNumber typo, GOSA columns) and the
+  pages that call the phantom classes:
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Tables/EmployesT
+       able.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Tables/EmployesT
+       able.php)
+  ⎿  Added 18 lines, removed 42 lines
+       4  
+       5  namespace AcMarche\EmailManagement\Filament\Resources\Employes\
+          Tables;
+       6  
+       7 -use AcMarche\EmailManagement\Models\Employe;                   
+       8 -use Filament\Actions\BulkActionGroup;                          
+       9 -use Filament\Actions\DeleteBulkAction;                         
+       7  use Filament\Actions\EditAction;
+       8  use Filament\Actions\ViewAction;
+       9  use Filament\Forms\Components\DatePicker;
+      10  use Filament\Tables\Columns\TextColumn;
+      11  use Filament\Tables\Filters\Filter;
+      15 -use Filament\Tables\Filters\SelectFilter;                      
+      12  use Filament\Tables\Table;
+      13  use Illuminate\Database\Eloquent\Builder;
+      14  
+     ...
+       34                      ->sortable()
+       35                      ->searchable()
+       36                      ->toggleable(),
+       41 -                TextColumn::make('l')                         
+       42 -                    ->label('Localité')                       
+       37 +                TextColumn::make('samaccountname')            
+       38 +                    ->label('Identifiant')                    
+       39                      ->searchable()
+       40 +                    ->sortable()                              
+       41 +                    ->toggleable(),                           
+       42 +                TextColumn::make('telephoneNumber')           
+       43 +                    ->label('Téléphone')                      
+       44 +                    ->searchable()                            
+       45                      ->toggleable(isToggledHiddenByDefault: tru
+           e),
+       46                  TextColumn::make('last_connection')
+       47                      ->label('Dernière connexion')
+       48                      ->date()
+       49                      ->sortable()
+       49 -                    ->searchable()                            
+       50                      ->toggleable(isToggledHiddenByDefault: tru
+           e),
+       51 -                TextColumn::make('l')                         
+       52 -                    ->label('Localité')                       
+       53 -                    ->searchable()                            
+       54 -                    ->toggleable(isToggledHiddenByDefault: tru
+          -e),                                                           
+       55 -                TextColumn::make('employeNumber')             
+       56 -                    ->label('Numéro national')                
+       57 -                    ->toggleable(isToggledHiddenByDefault: tru
+          -e),                                                           
+       58 -                TextColumn::make('gosaMailQuota')             
+       59 -                    ->label('Quota mail')                     
+       51 +                TextColumn::make('sync_at')                   
+       52 +                    ->label('Synchronisé le')                 
+       53 +                    ->dateTime()                              
+       54                      ->sortable()
+       55                      ->toggleable(isToggledHiddenByDefault: tru
+           e),
+       56              ])
+       57              ->filters([
+       64 -                SelectFilter::make('l')                       
+       65 -                    ->label('Localité')                       
+       66 -                    ->searchable()                            
+       67 -                    ->options(fn (): array => Employe::query()
+       68 -                        ->whereNotNull('l')                   
+       69 -                        ->where('l', '!=', '')                
+       70 -                        ->distinct()                          
+       71 -                        ->orderBy('l')                        
+       72 -                        ->pluck('l', 'l')                     
+       73 -                        ->all()),                             
+       58                  Filter::make('last_connection')
+       59                      ->label('Dernière connexion')
+       60                      ->schema([
+       61                          DatePicker::make('connected_from')
+       62                              ->label('Dernière connexion avant 
+           le'),
+       63                      ])
+       80 -                    ->query(function (Builder $query, array $d
+          -ata): Builder {                                               
+       81 -                        return $query                         
+       82 -                            ->when(                           
+       83 -                                $data['connected_from'],      
+       84 -                                fn (Builder $query, string $da
+          -te): Builder => $query->whereDate(                            
+       85 -                                    'last_connection',        
+       86 -                                    '<=',                     
+       87 -                                    $date                     
+       88 -                                )                             
+       89 -                            );                                
+       90 -                    }),                                       
+       64 +                    ->query(fn (Builder $query, array $data): 
+          +Builder => $query->when(                                      
+       65 +                        $data['connected_from'],              
+       66 +                        fn (Builder $query, string $date): Bui
+          +lder => $query->whereDate(                                    
+       67 +                            'last_connection',                
+       68 +                            '<=',                             
+       69 +                            $date                             
+       70 +                        )                                     
+       71 +                    )),                                       
+       72              ])
+       73              ->recordActions([
+       74                  ViewAction::make(),
+       75                  EditAction::make(),
+       95 -            ])                                                
+       96 -            ->toolbarActions([                                
+       97 -                BulkActionGroup::make([                       
+       98 -                    DeleteBulkAction::make(),                 
+       99 -                ]),                                           
+       76              ]);
+       77      }
+       78  }
+
+● Now the three pages — the $body bug, the token actions targeting the dead
+  portal, and the phantom PasswordForm::quota():
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Pages/CreateEmpl
+       oye.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Pages/CreateEmpl
+       oye.php)
+  ⎿  Added 5 lines, removed 5 lines
+      25  
+      26      protected function handleRecordCreation(array $data): Emplo
+          ye
+      27      {
+      28 -        $citoyenHandler = app(EmployeHandler::class);          
+      28 +        $employeHandler = app(EmployeHandler::class);          
+      29  
+      30          try {
+      31 -            $citoyen = $citoyenHandler->createEmploye($data);  
+      31 +            $employe = $employeHandler->createEmploye($data);  
+      32          } catch (Exception|LdapRecordException $exception) {
+      33              $error = $exception->getMessage();
+      34              if ($exception instanceof LdapRecordException && $e
+          xception->getDetailedError()) {
+     ...
+      45          }
+      46  
+      47          Notification::make()
+      48 -            ->title('Le citoyen a bien été ajouté.')           
+      49 -            ->body($body)                                      
+      48 +            ->title("L'employé a bien été ajouté.")            
+      49 +            ->body("Le compte {$employe->samaccountname} a été 
+         +créé dans l'annuaire.")                                        
+      50              ->success()
+      51              ->persistent()
+      52              ->send();
+      53  
+      54 -        return $citoyen;                                       
+      54 +        return $employe;                                       
+      55      }
+      56  
+      57      protected function getCreatedNotification(): ?Notification
+● Update(modules/EmailManagement/src/Filament/Resources/Employes/Pages/EditEmplo
+        ye.php)
+  ⎿  Added 1 line, removed 1 line
+       6  
+       7  use AcMarche\EmailManagement\Filament\Resources\Employes\Employ
+          eResource;
+       8  use AcMarche\EmailManagement\Ldap\EmployeHandler;
+       9 -use AcMarche\Security\Repository\LdapRepository;               
+       9 +use AcMarche\EmailManagement\Repository\EmployeLdapRepository; 
+      10  use Exception;
+      11  use Filament\Actions\ViewAction;
+      12  use Filament\Notifications\Notification;
+
+● Update(modules/EmailManagement/src/Filament/Resources/Employes/Pages/EditEmplo
+        ye.php)
+  ⎿  Added 6 lines, removed 6 lines
+      32  
+      33      protected function afterSave(): void
+      34      {
+      35 -        $citoyenHandler = app(EmployeHandler::class);          
+      36 -        $ldapEmployeRepository = app(LdapRepository::class);   
+      37 -        $citoyen = $this->record;                              
+      35 +        $employeHandler = app(EmployeHandler::class);          
+      36 +        $ldapEmployeRepository = app(EmployeLdapRepository::cla
+         +ss);                                                           
+      37 +        $employe = $this->record;                              
+      38  
+      39          try {
+      40 -            $ldapEntry = $ldapEmployeRepository->getEntryByEmai
+         -l($citoyen->mail);                                             
+      40 +            $ldapEntry = $ldapEmployeRepository->getEntry($empl
+         +oye->samaccountname);                                          
+      41  
+      42              if (! $ldapEntry) {
+      43                  Notification::make()
+      44 -                    ->title('Utilisateur LDAP introuvable pour 
+         -'.$citoyen->mail)                                              
+      44 +                    ->title('Utilisateur LDAP introuvable pour 
+         +'.$employe->samaccountname)                                    
+      45                      ->warning()
+      46                      ->send();
+      47  
+      48                  return;
+      49              }
+      50  
+      51 -            $citoyenHandler->updateEmploye($citoyen, $ldapEntry
+         -);                                                             
+      51 +            $employeHandler->updateEmploye($employe, $ldapEntry
+         +);                                                             
+      52  
+      53              Notification::make()
+      54                  ->title('Entrée LDAP mise à jour')
+
+● Now ViewEmploye — it has the most dead references (PasswordForm::quota(), the
+  token action, GOSA attributes):
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Pages/ViewEmploy
+       e.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Pages/ViewEmploy
+       e.php)
+  ⎿  Added 76 lines, removed 77 lines
+       5  namespace AcMarche\EmailManagement\Filament\Resources\Employes\
+          Pages;
+       6  
+       7  use AcMarche\EmailManagement\Filament\Resources\Employes\Employ
+          eResource;
+       8 -use AcMarche\EmailManagement\Ldap\EmployeHandler;              
+       9 -use AcMarche\Security\Repository\LdapRepository;               
+       8 +use AcMarche\EmailManagement\Repository\EmployeLdapRepository; 
+       9  use Exception;
+      10  use Filament\Actions\Action;
+      11  use Filament\Actions\ActionGroup;
+      12  use Filament\Actions\EditAction;
+      13 +use Filament\Forms\Components\TextInput;                       
+      14  use Filament\Infolists\Components\TextEntry;
+      15  use Filament\Notifications\Notification;
+      16  use Filament\Resources\Pages\ViewRecord;
+      17  use Filament\Schemas\Components\Section;
+      18  use Filament\Support\Enums\Size;
+      19  use Filament\Support\Icons\Heroicon;
+      20 -use Illuminate\Support\Str;                                    
+      20 +use Illuminate\Validation\Rules\Password;                      
+      21  use LdapRecord\LdapRecordException;
+      22  
+      23  final class ViewEmploye extends ViewRecord
+     ...
+      26  
+      27      public function getTitle(): string
+      28      {
+      29 -        return $this->record->mail ?? 'Empty name';            
+      29 +        return $this->record->mail ?? 'Sans email';            
+      30      }
+      31  
+      32      protected function getHeaderActions(): array
+     ...
+      34          return [
+      35              $this->viewLdapAction(),
+      36              ActionGroup::make([
+      37 -                $this->quotaAction(),                          
+      37                  $this->passwordAction(),
+      39 -                $this->regenerateTokenAction(),                
+      38                  EditAction::make()
+      39                      ->label('Modifier')
+      40                      ->icon(Heroicon::Pencil),
+      43 -                $this->handAction(),                           
+      41                  $this->deleteAction(),
+      42              ])
+      43                  ->label('Actions')
+     ...
+      56              ->modalHeading('Entrée LDAP')
+      57              ->modalSubmitAction(false)
+      58              ->modalCancelActionLabel('Fermer')
+      62 -            ->schema(function (LdapRepository $ldapEmployeRepos
+         -itory): array {                                                
+      63 -                $ldapEntry = $ldapEmployeRepository->getEntry($
+         -this->record->uid);                                            
+      59 +            ->schema(function (EmployeLdapRepository $ldapEmplo
+         +yeRepository): array {                                         
+      60 +                $ldapEntry = $ldapEmployeRepository->getEntry($
+         +this->record->samaccountname);                                 
+      61  
+      62                  if (! $ldapEntry) {
+      63                      return [
+     ...
+      69  
+      70                  $attributes = [
+      71                      'dn' => $ldapEntry->getDn(),
+      75 -                    'uid' => $ldapEntry->getFirstAttribute('uid
+         -'),                                                            
+      72 +                    'sAMAccountName' => $ldapEntry->getFirstAtt
+         +ribute('samaccountname'),                                      
+      73 +                    'userPrincipalName' => $ldapEntry->getFirst
+         +Attribute('userprincipalname'),                                
+      74                      'mail' => $ldapEntry->getFirstAttribute('ma
+          il'),
+      75                      'cn' => $ldapEntry->getFirstAttribute('cn')
+          ,
+      78 -                    'givenName' => $ldapEntry->getFirstAttribut
+         -e('givenName'),                                                
+      76 +                    'displayName' => $ldapEntry->getFirstAttrib
+         +ute('displayname'),                                            
+      77 +                    'givenName' => $ldapEntry->getFirstAttribut
+         +e('givenname'),                                                
+      78                      'sn' => $ldapEntry->getFirstAttribute('sn')
+          ,
+      80 -                    'employeeNumber' => $ldapEntry->getFirstAtt
+         -ribute('employeeNumber'),                                      
+      81 -                    'postalAddress' => $ldapEntry->getFirstAttr
+         -ibute('postalAddress'),                                        
+      82 -                    'postalCode' => $ldapEntry->getFirstAttribu
+         -te('postalCode'),                                              
+      83 -                    'l' => $ldapEntry->getFirstAttribute('l'), 
+      84 -                    'homeDirectory' => $ldapEntry->getFirstAttr
+         -ibute('homeDirectory'),                                        
+      85 -                    'gosaMailQuota' => $ldapEntry->getFirstAttr
+         -ibute('gosaMailQuota'),                                        
+      86 -                    'gosaMailForwardingAddress' => $ldapEntry->
+         -getFirstAttribute('gosaMailForwardingAddress'),                
+      87 -                    'gosaMailAlternateAddress' => $ldapEntry->g
+         -etFirstAttribute('gosaMailAlternateAddress'),                  
+      88 -                    'gosaMailServer' => $ldapEntry->getFirstAtt
+         -ribute('gosaMailServer'),                                      
+      89 -                    'gosaMailDeliveryMode' => $ldapEntry->getFi
+         -rstAttribute('gosaMailDeliveryMode'),                          
+      79 +                    'telephoneNumber' => $ldapEntry->getFirstAt
+         +tribute('telephonenumber'),                                    
+      80                      'description' => $ldapEntry->getFirstAttrib
+          ute('description'),
+      91 -                    'uidNumber' => $ldapEntry->getFirstAttribut
+         -e('uidNumber'),                                                
+      81 +                    'userAccountControl' => $ldapEntry->getFirs
+         +tAttribute('useraccountcontrol'),                              
+      82 +                    'whenCreated' => $ldapEntry->getFirstAttrib
+         +ute('whencreated'),                                            
+      83                  ];
+      84  
+      85                  $entries = [];
+     ...
+       98              });
+       99      }
+      100  
+      101 +    private function passwordAction(): Action                 
+      102 +    {                                                         
+      103 +        return Action::make('changePassword')                 
+      104 +            ->label('Changer le mot de passe')                
+      105 +            ->icon(Heroicon::Key)                             
+      106 +            ->color('info')                                   
+      107 +            ->modalHeading("Changer le mot de passe de {$this-
+          +>record->samaccountname}")                                    
+      108 +            ->schema([                                        
+      109 +                TextInput::make('password')                   
+      110 +                    ->label('Nouveau mot de passe')           
+      111 +                    ->password()                              
+      112 +                    ->revealable()                            
+      113 +                    ->required()                              
+      114 +                    ->rule(Password::min(12)->mixedCase()->num
+          +bers()->symbols()->uncompromised())                           
+      115 +                    ->confirmed()                             
+      116 +                    ->helperText('12 caractères minimum, avec 
+          +majuscules, minuscules, chiffres et symboles.'),              
+      117 +                TextInput::make('password_confirmation')      
+      118 +                    ->label('Confirmer le mot de passe')      
+      119 +                    ->password()                              
+      120 +                    ->revealable()                            
+      121 +                    ->required()                              
+      122 +                    ->dehydrated(false),                      
+      123 +            ])                                                
+      124 +            ->action(function (array $data, EmployeLdapReposit
+          +ory $ldapEmployeRepository): void {                           
+      125 +                try {                                         
+      126 +                    $ldapEntry = $ldapEmployeRepository->getEn
+          +try($this->record->samaccountname);                           
+      127 +                                                              
+      128 +                    if (! $ldapEntry) {                       
+      129 +                        Notification::make()                  
+      130 +                            ->title('Entrée LDAP introuvable')
+      131 +                            ->danger()                        
+      132 +                            ->send();                         
+      133 +                                                              
+      134 +                        return;                               
+      135 +                    }                                         
+      136 +                                                              
+      137 +                    $ldapEntry->unicodepwd = $data['password']
+          +;                                                             
+      138 +                    $ldapEntry->save();                       
+      139 +                                                              
+      140 +                    Notification::make()                      
+      141 +                        ->title('Mot de passe modifié avec suc
+          +cès')                                                         
+      142 +                        ->success()                           
+      143 +                        ->send();                             
+      144 +                } catch (Exception|LdapRecordException $e) {  
+      145 +                    Notification::make()                      
+      146 +                        ->title($this->describe($e))          
+      147 +                        ->danger()                            
+      148 +                        ->send();                             
+      149 +                }                                             
+      150 +            });                                               
+      151 +    }                                                         
+      152 +                                                              
+      153      private function deleteAction(): Action
+      154      {
+      155          return Action::make('deleteEmploye')
+     ...
+      157              ->icon(Heroicon::Trash)
+      158              ->color('danger')
+      159              ->requiresConfirmation()
+      117 -            ->modalHeading('Supprimer le citoyen')            
+      118 -            ->modalDescription("Êtes-vous sûr de vouloir suppr
+          -imer le compte de {$this->record->uid} ? Cette action supprime
+          -ra l'entrée LDAP et la fiche locale.")                        
+      119 -            ->action(function (LdapRepository $ldapEmployeRepo
+          -sitory): void {                                               
+      160 +            ->modalHeading("Supprimer l'employé")             
+      161 +            ->modalDescription("Êtes-vous sûr de vouloir suppr
+          +imer le compte de {$this->record->samaccountname} ? Cette acti
+          +on supprimera l'entrée dans l'annuaire et la fiche locale.")  
+      162 +            ->action(function (EmployeLdapRepository $ldapEmpl
+          +oyeRepository): void {                                        
+      163                  try {
+      121 -                    $ldapEmployeRepository->delete($this->reco
+          -rd->uid);                                                     
+      164 +                    $ldapEmployeRepository->delete($this->reco
+          +rd->samaccountname);                                          
+      165                      $this->record->delete();
+      166  
+      167                      Notification::make()
+      168                          ->title('Compte supprimé avec succès')
+      126 -                        ->body("Le dossier IMAP peut être supp
+          -rimé avec : rm -rI {$this->record->homeDirectory}")           
+      169                          ->success()
+      170                          ->send();
+      171  
+      172                      $this->redirect(EmployeResource::getUrl())
+           ;
+      173                  } catch (Exception|LdapRecordException $e) {
+      132 -                    $error = $e->getMessage();                
+      133 -                    if ($e instanceof LdapRecordException) {  
+      134 -                        $error .= ' '.$e->getDetailedError()->
+          -getDiagnosticMessage();                                       
+      135 -                    }                                         
+      136 -                                                              
+      174                      Notification::make()
+      138 -                        ->title($error)                       
+      175 +                        ->title($this->describe($e))          
+      176                          ->danger()
+      177                          ->send();
+      178                  }
+      179              });
+      180      }
+      181  
+      145 -    private function regenerateTokenAction(): Action          
+      182 +    private function describe(Exception|LdapRecordException $e
+          +): string                                                     
+      183      {
+      147 -        return Action::make('regenerateToken')                
+      148 -            ->label('Générer un jeton')                       
+      149 -            ->icon(Heroicon::Key)                             
+      150 -            ->color('info')                                   
+      151 -            ->requiresConfirmation()                          
+      152 -            ->modalHeading('Générer un jeton personnel')      
+      153 -            ->modalDescription('Un nouveau jeton sera généré p
+          -our permettre au citoyen de se connecter à l\'espace citoyen.'
+          -)                                                             
+      154 -            ->action(function (): void {                      
+      155 -                $token = Str::random(64);                     
+      156 -                $this->record->update(['auth_token' => $token]
+          -);                                                            
+      184 +        $error = $e->getMessage();                            
+      185  
+      158 -                Notification::make()                          
+      159 -                    ->title('Jeton généré avec succès')       
+      160 -                    ->body('Jeton : '.$token)                 
+      161 -                    ->success()                               
+      162 -                    ->persistent()                            
+      163 -                    ->send();                                 
+      164 -            });                                               
+      165 -    }                                                         
+      186 +        if ($e instanceof LdapRecordException && $e->getDetail
+          +edError()) {                                                  
+      187 +            $error .= ' '.$e->getDetailedError()->getDiagnosti
+          +cMessage();                                                   
+      188 +        }                                                     
+      189  
+      167 -    private function quotaAction(): Action                    
+      168 -    {                                                         
+      169 -        return Action::make('changeQuota')                    
+      170 -            ->label('Changer le quota')                       
+      171 -            ->icon(Heroicon::CircleStack)                     
+      172 -            ->color('info')                                   
+      173 -            ->fillForm(fn (): array => [                      
+      174 -                'gosaMailQuota' => $this->record->gosaMailQuot
+          -a,                                                            
+      175 -            ])                                                
+      176 -            ->schema(PasswordForm::quota())                   
+      177 -            ->action(function (array $data, EmployeHandler $ci
+          -toyenHandler): void {                                         
+      178 -                try {                                         
+      179 -                    $citoyenHandler->changeQuota($this->record
+          -, (int) $data['gosaMailQuota']);                              
+      180 -                                                              
+      181 -                    Notification::make()                      
+      182 -                        ->title('Quota modifié avec succès')  
+      183 -                        ->success()                           
+      184 -                        ->send();                             
+      185 -                } catch (Exception $e) {                      
+      186 -                    Notification::make()                      
+      187 -                        ->title($e->getMessage())             
+      188 -                        ->danger()                            
+      189 -                        ->send();                             
+      190 -                }                                             
+      191 -            });                                               
+      190 +        return $error;                                        
+      191      }
+      192  }
+
+● Now ListEmployes — it has the token-generation action targeting the dead
+  portal. Replacing it with a directory sync:
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Pages/ListEmploy
+       es.php)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/src/Filament/Resources/Employes/Pages/ListEmploy
+       es.php)
+  ⎿  Added 26 lines, removed 20 lines
+       6  
+       7  use AcMarche\EmailManagement\Filament\Resources\Employes\Employ
+          eResource;
+       8  use AcMarche\EmailManagement\Filament\Resources\Employes\Tables
+          \EmployesTable;
+       9 -use AcMarche\EmailManagement\Models\Employe;                   
+       9 +use AcMarche\EmailManagement\Ldap\EmployeHandler;              
+      10 +use Exception;                                                 
+      11  use Filament\Actions\Action;
+      12  use Filament\Actions\CreateAction;
+      13  use Filament\Notifications\Notification;
+     ...
+      15  use Filament\Support\Icons\Heroicon;
+      16  use Filament\Tables\Table;
+      17  use Illuminate\Contracts\Support\Htmlable;
+      17 -use Illuminate\Support\Str;                                    
+      18 +use LdapRecord\LdapRecordException;                            
+      19  
+      20  final class ListEmployes extends ListRecords
+      21  {
+      22      protected static string $resource = EmployeResource::class;
+      23  
+      23 -    protected static ?string $navigationLabel = 'citoyens';    
+      24 +    protected static ?string $navigationLabel = 'Employés';    
+      25  
+      26      public function getTitle(): string|Htmlable
+      27      {
+      27 -        return $this->getAllTableRecordsCount().' citoyens';   
+      28 +        return $this->getAllTableRecordsCount().' employés';   
+      29      }
+      30  
+      31      public function table(Table $table): Table
+     ...
+      37      {
+      38          return [
+      39              CreateAction::make()
+      39 -                ->label('Ajouter un citoyen')                  
+      40 +                ->label('Ajouter un employé')                  
+      41                  ->icon(Heroicon::Plus),
+      41 -            Action::make('generateAllTokens')                  
+      42 -                ->label('Générer tous les jetons')             
+      43 -                ->icon(Heroicon::Key)                          
+      44 -                ->color('warning')                             
+      42 +            Action::make('syncFromLdap')                       
+      43 +                ->label('Synchroniser')                        
+      44 +                ->icon(Heroicon::ArrowPath)                    
+      45 +                ->color('gray')                                
+      46                  ->requiresConfirmation()
+      46 -                ->modalHeading('Générer les jetons manquants') 
+      47 -                ->modalDescription('Un jeton personnel sera gén
+         -éré pour tous les citoyens qui n\'en possèdent pas encore.')   
+      48 -                ->action(function (): void {                   
+      49 -                    $count = Employe::whereNull('auth_token')->
+         -count();                                                       
+      47 +                ->modalHeading("Synchroniser depuis l'annuaire"
+         +)                                                              
+      48 +                ->modalDescription("Les fiches locales seront a
+         +lignées sur Active Directory. Les fiches absentes de l'annuaire
+         + seront supprimées.")                                          
+      49 +                ->action(function (EmployeHandler $employeHandl
+         +er): void {                                                    
+      50 +                    try {                                      
+      51 +                        $count = $employeHandler->syncFromLdap(
+         +);                                                             
+      52  
+      51 -                    Employe::whereNull('auth_token')           
+      52 -                        ->each(fn (Employe $citoyen) => $citoye
+         -n->update(['auth_token' => Str::random(64)]));                 
+      53 -                                                               
+      54 -                    Notification::make()                       
+      55 -                        ->title("{$count} jetons générés avec s
+         -uccès")                                                        
+      56 -                        ->success()                            
+      57 -                        ->send();                              
+      53 +                        Notification::make()                   
+      54 +                            ->title("{$count} employés synchron
+         +isés")                                                         
+      55 +                            ->success()                        
+      56 +                            ->send();                          
+      57 +                    } catch (Exception|LdapRecordException $e) 
+         +{                                                              
+      58 +                        Notification::make()                   
+      59 +                            ->title('Erreur de synchronisation'
+         +)                                                              
+      60 +                            ->body($e->getMessage())           
+      61 +                            ->danger()                         
+      62 +                            ->send();                          
+      63 +                    }                                          
+      64                  }),
+      65          ];
+      66      }
+
+● Phase 1 code is in. The real test is whether the panel now loads — let me
+  check the factory (it'll reference dropped columns) and drive the pages.
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(modules/EmailManagement/database/factories/EmployeFactory.php)
+  ⎿  Added 16 lines, removed 1 line
+       7  use AcMarche\EmailManagement\Models\Employe;
+       8  use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
+       9  use Illuminate\Database\Eloquent\Factories\Factory;
+      10 +use Illuminate\Support\Str;                                    
+      11  
+      12  #[UseModel(Employe::class)]
+      13  final class EmployeFactory extends Factory
+     ...
+      19       */
+      20      public function definition(): array
+      21      {
+      22 +        $givenName = fake()->firstName();                      
+      23 +        $sn = fake()->lastName();                              
+      24 +        $samAccountName = Str::lower(Str::substr(Str::ascii($gi
+         +venName), 0, 1).Str::ascii($sn));                              
+      25 +        $samAccountName = Str::limit(preg_replace('/[^a-z0-9]/'
+         +, '', $samAccountName), 18, '');                               
+      26 +                                                               
+      27          return [
+      22 -            //                                                 
+      28 +            'samaccountname' => $samAccountName.fake()->unique(
+         +)->numberBetween(1, 9999),                                     
+      29 +            'givenName' => $givenName,                         
+      30 +            'sn' => $sn,                                       
+      31 +            'cn' => $givenName.' '.$sn,                        
+      32 +            'displayName' => $givenName.' '.$sn,               
+      33 +            'mail' => fake()->unique()->safeEmail(),           
+      34 +            'dn' => fn (array $attributes): string => "CN={$att
+         +ributes['cn']},OU=AC,OU=MUSERS,DC=ad,DC=marche,DC=be",         
+      35 +            'description' => fake()->optional()->sentence(),   
+      36 +            'telephoneNumber' => fake()->optional()->phoneNumbe
+         +r(),                                                           
+      37 +            'sync_at' => now(),                                
+      38          ];
+      39      }
+      40  }
+
+● Now the real proof — a test that actually renders each page that was fataling:
+
+● Write(modules/EmailManagement/tests/Feature/EmployeResourceTest.php)
+  ⎿  Wrote 133 lines to
+     modules/EmailManagement/tests/Feature/EmployeResourceTest.php
+       1 <?php
+       3 declare(strict_types=1);
+       4 
+       5 use AcMarche\EmailManagement\Enums\RolesEnum;
+         reateEmploye;
+       7 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\E
+       8 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\L
+         istEmployes;
+       9 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\V
+      10 use AcMarche\EmailManagement\Models\Employe;
+     … +139 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● 16 of 21 pass — the pages render. Let me see the 3 failures.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Three real bugs, and one of them matters a lot: the table shows "27 employés"
+  when the test created 3 — meaning my tests wrote to the real MariaDB and 
+  aren't rolling back. Let me investigate before fixing anything else.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Confirmed and it's my fault: phpunit.xml only overrides the default
+  connection. maria-email-management reads DB_EMAIL_MANAGEMENT_* from .env and
+  points at the real MariaDB, and LazilyRefreshDatabase doesn't refresh it — so
+  my factory writes landed in the actual database. Let me see how other modules
+  avoid this.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● 36 rows of fake test data are now sitting in the real gestemail database. It
+  had 0 rows when I started. Let me see how other modules handle this, then
+  clean up.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● MailingList's contacts is 0 despite using factories on its own MariaDB
+  connection — so there's a pattern here I'm missing. Let me look at
+  HrmTestCase, since Hrm has its own connection too.
+
+  Ran 1 shell command (ctrl+o to expand)
+● Found the established pattern — HrmTestCase gives its module connection a
+  dedicated in-memory PDO and transacts it. I'll mirror it. First, cleaning up
+  the 36 rows my tests wrote into the real database.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Cleaned — back to the 0 rows it started with. Now the test case that prevents
+  it recurring:
+
+● Write(modules/EmailManagement/tests/EmailManagementTestCase.php)
+  ⎿  Wrote 43 lines to
+     modules/EmailManagement/tests/EmailManagementTestCase.php
+      1 <?php
+      2 
+      3 declare(strict_types=1);
+      4 
+      5 namespace AcMarche\EmailManagement\Tests;
+      6 
+      7 use Illuminate\Foundation\Testing\RefreshDatabaseState;
+      8 use PDO;
+      9 use Tests\TestCase;
+     … +41 lines (ctrl+o to expand)
+
+● Update(tests/Pest.php)
+  ⎿  Added 6 lines
+      52      '../modules/Conseil/tests/Filament',
+      53      '../modules/App/tests/Feature',
+      54      '../modules/App/tests/Unit',
+      55 +);                                                             
+      56 +                                                               
+      57 +uses(                                                          
+      58 +    AcMarche\EmailManagement\Tests\EmailManagementTestCase::cla
+         +ss,                                                            
+      59 +    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
+      60 +)->in(                                                         
+      61      '../modules/EmailManagement/tests/Feature',
+      62      '../modules/EmailManagement/tests/Unit',
+      63  );
+
+● Now the two other real bugs the tests exposed — the uncatchable TypeError and
+  the unique rule hitting the wrong connection:
+
+● Update(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/Employe
+        Infolist.php)
+  ⎿  Added 13 lines, removed 9 lines
+      130              return null;
+      131          }
+      132  
+      133 +        $host = config('imap.employe.host');                  
+      134 +        $user = config('imap.employe.user');                  
+      135 +        $password = config('imap.employe.password');          
+      136 +                                                              
+      137 +        if (! is_string($host) || ! is_string($user) || ! is_s
+          +tring($password)) {                                           
+      138 +            return null;                                      
+      139 +        }                                                     
+      140 +                                                              
+      141          return Cache::store('array')->remember(
+      142              'employe-quota:'.$samAccountName,
+      143              60,
+      136 -            function () use ($samAccountName): ?array {       
+      144 +            function () use ($host, $user, $password, $samAcco
+          +untName): ?array {                                            
+      145                  try {
+      138 -                    $imapEmploye = new ImapEmploye(           
+      139 -                        config('imap.employe.host'),          
+      140 -                        config('imap.employe.user'),          
+      141 -                        config('imap.employe.password'),      
+      142 -                    );                                        
+      143 -                                                              
+      144 -                    return $imapEmploye->getQuota($samAccountN
+          -ame);                                                         
+      145 -                } catch (Exception) {                         
+      146 +                    return (new ImapEmploye($host, $user, $pas
+          +sword))->getQuota($samAccountName);                           
+      147 +                } catch (Throwable) {                         
+      148 +                    // Throwable, not Exception: a misconfigur
+          +ed host surfaces as a                                         
+      149 +                    // TypeError from ImapEmploye's constructo
+          +r, which Exception misses.                                    
+      150                      return null;
+      151                  }
+      152              },
+
+● Update(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/Employe
+        Infolist.php)
+  ⎿  Removed 1 line
+       6  
+       7  use AcMarche\EmailManagement\Imap\ImapEmploye;
+       8  use AcMarche\EmailManagement\Models\Employe;
+       9 -use Exception;                                                 
+       9  use Filament\Infolists\Components\IconEntry;
+      10  use Filament\Infolists\Components\TextEntry;
+      11  use Filament\Schemas\Components\Section;
+
+● Update(modules/EmailManagement/src/Filament/Resources/Employes/Schemas/Employe
+        Infolist.php)
+  ⎿  Added 1 line
+      11  use Filament\Schemas\Components\Section;
+      12  use Filament\Schemas\Schema;
+      13  use Illuminate\Support\Facades\Cache;
+      14 +use Throwable;                                                 
+      15  
+      16  final class EmployeInfolist
+      17  {
+
+● The unique rules were validating against the default connection instead of the
+  module's — qualifying them:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● The MariaDB grammar is running against a sqlite PDO — my migration's
+  hasTable() emits information_schema SQL. I need the driver overridden too, not
+  just the PDO.
+
+● Write(modules/EmailManagement/tests/EmailManagementTestCase.php)
+  ⎿  Added 14 lines, removed 4 lines
+      15   * maria-email-management connection resolves to the live Maria
+          DB from .env and
+      16   * factories write real rows that no rollback removes.
+      17   *
+      18 - * Mirrors AcMarche\Hrm\Tests\HrmTestCase.                     
+      18 + * Follows AcMarche\Hrm\Tests\HrmTestCase, but also rewrites th
+         +e connection's driver                                          
+      19 + * to sqlite. Swapping the PDO alone would leave the mariadb qu
+         +ery grammar in place,                                          
+      20 + * and this module's migrations guard on hasTable()/hasColumn()
+         +, which that grammar                                           
+      21 + * answers with an information_schema lookup sqlite cannot serv
+         +e.                                                             
+      22   */
+      23  abstract class EmailManagementTestCase extends TestCase
+      24  {
+     ...
+      29      {
+      30          parent::refreshApplication();
+      31  
+      32 +        $this->app['config']->set('database.connections.maria-e
+         +mail-management', [                                            
+      33 +            'driver' => 'sqlite',                              
+      34 +            'database' => ':memory:',                          
+      35 +            'prefix' => '',                                    
+      36 +            'foreign_key_constraints' => true,                 
+      37 +        ]);                                                    
+      38 +                                                               
+      39          $db = $this->app['db'];
+      40 +        $db->purge('maria-email-management');                  
+      41  
+      31 -        // Give maria-email-management its own PDO so this modu
+         -le's migrations create                                         
+      32 -        // their own schema instead of seeing tables created by
+         - other modules on the                                          
+      33 -        // shared PDO.                                         
+      42 +        // Give the connection its own persistent PDO so this m
+         +odule's migrations create                                      
+      43 +        // their own schema, and so it survives between the mig
+         +ration run and the test.                                       
+      44          $pdo = RefreshDatabaseState::$inMemoryConnections['mari
+          a-email-management']
+      45              ?? new PDO('sqlite::memory:', null, null, [
+      46                  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Driver override works. Now sqlite refuses to drop uid while its unique index
+  exists — MariaDB drops the index implicitly, sqlite doesn't. Dropping the
+  index explicitly:
+
+● Update(modules/EmailManagement/database/migrations/2026_07_16_090000_align_emp
+        loyes_table_with_active_directory.php)
+  ⎿  Added 8 lines
+      63              }
+      64          });
+      65  
+      66 +        // uid carries a unique index. MariaDB drops it along w
+         +ith the column, sqlite                                         
+      67 +        // (used by the test suite) refuses the drop while the 
+         +index still references it.                                     
+      68 +        if ($schema->hasColumn('employes', 'uid')) {           
+      69 +            $schema->table('employes', function (Blueprint $tab
+         +le): void {                                                    
+      70 +                $table->dropUnique('employes_uid_unique');     
+      71 +            });                                                
+      72 +        }                                                      
+      73 +                                                               
+      74          $existing = array_values(array_filter(
+      75              self::DROPPED_COLUMNS,
+      76              fn (string $column): bool => $schema->hasColumn('em
+          ployes', $column),
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● 18/21 now. isTableLoaded: false — Filament defers table loading. Let me check
+  how the Hrm tests handle that.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● ->loadTable() is the convention. Applying it:
+
+● Update(modules/EmailManagement/tests/Feature/EmployeResourceTest.php)
+  ⎿  Added 1 line
+      30  
+      31          livewire(ListEmployes::class)
+      32              ->assertSuccessful()
+      33 +            ->loadTable()                                      
+      34              ->assertCanSeeTableRecords($employes);
+      35      });
+      36  
+
+● Update(modules/EmailManagement/tests/Feature/EmployeResourceTest.php)
+  ⎿  Added 1 line
+      56          $employes = Employe::factory(3)->create();
+      57  
+      58          livewire(ListEmployes::class)
+      59 +            ->loadTable()                                      
+      60              ->searchTable($employes->first()->mail)
+      61              ->assertCanSeeTableRecords($employes->take(1))
+      62              ->assertCanNotSeeTableRecords($employes->skip(1));
+
+● Update(modules/EmailManagement/tests/Feature/EmployeResourceTest.php)
+  ⎿  Added 1 line
+      66          $employes = Employe::factory(3)->create();
+      67  
+      68          livewire(ListEmployes::class)
+      69 +            ->loadTable()                                      
+      70              ->searchTable($employes->first()->samaccountname)
+      71              ->assertCanSeeTableRecords($employes->take(1));
+      72      });
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● All 21 pass. Let me confirm the real database stayed clean and nothing else
+  regressed.
+
+  Ran 1 shell command (ctrl+o to expand)
+● The real database stays at 0 rows after a full test run — leak fixed and
+  verified. Let me confirm the shared tests/Pest.php edit didn't disturb other
+  modules.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● MailingList's failures are identical before and after my changes (88 tests / 8
+  passed / 80 errors in both) — pre-existing, not mine. Let me re-confirm Hrm
+  against my latest Pest.php restructure.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Phase 1 is done and green. Here's where things stand.
+
+  The module runs now
+
+  It didn't before — every page fataled. 21 tests, 62 assertions, all passing,
+  and they exercise the pages that were broken rather than just asserting on
+  units: list, create, view, and edit all render; search works; validation
+  rejects bad input. Hrm's 371 tests still pass, so the shared test config
+  changes are safe.
+
+  Two things I got wrong, caught by testing rather than assumed
+
+  My tests wrote 36 rows of fake employees into your real gestemail database.
+  phpunit.xml only overrides the default connection — maria-email-management
+  resolves to the live MariaDB from .env, and LazilyRefreshDatabase doesn't roll
+  it back. I spotted it because the table reported "27 employés" when the test
+  had created 3. I truncated the table back to the 0 rows it held at session
+  start, and added EmailManagementTestCase (modelled on your HrmTestCase) so the
+  connection is redirected to in-memory sqlite and transacted. Verified: the
+  real database still reads 0 rows after a full test run.
+
+  The blueprint told me to add auth_token, charter and recovery columns. That 
+  was wrong. route('citoyen.auto-login') isn't registered anywhere, and no
+  citoyen panel exists among your 20 panels — so Employe::canAccessPanel() was
+  unreachable code and the whole "Espace Citoyen" surface pointed at a portal
+  this app doesn't serve. I removed it instead of building on it.
+
+  Testing also surfaced two genuine bugs I'd otherwise have shipped:
+  getQuotaInfo() caught Exception, but a null IMAP host surfaces as a TypeError,
+  which isn't an Exception — the view page died rather than degrading. And the
+  unique validation rules were querying the default connection, so they silently
+  never checked the real table.
+
+  What changed
+
+  Your rule is enforced: ROLE_EMAIL_ADMIN gates the panel (via EnsureEmailAdmin
+  middleware — I avoided canAccessPanel() because User's returns true for every
+  panel and editing it would have changed access intranet-wide) and every
+  EmployePolicy ability, replacing the old auth()->check() that let any
+  logged-in user do anything. Super admins pass, matching HrmAuthorization.
+
+  The module moved onto Active Directory: EmployeLdap now extends LdapRecord's
+  ActiveDirectory\User, so unicodePwd and userAccountControl are handled by the
+  library rather than the old {SSHA} GOSA hashing AD would reject. Dead config
+  and the never-registered LdapServiceProvider are deleted — that provider was a
+  trap, since registering it would have thrown on use_ssl (gone in LdapRecord
+  v4) and clobbered the default connection your intranet login depends on. The
+  handler's phantom methods, the undefined $body, the missing PasswordInput
+  class (now with your 12-char Password::min(12) policy), the duplicate l column
+  and the employeNumber typo are all fixed, and the migration ran cleanly.
+
+  I scoped Pint to my own paths this time so it left your Mileage work alone.
+
+  Next
+
+  The EmailList resource itself — model, ListHandler, sync command, resource,
+  and its policy behind the same role gate. One decision when you're ready:
+  creating AD entries has no staging directory here, so tests will use
+  DirectoryEmulator, but the first real create/delete will write to production
+  AD. Worth trying that against a throwaway _list group first rather than a live
+  one.
+
+✻ Cooked for 14m 31s

@@ -25,10 +25,10 @@ final class CreateEmploye extends CreateRecord
 
     protected function handleRecordCreation(array $data): Employe
     {
-        $citoyenHandler = app(EmployeHandler::class);
+        $employeHandler = app(EmployeHandler::class);
 
         try {
-            $citoyen = $citoyenHandler->createEmploye($data);
+            $employe = $employeHandler->createEmploye($data);
         } catch (Exception|LdapRecordException $exception) {
             $error = $exception->getMessage();
             if ($exception instanceof LdapRecordException && $exception->getDetailedError()) {
@@ -45,13 +45,13 @@ final class CreateEmploye extends CreateRecord
         }
 
         Notification::make()
-            ->title('Le citoyen a bien été ajouté.')
-            ->body($body)
+            ->title("L'employé a bien été ajouté.")
+            ->body("Le compte {$employe->samaccountname} a été créé dans l'annuaire.")
             ->success()
             ->persistent()
             ->send();
 
-        return $citoyen;
+        return $employe;
     }
 
     protected function getCreatedNotification(): ?Notification

@@ -6,95 +6,63 @@ namespace AcMarche\EmailManagement\Models;
 
 use AcMarche\EmailManagement\Database\Factories\EmployeFactory;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasName;
-use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Local mirror of a staff account held in Active Directory (OU=AC,OU=MUSERS).
+ *
+ * Active Directory is the source of truth: this table is a read mirror kept in step
+ * by write-through on create/update and by the sync command. Passwords are never
+ * mirrored -- they live in AD and are checked there.
+ */
 #[Connection('maria-email-management')]
 #[Fillable([
+    'samaccountname',
     'givenName',
     'sn',
-    'l',
+    'cn',
+    'displayName',
     'mail',
-    'uid',
     'dn',
     'description',
-    'postalAddress',
-    'employeeNumber',
-    'postalCode',
-    'homeDirectory',
-    'employeNumber',
-    'gosaMailQuota',
-    'gosaMailForwardingAddress',
-    'gosaMailAlternateAddress',
+    'telephoneNumber',
     'last_connection',
     'protocol_connection',
     'port_connection',
     'secure_connection',
-    'auth_token',
-    'recovery_email',
-    'recovery_phone',
-    'charter_accepted_at',
-    'password_changed_at',
+    'sync_at',
 ])]
 #[UseFactory(EmployeFactory::class)]
-final class Employe extends Authenticatable implements FilamentUser, HasName
+final class Employe extends Model
 {
     use HasFactory;
 
-    protected $hidden = [
-        'auth_token',
-        'remember_token',
-    ];
-
+    /**
+     * @return array<string, mixed>
+     */
     public static function generateDataFromLdap(EmployeLdap $userLdap): array
     {
         return [
+            'samaccountname' => $userLdap->getFirstAttribute('samaccountname'),
             'givenName' => $userLdap->getFirstAttribute('givenName'),
             'sn' => $userLdap->getFirstAttribute('sn'),
-            'dn' => $userLdap->getDn(),
             'cn' => $userLdap->getFirstAttribute('cn'),
-            'uid' => $userLdap->getFirstAttribute('uid'),
+            'displayName' => $userLdap->getFirstAttribute('displayName'),
+            'dn' => $userLdap->getDn(),
             'mail' => $userLdap->getFirstAttribute('mail'),
-            'postalAddress' => $userLdap->getFirstAttribute('postalAddress'),
-            'postalCode' => $userLdap->getFirstAttribute('postalCode'),
-            'l' => $userLdap->getFirstAttribute('l'),
-            'userPassword' => null,
-            'employeeNumber' => $userLdap->getFirstAttribute('employeeNumber'),
-            'gosaMailQuota' => $userLdap->getFirstAttribute('gosaMailQuota', 250),
-            'gosaMailForwardingAddress' => $userLdap->getFirstAttribute('gosaMailForwardingAddress'),
-            'gosaMailAlternateAddress' => $userLdap->getFirstAttribute('gosaMailAlternateAddress'),
-            'homeDirectory' => $userLdap->getFirstAttribute('homeDirectory'),
             'description' => $userLdap->getFirstAttribute('description'),
+            'telephoneNumber' => $userLdap->getFirstAttribute('telephoneNumber'),
         ];
     }
 
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $panel->getId() === 'citoyen';
-    }
-
-    public function getFilamentName(): string
+    public function getFullName(): string
     {
         return mb_trim($this->givenName.' '.$this->sn);
-    }
-
-    public function hasCompletedOnboarding(): bool
-    {
-        return $this->charter_accepted_at
-            && $this->password_changed_at
-            && ($this->recovery_email || $this->recovery_phone);
-    }
-
-    public function getAuthPassword(): string
-    {
-        return '';
     }
 
     protected function email(): Attribute
@@ -108,8 +76,7 @@ final class Employe extends Authenticatable implements FilamentUser, HasName
             'last_connection' => 'date',
             'secure_connection' => 'boolean',
             'port_connection' => 'integer',
-            'charter_accepted_at' => 'datetime',
-            'password_changed_at' => 'datetime',
+            'sync_at' => 'datetime',
         ];
     }
 }

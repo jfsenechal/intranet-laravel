@@ -6,7 +6,7 @@ namespace AcMarche\EmailManagement\Filament\Resources\Employes\Pages;
 
 use AcMarche\EmailManagement\Filament\Resources\Employes\EmployeResource;
 use AcMarche\EmailManagement\Ldap\EmployeHandler;
-use AcMarche\Security\Repository\LdapRepository;
+use AcMarche\EmailManagement\Repository\EmployeLdapRepository;
 use Exception;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
@@ -32,23 +32,23 @@ final class EditEmploye extends EditRecord
 
     protected function afterSave(): void
     {
-        $citoyenHandler = app(EmployeHandler::class);
-        $ldapEmployeRepository = app(LdapRepository::class);
-        $citoyen = $this->record;
+        $employeHandler = app(EmployeHandler::class);
+        $ldapEmployeRepository = app(EmployeLdapRepository::class);
+        $employe = $this->record;
 
         try {
-            $ldapEntry = $ldapEmployeRepository->getEntryByEmail($citoyen->mail);
+            $ldapEntry = $ldapEmployeRepository->getEntry($employe->samaccountname);
 
             if (! $ldapEntry) {
                 Notification::make()
-                    ->title('Utilisateur LDAP introuvable pour '.$citoyen->mail)
+                    ->title('Utilisateur LDAP introuvable pour '.$employe->samaccountname)
                     ->warning()
                     ->send();
 
                 return;
             }
 
-            $citoyenHandler->updateEmploye($citoyen, $ldapEntry);
+            $employeHandler->updateEmploye($employe, $ldapEntry);
 
             Notification::make()
                 ->title('Entrée LDAP mise à jour')

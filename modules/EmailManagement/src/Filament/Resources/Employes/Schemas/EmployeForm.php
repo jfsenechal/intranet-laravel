@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Employes\Schemas;
 
+use AcMarche\EmailManagement\Filament\Schemas\PasswordInput;
 use AcMarche\EmailManagement\Service\EmailService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -13,6 +14,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Str;
 
 final class EmployeForm
 {
@@ -24,18 +26,30 @@ final class EmployeForm
                     ->columns()
                     ->components([
                         TextInput::make('givenName')
-                            ->label('Prénom'),
+                            ->label('Prénom')
+                            ->maxLength(64),
                         TextInput::make('sn')
-                            ->label('Nom'),
-                        TextInput::make('cn')
-                            ->label('Nom complet')
-                            ->columnSpanFull(),
+                            ->label('Nom')
+                            ->required()
+                            ->maxLength(64),
+                        TextInput::make('samaccountname')
+                            ->label('Identifiant')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->helperText("L'identifiant ne peut pas être modifié après la création."),
+                        TextInput::make('mail')
+                            ->label('Email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
                     ]),
-                self::coordinates(),
+                self::contact(),
                 Section::make('Divers')
                     ->components([
                         Textarea::make('description')
                             ->label('Description')
+                            ->rows(3)
+                            ->maxLength(1000)
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -51,15 +65,44 @@ final class EmployeForm
                         TextInput::make('sn')
                             ->label('Nom')
                             ->required()
+                            ->maxLength(64)
                             ->live(onBlur: true),
                         TextInput::make('givenName')
                             ->label('Prénom')
+                            ->maxLength(64)
                             ->live(onBlur: true),
+                        TextInput::make('samaccountname')
+                            ->label('Identifiant')
+                            ->required()
+                            ->maxLength(20)
+                            ->unique('maria-email-management.employes', 'samaccountname')
+                            ->helperText('Identifiant de connexion Active Directory.')
+                            ->afterContent(
+                                Action::make('generateSamAccountName')
+                                    ->label('Générer')
+                                    ->icon(Heroicon::Sparkles)
+                                    ->color('gray')
+                                    ->action(function (Get $schemaGet, Set $schemaSet): void {
+                                        $givenName = $schemaGet('givenName');
+                                        $sn = $schemaGet('sn');
+
+                                        if (blank($givenName) || blank($sn)) {
+                                            return;
+                                        }
+
+                                        $schemaSet(
+                                            'samaccountname',
+                                            Str::lower(Str::substr(EmailService::sanitizeForEmail($givenName), 0, 1)
+                                                .EmailService::sanitizeForEmail($sn))
+                                        );
+                                    }),
+                            ),
                         TextInput::make('mail')
                             ->label('Email')
                             ->email()
-                            ->columnSpanFull()
                             ->required()
+                            ->maxLength(255)
+                            ->unique('maria-email-management.employes', 'mail')
                             ->afterContent(
                                 Action::make('generateEmail')
                                     ->label('Générer')
@@ -77,51 +120,37 @@ final class EmployeForm
                                             'mail',
                                             EmailService::sanitizeForEmail(
                                                 $givenName
-                                            ).'.'.EmailService::sanitizeForEmail($sn).'@marche.be'
+                                            ).'.'.EmailService::sanitizeForEmail($sn).'@ac.marche.be'
                                         );
                                     }),
                             ),
                     ]),
-                self::coordinates(),
+                self::contact(),
                 Section::make('Compte')
-                    ->columns(2)
+                    ->columns()
                     ->components(
                         PasswordInput::create(),
                     ),
                 Section::make('Divers')
                     ->components([
-                        TextInput::make('gosaMailQuota')
-                            ->label('Quota mail')
-                            ->numeric()
-                            ->minValue(150)
-                            ->maxValue(4000)
-                            ->default(350)
-                            ->suffix('MB'),
                         Textarea::make('description')
                             ->label('Description')
+                            ->rows(3)
+                            ->maxLength(1000)
                             ->columnSpanFull(),
                     ]),
             ]);
     }
 
-    private static function coordinates(): Section
+    private static function contact(): Section
     {
         return Section::make('Coordonnées')
             ->columns()
             ->components([
-                TextInput::make('employeeNumber')
-                    ->label('Numéro national')
-                    ->required(),
-                TextInput::make('postalAddress')
-                    ->label('Rue et numéro')
-                    ->required(),
-                TextInput::make('postalCode')
-                    ->label('Code postal')
-                    ->default('6900')
-                    ->required(),
-                TextInput::make('l')
-                    ->label('Localité')
-                    ->required(),
+                TextInput::make('telephoneNumber')
+                    ->label('Téléphone')
+                    ->tel()
+                    ->maxLength(64),
             ]);
     }
 }

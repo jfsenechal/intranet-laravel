@@ -4,81 +4,29 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Ldap;
 
-use LdapRecord\Models\Model;
+use LdapRecord\LdapRecordException;
+use LdapRecord\Models\ActiveDirectory\User;
 
-final class EmployeLdap extends Model
+/**
+ * A staff account in Active Directory, under OU=AC,OU=MUSERS.
+ *
+ * Identity is carried by sAMAccountName. Extends LdapRecord's Active Directory user so
+ * that password writes go through unicodePwd (which AD only accepts over the ldaps://
+ * connection this module uses) and userAccountControl is handled by HasAccountControl,
+ * rather than being hand-rolled here.
+ */
+final class EmployeLdap extends User
 {
-    /**
-     * The object classes of the LDAP model.
-     */
-    public static array $objectClasses = [
-        'gosaAccount',
-        'gosaMailAccount',
-        'top',
-        'person',
-        'organizationalPerson',
-        'inetOrgPerson',
-        'posixAccount',
-    ];
+    protected ?string $connection = 'default';
 
-    public static string $gosaMailDeliveryMode = '[CL]';
-
-    public static string $gosaMailServer = 'imap://mail.marche.be';
-
-    public static string $gosaSpamMailbox = 'INBOX\Junk';
-
-    public static int $gosaSpamSortLevel = 0;
-
-    public string $uid;
-
-    public array $attributes = [];
-
-    protected ?string $connection = 'employes';
-
-    public static function convertDataToLdapSchema(
-        string $uid,
-        string $first_name,
-        string $last_name,
-        string $email,
-        string $password,
-        string $postalAddress,
-        string $localite,
-        string $postCode,
-        string $homeDirectory,
-        string $employeNumber,
-        int $uidNumber,
-        int $quota = 250
-    ): array {
-        return [
-            'mail' => [$email],
-            'gidNumber' => [5000],
-            'uidNumber' => [$uidNumber],
-            'givenName' => [$first_name],
-            'employeeNumber' => [$employeNumber],
-            'homeDirectory' => [$homeDirectory],
-            'uid' => [$uid],
-            'postalCode' => [$postCode],
-            'postalAddress' => [$postalAddress],
-            'userPassword' => [self::cryptPassword($password)],
-            'l' => [$localite],
-            'sn' => [$last_name],
-            'cn' => [mb_trim($first_name.' '.$last_name)],
-            'objectClass' => self::$objectClasses,
-            'gosaMailDeliveryMode' => [self::$gosaMailDeliveryMode],
-            'gosaMailForwardingAddress' => [$uid.'@citoyen.marche.be'],
-            'gosaMailServer' => [self::$gosaMailServer],
-            'gosaSpamMailbox' => [self::$gosaSpamMailbox],
-            'gosaSpamSortLevel' => [self::$gosaSpamSortLevel],
-            'gosaMailQuota' => [$quota],
-        ];
-    }
-
-    public static function cryptPassword(string $password): string
+    public static function describe(\Exception|LdapRecordException $e): string
     {
-        $salt = mb_substr(sha1(uniqid((string) random_int(0, mt_getrandmax()), true), true), 0, 4);
-        $rawHash = sha1($password.$salt, true).$salt;
-        $method = '{SSHA}';
+        $error = $e->getMessage();
 
-        return $method.base64_encode($rawHash);
+        if ($e instanceof LdapRecordException && $e->getDetailedError()) {
+            $error .= ' '.$e->getDetailedError()->getDiagnosticMessage();
+        }
+
+        return $error;
     }
 }

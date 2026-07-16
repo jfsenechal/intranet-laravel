@@ -55,6 +55,14 @@ uses(
 );
 
 uses(
+    AcMarche\EmailManagement\Tests\EmailManagementTestCase::class,
+    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
+)->in(
+    '../modules/EmailManagement/tests/Feature',
+    '../modules/EmailManagement/tests/Unit',
+);
+
+uses(
     AcMarche\Conseil\Tests\ConseilTestCase::class,
 )->in(
     '../modules/Conseil/tests/Feature',

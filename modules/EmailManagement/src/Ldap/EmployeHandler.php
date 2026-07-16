@@ -4,90 +4,114 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Ldap;
 
-use AcMarche\EmailManagement\Models\EmailDto;
 use AcMarche\EmailManagement\Models\Employe;
-use AcMarche\Security\Repository\LdapRepository;
+use AcMarche\EmailManagement\Repository\EmployeLdapRepository;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
-use LdapRecord\Models\ModelDoesNotExistException;
+use LdapRecord\Models\Attributes\AccountControl;
 
+/**
+ * Write-through for staff accounts: Active Directory first, then the local mirror.
+ *
+ * Order matters. If AD rejects a write the mirror must not be left holding a row that
+ * does not exist in the directory, so nothing is persisted locally until AD has
+ * accepted the change.
+ */
 final class EmployeHandler
 {
-    public function __construct(private readonly LdapRepository $ldapRepository) {}
+    public function __construct(private readonly EmployeLdapRepository $employeLdapRepository) {}
 
     /**
-     * @throws Exception
-     */
-    public static function createCitoyenDbFromLdap(EmployeLdap $data): ?Employe
-    {
-        if (Employe::where('uid', $data->getFirstAttribute('uid'))->first()) {
-            throw new Exception('Utilisateur déjà existant');
-        }
-        $dataUser = Employe::generateDataFromLdap($data);
-        $dataUser['userPassword'] = Str::password();
-        $dataUser['auth_token'] = Str::random(64);
-
-        return Employe::create($dataUser);
-    }
-
-    /**
+     * @param  array<string, mixed>  $data
+     *
      * @throws Exception
      * @throws LdapRecordException
      */
-    public function createCitoyen(array $data): Employe
+    public function createEmploye(array $data): Employe
     {
-        $emailDto = new EmailDto;
-        $emailDto->givenName = $data['givenName'];
-        $emailDto->sn = $data['sn'];
-        $emailDto->mail = $data['mail'];
-        $emailDto->postalAddress = $data['postalAddress'];
-        $emailDto->postalCode = $data['postalCode'];
-        $emailDto->l = $data['l'];
-        $emailDto->employeeNumber = $data['employeeNumber'];
-        $emailDto->userPassword = $data['password'];
-        $emailDto->gosaMailQuota = (int) ($data['gosaMailQuota'] ?? 350);
-        $emailDto->description = $data['description'] ?? null;
+        $samAccountName = $data['samaccountname'];
 
-        $ldapEntry = $this->ldapRepository->createCitizen($emailDto);
+        if ($this->employeLdapRepository->getEntry($samAccountName) instanceof EmployeLdap) {
+            throw new Exception("L'identifiant {$samAccountName} existe déjà dans l'annuaire.");
+        }
+
+        if (Employe::where('samaccountname', $samAccountName)->exists()) {
+            throw new Exception("L'identifiant {$samAccountName} existe déjà localement.");
+        }
+
+        $fullName = $this->fullName($data['givenName'] ?? null, $data['sn']);
+
+        $ldapEntry = new EmployeLdap;
+        $ldapEntry->cn = $fullName;
+        $ldapEntry->samaccountname = $samAccountName;
+        $ldapEntry->givenName = $data['givenName'] ?? null;
+        $ldapEntry->sn = $data['sn'];
+        $ldapEntry->displayName = $fullName;
+        $ldapEntry->mail = $data['mail'];
+        $ldapEntry->userPrincipalName = $data['mail'];
+        $ldapEntry->description = $data['description'] ?? null;
+        $ldapEntry->telephoneNumber = $data['telephoneNumber'] ?? null;
+        $ldapEntry->unicodepwd = $data['password'];
+        $ldapEntry->userAccountControl = (new AccountControl)
+            ->add(AccountControl::NORMAL_ACCOUNT)
+            ->getValue();
+
+        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
 
         return Employe::create([
             ...Employe::generateDataFromLdap($ldapEntry),
-            'auth_token' => Str::random(64),
+            'sync_at' => now(),
         ]);
     }
 
     /**
+     * Pushes the mirror's current state back to the directory entry.
+     *
      * @throws LdapRecordException
-     * @throws ModelDoesNotExistException
      */
-    public function updateCitoyen(Employe|Model $employe, EmployeLdap $ldapEntry): void
+    public function updateEmploye(Employe $employe, EmployeLdap $ldapEntry): void
     {
-        $ldapEntry->setAttribute('givenName', $employe->givenName);
-        $ldapEntry->setAttribute('sn', $employe->sn);
-        $ldapEntry->setAttribute('cn', mb_trim($employe->givenName.' '.$employe->sn));
-        $ldapEntry->setAttribute('description', $employe->description);
-        $ldapEntry->setAttribute('employeeNumber', $employe->employeeNumber);
-        $ldapEntry->setAttribute('postalAddress', $employe->postalAddress);
-        $ldapEntry->setAttribute('postalCode', $employe->postalCode);
-        $ldapEntry->setAttribute('l', $employe->l);
+        $ldapEntry->givenName = $employe->givenName;
+        $ldapEntry->sn = $employe->sn;
+        $ldapEntry->displayName = $this->fullName($employe->givenName, $employe->sn);
+        $ldapEntry->description = $employe->description;
+        $ldapEntry->telephoneNumber = $employe->telephoneNumber;
+        $ldapEntry->mail = $employe->mail;
 
-        $ldapEntry->update();
+        $ldapEntry->save();
     }
 
     /**
-     * @throws Exception
+     * Pulls every directory entry into the mirror, keyed on sAMAccountName.
+     *
+     * @throws LdapRecordException
      */
-    public function changeQuota(Employe|Model $employe, int $quota): void
+    public function syncFromLdap(): int
     {
-        $ldapEntry = $this->ldapRepository->findByUsername($employe->uid);
+        $seen = [];
 
-        if (! $ldapEntry) {
-            throw new Exception('Utilisateur LDAP introuvable');
+        foreach ($this->employeLdapRepository->all() as $ldapEntry) {
+            $samAccountName = $ldapEntry->getFirstAttribute('samaccountname');
+
+            if ($samAccountName === null || $samAccountName === '') {
+                continue;
+            }
+
+            Employe::updateOrCreate(
+                ['samaccountname' => $samAccountName],
+                [...Employe::generateDataFromLdap($ldapEntry), 'sync_at' => now()],
+            );
+
+            $seen[] = $samAccountName;
         }
 
-        $this->ldapRepository->updateQuota($ldapEntry, $quota);
-        $employe->update(['gosaMailQuota' => $quota]);
+        Employe::whereNotIn('samaccountname', $seen)->delete();
+
+        return count($seen);
+    }
+
+    private function fullName(?string $givenName, ?string $sn): string
+    {
+        return mb_trim(($givenName ?? '').' '.($sn ?? ''));
     }
 }
