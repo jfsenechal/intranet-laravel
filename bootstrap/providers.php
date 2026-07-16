@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\Filament\AdminPanelProvider::class,
     AcMarche\ActivityManager\Providers\Filament\ActivityManagerPanelProvider::class,
     AcMarche\Ad\Providers\Filament\AdPanelProvider::class,
     AcMarche\Agent\Providers\Filament\AgentPanelProvider::class,
@@ -30,6 +32,4 @@ return [
     AcMarche\StreetWatch\Providers\Filament\StreetWatchPanelProvider::class,
     AcMarche\Telecommunication\Providers\Filament\TelecommunicationPanelProvider::class,
     AcMarche\WhoIsWho\Providers\Filament\WhoIsWhoPanelProvider::class,
-    App\Providers\AppServiceProvider::class,
-    App\Providers\Filament\AdminPanelProvider::class,
 ];
