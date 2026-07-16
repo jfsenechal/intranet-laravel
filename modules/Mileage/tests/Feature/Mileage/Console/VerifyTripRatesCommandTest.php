@@ -9,7 +9,14 @@ use App\Models\User;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
-    $this->declaration = Declaration::factory()->create(['omnium' => true]);
+
+    // The declaration is the source of truth for a declared trip, and the
+    // factory randomises its rate, hence pinning it here.
+    $this->declaration = Declaration::factory()->create([
+        'omnium' => true,
+        'rate' => 0.4000,
+        'rate_omnium' => 0.0300,
+    ]);
 });
 
 /**
@@ -29,43 +36,40 @@ function declaredTripWithRate(int $userId, int $declarationId, string $departure
     return $trip;
 }
 
-test('passes when declared trips carry the applicable rate', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
+test('passes when declared trips carry their declaration rate', function (): void {
     declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.4000, 0.0300);
 
     $this->artisan('mileage:verify-trip-rates')
-        ->expectsOutputToContain('All declared trips carry the correct rate.')
+        ->expectsOutputToContain('All declared trips match their declaration.')
         ->assertSuccessful();
 });
 
-test('fails when a declared trip has an incorrect rate', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
+test('fails when a declared trip does not match its declaration', function (): void {
     declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.3000, 0.0300);
 
     $this->artisan('mileage:verify-trip-rates')
         ->assertFailed();
 });
 
-test('ignores undeclared trips', function (): void {
+test('ignores the rate applicable today when it superseded the declaration', function (): void {
+    // The rate period was edited or superseded after the declaration was filed.
+    // The trip still agrees with the declaration it was reimbursed under, so it
+    // is settled history and must not be reported.
     Rate::factory()->create([
         'start_date' => '2026-01-01',
         'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
+        'amount' => 0.9999,
+        'omnium' => 0.0900,
     ]);
 
+    declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.4000, 0.0300);
+
+    $this->artisan('mileage:verify-trip-rates')
+        ->expectsOutputToContain('All declared trips match their declaration.')
+        ->assertSuccessful();
+});
+
+test('ignores undeclared trips', function (): void {
     // Undeclared trip with a wrong rate must not be reported.
     $trip = Trip::factory()->create([
         'user_id' => $this->user->id,
@@ -79,13 +83,6 @@ test('ignores undeclared trips', function (): void {
 });
 
 test('--fix corrects the stored rate and omnium', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
     $trip = declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.3000, 0.0100);
 
     $this->artisan('mileage:verify-trip-rates', ['--fix' => true])
@@ -98,13 +95,6 @@ test('--fix corrects the stored rate and omnium', function (): void {
 });
 
 test('--skip-omnium ignores omnium mismatches', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
     // Correct rate but wrong omnium.
     declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.4000, 0.9900);
 
@@ -117,13 +107,6 @@ test('--skip-omnium ignores omnium mismatches', function (): void {
 });
 
 test('--skip-omnium still reports rate mismatches', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
     declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.3000, 0.9900);
 
     $this->artisan('mileage:verify-trip-rates', ['--skip-omnium' => true])
@@ -131,13 +114,6 @@ test('--skip-omnium still reports rate mismatches', function (): void {
 });
 
 test('--fix with --skip-omnium corrects the rate but leaves omnium untouched', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
     $trip = declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.3000, 0.9900);
 
     $this->artisan('mileage:verify-trip-rates', ['--fix' => true, '--skip-omnium' => true])
@@ -150,33 +126,27 @@ test('--fix with --skip-omnium corrects the rate but leaves omnium untouched', f
 });
 
 test('passes when a non-omnium declaration carries a zero omnium', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
     // Beneficiary not entitled to omnium: stored omnium is 0, which is correct
-    // even though the rate carries an omnium. This must not be flagged.
-    $declaration = Declaration::factory()->create(['omnium' => false]);
+    // even though the declaration carries a rate omnium. This must not be flagged.
+    $declaration = Declaration::factory()->create([
+        'omnium' => false,
+        'rate' => 0.4000,
+        'rate_omnium' => 0.0300,
+    ]);
     declaredTripWithRate($this->user->id, $declaration->id, '2026-06-15', 0.4000, 0.0000);
 
     $this->artisan('mileage:verify-trip-rates')
-        ->expectsOutputToContain('All declared trips carry the correct rate.')
+        ->expectsOutputToContain('All declared trips match their declaration.')
         ->assertSuccessful();
 });
 
 test('fails when a non-omnium declaration wrongly carries the rate omnium', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
-    ]);
-
     // Beneficiary not entitled to omnium but charged one anyway: expected 0.
-    $declaration = Declaration::factory()->create(['omnium' => false]);
+    $declaration = Declaration::factory()->create([
+        'omnium' => false,
+        'rate' => 0.4000,
+        'rate_omnium' => 0.0300,
+    ]);
     declaredTripWithRate($this->user->id, $declaration->id, '2026-06-15', 0.4000, 0.0300);
 
     $this->artisan('mileage:verify-trip-rates')
@@ -184,14 +154,11 @@ test('fails when a non-omnium declaration wrongly carries the rate omnium', func
 });
 
 test('--fix resets omnium to zero for a non-omnium declaration', function (): void {
-    Rate::factory()->create([
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-        'amount' => 0.4000,
-        'omnium' => 0.0300,
+    $declaration = Declaration::factory()->create([
+        'omnium' => false,
+        'rate' => 0.4000,
+        'rate_omnium' => 0.0300,
     ]);
-
-    $declaration = Declaration::factory()->create(['omnium' => false]);
     $trip = declaredTripWithRate($this->user->id, $declaration->id, '2026-06-15', 0.4000, 0.0300);
 
     $this->artisan('mileage:verify-trip-rates', ['--fix' => true])
@@ -203,10 +170,12 @@ test('--fix resets omnium to zero for a non-omnium declaration', function (): vo
         ->and((float) $trip->omnium)->toBe(0.0000);
 });
 
-test('warns when no applicable rate exists for a declared trip', function (): void {
+test('warns when the declaration a trip points at no longer exists', function (): void {
     declaredTripWithRate($this->user->id, $this->declaration->id, '2026-06-15', 0.4000, 0.0300);
 
+    $this->declaration->delete();
+
     $this->artisan('mileage:verify-trip-rates')
-        ->expectsOutputToContain('no applicable rate found')
+        ->expectsOutputToContain('no longer exists')
         ->assertSuccessful();
 });
