@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\EmailManagement\Enums\EmailExtensionEnum;
 use AcMarche\EmailManagement\Enums\RolesEnum;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
@@ -70,10 +71,14 @@ describe('table', function (): void {
 });
 
 describe('edit form', function (): void {
+    /**
+     * The mirror and the form carry the same identity attributes: everything the form edits is
+     * pushed by EmployeHandler::updateEmploye, and nothing is mirrored that cannot be edited.
+     * A field on one side but not the other would save to the mirror and silently never reach
+     * the directory, so this holds the two lists together.
+     */
     it('exposes every identity field the mirror carries', function (): void {
-        $employe = Employe::factory()->create();
-
-        $component = livewire(EditEmploye::class, ['record' => $employe->id]);
+        $component = livewire(EditEmploye::class, ['record' => Employe::factory()->create()->id]);
 
         foreach (Employe::LDAP_IDENTITY_ATTRIBUTES as $attribute) {
             $component->assertFormFieldExists($attribute);
@@ -146,6 +151,52 @@ describe('ldap header actions', function (): void {
             ->mountAction('viewLdap')
             ->assertSuccessful()
             ->assertActionMounted('viewLdap');
+    });
+
+    it('joins the local part to the chosen domain', function (): void {
+        $employe = Employe::factory()->create(['samaccountname' => 'aaguirre', 'mail' => null]);
+
+        $ldapEntry = new EmployeLdap;
+        $ldapEntry->cn = 'Ana Aguirre';
+        $ldapEntry->samaccountname = 'aaguirre';
+        $ldapEntry->sn = 'Aguirre';
+        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->callAction('createEmail', [
+                'mail' => 'ana.aguirre',
+                'extension' => EmailExtensionEnum::EXTENSION_CPAS->value,
+            ])
+            ->assertHasNoActionErrors();
+
+        expect($employe->refresh()->mail)->toBe('ana.aguirre@cpas.marche.be');
+    });
+
+    it('splits an existing address back across the two fields', function (): void {
+        $employe = Employe::factory()->create([
+            'samaccountname' => 'aaguirre',
+            'mail' => 'ana.aguirre@cpas.marche.be',
+        ]);
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->mountAction('createEmail')
+            ->assertActionDataSet([
+                'mail' => 'ana.aguirre',
+                // The select casts the state to the enum case, which is why the action
+                // normalises it back to a string before building the address.
+                'extension' => EmailExtensionEnum::EXTENSION_CPAS,
+            ]);
+    });
+
+    it('refuses a local part containing a domain', function (): void {
+        $employe = Employe::factory()->create(['samaccountname' => 'aaguirre', 'mail' => null]);
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->callAction('createEmail', [
+                'mail' => 'ana.aguirre@ac.marche.be',
+                'extension' => EmailExtensionEnum::EXTENSION_AC->value,
+            ])
+            ->assertHasActionErrors(['mail']);
     });
 
     it('mounts every mailbox action', function (string $action): void {

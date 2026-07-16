@@ -35,12 +35,10 @@ function identityAttributes(): array
         'info' => 'compte créé en 2017',
         'wWWHomePage' => 'www.marche.be',
         'streetAddress' => 'Rue Victor Libert, 36E',
-        'postOfficeBox' => '6900',
         'postalCode' => '6900',
         'l' => 'Marche-en-Famenne',
         'telephoneNumber' => '+3284326991',
         'ipPhone' => '9991',
-        'facsimileTelephoneNumber' => '+3284327049',
         'mobile' => '+32477320320',
     ];
 }

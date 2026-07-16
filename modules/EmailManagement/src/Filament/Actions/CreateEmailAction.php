@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Actions;
 
+use AcMarche\EmailManagement\Enums\EmailExtensionEnum;
+use AcMarche\EmailManagement\Filament\Resources\Employes\Schemas\EmployeForm;
 use AcMarche\EmailManagement\Ldap\EmployeHandler;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
 use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\EmailManagement\Service\EmailService;
 use Exception;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
@@ -27,28 +27,26 @@ final class CreateEmailAction
             ->color('info')
             ->modalHeading("Adresse mail de {$record->samaccountname}")
             ->modalDescription(
-                "L'adresse est écrite dans l'annuaire, le quota par défaut est appliqué et la boîte est créée si elle n'existe pas."
+                "Si il s'agit d'une adresse mail déjà existante, vous pouvez forcer la création du dossier Imap"
             )
             ->modalSubmitActionLabel('Enregistrer')
-            ->fillForm(fn (): array => [
-                'mail' => $record->mail ?? self::suggestAddress($record),
-                'force' => false,
-            ])
-            ->schema([
-                TextInput::make('mail')
-                    ->label('Adresse mail')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Checkbox::make('force')
-                    ->label('Forcer')
-                    ->helperText("Enregistrer même si l'adresse est déjà utilisée par une autre fiche de l'annuaire."),
-            ])
+            ->fillForm(function () use ($record): array {
+                $mail = $record->mail ?? self::suggestLocalPart($record);
+
+                return [
+                    'mail' => EmailExtensionEnum::localPart($mail),
+                    'extension' => (EmailExtensionEnum::fromAddress(
+                        $record->mail
+                    ) ?? EmailExtensionEnum::EXTENSION_AC)->value,
+                    'force' => false,
+                ];
+            })
+            ->schema(EmployeForm::forEmail())
             ->action(function (array $data, EmployeHandler $employeHandler) use ($record): void {
                 try {
                     $mailboxCreated = $employeHandler->createEmail(
                         $record,
-                        $data['mail'],
+                        $data['mail'].self::extensionValue($data['extension']),
                         (bool) ($data['force'] ?? false),
                     );
                 } catch (Exception|LdapRecordException $e) {
@@ -64,7 +62,9 @@ final class CreateEmailAction
                 if (! $mailboxCreated) {
                     Notification::make()
                         ->title('Adresse enregistrée, boîte non créée')
-                        ->body('Les identifiants IMAP ne sont pas configurés (IMAP_EMPLOYE_*). La boîte devra être créée séparément.')
+                        ->body(
+                            'Les identifiants IMAP ne sont pas configurés (IMAP_EMPLOYE_*). La boîte devra être créée séparément.'
+                        )
                         ->warning()
                         ->persistent()
                         ->send();
@@ -80,16 +80,24 @@ final class CreateEmailAction
     }
 
     /**
-     * prenom.nom@ac.marche.be, as the legacy GestEmail built it.
+     * The select hands back the enum case itself once the schema has cast it, and the raw
+     * string before that, so both have to be accepted.
      */
-    private static function suggestAddress(Model|Employe $record): ?string
+    private static function extensionValue(EmailExtensionEnum|string $extension): string
+    {
+        return $extension instanceof EmailExtensionEnum ? $extension->value : $extension;
+    }
+
+    /**
+     * prenom.nom, as the legacy GestEmail built it. The domain is picked separately.
+     */
+    private static function suggestLocalPart(Model|Employe $record): ?string
     {
         if (blank($record->givenName) || blank($record->sn)) {
             return null;
         }
 
         return EmailService::sanitizeForEmail($record->givenName)
-            .'.'.EmailService::sanitizeForEmail($record->sn)
-            .'@ac.marche.be';
+            .'.'.EmailService::sanitizeForEmail($record->sn);
     }
 }

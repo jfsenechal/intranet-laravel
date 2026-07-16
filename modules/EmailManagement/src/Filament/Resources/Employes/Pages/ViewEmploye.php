@@ -14,6 +14,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\Size;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 
 final class ViewEmploye extends ViewRecord
@@ -22,7 +23,7 @@ final class ViewEmploye extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->mail ?? 'Sans email';
+        return $this->record->mail ?? $this->record->sn.' '.$this->record->givenName;
     }
 
     protected function getHeaderActions(): array
@@ -39,6 +40,8 @@ final class ViewEmploye extends ViewRecord
             ])
                 ->label('Actions...')
                 ->button()
+                ->icon('tabler-plus')
+                ->dropdownWidth(Width::FitContent)
                 ->size(Size::Large)
                 ->color('secondary'),
         ];
