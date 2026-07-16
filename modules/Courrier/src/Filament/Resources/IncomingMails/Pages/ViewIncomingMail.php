@@ -40,9 +40,11 @@ final class ViewIncomingMail extends ViewRecord
             Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')
+                ->color('primary')
                 ->url(IncomingMailResource::getUrl('index')),
             EditAction::make()
-                ->icon('tabler-edit'),
+                ->icon('tabler-edit')
+                ->color('warning'),
             DeleteAction::make()
                 ->icon('tabler-trash'),
         ];
