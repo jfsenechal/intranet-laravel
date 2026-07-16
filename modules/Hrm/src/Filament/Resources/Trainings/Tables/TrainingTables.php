@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Trainings\Tables;
 
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
+use AcMarche\Hrm\Filament\Actions\ReplicateTrainingAction;
 use AcMarche\Hrm\Filament\Filters\ContractActiveFilter;
 use AcMarche\Hrm\Filament\Filters\EmployerFilter;
 use AcMarche\Hrm\Models\Training;
@@ -174,6 +175,7 @@ final class TrainingTables
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                ReplicateTrainingAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

@@ -7,11 +7,14 @@ use AcMarche\Hrm\Filament\Resources\Contracts\Pages\CreateContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\EditContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ListContracts;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
+use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\ContractNature;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 
@@ -122,6 +125,53 @@ describe('crud operations', function (): void {
         expect($replica->employee_id)->toBe($targetEmployee->id);
         expect($replica->is_closed)->toBeTrue();
         expect($replica->is_suspended)->toBeTrue();
+    });
+
+    it('does not preselect an agent when opening the replicate modal', function (): void {
+        $record = Contract::factory()->create();
+
+        Livewire::test(ViewContract::class, [
+            'record' => $record->id,
+        ])
+            ->mountAction('replicate')
+            ->assertSchemaStateSet(['employee_id' => null]);
+    });
+
+    it('requires an agent when replicating a contract', function (): void {
+        $record = Contract::factory()->create(['job_title' => 'Unreplicated Job Title']);
+
+        Livewire::test(ViewContract::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate', ['employee_id' => null])
+            ->assertHasActionErrors(['employee_id' => 'required']);
+
+        expect(Contract::query()->where('job_title', 'Unreplicated Job Title')->count())->toBe(1);
+    });
+
+    it('can replicate a contract to another employee from the employee relation manager', function (): void {
+        $employee = Employee::factory()->create();
+        $record = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'job_title' => 'Relation Job Title',
+            'is_closed' => false,
+        ]);
+        $targetEmployee = Employee::factory()->create();
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->callAction(TestAction::make('replicate')->table($record), ['employee_id' => $targetEmployee->id])
+            ->assertHasNoActionErrors();
+
+        $replica = Contract::query()
+            ->where('job_title', 'Relation Job Title')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica)->not->toBeNull();
+        expect($replica->employee_id)->toBe($targetEmployee->id);
     });
 });
 

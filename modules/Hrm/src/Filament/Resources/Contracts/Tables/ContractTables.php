@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Contracts\Tables;
 
 use AcMarche\Hrm\Enums\ContractStatusEnum;
+use AcMarche\Hrm\Filament\Actions\ReplicateContractAction;
 use AcMarche\Hrm\Filament\Filters\ContractNatureFilter;
 use AcMarche\Hrm\Filament\Filters\ContractTypeFilter;
 use AcMarche\Hrm\Filament\Filters\DirectionFilter;
@@ -159,14 +160,16 @@ final class ContractTables
                 TextColumn::make('end_date')
                     ->label('Fin')
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('work_regime')
                     ->label('Régime')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_closed')
                     ->label('Clôturé')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('is_closed')
@@ -179,6 +182,7 @@ final class ContractTables
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                ReplicateContractAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Exports\TrainingExport;
+use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\TrainingsRelationManager;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\CreateTraining;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\EditTraining;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ListTrainings;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Training;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -100,6 +103,52 @@ describe('crud operations', function (): void {
         expect($replica->employee_id)->toBe($targetEmployee->id);
         expect($replica->is_closed)->toBeTrue();
         expect($replica->certificate_received)->toBeTrue();
+    });
+
+    it('does not preselect an agent when opening the replicate modal', function (): void {
+        $record = Training::factory()->create();
+
+        Livewire::test(ViewTraining::class, [
+            'record' => $record->id,
+        ])
+            ->mountAction('replicate')
+            ->assertSchemaStateSet(['employee_id' => null]);
+    });
+
+    it('requires an agent when replicating a training', function (): void {
+        $record = Training::factory()->create(['name' => 'Unreplicated Training']);
+
+        Livewire::test(ViewTraining::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate', ['employee_id' => null])
+            ->assertHasActionErrors(['employee_id' => 'required']);
+
+        expect(Training::query()->where('name', 'Unreplicated Training')->count())->toBe(1);
+    });
+
+    it('can replicate a training to another employee from the employee relation manager', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $record = Training::factory()->create([
+            'employee_id' => $employee->id,
+            'name' => 'Relation Training',
+        ]);
+        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Livewire::test(TrainingsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->callAction(TestAction::make('replicate')->table($record), ['employee_id' => $targetEmployee->id])
+            ->assertHasNoActionErrors();
+
+        $replica = Training::query()
+            ->where('name', 'Relation Training')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica)->not->toBeNull();
+        expect($replica->employee_id)->toBe($targetEmployee->id);
     });
 
     it('does not copy the certificate file when replicating', function (): void {

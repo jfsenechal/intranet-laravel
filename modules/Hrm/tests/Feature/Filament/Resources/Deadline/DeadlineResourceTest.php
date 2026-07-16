@@ -7,8 +7,11 @@ use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\CreateDeadline;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\EditDeadline;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ListDeadlines;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ViewDeadline;
+use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\DeadlinesRelationManager;
 use AcMarche\Hrm\Models\Deadline;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -135,6 +138,52 @@ describe('crud operations', function (): void {
         expect($replica->employee_id)->toBe($targetEmployee->id);
         expect($replica->is_closed)->toBeTrue();
         expect($replica->closed_date)->not->toBeNull();
+    });
+
+    it('can replicate a deadline to another employee from the employee relation manager', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $record = Deadline::factory()->create([
+            'employee_id' => $employee->id,
+            'name' => 'Relation Deadline',
+        ]);
+        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Livewire::test(DeadlinesRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->callAction(TestAction::make('replicate')->table($record), ['employee_id' => $targetEmployee->id])
+            ->assertHasNoActionErrors();
+
+        $replica = Deadline::query()
+            ->where('name', 'Relation Deadline')
+            ->where('id', '!=', $record->id)
+            ->first();
+
+        expect($replica)->not->toBeNull();
+        expect($replica->employee_id)->toBe($targetEmployee->id);
+    });
+
+    it('does not preselect an agent when opening the replicate modal', function (): void {
+        $record = Deadline::factory()->create();
+
+        Livewire::test(ViewDeadline::class, [
+            'record' => $record->id,
+        ])
+            ->mountAction('replicate')
+            ->assertSchemaStateSet(['employee_id' => null]);
+    });
+
+    it('requires an agent when replicating a deadline', function (): void {
+        $record = Deadline::factory()->create(['name' => 'Unreplicated Deadline']);
+
+        Livewire::test(ViewDeadline::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate', ['employee_id' => null])
+            ->assertHasActionErrors(['employee_id' => 'required']);
+
+        expect(Deadline::query()->where('name', 'Unreplicated Deadline')->count())->toBe(1);
     });
 });
 

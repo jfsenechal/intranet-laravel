@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Deadlines\Tables;
 
+use AcMarche\Hrm\Filament\Actions\ReplicateDeadlineAction;
 use AcMarche\Hrm\Filament\Filters\ContractActiveFilter;
 use AcMarche\Hrm\Filament\Filters\DirectionFilter;
 use AcMarche\Hrm\Filament\Filters\EmployerFilter;
@@ -184,6 +185,7 @@ final class DeadlineTables
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                ReplicateDeadlineAction::make(),
             ])
             ->recordAction(ViewAction::class);
     }
