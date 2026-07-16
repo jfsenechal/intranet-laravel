@@ -47,7 +47,10 @@ it('lets a user who can download share the courrier with recipients', function (
     livewire(ViewIncomingMail::class, ['record' => $mail->id])
         ->assertActionVisible('share')
         ->assertActionHidden('ask')
-        ->callAction('share', ['recipients' => [$recipient->id], 'note' => 'Voici le courrier'])
+        ->mountAction('share')
+        ->assertMountedActionModalSee('Le courrier partira en pièce jointe.')
+        ->fillForm(['recipients' => [$recipient->id], 'note' => 'Voici le courrier'])
+        ->callMountedAction()
         ->assertHasNoActionErrors()
         ->assertNotified();
 
@@ -57,6 +60,21 @@ it('lets a user who can download share the courrier with recipients', function (
             && $sent->incomingMail->is($mail)
             && $sent->note === 'Voici le courrier',
     );
+});
+
+it('requires readers and a note to ask for the attachment', function (): void {
+    $user = User::factory()->create();
+    $user->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]));
+    $this->actingAs($user);
+    Mail::fake();
+
+    $mail = mailWithAttachment(DepartmentCourrierEnum::VILLE->value);
+
+    livewire(ViewIncomingMail::class, ['record' => $mail->id])
+        ->callAction('ask', data: ['readers' => [], 'note' => null])
+        ->assertHasActionErrors(['readers' => 'required', 'note' => 'required']);
+
+    Mail::assertNothingSent();
 });
 
 it('searches share recipients server side instead of listing them all', function (): void {
@@ -106,9 +124,15 @@ it('lets a user who cannot download ask the department attachment readers', func
     $otherDepartment = Recipient::factory()->receivesAttachments()->create();
     $otherDepartment->services()->attach($otherService);
 
-    // Default readers list is pre-filled from the eligible readers only.
+    // Only the eligible readers of the department are offered as options.
+    expect(RecipientRepository::getAttachmentReaderOptions(DepartmentCourrierEnum::VILLE->value)->keys()->all())
+        ->toBe([$reader->id]);
+
     livewire(ViewIncomingMail::class, ['record' => $mail->id])
-        ->callAction('ask', ['note' => 'Merci de me la transmettre'])
+        ->callAction('ask', data: [
+            'readers' => [$reader->id],
+            'note' => 'Merci de me la transmettre',
+        ])
         ->assertHasNoActionErrors()
         ->assertNotified();
 
