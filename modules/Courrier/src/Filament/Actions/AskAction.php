@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\Courrier\Filament\Actions;
 
 use AcMarche\Courrier\Mail\AskAttachment;
@@ -15,12 +17,12 @@ use Filament\Support\Colors\Color;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Facades\Mail;
 
-class AskAction
+final class AskAction
 {
     /**
      * Ask someone who may read the attachment to share it. Only a user who may
-     * not download the attachment can ask for it. The pre-filled list holds the
-     * recipients allowed to read it; the asker may deselect but not add anyone.
+     * not download the attachment can ask for it. The list offers the recipients
+     * allowed to read it; the asker picks at least one but may not add anyone else.
      */
     public static function make(): Action
     {
@@ -28,14 +30,14 @@ class AskAction
             ->label('Demander la pièce jointe')
             ->icon('tabler-help')
             ->color(Color::Amber)
-            ->visible(fn(IncomingMail $record): bool => $record->attachments->isNotEmpty()
-                && !auth()->user()?->can('download', $record->attachments->first()))
+            ->visible(fn (IncomingMail $record): bool => $record->attachments->isNotEmpty()
+                && ! auth()->user()?->can('download', $record->attachments->first()))
             ->modalHeading('Demander la pièce jointe')
             ->schema([
                 CheckboxList::make('readers')
                     ->label('Personnes pouvant accéder à la pièce jointe')
                     ->options(
-                        fn(IncomingMail $record): array => RecipientRepository::getAttachmentReaderOptions(
+                        fn (IncomingMail $record): array => RecipientRepository::getAttachmentReaderOptions(
                             $record->department
                         )->all()
                     )
@@ -44,13 +46,12 @@ class AskAction
                     ->required(),
                 Textarea::make('note')
                     ->label('Message')
-                    ->required()
                     ->rows(4),
             ])
             ->action(function (array $data, IncomingMail $record): void {
                 $asker = auth()->user();
 
-                if (!$asker instanceof User) {
+                if (! $asker instanceof User) {
                     return;
                 }
 
@@ -65,7 +66,7 @@ class AskAction
                             new AskAttachment(
                                 $record,
                                 $asker->fullNameAsString(),
-                                (string)$asker->email,
+                                (string) $asker->email,
                                 $data['note'] ?? null,
                             )
                         );

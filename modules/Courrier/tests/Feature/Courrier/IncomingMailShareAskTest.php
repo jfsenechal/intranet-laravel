@@ -62,7 +62,7 @@ it('lets a user who can download share the courrier with recipients', function (
     );
 });
 
-it('requires readers and a note to ask for the attachment', function (): void {
+it('requires readers to ask for the attachment, but not a note', function (): void {
     $user = User::factory()->create();
     $user->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]));
     $this->actingAs($user);
@@ -72,9 +72,24 @@ it('requires readers and a note to ask for the attachment', function (): void {
 
     livewire(ViewIncomingMail::class, ['record' => $mail->id])
         ->callAction('ask', data: ['readers' => [], 'note' => null])
-        ->assertHasActionErrors(['readers' => 'required', 'note' => 'required']);
+        ->assertHasActionErrors(['readers' => 'required']);
 
     Mail::assertNothingSent();
+
+    // A note stays optional: picking a reader alone is enough to send the ask.
+    $service = Service::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+    $reader = Recipient::factory()->receivesAttachments()->create();
+    $reader->services()->attach($service);
+
+    livewire(ViewIncomingMail::class, ['record' => $mail->id])
+        ->callAction('ask', data: ['readers' => [$reader->id], 'note' => null])
+        ->assertHasNoActionErrors()
+        ->assertNotified();
+
+    Mail::assertSent(
+        AskAttachment::class,
+        fn (AskAttachment $sent): bool => $sent->hasTo($reader->email) && $sent->note === null,
+    );
 });
 
 it('searches share recipients server side instead of listing them all', function (): void {
