@@ -216,6 +216,7 @@ describe('nature filter', function (): void {
         $contractC = Contract::factory()->create(['contract_nature_id' => $natureC->id]);
 
         Livewire::test(ListContracts::class)
+            ->loadTable()
             ->filterTable('contract_nature_id', [$natureA->id, $natureB->id])
             ->assertCanSeeTableRecords([$contractA, $contractB])
             ->assertCanNotSeeTableRecords([$contractC]);
