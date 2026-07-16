@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Sieve;
 
 use Exception;
+use PhpSieveManager\Exceptions\SieveException;
 use PhpSieveManager\ManageSieve\Client;
+use Throwable;
 
 /**
  * ManageSieve scripts for staff accounts, reached with the admin account.
@@ -52,8 +54,14 @@ final class SieveEmploye
 
         $client = new Client($this->host, $this->port);
 
-        if (! $client->connect($this->user, $this->password, false, $asUser)) {
-            throw new Exception($client->getErrorMessage() ?: "Connexion Sieve refusée pour {$asUser}.");
+        try {
+            if (! $client->connect($this->user, $this->password, false, $asUser, $this->authMechanism())) {
+                throw new Exception($this->describeFailure($client, $asUser));
+            }
+        } catch (SieveException $e) {
+            // connect() throws this rather than returning false when authentication is
+            // refused, which would otherwise lose the server's own response.
+            throw new Exception($this->describeFailure($client, $asUser, $e), $e->getCode(), $e);
         }
 
         return $this->client = $client;
@@ -117,5 +125,47 @@ final class SieveEmploye
     {
         $this->client?->close();
         $this->client = null;
+    }
+
+    /**
+     * The mechanism to authenticate with, or null to let the client choose.
+     *
+     * Worth pinning: the client attempts only the first mechanism the server advertises and
+     * gives up rather than trying the rest, so a server offering DIGEST-MD5 never reaches
+     * PLAIN -- which is what admin proxy auth needs.
+     */
+    private function authMechanism(): ?string
+    {
+        $mechanism = config('email-management.sieve.auth_mechanism');
+
+        return is_string($mechanism) && $mechanism !== '' ? $mechanism : null;
+    }
+
+    /**
+     * Adds what the server said, and what it offered, to an otherwise bare failure.
+     */
+    private function describeFailure(Client $client, string $asUser, ?SieveException $e = null): string
+    {
+        $parts = array_filter([
+            $e?->getMessage() ?: "Connexion Sieve refusée pour {$asUser}.",
+            $client->getErrorMessage() ? 'Réponse du serveur : '.$client->getErrorMessage() : null,
+            $this->describeMechanisms($client),
+            'Compte : '.$this->user.', pour : '.$asUser.', serveur : '.$this->host.':'.$this->port,
+        ]);
+
+        return implode(' | ', $parts);
+    }
+
+    private function describeMechanisms(Client $client): ?string
+    {
+        try {
+            $mechanisms = $client->getSASLMechanisms();
+        } catch (Throwable) {
+            return null;
+        }
+
+        return is_array($mechanisms) && $mechanisms !== []
+            ? 'Mécanismes proposés : '.implode(', ', $mechanisms).($this->authMechanism() !== null ? ' (demandé : '.$this->authMechanism().')' : '')
+            : null;
     }
 }

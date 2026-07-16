@@ -34,6 +34,14 @@ return [
         'port' => env('SIEVE_PORT', 4190),
         'user' => env('SIEVE_ADMIN'),
         'password' => env('SIEVE_PWD'),
+
+        /*
+         * Pin the SASL mechanism. The client tries only the first one the server advertises
+         * and then gives up, so a server offering DIGEST-MD5 never falls through to PLAIN,
+         * which is what authenticating as the admin on behalf of an account needs.
+         * Null lets the client pick. See email-management:sieve-check.
+         */
+        'auth_mechanism' => env('SIEVE_AUTH_MECHANISM', 'PLAIN'),
     ],
 
     /*
