@@ -24,8 +24,7 @@ final class ViewEmploye extends ViewRecord
     }
 
     protected function getHeaderActions(): array
-    {
-        return [
+    {        return [
             ActionGroup::make([
                 ViewLdapAction::make($this->record),
                 PasswordLdapAction::make($this->record),

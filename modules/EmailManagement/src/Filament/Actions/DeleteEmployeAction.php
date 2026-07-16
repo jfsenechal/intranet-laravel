@@ -14,9 +14,12 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use LdapRecord\LdapRecordException;
+use Livewire\Features\SupportRedirects\HandlesRedirects;
 
 final class DeleteEmployeAction
 {
+    use HandlesRedirects;
+
     public static function make(Model|Employe $record): Action
     {
         return Action::make('deleteEmploye')
