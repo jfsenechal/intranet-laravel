@@ -25,7 +25,7 @@ final class SieveCheckCommand extends Command
      */
     #[Override]
     protected $signature = 'email-management:sieve-check
-                            {user? : sAMAccountName to act on behalf of, e.g. jfsenechal (not the mail address)}
+                            {user? : sAMAccountName to act on behalf of, e.g. jdupont (not the mail address)}
                             {--mechanism= : force a SASL mechanism, overriding config}';
 
     /**
@@ -105,7 +105,7 @@ final class SieveCheckCommand extends Command
             $this->line('  Pistes :');
 
             if ($asUser !== null && str_contains($asUser, '@')) {
-                $this->line("  - Attendu ici : le sAMAccountName (par exemple jfsenechal), pas l'adresse mail.");
+                $this->line("  - Attendu ici : le sAMAccountName (par exemple judpont), pas l'adresse mail.");
             }
 
             $this->line("  - Le compte {$admin} est-il déclaré master user côté Dovecot (auth_master_user_separator, passdb master) ?");
