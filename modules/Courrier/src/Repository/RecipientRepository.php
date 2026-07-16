@@ -43,6 +43,42 @@ final class RecipientRepository
     }
 
     /**
+     * Share targets whose name matches the search term.
+     *
+     * @return Collection<int, string> keyed by recipient id
+     */
+    public static function searchShareOptions(string $search, int $limit = 50): Collection
+    {
+        return Recipient::query()
+            ->whereNotNull('email')
+            ->where(fn (Builder $query): Builder => $query
+                ->where('last_name', 'like', "%{$search}%")
+                ->orWhere('first_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%"))
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->limit($limit)
+            ->get()
+            ->mapWithKeys(fn (Recipient $r): array => [$r->id => "{$r->last_name} {$r->first_name}"]);
+    }
+
+    /**
+     * Labels of the given share targets, used to render already-selected values.
+     *
+     * @param  array<int, int|string>  $ids
+     * @return Collection<int, string> keyed by recipient id
+     */
+    public static function getShareLabels(array $ids): Collection
+    {
+        return Recipient::query()
+            ->whereIn('id', $ids)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get()
+            ->mapWithKeys(fn (Recipient $r): array => [$r->id => "{$r->last_name} {$r->first_name}"]);
+    }
+
+    /**
      * Recipients who may read the department's attachments: those flagged to
      * receive attachments and, when a department is given, linked to a service
      * of that department. Used as the pre-filled "who can read" list of an ask.

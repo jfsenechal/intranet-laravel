@@ -11,6 +11,7 @@ use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
+use AcMarche\Courrier\Repository\RecipientRepository;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -56,6 +57,20 @@ it('lets a user who can download share the courrier with recipients', function (
             && $sent->incomingMail->is($mail)
             && $sent->note === 'Voici le courrier',
     );
+});
+
+it('searches share recipients server side instead of listing them all', function (): void {
+    $match = Recipient::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Jean']);
+    $other = Recipient::factory()->create(['last_name' => 'Martin', 'first_name' => 'Paul']);
+
+    $results = RecipientRepository::searchShareOptions('dupo');
+
+    expect($results->keys()->all())->toBe([$match->id])
+        ->and($results->get($match->id))->toBe('Dupont Jean')
+        ->and($results->has($other->id))->toBeFalse();
+
+    expect(RecipientRepository::getShareLabels([$other->id])->all())
+        ->toBe([$other->id => 'Martin Paul']);
 });
 
 it('hides the share action from a user who cannot download', function (): void {

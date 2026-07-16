@@ -9,7 +9,7 @@ use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use Filament\Actions\Action;
-use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Mail\Mailables\Address;
@@ -30,13 +30,20 @@ final class ShareAction
             ->visible(fn (IncomingMail $record): bool => $record->attachments->isNotEmpty()
                 && auth()->user()?->can('download', $record->attachments->first()))
             ->modalHeading('Partager le courrier')
+            ->modalDescription('Le courrier partira en pièce jointe.')
             ->schema([
-                CheckboxList::make('recipients')
+                Select::make('recipients')
                     ->label('Destinataires')
-                    ->options(fn (): array => RecipientRepository::getShareOptions()->all())
+                    ->multiple()
                     ->searchable()
-                    ->bulkToggleable()
-                    ->columns(2)
+                    ->getSearchResultsUsing(
+                        fn (string $search): array => RecipientRepository::searchShareOptions($search)->all(),
+                    )
+                    ->getOptionLabelsUsing(
+                        fn (array $values): array => RecipientRepository::getShareLabels($values)->all(),
+                    )
+                    ->searchPrompt('Rechercher un destinataire par nom ou email')
+                    ->noSearchResultsMessage('Aucun destinataire trouvé.')
                     ->required(),
                 Textarea::make('note')
                     ->label('Message')

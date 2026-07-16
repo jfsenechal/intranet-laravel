@@ -39,15 +39,12 @@ class AskAction
                             $record->department
                         )->all()
                     )
-                    ->default(
-                        fn(IncomingMail $record): array => RecipientRepository::getAttachmentReaderOptions(
-                            $record->department
-                        )->keys()->all()
-                    )
+                    ->bulkToggleable()
                     ->columns(2)
                     ->required(),
                 Textarea::make('note')
                     ->label('Message')
+                    ->required()
                     ->rows(4),
             ])
             ->action(function (array $data, IncomingMail $record): void {
