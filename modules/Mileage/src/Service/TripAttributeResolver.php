@@ -35,6 +35,32 @@ final class TripAttributeResolver
             ->first();
     }
 
+    /**
+     * Apply a rate to every trip within its period that is not yet linked to a
+     * declaration. Declared trips are left untouched: their rate is a snapshot
+     * of what was declared, and correcting those is the job of the
+     * mileage:verify-trip-rates command.
+     *
+     * @return int The number of trips updated.
+     */
+    public function applyRateToUndeclaredTrips(Rate $rate): int
+    {
+        return Trip::query()
+            ->where(function ($query): void {
+                $query->whereNull('declaration_id')
+                    ->orWhere('declaration_id', '<=', 0);
+            })
+            ->where('departure_date', '>=', $rate->start_date)
+            ->when(
+                $rate->end_date !== null,
+                fn ($query) => $query->where('departure_date', '<=', $rate->end_date),
+            )
+            ->update([
+                'rate' => $rate->amount,
+                'omnium' => $rate->omnium,
+            ]);
+    }
+
     public function setTypeOfMovement(Trip $trip): void
     {
         $isExternal = filled($trip->departure_location)

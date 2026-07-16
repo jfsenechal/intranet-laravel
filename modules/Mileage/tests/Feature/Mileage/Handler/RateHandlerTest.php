@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\Rate;
+use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Validator\RateOverlapValidator;
 
 describe('hasOverlappingRate', function (): void {
@@ -184,5 +186,167 @@ describe('hasOverlappingRate', function (): void {
         $hasOverlap = RateOverlapValidator::hasOverlappingRate('2024-07-01', '2024-12-31', null);
 
         expect($hasOverlap)->toBeFalse();
+    });
+});
+
+describe('rate creation back-fills undeclared trips', function (): void {
+    test('applies the new rate to undeclared trips within its period', function (): void {
+        $trip = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+            'omnium' => 0.01,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        expect($trip->refresh()->rate)->toBe('0.4400')
+            ->and($trip->omnium)->toBe('0.0300');
+    });
+
+    test('leaves trips already linked to a declaration untouched', function (): void {
+        $declaration = Declaration::factory()->create();
+
+        $trip = Trip::factory()->create([
+            'declaration_id' => $declaration->id,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+            'omnium' => 0.01,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        expect($trip->refresh()->rate)->toBe('0.3000')
+            ->and($trip->omnium)->toBe('0.0100');
+    });
+
+    test('leaves undeclared trips outside the rate period untouched', function (): void {
+        $before = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2023-12-31 08:00:00',
+            'rate' => 0.30,
+        ]);
+
+        $after = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2025-01-01 08:00:00',
+            'rate' => 0.30,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        expect($before->refresh()->rate)->toBe('0.3000')
+            ->and($after->refresh()->rate)->toBe('0.3000');
+    });
+});
+
+describe('rate updates re-apply to undeclared trips', function (): void {
+    test('applies a corrected amount to undeclared trips in the period', function (): void {
+        $trip = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+            'omnium' => 0.01,
+        ]);
+
+        $rate = Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $rate->update([
+            'amount' => 0.50,
+            'omnium' => 0.05,
+        ]);
+
+        expect($trip->refresh()->rate)->toBe('0.5000')
+            ->and($trip->omnium)->toBe('0.0500');
+    });
+
+    test('leaves trips already linked to a declaration untouched', function (): void {
+        $declaration = Declaration::factory()->create();
+
+        $trip = Trip::factory()->create([
+            'declaration_id' => $declaration->id,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+            'omnium' => 0.01,
+        ]);
+
+        $rate = Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $rate->update(['amount' => 0.50]);
+
+        expect($trip->refresh()->rate)->toBe('0.3000')
+            ->and($trip->omnium)->toBe('0.0100');
+    });
+
+    test('picks up trips brought into the period by an extended end date', function (): void {
+        $trip = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2025-03-01 08:00:00',
+            'rate' => 0.30,
+        ]);
+
+        $rate = Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        expect($trip->refresh()->rate)->toBe('0.3000');
+
+        $rate->update(['end_date' => '2025-12-31']);
+
+        expect($trip->refresh()->rate)->toBe('0.4400');
+    });
+
+    test('does not rewrite trips when no rate value changed', function (): void {
+        $trip = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+        ]);
+
+        $rate = Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        // Diverge the trip behind the observer's back, then save the rate
+        // without touching any value a trip copies. Travelling forward keeps
+        // the touch a real update, otherwise updated_at is unchanged and the
+        // save short-circuits before the observer ever runs.
+        Trip::query()->whereKey($trip->id)->update(['rate' => 0.30]);
+
+        $this->travel(1)->minutes();
+        $rate->touch();
+
+        expect($trip->refresh()->rate)->toBe('0.3000');
     });
 });
