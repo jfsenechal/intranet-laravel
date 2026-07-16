@@ -38,3 +38,19 @@
 .dark .meal-week-grid .fi-ta-table thead th {
     background-color: var(--gray-900);
 }
+
+/*
+ * Rich editor: keep the toolbar reachable while scrolling through long content.
+ * It sticks within the editor's own box, below the panel's sticky topbar.
+ * The background is required because the toolbar is transparent by default.
+ */
+.fi-fo-rich-editor-toolbar {
+    position: sticky;
+    top: 4rem;
+    z-index: 10;
+    background-color: var(--color-white);
+}
+
+.dark .fi-fo-rich-editor-toolbar {
+    background-color: var(--gray-900);
+}
