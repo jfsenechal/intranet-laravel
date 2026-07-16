@@ -3,9 +3,23 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Validator\RateOverlapValidator;
+use App\Models\User;
+
+/**
+ * Trips are stamped with the acting user's username by HasUserAdd, so making
+ * them an entitled beneficiary is what lets the omnium apply.
+ */
+function entitleActingUserToOmnium(): void
+{
+    PersonalInformation::factory()->create([
+        'username' => auth()->user()->username,
+        'omnium' => true,
+    ]);
+}
 
 describe('hasOverlappingRate', function (): void {
     test('detects overlap when new range starts before existing range ends', function (): void {
@@ -190,6 +204,8 @@ describe('hasOverlappingRate', function (): void {
 });
 
 describe('rate creation back-fills undeclared trips', function (): void {
+    beforeEach(fn () => entitleActingUserToOmnium());
+
     test('applies the new rate to undeclared trips within its period', function (): void {
         $trip = Trip::factory()->create([
             'declaration_id' => null,
@@ -256,6 +272,8 @@ describe('rate creation back-fills undeclared trips', function (): void {
 });
 
 describe('rate updates re-apply to undeclared trips', function (): void {
+    beforeEach(fn () => entitleActingUserToOmnium());
+
     test('applies a corrected amount to undeclared trips in the period', function (): void {
         $trip = Trip::factory()->create([
             'declaration_id' => null,
@@ -348,5 +366,45 @@ describe('rate updates re-apply to undeclared trips', function (): void {
         $rate->touch();
 
         expect($trip->refresh()->rate)->toBe('0.3000');
+    });
+});
+
+describe('back-fill honours each beneficiary omnium entitlement', function (): void {
+    test('gives the omnium only to entitled beneficiaries', function (): void {
+        entitleActingUserToOmnium();
+
+        $entitledTrip = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+            'omnium' => 0.01,
+        ]);
+
+        $other = User::factory()->create();
+        $this->actingAs($other);
+        PersonalInformation::factory()->create([
+            'username' => $other->username,
+            'omnium' => false,
+        ]);
+
+        $notEntitledTrip = Trip::factory()->create([
+            'declaration_id' => null,
+            'departure_date' => '2024-06-15 08:00:00',
+            'rate' => 0.30,
+            'omnium' => 0.01,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        // Both get the new rate; only the entitled one carries the omnium.
+        expect($entitledTrip->refresh()->rate)->toBe('0.4400')
+            ->and($entitledTrip->omnium)->toBe('0.0300')
+            ->and($notEntitledTrip->refresh()->rate)->toBe('0.4400')
+            ->and($notEntitledTrip->omnium)->toBe('0.0000');
     });
 });

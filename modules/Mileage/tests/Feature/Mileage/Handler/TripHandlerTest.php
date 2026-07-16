@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\TypeMovementEnum;
+use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Service\TripAttributeResolver;
@@ -11,6 +12,16 @@ use App\Models\User;
 beforeEach(function (): void {
     $this->handler = new TripAttributeResolver();
     $this->user = User::factory()->create();
+
+    // HasUserAdd stamps user_add from the authenticated user, so the acting
+    // user is the beneficiary these trips belong to. The omnium only applies
+    // to a beneficiary entitled to it, and the factory randomises the
+    // entitlement, hence setting it explicitly.
+    $this->actingAs($this->user);
+    PersonalInformation::factory()->create([
+        'username' => $this->user->username,
+        'omnium' => true,
+    ]);
 });
 
 describe('setRate', function (): void {
@@ -310,5 +321,58 @@ describe('setTypeOfMovement', function (): void {
         $this->handler->setTypeOfMovement($trip);
 
         expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
+    });
+});
+
+describe('omnium entitlement', function (): void {
+    test('applies the omnium to an entitled beneficiary', function (): void {
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $trip = Trip::factory()->create(['departure_date' => '2024-06-15']);
+
+        expect($trip->rate)->toBe('0.4400')
+            ->and($trip->omnium)->toBe('0.0300');
+    });
+
+    test('zeroes the omnium for a beneficiary without omnium coverage', function (): void {
+        $beneficiary = User::factory()->create();
+        $this->actingAs($beneficiary);
+        PersonalInformation::factory()->create([
+            'username' => $beneficiary->username,
+            'omnium' => false,
+        ]);
+
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $trip = Trip::factory()->create(['departure_date' => '2024-06-15']);
+
+        expect($trip->rate)->toBe('0.4400')
+            ->and($trip->omnium)->toBe('0.0000');
+    });
+
+    test('zeroes the omnium for a beneficiary with no personal information', function (): void {
+        $this->actingAs(User::factory()->create());
+
+        Rate::factory()->create([
+            'amount' => 0.44,
+            'omnium' => 0.03,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+
+        $trip = Trip::factory()->create(['departure_date' => '2024-06-15']);
+
+        expect($trip->rate)->toBe('0.4400')
+            ->and($trip->omnium)->toBe('0.0000');
     });
 });
