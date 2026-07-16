@@ -120,37 +120,6 @@ final class ImapEmploye
         return $quota;
     }
 
-    /**
-     * Creates the account's mailbox and its default folders, skipping whatever already
-     * exists so that a partially created account can be repaired by running this again.
-     *
-     * @throws Exception
-     */
-    public function createMailBox(string $user): void
-    {
-        try {
-            $this->connect($user);
-
-            $root = 'user/'.$user;
-
-            if ($this->mailbox->folders()->find($root) === null) {
-                $this->mailbox->folders()->create($root);
-            }
-
-            foreach (self::DEFAULT_FOLDERS as $folderName) {
-                $path = $root.'/'.$folderName;
-
-                if ($this->mailbox->folders()->find($path) === null) {
-                    $this->mailbox->folders()->create($path);
-                }
-            }
-        } catch (ImapConnectionFailedException $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e);
-        } finally {
-            $this->close();
-        }
-    }
-
     public function close(): void
     {
         $this->mailbox?->disconnect();

@@ -22,7 +22,8 @@ final class EmployeHandler
     public function __construct(
         private readonly EmployeLdapRepository $employeLdapRepository,
         private readonly ImapEmploye $imapEmploye,
-    ) {}
+    ) {
+    }
 
     /**
      * Sets the mailbox quota, in megabytes.
@@ -42,27 +43,35 @@ final class EmployeHandler
     /**
      * Replaces the account's alias addresses.
      *
-     * @param  array<int, string>  $aliases
+     * @param array<int, string> $aliases
      *
      * @throws Exception
      * @throws LdapRecordException
      */
     public function updateAliases(Employe $employe, array $aliases): void
     {
-        $aliases = array_values(array_unique(array_filter(array_map(
-            static fn (string $alias): string => mb_trim($alias),
-            $aliases,
-        ))));
+        $aliases = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        static fn(string $alias): string => mb_trim($alias),
+                        $aliases,
+                    )
+                )
+            )
+        );
 
         foreach ($aliases as $alias) {
-            if (! filter_var($alias, FILTER_VALIDATE_EMAIL)) {
+            if (!filter_var($alias, FILTER_VALIDATE_EMAIL)) {
                 throw new Exception("L'alias {$alias} n'a pas un format valide.");
             }
 
             $owner = $this->employeLdapRepository->findMailOwner($alias, $employe->samaccountname);
 
             if ($owner !== null) {
-                throw new Exception("L'adresse {$alias} est déjà utilisée par {$owner->getFirstAttribute('samaccountname')}.");
+                throw new Exception(
+                    "L'adresse {$alias} est déjà utilisée par {$owner->getFirstAttribute('samaccountname')}."
+                );
             }
         }
 
@@ -86,11 +95,11 @@ final class EmployeHandler
     {
         $mail = mb_trim($mail);
 
-        if (! filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
             throw new Exception("L'adresse {$mail} n'a pas un format valide.");
         }
 
-        if (! $force) {
+        if (!$force) {
             $owner = $this->employeLdapRepository->findMailOwner($mail, $employe->samaccountname);
 
             if ($owner !== null) {
@@ -103,15 +112,13 @@ final class EmployeHandler
         $ldapEntry = $this->requireEntry($employe);
 
         $this->employeLdapRepository->updateEmail($ldapEntry, $mail);
-        $this->employeLdapRepository->setQuota($ldapEntry, (float) config('email-management.default_quota_mb'));
+        $this->employeLdapRepository->setQuota($ldapEntry, (float)config('email-management.default_quota_mb'));
 
         $employe->update(['mail' => $mail, 'sync_at' => now()]);
 
-        if (! $this->imapEmploye->isConfigured()) {
+        if (!$this->imapEmploye->isConfigured()) {
             return false;
         }
-
-        $this->imapEmploye->createMailBox($employe->samaccountname);
 
         return true;
     }
@@ -167,7 +174,9 @@ final class EmployeHandler
         }
 
         if ($seen === []) {
-            throw new Exception("L'annuaire n'a renvoyé aucun employé exploitable. Aucune fiche locale n'a été supprimée.");
+            throw new Exception(
+                "L'annuaire n'a renvoyé aucun employé exploitable. Aucune fiche locale n'a été supprimée."
+            );
         }
 
         Employe::whereNotIn('samaccountname', $seen)->delete();
@@ -182,7 +191,7 @@ final class EmployeHandler
     {
         $ldapEntry = $this->employeLdapRepository->getEntry($employe->samaccountname);
 
-        if (! $ldapEntry instanceof EmployeLdap) {
+        if (!$ldapEntry instanceof EmployeLdap) {
             throw new Exception("{$employe->samaccountname} est introuvable dans l'annuaire.");
         }
 
