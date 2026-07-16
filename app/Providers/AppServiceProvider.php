@@ -4,15 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Filament\Forms\Components\Field;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Infolists\Components\Entry;
-use Filament\Support\Components\Component;
-use Filament\Support\Concerns\Configurable;
 use Filament\Support\Facades\FilamentView;
-use Filament\Tables\Columns\Column;
-use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
@@ -30,7 +23,6 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureTable();
-        //   $this->translatableComponents();
         if (! app()->environment('production') && config('mail.redirect_to')) {
             Mail::alwaysTo(config('mail.redirect_to'));
         }
@@ -45,17 +37,6 @@ final class AppServiceProvider extends ServiceProvider
                 PanelsRenderHook::BODY_END,
                 fn (): HtmlString => new HtmlString('<script src="http://localhost:8400/live.js"></script>'),
             );
-        }
-    }
-
-    private function translatableComponents(): void
-    {
-        foreach ([Field::class, BaseFilter::class, Placeholder::class, Column::class, Entry::class] as $component) {
-            /* @var Configurable $component */
-            $component::configureUsing(function (Component $translatable): void {
-                /** @phpstan-ignore method.notFound */
-                $translatable->translateLabel();
-            });
         }
     }
 
