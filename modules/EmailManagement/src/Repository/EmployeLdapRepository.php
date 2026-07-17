@@ -138,8 +138,10 @@ final class EmployeLdapRepository
     }
 
     /**
-     * The directory does not return sAMAccountName under the default '*' selection, and it is
-     * the key the local mirror is built on, so it has to be asked for by name.
+     * sAMAccountName is selected by name on top of '*' because all() sorts by it: orderBy() asks
+     * the directory for a server-side sort, and Active Directory returns the sort key stripped
+     * from every entry unless it is named in the selection. It is the key the local mirror is
+     * built on, so it cannot be allowed to come back empty.
      */
     private function query(): \LdapRecord\Query\Model\Builder
     {

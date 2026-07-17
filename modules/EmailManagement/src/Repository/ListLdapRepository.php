@@ -92,8 +92,14 @@ final class ListLdapRepository
         $entry->update();
     }
 
+    /**
+     * cn is selected by name on top of '*' because all() sorts by it: orderBy() asks the
+     * directory for a server-side sort, and Active Directory returns the sort key stripped from
+     * every entry unless it is named in the selection. cn is the identity of a list and the key
+     * the table rows are tracked by, so losing it collapses every row into one.
+     */
     private function query(ListOuEnum $ou): \LdapRecord\Query\Model\Builder
     {
-        return ListAliasLdap::query()->in($ou->baseDn());
+        return ListAliasLdap::query()->in($ou->baseDn())->select(['*', 'cn']);
     }
 }
