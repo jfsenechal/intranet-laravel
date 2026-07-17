@@ -6,6 +6,7 @@ namespace AcMarche\MealDelivery\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\MealDelivery\Console\Commands\PruneAbsencesCommand;
+use AcMarche\MealDelivery\Service\ClientDietOptions;
 use Illuminate\Support\ServiceProvider;
 
 final class MealDeliveryServiceProvider extends ServiceProvider
@@ -17,6 +18,8 @@ final class MealDeliveryServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerModuleConfig();
+
+        $this->app->scoped(ClientDietOptions::class);
     }
 
     public function boot(): void
