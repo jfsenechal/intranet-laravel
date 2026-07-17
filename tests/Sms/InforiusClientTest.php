@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use AcMarche\App\Sms\InforiusClient;
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 
 function smsFake(array $responses): HttpFactory
@@ -13,7 +15,7 @@ function smsFake(array $responses): HttpFactory
     return $http;
 }
 
-function buildClient(HttpFactory $http, ?string $sender = null): InforiusClient
+function buildClient(HttpFactory $http, ?string $sender = null, ?CacheRepository $cache = null): InforiusClient
 {
     return new InforiusClient(
         host: 'https://ecom.example.test/Api/',
@@ -21,6 +23,7 @@ function buildClient(HttpFactory $http, ?string $sender = null): InforiusClient
         password: 'secret',
         sender: $sender,
         http: $http,
+        cache: $cache,
     );
 }
 
@@ -100,6 +103,54 @@ XML
     $client->sendSms('0476123456', 'second');
 
     $http->assertSentCount(3);
+});
+
+test('sendSms reuses a token cached in the injected store across instances', function (): void {
+    $http = smsFake([
+        'ecom.example.test/Api/RequestToken' => HttpFactory::response(
+            <<<'XML'
+<RequestTokenResponse xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+    <Error i:nil="true"/>
+    <Expiration>1200000</Expiration>
+    <Token>token-xyz</Token>
+</RequestTokenResponse>
+XML
+        ),
+        'ecom.example.test/Api/Send' => HttpFactory::response(
+            '<SendMessageResponse><Balance>0</Balance><Messages/></SendMessageResponse>'
+        ),
+    ]);
+
+    $cache = new CacheRepository(new ArrayStore);
+
+    buildClient($http, cache: $cache)->sendSms('0476123456', 'first');
+    buildClient($http, cache: $cache)->sendSms('0476123456', 'second');
+
+    // One token request shared by both clients, plus the two sends.
+    $http->assertSentCount(3);
+});
+
+test('sendSms does not cache the token beyond its own instance without a store', function (): void {
+    $http = smsFake([
+        'ecom.example.test/Api/RequestToken' => HttpFactory::response(
+            <<<'XML'
+<RequestTokenResponse xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+    <Error i:nil="true"/>
+    <Expiration>1200000</Expiration>
+    <Token>token-xyz</Token>
+</RequestTokenResponse>
+XML
+        ),
+        'ecom.example.test/Api/Send' => HttpFactory::response(
+            '<SendMessageResponse><Balance>0</Balance><Messages/></SendMessageResponse>'
+        ),
+    ]);
+
+    buildClient($http)->sendSms('0476123456', 'first');
+    buildClient($http)->sendSms('0476123456', 'second');
+
+    // Each client requests its own token: 2 tokens plus the two sends.
+    $http->assertSentCount(4);
 });
 
 test('sendSms includes a sender tag when configured', function (): void {
