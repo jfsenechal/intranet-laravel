@@ -39,6 +39,48 @@ it('sends a deadline reminder for an employee with an active contract', function
     );
 });
 
+it('sends a deadline reminder for an employee whose contract is no longer active', function (): void {
+    $employee = Employee::factory()->create();
+    Contract::factory()->create([
+        'employee_id' => $employee->id,
+        'employer_id' => $this->employer->id,
+        'is_closed' => true,
+        'is_suspended' => true,
+        'end_date' => Carbon::yesterday(),
+    ]);
+
+    $deadline = Deadline::factory()->create([
+        'employee_id' => $employee->id,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline) && $mail->reminderType === 'Échéance',
+    );
+});
+
+it('does not send a deadline for an employee contracted to another department', function (): void {
+    $otherEmployer = Employer::factory()->create(['slug' => 'cpas']);
+
+    $employee = Employee::factory()->create();
+    Contract::factory()->create([
+        'employee_id' => $employee->id,
+        'employer_id' => $otherEmployer->id,
+    ]);
+
+    Deadline::factory()->create([
+        'employee_id' => $employee->id,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertNotSent(ReminderMail::class);
+});
+
 it('sends a deadline reminder for a deadline without an employee scoped to the department', function (): void {
     $deadline = Deadline::factory()->create([
         'employee_id' => null,

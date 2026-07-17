@@ -107,14 +107,14 @@ final class ReminderCommand extends Command
     }
 
     /**
-     * Restrict a query to records whose employee has at least one active
-     * contract within the given employer set.
+     * Restrict a query to records whose employee has at least one contract
+     * within the given employer set.
      *
      * @param  list<int>  $employerIds
      */
-    private function whereEmployeeHasActiveContract(Builder $query, array $employerIds): void
+    private function whereEmployeeBelongsToEmployers(Builder $query, array $employerIds): void
     {
-        $query->whereHas('employee.activeContracts', function (Builder $contracts) use ($employerIds): void {
+        $query->whereHas('employee.contracts', function (Builder $contracts) use ($employerIds): void {
             $contracts->whereIn('employer_id', $employerIds);
         });
     }
@@ -142,7 +142,7 @@ final class ReminderCommand extends Command
     {
         Absence::query()
             ->whereDate('reminder_date', $today)
-            ->tap(fn (Builder $query) => $this->whereEmployeeHasActiveContract($query, $employerIds))
+            ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
             ->with('employee')
             ->get()
             ->each(function (Absence $absence) use ($recipients): void {
@@ -165,7 +165,7 @@ final class ReminderCommand extends Command
         Deadline::query()
             ->whereDate('reminder_date', $today)
             ->where(function (Builder $query) use ($employerIds): void {
-                $this->whereEmployeeHasActiveContract($query, $employerIds);
+                $this->whereEmployeeBelongsToEmployers($query, $employerIds);
 
                 // Deadlines without an employee still belong to a department
                 // through their own employer, so include those too.
@@ -195,7 +195,7 @@ final class ReminderCommand extends Command
     {
         Contract::query()
             ->whereDate('reminder_date', $today)
-            ->tap(fn (Builder $query) => $this->whereEmployeeHasActiveContract($query, $employerIds))
+            ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
             ->with('employee')
             ->get()
             ->each(function (Contract $contract) use ($recipients): void {
@@ -292,7 +292,7 @@ final class ReminderCommand extends Command
     {
         Training::query()
             ->whereDate('reminder_date', $today)
-            ->tap(fn (Builder $query) => $this->whereEmployeeHasActiveContract($query, $employerIds))
+            ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
             ->with('employee')
             ->get()
             ->each(function (Training $training) use ($recipients): void {
@@ -317,7 +317,7 @@ final class ReminderCommand extends Command
                 $query->whereDate('reminder_date', $today)
                     ->orWhereDate('other_reminder_date', $today);
             })
-            ->tap(fn (Builder $query) => $this->whereEmployeeHasActiveContract($query, $employerIds))
+            ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
             ->with('employee')
             ->get()
             ->each(function (SmsReminder $sms) use ($recipients): void {
