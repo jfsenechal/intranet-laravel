@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Meals\Schemas;
 
 use AcMarche\MealDelivery\Service\ClientDietOptions;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -31,9 +31,8 @@ final class MealForm
                 ->minValue(0)
                 ->default(0),
 
-            Select::make('menu_1_diets')
+            CheckboxList::make('menu_1_diets')
                 ->label('Régimes menu 1')
-                ->multiple()
                 ->options(fn (Get $get): array => self::clientDietOptions($get))
                 ->default([]),
 
@@ -43,9 +42,8 @@ final class MealForm
                 ->minValue(0)
                 ->default(0),
 
-            Select::make('menu_2_diets')
+            CheckboxList::make('menu_2_diets')
                 ->label('Régimes menu 2')
-                ->multiple()
                 ->options(fn (Get $get): array => self::clientDietOptions($get))
                 ->default([]),
 
