@@ -7,6 +7,7 @@ use AcMarche\MealDelivery\Filament\Resources\Orders\Pages\CreateOrder;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
+use AcMarche\MealDelivery\Models\Diet;
 use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use App\Models\User;
@@ -190,4 +191,68 @@ it('exposes the at_cafeteria toggle on the meal form and binds it', function ():
                 ],
             ],
         ]);
+});
+
+it('attaches the selected diets to the matching menu of each meal', function (): void {
+    $saltFree = Diet::create(['name' => 'Sans sel']);
+    $sugarFree = Diet::create(['name' => 'Sans sucre']);
+    $this->client->diets()->attach([$saltFree->id, $sugarFree->id]);
+
+    Livewire::withQueryParams([
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]);
+
+    livewire(CreateOrder::class)
+        ->fillForm([
+            'week_id' => $this->week->id,
+            'client_id' => $this->client->id,
+            'is_last_meal' => false,
+            'meals' => [[
+                'date' => '2026-06-15',
+                'soup_count' => 0,
+                'menu_1' => 1,
+                'menu_1_diets' => [$saltFree->id],
+                'menu_2' => 1,
+                'menu_2_diets' => [$saltFree->id, $sugarFree->id],
+                'at_cafeteria' => false,
+                'notes' => null,
+            ]],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $menus = Order::query()
+        ->where('week_id', $this->week->id)
+        ->where('client_id', $this->client->id)
+        ->sole()
+        ->meals()
+        ->sole()
+        ->menus()
+        ->with('diets')
+        ->get();
+
+    expect($menus->firstWhere('position', 1)->diets->pluck('id')->all())
+        ->toBe([$saltFree->id])
+        ->and($menus->firstWhere('position', 2)->diets->pluck('id')->sort()->values()->all())
+        ->toBe(collect([$saltFree->id, $sugarFree->id])->sort()->values()->all());
+});
+
+it('only offers the diets owned by the client in the meal diet selects', function (): void {
+    $owned = Diet::create(['name' => 'Sans sel']);
+    Diet::create(['name' => 'Régime de quelqu\'un d\'autre']);
+    $this->client->diets()->attach($owned->id);
+
+    Livewire::withQueryParams([
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]);
+
+    $this->get(OrderResource::getUrl('create', [
+        'week_id' => $this->week->id,
+        'client_id' => $this->client->id,
+    ]))
+        ->assertOk()
+        ->assertSee('Sans sel')
+        ->assertDontSee('Régime de quelqu\'un d\'autre');
 });

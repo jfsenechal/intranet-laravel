@@ -85,7 +85,9 @@ final class CreateOrder extends CreateRecord
                     'date' => $day,
                     'soup_count' => 0,
                     'menu_1' => 0,
+                    'menu_1_diets' => [],
                     'menu_2' => 0,
+                    'menu_2_diets' => [],
                     'at_cafeteria' => $atCafeteria,
                     'notes' => null,
                 ])
@@ -184,13 +186,13 @@ final class CreateOrder extends CreateRecord
                     'meal_id' => $meal->id,
                     'position' => 1,
                     'quantity' => $menu1,
-                ]);
+                ])->diets()->sync($mealData['menu_1_diets'] ?? []);
 
                 Menu::query()->create([
                     'meal_id' => $meal->id,
                     'position' => 2,
                     'quantity' => $menu2,
-                ]);
+                ])->diets()->sync($mealData['menu_2_diets'] ?? []);
             }
 
             return $order;

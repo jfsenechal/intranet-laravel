@@ -64,7 +64,7 @@ final class EditOrder extends EditRecord
         $order = $this->record;
 
         $existingMeals = $order->meals()
-            ->with('menus')
+            ->with('menus.diets')
             ->orderBy('date')
             ->get()
             ->keyBy(fn (Meal $meal): string => $meal->date->format('Y-m-d'));
@@ -82,11 +82,16 @@ final class EditOrder extends EditRecord
                 $meal = $existingMeals->get($day);
                 $menus = $meal?->menus ?? collect();
 
+                $menu1 = $menus->firstWhere('position', 1);
+                $menu2 = $menus->firstWhere('position', 2);
+
                 return [
                     'date' => $day,
                     'soup_count' => (int) ($meal->soup_count ?? 0),
-                    'menu_1' => (int) ($menus->firstWhere('position', 1)->quantity ?? 0),
-                    'menu_2' => (int) ($menus->firstWhere('position', 2)->quantity ?? 0),
+                    'menu_1' => (int) ($menu1->quantity ?? 0),
+                    'menu_1_diets' => self::dietIds($menu1),
+                    'menu_2' => (int) ($menu2->quantity ?? 0),
+                    'menu_2_diets' => self::dietIds($menu2),
                     'at_cafeteria' => (bool) ($meal->at_cafeteria ?? false),
                     'notes' => $meal->notes ?? null,
                 ];
@@ -139,8 +144,8 @@ final class EditOrder extends EditRecord
 
                 $keptMealIds[] = $meal->id;
 
-                self::upsertMenu($meal, 1, (int) ($mealData['menu_1'] ?? 0));
-                self::upsertMenu($meal, 2, (int) ($mealData['menu_2'] ?? 0));
+                self::upsertMenu($meal, 1, (int) ($mealData['menu_1'] ?? 0), $mealData['menu_1_diets'] ?? []);
+                self::upsertMenu($meal, 2, (int) ($mealData['menu_2'] ?? 0), $mealData['menu_2_diets'] ?? []);
             }
 
             $record->meals()
@@ -151,20 +156,31 @@ final class EditOrder extends EditRecord
         });
     }
 
-    private static function upsertMenu(Meal $meal, int $position, int $quantity): void
+    /**
+     * @return array<int, int>
+     */
+    private static function dietIds(?Menu $menu): array
+    {
+        return $menu?->diets->pluck('id')->all() ?? [];
+    }
+
+    /**
+     * @param  array<int, int|string>  $dietIds
+     */
+    private static function upsertMenu(Meal $meal, int $position, int $quantity, array $dietIds): void
     {
         $menu = $meal->menus->firstWhere('position', $position);
 
         if ($menu instanceof Menu) {
             $menu->update(['quantity' => $quantity]);
-
-            return;
+        } else {
+            $menu = Menu::query()->create([
+                'meal_id' => $meal->id,
+                'position' => $position,
+                'quantity' => $quantity,
+            ]);
         }
 
-        Menu::query()->create([
-            'meal_id' => $meal->id,
-            'position' => $position,
-            'quantity' => $quantity,
-        ]);
+        $menu->diets()->sync($dietIds);
     }
 }
