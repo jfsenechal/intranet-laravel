@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string|null $phone_number
+ * @property string|null $message
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'employee_id',

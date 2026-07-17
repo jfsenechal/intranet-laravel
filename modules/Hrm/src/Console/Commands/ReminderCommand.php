@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Console\Commands;
 
+use AcMarche\App\Sms\InforiusClient;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Console\Command\Command as SfCommand;
+use Throwable;
 
 final class ReminderCommand extends Command
 {
@@ -320,20 +322,71 @@ final class ReminderCommand extends Command
             ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
             ->with('employee')
             ->get()
-            ->each(function (SmsReminder $sms) use ($recipients): void {
-                $this->dispatchMail(
-                    $recipients,
-                    'SMS',
-                    $sms,
-                    ViewSmsReminder::getUrl(['record' => $sms]),
-                    $sms->employee,
-                );
+            ->each(fn (SmsReminder $sms) => $this->sendSmsReminder($sms, $recipients));
+    }
 
-                $sms->forceFill([
-                    'sent_at' => Carbon::now(),
-                    'result' => 'sent to '.implode(', ', $recipients),
-                ])->save();
-            });
+    /**
+     * Send one reminder through the SMS gateway. The outcome is always recorded
+     * on the reminder; recipients are only mailed when the send fails, so the
+     * failure does not go unnoticed.
+     *
+     * @param  list<string>  $recipients
+     */
+    private function sendSmsReminder(SmsReminder $sms, array $recipients): void
+    {
+        $number = (string) $sms->phone_number;
+        $message = mb_trim(strip_tags((string) $sms->message));
+
+        if ($number === '' || $message === '') {
+            $this->recordSmsFailure($sms, $recipients, 'Numéro et message obligatoires');
+
+            return;
+        }
+
+        try {
+            $response = app(InforiusClient::class)->sendSms(
+                number: $number,
+                message: $message,
+                customerReference: 'reminder-'.$number,
+            );
+        } catch (Throwable $exception) {
+            $this->recordSmsFailure($sms, $recipients, $exception->getMessage());
+
+            return;
+        }
+
+        if (! $response->isSuccessful()) {
+            $this->recordSmsFailure(
+                $sms,
+                $recipients,
+                $response->error ?? $response->messages[0]->errorMessage ?? 'Erreur inconnue',
+            );
+
+            return;
+        }
+
+        $sms->forceFill([
+            'sent_at' => Carbon::now(),
+            'result' => 'OK',
+        ])->save();
+    }
+
+    /**
+     * @param  list<string>  $recipients
+     */
+    private function recordSmsFailure(SmsReminder $sms, array $recipients, string $result): void
+    {
+        $sms->forceFill(['result' => $result])->save();
+
+        $this->error(sprintf('SMS reminder #%s failed: %s', $sms->getKey(), $result));
+
+        $this->dispatchMail(
+            $recipients,
+            'SMS',
+            $sms,
+            ViewSmsReminder::getUrl(['record' => $sms]),
+            $sms->employee,
+        );
     }
 
     /**
