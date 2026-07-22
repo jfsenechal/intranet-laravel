@@ -85,3 +85,34 @@ it('syncs the meal diet selects to the menus on save', function (): void {
         ->and($this->menu2->refresh()->diets->pluck('id')->all())
         ->toBe([$this->saltFree->id]);
 });
+
+it('keeps a menu diet the client is no longer linked to instead of rejecting the order', function (): void {
+    $this->client->diets()->detach($this->saltFree->id);
+
+    livewire(EditOrder::class, ['record' => $this->order->id])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($this->menu1->refresh()->diets->pluck('id')->all())
+        ->toBe([$this->saltFree->id]);
+});
+
+it('still refuses a diet that is neither offered nor already on the menu', function (): void {
+    $foreign = Diet::create(['name' => 'Régime de quelqu\'un d\'autre']);
+
+    livewire(EditOrder::class, ['record' => $this->order->id])
+        ->fillForm([
+            'meals' => [[
+                'date' => '2026-06-15',
+                'soup_count' => 0,
+                'menu_1' => 1,
+                'menu_1_diets' => [$foreign->id],
+                'menu_2' => 0,
+                'menu_2_diets' => [],
+                'at_cafeteria' => false,
+                'notes' => null,
+            ]],
+        ])
+        ->call('save')
+        ->assertHasFormErrors();
+});

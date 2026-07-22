@@ -34,6 +34,7 @@ final class MealForm
             CheckboxList::make('menu_1_diets')
                 ->label('Régimes menu 1')
                 ->options(fn (Get $get): array => self::clientDietOptions($get))
+                ->in(fn (Get $get): array => self::acceptedDietIds($get))
                 ->default([]),
 
             TextInput::make('menu_2')
@@ -45,6 +46,7 @@ final class MealForm
             CheckboxList::make('menu_2_diets')
                 ->label('Régimes menu 2')
                 ->options(fn (Get $get): array => self::clientDietOptions($get))
+                ->in(fn (Get $get): array => self::acceptedDietIds($get))
                 ->default([]),
 
             Toggle::make('at_cafeteria')
@@ -72,5 +74,23 @@ final class MealForm
         }
 
         return app(ClientDietOptions::class)->forClient((int) $clientId);
+    }
+
+    /**
+     * The diets accepted by validation: the ones offered to the user, widened
+     * with the ones the client's menus already carry. A diet unlinked from a
+     * client after the fact must not make its existing orders unsavable.
+     *
+     * @return array<int, int>
+     */
+    private static function acceptedDietIds(Get $get): array
+    {
+        $clientId = $get('../../client_id');
+
+        if (blank($clientId)) {
+            return [];
+        }
+
+        return app(ClientDietOptions::class)->acceptedForClient((int) $clientId);
     }
 }
