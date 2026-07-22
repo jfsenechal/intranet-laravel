@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[UseFactory(QrCodeFactory::class)]
 #[Fillable([
+    'user_id',
     'username',
     'name',
     'action',
@@ -56,7 +57,7 @@ final class QrCode extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'username', 'username');
+        return $this->belongsTo(User::class);
     }
 
     protected function casts(): array
