@@ -116,3 +116,22 @@ it('still refuses a diet that is neither offered nor already on the menu', funct
         ->call('save')
         ->assertHasFormErrors();
 });
+
+it('hides the diet lists when the client has no diet at all', function (): void {
+    $this->client->diets()->detach();
+
+    livewire(EditOrder::class, ['record' => $this->order->id])
+        ->assertFormFieldDoesNotExist('meals.0.menu_1_diets')
+        ->assertFormFieldDoesNotExist('meals.0.menu_2_diets');
+});
+
+it('does not wipe the menu diets when the hidden lists are not submitted', function (): void {
+    $this->client->diets()->detach();
+
+    livewire(EditOrder::class, ['record' => $this->order->id])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($this->menu1->refresh()->diets->pluck('id')->all())
+        ->toBe([$this->saltFree->id]);
+});

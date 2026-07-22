@@ -144,8 +144,8 @@ final class EditOrder extends EditRecord
 
                 $keptMealIds[] = $meal->id;
 
-                self::upsertMenu($meal, 1, (int) ($mealData['menu_1'] ?? 0), $mealData['menu_1_diets'] ?? []);
-                self::upsertMenu($meal, 2, (int) ($mealData['menu_2'] ?? 0), $mealData['menu_2_diets'] ?? []);
+                self::upsertMenu($meal, 1, (int) ($mealData['menu_1'] ?? 0), $mealData['menu_1_diets'] ?? null);
+                self::upsertMenu($meal, 2, (int) ($mealData['menu_2'] ?? 0), $mealData['menu_2_diets'] ?? null);
             }
 
             $record->meals()
@@ -165,9 +165,13 @@ final class EditOrder extends EditRecord
     }
 
     /**
-     * @param  array<int, int|string>  $dietIds
+     * A null `$dietIds` means the diet list was not part of the submission,
+     * which happens when the client has no diet to offer and the list is
+     * hidden. The menu keeps whatever it already carries in that case.
+     *
+     * @param  array<int, int|string>|null  $dietIds
      */
-    private static function upsertMenu(Meal $meal, int $position, int $quantity, array $dietIds): void
+    private static function upsertMenu(Meal $meal, int $position, int $quantity, ?array $dietIds): void
     {
         $menu = $meal->menus->firstWhere('position', $position);
 
@@ -179,6 +183,10 @@ final class EditOrder extends EditRecord
                 'position' => $position,
                 'quantity' => $quantity,
             ]);
+        }
+
+        if ($dietIds === null) {
+            return;
         }
 
         $menu->diets()->sync($dietIds);

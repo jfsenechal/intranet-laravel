@@ -35,6 +35,7 @@ final class MealForm
                 ->label('Régimes menu 1')
                 ->options(fn (Get $get): array => self::clientDietOptions($get))
                 ->in(fn (Get $get): array => self::acceptedDietIds($get))
+                ->visible(fn (Get $get): bool => self::clientDietOptions($get) !== [])
                 ->default([]),
 
             TextInput::make('menu_2')
@@ -47,6 +48,7 @@ final class MealForm
                 ->label('Régimes menu 2')
                 ->options(fn (Get $get): array => self::clientDietOptions($get))
                 ->in(fn (Get $get): array => self::acceptedDietIds($get))
+                ->visible(fn (Get $get): bool => self::clientDietOptions($get) !== [])
                 ->default([]),
 
             Toggle::make('at_cafeteria')
