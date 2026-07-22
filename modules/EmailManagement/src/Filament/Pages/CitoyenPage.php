@@ -43,6 +43,10 @@ final class CitoyenPage extends Page
                 'description' => "Changer le mot de passe d'un compte administrateur",
             ],
             [
+                'command' => 'php artisan citoyen:new-mail --only-with-mail',
+                'description' => 'Vérifie si le compte a des mails dans sont dossier Maildir/new',
+            ],
+            [
                 'command' => 'php artisan citoyen:send-message',
                 'description' => 'Envoi d\'un message à tous les citoyens. Le texte est dans resources/views/mail',
             ],
