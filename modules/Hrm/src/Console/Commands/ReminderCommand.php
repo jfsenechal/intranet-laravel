@@ -319,7 +319,19 @@ final class ReminderCommand extends Command
                 $query->whereDate('reminder_date', $today)
                     ->orWhereDate('other_reminder_date', $today);
             })
-            ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
+            ->where(function (Builder $query) use ($employerIds): void {
+                $this->whereEmployeeBelongsToEmployers($query, $employerIds);
+
+                // Reminders without an employee are standalone entries tied to
+                // no department, so every department run picks them up.
+                $query->orWhereNull('employee_id');
+            })
+            // The command runs once per department each day, so a reminder
+            // already sent today must not go out a second time.
+            ->where(function (Builder $query) use ($today): void {
+                $query->whereNull('sent_at')
+                    ->orWhereDate('sent_at', '!=', $today);
+            })
             ->with('employee')
             ->get()
             ->each(fn (SmsReminder $sms) => $this->sendSmsReminder($sms, $recipients));

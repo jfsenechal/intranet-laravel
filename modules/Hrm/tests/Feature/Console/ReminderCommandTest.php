@@ -234,6 +234,37 @@ it('sends an sms reminder due on its other reminder date', function (): void {
     expect($sms->refresh()->result)->toBe('OK');
 });
 
+it('sends an sms reminder that has no employee attached', function (): void {
+    $sms = SmsReminder::factory()->create([
+        'employee_id' => null,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    fakeSmsGateway(successfulSendResponse());
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    expect($sms->refresh()->result)->toBe('OK');
+
+    Mail::assertNotSent(ReminderMail::class);
+});
+
+it('does not send an sms reminder twice on the same day', function (): void {
+    $sms = SmsReminder::factory()->create([
+        'employee_id' => null,
+        'reminder_date' => Carbon::today(),
+        'sent_at' => Carbon::today(),
+    ]);
+
+    $http = fakeSmsGateway(successfulSendResponse());
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    $http->assertNotSent(fn ($request): bool => str_contains((string) $request->url(), '/Send'));
+
+    expect($sms->refresh()->result)->toBeNull();
+});
+
 it('mails the recipients when the gateway rejects the sms', function (): void {
     $employee = employeeInDepartment($this->employer);
 
