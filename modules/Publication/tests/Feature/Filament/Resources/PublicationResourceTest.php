@@ -20,6 +20,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('publication-panel'));
+    auth()->user()->update(['is_administrator' => true]);
 
     // Register dummy routes to prevent URL generation errors in tests
     if (! Route::getRoutes()->getByName('filament.publication-panel.resources.publications.index')) {
@@ -160,6 +161,24 @@ it('displays delete action on view page', function (): void {
         'record' => $publication->id,
     ])
         ->assertActionExists('delete');
+});
+
+it('can create a publication and sets user_add to the authenticated user', function (): void {
+    $publicationData = Publication::factory()->make();
+
+    livewire(CreatePublication::class)
+        ->fillForm([
+            'name' => $publicationData->name,
+            'url' => $publicationData->url,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    $publication = Publication::query()->where('name', $publicationData->name)->first();
+
+    expect($publication)->not->toBeNull()
+        ->and($publication->user_add)->toBe(auth()->user()->username);
 });
 
 it('validates the form data', function (array $data, array $errors): void {

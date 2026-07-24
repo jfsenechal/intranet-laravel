@@ -29,6 +29,11 @@ final class Publication extends Model
         return $this->belongsTo(Category::class);
     }
 
+    protected static function booted(): void
+    {
+        self::bootHasUser();
+    }
+
     protected static function newFactory(): PublicationFactory
     {
         return PublicationFactory::new();
