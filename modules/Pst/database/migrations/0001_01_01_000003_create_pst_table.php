@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Pst\Enums\ActionRoadmapEnum;
+use AcMarche\Pst\Enums\ActionScopeEnum;
 use AcMarche\Pst\Enums\ActionStateEnum;
 use AcMarche\Pst\Enums\ActionSynergyEnum;
 use AcMarche\Pst\Enums\ActionTypeEnum;
@@ -30,9 +31,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('department', DepartmentEnum::toArray())
-                ->nullable(false);
+                ->nullable();
             $table->integer('position')->default(0);
-            $table->boolean('is_internal')->default(false);
+            $table->string('scope')->default(ActionScopeEnum::EXTERNAL->value);
             $table->timestamps();
         });
 
@@ -41,8 +42,9 @@ return new class extends Migration
             $table->foreignIdFor(StrategicObjective::class)->constrained('strategic_objectives')->cascadeOnDelete();
             $table->string('name');
             $table->enum('department', DepartmentEnum::toArray())
-                ->nullable(false);
+                ->nullable();
             $table->integer('position')->default(0);
+            $table->string('scope')->default(ActionScopeEnum::EXTERNAL->value);
             $table->timestamps();
         });
 
@@ -60,16 +62,18 @@ return new class extends Migration
             $table->text('budget_estimate')->nullable();
             $table->text('financing_mode')->nullable();
             $table->enum('state', ActionStateEnum::toArray())->nullable()->default(null);
-            $table->boolean('to_validate')->default(true);
+            $table->boolean('validated')->default(false);
             $table->enum('type', ActionTypeEnum::toArray())->nullable();
             $table->enum('roadmap', ActionRoadmapEnum::toArray())->nullable();
-            $table->enum('synergy', ActionSynergyEnum::toArray())->nullable();
+            $table->enum('synergy', ActionSynergyEnum::toArray())->default(ActionSynergyEnum::NO->value);
             $table->integer('state_percentage')->nullable();
             $table->text('work_plan')->nullable();
             $table->text('evaluation_indicator')->nullable();
             $table->string('user_add');
             $table->integer('position')->default(0);
+            $table->string('scope')->default(ActionScopeEnum::INTERNAL->value);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('partners', function (Blueprint $table): void {

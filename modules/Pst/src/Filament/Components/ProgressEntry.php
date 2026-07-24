@@ -10,5 +10,5 @@ use Override;
 final class ProgressEntry extends Entry
 {
     #[Override]
-    protected string $view = 'components.progress-entry';
+    protected string $view = 'pst::components.progress-entry';
 }
