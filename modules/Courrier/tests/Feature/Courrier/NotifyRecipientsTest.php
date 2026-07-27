@@ -7,6 +7,7 @@ use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\NotifyRecipients;
 use AcMarche\Courrier\Jobs\SendIncomingMailNotificationJob;
 use AcMarche\Courrier\Mail\IncomingMailNotification;
+use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
@@ -16,6 +17,7 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Livewire\livewire;
 
@@ -721,6 +723,47 @@ describe('IncomingMailNotification Mailable', function (): void {
         $mails = collect([IncomingMail::factory()->create()]);
 
         $mailable = new IncomingMailNotification($recipient, $mails, false);
+
+        expect($mailable->attachments())->toBeEmpty();
+    });
+
+    test('mailable attaches the stored file using the attachment path', function (): void {
+        Storage::fake('local');
+        config()->set('courrier.storage.disk', 'local');
+
+        $recipient = Recipient::factory()->receivesAttachments()->create();
+        $mail = IncomingMail::factory()->create(['mail_date' => today()]);
+
+        $path = 'courrier/attachments/'.$mail->id.'_rapport.pdf';
+        Storage::disk('local')->put($path, 'pdf content');
+
+        Attachment::query()->create([
+            'incoming_mail_id' => $mail->id,
+            'file_name' => 'rapport.pdf',
+            'mime' => 'application/pdf',
+            'path' => $path,
+        ]);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail->fresh()]), true);
+
+        expect($mailable->attachments())->toHaveCount(1);
+    });
+
+    test('mailable skips attachments whose file is missing from the disk', function (): void {
+        Storage::fake('local');
+        config()->set('courrier.storage.disk', 'local');
+
+        $recipient = Recipient::factory()->receivesAttachments()->create();
+        $mail = IncomingMail::factory()->create(['mail_date' => today()]);
+
+        Attachment::query()->create([
+            'incoming_mail_id' => $mail->id,
+            'file_name' => 'rapport.pdf',
+            'mime' => 'application/pdf',
+            'path' => 'courrier/attachments/missing.pdf',
+        ]);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail->fresh()]), true);
 
         expect($mailable->attachments())->toBeEmpty();
     });

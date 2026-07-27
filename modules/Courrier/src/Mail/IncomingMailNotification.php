@@ -69,16 +69,18 @@ final class IncomingMailNotification extends Mailable
 
         $attachments = [];
         $disk = config('courrier.storage.disk', 'public');
-        $directory = config('courrier.storage.directory', 'courrier');
 
         foreach ($this->incomingMails as $incomingMail) {
             foreach ($incomingMail->attachments as $attachment) {
-                $path = "{$directory}/{$attachment->file_name}";
-                if (Storage::disk($disk)->exists($path)) {
-                    $attachments[] = Attachment::fromStorageDisk($disk, $path)
-                        ->as($attachment->file_name)
-                        ->withMime($attachment->mime);
+                $path = $attachment->path;
+
+                if ($path === null || ! Storage::disk($disk)->exists($path)) {
+                    continue;
                 }
+
+                $attachments[] = Attachment::fromStorageDisk($disk, $path)
+                    ->as($attachment->file_name)
+                    ->withMime($attachment->mime);
             }
         }
 
