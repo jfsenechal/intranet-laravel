@@ -13,7 +13,7 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
+        if (! Schema::hasColumn('actions', 'to_validate')) {
             return;
         }
         Schema::table('actions', function (Blueprint $table): void {

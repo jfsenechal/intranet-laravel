@@ -14,7 +14,7 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
+        if (! Schema::hasColumn('actions', 'is_internal')) {
             return;
         }
         Schema::table('actions', function (Blueprint $table): void {

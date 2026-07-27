@@ -12,9 +12,6 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
-            return;
-        }
         Schema::table('strategic_objectives', function (Blueprint $table): void {
             $table->string('department')->nullable()->change();
         });
