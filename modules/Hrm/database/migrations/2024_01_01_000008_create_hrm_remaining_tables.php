@@ -206,6 +206,7 @@ return new class extends Migration
             Schema::connection($this->connection)->table('teleworks', function (Blueprint $table): void {
                 $table->renameColumn('accord_reglement', 'regulation_agreement');
                 $table->renameColumn('rue', 'street');
+                $table->renameColumn('code_postal', 'postal_code');
                 $table->renameColumn('localite', 'locality');
                 $table->renameColumn('validation_chef', 'manager_validated');
                 $table->renameColumn('date_validation_chef', 'manager_validated_at');
