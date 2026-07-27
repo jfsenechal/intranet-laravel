@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 
 #[UseFactory(ServiceFactory::class)]
@@ -26,6 +25,7 @@ use Laravel\Scout\Searchable;
 final class Service extends Model
 {
     use HasFactory, Notifiable;
+    use QualifiedUsersTableTrait;
     use Searchable;
 
     protected $table = 'pst_services';
@@ -54,17 +54,14 @@ final class Service extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(
+        return $this->withQualifiedUsersTable($this->belongsToMany(
             User::class,
             'service_user',
             'service_id',
             'username',
             'id',
             'username'
-        )->tap(function ($query): void {
-            // Handle cross-database join by explicitly specifying the database
-            $query->from(DB::raw('`intranet`.`users`'));
-        });
+        ));
     }
 
     public function leadingActions(): BelongsToMany

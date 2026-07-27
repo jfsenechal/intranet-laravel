@@ -21,7 +21,7 @@ final class PdfExport
         $fullPath = Storage::disk('public')->path($relativePath);
 
         Pdf::html(
-            view('pdf.action', [
+            view('pst::pdf.action', [
                 'action' => $action,
             ])->render()
         )

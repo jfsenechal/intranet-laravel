@@ -63,7 +63,7 @@ use Override;
 ])]
 final class Action extends Model
 {
-    use HasDepartmentScope, HasFactory, Notifiable, Searchable, SoftDeletes;
+    use HasDepartmentScope, HasFactory, Notifiable, QualifiedUsersTableTrait, Searchable, SoftDeletes;
 
     #[Override]
     protected $casts = [
@@ -169,14 +169,14 @@ final class Action extends Model
      */
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(
+        return $this->withQualifiedUsersTable($this->belongsToMany(
             User::class,
             'action_user',
             'action_id',
             'username',
             'id',
             'username'
-        );
+        ));
     }
 
     /**
@@ -184,14 +184,14 @@ final class Action extends Model
      */
     public function mandataries(): BelongsToMany
     {
-        return $this->belongsToMany(
+        return $this->withQualifiedUsersTable($this->belongsToMany(
             User::class,
             'action_mandatory',
             'action_id',
             'username',
             'id',
             'username'
-        ); // ->withPivot('permission')
+        )); // ->withPivot('permission')
     }
 
     /**

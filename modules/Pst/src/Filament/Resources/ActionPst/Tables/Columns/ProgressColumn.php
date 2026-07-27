@@ -13,5 +13,5 @@ use Override;
 final class ProgressColumn extends Column
 {
     #[Override]
-    protected string $view = 'tables.columns.progress-column';
+    protected string $view = 'pst::tables.columns.progress-column';
 }

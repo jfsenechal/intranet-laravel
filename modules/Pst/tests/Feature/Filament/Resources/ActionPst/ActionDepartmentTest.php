@@ -52,7 +52,7 @@ final class ActionDepartmentTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
         $this->mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
@@ -239,7 +239,7 @@ final class ActionDepartmentTest extends TestCase
 
         // Tab 0 is "All"
         $allTabBadge = $tabs[0]->getBadge();
-        expect($allTabBadge)->toBe(5);
+        expect($allTabBadge)->toBe('5');
     }
 
     public function test_tabs_show_correct_count_for_not_validated_tab_for_admin(): void
@@ -271,7 +271,7 @@ final class ActionDepartmentTest extends TestCase
         // Tab 1 is NotValidated for admin
         expect($tabs)->toHaveKey(1);
         $notValidatedBadge = $tabs[1]->getBadge();
-        expect($notValidatedBadge)->toBe(2);
+        expect($notValidatedBadge)->toBe('2');
     }
 
     public function test_admin_has_correct_number_of_tabs(): void
@@ -338,7 +338,7 @@ final class ActionDepartmentTest extends TestCase
 
         // For admin: Tab 2 is START (index 0=All, 1=NotValidated, 2=START)
         $startTabBadge = $tabs[2]->getBadge();
-        expect($startTabBadge)->toBe(3);
+        expect($startTabBadge)->toBe('3');
     }
 
     public function test_all_tab_counts_both_validated_and_non_validated(): void
@@ -369,7 +369,7 @@ final class ActionDepartmentTest extends TestCase
 
         // All tab should count everything
         $allTabBadge = $tabs[0]->getBadge();
-        expect($allTabBadge)->toBe(5);
+        expect($allTabBadge)->toBe('5');
     }
 
     public function test_user_with_both_departments_creates_action_with_cpas_department_when_cpas_selected(): void

@@ -34,7 +34,7 @@ final class OperationalObjectiveSelectDepartmentFilterTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
     }
@@ -103,9 +103,10 @@ final class OperationalObjectiveSelectDepartmentFilterTest extends TestCase
         $this->actingAs($user);
         session([UserRepository::$department_selected_key => DepartmentEnum::VILLE->value]);
 
-        // Create internal strategic objective (department = null)
+        // Internal strategic objective from the other department: its scope, not a
+        // missing department, is what keeps it selectable here.
         $internalStrategicObjective = StrategicObjective::factory()->create([
-            'department' => null,
+            'department' => DepartmentEnum::CPAS->value,
             'scope' => ActionScopeEnum::INTERNAL,
         ]);
 

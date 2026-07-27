@@ -40,9 +40,13 @@ it('adds soft deletes to actions', function (): void {
     expect(Schema::connection('maria-pst')->hasColumn('actions', 'deleted_at'))->toBeTrue();
 });
 
-it('allows a null department on objectives, for internal ones', function (string $table): void {
+/**
+ * The two make_department_*_nullable migrations shared a timestamp, and the alphabetical
+ * tie-break ran them in the wrong order, so a fresh database ended up nullable.
+ */
+it('requires a department on objectives', function (string $table): void {
     $column = collect(Schema::connection('maria-pst')->getColumns($table))
         ->firstWhere('name', 'department');
 
-    expect($column['nullable'])->toBeTrue();
+    expect($column['nullable'])->toBeFalse();
 })->with(['strategic_objectives', 'operational_objectives']);

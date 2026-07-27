@@ -25,7 +25,7 @@ final class ActionsByServicesTableWidgetTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $this->user = User::factory()->create(['departments' => ['VILLE']]);
     }

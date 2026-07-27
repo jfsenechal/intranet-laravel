@@ -28,7 +28,7 @@ final class ReminderActionTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
 
@@ -58,9 +58,12 @@ final class ReminderActionTest extends TestCase
 
     public function test_reminder_action_prefills_recipients_from_pivot(): void
     {
-        $pilotOne = User::factory()->create();
-        $pilotTwo = User::factory()->create();
-        $this->action->users()->attach([$pilotOne->id, $pilotTwo->id]);
+        // The pivot is read without an order by, and the (action_id, username) unique
+        // index makes the rows come back by username, so the usernames are fixed here
+        // to keep the expected order stable whichever way the database returns them.
+        $pilotOne = User::factory()->create(['username' => 'pilot.one']);
+        $pilotTwo = User::factory()->create(['username' => 'pilot.two']);
+        $this->action->users()->attach([$pilotOne->username, $pilotTwo->username]);
 
         $this->actingAs($this->adminUser);
 

@@ -39,7 +39,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
     }
@@ -210,16 +210,21 @@ final class ActionSelectDepartmentFilterTest extends TestCase
         ]);
     }
 
+    /**
+     * Internal objectives carry a department like any other, and are reachable from the
+     * other one through their scope. CPAS here, while these tests act as a VILLE user,
+     * so the objective is only selectable if the scope is what makes it visible.
+     */
     private function createInternalOperationalObjective(): OperationalObjective
     {
         $strategicObjective = StrategicObjective::factory()->create([
-            'department' => null,
+            'department' => DepartmentEnum::CPAS->value,
             'scope' => ActionScopeEnum::INTERNAL,
         ]);
 
         return OperationalObjective::factory()->create([
             'strategic_objective_id' => $strategicObjective->id,
-            'department' => null,
+            'department' => DepartmentEnum::CPAS->value,
             'scope' => ActionScopeEnum::INTERNAL,
         ]);
     }
