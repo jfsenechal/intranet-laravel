@@ -23,6 +23,25 @@ final class UserRepository
             ->all();
     }
 
+    /**
+     * Same list as {@see self::listLocalUsersForSelect()}, keyed by username.
+     *
+     * For selects whose state is a username rather than a user id, such as
+     * sharing, where the underlying rows reference users by username.
+     *
+     * @return array<string, string>
+     */
+    public static function listLocalUsersForSelectByUsername(): array
+    {
+        return User::query()
+            ->orderBy('last_name')
+            ->get()
+            ->mapWithKeys(fn (User $user): array => [
+                $user->username => "{$user->last_name} $user->first_name",
+            ])
+            ->all();
+    }
+
     public static function find(int $userId): ?User
     {
         return User::find($userId);

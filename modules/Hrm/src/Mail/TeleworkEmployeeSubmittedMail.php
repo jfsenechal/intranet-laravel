@@ -15,7 +15,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-final class TeleworkEmployeeManagerResultMail extends Mailable implements ShouldQueue
+final class TeleworkEmployeeSubmittedMail extends Mailable implements ShouldQueue
 {
     use Queueable;
     use ResolvesSenderAddress;
@@ -26,10 +26,9 @@ final class TeleworkEmployeeManagerResultMail extends Mailable implements Should
     public function __construct(
         public readonly Telework $telework,
         public readonly Employee $employee,
+        public readonly ?Employee $director = null,
     ) {
-        $this->subject = $telework->manager_validated
-            ? '[GRH] Votre télétravail a été validé par votre direction'
-            : '[GRH] Votre télétravail a été refusé par votre direction';
+        $this->subject = '[GRH] Votre demande de télétravail a été enregistrée';
         $this->captureSenderAddress();
     }
 
@@ -49,10 +48,11 @@ final class TeleworkEmployeeManagerResultMail extends Mailable implements Should
         }
 
         return new Content(
-            view: 'hrm::mail.telework.employee_manager_result',
+            view: 'hrm::mail.telework.employee_submitted',
             with: [
                 'telework' => $this->telework,
                 'employee' => $this->employee,
+                'director' => $this->director,
                 'url' => TeleworkPage::getUrl(panel: 'app-panel'),
                 'logo' => $this->logo,
             ],

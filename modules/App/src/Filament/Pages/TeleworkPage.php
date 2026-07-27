@@ -61,6 +61,7 @@ final class TeleworkPage extends Page implements HasForms
             $this->record->update($data);
         } else {
             $this->record = TeleworkModel::create($data);
+            TeleworkNotifier::notifyEmployeeOfSubmission($this->record);
             TeleworkNotifier::notifyManagerOfNewRequest($this->record);
         }
 

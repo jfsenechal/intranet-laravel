@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\Agent\Mail\ProfileRequestMail;
 use AcMarche\Hrm\Mail\TeleworkEmployeeHrResultMail;
 use AcMarche\Hrm\Mail\TeleworkEmployeeManagerResultMail;
+use AcMarche\Hrm\Mail\TeleworkEmployeeSubmittedMail;
 use AcMarche\Hrm\Mail\TeleworkHrValidationMail;
 use AcMarche\Hrm\Mail\TeleworkManagerValidationMail;
 use AcMarche\Hrm\Models\Employee;
@@ -40,11 +41,14 @@ it('captures the authenticated sender at construction so it survives the queue',
 });
 
 /**
- * The Telework pages live in the `hrm-panel`, but a queue worker has no current
- * Filament panel, so `getUrl()` would fall back to the default `app-panel` and
- * throw RouteNotFoundException. The panel must be named explicitly.
+ * A queue worker has no current Filament panel, so `getUrl()` would fall back to
+ * the default panel and throw RouteNotFoundException. Every telework mail has to
+ * name its panel explicitly.
+ *
+ * The mails addressed to staff link into the hrm-panel, where the validation
+ * pages live and only HRM roles can reach.
  */
-it('builds telework links against the hrm panel with no current panel', function (
+it('builds validation links against the hrm panel with no current panel', function (
     Mailable $mail,
     string $expectedPath,
 ): void {
@@ -72,18 +76,29 @@ it('builds telework links against the hrm panel with no current panel', function
         ),
         "/{$telework->getKey()}/hr-validate",
     ],
-    'employee manager result' => fn (): array => [
-        new TeleworkEmployeeManagerResultMail(
-            $telework = Telework::factory()->create(),
-            Employee::factory()->create(),
-        ),
-        "/{$telework->getKey()}/view",
-    ],
-    'employee hr result' => fn (): array => [
-        new TeleworkEmployeeHrResultMail(
-            $telework = Telework::factory()->create(),
-            Employee::factory()->create(),
-        ),
-        "/{$telework->getKey()}/view",
-    ],
+]);
+
+/**
+ * The mails addressed to the agent link to their own page in the app-panel, not
+ * into the hrm-panel: TeleworkPage resolves the record from the authenticated
+ * user, so it needs no record parameter.
+ */
+it('points the agent at their own telework page with no current panel', function (Mailable $mail): void {
+    Auth::logout();
+    Filament::setCurrentPanel(null);
+
+    expect($mail->content()->with['url'])->toEndWith('/my-space/telework-page');
+})->with([
+    'submission' => fn (): Mailable => new TeleworkEmployeeSubmittedMail(
+        Telework::factory()->create(),
+        Employee::factory()->create(),
+    ),
+    'employee manager result' => fn (): Mailable => new TeleworkEmployeeManagerResultMail(
+        Telework::factory()->create(),
+        Employee::factory()->create(),
+    ),
+    'employee hr result' => fn (): Mailable => new TeleworkEmployeeHrResultMail(
+        Telework::factory()->create(),
+        Employee::factory()->create(),
+    ),
 ]);

@@ -7,6 +7,7 @@ use AcMarche\MailingList\Enums\RecipientStatus;
 use AcMarche\MailingList\Filament\Resources\Emails\Pages\CreateEmail;
 use AcMarche\MailingList\Filament\Resources\Emails\Pages\EditEmail;
 use AcMarche\MailingList\Filament\Resources\Emails\Pages\ListEmails;
+use AcMarche\MailingList\Filament\Resources\Emails\Pages\ViewEmail;
 use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Email;
@@ -22,7 +23,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('mailing-list'));
+    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
     $this->sender = Sender::factory()->create(['username' => $this->user->username]);
@@ -139,7 +140,7 @@ it('can delete an email', function (): void {
         'sender_id' => $this->sender->id,
     ]);
 
-    livewire(EditEmail::class, ['record' => $email->id])
+    livewire(ViewEmail::class, ['record' => $email->id])
         ->callAction(DeleteAction::class)
         ->assertNotified()
         ->assertRedirect();
@@ -167,7 +168,7 @@ it('can dispatch send action', function (): void {
         ]);
     }
 
-    livewire(EditEmail::class, ['record' => $email->id])
+    livewire(ViewEmail::class, ['record' => $email->id])
         ->callAction('send')
         ->assertNotified();
 
@@ -186,9 +187,8 @@ it('prevents sending with no recipients', function (): void {
         'total_count' => 0,
     ]);
 
-    livewire(EditEmail::class, ['record' => $email->id])
-        ->callAction('send')
-        ->assertNotified();
+    livewire(ViewEmail::class, ['record' => $email->id])
+        ->assertActionDisabled('send');
 
     $email->refresh();
     expect($email->status)->toBe(EmailStatus::Draft);
@@ -200,7 +200,7 @@ it('hides send action for sent emails', function (): void {
         'sender_id' => $this->sender->id,
     ]);
 
-    livewire(EditEmail::class, ['record' => $email->id])
+    livewire(ViewEmail::class, ['record' => $email->id])
         ->assertActionHidden('send');
 });
 

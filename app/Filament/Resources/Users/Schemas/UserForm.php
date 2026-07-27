@@ -19,6 +19,12 @@ final class UserForm
                 TextInput::make('name')
                     ->maxLength(255)
                     ->required(),
+                TextInput::make('first_name')
+                    ->maxLength(255)
+                    ->required(),
+                TextInput::make('last_name')
+                    ->maxLength(255)
+                    ->required(),
                 TextInput::make('email')
                     ->maxLength(255)
                     ->unique()

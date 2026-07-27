@@ -6,6 +6,7 @@ namespace AcMarche\Hrm\Services;
 
 use AcMarche\Hrm\Mail\TeleworkEmployeeHrResultMail;
 use AcMarche\Hrm\Mail\TeleworkEmployeeManagerResultMail;
+use AcMarche\Hrm\Mail\TeleworkEmployeeSubmittedMail;
 use AcMarche\Hrm\Mail\TeleworkHrValidationMail;
 use AcMarche\Hrm\Mail\TeleworkManagerValidationMail;
 use AcMarche\Hrm\Models\Direction;
@@ -34,6 +35,22 @@ final class TeleworkNotifier
         }
 
         return Employee::query()->where('username', $direction->director)->first();
+    }
+
+    /**
+     * Confirm to the requester that their request was recorded and is awaiting
+     * their director's decision. Sent even when no director is resolvable, so
+     * the agent always gets an acknowledgement of the first step.
+     */
+    public static function notifyEmployeeOfSubmission(Telework $telework): void
+    {
+        $employee = self::employee($telework);
+        if (! $employee instanceof Employee || empty($employee->professional_email)) {
+            return;
+        }
+
+        Mail::to($employee->professional_email)
+            ->send(new TeleworkEmployeeSubmittedMail($telework, $employee, self::director($employee)));
     }
 
     public static function notifyManagerOfNewRequest(Telework $telework): void

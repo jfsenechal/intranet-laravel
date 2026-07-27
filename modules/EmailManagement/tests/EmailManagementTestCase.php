@@ -4,27 +4,20 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Tests;
 
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
-use PDO;
 use Tests\TestCase;
 
 /**
- * Keeps EmailManagement tests off the real gestemail database and off the live mail server.
+ * Keeps EmailManagement tests off the live mail server.
  *
- * phpunit.xml only overrides the default connection, so without this the
- * maria-email-management connection resolves to the live MariaDB from .env and
- * factories write real rows that no rollback removes.
- *
- * Follows AcMarche\Hrm\Tests\HrmTestCase, but also rewrites the connection's driver
- * to sqlite. Swapping the PDO alone would leave the mariadb query grammar in place,
- * and this module's migrations guard on hasTable()/hasColumn(), which that grammar
- * answers with an information_schema lookup sqlite cannot serve.
+ * The maria-email-management connection itself is handled by Tests\TestCase,
+ * which rewrites it to sqlite and gives it its own in-memory PDO. That has to
+ * happen for every test in the process, not just this module's: phpunit.xml only
+ * overrides the default connection, so a test case that left this connection
+ * alone would resolve it to the live MariaDB from .env, and its migrations would
+ * run against a schema this module's tests never see.
  */
 abstract class EmailManagementTestCase extends TestCase
 {
-    /** @var array<int, string|null> */
-    protected array $connectionsToTransact = [null, 'maria-email-management'];
-
     protected function refreshApplication(): void
     {
         parent::refreshApplication();
@@ -36,26 +29,5 @@ abstract class EmailManagementTestCase extends TestCase
         // these services bind their own doubles.
         $this->app['config']->set('email-management.imap', null);
         $this->app['config']->set('email-management.sieve', null);
-
-        $this->app['config']->set('database.connections.maria-email-management', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-            'foreign_key_constraints' => true,
-        ]);
-
-        $db = $this->app['db'];
-        $db->purge('maria-email-management');
-
-        // Give the connection its own persistent PDO so this module's migrations create
-        // their own schema, and so it survives between the migration run and the test.
-        $pdo = RefreshDatabaseState::$inMemoryConnections['maria-email-management']
-            ?? new PDO('sqlite::memory:', null, null, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_PERSISTENT => true,
-            ]);
-
-        RefreshDatabaseState::$inMemoryConnections['maria-email-management'] = $pdo;
-        $db->connection('maria-email-management')->setPdo($pdo)->setReadPdo($pdo);
     }
 }
