@@ -51,7 +51,7 @@ final class TeleworkEmployeeHrResultMail extends Mailable implements ShouldQueue
             with: [
                 'telework' => $this->telework,
                 'employee' => $this->employee,
-                'url' => ViewTelework::getUrl(['record' => $this->telework]),
+                'url' => ViewTelework::getUrl(['record' => $this->telework], panel: 'hrm-panel'),
                 'logo' => $this->logo,
             ],
         );

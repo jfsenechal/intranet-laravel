@@ -53,7 +53,7 @@ final class TeleworkManagerValidationMail extends Mailable implements ShouldQueu
                 'telework' => $this->telework,
                 'employee' => $this->employee,
                 'director' => $this->director,
-                'url' => ManagerValidateTelework::getUrl(['record' => $this->telework]),
+                'url' => ManagerValidateTelework::getUrl(['record' => $this->telework], panel: 'hrm-panel'),
                 'logo' => $this->logo,
             ],
         );
