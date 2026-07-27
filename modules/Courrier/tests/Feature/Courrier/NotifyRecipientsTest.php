@@ -25,6 +25,47 @@ beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
 });
 
+function storeAttachmentFor(IncomingMail $mail, string $fileName, bool $storeFile = true): Attachment
+{
+    $path = 'courrier/attachments/'.$mail->id.'_'.$fileName;
+
+    if ($storeFile) {
+        Storage::disk('local')->put($path, 'pdf content');
+    }
+
+    return Attachment::query()->create([
+        'incoming_mail_id' => $mail->id,
+        'file_name' => $fileName,
+        'mime' => 'application/pdf',
+        'path' => $path,
+    ]);
+}
+
+/**
+ * A recipient addressed on their own mail, with the matching intranet user and
+ * a stored PDF attachment they are allowed to download.
+ *
+ * @return array{0: Recipient, 1: IncomingMail}
+ */
+function makeRecipientWithOwnMailAndAttachment(bool $storeFile = true): array
+{
+    Storage::fake('local');
+    config()->set('courrier.storage.disk', 'local');
+
+    $recipient = Recipient::factory()->receivesAttachments()->create();
+    User::factory()->create(['username' => $recipient->username]);
+
+    $mail = IncomingMail::factory()->create([
+        'mail_date' => today(),
+        'department' => DepartmentCourrierEnum::VILLE->value,
+    ]);
+    $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+    storeAttachmentFor($mail, 'rapport.pdf', $storeFile);
+
+    return [$recipient, $mail->fresh()];
+}
+
 describe('NotifyRecipients Page Access', function (): void {
     test('admin user can access notify recipients page', function (): void {
         $admin = User::factory()->create(['is_administrator' => true]);
@@ -728,42 +769,46 @@ describe('IncomingMailNotification Mailable', function (): void {
     });
 
     test('mailable attaches the stored file using the attachment path', function (): void {
-        Storage::fake('local');
-        config()->set('courrier.storage.disk', 'local');
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment();
 
-        $recipient = Recipient::factory()->receivesAttachments()->create();
-        $mail = IncomingMail::factory()->create(['mail_date' => today()]);
-
-        $path = 'courrier/attachments/'.$mail->id.'_rapport.pdf';
-        Storage::disk('local')->put($path, 'pdf content');
-
-        Attachment::query()->create([
-            'incoming_mail_id' => $mail->id,
-            'file_name' => 'rapport.pdf',
-            'mime' => 'application/pdf',
-            'path' => $path,
-        ]);
-
-        $mailable = new IncomingMailNotification($recipient, collect([$mail->fresh()]), true);
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
 
         expect($mailable->attachments())->toHaveCount(1);
     });
 
     test('mailable skips attachments whose file is missing from the disk', function (): void {
-        Storage::fake('local');
-        config()->set('courrier.storage.disk', 'local');
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(storeFile: false);
 
-        $recipient = Recipient::factory()->receivesAttachments()->create();
-        $mail = IncomingMail::factory()->create(['mail_date' => today()]);
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
 
-        Attachment::query()->create([
-            'incoming_mail_id' => $mail->id,
-            'file_name' => 'rapport.pdf',
-            'mime' => 'application/pdf',
-            'path' => 'courrier/attachments/missing.pdf',
+        expect($mailable->attachments())->toBeEmpty();
+    });
+
+    test('mailable does not attach files the recipient may not download', function (): void {
+        [$recipient] = makeRecipientWithOwnMailAndAttachment();
+
+        // Mail of the same department the recipient only oversees through the
+        // index role: listed in the notification, but not downloadable.
+        $otherMail = IncomingMail::factory()->create([
+            'mail_date' => today(),
+            'department' => DepartmentCourrierEnum::VILLE->value,
         ]);
+        storeAttachmentFor($otherMail, 'confidentiel.pdf');
 
-        $mailable = new IncomingMailNotification($recipient, collect([$mail->fresh()]), true);
+        $user = User::query()->where('username', $recipient->username)->firstOrFail();
+        $user->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]));
+
+        $mailable = new IncomingMailNotification($recipient, collect([$otherMail->fresh()]), true);
+
+        expect($mailable->attachments())->toBeEmpty();
+    });
+
+    test('mailable attaches nothing when the recipient has no intranet user', function (): void {
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment();
+
+        User::query()->where('username', $recipient->username)->delete();
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
 
         expect($mailable->attachments())->toBeEmpty();
     });
