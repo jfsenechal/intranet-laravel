@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Table(name: 'delivery_routes')]
 final class DeliveryRoute extends Model
 {
+    public $timestamps = false;
+
     public function __toString(): string
     {
         return (string) $this->name;

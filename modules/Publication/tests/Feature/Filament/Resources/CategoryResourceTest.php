@@ -19,6 +19,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('publication-panel'));
+    auth()->user()->update(['is_administrator' => true]);
 
     // Register dummy routes to prevent URL generation errors in tests
     if (! Route::getRoutes()->getByName('filament.publication-panel.resources.categories.index')) {

@@ -99,7 +99,7 @@ final class GenerateQrCode extends Page implements HasForms
 
         if (! empty($data['save_to_db'])) {
             $qrCode->user_id = auth()->id();
-            $qrCode->username = auth()->user()?->name;
+            $qrCode->username = auth()->user()?->username;
             $qrCode->save();
 
             Notification::make()

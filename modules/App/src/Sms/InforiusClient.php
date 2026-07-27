@@ -9,6 +9,9 @@ use AcMarche\App\Sms\Dto\SmsResponse;
 use AcMarche\App\Sms\Exception\SmsException;
 use DateTimeImmutable;
 use DateTimeInterface;
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository as CacheStoreRepository;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Cache;
@@ -30,12 +33,7 @@ final class InforiusClient
 
     private readonly InforiusXmlParser $parser;
 
-    /**
-     * In-memory cache fallback, used when the Laravel Cache facade is not bound.
-     *
-     * @var array{token: string, expires_at: int}|null
-     */
-    private ?array $memoryToken = null;
+    private readonly CacheRepository $cache;
 
     public function __construct(
         private readonly string $host,
@@ -44,9 +42,13 @@ final class InforiusClient
         private readonly ?string $sender = null,
         ?HttpFactory $http = null,
         ?InforiusXmlParser $parser = null,
+        ?CacheRepository $cache = null,
     ) {
         $this->http = $http ?? new HttpFactory;
         $this->parser = $parser ?? new InforiusXmlParser;
+        // Without a store the token is cached for this instance only, which keeps
+        // the client usable outside a booted application.
+        $this->cache = $cache ?? new CacheStoreRepository(new ArrayStore);
     }
 
     public static function fromConfig(): self
@@ -64,6 +66,7 @@ final class InforiusClient
             user: $user,
             password: $password,
             sender: config('app.sms.sender'),
+            cache: Cache::store(),
         );
     }
 
@@ -163,42 +166,19 @@ final class InforiusClient
 
     private function readCachedToken(): ?string
     {
-        if ($this->hasLaravelCache()) {
-            $value = Cache::get(self::TOKEN_CACHE_KEY);
+        $value = $this->cache->get(self::TOKEN_CACHE_KEY);
 
-            return is_string($value) && $value !== '' ? $value : null;
-        }
-
-        if ($this->memoryToken === null || $this->memoryToken['expires_at'] <= time()) {
-            return null;
-        }
-
-        return $this->memoryToken['token'];
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     private function storeCachedToken(string $token, int $ttl): void
     {
-        if ($this->hasLaravelCache()) {
-            Cache::put(self::TOKEN_CACHE_KEY, $token, $ttl);
-
-            return;
-        }
-
-        $this->memoryToken = ['token' => $token, 'expires_at' => time() + $ttl];
+        $this->cache->put(self::TOKEN_CACHE_KEY, $token, $ttl);
     }
 
     private function forgetCachedToken(): void
     {
-        if ($this->hasLaravelCache()) {
-            Cache::forget(self::TOKEN_CACHE_KEY);
-        }
-
-        $this->memoryToken = null;
-    }
-
-    private function hasLaravelCache(): bool
-    {
-        return Cache::getFacadeApplication() !== null;
+        $this->cache->forget(self::TOKEN_CACHE_KEY);
     }
 
     private function buildTokenXml(): string

@@ -51,7 +51,7 @@ it('lets a guichet agent assign an office to a pending ticket', function (): voi
     actingAsGuichetAgent();
     $office = Office::factory()->create();
     $ticket = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);
-    $username = auth()->user()->username ?? auth()->user()->name;
+    $username = auth()->user()->username;
 
     livewire(TicketsOfTheDay::class)
         ->callAction('assignOffice', data: ['office_id' => $office->id], arguments: ['ticket' => $ticket->id])

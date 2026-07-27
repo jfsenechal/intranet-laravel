@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\App\Providers;
 
+use AcMarche\App\Sms\InforiusClient;
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use Filament\Panel;
@@ -17,6 +18,8 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerModuleConfig();
+
+        $this->app->scoped(InforiusClient::class, fn (): InforiusClient => InforiusClient::fromConfig());
 
         Panel::configureUsing(function (Panel $panel): void {
             if ($panel->getId() !== 'admin') {

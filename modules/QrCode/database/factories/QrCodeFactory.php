@@ -6,6 +6,7 @@ namespace AcMarche\QrCode\Database\Factories;
 
 use AcMarche\QrCode\Enums\QrCodeActionEnum;
 use AcMarche\QrCode\Models\QrCode;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
 
@@ -23,6 +24,7 @@ final class QrCodeFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'username' => fake()->userName(),
             'name' => fake()->words(3, true),
             'action' => QrCodeActionEnum::URL,

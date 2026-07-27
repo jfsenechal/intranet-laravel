@@ -86,7 +86,7 @@ it('can create a ticket', function (): void {
 
 it('auto-fills assignment fields on create with the current user', function (): void {
     Reason::factory()->create(['content' => 'Carte d\'identité (DEMANDE/RETRAIT)']);
-    $username = auth()->user()->username ?? auth()->user()->name;
+    $username = auth()->user()->username;
 
     livewire(CreateTicket::class)
         ->fillForm([

@@ -82,6 +82,17 @@ final class Client extends Model
         return $this->hasMany(Note::class);
     }
 
+    protected static function booted(): void
+    {
+        self::deleting(function (Client $client): void {
+            $client->orders->each(fn (Order $order): ?bool => $order->delete());
+            // `notes` is also a text column, so the relation must be queried explicitly.
+            $client->notes()->get()->each(fn (Note $note): ?bool => $note->delete());
+            $client->absence?->delete();
+            $client->diets()->detach();
+        });
+    }
+
     protected function casts(): array
     {
         return [

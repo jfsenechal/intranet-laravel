@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['first_day', 'days', 'notes', 'is_archived'])]
 final class Week extends Model
 {
+    public $timestamps = false;
+
     public function __toString(): string
     {
         return 'Week of: '.($this->first_day?->format('d-m-Y') ?? '');

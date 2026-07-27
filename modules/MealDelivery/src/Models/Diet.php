@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['name', 'not_deletable'])]
 final class Diet extends Model
 {
+    public $timestamps = false;
+
     public function __toString(): string
     {
         return (string) $this->name;

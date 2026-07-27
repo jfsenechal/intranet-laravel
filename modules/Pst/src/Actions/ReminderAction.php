@@ -18,7 +18,11 @@ final class ReminderAction
 {
     public static function createAction(Model|ActionModel $action): ActionAction
     {
-        $defaultRecipients = $action->users()->pluck('users.username')->toArray();
+        $defaultRecipients = $action->users()
+            ->newPivotStatement()
+            ->where('action_id', $action->getKey())
+            ->pluck('username')
+            ->toArray();
 
         return ActionAction::make('reminder')
             ->label('Houspiller')
