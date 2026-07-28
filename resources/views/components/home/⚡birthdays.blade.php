@@ -2,6 +2,7 @@
 
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -21,8 +22,8 @@ new class extends Component
             ->where('is_archived', false)
             ->where('status', StatusEnum::AGENT)
             ->whereNotNull('birth_date')
-            ->whereRaw('MONTH(birth_date) = ?', [$today->month])
-            ->whereRaw('DAY(birth_date) = ?', [$today->day])
+            ->whereMonth('birth_date', $today->month)
+            ->whereDay('birth_date', $today->day)
             ->whereHas('activeContracts')
             ->with('activeContracts')
             ->orderBy('last_name')
@@ -70,9 +71,18 @@ new class extends Component
                     @endif
                     <span class="absolute -right-1 -top-1 text-sm animate-float">🎂</span>
                 </div>
-                <p class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
-                    {{ $employee->first_name }} {{ $employee->last_name }}
-                </p>
+                @auth
+                    <a
+                        href="{{ EmployeeResource::getUrl('view', ['record' => $employee], panel: 'who-is-who-panel') }}"
+                        class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900 hover:text-amber-700 hover:underline"
+                    >
+                        {{ $employee->first_name }} {{ $employee->last_name }}
+                    </a>
+                @else
+                    <p class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
+                        {{ $employee->first_name }} {{ $employee->last_name }}
+                    </p>
+                @endauth
             </div>
         @empty
             <div class="flex flex-col items-center justify-center py-4 text-center">

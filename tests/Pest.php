@@ -48,6 +48,7 @@ uses(
     '../modules/App/tests/Unit',
     '../modules/MealDelivery/tests/Feature',
     '../modules/MealDelivery/tests/Unit',
+    '../modules/WhoIsWho/tests/Feature',
 );
 
 uses(

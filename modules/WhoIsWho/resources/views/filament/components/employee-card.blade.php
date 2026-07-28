@@ -26,9 +26,12 @@
          class="h-24 w-24 rounded-full object-cover shrink-0 bg-gray-100 dark:bg-gray-800" />
 
     <div class="flex-1 min-w-0">
-        <div class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
+        <a
+            href="{{ \AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource::getUrl('view', ['record' => $employee]) }}"
+            class="block text-base font-semibold text-gray-900 dark:text-gray-100 truncate hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
             {{ $employee->last_name }} {{ $employee->first_name }}
-        </div>
+        </a>
 
         @if ($jobTitles->isNotEmpty())
             <div class="text-gray-700 dark:text-gray-300 mt-0.5">
