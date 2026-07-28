@@ -11,10 +11,15 @@ use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\HrValidateTelework;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\ListTeleworks;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\ManagerValidateTelework;
 use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\ViewTelework;
+use AcMarche\Hrm\Mail\TeleworkManagerValidationMail;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Direction;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Telework;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -24,6 +29,49 @@ beforeEach(function (): void {
     $this->adminUser->roles()->attach($hrmAdminRole);
     $this->actingAs($this->adminUser);
 });
+
+/**
+ * Gives the acting user an Employee record attached to an active contract, so the
+ * request resolves to a direction. Telework stamps `user_add` from the authenticated
+ * user via HasUserAdd, hence the shared username.
+ */
+/**
+ * `professional_email` is intentionally not mass-assignable on Employee, so it is
+ * set outside the factory attributes.
+ */
+function directorNamed(string $username, ?string $email): Employee
+{
+    $employee = Employee::factory()->create([
+        'username' => $username,
+        'last_name' => 'WILMET',
+        'first_name' => 'Quentin',
+    ]);
+
+    $employee->professional_email = $email;
+    $employee->save();
+
+    return $employee;
+}
+
+function requesterWithDirector(string $adminUsername, ?string $directorUsername): Employee
+{
+    $employee = Employee::factory()->create(['username' => $adminUsername]);
+
+    $direction = Direction::factory()->create([
+        'name' => 'Direction du Personnel',
+        'director' => $directorUsername,
+    ]);
+
+    Contract::factory()->create([
+        'employee_id' => $employee->getKey(),
+        'direction_id' => $direction->getKey(),
+        'is_closed' => false,
+        'is_suspended' => false,
+        'end_date' => null,
+    ]);
+
+    return $employee;
+}
 
 describe('page rendering', function (): void {
     it('can render the index page', function (): void {
@@ -65,6 +113,144 @@ describe('page rendering', function (): void {
             'record' => $record->id,
         ])
             ->assertOk();
+    });
+});
+
+describe('director who must validate', function (): void {
+    it('shows the direction and the director who must validate the request', function (): void {
+        $director = Employee::factory()->create([
+            'username' => 'qwilmet',
+            'last_name' => 'WILMET',
+            'first_name' => 'Quentin',
+        ]);
+        $director->professional_email = 'quentin.wilmet@marche.be';
+        $director->save();
+
+        requesterWithDirector($this->adminUser->username, 'qwilmet');
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee('Directeur qui doit valider')
+            ->assertSee('Direction du Personnel')
+            ->assertSee('WILMET Quentin')
+            ->assertSee('quentin.wilmet@marche.be')
+            ->assertDontSee('la demande de validation ne lui a pas');
+    });
+
+    it('warns when the direction has no director', function (): void {
+        requesterWithDirector($this->adminUser->username, null);
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee('Aucun directeur renseigné')
+            ->assertSee('la demande de validation ne lui a pas été envoyée par mail.');
+    });
+
+    it('warns when the director has no email address', function (): void {
+        directorNamed('qwilmet', null);
+        requesterWithDirector($this->adminUser->username, 'qwilmet');
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee('WILMET Quentin')
+            ->assertSee('la demande de validation ne lui a pas été envoyée par mail.');
+    });
+
+    it('warns when the agent has no active contract', function (): void {
+        Employee::factory()->create(['username' => $this->adminUser->username]);
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee('Aucun contrat actif')
+            ->assertSee('la demande de validation ne lui a pas été envoyée par mail.');
+    });
+});
+
+describe('validation request mail', function (): void {
+    it('sends the request to the director with a link to the validation page', function (): void {
+        Mail::fake();
+
+        directorNamed('qwilmet', 'quentin.wilmet@marche.be');
+        requesterWithDirector($this->adminUser->username, 'qwilmet');
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertActionEnabled('requestManagerValidation')
+            ->callAction('requestManagerValidation')
+            ->assertNotified('Demande de validation envoyée');
+
+        Mail::assertQueued(
+            TeleworkManagerValidationMail::class,
+            fn (TeleworkManagerValidationMail $mail): bool => $mail->hasTo('quentin.wilmet@marche.be')
+                && str_contains(
+                    $mail->render(),
+                    ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'),
+                ),
+        );
+    });
+
+    it('reports that nothing was sent when no director is resolvable', function (): void {
+        Mail::fake();
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertActionDisabled('requestManagerValidation')
+            ->call('requestManagerValidation')
+            ->assertNotified('Aucun mail envoyé');
+
+        Mail::assertNotQueued(TeleworkManagerValidationMail::class);
+    });
+
+    it('reports that nothing was sent when the director has no email', function (): void {
+        Mail::fake();
+
+        directorNamed('qwilmet', null);
+        requesterWithDirector($this->adminUser->username, 'qwilmet');
+
+        $record = Telework::factory()->create();
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertActionDisabled('requestManagerValidation')
+            ->call('requestManagerValidation')
+            ->assertNotified('Aucun mail envoyé');
+
+        Mail::assertNotQueued(TeleworkManagerValidationMail::class);
+    });
+
+    it('hides the button once the director has decided', function (): void {
+        directorNamed('qwilmet', 'quentin.wilmet@marche.be');
+        requesterWithDirector($this->adminUser->username, 'qwilmet');
+
+        $record = Telework::factory()->create(['manager_validated' => true]);
+
+        Livewire::test(ViewTelework::class, [
+            'record' => $record->id,
+        ])
+            ->assertActionHidden('requestManagerValidation');
     });
 });
 

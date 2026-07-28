@@ -53,20 +53,27 @@ final class TeleworkNotifier
             ->send(new TeleworkEmployeeSubmittedMail($telework, $employee, self::director($employee)));
     }
 
-    public static function notifyManagerOfNewRequest(Telework $telework): void
+    /**
+     * Ask the agent's director to validate the request, with a direct link to the
+     * validation page. Returns false when no director with an email is resolvable,
+     * so callers can report that nothing was sent.
+     */
+    public static function notifyManagerOfNewRequest(Telework $telework): bool
     {
         $employee = self::employee($telework);
         if (! $employee instanceof Employee) {
-            return;
+            return false;
         }
 
         $director = self::director($employee);
         if (! $director instanceof Employee || empty($director->professional_email)) {
-            return;
+            return false;
         }
 
         Mail::to($director->professional_email)
             ->send(new TeleworkManagerValidationMail($telework, $employee, $director));
+
+        return true;
     }
 
     public static function notifyEmployeeAfterManagerValidation(Telework $telework): void
