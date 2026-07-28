@@ -97,11 +97,24 @@ final class Contract extends Model
      */
     public const string DEPRECATED_STATUS = 'status';
 
+    /**
+     * A contract is active once it has started and as long as it is neither closed,
+     * suspended nor expired. A missing date is treated as open ended: no start date
+     * means the contract already runs, no end date means it never expires.
+     *
+     * The start date is compared to the end of today because the `date` cast writes
+     * a midnight time component, which would otherwise push a contract starting
+     * today out of the scope.
+     */
     #[Scope]
     public static function active(Builder $query): void
     {
         $query->where('is_closed', false)
             ->where('is_suspended', false)
+            ->where(function (Builder $query): void {
+                $query->whereNull('start_date')
+                    ->orWhere('start_date', '<=', Carbon::today()->endOfDay());
+            })
             ->where(function (Builder $query): void {
                 $query->whereNull('end_date')
                     ->orWhere('end_date', '>=', Carbon::today());

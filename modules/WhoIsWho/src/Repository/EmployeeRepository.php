@@ -19,13 +19,42 @@ final class EmployeeRepository
      */
     public static function activeAgentsQuery(): Builder
     {
-        return Employee::query()
+        $query = Employee::query()
             ->where('status', StatusEnum::AGENT->value)
             ->where('is_archived', false)
             ->whereHas('activeContracts')
             ->with(['activeContracts.service'])
             ->orderBy('last_name')
             ->orderBy('first_name');
+
+        self::excludeNonPersonRecords($query);
+
+        return $query;
+    }
+
+    /**
+     * The HRM `employees` table also holds records that are not people: unions,
+     * external partners and administrative procedures, all marked by a prefix in
+     * their name. They must never surface in the directory, even when a contract
+     * happens to be attached to them.
+     *
+     * @param  Builder<Employee>  $query
+     */
+    public static function excludeNonPersonRecords(Builder $query): void
+    {
+        /** @var array<int, string> $patterns */
+        $patterns = config('who-is-who.excluded_name_patterns', []);
+
+        if ($patterns === []) {
+            return;
+        }
+
+        $query->whereNot(function (Builder $query) use ($patterns): void {
+            foreach ($patterns as $pattern) {
+                $query->orWhere('last_name', 'like', $pattern)
+                    ->orWhere('first_name', 'like', $pattern);
+            }
+        });
     }
 
     /**
@@ -70,6 +99,8 @@ final class EmployeeRepository
                     ->whereHas('employee', function (Builder $query): void {
                         $query->where('status', StatusEnum::AGENT->value)
                             ->where('is_archived', false);
+
+                        self::excludeNonPersonRecords($query);
                     });
             })
             ->orderBy('name')
