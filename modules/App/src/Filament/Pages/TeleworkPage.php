@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\App\Filament\Pages;
 
 use AcMarche\Hrm\Filament\Resources\Teleworks\Schemas\TeleworkForm;
+use AcMarche\Hrm\Filament\Resources\Teleworks\Schemas\TeleworkInfolist;
 use AcMarche\Hrm\Models\Telework as TeleworkModel;
 use AcMarche\Hrm\Services\TeleworkNotifier;
 use BackedEnum;
@@ -51,6 +52,11 @@ final class TeleworkPage extends Page implements HasForms
     public function form(Schema $schema): Schema
     {
         return TeleworkForm::configure($schema)->statePath('data');
+    }
+
+    public function validationInfolist(Schema $schema): Schema
+    {
+        return TeleworkInfolist::validationProcess($schema)->record($this->record);
     }
 
     public function save(): void

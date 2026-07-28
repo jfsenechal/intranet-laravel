@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Teleworks\Schemas;
 
+use AcMarche\Hrm\Models\Telework;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -100,5 +101,111 @@ final class TeleworkInfolist
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    /**
+     * Read-only follow-up of the validation process, shown to the requesting employee.
+     */
+    public static function validationProcess(Schema $schema): Schema
+    {
+        return $schema
+            ->columns(1)
+            ->components([
+                Section::make('Suivi de ma demande')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('status')
+                            ->label('État de la demande')
+                            ->badge()
+                            ->state(fn (Telework $record): string => self::status($record))
+                            ->color(fn (Telework $record): string => self::statusColor($record))
+                            ->columnSpanFull(),
+                        TextEntry::make('created_at')
+                            ->label('Introduite le')
+                            ->dateTime('d/m/Y H:i'),
+                        TextEntry::make('updated_at')
+                            ->label('Dernière modification')
+                            ->dateTime('d/m/Y H:i'),
+                    ]),
+                Section::make('Validation par la direction de service')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('manager_validated')
+                            ->label('Décision')
+                            ->badge()
+                            ->state(fn (Telework $record): string => match ($record->manager_validated) {
+                                true => 'Validée',
+                                false => 'Refusée',
+                                default => 'En attente',
+                            })
+                            ->color(fn (Telework $record): string => match ($record->manager_validated) {
+                                true => 'success',
+                                false => 'danger',
+                                default => 'gray',
+                            }),
+                        TextEntry::make('manager_validated_at')
+                            ->label('Date de la décision')
+                            ->date('d/m/Y')
+                            ->placeholder('-'),
+                        TextEntry::make('manager_validator_name')
+                            ->label('Traitée par')
+                            ->placeholder('-'),
+                        TextEntry::make('manager_validation_notes')
+                            ->label('Remarques de la direction du service')
+                            ->html()
+                            ->placeholder('Aucune remarque')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Traitement par le service GRH')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('date_college')
+                            ->label('Date du collège')
+                            ->date('d/m/Y')
+                            ->placeholder('En attente'),
+                        TextEntry::make('hr_validator_name')
+                            ->label('Traitée par')
+                            ->placeholder('-'),
+                        TextEntry::make('hr_notes')
+                            ->label('Remarques du service GRH')
+                            ->html()
+                            ->placeholder('Aucune remarque')
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    private static function status(Telework $telework): string
+    {
+        if ($telework->manager_validated === false) {
+            return 'Refusée par la direction de service';
+        }
+
+        if ($telework->date_college !== null) {
+            return 'Traitée par le service GRH';
+        }
+
+        if ($telework->manager_validated === true) {
+            return 'Validée par la direction, en attente du service GRH';
+        }
+
+        return 'En attente de validation par la direction de service';
+    }
+
+    private static function statusColor(Telework $telework): string
+    {
+        if ($telework->manager_validated === false) {
+            return 'danger';
+        }
+
+        if ($telework->date_college !== null) {
+            return 'success';
+        }
+
+        if ($telework->manager_validated === true) {
+            return 'info';
+        }
+
+        return 'warning';
     }
 }

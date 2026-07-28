@@ -25,6 +25,53 @@ it('renders the telework page', function (): void {
     Livewire::test(TeleworkPage::class)->assertOk();
 });
 
+it('hides the validation follow-up when no request exists', function (): void {
+    Livewire::test(TeleworkPage::class)
+        ->assertOk()
+        ->assertDontSee('Suivi de ma demande');
+});
+
+it('shows the pending validation follow-up when a request exists', function (): void {
+    Telework::factory()->create(['user_add' => 'mmartin']);
+
+    Livewire::test(TeleworkPage::class)
+        ->assertOk()
+        ->assertSee('Suivi de ma demande')
+        ->assertSee('En attente de validation par la direction de service')
+        ->assertSee('Validation par la direction de service')
+        ->assertSee('Traitement par le service GRH');
+});
+
+it('shows the manager decision and the hr processing in the follow-up', function (): void {
+    Telework::factory()->create([
+        'user_add' => 'mmartin',
+        'manager_validated' => true,
+        'manager_validated_at' => '2026-06-15',
+        'manager_validator_name' => 'Alice Dupont',
+        'date_college' => '2026-07-01',
+        'hr_validator_name' => 'Bob Lambert',
+    ]);
+
+    Livewire::test(TeleworkPage::class)
+        ->assertOk()
+        ->assertSee('Traitée par le service GRH')
+        ->assertSee('15/06/2026')
+        ->assertSee('Alice Dupont')
+        ->assertSee('01/07/2026')
+        ->assertSee('Bob Lambert');
+});
+
+it('shows a refusal in the follow-up', function (): void {
+    Telework::factory()->create([
+        'user_add' => 'mmartin',
+        'manager_validated' => false,
+    ]);
+
+    Livewire::test(TeleworkPage::class)
+        ->assertOk()
+        ->assertSee('Refusée par la direction de service');
+});
+
 it('creates a telework request with the address on save', function (): void {
     Livewire::test(TeleworkPage::class)
         ->fillForm([

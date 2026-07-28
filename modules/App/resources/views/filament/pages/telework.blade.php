@@ -1,4 +1,8 @@
 <x-filament-panels::page>
+    @if ($this->record)
+        {{ $this->validationInfolist }}
+    @endif
+
     <form wire:submit="save">
         {{ $this->form }}
 
