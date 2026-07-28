@@ -14,8 +14,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property string|null $phone_number
- * @property string|null $message
+ * @property int $id
+ * @property int|null $employee_id
+ * @property string $phone_number
+ * @property string $message
+ * @property \Carbon\CarbonImmutable $reminder_date
+ * @property string|null $updated_by
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property \Carbon\CarbonImmutable|null $sent_at
+ * @property string|null $result
+ * @property \Carbon\CarbonImmutable|null $other_reminder_date
+ * @property-read Employee|null $employee
  */
 #[Connection('maria-hrm')]
 #[Fillable([

@@ -12,6 +12,18 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $last_name
+ * @property string|null $first_name
+ * @property string $email_1
+ * @property string|null $phone_1
+ * @property string $email_2
+ * @property string|null $phone_2
+ * @property string|null $description
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'last_name',

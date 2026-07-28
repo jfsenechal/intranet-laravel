@@ -12,6 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $notification_id
+ * @property string $user
+ * @property-read HrNotification|null $notification
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'notification_id',

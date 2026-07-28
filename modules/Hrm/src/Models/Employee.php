@@ -22,6 +22,89 @@ use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+/**
+ * @property int $id
+ * @property int|null $prerequisite_id
+ * @property string|null $uid
+ * @property string $slug
+ * @property string $last_name
+ * @property string $first_name
+ * @property string|null $job_title
+ * @property \Carbon\CarbonImmutable|null $birth_date
+ * @property string|null $private_email
+ * @property string|null $private_phone
+ * @property string|null $private_mobile
+ * @property \Carbon\CarbonImmutable|null $hired_at
+ * @property \Carbon\CarbonImmutable|null $left_at
+ * @property \Carbon\CarbonImmutable|null $salary_seniority_date
+ * @property \Carbon\CarbonImmutable|null $scale_seniority_date
+ * @property \Carbon\CarbonImmutable|null $reminder_date
+ * @property StatusEnum|null $status
+ * @property string|null $notes
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property string|null $photo
+ * @property string|null $address
+ * @property int|null $postal_code
+ * @property string|null $city
+ * @property string|null $national_registry_number
+ * @property int|null $pay_scale_id
+ * @property \Carbon\CarbonImmutable|null $received_at
+ * @property string|null $mail_reference
+ * @property string|null $diploma_level
+ * @property string|null $diploma_level_simplified
+ * @property string|null $diploma_nature
+ * @property string|null $candidate_file_name
+ * @property \Carbon\CarbonImmutable|null $mail_sent_at
+ * @property int|null $mail_count
+ * @property string|null $priority
+ * @property int|null $employeur_save_id
+ * @property string $user_add
+ * @property bool $is_archived
+ * @property bool|null $show_birthday
+ * @property int|null $candidate_service_id
+ * @property string|null $local_unit
+ * @property string|null $pay_scale_code
+ * @property string|null $allowance
+ * @property string|null $civility
+ * @property string|null $updated_by
+ * @property int|null $health_insurance_id
+ * @property string|null $insurance_affiliation
+ * @property InternTypeEnum|null $intern_type
+ * @property string|null $username
+ * @property string $uuid
+ * @property string|null $professional_email
+ * @property string|null $professional_mobile
+ * @property string|null $professional_phone
+ * @property string|null $professional_phone_extension
+ * @property string|null $longitude
+ * @property string|null $latitude
+ * @property string|null $phone_office
+ * @property string|null $mobile_office
+ * @property bool|null $show_photo
+ * @property string|null $emergency_contact
+ * @property string|null $note
+ * @property bool $is_new_hire
+ * @property \Carbon\CarbonImmutable|null $is_new_hire_updated_at
+ * @property-read PayScale|null $payScale
+ * @property-read HealthInsurance|null $healthInsurance
+ * @property-read Prerequisite|null $prerequisite
+ * @property-read Service|null $candidateService
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Contract> $contracts
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Contract> $activeContracts
+ * @property-read Profile|null $profile
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Absence> $absences
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Training> $trainings
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Evaluation> $evaluations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Diploma> $diplomas
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Internship> $internships
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Application> $applications
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, HrDocument> $documents
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Valorization> $valorizations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Deadline> $deadlines
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SmsReminder> $smsMessages
+ * @property-read string $full_name
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'uuid',

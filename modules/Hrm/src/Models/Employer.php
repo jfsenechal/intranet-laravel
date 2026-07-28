@@ -14,6 +14,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $slug
+ * @property string $name
+ * @property int|null $parent_id
+ * @property-read Employer|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Employer> $children
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Direction> $directions
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'name',

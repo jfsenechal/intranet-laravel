@@ -13,6 +13,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $employee_id
+ * @property string $employer_name
+ * @property string $duration
+ * @property string|null $regime
+ * @property string|null $content
+ * @property string|null $file_name
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property string|null $updated_by
+ * @property-read Employee|null $employee
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'employee_id',

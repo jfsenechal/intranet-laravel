@@ -16,6 +16,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $employee_id
+ * @property \Carbon\CarbonImmutable|null $start_date
+ * @property \Carbon\CarbonImmutable|null $end_date
+ * @property \Carbon\CarbonImmutable|null $reminder_date
+ * @property \Carbon\CarbonImmutable|null $closed_date
+ * @property bool|null $has_resumed
+ * @property string $notes
+ * @property string|null $ssa
+ * @property ReasonsEnum|null $reason
+ * @property bool|null $clock_updated
+ * @property bool|null $certimed
+ * @property bool|null $is_closed
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property string $user_add
+ * @property bool|null $acropole
+ * @property bool|null $agent_file
+ * @property string|null $updated_by
+ * @property WorkCapacityAssessmentEnum|null $work_capacity_assessment
+ * @property-read Employee|null $employee
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'employee_id',

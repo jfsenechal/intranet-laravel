@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Employee> $employees
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'name',
