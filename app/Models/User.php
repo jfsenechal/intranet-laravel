@@ -12,6 +12,7 @@ use AcMarche\Security\Enums\RolesEnum;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Models\Role;
+use AcMarche\WhoIsWho\Models\UserWhoIsWhoTrait;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
@@ -63,7 +64,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasName
 {
     use HasApiTokens, HasFactory, HasPushSubscriptions, Notifiable, Searchable;
-    use UserCourrierTrait, UserMailingListTrait,UserPstTrait;
+    use UserCourrierTrait, UserMailingListTrait,UserPstTrait, UserWhoIsWhoTrait;
 
     public static function generateDataFromLdap(UserLdap $userLdap): array
     {

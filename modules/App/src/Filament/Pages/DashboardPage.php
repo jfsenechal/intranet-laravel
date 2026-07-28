@@ -8,8 +8,10 @@ use AcMarche\App\Handler\FavoriteModuleHandler;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Document\Models\Document;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\News\Models\News;
 use AcMarche\Security\Models\Module;
+use AcMarche\WhoIsWho\Repository\FavoriteEmployeeRepository;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,6 +37,11 @@ final class DashboardPage extends BaseDashboard
     public Collection $latestDocuments;
 
     public Collection $myCourriers;
+
+    /**
+     * @var Collection<int, Employee>
+     */
+    public Collection $favoriteEmployees;
 
     /**
      * @var SupportCollection<int, Module>
@@ -63,6 +70,8 @@ final class DashboardPage extends BaseDashboard
         $username = Auth::user()?->username;
 
         $this->favoriteModules = FavoriteModuleHandler::getFavoriteModules();
+
+        $this->favoriteEmployees = FavoriteEmployeeRepository::favorites();
 
         $this->latestNews = News::query()
             ->latest('created_at')

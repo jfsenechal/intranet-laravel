@@ -2,7 +2,7 @@
 <x-filament-panels::page>
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-        <x-filament::section class="lg:col-span-2">
+        <x-filament::section>
             <x-slot name="heading">Mes applications favorites</x-slot>
 
             @forelse ($this->favoriteModules as $module)
@@ -30,6 +30,42 @@
                 </a>
             @empty
                 <p class="text-sm text-gray-500 dark:text-gray-400">Aucun favori pour le moment.</p>
+            @endforelse
+        </x-filament::section>
+
+        <x-filament::section>
+            <x-slot name="heading">Mes agents favoris</x-slot>
+
+            @forelse ($this->favoriteEmployees as $employee)
+                <a
+                    href="{{ \AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource::getUrl('view', ['record' => $employee], panel: 'who-is-who-panel') }}"
+                    class="group flex items-center gap-3 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
+                    <img
+                        src="{{ \AcMarche\WhoIsWho\Repository\EmployeeRepository::photoUrl($employee) }}"
+                        alt=""
+                        class="size-9 shrink-0 rounded-full bg-gray-100 object-cover dark:bg-gray-800"
+                    />
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate font-medium text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
+                            {{ $employee->last_name }} {{ $employee->first_name }}
+                        </p>
+                        <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                            {{ $employee->activeContracts->pluck('service.name')->filter()->unique()->implode(', ') }}
+                        </p>
+                    </div>
+                    <x-filament::icon
+                        icon="heroicon-m-chevron-right"
+                        class="h-4 w-4 shrink-0 text-gray-400"
+                    />
+                </a>
+            @empty
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Aucun agent favori. Ajoutez-en depuis l'annuaire
+                    <a
+                        href="{{ \AcMarche\WhoIsWho\Filament\Pages\Index::getUrl(panel: 'who-is-who-panel') }}"
+                        class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+                    >« Qui est qui ? »</a>.
+                </p>
             @endforelse
         </x-filament::section>
 

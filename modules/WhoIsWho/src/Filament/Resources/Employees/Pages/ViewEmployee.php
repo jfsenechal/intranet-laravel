@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\WhoIsWho\Filament\Resources\Employees\Pages;
 
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\WhoIsWho\Filament\Concerns\InteractsWithFavoriteEmployees;
 use AcMarche\WhoIsWho\Filament\Pages\Index;
 use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;
 use Filament\Actions\Action;
@@ -14,6 +15,8 @@ use Override;
 
 final class ViewEmployee extends ViewRecord
 {
+    use InteractsWithFavoriteEmployees;
+
     #[Override]
     protected static string $resource = EmployeeResource::class;
 
@@ -30,6 +33,18 @@ final class ViewEmployee extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('toggleFavorite')
+                ->label(fn (): string => $this->isFavoriteEmployee($this->employee()->id)
+                    ? 'Retirer de mes favoris'
+                    : 'Ajouter à mes favoris')
+                ->icon(fn (): Heroicon => $this->isFavoriteEmployee($this->employee()->id)
+                    ? Heroicon::Star
+                    : Heroicon::OutlinedStar)
+                ->color(fn (): string => $this->isFavoriteEmployee($this->employee()->id) ? 'warning' : 'gray')
+                ->action(function (): void {
+                    $this->toggleFavoriteEmployee($this->employee()->id);
+                }),
+
             Action::make('backToDirectory')
                 ->label('Retour à l\'annuaire')
                 ->icon(Heroicon::ArrowLeft)
