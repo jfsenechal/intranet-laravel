@@ -13,6 +13,6 @@ return [
     */
     'storage' => [
         'disk' => env('OFFENSE_DISK', 'local'),
-        'directory' => env('OFFENSE_DIRECTORY', 'uploads/offense'),
+        'directory' => env('OFFENSE_DIRECTORY', 'offense'),
     ],
 ];
