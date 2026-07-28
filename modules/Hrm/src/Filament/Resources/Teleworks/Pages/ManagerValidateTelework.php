@@ -27,6 +27,12 @@ final class ManagerValidateTelework extends EditRecord
 
     public static function canAccess(array $parameters = []): bool
     {
+        $record = $parameters['record'] ?? null;
+
+        if ($record instanceof Telework) {
+            return Gate::forUser(auth()->user())->allows('validateAsManager', $record);
+        }
+
         return Gate::forUser(auth()->user())->check('hrm-director');
     }
 
@@ -39,6 +45,16 @@ final class ManagerValidateTelework extends EditRecord
     public function form(Schema $schema): Schema
     {
         return TeleworkForm::validationService($schema);
+    }
+
+    /**
+     * The base implementation requires the `update` ability, which is reserved for GRH
+     * administrators. Validating is the director's own step, so it is authorized on its own.
+     */
+    #[Override]
+    protected function authorizeAccess(): void
+    {
+        abort_unless(self::canAccess(['record' => $this->getRecord()]), 403);
     }
 
     protected function afterSave(): void

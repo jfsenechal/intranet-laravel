@@ -182,6 +182,131 @@ describe('director who must validate', function (): void {
     });
 });
 
+describe('director access to the validation page', function (): void {
+    /**
+     * A director holds ROLE_GRH_DIRECTION and no GRH administration role: their access
+     * comes solely from being the director of the requester's direction.
+     */
+    function actingAsDirector(string $username): User
+    {
+        $role = Role::firstOrCreate(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $user = User::factory()->create(['username' => $username]);
+        $user->addRole($role);
+
+        test()->actingAs($user);
+
+        return $user;
+    }
+
+    /**
+     * Telework stamps `user_add` from the authenticated user, so the request is created
+     * while acting as the requester before switching to the director.
+     */
+    function requestFromAgentOfDirection(string $agentUsername, ?string $directorUsername): Telework
+    {
+        $employee = Employee::factory()->create(['username' => $agentUsername]);
+
+        $direction = Direction::factory()->create(['director' => $directorUsername]);
+
+        Contract::factory()->create([
+            'employee_id' => $employee->getKey(),
+            'direction_id' => $direction->getKey(),
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        test()->actingAs(User::factory()->create(['username' => $agentUsername]));
+
+        return Telework::factory()->create();
+    }
+
+    it('lets the director of the requester validate the request', function (): void {
+        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        actingAsDirector('qwilmet');
+
+        $this->get(ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
+            ->assertOk();
+    });
+
+    it('lets the director of the requester open the request', function (): void {
+        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        actingAsDirector('qwilmet');
+
+        $this->get(ViewTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
+            ->assertOk();
+    });
+
+    it('lets the director record their decision', function (): void {
+        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        actingAsDirector('qwilmet');
+
+        Livewire::test(ManagerValidateTelework::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'manager_validated' => true,
+                'manager_validator_name' => 'WILMET Quentin',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($record->refresh()->manager_validated)->toBeTrue();
+    });
+
+    /**
+     * The resource query hides records outside the user's direction, so an unauthorized
+     * user cannot resolve the route binding at all and gets a 404 rather than a 403.
+     */
+    it('hides the request from a director of another direction', function (): void {
+        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        actingAsDirector('someone-else');
+
+        $this->get(ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
+            ->assertNotFound();
+    });
+
+    it('hides the request from an agent without any director role', function (): void {
+        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+
+        $this->actingAs(User::factory()->create(['username' => 'nobody']));
+
+        $this->get(ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
+            ->assertNotFound();
+    });
+
+    it('keeps the full edit form closed to the director', function (): void {
+        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        actingAsDirector('qwilmet');
+
+        $this->get(EditTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
+            ->assertForbidden();
+    });
+
+    it('lists only the requests of the director own agents', function (): void {
+        $own = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        $other = requestFromAgentOfDirection('asmith', 'another-director');
+
+        actingAsDirector('qwilmet');
+
+        Livewire::test(ListTeleworks::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$own])
+            ->assertCanNotSeeTableRecords([$other]);
+    });
+
+    it('still lists every request for a grh administrator', function (): void {
+        $first = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        $second = requestFromAgentOfDirection('asmith', 'another-director');
+
+        $this->actingAs($this->adminUser);
+
+        Livewire::test(ListTeleworks::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$first, $second]);
+    });
+});
+
 describe('validation request mail', function (): void {
     it('sends the request to the director with a link to the validation page', function (): void {
         Mail::fake();
