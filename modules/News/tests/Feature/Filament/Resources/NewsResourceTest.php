@@ -130,15 +130,35 @@ it('can filter by name', function (): void {
         ->assertCanNotSeeTableRecords([$news2]);
 });
 
-it('can filter archived news', function (): void {
+it('hides archived news by default', function (): void {
     $archived = News::factory()->create(['archive' => true]);
     $notArchived = News::factory()->create(['archive' => false]);
 
-    // NewsTables excludes archived by default, so archived should not appear
     livewire(ListNews::class)
         ->loadTable()
         ->assertCanSeeTableRecords([$notArchived])
         ->assertCanNotSeeTableRecords([$archived]);
+});
+
+it('can list archived news only', function (): void {
+    $archived = News::factory()->create(['archive' => true]);
+    $notArchived = News::factory()->create(['archive' => false]);
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->filterTable('archive', true)
+        ->assertCanSeeTableRecords([$archived])
+        ->assertCanNotSeeTableRecords([$notArchived]);
+});
+
+it('can list every news item when the archive filter is cleared', function (): void {
+    $archived = News::factory()->create(['archive' => true]);
+    $notArchived = News::factory()->create(['archive' => false]);
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->filterTable('archive', null)
+        ->assertCanSeeTableRecords([$archived, $notArchived]);
 });
 
 it('can load the create form', function (): void {
@@ -193,6 +213,27 @@ it('archive action exists on view page', function (): void {
         'record' => $news->id,
     ])
         ->assertActionExists('archive');
+});
+
+it('persists the archive flag when the archive action runs', function (): void {
+    $news = News::factory()->create(['archive' => false]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->callAction('archive')
+        ->assertNotified();
+
+    expect($news->refresh()->archive)->toBeTrue();
+});
+
+it('hides the archive action on an already archived news item', function (): void {
+    $news = News::factory()->create(['archive' => true]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->assertActionHidden('archive');
 });
 
 it('can create a news item without medias', function (): void {

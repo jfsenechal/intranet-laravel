@@ -31,7 +31,7 @@ final class NewsTables
         return $table
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('category')->where('archive', '!=', '1'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('category'))
             ->columns([
                 Stack::make([
                     TextColumn::make('name')
@@ -99,7 +99,16 @@ final class NewsTables
                     ->boolean()
                     ->trueLabel('Archivés seulement')
                     ->falseLabel('Non archivés seulement')
-                    ->native(false),
+                    ->placeholder('Tous')
+                    ->native(false)
+                    ->default(false)
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->where('archive', true),
+                        false: fn (Builder $query): Builder => $query->where(
+                            fn (Builder $query): Builder => $query->where('archive', false)->orWhereNull('archive'),
+                        ),
+                        blank: fn (Builder $query): Builder => $query,
+                    ),
                 Filter::make('created_at')
                     ->label('Ajouté le')
                     ->columnSpan(2)
