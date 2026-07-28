@@ -51,7 +51,9 @@ final class TeleworkPage extends Page implements HasForms
 
     public function form(Schema $schema): Schema
     {
-        return TeleworkForm::configure($schema)->statePath('data');
+        return TeleworkForm::configure($schema)
+            ->statePath('data')
+            ->disabled(fn (): bool => $this->isLocked());
     }
 
     public function validationInfolist(Schema $schema): Schema
@@ -59,17 +61,30 @@ final class TeleworkPage extends Page implements HasForms
         return TeleworkInfolist::validationProcess($schema)->record($this->record);
     }
 
+    /**
+     * A request can only be introduced once: it becomes read-only for the agent as soon as it exists.
+     */
+    public function isLocked(): bool
+    {
+        return $this->record instanceof TeleworkModel;
+    }
+
     public function save(): void
     {
-        $data = $this->form->getState();
+        if ($this->isLocked()) {
+            Notification::make()
+                ->title('Votre demande a déjà été introduite et ne peut plus être modifiée')
+                ->body('Contactez le service GRH si une correction est nécessaire.')
+                ->danger()
+                ->send();
 
-        if ($this->record instanceof TeleworkModel) {
-            $this->record->update($data);
-        } else {
-            $this->record = TeleworkModel::create($data);
-            TeleworkNotifier::notifyEmployeeOfSubmission($this->record);
-            TeleworkNotifier::notifyManagerOfNewRequest($this->record);
+            return;
         }
+
+        $this->record = TeleworkModel::create($this->form->getState());
+
+        TeleworkNotifier::notifyEmployeeOfSubmission($this->record);
+        TeleworkNotifier::notifyManagerOfNewRequest($this->record);
 
         Notification::make()
             ->title('Enregistré')

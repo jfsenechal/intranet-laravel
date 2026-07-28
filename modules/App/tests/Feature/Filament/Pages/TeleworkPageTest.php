@@ -122,7 +122,7 @@ it('confirms the submission to the requester by email', function (): void {
     );
 });
 
-it('does not re-confirm when an existing request is updated', function (): void {
+it('does not re-confirm when an existing request is submitted again', function (): void {
     Mail::fake();
 
     $employee = Employee::factory()->create(['username' => 'mmartin']);
@@ -132,14 +132,35 @@ it('does not re-confirm when an existing request is updated', function (): void 
     Telework::factory()->create(['user_add' => 'mmartin', 'postal_code' => '6900']);
 
     Livewire::test(TeleworkPage::class)
-        ->fillForm(['postal_code' => '6640'])
         ->call('save')
         ->assertHasNoFormErrors();
 
     Mail::assertNotQueued(TeleworkEmployeeSubmittedMail::class);
 });
 
-it('updates the existing request instead of creating a second one', function (): void {
+it('locks the form once the request exists', function (): void {
+    Telework::factory()->create(['user_add' => 'mmartin']);
+
+    Livewire::test(TeleworkPage::class)
+        ->assertOk()
+        ->assertFormFieldDisabled('street')
+        ->assertFormFieldDisabled('postal_code')
+        ->assertFormFieldDisabled('locality')
+        ->assertFormFieldDisabled('location_type')
+        ->assertFormFieldDisabled('day_type')
+        ->assertFormFieldDisabled('regulation_agreement')
+        ->assertFormFieldDisabled('it_agreement')
+        ->assertDontSee('Enregistrer');
+});
+
+it('leaves the form editable while no request exists', function (): void {
+    Livewire::test(TeleworkPage::class)
+        ->assertOk()
+        ->assertFormFieldEnabled('street')
+        ->assertSee('Enregistrer');
+});
+
+it('refuses to modify an existing request', function (): void {
     Telework::factory()->create([
         'user_add' => 'mmartin',
         'postal_code' => '6900',
@@ -148,12 +169,12 @@ it('updates the existing request instead of creating a second one', function ():
     Livewire::test(TeleworkPage::class)
         ->fillForm(['postal_code' => '6640'])
         ->call('save')
-        ->assertHasNoFormErrors();
+        ->assertNotified('Votre demande a déjà été introduite et ne peut plus être modifiée');
 
     expect(Telework::query()->where('user_add', 'mmartin')->count())->toBe(1);
 
     assertDatabaseHas(Telework::class, [
         'user_add' => 'mmartin',
-        'postal_code' => '6640',
+        'postal_code' => '6900',
     ]);
 });
