@@ -1,6 +1,6 @@
 @php
     /** @var \AcMarche\Hrm\Models\Employee $employee */
-    use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;$fullName = mb_trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
+    use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;use AcMarche\WhoIsWho\Repository\EmployeeRepository;$fullName = mb_trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
     $jobTitles = $employee->activeContracts
         ->pluck('job_title')
         ->filter()
@@ -11,7 +11,7 @@
         ->filter()
         ->unique()
         ->values();
-    $photoUrl = \AcMarche\WhoIsWho\Repository\EmployeeRepository::photoUrl($employee);
+    $photoUrl = EmployeeRepository::photoUrl($employee);
     $phoneDisplay = $employee->professional_phone
         ? trim($employee->professional_phone . ($employee->professional_phone_extension ? ' (ext. ' . $employee->professional_phone_extension . ')' : ''))
         : null;

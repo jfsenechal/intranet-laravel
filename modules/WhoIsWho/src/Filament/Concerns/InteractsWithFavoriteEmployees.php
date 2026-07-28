@@ -48,7 +48,7 @@ trait InteractsWithFavoriteEmployees
         $this->favoriteEmployeeIds = null;
 
         Notification::make()
-            ->title($isFavorite ? 'Ajouté à mes agents favoris' : 'Retiré de mes agents favoris')
+            ->title($isFavorite ? 'Ajouté à mes collègues favoris' : 'Retiré de mes collègues favoris')
             ->success()
             ->send();
     }

@@ -1,4 +1,4 @@
-@php use AcMarche\App\Filament\Pages\DashboardPage; @endphp
+@php use AcMarche\App\Filament\Pages\DashboardPage;use AcMarche\WhoIsWho\Filament\Pages\Index;use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;use AcMarche\WhoIsWho\Repository\EmployeeRepository; @endphp
 <x-filament-panels::page>
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
@@ -18,7 +18,8 @@
                     >
                         {{ mb_strtoupper(mb_substr($module->name, 0, 2)) }}
                     </span>
-                    <span class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
+                    <span
+                        class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
                         {{ $module->name }}
                     </span>
                     @if ($module->is_external)
@@ -34,14 +35,14 @@
         </x-filament::section>
 
         <x-filament::section>
-            <x-slot name="heading">Mes agents favoris</x-slot>
+            <x-slot name="heading">Mes collègues favoris</x-slot>
 
             @forelse ($this->favoriteEmployees as $employee)
                 <a
-                    href="{{ \AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource::getUrl('view', ['record' => $employee], panel: 'who-is-who-panel') }}"
+                    href="{{ EmployeeResource::getUrl('view', ['record' => $employee], panel: 'who-is-who-panel') }}"
                     class="group flex items-center gap-3 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <img
-                        src="{{ \AcMarche\WhoIsWho\Repository\EmployeeRepository::photoUrl($employee) }}"
+                        src="{{ EmployeeRepository::photoUrl($employee) }}"
                         alt=""
                         class="size-9 shrink-0 rounded-full bg-gray-100 object-cover dark:bg-gray-800"
                     />
@@ -60,9 +61,9 @@
                 </a>
             @empty
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Aucun agent favori. Ajoutez-en depuis l'annuaire
+                    Aucun collègue favori. Ajoutez-en depuis l'annuaire
                     <a
-                        href="{{ \AcMarche\WhoIsWho\Filament\Pages\Index::getUrl(panel: 'who-is-who-panel') }}"
+                        href="{{ Index::getUrl(panel: 'who-is-who-panel') }}"
                         class="font-medium text-primary-600 hover:underline dark:text-primary-400"
                     >« Qui est qui ? »</a>.
                 </p>
