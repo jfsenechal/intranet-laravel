@@ -134,6 +134,21 @@ it('hides the birth year of an agent who opted in', function (): void {
         ->assertDontSee('1985');
 });
 
+it('offers the profile link only on the agent own entry', function (): void {
+    $own = activeAgent(['username' => $this->user->username]);
+
+    livewire(ViewEmployee::class, ['record' => $own->id])
+        ->assertOk()
+        ->assertSee('Changer ma photo')
+        ->assertSee(Filament::getPanel('app-panel')->getProfileUrl());
+
+    $other = activeAgent(['username' => 'someone.else']);
+
+    livewire(ViewEmployee::class, ['record' => $other->id])
+        ->assertOk()
+        ->assertDontSee('Changer ma photo');
+});
+
 it('does not expose an archived employee', function (): void {
     $employee = activeAgent(['is_archived' => true]);
 

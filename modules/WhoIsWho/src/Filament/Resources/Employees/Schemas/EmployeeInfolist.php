@@ -6,13 +6,20 @@ namespace AcMarche\WhoIsWho\Filament\Resources\Employees\Schemas;
 
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\WhoIsWho\Repository\EmployeeRepository;
+use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Read-only staff directory card.
@@ -52,6 +59,15 @@ final class EmployeeInfolist
                                             ->icon('heroicon-o-cake')
                                             ->visible(fn (Employee $record): bool => $record->show_birthday === true && $record->birth_date !== null)
                                             ->state(fn (Employee $record): ?string => $record->birth_date?->translatedFormat('d F')),
+
+                                        Actions::make([
+                                            Action::make('editPhoto')
+                                                ->label('Changer ma photo')
+                                                ->icon(Heroicon::OutlinedCamera)
+                                                ->link()
+                                                ->url(fn (): ?string => Filament::getPanel('app-panel')->getProfileUrl())
+                                                ->visible(fn (Employee $record): bool => self::isOwnRecord($record)),
+                                        ])->alignment(Alignment::Center),
                                     ]),
                             ]),
 
@@ -113,6 +129,22 @@ final class EmployeeInfolist
                             ]),
                     ]),
             ]);
+    }
+
+    /**
+     * The directory photo comes from the User avatar matched by `username`
+     * (see `EmployeeRepository::photoUrl()`), so only the agent looking at
+     * their own entry is offered the link to the profile page.
+     */
+    private static function isOwnRecord(Employee $employee): bool
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User || blank($user->username)) {
+            return false;
+        }
+
+        return $user->username === $employee->username;
     }
 
     /**
