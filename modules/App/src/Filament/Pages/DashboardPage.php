@@ -70,6 +70,7 @@ final class DashboardPage extends BaseDashboard
             ->get();
 
         $this->latestDocuments = Document::query()
+            ->with('category')
             ->latest('created_at')
             ->limit(5)
             ->get();

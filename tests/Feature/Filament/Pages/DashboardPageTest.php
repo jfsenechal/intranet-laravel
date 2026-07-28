@@ -6,6 +6,8 @@ use AcMarche\App\Filament\Pages\DashboardPage;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
+use AcMarche\Document\Models\Document;
+use AcMarche\News\Models\News;
 use App\Models\User;
 use Filament\Facades\Filament;
 
@@ -55,6 +57,40 @@ it('excludes mail older than 15 days', function (): void {
     $myCourriers = livewire(DashboardPage::class)->instance()->myCourriers;
 
     expect($myCourriers->pluck('id'))->not->toContain($old->id);
+});
+
+it('links each recent news item to its view page', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $news = News::factory()->create();
+
+    livewire(DashboardPage::class)
+        ->assertSee($news->name)
+        ->assertSeeHtml(route('filament.news-panel.resources.news.view', ['record' => $news]));
+});
+
+it('links each recent document to its view page', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $document = Document::factory()->create();
+
+    livewire(DashboardPage::class)
+        ->assertSee($document->name)
+        ->assertSeeHtml(route('filament.document-panel.resources.documents.view', ['record' => $document]));
+});
+
+it('eager loads the category of each recent document', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Document::factory()->count(3)->create();
+
+    $latestDocuments = livewire(DashboardPage::class)->instance()->latestDocuments;
+
+    expect($latestDocuments)->toHaveCount(3)
+        ->and($latestDocuments->every(fn (Document $document): bool => $document->relationLoaded('category')))->toBeTrue();
 });
 
 it('excludes mail the user is not linked to', function (): void {

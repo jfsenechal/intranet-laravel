@@ -12,7 +12,7 @@
                     class="group flex items-center gap-3 border-b border-gray-100 py-2 last:border-0 dark:border-gray-700"
                 >
                     <span
-                        class="flex size-9 flex-shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm transition group-hover:scale-105"
+                        class="flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm transition group-hover:scale-105"
                         style="background-color: {{ $module->color ?: '#f59e0b' }}"
                         aria-hidden="true"
                     >
@@ -24,7 +24,7 @@
                     @if ($module->is_external)
                         <x-filament::icon
                             icon="heroicon-m-arrow-top-right-on-square"
-                            class="h-4 w-4 flex-shrink-0 text-gray-400"
+                            class="h-4 w-4 shrink-0 text-gray-400"
                         />
                     @endif
                 </a>
@@ -50,7 +50,7 @@
                     </div>
                     <x-filament::icon
                         icon="heroicon-m-chevron-right"
-                        class="h-4 w-4 flex-shrink-0 text-gray-400"
+                        class="h-4 w-4 shrink-0 text-gray-400"
                     />
                 </a>
             @empty
@@ -63,10 +63,11 @@
             <x-slot name="heading">Dernières actualités</x-slot>
 
             @forelse ($this->latestNews as $news)
-                <div
-                    class="flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
+                <a
+                    href="{{ route('filament.news-panel.resources.news.view', ['record' => $news]) }}"
+                    class="group flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <div class="min-w-0">
-                        <p class="truncate font-medium text-gray-900 dark:text-gray-100">
+                        <p class="truncate font-medium text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
                             {{ $news->name }}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -76,7 +77,11 @@
                             @endif
                         </p>
                     </div>
-                </div>
+                    <x-filament::icon
+                        icon="heroicon-m-chevron-right"
+                        class="h-4 w-4 shrink-0 text-gray-400"
+                    />
+                </a>
             @empty
                 <p class="text-sm text-gray-500 dark:text-gray-400">Aucune actualité récente.</p>
             @endforelse
@@ -86,10 +91,11 @@
             <x-slot name="heading">Derniers documents</x-slot>
 
             @forelse ($this->latestDocuments as $document)
-                <div
-                    class="flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
+                <a
+                    href="{{ route('filament.document-panel.resources.documents.view', ['record' => $document]) }}"
+                    class="group flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <div class="min-w-0">
-                        <p class="truncate font-medium text-gray-900 dark:text-gray-100">
+                        <p class="truncate font-medium text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
                             {{ $document->name }}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -97,7 +103,11 @@
                             - {{ $document->created_at?->translatedFormat('d/m/Y') }}
                         </p>
                     </div>
-                </div>
+                    <x-filament::icon
+                        icon="heroicon-m-chevron-right"
+                        class="h-4 w-4 shrink-0 text-gray-400"
+                    />
+                </a>
             @empty
                 <p class="text-sm text-gray-500 dark:text-gray-400">Aucun document récent.</p>
             @endforelse
