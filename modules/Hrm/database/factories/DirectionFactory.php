@@ -26,7 +26,6 @@ final class DirectionFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'abbreviation' => Str::upper(Str::substr($name, 0, 3)),
             'director' => null,
             'employer_id' => null,

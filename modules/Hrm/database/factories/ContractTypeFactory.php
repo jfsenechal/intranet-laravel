@@ -6,7 +6,6 @@ namespace AcMarche\Hrm\Database\Factories;
 
 use AcMarche\Hrm\Models\ContractType;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use Override;
 
 /**
@@ -26,7 +25,6 @@ final class ContractTypeFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'description' => fake()->sentence(),
             'employer_id' => null,
         ];
