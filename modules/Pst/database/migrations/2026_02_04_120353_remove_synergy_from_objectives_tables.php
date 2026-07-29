@@ -12,15 +12,14 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
-            return;
-        }
-        Schema::table('strategic_objectives', function (Blueprint $table): void {
-            $table->dropColumn('synergy');
-        });
+        foreach (['strategic_objectives', 'operational_objectives'] as $name) {
+            if (! Schema::hasColumn($name, 'synergy')) {
+                continue;
+            }
 
-        Schema::table('operational_objectives', function (Blueprint $table): void {
-            $table->dropColumn('synergy');
-        });
+            Schema::table($name, function (Blueprint $table): void {
+                $table->dropColumn('synergy');
+            });
+        }
     }
 };

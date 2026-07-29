@@ -11,6 +11,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -18,7 +19,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('mailing-list'));
+    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
 });
@@ -58,7 +59,15 @@ it('has table columns', function (string $column): void {
 })->with(['name', 'email', 'created_at', 'updated_at']);
 
 it('can sort column', function (string $column): void {
-    $senders = Sender::factory(5)->create(['username' => $this->user->username]);
+    /* Explicit distinct values per sorted column: faker can repeat a name across
+       five records, and the database order among ties is unspecified while
+       Collection::sortBy is stable, which makes the assertion flaky. */
+    $senders = Sender::factory(5)
+        ->sequence(fn (Sequence $sequence): array => [
+            'name' => 'Sender'.$sequence->index,
+            'email' => "sender{$sequence->index}@example.test",
+        ])
+        ->create(['username' => $this->user->username]);
 
     livewire(ListSenders::class)
         ->loadTable()

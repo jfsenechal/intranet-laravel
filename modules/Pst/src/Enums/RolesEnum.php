@@ -28,6 +28,7 @@ enum RolesEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
+            self::PST => 'Utilisateur PST',
             self::ADMIN => 'Administrateur PST',
             self::MANDATAIRE => 'Mandataire',
         };
@@ -36,6 +37,7 @@ enum RolesEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
     public function getColor(): string|array|null
     {
         return match ($this) {
+            self::PST => 'gray',
             self::ADMIN => 'success',
             self::MANDATAIRE => 'primary',
         };
@@ -44,6 +46,7 @@ enum RolesEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
     public function getDescription(): string
     {
         return match ($this) {
+            self::PST => 'Accès au module PST',
             self::ADMIN => 'Gestion des actions,des agents et des paramètres',
             self::MANDATAIRE => 'Accès en lecture seul',
         };
@@ -52,6 +55,7 @@ enum RolesEnum: string implements HasColor, HasDescription, HasIcon, HasLabel
     public function getIcon(): string
     {
         return match ($this) {
+            self::PST => 'tabler-user',
             self::ADMIN => 'tabler-user-bolt',
             self::MANDATAIRE => 'tabler-user-circle',
         };

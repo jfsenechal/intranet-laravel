@@ -13,6 +13,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $object_id
+ * @property string $object_type
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property string $user_add
+ * @property int|null $employeur_id
+ * @property-read Employer|null $employer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, NotificationUser> $notificationUsers
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'name',

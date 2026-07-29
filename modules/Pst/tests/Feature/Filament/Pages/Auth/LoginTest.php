@@ -6,7 +6,7 @@ use App\Models\User;
 use Filament\Facades\Filament;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('pst'));
+    Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
     $this->user = User::factory()->create();
 });
 

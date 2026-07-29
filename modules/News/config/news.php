@@ -10,6 +10,6 @@ return [
     */
     'uploads' => [
         'featured_image' => 'news',
-        'medias' => 'uploads/news',
+        'medias' => 'news',
     ],
 ];

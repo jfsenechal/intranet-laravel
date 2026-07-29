@@ -203,6 +203,37 @@ describe('model behavior', function (): void {
         expect($contracts->pluck('id'))->toContain($active->id);
         expect($contracts->where('is_closed', true))->toBeEmpty();
     });
+
+    it('active scope excludes contracts that have not started yet', function (): void {
+        $future = Contract::factory()->create([
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->addDay(),
+            'end_date' => null,
+        ]);
+
+        expect(Contract::query()->active()->pluck('id'))->not->toContain($future->id);
+    });
+
+    it('active scope keeps contracts starting today and contracts without a start date', function (): void {
+        $startsToday = Contract::factory()->create([
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now(),
+            'end_date' => null,
+        ]);
+
+        $withoutStartDate = Contract::factory()->create([
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => null,
+            'end_date' => null,
+        ]);
+
+        expect(Contract::query()->active()->pluck('id'))
+            ->toContain($startsToday->id)
+            ->toContain($withoutStartDate->id);
+    });
 });
 
 describe('nature filter', function (): void {

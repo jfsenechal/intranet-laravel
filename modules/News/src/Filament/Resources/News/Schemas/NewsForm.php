@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\News\Filament\Resources\News\Schemas;
 
 use AcMarche\News\Enums\DepartmentEnum;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 use Illuminate\Support\Facades\Date;
 
 final class NewsForm
@@ -62,7 +64,12 @@ final class NewsForm
                             ->default(Date::make('now')->add('2 weeks'))
                             ->required()
                             ->suffixIcon('tabler-calendar-stats'),
-
+                        Checkbox::make('resend_mail')
+                            ->label('Renvoyer le mail')
+                            ->helperText('Renvoie la notification par mail aux utilisateurs concernés.')
+                            ->default(false)
+                            ->saved(false)
+                            ->visibleOn(Operation::Edit),
                     ])->grow(false),
                 ])->from('md'),
             ]);

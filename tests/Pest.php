@@ -5,19 +5,13 @@ declare(strict_types=1);
 uses(PHPUnit\Framework\TestCase::class)->in('Sms');
 
 uses(
-    AcMarche\Hrm\Tests\HrmTestCase::class,
+    Tests\TestCase::class,
     Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
 )->in(
     '../modules/Hrm/tests/Feature',
     '../modules/Hrm/tests/Unit',
     '../modules/Ad/tests/Feature',
     '../modules/Ad/tests/Unit',
-);
-
-uses(
-    Tests\TestCase::class,
-    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
-)->in(
     'Feature',
     'Unit',
     'Browser',
@@ -52,6 +46,9 @@ uses(
     '../modules/Conseil/tests/Filament',
     '../modules/App/tests/Feature',
     '../modules/App/tests/Unit',
+    '../modules/MealDelivery/tests/Feature',
+    '../modules/MealDelivery/tests/Unit',
+    '../modules/WhoIsWho/tests/Feature',
 );
 
 uses(
@@ -66,12 +63,4 @@ uses(
     AcMarche\Conseil\Tests\ConseilTestCase::class,
 )->in(
     '../modules/Conseil/tests/Feature',
-);
-
-uses(
-    Tests\MealDeliveryTestCase::class,
-    Illuminate\Foundation\Testing\LazilyRefreshDatabase::class,
-)->in(
-    '../modules/MealDelivery/tests/Feature',
-    '../modules/MealDelivery/tests/Unit',
 );

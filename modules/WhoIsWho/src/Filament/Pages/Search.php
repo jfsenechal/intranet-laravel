@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\WhoIsWho\Filament\Pages;
 
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\WhoIsWho\Filament\Concerns\InteractsWithFavoriteEmployees;
 use AcMarche\WhoIsWho\Repository\EmployeeRepository;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -16,6 +17,7 @@ use Override;
 
 final class Search extends Page implements HasForms
 {
+    use InteractsWithFavoriteEmployees;
     use InteractsWithForms;
 
     /**

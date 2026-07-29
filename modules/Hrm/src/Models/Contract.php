@@ -18,6 +18,45 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int|null $replaces_id
+ * @property int $employee_id
+ * @property string|null $college
+ * @property string $is_replacement
+ * @property \Carbon\CarbonImmutable|null $start_date
+ * @property \Carbon\CarbonImmutable|null $end_date
+ * @property bool|null $is_closed
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property \Carbon\CarbonImmutable|null $reminder_date
+ * @property int|null $contract_nature_id
+ * @property int|null $contract_type_id
+ * @property int $employer_id
+ * @property int|null $pay_scale_id
+ * @property float|null $work_regime
+ * @property string|null $job_title
+ * @property string $user_add
+ * @property int|null $direction_id
+ * @property int|null $service_id
+ * @property string|null $hourly_regime
+ * @property bool|null $is_amendment
+ * @property string|null $updated_by
+ * @property string|null $file1_name
+ * @property string|null $file2_name
+ * @property \Carbon\CarbonImmutable|null $createdAt
+ * @property \Carbon\CarbonImmutable|null $updatedAt
+ * @property ContractStatusEnum|null $status
+ * @property bool|null $is_suspended
+ * @property-read Employee|null $employee
+ * @property-read Employer|null $employer
+ * @property-read Direction|null $direction
+ * @property-read Service|null $service
+ * @property-read ContractNature|null $contractNature
+ * @property-read ContractType|null $contractType
+ * @property-read PayScale|null $payScale
+ * @property-read Employee|null $replaces
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'employee_id',
@@ -58,11 +97,24 @@ final class Contract extends Model
      */
     public const string DEPRECATED_STATUS = 'status';
 
+    /**
+     * A contract is active once it has started and as long as it is neither closed,
+     * suspended nor expired. A missing date is treated as open ended: no start date
+     * means the contract already runs, no end date means it never expires.
+     *
+     * The start date is compared to the end of today because the `date` cast writes
+     * a midnight time component, which would otherwise push a contract starting
+     * today out of the scope.
+     */
     #[Scope]
     public static function active(Builder $query): void
     {
         $query->where('is_closed', false)
             ->where('is_suspended', false)
+            ->where(function (Builder $query): void {
+                $query->whereNull('start_date')
+                    ->orWhere('start_date', '<=', Carbon::today()->endOfDay());
+            })
             ->where(function (Builder $query): void {
                 $query->whereNull('end_date')
                     ->orWhere('end_date', '>=', Carbon::today());

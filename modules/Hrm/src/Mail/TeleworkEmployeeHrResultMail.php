@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Mail;
 
-use AcMarche\Hrm\Filament\Resources\Teleworks\Pages\ViewTelework;
+use AcMarche\App\Filament\Pages\TeleworkPage;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Telework;
 use App\Mail\Concerns\ResolvesSenderAddress;
@@ -51,7 +51,7 @@ final class TeleworkEmployeeHrResultMail extends Mailable implements ShouldQueue
             with: [
                 'telework' => $this->telework,
                 'employee' => $this->employee,
-                'url' => ViewTelework::getUrl(['record' => $this->telework]),
+                'url' => TeleworkPage::getUrl(panel: 'app-panel'),
                 'logo' => $this->logo,
             ],
         );

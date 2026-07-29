@@ -18,6 +18,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property bool $regulation_agreement
+ * @property string|null $street
+ * @property string|null $postal_code
+ * @property string|null $locality
+ * @property string $user_add
+ * @property bool|null $manager_validated
+ * @property \Carbon\CarbonImmutable|null $manager_validated_at
+ * @property string|null $manager_validation_notes
+ * @property \Carbon\CarbonImmutable|null $date_college
+ * @property string|null $hr_notes
+ * @property string|null $employee_notes
+ * @property string|null $updated_by
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property LocationTypeEnum $location_type
+ * @property DayTypeEnum $day_type
+ * @property WeekdayEnum|null $fixed_day
+ * @property string|null $variable_day_reason
+ * @property bool $it_agreement
+ * @property string $uuid
+ * @property string|null $manager_validator_name
+ * @property string|null $hr_validator_name
+ * @property-read Employee|null $employee
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'uuid',

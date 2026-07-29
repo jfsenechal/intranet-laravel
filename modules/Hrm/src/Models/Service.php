@@ -17,6 +17,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property string $user_add
+ * @property int|null $direction_id
+ * @property string|null $abbreviation
+ * @property int|null $employer_id
+ * @property int|null $postal_code
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string|null $gsm
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $notes
+ * @property-read Direction|null $direction
+ * @property-read Employer|null $employer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Contract> $contracts
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'name',

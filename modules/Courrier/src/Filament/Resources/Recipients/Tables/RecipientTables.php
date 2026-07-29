@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 final class RecipientTables
@@ -44,7 +45,13 @@ final class RecipientTables
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->filters([
+                TernaryFilter::make('receives_attachments')
+                    ->label('Pièces jointes')
+                    ->placeholder('Tous')
+                    ->trueLabel('Reçoit les pièces jointes')
+                    ->falseLabel('Ne reçoit pas les pièces jointes'),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

@@ -14,7 +14,7 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
+        if (Schema::hasColumn('operational_objectives', 'scope')) {
             return;
         }
         Schema::table('operational_objectives', function (Blueprint $table): void {

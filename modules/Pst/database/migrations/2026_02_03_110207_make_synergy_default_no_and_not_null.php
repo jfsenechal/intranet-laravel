@@ -13,18 +13,14 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
-            return;
-        }
-        Schema::table('strategic_objectives', function (Blueprint $table): void {
-            $table->enum('synergy', ActionSynergyEnum::toArray())->nullable(false)->default(ActionSynergyEnum::NO)->change();
-        });
+        foreach (['strategic_objectives', 'operational_objectives', 'actions'] as $name) {
+            if (! Schema::hasColumn($name, 'synergy')) {
+                continue;
+            }
 
-        Schema::table('operational_objectives', function (Blueprint $table): void {
-            $table->enum('synergy', ActionSynergyEnum::toArray())->nullable(false)->default(ActionSynergyEnum::NO)->change();
-        });
-        Schema::table('actions', function (Blueprint $table): void {
-            $table->enum('synergy', ActionSynergyEnum::toArray())->nullable(false)->default(ActionSynergyEnum::NO)->change();
-        });
+            Schema::table($name, function (Blueprint $table): void {
+                $table->enum('synergy', ActionSynergyEnum::toArray())->nullable(false)->default(ActionSynergyEnum::NO)->change();
+            });
+        }
     }
 };

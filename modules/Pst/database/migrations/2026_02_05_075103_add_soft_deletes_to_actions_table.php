@@ -12,7 +12,7 @@ return new class() extends Migration
 
     public function up(): void
     {
-        if (Schema::hasTable('actions')) {
+        if (Schema::hasColumn('actions', 'deleted_at')) {
             return;
         }
         Schema::table('actions', function (Blueprint $table): void {

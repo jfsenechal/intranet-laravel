@@ -33,7 +33,7 @@ final class ActionHistoryTrackingTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
         $this->adminUser = User::factory()->create();

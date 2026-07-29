@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\WhoIsWho\Filament\Pages;
 
+use AcMarche\WhoIsWho\Filament\Concerns\InteractsWithFavoriteEmployees;
 use AcMarche\WhoIsWho\Repository\EmployeeRepository;
 use Filament\Pages\Page;
 use Filament\Panel;
@@ -11,6 +12,8 @@ use Override;
 
 final class Index extends Page
 {
+    use InteractsWithFavoriteEmployees;
+
     public ?string $letter = null;
 
     #[Override]

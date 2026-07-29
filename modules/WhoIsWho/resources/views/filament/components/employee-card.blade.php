@@ -1,6 +1,6 @@
 @php
     /** @var \AcMarche\Hrm\Models\Employee $employee */
-    $fullName = mb_trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
+    use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;use AcMarche\WhoIsWho\Repository\EmployeeRepository;$fullName = mb_trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
     $jobTitles = $employee->activeContracts
         ->pluck('job_title')
         ->filter()
@@ -11,24 +11,46 @@
         ->filter()
         ->unique()
         ->values();
-    $photoUrl = \AcMarche\WhoIsWho\Repository\EmployeeRepository::photoUrl($employee);
+    $photoUrl = EmployeeRepository::photoUrl($employee);
     $phoneDisplay = $employee->professional_phone
         ? trim($employee->professional_phone . ($employee->professional_phone_extension ? ' (ext. ' . $employee->professional_phone_extension . ')' : ''))
         : null;
     $hasContactInfo = $employee->professional_email
         || $phoneDisplay
         || $employee->professional_mobile;
+    $isFavorite = $this->isFavoriteEmployee($employee->id);
 @endphp
 
-<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm flex gap-4">
+<div wire:key="employee-card-{{ $employee->id }}"
+     class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm flex gap-4">
+    <button
+        type="button"
+        wire:click="toggleFavoriteEmployee({{ $employee->id }})"
+        aria-label="{{ $isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+        aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
+        class="absolute right-2 top-2 z-10 rounded-full p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:bg-gray-700"
+    >
+        <x-filament::icon
+            :icon="$isFavorite ? 'heroicon-s-star' : 'heroicon-o-star'"
+            @class([
+                'h-5 w-5',
+                'text-amber-400' => $isFavorite,
+                'text-gray-300 dark:text-gray-600' => ! $isFavorite,
+            ])
+        />
+    </button>
+
     <img src="{{ $photoUrl }}"
          alt="{{ $fullName }}"
-         class="h-24 w-24 rounded-full object-cover shrink-0 bg-gray-100 dark:bg-gray-800" />
+         class="h-24 w-24 rounded-full object-cover shrink-0 bg-gray-100 dark:bg-gray-800"/>
 
-    <div class="flex-1 min-w-0">
-        <div class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
+    <div class="flex-1 min-w-0 pr-8">
+        <a
+            href="{{ EmployeeResource::getUrl('view', ['record' => $employee]) }}"
+            class="block text-base font-semibold text-gray-900 dark:text-gray-100 truncate hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
             {{ $employee->last_name }} {{ $employee->first_name }}
-        </div>
+        </a>
 
         @if ($jobTitles->isNotEmpty())
             <div class="text-gray-700 dark:text-gray-300 mt-0.5">
@@ -79,9 +101,12 @@
                     <div class="space-y-3">
                         @if ($employee->professional_email)
                             <div class="flex items-start gap-2">
-                                <x-filament::icon icon="heroicon-o-envelope" class="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0" />
+                                <x-filament::icon icon="heroicon-o-envelope"
+                                                  class="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0"/>
                                 <div class="min-w-0">
-                                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Email</div>
+                                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        Email
+                                    </div>
                                     <a href="mailto:{{ $employee->professional_email }}"
                                        class="text-primary-600 dark:text-primary-400 hover:underline break-all">
                                         {{ $employee->professional_email }}
@@ -92,9 +117,12 @@
 
                         @if ($phoneDisplay)
                             <div class="flex items-start gap-2">
-                                <x-filament::icon icon="heroicon-o-phone" class="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0" />
+                                <x-filament::icon icon="heroicon-o-phone"
+                                                  class="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0"/>
                                 <div>
-                                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Téléphone</div>
+                                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        Téléphone
+                                    </div>
                                     <a href="tel:{{ $employee->professional_phone }}"
                                        class="text-primary-600 dark:text-primary-400 hover:underline">
                                         {{ $employee->professional_phone }}
@@ -110,9 +138,11 @@
 
                         @if ($employee->professional_mobile)
                             <div class="flex items-start gap-2">
-                                <x-filament::icon icon="heroicon-o-device-phone-mobile" class="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0" />
+                                <x-filament::icon icon="heroicon-o-device-phone-mobile"
+                                                  class="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0"/>
                                 <div>
-                                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">GSM</div>
+                                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">GSM
+                                    </div>
                                     <a href="tel:{{ $employee->professional_mobile }}"
                                        class="text-primary-600 dark:text-primary-400 hover:underline">
                                         {{ $employee->professional_mobile }}

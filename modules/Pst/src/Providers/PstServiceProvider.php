@@ -6,6 +6,7 @@ namespace AcMarche\Pst\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Pst\Console\Commands\MeiliCommand;
+use AcMarche\Pst\Console\Commands\MigrateRolesCommand;
 use AcMarche\Pst\Policies\RegisterPolicies;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +31,7 @@ final class PstServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MeiliCommand::class,
+                MigrateRolesCommand::class,
             ]);
         }
     }

@@ -15,6 +15,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $employee_id
+ * @property string $name
+ * @property string|null $description
+ * @property \Carbon\CarbonImmutable|null $start_date
+ * @property \Carbon\CarbonImmutable|null $end_date
+ * @property \Carbon\CarbonImmutable|null $college_date
+ * @property int|null $duration_minutes
+ * @property TrainingTypeEnum $training_type
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property string|null $certificate_file
+ * @property bool $certificate_received
+ * @property \Carbon\CarbonImmutable|null $reminder_date
+ * @property string $user_add
+ * @property \Carbon\CarbonImmutable|null $certificate_received_at
+ * @property string|null $granted_by
+ * @property \Carbon\CarbonImmutable|null $granted_at
+ * @property string|null $updated_by
+ * @property bool|null $is_closed
+ * @property-read Employee|null $employee
+ */
 #[Connection('maria-hrm')]
 #[Fillable([
     'employee_id',

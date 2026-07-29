@@ -29,7 +29,7 @@ final class ActionTablesTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel(Filament::getPanel('pst'));
+        Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
         $this->adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
 

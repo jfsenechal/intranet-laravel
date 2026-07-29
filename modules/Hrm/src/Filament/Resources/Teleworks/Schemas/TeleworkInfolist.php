@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Teleworks\Schemas;
 
+use AcMarche\Hrm\Models\Direction;
+use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Telework;
+use AcMarche\Hrm\Services\TeleworkNotifier;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -65,6 +69,29 @@ final class TeleworkInfolist
                 Section::make('Validation par la direction de service')
                     ->columns(2)
                     ->schema([
+                        TextEntry::make('expected_direction')
+                            ->label('Direction')
+                            ->state(fn (Telework $record): ?string => self::direction($record)?->name)
+                            ->placeholder('Aucun contrat actif'),
+                        TextEntry::make('expected_director')
+                            ->label('Directeur qui doit valider')
+                            ->state(fn (Telework $record): ?string => self::director($record)?->full_name)
+                            ->placeholder('Aucun directeur renseigné')
+                            ->weight('bold'),
+                        TextEntry::make('expected_director_email')
+                            ->label('Email du directeur')
+                            ->state(fn (Telework $record): ?string => self::director($record)?->professional_email)
+                            ->placeholder('-')
+                            ->copyable(),
+                        TextEntry::make('expected_director_warning')
+                            ->hiddenLabel()
+                            ->state(
+                                'Aucun directeur n\'a pu être déterminé pour cet agent : la demande de validation ne lui a pas été envoyée par mail.'
+                            )
+                            ->badge()
+                            ->color('danger')
+                            ->visible(fn (Telework $record): bool => ! self::hasNotifiableDirector($record))
+                            ->columnSpanFull(),
                         IconEntry::make('manager_validated')
                             ->label('Validé')
                             ->boolean(),
@@ -100,5 +127,142 @@ final class TeleworkInfolist
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    /**
+     * Read-only follow-up of the validation process, shown to the requesting employee.
+     */
+    public static function validationProcess(Schema $schema): Schema
+    {
+        return $schema
+            ->columns(1)
+            ->components([
+                Section::make('Suivi de ma demande')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('status')
+                            ->label('État de la demande')
+                            ->badge()
+                            ->state(fn (Telework $record): string => self::status($record))
+                            ->color(fn (Telework $record): string => self::statusColor($record))
+                            ->columnSpanFull(),
+                        TextEntry::make('created_at')
+                            ->label('Introduite le')
+                            ->dateTime('d/m/Y H:i'),
+                        TextEntry::make('updated_at')
+                            ->label('Dernière modification')
+                            ->dateTime('d/m/Y H:i'),
+                    ]),
+                Section::make('Validation par la direction de service')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('manager_validated')
+                            ->label('Décision')
+                            ->badge()
+                            ->state(fn (Telework $record): string => match ($record->manager_validated) {
+                                true => 'Validée',
+                                false => 'Refusée',
+                                default => 'En attente',
+                            })
+                            ->color(fn (Telework $record): string => match ($record->manager_validated) {
+                                true => 'success',
+                                false => 'danger',
+                                default => 'gray',
+                            }),
+                        TextEntry::make('manager_validated_at')
+                            ->label('Date de la décision')
+                            ->date('d/m/Y')
+                            ->placeholder('-'),
+                        TextEntry::make('manager_validator_name')
+                            ->label('Traitée par')
+                            ->placeholder('-'),
+                        TextEntry::make('manager_validation_notes')
+                            ->label('Remarques de la direction du service')
+                            ->html()
+                            ->placeholder('Aucune remarque')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Traitement par le service GRH')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('date_college')
+                            ->label('Date du collège')
+                            ->date('d/m/Y')
+                            ->placeholder('En attente'),
+                        TextEntry::make('hr_validator_name')
+                            ->label('Traitée par')
+                            ->placeholder('-'),
+                        TextEntry::make('hr_notes')
+                            ->label('Remarques du service GRH')
+                            ->html()
+                            ->placeholder('Aucune remarque')
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    /**
+     * The direction of the agent's active contract, which drives who must validate the request.
+     */
+    private static function direction(Telework $telework): ?Direction
+    {
+        $employee = $telework->employee;
+
+        return $employee instanceof Employee ? TeleworkNotifier::direction($employee) : null;
+    }
+
+    /**
+     * Whether the validation request can reach a director, i.e. whether one is
+     * resolvable and has an email address.
+     */
+    private static function hasNotifiableDirector(Telework $telework): bool
+    {
+        $director = self::director($telework);
+
+        return $director instanceof Employee && filled($director->professional_email);
+    }
+
+    /**
+     * The director of that direction: the person the validation request was sent to.
+     */
+    private static function director(Telework $telework): ?Employee
+    {
+        $employee = $telework->employee;
+
+        return $employee instanceof Employee ? TeleworkNotifier::director($employee) : null;
+    }
+
+    private static function status(Telework $telework): string
+    {
+        if ($telework->manager_validated === false) {
+            return 'Refusée par la direction de service';
+        }
+
+        if ($telework->date_college !== null) {
+            return 'Traitée par le service GRH';
+        }
+
+        if ($telework->manager_validated === true) {
+            return 'Validée par la direction, en attente du service GRH';
+        }
+
+        return 'En attente de validation par la direction de service';
+    }
+
+    private static function statusColor(Telework $telework): string
+    {
+        if ($telework->manager_validated === false) {
+            return 'danger';
+        }
+
+        if ($telework->date_college !== null) {
+            return 'success';
+        }
+
+        if ($telework->manager_validated === true) {
+            return 'info';
+        }
+
+        return 'warning';
     }
 }

@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace AcMarche\WhoIsWho\Filament\Pages;
 
 use AcMarche\Hrm\Models\Service;
+use AcMarche\WhoIsWho\Filament\Concerns\InteractsWithFavoriteEmployees;
 use AcMarche\WhoIsWho\Repository\EmployeeRepository;
 use Filament\Pages\Page;
 use Override;
 
 final class Services extends Page
 {
+    use InteractsWithFavoriteEmployees;
+
     public ?int $serviceId = null;
 
     #[Override]

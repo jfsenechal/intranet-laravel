@@ -7,8 +7,10 @@ use AcMarche\News\Filament\Resources\News\Pages\CreateNews;
 use AcMarche\News\Filament\Resources\News\Pages\EditNews;
 use AcMarche\News\Filament\Resources\News\Pages\ListNews;
 use AcMarche\News\Filament\Resources\News\Pages\ViewNews;
+use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\Category;
 use AcMarche\News\Models\News;
+use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
@@ -130,15 +132,35 @@ it('can filter by name', function (): void {
         ->assertCanNotSeeTableRecords([$news2]);
 });
 
-it('can filter archived news', function (): void {
+it('hides archived news by default', function (): void {
     $archived = News::factory()->create(['archive' => true]);
     $notArchived = News::factory()->create(['archive' => false]);
 
-    // NewsTables excludes archived by default, so archived should not appear
     livewire(ListNews::class)
         ->loadTable()
         ->assertCanSeeTableRecords([$notArchived])
         ->assertCanNotSeeTableRecords([$archived]);
+});
+
+it('can list archived news only', function (): void {
+    $archived = News::factory()->create(['archive' => true]);
+    $notArchived = News::factory()->create(['archive' => false]);
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->filterTable('archive', true)
+        ->assertCanSeeTableRecords([$archived])
+        ->assertCanNotSeeTableRecords([$notArchived]);
+});
+
+it('can list every news item when the archive filter is cleared', function (): void {
+    $archived = News::factory()->create(['archive' => true]);
+    $notArchived = News::factory()->create(['archive' => false]);
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->filterTable('archive', null)
+        ->assertCanSeeTableRecords([$archived, $notArchived]);
 });
 
 it('can load the create form', function (): void {
@@ -195,6 +217,27 @@ it('archive action exists on view page', function (): void {
         ->assertActionExists('archive');
 });
 
+it('persists the archive flag when the archive action runs', function (): void {
+    $news = News::factory()->create(['archive' => false]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->callAction('archive')
+        ->assertNotified();
+
+    expect($news->refresh()->archive)->toBeTrue();
+});
+
+it('hides the archive action on an already archived news item', function (): void {
+    $news = News::factory()->create(['archive' => true]);
+
+    livewire(ViewNews::class, [
+        'record' => $news->id,
+    ])
+        ->assertActionHidden('archive');
+});
+
 it('can create a news item without medias', function (): void {
     $newsData = News::factory()->make();
 
@@ -211,6 +254,61 @@ it('can create a news item without medias', function (): void {
         ->assertNotified();
 
     expect(News::query()->where('name', $newsData->name)->exists())->toBeTrue();
+});
+
+it('does not show the resend mail checkbox on the create page', function (): void {
+    livewire(CreateNews::class)
+        ->assertSchemaComponentHidden('resend_mail');
+});
+
+it('shows an unchecked resend mail checkbox on the edit page', function (): void {
+    $news = News::factory()->create();
+
+    livewire(EditNews::class, ['record' => $news->id])
+        ->assertSchemaComponentVisible('resend_mail')
+        ->assertSchemaStateSet(['resend_mail' => false]);
+});
+
+it('does not resend the mail when the checkbox is left unchecked', function (): void {
+    $news = News::factory()->create(['department' => DepartmentEnum::COMMON->value]);
+
+    livewire(EditNews::class, ['record' => $news->id])
+        ->fillForm(['name' => 'Titre modifié', 'resend_mail' => false])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($news->refresh()->name)->toBe('Titre modifié');
+    Mail::assertNothingQueued();
+});
+
+it('resends the mail when the checkbox is checked', function (): void {
+    $recipient = User::factory()->create(['departments' => [DepartmentEnum::COMMON->value]]);
+
+    $news = News::factory()->create(['department' => DepartmentEnum::COMMON->value]);
+
+    livewire(EditNews::class, ['record' => $news->id])
+        ->fillForm(['name' => 'Titre modifié', 'resend_mail' => true])
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    expect($news->refresh()->name)->toBe('Titre modifié');
+
+    Mail::assertQueued(
+        NewsEmail::class,
+        fn (NewsEmail $mail): bool => $mail->hasTo($recipient->email) && $mail->news->is($news),
+    );
+});
+
+it('does not persist the resend mail flag on the news', function (): void {
+    $news = News::factory()->create();
+
+    livewire(EditNews::class, ['record' => $news->id])
+        ->fillForm(['resend_mail' => true])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($news->refresh()->getAttributes())->not->toHaveKey('resend_mail');
 });
 
 it('validates the form data', function (array $data, array $errors): void {

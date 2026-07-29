@@ -6,6 +6,7 @@ namespace AcMarche\Hrm\Services;
 
 use AcMarche\Hrm\Mail\TeleworkEmployeeHrResultMail;
 use AcMarche\Hrm\Mail\TeleworkEmployeeManagerResultMail;
+use AcMarche\Hrm\Mail\TeleworkEmployeeSubmittedMail;
 use AcMarche\Hrm\Mail\TeleworkHrValidationMail;
 use AcMarche\Hrm\Mail\TeleworkManagerValidationMail;
 use AcMarche\Hrm\Models\Direction;
@@ -36,20 +37,43 @@ final class TeleworkNotifier
         return Employee::query()->where('username', $direction->director)->first();
     }
 
-    public static function notifyManagerOfNewRequest(Telework $telework): void
+    /**
+     * Confirm to the requester that their request was recorded and is awaiting
+     * their director's decision. Sent even when no director is resolvable, so
+     * the agent always gets an acknowledgement of the first step.
+     */
+    public static function notifyEmployeeOfSubmission(Telework $telework): void
+    {
+        $employee = self::employee($telework);
+        if (! $employee instanceof Employee || empty($employee->professional_email)) {
+            return;
+        }
+
+        Mail::to($employee->professional_email)
+            ->send(new TeleworkEmployeeSubmittedMail($telework, $employee, self::director($employee)));
+    }
+
+    /**
+     * Ask the agent's director to validate the request, with a direct link to the
+     * validation page. Returns false when no director with an email is resolvable,
+     * so callers can report that nothing was sent.
+     */
+    public static function notifyManagerOfNewRequest(Telework $telework): bool
     {
         $employee = self::employee($telework);
         if (! $employee instanceof Employee) {
-            return;
+            return false;
         }
 
         $director = self::director($employee);
         if (! $director instanceof Employee || empty($director->professional_email)) {
-            return;
+            return false;
         }
 
         Mail::to($director->professional_email)
             ->send(new TeleworkManagerValidationMail($telework, $employee, $director));
+
+        return true;
     }
 
     public static function notifyEmployeeAfterManagerValidation(Telework $telework): void

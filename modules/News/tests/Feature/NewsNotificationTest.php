@@ -74,7 +74,7 @@ it('attaches the medias for a user who opted in to attachments', function (): vo
         'news_attachment' => true,
     ]);
 
-    $news = News::factory()->create(['medias' => ['uploads/news/report.pdf']]);
+    $news = News::factory()->create(['medias' => ['news/report.pdf']]);
 
     notifyNews($news);
 
@@ -91,7 +91,7 @@ it('does not attach the medias for a user who opted out of attachments', functio
         'news_attachment' => false,
     ]);
 
-    $news = News::factory()->create(['medias' => ['uploads/news/report.pdf']]);
+    $news = News::factory()->create(['medias' => ['news/report.pdf']]);
 
     notifyNews($news);
 
@@ -103,7 +103,7 @@ it('does not attach the medias for a user who opted out of attachments', functio
 });
 
 it('shows the intranet notice when the medias are not attached', function (): void {
-    $news = News::factory()->create(['medias' => ['uploads/news/report.pdf']]);
+    $news = News::factory()->create(['medias' => ['news/report.pdf']]);
 
     $rendered = (new NewsEmail($news, attachMedias: false))->render();
 

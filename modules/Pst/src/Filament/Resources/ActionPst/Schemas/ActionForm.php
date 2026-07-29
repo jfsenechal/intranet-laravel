@@ -147,7 +147,7 @@ final class ActionForm
                             modifyQueryUsing: fn (Builder $query) => $query
                                 ->where(function (Builder $query): void {
                                     $query->forSelectedDepartment()
-                                        ->orWhereNull('department');
+                                        ->orWhere('scope', ActionScopeEnum::INTERNAL);
                                 })
                                 ->orderBy('name', 'asc')
                         )

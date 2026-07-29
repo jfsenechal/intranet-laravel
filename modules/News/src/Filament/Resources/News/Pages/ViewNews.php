@@ -12,6 +12,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
@@ -41,7 +42,16 @@ final class ViewNews extends ViewRecord
                 ->icon('tabler-archive')
                 ->label('Archiver')
                 ->color(Color::Slate)
-                ->action(fn (News $news): true => $news->archive = true),
+                ->requiresConfirmation()
+                ->visible(fn (News $record): bool => ! $record->archive)
+                ->action(function (News $record): void {
+                    $record->update(['archive' => true]);
+
+                    Notification::make()
+                        ->title('Actualité archivée')
+                        ->success()
+                        ->send();
+                }),
             DeleteAction::make()
                 ->icon('tabler-trash'),
             RestoreAction::make(),

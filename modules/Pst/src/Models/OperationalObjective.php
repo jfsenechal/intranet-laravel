@@ -80,15 +80,6 @@ final class OperationalObjective extends Model
         return $this->actions()->forSelectedDepartment();
     }
 
-    protected static function booted(): void
-    {
-        self::saving(function (OperationalObjective $model): void {
-            if ($model->scope === ActionScopeEnum::INTERNAL) {
-                $model->department = null;
-            }
-        });
-    }
-
     /**
      * @return array<string, class-string>
      */
