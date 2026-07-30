@@ -61,7 +61,7 @@
                 </a>
             @empty
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Aucun collègue favori. Ajoutez-en depuis l'annuaire
+                    Aucun collègue en favori. Ajoutez-en depuis l'annuaire
                     <a
                         href="{{ Index::getUrl(panel: 'who-is-who-panel') }}"
                         class="font-medium text-primary-600 hover:underline dark:text-primary-400"
