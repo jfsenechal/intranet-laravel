@@ -45,7 +45,7 @@ it('lists the favorite agents of the user', function (): void {
 
     Livewire::test(DashboardPage::class)
         ->assertOk()
-        ->assertSee('Mes collègues favoris')
+        ->assertSee('Mes complices du quotidien')
         ->assertSee('Delvaux')
         ->assertDontSee('Lambert')
         ->assertSeeHtml(EmployeeResource::getUrl('view', ['record' => $favorite], panel: 'who-is-who-panel'));

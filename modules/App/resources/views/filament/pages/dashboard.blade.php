@@ -35,7 +35,7 @@
         </x-filament::section>
 
         <x-filament::section>
-            <x-slot name="heading">Mes collègues favoris</x-slot>
+            <x-slot name="heading">Mes complices du quotidien</x-slot>
 
             @forelse ($this->favoriteEmployees as $employee)
                 <a

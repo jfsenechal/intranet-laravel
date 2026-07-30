@@ -31,7 +31,7 @@ final class Favorites extends Page
 
     public function getTitle(): string
     {
-        return 'Mes collègues favoris';
+        return 'Mes complices du quotidien';
     }
 
     /**

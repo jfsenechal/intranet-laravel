@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <x-filament::section>
         <x-slot name="heading">
-            {{ $employees->count() }} collègue(s) favori(s)
+            {{ $employees->count() }} complice(s) du quotidien
         </x-slot>
 
         @if ($employees->isEmpty())
