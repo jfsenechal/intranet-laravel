@@ -30,7 +30,6 @@ final class EmployeeFactory extends Factory
             'uuid' => (string) Str::uuid(),
             'last_name' => $lastName,
             'first_name' => $firstName,
-            'slug' => Str::slug($lastName.' '.$firstName).'-'.fake()->unique()->numberBetween(1, 999_999),
             'civility' => fake()->randomElement(['monsieur', 'madame']),
             'status' => StatusEnum::AGENT->value,
             'is_archived' => false,

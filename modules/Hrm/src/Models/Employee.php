@@ -19,14 +19,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
-use Spatie\Sluggable\HasSlug;
-use Spatie\Sluggable\SlugOptions;
 
 /**
  * @property int $id
  * @property int|null $prerequisite_id
  * @property string|null $uid
- * @property string $slug
  * @property string $last_name
  * @property string $first_name
  * @property string|null $job_title
@@ -110,7 +107,6 @@ use Spatie\Sluggable\SlugOptions;
     'uuid',
     'uid',
     'username',
-    'slug',
     'civility',
     'last_name',
     'first_name',
@@ -162,7 +158,6 @@ use Spatie\Sluggable\SlugOptions;
 final class Employee extends Model
 {
     use HasFactory;
-    use HasSlug;
     use HasUserAdd;
 
     /**
@@ -312,14 +307,6 @@ final class Employee extends Model
     public function smsMessages(): HasMany
     {
         return $this->hasMany(SmsReminder::class);
-    }
-
-    public function getSlugOptions(): SlugOptions
-    {
-        return SlugOptions::create()
-            ->generateSlugsFrom(['last_name', 'first_name'])
-            ->saveSlugsTo('slug')
-            ->slugsShouldBeNoLongerThan(55);
     }
 
     protected static function booted(): void

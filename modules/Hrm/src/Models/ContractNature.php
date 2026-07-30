@@ -17,7 +17,6 @@ use Override;
 
 /**
  * @property int $id
- * @property string $slug
  * @property string $name
  * @property string|null $description
  * @property int|null $employer_id
@@ -27,7 +26,6 @@ use Override;
 #[Connection('maria-hrm')]
 #[Fillable([
     'name',
-    'slug',
     'description',
     'employer_id',
 ])]

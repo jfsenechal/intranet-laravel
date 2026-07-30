@@ -26,7 +26,6 @@ final class ServiceFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'abbreviation' => Str::upper(Str::substr($name, 0, 3)),
             'direction_id' => null,
             'employer_id' => null,
