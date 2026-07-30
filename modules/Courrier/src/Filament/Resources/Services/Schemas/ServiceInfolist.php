@@ -26,7 +26,7 @@ final class ServiceInfolist
                                 TextEntry::make('email')
                                     ->label('Email'),
                             ])
-                            ->columns(3)
+                            ->columns(2)
                             ->contained(false),
                     ])
                     ->hidden(fn ($record): bool => $record->recipients->isEmpty()),
