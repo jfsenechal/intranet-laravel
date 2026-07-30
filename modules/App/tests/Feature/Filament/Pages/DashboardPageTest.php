@@ -38,7 +38,11 @@ function dashboardAgent(array $attributes = []): Employee
 }
 
 it('lists the favorite agents of the user', function (): void {
-    $favorite = dashboardAgent(['last_name' => 'Delvaux']);
+    $favorite = dashboardAgent([
+        'last_name' => 'Delvaux',
+        'professional_phone' => '084 12 34 56',
+        'professional_phone_extension' => '123',
+    ]);
     dashboardAgent(['last_name' => 'Lambert']);
 
     $this->user->toggleFavoriteEmployee($favorite->id);
@@ -47,13 +51,25 @@ it('lists the favorite agents of the user', function (): void {
         ->assertOk()
         ->assertSee('Mes complices du quotidien')
         ->assertSee('Delvaux')
+        ->assertSee('084 12 34 56 (ext. 123)')
         ->assertDontSee('Lambert')
         ->assertSeeHtml(EmployeeResource::getUrl('view', ['record' => $favorite], panel: 'who-is-who-panel'));
+});
+
+it('links to the directory to add a favorite agent', function (): void {
+    $favorite = dashboardAgent(['last_name' => 'Delvaux']);
+
+    $this->user->toggleFavoriteEmployee($favorite->id);
+
+    Livewire::test(DashboardPage::class)
+        ->assertOk()
+        ->assertSee('Ajouter')
+        ->assertSeeHtml(WhoIsWhoIndex::getUrl(panel: 'who-is-who-panel'));
 });
 
 it('invites the user to pick favorite agents when there is none', function (): void {
     Livewire::test(DashboardPage::class)
         ->assertOk()
-        ->assertSee('Aucun agent favori', escape: false)
+        ->assertSee('Aucun collègue en favori', escape: false)
         ->assertSeeHtml(WhoIsWhoIndex::getUrl(panel: 'who-is-who-panel'));
 });

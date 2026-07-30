@@ -1,4 +1,4 @@
-@php use AcMarche\App\Filament\Pages\DashboardPage;use AcMarche\WhoIsWho\Filament\Pages\Index;use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;use AcMarche\WhoIsWho\Repository\EmployeeRepository; @endphp
+@php use AcMarche\App\Filament\Pages\DashboardPage;use AcMarche\WhoIsWho\Filament\Pages\Index;use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;use AcMarche\WhoIsWho\Filament\Resources\Employees\Schemas\EmployeeInfolist;use AcMarche\WhoIsWho\Repository\EmployeeRepository; @endphp
 <x-filament-panels::page>
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
@@ -36,6 +36,15 @@
 
         <x-filament::section>
             <x-slot name="heading">Mes complices du quotidien</x-slot>
+            <x-slot name="afterHeader">
+                <x-filament::link
+                    href="{{ Index::getUrl(panel: 'who-is-who-panel') }}"
+                    icon="heroicon-o-plus"
+                    size="sm"
+                >
+                    Ajouter
+                </x-filament::link>
+            </x-slot>
 
             @forelse ($this->favoriteEmployees as $employee)
                 <a
@@ -53,6 +62,11 @@
                         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
                             {{ $employee->activeContracts->pluck('service.name')->filter()->unique()->implode(', ') }}
                         </p>
+                        @if ($phone = EmployeeInfolist::phoneWithExtension($employee))
+                            <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                                {{ $phone }}
+                            </p>
+                        @endif
                     </div>
                     <x-filament::icon
                         icon="heroicon-m-chevron-right"

@@ -46,7 +46,7 @@ final class EmployeeInfolist
                                             ->label('Photo')
                                             ->hiddenLabel()
                                             ->circular()
-                                            ->size(160)
+                                            ->imageSize(160)
                                             ->state(fn (Employee $record): string => EmployeeRepository::photoUrl($record)),
 
                                         TextEntry::make('last_name')
@@ -132,6 +132,22 @@ final class EmployeeInfolist
     }
 
     /**
+     * Format the desk phone as `084 12 34 56 (ext. 123)` when an extension is set.
+     */
+    public static function phoneWithExtension(Employee $employee): ?string
+    {
+        if ($employee->professional_phone === null) {
+            return null;
+        }
+
+        if (blank($employee->professional_phone_extension)) {
+            return $employee->professional_phone;
+        }
+
+        return $employee->professional_phone.' (ext. '.$employee->professional_phone_extension.')';
+    }
+
+    /**
      * The directory photo comes from the User avatar matched by `username`
      * (see `EmployeeRepository::photoUrl()`), so only the agent looking at
      * their own entry is offered the link to the profile page.
@@ -145,21 +161,5 @@ final class EmployeeInfolist
         }
 
         return $user->username === $employee->username;
-    }
-
-    /**
-     * Format the desk phone as `084 12 34 56 (ext. 123)` when an extension is set.
-     */
-    private static function phoneWithExtension(Employee $employee): ?string
-    {
-        if ($employee->professional_phone === null) {
-            return null;
-        }
-
-        if (blank($employee->professional_phone_extension)) {
-            return $employee->professional_phone;
-        }
-
-        return $employee->professional_phone.' (ext. '.$employee->professional_phone_extension.')';
     }
 }
