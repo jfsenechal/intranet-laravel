@@ -91,7 +91,13 @@
                     />
                 </a>
             @empty
-                <p class="text-sm text-gray-500 dark:text-gray-400">Vous n'avez encore enregistré aucun courrier.</p>
+                @if ($this->courrierSearchFailed)
+                    <p class="text-sm text-danger-600 dark:text-danger-400">
+                        La recherche de courriers est momentanément indisponible. Réessayez dans quelques instants.
+                    </p>
+                @else
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Vous n'avez encore enregistré aucun courrier.</p>
+                @endif
             @endforelse
         </x-filament::section>
 

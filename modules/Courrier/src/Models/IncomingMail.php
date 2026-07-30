@@ -117,6 +117,14 @@ final class IncomingMail extends Model
             IndexIncomingMailJob::dispatch($model->id)->afterCommit();
         });
 
+        // Attribute changes must reach the index too. The indexer itself writes
+        // the extracted attachment text back with saveQuietly(), so this does
+        // not loop. Pivot writes (recipients, services) fire no model event at
+        // all and are re-indexed explicitly by their caller.
+        self::updated(function (IncomingMail $model): void {
+            IndexIncomingMailJob::dispatch($model->id)->afterCommit();
+        });
+
         self::deleted(function (IncomingMail $model): void {
             IndexIncomingMailJob::dispatch($model->id)->afterCommit();
         });

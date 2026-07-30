@@ -137,6 +137,17 @@ describe('MeiliIndexer document', function (): void {
         expect($document['original'])->toContain($primary->full_name, $service->name);
         expect($document['copie'])->toContain($copy->full_name);
     });
+
+    it('keeps the stored content when nothing can be extracted', function (): void {
+        $mail = IncomingMail::factory()->create();
+        $mail->update(['content' => 'Texte OCR extrait']);
+        $mail->setRelation('attachments', collect());
+
+        $document = app(MeiliIndexer::class)->createDocument($mail);
+
+        expect($document['content'])->toBe('Texte OCR extrait');
+        expect($mail->fresh()->content)->toBe('Texte OCR extrait');
+    });
 });
 
 describe('MeiliSearcher reference and category filters', function (): void {

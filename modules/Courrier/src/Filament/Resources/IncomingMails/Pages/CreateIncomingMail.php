@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\Sender;
 use Filament\Resources\Pages\CreateRecord;
@@ -96,8 +97,20 @@ final class CreateIncomingMail extends CreateRecord
             $this->record->recipients()->attach($recipientId, ['is_primary' => false]);
         }
 
-        // Handle file attachment. A FileUpload field keeps its state as an
-        // array of uploaded files keyed by a random id, even when not multiple.
+        $this->storeAttachment();
+
+        // The job dispatched by the `created` event ran before the pivots and
+        // the attachment existed, so index the record again now it is complete.
+        IndexIncomingMailJob::dispatch($this->record->id)->afterCommit();
+    }
+
+    /**
+     * Store the uploaded file, if any, as an attachment of the new mail.
+     */
+    private function storeAttachment(): void
+    {
+        // A FileUpload field keeps its state as an array of uploaded files
+        // keyed by a random id, even when not multiple.
         $file = $this->data['attachment_file'] ?? null;
         if (is_array($file)) {
             $file = Arr::first($file);

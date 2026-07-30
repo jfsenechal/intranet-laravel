@@ -86,6 +86,12 @@ final class MeiliIndexer
         $content = self::cleanData($this->attachmentsText($incomingMail));
         $this->persistContent($incomingMail, $content);
 
+        if ($content === '') {
+            // Nothing could be extracted this time (missing file, OCR disabled
+            // or unavailable binary): index the text stored previously.
+            $content = self::cleanData($incomingMail->content);
+        }
+
         return [
             'id' => $incomingMail->id,
             'reference_number' => $incomingMail->reference_number,
@@ -111,10 +117,14 @@ final class MeiliIndexer
      * Store the extracted attachment text on the incoming mail so it is
      * available outside the search index. Persisted quietly to avoid
      * re-dispatching the index job and only when the value changed.
+     *
+     * An empty extraction is never persisted: mail is re-indexed on every
+     * update, and a file that has moved or an unavailable OCR binary must not
+     * wipe the text extracted when the mail was created.
      */
     private function persistContent(IncomingMail $incomingMail, string $content): void
     {
-        if (! $incomingMail->exists || $incomingMail->content === $content) {
+        if (! $incomingMail->exists || $content === '' || $incomingMail->content === $content) {
             return;
         }
 

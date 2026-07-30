@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Models\Sender;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -116,5 +117,9 @@ final class EditIncomingMail extends EditRecord
             $recipients[$recipientId] = ['is_primary' => false];
         }
         $this->record->recipients()->sync($recipients);
+
+        // Pivot writes fire no model event, so nothing has re-indexed the mail
+        // when only its recipients or services changed.
+        IndexIncomingMailJob::dispatch($this->record->id)->afterCommit();
     }
 }

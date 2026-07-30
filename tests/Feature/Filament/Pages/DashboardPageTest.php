@@ -56,6 +56,27 @@ function fakeCourrierSearch(array $ids = []): stdClass
     return $captured;
 }
 
+/**
+ * Bind a MeiliSearcher whose index throws, as during a Meilisearch outage.
+ */
+function failingCourrierSearch(): void
+{
+    $index = Mockery::mock(Indexes::class);
+    $index->shouldReceive('search')->andThrow(new RuntimeException('Index `indicateur` not found.'));
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('index')->andReturn($index);
+
+    config()->set('app.meilisearch.master_key', 'test-master-key');
+
+    app()->bind(MeiliSearcher::class, function () use ($client): MeiliSearcher {
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        return $searcher;
+    });
+}
+
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('app-panel'));
     fakeCourrierSearch();
@@ -148,6 +169,22 @@ it('eager loads the category of each recent document', function (): void {
 
     expect($latestDocuments)->toHaveCount(3)
         ->and($latestDocuments->every(fn (Document $document): bool => $document->relationLoaded('category')))->toBeTrue();
+});
+
+it('still renders and warns when the mail search is unavailable', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Recipient::factory()->create(['username' => $user->username]);
+
+    failingCourrierSearch();
+
+    $page = livewire(DashboardPage::class)
+        ->assertOk()
+        ->assertSee('La recherche de courriers est momentanément indisponible.');
+
+    expect($page->instance()->courrierSearchFailed)->toBeTrue();
+    expect($page->instance()->myCourriers)->toBeEmpty();
 });
 
 it('lists no mail for a user who is not a known recipient', function (): void {

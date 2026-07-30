@@ -27,8 +27,8 @@ function createMailWithOcr(string $department): IncomingMail
         'mime' => 'application/pdf',
     ]);
 
-    // Set the OCR content after creation: the create hook runs the indexing job
-    // (which resets content), and there is no indexing hook on update.
+    // Set the OCR content after creation. Every save re-indexes the mail, but
+    // the indexer only persists a non-empty extraction, so this text survives.
     $mail->update(['content' => 'Texte OCR extrait']);
 
     return $mail;

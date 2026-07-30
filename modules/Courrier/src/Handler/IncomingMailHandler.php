@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Handler;
 
 use AcMarche\Courrier\Exception\ImapException;
+use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Models\Attachment;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\ImapRepository;
@@ -71,6 +72,11 @@ final class IncomingMailHandler
 
             // Save the attachment
             self::saveAttachment($imapRepository, $incomingMail, $uid, $attachmentIndex, $attachmentFilename, $attachmentMime);
+
+            // The job dispatched by the `created` event ran before the pivots
+            // and the attachment existed, so index the record again now it is
+            // complete.
+            IndexIncomingMailJob::dispatch($incomingMail->id)->afterCommit();
 
             Notification::make()
                 ->title('Courrier créé')

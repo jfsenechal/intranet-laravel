@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
 use Override;
+use Throwable;
 
 final class DashboardPage extends BaseDashboard
 {
@@ -40,6 +41,12 @@ final class DashboardPage extends BaseDashboard
      * @var Collection<int, IncomingMail>
      */
     public Collection $myCourriers;
+
+    /**
+     * Whether the search index could not be reached while building
+     * {@see $myCourriers}, so the section can say so instead of looking empty.
+     */
+    public bool $courrierSearchFailed = false;
 
     /**
      * @var Collection<int, Employee>
@@ -101,7 +108,16 @@ final class DashboardPage extends BaseDashboard
             return new Collection();
         }
 
-        $mailIds = app(MeiliSearcher::class)->myMailIds($user, now()->subDays(15), 10);
+        try {
+            $mailIds = app(MeiliSearcher::class)->myMailIds($user, now()->subDays(15), 10);
+        } catch (Throwable $throwable) {
+            // A Meilisearch outage must not take the home page down with it.
+            report($throwable);
+            $this->courrierSearchFailed = true;
+
+            return new Collection();
+        }
+
         if ($mailIds === []) {
             return new Collection();
         }

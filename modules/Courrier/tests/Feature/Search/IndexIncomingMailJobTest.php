@@ -18,6 +18,27 @@ it('queues an index job when an incoming mail is created', function (): void {
     );
 });
 
+it('queues an index job when an incoming mail is updated', function (): void {
+    $mail = IncomingMail::factory()->create();
+
+    Queue::fake();
+    $mail->update(['sender' => 'ACME SA']);
+
+    Queue::assertPushed(
+        IndexIncomingMailJob::class,
+        fn (IndexIncomingMailJob $job): bool => $job->incomingMailId === $mail->id,
+    );
+});
+
+it('queues no index job when a save changes nothing', function (): void {
+    $mail = IncomingMail::factory()->create();
+
+    Queue::fake();
+    $mail->save();
+
+    Queue::assertNotPushed(IndexIncomingMailJob::class);
+});
+
 it('queues an index job when an incoming mail is deleted', function (): void {
     $mail = IncomingMail::factory()->create();
 
