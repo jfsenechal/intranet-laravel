@@ -40,16 +40,7 @@ final class MeiliSearcher
             return [];
         }
 
-        $result = $this->client->index($this->indexName)->search(
-            mb_trim($query),
-            [
-                'filter' => $clauses,
-                'sort' => ['mail_date_timestamp:desc'],
-                'limit' => $limit,
-            ],
-        );
-
-        return $result->getHits();
+        return $this->hits($query, $clauses, $limit);
     }
 
     /**
@@ -58,10 +49,30 @@ final class MeiliSearcher
      */
     public function searchIds(string $query, User $user, array $filters = [], int $limit = 500): array
     {
-        return array_map(
-            static fn (array $hit): int => (int) $hit['id'],
-            $this->search($query, $user, $filters, $limit),
-        );
+        return self::toIds($this->search($query, $user, $filters, $limit));
+    }
+
+    /**
+     * Ids of the mail the user personally receives, most recent mail date first.
+     *
+     * Unlike {@see search()} this never widens to the administrator or
+     * department visibility: it always answers "my mail".
+     *
+     * @return array<int, int>
+     */
+    public function myMailIds(User $user, ?DateTimeInterface $since = null, int $limit = 10): array
+    {
+        $clause = $this->recipientClause($user);
+        if ($clause === null) {
+            return [];
+        }
+
+        $clauses = [$clause];
+        if ($since instanceof DateTimeInterface) {
+            $clauses[] = 'mail_date_timestamp >= '.$since->getTimestamp();
+        }
+
+        return self::toIds($this->hits('', $clauses, $limit));
     }
 
     /**
@@ -88,6 +99,45 @@ final class MeiliSearcher
             return sprintf('department IN [%s]', implode(', ', $values));
         }
 
+        return $this->recipientClause($user);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $hits
+     * @return array<int, int>
+     */
+    private static function toIds(array $hits): array
+    {
+        return array_map(static fn (array $hit): int => (int) $hit['id'], $hits);
+    }
+
+    /**
+     * Run the query against the index and return its raw hits.
+     *
+     * @param  array<int, string>  $clauses
+     * @return array<int, array<string, mixed>>
+     */
+    private function hits(string $query, array $clauses, int $limit): array
+    {
+        $result = $this->client->index($this->indexName)->search(
+            mb_trim($query),
+            [
+                'filter' => $clauses,
+                'sort' => ['mail_date_timestamp:desc'],
+                'limit' => $limit,
+            ],
+        );
+
+        return $result->getHits();
+    }
+
+    /**
+     * Clause matching the mail a user personally receives: addressed to them,
+     * or to one of the services they belong to. Returns `null` when the user is
+     * not a known recipient.
+     */
+    private function recipientClause(User $user): ?string
+    {
         $recipient = Recipient::query()->where('username', $user->username)->first();
         if ($recipient === null) {
             return null;

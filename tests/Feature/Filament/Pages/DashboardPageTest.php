@@ -6,15 +6,59 @@ use AcMarche\App\Filament\Pages\DashboardPage;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
+use AcMarche\Courrier\Search\MeiliSearcher;
 use AcMarche\Document\Models\Document;
 use AcMarche\News\Models\News;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Meilisearch\Client;
+use Meilisearch\Endpoints\Indexes;
+use Meilisearch\Search\SearchResult;
 
 use function Pest\Livewire\livewire;
 
+/**
+ * Bind a MeiliSearcher whose index returns the given mail ids, and capture the
+ * search options (filter, sort, …) it was called with for assertion.
+ *
+ * @param  array<int, int>  $ids
+ */
+function fakeCourrierSearch(array $ids = []): stdClass
+{
+    $captured = new stdClass();
+    $captured->options = [];
+
+    $result = Mockery::mock(SearchResult::class);
+    $result->shouldReceive('getHits')->andReturn(
+        array_map(static fn (int $id): array => ['id' => $id], $ids),
+    );
+
+    $index = Mockery::mock(Indexes::class);
+    $index->shouldReceive('search')
+        ->andReturnUsing(function (string $query, array $options) use ($captured, $result): SearchResult {
+            $captured->options = $options;
+
+            return $result;
+        });
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('index')->andReturn($index);
+
+    config()->set('app.meilisearch.master_key', 'test-master-key');
+
+    app()->bind(MeiliSearcher::class, function () use ($client): MeiliSearcher {
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        return $searcher;
+    });
+
+    return $captured;
+}
+
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('app-panel'));
+    fakeCourrierSearch();
 });
 
 it('lists recent mail the user is a recipient of', function (): void {
@@ -25,12 +69,16 @@ it('lists recent mail the user is a recipient of', function (): void {
     $mine = IncomingMail::factory()->create();
     $mine->recipients()->attach($recipient->id);
 
+    $captured = fakeCourrierSearch([$mine->id]);
+
     livewire(DashboardPage::class)
         ->assertSee($mine->reference_number)
         ->assertSeeHtml(route('filament.courrier-panel.resources.incoming-mails.view', ['record' => $mine]));
+
+    expect($captured->options['filter'])->toContain(sprintf('recipients IN [%d]', $recipient->id));
 });
 
-it('lists recent mail linked to a service the user belongs to', function (): void {
+it('searches the mail of the services the user belongs to', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
@@ -41,22 +89,31 @@ it('lists recent mail linked to a service the user belongs to', function (): voi
     $mine = IncomingMail::factory()->create();
     $mine->services()->attach($service->id);
 
+    $captured = fakeCourrierSearch([$mine->id]);
+
     $myCourriers = livewire(DashboardPage::class)->instance()->myCourriers;
 
     expect($myCourriers->pluck('id'))->toContain($mine->id);
+    expect($captured->options['filter'])->toContain(
+        sprintf('(recipients IN [%d] OR services IN [%d])', $recipient->id, $service->id),
+    );
 });
 
-it('excludes mail older than 15 days', function (): void {
+it('restricts the mail search to the last 15 days', function (): void {
+    $this->freezeTime();
+
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $recipient = Recipient::factory()->create(['username' => $user->username]);
-    $old = IncomingMail::factory()->create(['created_at' => now()->subDays(16)]);
-    $old->recipients()->attach($recipient->id);
+    Recipient::factory()->create(['username' => $user->username]);
 
-    $myCourriers = livewire(DashboardPage::class)->instance()->myCourriers;
+    $captured = fakeCourrierSearch();
 
-    expect($myCourriers->pluck('id'))->not->toContain($old->id);
+    livewire(DashboardPage::class)->assertOk();
+
+    expect($captured->options['filter'])
+        ->toContain('mail_date_timestamp >= '.now()->subDays(15)->getTimestamp());
+    expect($captured->options['limit'])->toBe(10);
 });
 
 it('links each recent news item to its view page', function (): void {
@@ -93,14 +150,15 @@ it('eager loads the category of each recent document', function (): void {
         ->and($latestDocuments->every(fn (Document $document): bool => $document->relationLoaded('category')))->toBeTrue();
 });
 
-it('excludes mail the user is not linked to', function (): void {
+it('lists no mail for a user who is not a known recipient', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    Recipient::factory()->create(['username' => $user->username]);
     $other = IncomingMail::factory()->create();
+
+    fakeCourrierSearch([$other->id]);
 
     $myCourriers = livewire(DashboardPage::class)->instance()->myCourriers;
 
-    expect($myCourriers->pluck('id'))->not->toContain($other->id);
+    expect($myCourriers)->toBeEmpty();
 });

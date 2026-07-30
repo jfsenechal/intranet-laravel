@@ -6,7 +6,7 @@ namespace AcMarche\App\Filament\Pages;
 
 use AcMarche\App\Handler\FavoriteModuleHandler;
 use AcMarche\Courrier\Models\IncomingMail;
-use AcMarche\Courrier\Models\Recipient;
+use AcMarche\Courrier\Search\MeiliSearcher;
 use AcMarche\Document\Models\Document;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\News\Models\News;
@@ -36,6 +36,9 @@ final class DashboardPage extends BaseDashboard
 
     public Collection $latestDocuments;
 
+    /**
+     * @var Collection<int, IncomingMail>
+     */
     public Collection $myCourriers;
 
     /**
@@ -67,8 +70,6 @@ final class DashboardPage extends BaseDashboard
 
     public function mount(): void
     {
-        $username = Auth::user()?->username;
-
         $this->favoriteModules = FavoriteModuleHandler::getFavoriteModules();
 
         $this->favoriteEmployees = FavoriteEmployeeRepository::favorites();
@@ -84,30 +85,30 @@ final class DashboardPage extends BaseDashboard
             ->limit(5)
             ->get();
 
-        $serviceIds = Recipient::query()
-            ->where('recipients.username', $username)
-            ->get()
-            ->flatMap(fn (Recipient $recipient): SupportCollection => $recipient->services()->pluck('courrier_services.id'))
-            ->unique()
-            ->values();
+        $this->myCourriers = $this->recentMails();
+    }
 
-        $this->myCourriers = IncomingMail::query()
-            ->where('created_at', '>=', now()->subDays(15))
-            ->where(function ($query) use ($username, $serviceIds): void {
-                $query->whereHas(
-                    'recipients',
-                    fn ($recipientQuery) => $recipientQuery->where('recipients.username', $username),
-                );
+    /**
+     * The mail of the last 15 days the current user receives, resolved through
+     * the search index because the equivalent SQL query is too slow.
+     *
+     * @return Collection<int, IncomingMail>
+     */
+    private function recentMails(): Collection
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            return new Collection();
+        }
 
-                if ($serviceIds->isNotEmpty()) {
-                    $query->orWhereHas(
-                        'services',
-                        fn ($serviceQuery) => $serviceQuery->whereIn('courrier_services.id', $serviceIds),
-                    );
-                }
-            })
-            ->latest('created_at')
-            ->limit(10)
+        $mailIds = app(MeiliSearcher::class)->myMailIds($user, now()->subDays(15), 10);
+        if ($mailIds === []) {
+            return new Collection();
+        }
+
+        return IncomingMail::query()
+            ->whereIn('id', $mailIds)
+            ->latest('mail_date')
             ->get();
     }
 }

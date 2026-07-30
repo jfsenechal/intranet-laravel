@@ -13,6 +13,7 @@ use AcMarche\Courrier\Search\MeiliSearcher;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Support\Carbon;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
 use Meilisearch\Search\SearchResult;
@@ -193,6 +194,46 @@ describe('MeiliSearcher reference and category filters', function (): void {
         $searcher->searchIds('hello', $user);
 
         expect($captured->options['filter'])->toBe([]);
+    });
+});
+
+describe('MeiliSearcher my mail', function (): void {
+    it('scopes an administrator to their own mail instead of every mail', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        $recipient = Recipient::factory()->create(['username' => $user->username]);
+        [$client, $captured] = captureMeiliSearch([['id' => 7]]);
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $ids = $searcher->myMailIds($user);
+
+        expect($ids)->toBe([7]);
+        expect($captured->options['filter'])->toBe([sprintf('recipients IN [%d]', $recipient->id)]);
+        expect($captured->options['sort'])->toBe(['mail_date_timestamp:desc']);
+    });
+
+    it('limits the mail to those received since the given date', function (): void {
+        $user = User::factory()->create();
+        $recipient = Recipient::factory()->create(['username' => $user->username]);
+        $since = Carbon::parse('2026-07-01 00:00:00');
+        [$client, $captured] = captureMeiliSearch();
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $searcher->myMailIds($user, $since, 3);
+
+        expect($captured->options['filter'])->toBe([
+            sprintf('recipients IN [%d]', $recipient->id),
+            'mail_date_timestamp >= '.$since->getTimestamp(),
+        ]);
+        expect($captured->options['limit'])->toBe(3);
+    });
+
+    it('returns nothing for a user that is not a known recipient', function (): void {
+        $user = User::factory()->create();
+        $searcher = new MeiliSearcher();
+
+        expect($searcher->myMailIds($user))->toBe([]);
     });
 });
 
