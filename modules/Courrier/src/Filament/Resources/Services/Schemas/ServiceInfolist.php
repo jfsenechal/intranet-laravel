@@ -15,15 +15,6 @@ final class ServiceInfolist
     {
         return $schema
             ->schema([
-                Section::make('Informations du service')
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Nom'),
-                        TextEntry::make('initials')
-                            ->label('Initiales'),
-                    ])
-                    ->columns(3),
-
                 Section::make('Destinataires')
                     ->description('Liste des membres affectés à ce service')
                     ->schema([

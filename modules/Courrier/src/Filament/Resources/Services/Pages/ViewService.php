@@ -19,7 +19,7 @@ final class ViewService extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->name;
+        return $this->record->name. ' '.$this->record->initials;
     }
 
     public function infolist(Schema $schema): Schema

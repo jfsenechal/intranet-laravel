@@ -115,14 +115,14 @@ final class IncomingMailTables
                     ->label('Description')
                     ->html()
                     ->limit(80)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('services.name')
                     ->label('Services')
                     ->badge()
                     ->separator(',')
                     ->limitList(2)
                     ->expandableLimitedList()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('recipients.full_name')
                     ->label('Destinataires')
                     ->badge()
@@ -130,7 +130,7 @@ final class IncomingMailTables
                     ->separator(',')
                     ->limitList(2)
                     ->expandableLimitedList()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_registered')
                     ->label('Recommandé')
                     ->boolean()
