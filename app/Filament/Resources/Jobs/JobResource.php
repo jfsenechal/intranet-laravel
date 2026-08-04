@@ -85,11 +85,11 @@ final class JobResource extends Resource
                     ->color(fn (string $state): string => $state === 'En cours' ? 'info' : 'gray'),
                 TextColumn::make('created_at')
                     ->label('Créé le')
-                    ->state(fn (Job $record): ?string => $record->createdAt()?->format('d/m/Y H:i:s'))
+                    ->state(fn (Job $record): ?string => display_datetime($record->createdAt(), 'd/m/Y H:i:s'))
                     ->sortable(),
                 TextColumn::make('available_at')
                     ->label('Disponible le')
-                    ->state(fn (Job $record): ?string => $record->availableAt()?->format('d/m/Y H:i:s'))
+                    ->state(fn (Job $record): ?string => display_datetime($record->availableAt(), 'd/m/Y H:i:s'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

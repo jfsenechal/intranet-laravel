@@ -120,10 +120,12 @@ it('sends from the application default address', function (): void {
     expect($envelope->from?->address)->toBe(config('mail.from.address'));
 });
 
-it('shows the creation date in the footer', function (): void {
-    $news = News::factory()->create();
+it('shows the creation date in the footer in the local timezone', function (): void {
+    $news = News::factory()->create(['created_at' => '2026-08-04 06:24:00']);
 
     $rendered = (new NewsEmail($news))->render();
 
-    expect($rendered)->toContain($news->created_at->format('d/m/Y à H:i'));
+    expect($rendered)
+        ->toContain('04/08/2026 à 08:24')
+        ->not->toContain('04/08/2026 à 06:24');
 });

@@ -24,6 +24,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Display Timezone
+    |--------------------------------------------------------------------------
+    |
+    | Timestamps are stored in UTC (see the "timezone" option). This value is
+    | the timezone they are rendered in for end users: Filament tables, forms
+    | and infolists, plus mail and PDF views. Never change "timezone" itself,
+    | as that would re-interpret every timestamp already stored in the
+    | database and shift all historical dates.
+    |
+    */
+
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'Europe/Brussels'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Meilisearch
     |--------------------------------------------------------------------------
     |

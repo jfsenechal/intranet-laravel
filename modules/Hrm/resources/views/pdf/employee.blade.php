@@ -21,7 +21,7 @@
             <p class="text-sm text-gray-500">Fiche agent</p>
         </div>
         <div class="text-right text-xs text-gray-400">
-            <p>Généré le {{ now()->format('d/m/Y à H:i') }}</p>
+            <p>Généré le {{ display_datetime(now(), 'd/m/Y à H:i') }}</p>
             @if($employee->status)
                 <span class="inline-block mt-1 px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold">
                     {{ $employee->status->getLabel() }}
@@ -420,7 +420,7 @@
 
     {{-- Footer --}}
     <footer class="border-t border-gray-200 pt-4 mt-8 text-center text-xs text-gray-500">
-        <p>Document généré le {{ now()->format('d/m/Y à H:i') }}</p>
+        <p>Document généré le {{ display_datetime(now(), 'd/m/Y à H:i') }}</p>
         <p class="mt-1">Module RH</p>
     </footer>
 

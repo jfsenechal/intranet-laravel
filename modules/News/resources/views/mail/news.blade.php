@@ -85,7 +85,7 @@
         <div class="email-footer">
             Envoyé par {{ $resolvedSender?->name }}
             @if ($news->created_at)
-                &middot; créée le {{ $news->created_at->format('d/m/Y à H:i') }}
+                &middot; créée le {{ display_datetime($news->created_at, 'd/m/Y à H:i') }}
             @endif
             <br/>
             &copy; {{ date('Y') }} {{ config('app.name') }}

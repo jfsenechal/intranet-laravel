@@ -316,7 +316,7 @@
                     <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-400">
                         <div class="flex justify-between items-start mb-2">
                             <span class="text-xs font-semibold text-gray-500">
-                                {{ $followUp->created_at?->format('d/m/Y H:i') }}
+                                {{ display_datetime($followUp->created_at) }}
                             </span>
                         </div>
                         <p class="text-gray-700 whitespace-pre-line">{{ $followUp->content ?? $followUp->note ?? $followUp->description ?? '-' }}</p>
@@ -341,7 +341,7 @@
 
     {{-- Footer --}}
     <footer class="border-t border-gray-200 pt-4 mt-8 text-center text-xs text-gray-500">
-        <p>Document généré le {{ now()->format('d/m/Y à H:i') }}</p>
+        <p>Document généré le {{ display_datetime(now(), 'd/m/Y à H:i') }}</p>
         <p class="mt-1">Plan Stratégique Transversal - Ville de Marche-en-Famenne</p>
     </footer>
 

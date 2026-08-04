@@ -46,13 +46,13 @@
                     @if($event->start_at)
                         <tr>
                             <td style="padding: 4px 12px 4px 0; color: #94a3b8;">Date de début</td>
-                            <td style="padding: 4px 0;">{{ $event->start_at->format('d/m/Y H:i') }}</td>
+                            <td style="padding: 4px 0;">{{ display_datetime($event->start_at) }}</td>
                         </tr>
                     @endif
                     @if($event->end_at)
                         <tr>
                             <td style="padding: 4px 12px 4px 0; color: #94a3b8;">Date de fin</td>
-                            <td style="padding: 4px 0;">{{ $event->end_at->format('d/m/Y H:i') }}</td>
+                            <td style="padding: 4px 0;">{{ display_datetime($event->end_at) }}</td>
                         </tr>
                     @endif
                     @if($event->location)

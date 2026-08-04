@@ -21,7 +21,7 @@
                         <p class="mt-1 truncate text-gray-500 dark:text-gray-400">{{ $ticket->reason }}</p>
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-2">
-                        <span class="tabular-nums text-gray-400">{{ $ticket->createdAt?->format('H:i') }}</span>
+                        <span class="tabular-nums text-gray-400">{{ display_datetime($ticket->createdAt, 'H:i') }}</span>
                         <div class="flex items-center gap-1">
                             {{ ($this->assignOfficeAction)(['ticket' => $ticket->id]) }}
                             {{ ($this->cancelTicketAction)(['ticket' => $ticket->id]) }}
@@ -55,7 +55,7 @@
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-2 text-right">
                         <x-filament::badge color="info" size="sm">{{ $ticket->office?->name ?? '—' }}</x-filament::badge>
-                        <span class="tabular-nums text-gray-400">{{ $ticket->createdAt?->format('H:i') }}</span>
+                        <span class="tabular-nums text-gray-400">{{ display_datetime($ticket->createdAt, 'H:i') }}</span>
                         {{ ($this->cancelTicketAction)(['ticket' => $ticket->id]) }}
                     </div>
                 </div>

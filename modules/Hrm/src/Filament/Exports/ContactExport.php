@@ -99,7 +99,7 @@ final readonly class ContactExport
             'email_2' => $row->email_2,
             'phone_1' => $row->phone_1,
             'phone_2' => $row->phone_2,
-            'created_at' => $row->created_at?->format('d/m/Y H:i'),
+            'created_at' => display_datetime($row->created_at),
         ];
     }
 }

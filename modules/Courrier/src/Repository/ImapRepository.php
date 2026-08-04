@@ -254,7 +254,7 @@ final class ImapRepository
     {
         return new EmailMessage(
             uid: $message->uid(),
-            date: $message->date()?->format('d/m/Y H:i') ?? '',
+            date: display_datetime($message->date()) ?? '',
             from: $this->formatAddress($message->from()),
             fromEmail: $message->from()?->email() ?? '',
             fromName: $message->from()?->name() ?? '',

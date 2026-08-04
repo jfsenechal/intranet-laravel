@@ -92,8 +92,8 @@ final readonly class ProcessExport
         return [
             'name' => $row->name,
             'description' => $row->description,
-            'created_at' => $row->created_at?->format('d/m/Y H:i'),
-            'updated_at' => $row->updated_at?->format('d/m/Y H:i'),
+            'created_at' => display_datetime($row->created_at),
+            'updated_at' => display_datetime($row->updated_at),
         ];
     }
 }

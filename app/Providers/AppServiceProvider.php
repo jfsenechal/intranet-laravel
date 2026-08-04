@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use Filament\Forms\Components\RichEditor;
+use Filament\Support\Facades\FilamentTimezone;
 use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
@@ -22,6 +23,7 @@ final class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        FilamentTimezone::set(config('app.display_timezone'));
         $this->configureTable();
         if (! app()->environment('production') && config('mail.redirect_to')) {
             Mail::alwaysTo(config('mail.redirect_to'));
