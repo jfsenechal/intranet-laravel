@@ -8,6 +8,7 @@ use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 final class TripAttributeResolver
@@ -24,13 +25,24 @@ final class TripAttributeResolver
 
     /**
      * Resolve the Rate applicable to the trip's departure date, if any.
+     *
+     * The comparison is made on the date alone: a trip departure is a datetime
+     * while a rate period is bounded by dates, so a trip leaving at 08h30 on
+     * the closing day of a period would otherwise fall past its end_date and
+     * match no rate at all.
      */
     public function resolveRate(Trip $trip): ?Rate
     {
+        if (! $trip->departure_date instanceof DateTimeInterface) {
+            return null;
+        }
+
+        $departureDay = $trip->departure_date->format('Y-m-d');
+
         return Rate::query()
-            ->where('start_date', '<=', $trip->departure_date)
-            ->where(function ($query) use ($trip): void {
-                $query->where('end_date', '>=', $trip->departure_date)
+            ->whereDate('start_date', '<=', $departureDay)
+            ->where(function ($query) use ($departureDay): void {
+                $query->whereDate('end_date', '>=', $departureDay)
                     ->orWhereNull('end_date');
             })
             ->latest('start_date')
