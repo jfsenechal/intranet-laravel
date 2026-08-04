@@ -51,6 +51,14 @@ final class AttachmentOcr
         $this->timeout = (int) config('courrier.ocr.timeout', 120);
     }
 
+    /**
+     * Relative path, on the courrier disk, of the cached extracted text.
+     */
+    public static function cachePathFor(Attachment $attachment): string
+    {
+        return config('courrier.storage.directory').'/ocr/'.$attachment->id.'.txt';
+    }
+
     public function textFor(Attachment $attachment): string
     {
         if (! $this->enabled || $attachment->path === null) {
@@ -64,7 +72,7 @@ final class AttachmentOcr
             return '';
         }
 
-        $cachePath = config('courrier.storage.directory').'/ocr/'.$attachment->id.'.txt';
+        $cachePath = self::cachePathFor($attachment);
         if ($disk->exists($cachePath) && $disk->lastModified($cachePath) >= $disk->lastModified($relativePath)) {
             return (string) $disk->get($cachePath);
         }
