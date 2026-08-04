@@ -35,6 +35,24 @@ it('filters employee headings to the selected columns', function (): void {
     expect($export->headings())->toBe(['Nom', 'Email']);
 });
 
+it('returns all employee headings when no columns are selected', function (): void {
+    $export = new EmployeeExport(Employee::query());
+
+    expect($export->headings())->toBe(array_values(EmployeeExport::columns()));
+});
+
+it('keeps the declared employee column order regardless of selection order', function (): void {
+    $export = new EmployeeExport(Employee::query(), ['private_email', 'last_name']);
+
+    expect($export->headings())->toBe(['Nom', 'Email']);
+});
+
+it('ignores unknown employee column keys', function (): void {
+    $export = new EmployeeExport(Employee::query(), ['job_title', 'does_not_exist']);
+
+    expect($export->headings())->toBe(['Fonction']);
+});
+
 it('returns all training headings when selection is empty', function (): void {
     $export = new TrainingExport(Training::query());
 

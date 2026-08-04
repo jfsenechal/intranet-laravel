@@ -14,9 +14,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 final readonly class TrainingExport
 {
     /**
-     * @param  list<string>  $columns
+     * @param  list<string>  $columns  Selected column keys; empty = all.
      */
-    public function __construct(private Builder $query, private array $columns) {}
+    public function __construct(private Builder $query, private array $columns = []) {}
 
     /**
      * @return array<string, string>
@@ -40,12 +40,9 @@ final readonly class TrainingExport
      */
     public function headings(): array
     {
-        $columns = self::columns();
+        $labels = self::columns();
 
-        return array_values(array_map(
-            fn (string $key): string => $columns[$key],
-            $this->columns,
-        ));
+        return array_map(fn (string $key): string => $labels[$key], $this->selectedColumns());
     }
 
     /**
@@ -53,21 +50,9 @@ final readonly class TrainingExport
      */
     public function map(Training $row): array
     {
-        $values = [
-            'employee' => mb_trim(($row->employee?->last_name ?? '').' '.($row->employee?->first_name ?? '')),
-            'name' => $row->name,
-            'training_type' => $row->training_type?->getLabel(),
-            'start_date' => $row->start_date?->format('d/m/Y'),
-            'end_date' => $row->end_date?->format('d/m/Y'),
-            'duration_minutes' => Training::formatDuration($row->duration_minutes),
-            'certificate_received' => $row->certificate_received ? 'Oui' : 'Non',
-            'is_closed' => $row->is_closed ? 'Oui' : 'Non',
-        ];
+        $data = $this->row($row);
 
-        return array_values(array_map(
-            fn (string $key) => $values[$key],
-            $this->columns,
-        ));
+        return array_map(fn (string $key) => $data[$key], $this->selectedColumns());
     }
 
     public function downloadXlsx(string $filename): StreamedResponse
@@ -90,5 +75,35 @@ final readonly class TrainingExport
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function selectedColumns(): array
+    {
+        $all = array_keys(self::columns());
+        if ($this->columns === []) {
+            return $all;
+        }
+
+        return array_values(array_filter($all, fn (string $key): bool => in_array($key, $this->columns, true)));
+    }
+
+    /**
+     * @return array<string, null|string>
+     */
+    private function row(Training $row): array
+    {
+        return [
+            'employee' => mb_trim(($row->employee?->last_name ?? '').' '.($row->employee?->first_name ?? '')),
+            'name' => $row->name,
+            'training_type' => $row->training_type?->getLabel(),
+            'start_date' => $row->start_date?->format('d/m/Y'),
+            'end_date' => $row->end_date?->format('d/m/Y'),
+            'duration_minutes' => Training::formatDuration($row->duration_minutes),
+            'certificate_received' => $row->certificate_received ? 'Oui' : 'Non',
+            'is_closed' => $row->is_closed ? 'Oui' : 'Non',
+        ];
     }
 }
