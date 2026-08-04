@@ -16,6 +16,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property string $last_name
+ * @property string $first_name
+ * @property list<string> $emails
+ * @property list<string>|null $supervisors
+ * @property string|null $location
+ * @property string|null $notes
+ * @property list<int> $modules
+ * @property int|null $employee_id
+ * @property string $uuid
+ * @property string|null $username
+ * @property bool $no_mail
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property-read User|null $user
+ * @property-read ProfileHardware|null $hardware
+ * @property-read ProfilePhone|null $phone
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ExternalApplication> $externalApplications
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Folder> $folders
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, History> $histories
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Share> $shares
+ */
 #[Connection('maria-agent')]
 #[Fillable([
     'last_name',

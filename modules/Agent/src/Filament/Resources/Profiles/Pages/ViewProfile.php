@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\Agent\Filament\Resources\Profiles\Pages;
 
+use AcMarche\Agent\Filament\Actions\ExportResumeAction;
+use AcMarche\Agent\Filament\Actions\SendWelcomeMailAction;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\Agent\Filament\Resources\Profiles\Schemas\ProfileInfolist;
 use AcMarche\Agent\Models\Profile;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -24,7 +27,7 @@ final class ViewProfile extends ViewRecord
         /** @var Profile $record */
         $record = $this->record;
 
-        return 'Profil de '.$record->fullName() ?? $record->username;
+        return 'Profil de '.(mb_trim($record->fullName()) ?: $record->username);
     }
 
     public function infolist(Schema $schema): Schema
@@ -37,6 +40,14 @@ final class ViewProfile extends ViewRecord
         return [
             EditAction::make()
                 ->icon(Heroicon::PencilSquare),
+            ActionGroup::make([
+                ExportResumeAction::make(),
+                SendWelcomeMailAction::make(),
+            ])
+                ->label('Exporter...')
+                ->icon(Heroicon::ArrowUpTray)
+                ->color('success')
+                ->button(),
             DeleteAction::make()
                 ->icon(Heroicon::Trash),
         ];

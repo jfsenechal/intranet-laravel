@@ -11,6 +11,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int|null $parent_id
+ * @property string $name
+ * @property string|null $description
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property-read Folder|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Folder> $children
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Profile> $profiles
+ */
 #[Connection('maria-agent')]
 #[Fillable([
     'parent_id',
