@@ -13,21 +13,6 @@
     @endif
 
     <p style="margin-top: 24px;">
-        Vous pouvez nous faire part de toute modification dans les accès pour cette personne ici :
-    </p>
-
-    <p>
-        <a href="{{ $url }}"
-           style="background-color: #059669; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
-            Voir le profil
-        </a>
-    </p>
-
-    <p style="font-size: 13px; color: #64748b;">
-        Ou copiez ce lien : <a href="{{ $url }}">{{ $url }}</a>
-    </p>
-
-    <p style="margin-top: 24px;">
         Bien à vous,<br>
         Espace Public Numérique<br>
         Rue Victor Libert, 36<br>

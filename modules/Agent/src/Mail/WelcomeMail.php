@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Mail;
 
 use AcMarche\Agent\Filament\Exports\ProfilePdfExport;
-use AcMarche\Agent\Filament\Resources\Profiles\Pages\ViewProfile;
 use AcMarche\Agent\Models\Profile;
 use App\Mail\Concerns\ResolvesSenderAddress;
 use Illuminate\Bus\Queueable;
@@ -47,7 +46,7 @@ final class WelcomeMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         $this->logo = public_path('images/Marche_logo.png');
-        if (! file_exists($this->logo)) {
+        if (!file_exists($this->logo)) {
             $this->logo = null;
         }
 
@@ -57,7 +56,6 @@ final class WelcomeMail extends Mailable implements ShouldQueue
                 'profile' => $this->profile,
                 'profileLabel' => $this->profile->fullName(),
                 'notes' => $this->notes,
-                'url' => ViewProfile::getUrl(['record' => $this->profile->getKey()], panel: 'agent-panel'),
                 'logo' => $this->logo,
             ],
         );
