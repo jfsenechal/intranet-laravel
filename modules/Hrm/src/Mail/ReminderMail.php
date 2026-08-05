@@ -25,10 +25,14 @@ final class ReminderMail extends Mailable
         public readonly Model $record,
         public readonly string $url,
         public readonly ?string $employeeName = null,
+        public readonly ?string $recordName = null,
     ) {
-        $this->subject = $employeeName !== null && $employeeName !== ''
-            ? "[GRH] Rappel - {$reminderType} - {$employeeName}"
-            : "[GRH] Rappel - {$reminderType}";
+        $parts = array_filter(
+            ["[GRH] Rappel - {$reminderType}", $recordName, $employeeName],
+            fn (?string $part): bool => $part !== null && $part !== '',
+        );
+
+        $this->subject = implode(' - ', $parts);
     }
 
     public function envelope(): Envelope

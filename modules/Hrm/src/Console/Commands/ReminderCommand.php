@@ -123,8 +123,9 @@ final class ReminderCommand extends Command
 
     /**
      * @param  list<string>  $recipients
+     * @param  bool  $withRecordName  Adds the record's own name to the mail subject
      */
-    private function dispatchMail(array $recipients, string $reminderType, Model $record, string $url, ?Employee $employee): void
+    private function dispatchMail(array $recipients, string $reminderType, Model $record, string $url, ?Employee $employee, bool $withRecordName = false): void
     {
         Mail::to($recipients)->send(new ReminderMail(
             reminderType: $reminderType,
@@ -132,6 +133,9 @@ final class ReminderCommand extends Command
             url: $url,
             employeeName: $employee instanceof Employee
                 ? mb_trim($employee->last_name.' '.$employee->first_name)
+                : null,
+            recordName: $withRecordName
+                ? mb_trim((string) $record->getAttribute('name'))
                 : null,
         ));
     }
@@ -185,6 +189,7 @@ final class ReminderCommand extends Command
                     $deadline,
                     ViewDeadline::getUrl(['record' => $deadline]),
                     $deadline->employee,
+                    withRecordName: true,
                 );
             });
     }

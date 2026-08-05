@@ -39,3 +39,39 @@ it('omits the employee name from the subject when empty', function () use ($reco
 
     expect($mail->subject)->toBe('[GRH] Rappel - Absence');
 });
+
+it('includes the record name before the employee name in the subject', function () use ($record): void {
+    $mail = new ReminderMail(
+        reminderType: 'Échéance',
+        record: $record,
+        url: 'https://example.test',
+        employeeName: 'Doe John',
+        recordName: 'Visite médicale',
+    );
+
+    expect($mail->subject)->toBe('[GRH] Rappel - Échéance - Visite médicale - Doe John');
+});
+
+it('includes the record name in the subject without an employee', function () use ($record): void {
+    $mail = new ReminderMail(
+        reminderType: 'Échéance',
+        record: $record,
+        url: 'https://example.test',
+        employeeName: null,
+        recordName: 'Visite médicale',
+    );
+
+    expect($mail->subject)->toBe('[GRH] Rappel - Échéance - Visite médicale');
+});
+
+it('omits the record name from the subject when empty', function () use ($record): void {
+    $mail = new ReminderMail(
+        reminderType: 'Échéance',
+        record: $record,
+        url: 'https://example.test',
+        employeeName: 'Doe John',
+        recordName: '',
+    );
+
+    expect($mail->subject)->toBe('[GRH] Rappel - Échéance - Doe John');
+});

@@ -96,6 +96,7 @@ it('sends a deadline reminder for an employee with an active contract', function
 
     $deadline = Deadline::factory()->create([
         'employee_id' => $employee->id,
+        'name' => 'Visite médicale',
         'reminder_date' => Carbon::today(),
     ]);
 
@@ -103,7 +104,10 @@ it('sends a deadline reminder for an employee with an active contract', function
 
     Mail::assertSent(
         ReminderMail::class,
-        fn (ReminderMail $mail): bool => $mail->record->is($deadline) && $mail->reminderType === 'Échéance',
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline)
+            && $mail->reminderType === 'Échéance'
+            && $mail->recordName === 'Visite médicale'
+            && str_contains($mail->subject, 'Visite médicale'),
     );
 });
 
