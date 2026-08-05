@@ -354,6 +354,30 @@ describe('table scoping by role', function (): void {
             ->loadTable()
             ->assertCanSeeTableRecords([$employee]);
     });
+
+    /**
+     * The HR database holds pseudo records used as note holders (`@ Traitements
+     * du mois Ville`, `@ RECRUTEMENT`, ...). They carry no contract at all, so
+     * the department condition keeps them out of a reader's listing.
+     */
+    it('hides employees without any contract from a ville reader', function (): void {
+        $readRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_VILLE_READ->value]);
+        $reader = User::factory()->create(['is_administrator' => false, 'username' => 'villereader']);
+        $reader->roles()->attach($readRole);
+
+        AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'ville', 'parent_id' => null]);
+
+        $pseudoRecord = Employee::factory()->create([
+            'last_name' => '@ Traitements du mois Ville',
+            'username' => null,
+        ]);
+
+        $this->actingAs($reader);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanNotSeeTableRecords([$pseudoRecord]);
+    });
 });
 
 describe('relation manager visibility', function (): void {
