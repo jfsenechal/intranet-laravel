@@ -60,6 +60,13 @@
             background-color: #dbeafe;
             color: #1e40af;
         }
+        .warning {
+            background-color: #fef3c7;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            padding: 12px;
+            border-radius: 4px;
+        }
         .footer {
             margin-top: 20px;
             padding-top: 20px;
@@ -132,7 +139,21 @@
             </tbody>
         </table>
 
-        @if($recipient->receives_attachments && $incomingMails->flatMap->attachments->isNotEmpty())
+        @if($attachmentsOmitted)
+        <p class="warning">
+            <strong>Attention :</strong> les pieces jointes
+            ({{ $attachmentsCount }} {{ $attachmentsCount > 1 ? 'fichiers' : 'fichier' }},
+            {{ \Illuminate\Support\Number::fileSize($attachmentsSize, precision: 1) }})
+            n'ont pas pu etre jointes a cet email : leur taille totale depasse la limite
+            autorisee par le serveur de messagerie. Vous pouvez les consulter et les
+            telecharger dans l'application.
+        </p>
+        @elseif($attachmentsUnavailable)
+        <p class="warning">
+            <strong>Attention :</strong> les pieces jointes n'ont pas pu etre jointes a cet
+            email. Vous pouvez les consulter et les telecharger dans l'application.
+        </p>
+        @elseif($attachmentsCount > 0)
         <p><strong>Note:</strong> Les pieces jointes sont incluses dans cet email.</p>
         @endif
 

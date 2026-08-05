@@ -25,12 +25,12 @@ beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
 });
 
-function storeAttachmentFor(IncomingMail $mail, string $fileName, bool $storeFile = true): Attachment
+function storeAttachmentFor(IncomingMail $mail, string $fileName, bool $storeFile = true, int $bytes = 1024): Attachment
 {
     $path = 'courrier/attachments/'.$mail->id.'_'.$fileName;
 
     if ($storeFile) {
-        Storage::disk('local')->put($path, 'pdf content');
+        Storage::disk('local')->put($path, str_repeat('a', $bytes));
     }
 
     return Attachment::query()->create([
@@ -47,7 +47,7 @@ function storeAttachmentFor(IncomingMail $mail, string $fileName, bool $storeFil
  *
  * @return array{0: Recipient, 1: IncomingMail}
  */
-function makeRecipientWithOwnMailAndAttachment(bool $storeFile = true): array
+function makeRecipientWithOwnMailAndAttachment(bool $storeFile = true, int $bytes = 1024): array
 {
     Storage::fake('local');
     config()->set('courrier.storage.disk', 'local');
@@ -55,13 +55,16 @@ function makeRecipientWithOwnMailAndAttachment(bool $storeFile = true): array
     $recipient = Recipient::factory()->receivesAttachments()->create();
     User::factory()->create(['username' => $recipient->username]);
 
+    // The factory notifies 70% of its mail at random: pin the flag so a job
+    // driven off this helper always has something to send.
     $mail = IncomingMail::factory()->create([
         'mail_date' => today(),
         'department' => DepartmentCourrierEnum::VILLE->value,
+        'is_notified' => false,
     ]);
     $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
 
-    storeAttachmentFor($mail, 'rapport.pdf', $storeFile);
+    storeAttachmentFor($mail, 'rapport.pdf', $storeFile, $bytes);
 
     return [$recipient, $mail->fresh()];
 }
@@ -811,5 +814,189 @@ describe('IncomingMailNotification Mailable', function (): void {
         $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
 
         expect($mailable->attachments())->toBeEmpty();
+    });
+});
+
+describe('IncomingMailNotification attachment size limit', function (): void {
+    test('attachments are kept when the encoded total stays under the limit', function (): void {
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(bytes: 1024);
+        config()->set('courrier.mail.message_size_limit', 100000);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
+
+        expect($mailable->attachments())->toHaveCount(1);
+        $mailable->assertSeeInHtml('Les pieces jointes sont incluses dans cet email.');
+    });
+
+    test('no file is attached when the total size exceeds the message size limit', function (): void {
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(bytes: 2048);
+        config()->set('courrier.mail.message_size_limit', 1000);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
+
+        expect($mailable->attachments())->toBeEmpty();
+    });
+
+    test('the base64 encoding overhead counts against the limit', function (): void {
+        // 1024 raw bytes fit under the limit, but not once encoded (x1.37).
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(bytes: 1024);
+        config()->set('courrier.mail.message_size_limit', 1200);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
+
+        expect($mailable->attachments())->toBeEmpty();
+    });
+
+    test('the notification explains why oversized attachments were left out', function (): void {
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(bytes: 2048);
+        config()->set('courrier.mail.message_size_limit', 1000);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), true);
+
+        $mailable->assertSeeInHtml('depasse la limite');
+        $mailable->assertDontSeeInHtml('Les pieces jointes sont incluses dans cet email.');
+    });
+
+    test('the listing is still delivered when the attachments are dropped', function (): void {
+        Mail::fake();
+
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(bytes: 2048);
+        config()->set('courrier.mail.message_size_limit', 1000);
+
+        $job = new SendIncomingMailNotificationJob(Date::now());
+        $job->handle();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mailable): bool => $mailable->hasTo($recipient->email) && $mailable->attachments() === []
+        );
+
+        expect($mail->fresh()->is_notified)->toBeTrue();
+    });
+
+    test('the notice is shown when the attachments could not be delivered', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mails = collect([IncomingMail::factory()->create()]);
+
+        $mailable = new IncomingMailNotification($recipient, $mails, false, null, attachmentsUnavailable: true);
+
+        $mailable->assertSeeInHtml("n'ont pas pu etre jointes", false);
+    });
+
+    test('a recipient without the receives_attachments flag never sees the notice', function (): void {
+        [$recipient, $mail] = makeRecipientWithOwnMailAndAttachment(bytes: 2048);
+        config()->set('courrier.mail.message_size_limit', 1000);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]), false);
+
+        $mailable->assertDontSeeInHtml('depasse la limite');
+    });
+});
+
+describe('SendIncomingMailNotificationJob attachment fallback', function (): void {
+    /**
+     * Records every mailable handed to the mailer and fails the ones carrying
+     * files, the way an SMTP server refusing an oversized message would.
+     *
+     * @param  array<int, IncomingMailNotification>  $sent
+     */
+    function failSendsWithAttachments(array &$sent, bool $failEverything = false): void
+    {
+        Mail::shouldReceive('to')->andReturnSelf();
+        Mail::shouldReceive('send')->andReturnUsing(
+            function (IncomingMailNotification $mailable) use (&$sent, $failEverything): void {
+                $sent[] = $mailable;
+
+                if ($failEverything || $mailable->includeAttachments) {
+                    throw new RuntimeException('552 5.3.4 Error: message file too big');
+                }
+            }
+        );
+    }
+
+    test('a failed send is retried without the attachments', function (): void {
+        $recipient = Recipient::factory()->receivesAttachments()->create(['email' => 'retry@example.com']);
+
+        $mail = IncomingMail::factory()->create(['mail_date' => now(), 'is_notified' => false]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $sent = [];
+        failSendsWithAttachments($sent);
+
+        (new SendIncomingMailNotificationJob(Date::now()))->handle();
+
+        expect($sent)->toHaveCount(2)
+            ->and($sent[0]->includeAttachments)->toBeTrue()
+            ->and($sent[1]->includeAttachments)->toBeFalse()
+            ->and($sent[1]->attachmentsUnavailable)->toBeTrue();
+    });
+
+    test('mail is marked as notified when the retry succeeds', function (): void {
+        $recipient = Recipient::factory()->receivesAttachments()->create(['email' => 'retry-flag@example.com']);
+
+        $mail = IncomingMail::factory()->create(['mail_date' => now(), 'is_notified' => false]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $sent = [];
+        failSendsWithAttachments($sent);
+
+        (new SendIncomingMailNotificationJob(Date::now()))->handle();
+
+        expect($mail->fresh()->is_notified)->toBeTrue();
+    });
+
+    test('mail stays unnotified when the plain listing fails too', function (): void {
+        $recipient = Recipient::factory()->receivesAttachments()->create(['email' => 'dead@example.com']);
+
+        $mail = IncomingMail::factory()->create(['mail_date' => now(), 'is_notified' => false]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $sent = [];
+        failSendsWithAttachments($sent, failEverything: true);
+
+        (new SendIncomingMailNotificationJob(Date::now()))->handle();
+
+        expect($sent)->toHaveCount(2)
+            ->and($mail->fresh()->is_notified)->toBeFalse();
+    });
+
+    test('a recipient who never gets attachments is not retried', function (): void {
+        $recipient = Recipient::factory()->create([
+            'email' => 'noretry@example.com',
+            'receives_attachments' => false,
+        ]);
+
+        $mail = IncomingMail::factory()->create(['mail_date' => now(), 'is_notified' => false]);
+        $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+
+        $sent = [];
+        failSendsWithAttachments($sent, failEverything: true);
+
+        (new SendIncomingMailNotificationJob(Date::now()))->handle();
+
+        expect($sent)->toHaveCount(1)
+            ->and($mail->fresh()->is_notified)->toBeFalse();
+    });
+
+    test('a failure for one recipient does not stop the others', function (): void {
+        $failing = Recipient::factory()->receivesAttachments()->create(['email' => 'failing@example.com']);
+        $healthy = Recipient::factory()->create([
+            'email' => 'healthy@example.com',
+            'receives_attachments' => false,
+        ]);
+
+        $mail = IncomingMail::factory()->create(['mail_date' => now(), 'is_notified' => false]);
+        $mail->recipients()->attach($failing->id, ['is_primary' => true]);
+        $mail->recipients()->attach($healthy->id, ['is_primary' => false]);
+
+        $sent = [];
+        failSendsWithAttachments($sent);
+
+        (new SendIncomingMailNotificationJob(Date::now()))->handle();
+
+        $recipients = array_map(fn (IncomingMailNotification $mailable): string => $mailable->recipient->email, $sent);
+
+        expect($recipients)->toContain('failing@example.com', 'healthy@example.com')
+            ->and($mail->fresh()->is_notified)->toBeTrue();
     });
 });

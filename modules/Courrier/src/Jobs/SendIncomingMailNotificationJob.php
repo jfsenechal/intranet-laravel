@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -66,27 +67,7 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
                 continue;
             }
 
-            $notification = new IncomingMailNotification(
-                $recipient,
-                $incomingMails,
-                $recipient->receives_attachments,
-                $this->mailDate,
-            );
-
-            // Use the admin who triggered the job as the sender when available;
-            // resolvedSender is null on a console/scheduled run and the mailable
-            // then falls back to the configured default address.
-            $notification->resolvedSender = $this->sender;
-
-            try {
-                Mail::to(new Address($recipient->email))->send($notification);
-            } catch (Throwable $throwable) {
-                Log::error(sprintf(
-                    'Courrier notification failed for %s: %s',
-                    $recipient->email,
-                    $throwable->getMessage(),
-                ));
-
+            if (! $this->notify($recipient, $incomingMails)) {
                 continue;
             }
 
@@ -98,5 +79,76 @@ final class SendIncomingMailNotificationJob implements ShouldQueue
                 ->whereIn('id', array_unique($notifiedMailIds))
                 ->update(['is_notified' => true]);
         }
+    }
+
+    /**
+     * Send the daily listing to one recipient.
+     *
+     * A recipient who takes their files by mail gets a second chance without
+     * them: attachments are what usually breaks delivery (a message over the
+     * SMTP size limit, an unreadable file), and the listing alone is worth more
+     * than nothing. The retry carries a notice pointing to the application, and
+     * only a failure of that plain mail leaves the mail unnotified for a later
+     * run.
+     *
+     * @param  Collection<int, IncomingMail>  $incomingMails
+     * @return bool Whether the recipient was reached.
+     */
+    private function notify(Recipient $recipient, Collection $incomingMails): bool
+    {
+        try {
+            $this->send($recipient, $incomingMails, $recipient->receives_attachments);
+
+            return true;
+        } catch (Throwable $throwable) {
+            Log::error(sprintf(
+                'Courrier notification failed for %s: %s',
+                $recipient->email,
+                $throwable->getMessage(),
+            ));
+        }
+
+        if (! $recipient->receives_attachments) {
+            return false;
+        }
+
+        try {
+            $this->send($recipient, $incomingMails, false, attachmentsUnavailable: true);
+
+            return true;
+        } catch (Throwable $throwable) {
+            Log::error(sprintf(
+                'Courrier notification without attachments also failed for %s: %s',
+                $recipient->email,
+                $throwable->getMessage(),
+            ));
+
+            return false;
+        }
+    }
+
+    /**
+     * @param  Collection<int, IncomingMail>  $incomingMails
+     */
+    private function send(
+        Recipient $recipient,
+        Collection $incomingMails,
+        bool $includeAttachments,
+        bool $attachmentsUnavailable = false,
+    ): void {
+        $notification = new IncomingMailNotification(
+            $recipient,
+            $incomingMails,
+            $includeAttachments,
+            $this->mailDate,
+            $attachmentsUnavailable,
+        );
+
+        // Use the admin who triggered the job as the sender when available;
+        // resolvedSender is null on a console/scheduled run and the mailable
+        // then falls back to the configured default address.
+        $notification->resolvedSender = $this->sender;
+
+        Mail::to(new Address($recipient->email))->send($notification);
     }
 }

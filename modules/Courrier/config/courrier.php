@@ -63,6 +63,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Notification Mail
+    |--------------------------------------------------------------------------
+    |
+    | `message_size_limit` mirrors the limit of the same name on the SMTP
+    | server: past it the whole message is rejected with a 552 5.3.4 and the
+    | recipient never gets their daily digest. Attachments travel base64
+    | encoded, which inflates them by about a third, so the raw total is
+    | weighted by `encoding_overhead` before the comparison. When the estimate
+    | exceeds the limit the notification is sent without any file and carries
+    | a notice instead.
+    |
+    */
+
+    'mail' => [
+        'message_size_limit' => env('COURRIER_MAIL_MESSAGE_SIZE_LIMIT', 35000000), // 35MB
+        'encoding_overhead' => 1.37,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Attachment OCR
     |--------------------------------------------------------------------------
     |

@@ -17,6 +17,18 @@ use Override;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+/**
+ * @property int $id
+ * @property int|null $old_id
+ * @property int|null $supervisor_id
+ * @property string $slug
+ * @property string $last_name
+ * @property string $first_name
+ * @property string $username
+ * @property string $email
+ * @property int $actif
+ * @property bool $receives_attachments
+ */
 #[UseFactory(RecipientFactory::class)]
 #[Connection('maria-courrier')]
 #[Fillable([

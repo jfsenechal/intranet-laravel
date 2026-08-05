@@ -21,6 +21,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int $id
+ * @property int|null $old_id
+ * @property int|null $category_id
+ * @property string $reference_number
+ * @property string $sender
+ * @property string|null $description
+ * @property string|null $content
+ * @property \Carbon\CarbonImmutable $mail_date
+ * @property bool $is_notified
+ * @property bool $is_registered
+ * @property bool $has_acknowledgment
+ * @property string $user_add
+ * @property string|null $department
+ * @property string|null $follow_up_note
+ * @property int|null $file_size
+ * @property string|null $file_mime
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property \Carbon\CarbonImmutable $updated_at
+ * @property \Carbon\CarbonImmutable|null $deleted_at
+ */
 #[UseFactory(IncomingMailFactory::class)]
 #[ScopedBy([DepartmentScope::class])]
 #[Connection('maria-courrier')]
@@ -91,6 +112,9 @@ final class IncomingMail extends Model
         return $this->recipients()->wherePivot('is_primary', true);
     }
 
+    /**
+     * @return HasMany<Attachment, $this>
+     */
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);

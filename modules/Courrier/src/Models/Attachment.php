@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int $id
+ * @property int|null $old_id
+ * @property int $incoming_mail_id
+ * @property string $file_name
+ * @property string|null $path
+ * @property string $mime
+ * @property string|null $updated_at
+ */
 #[Connection('maria-courrier')]
 #[Fillable([
     'incoming_mail_id',

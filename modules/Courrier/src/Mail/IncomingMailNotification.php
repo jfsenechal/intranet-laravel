@@ -24,6 +24,21 @@ final class IncomingMailNotification extends Mailable
     use Queueable, ResolvesSenderAddress, SerializesModels;
 
     /**
+     * Files the recipient is allowed to receive, resolved once and shared by
+     * content() and attachments(): the view has to know whether the files made
+     * it into the message, and Laravel may call either method first.
+     *
+     * @var array<Attachment>|null
+     */
+    private ?array $resolvedAttachments = null;
+
+    private int $attachmentsCount = 0;
+
+    private int $attachmentsSize = 0;
+
+    private bool $attachmentsOmitted = false;
+
+    /**
      * @param  Collection<int, IncomingMail>  $incomingMails
      */
     public function __construct(
@@ -31,6 +46,7 @@ final class IncomingMailNotification extends Mailable
         public readonly Collection $incomingMails,
         public readonly bool $includeAttachments = false,
         public readonly ?CarbonInterface $mailDate = null,
+        public readonly bool $attachmentsUnavailable = false,
     ) {}
 
     public function envelope(): Envelope
@@ -50,14 +66,28 @@ final class IncomingMailNotification extends Mailable
 
     public function content(): Content
     {
+        $this->resolveAttachments();
+
         return new Content(
             html: 'courrier::mail.incoming-mail-notification',
             with: [
                 'recipient' => $this->recipient,
                 'incomingMails' => $this->incomingMails,
                 'url' => url('/indicateur'),
+                'attachmentsCount' => $this->attachmentsCount,
+                'attachmentsSize' => $this->attachmentsSize,
+                'attachmentsOmitted' => $this->attachmentsOmitted,
+                'attachmentsUnavailable' => $this->attachmentsUnavailable,
             ],
         );
+    }
+
+    /**
+     * @return array<Attachment>
+     */
+    public function attachments(): array
+    {
+        return $this->resolveAttachments();
     }
 
     /**
@@ -69,10 +99,22 @@ final class IncomingMailNotification extends Mailable
      * AttachmentPolicy the download route enforces, so the mail never delivers
      * a document the recipient could not open in the application.
      *
+     * A day's worth of scanned mail can outgrow the `message_size_limit` of the
+     * SMTP server, which then rejects the whole message (552 5.3.4) and leaves
+     * the recipient with no notification at all. The total is therefore weighed
+     * up front: past the limit nothing is attached and the view explains why,
+     * so the listing always reaches its recipient.
+     *
      * @return array<Attachment>
      */
-    public function attachments(): array
+    private function resolveAttachments(): array
     {
+        if ($this->resolvedAttachments !== null) {
+            return $this->resolvedAttachments;
+        }
+
+        $this->resolvedAttachments = [];
+
         if (! $this->includeAttachments) {
             return [];
         }
@@ -83,14 +125,16 @@ final class IncomingMailNotification extends Mailable
             return [];
         }
 
+        $diskName = config('courrier.storage.disk', 'public');
+        $disk = Storage::disk($diskName);
+
         $attachments = [];
-        $disk = config('courrier.storage.disk', 'public');
 
         foreach ($this->incomingMails as $incomingMail) {
             foreach ($incomingMail->attachments as $attachment) {
                 $path = $attachment->path;
 
-                if ($path === null || ! Storage::disk($disk)->exists($path)) {
+                if ($path === null || ! $disk->exists($path)) {
                     continue;
                 }
 
@@ -98,13 +142,38 @@ final class IncomingMailNotification extends Mailable
                     continue;
                 }
 
-                $attachments[] = Attachment::fromStorageDisk($disk, $path)
+                $this->attachmentsSize += $disk->size($path);
+
+                $attachments[] = Attachment::fromStorageDisk($diskName, $path)
                     ->as($attachment->file_name)
                     ->withMime($attachment->mime);
             }
         }
 
-        return $attachments;
+        $this->attachmentsCount = count($attachments);
+
+        if ($this->exceedsMessageSizeLimit()) {
+            $this->attachmentsOmitted = true;
+
+            return [];
+        }
+
+        return $this->resolvedAttachments = $attachments;
+    }
+
+    /**
+     * Whether the encoded message would be refused by the SMTP server.
+     */
+    private function exceedsMessageSizeLimit(): bool
+    {
+        if ($this->attachmentsSize === 0) {
+            return false;
+        }
+
+        $limit = (int) config('courrier.mail.message_size_limit');
+        $overhead = (float) config('courrier.mail.encoding_overhead', 1.37);
+
+        return $this->attachmentsSize * $overhead > $limit;
     }
 
     /**
