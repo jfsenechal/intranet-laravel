@@ -45,10 +45,20 @@ final class ContractTables
                     ->label('Employeur')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('contractNature.name')
+                    ->label('Nature')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
                 TextColumn::make('contractType.name')
                     ->label('Type')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('payScale.name')
+                    ->label('Echelle')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
                 TextColumn::make('job_title')
                     ->label('Fonction')
                     ->searchable()
@@ -73,16 +83,16 @@ final class ContractTables
                 TextColumn::make('work_regime')
                     ->label('Regime')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 IconColumn::make('is_closed')
                     ->label('Clôturé')
                     ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->filtersFormColumns(2)
             ->persistFiltersInSession()
@@ -167,10 +177,20 @@ final class ContractTables
                     ->label('Employeur')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('contractNature.name')
+                    ->label('Nature')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
                 TextColumn::make('contractType.name')
                     ->label('Type')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('payScale.name')
+                    ->label('Echelle')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
                 TextColumn::make('job_title')
                     ->label('Fonction')
                     ->searchable()
@@ -183,22 +203,22 @@ final class ContractTables
                     ->label('Fin')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('replaces.last_name')
                     ->label('Remplace')
                     ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
                     ->searchable(['last_name', 'first_name'])
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->placeholder('—'),
                 TextColumn::make('work_regime')
                     ->label('Régime')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 IconColumn::make('is_closed')
                     ->label('Clôturé')
                     ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->filters([
                 TernaryFilter::make('is_closed')

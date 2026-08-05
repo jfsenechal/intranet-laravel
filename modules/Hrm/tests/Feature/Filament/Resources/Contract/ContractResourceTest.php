@@ -13,6 +13,7 @@ use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\ContractNature;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
+use AcMarche\Hrm\Models\PayScale;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -30,6 +31,37 @@ describe('page rendering', function (): void {
     it('can render the index page', function (): void {
         Livewire::test(ListContracts::class)
             ->assertOk();
+    });
+
+    it('shows the nature and pay scale columns', function (): void {
+        $nature = ContractNature::factory()->create();
+        $payScale = PayScale::factory()->create();
+        $record = Contract::factory()->create([
+            'contract_nature_id' => $nature->id,
+            'pay_scale_id' => $payScale->id,
+        ]);
+
+        Livewire::test(ListContracts::class)
+            ->assertTableColumnStateSet('contractNature.name', $nature->name, $record)
+            ->assertTableColumnStateSet('payScale.name', $payScale->name, $record);
+    });
+
+    it('shows the nature and pay scale columns in the employee relation manager', function (): void {
+        $employee = Employee::factory()->create();
+        $nature = ContractNature::factory()->create();
+        $payScale = PayScale::factory()->create();
+        $record = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'contract_nature_id' => $nature->id,
+            'pay_scale_id' => $payScale->id,
+        ]);
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->assertTableColumnStateSet('contractNature.name', $nature->name, $record)
+            ->assertTableColumnStateSet('payScale.name', $payScale->name, $record);
     });
 
     it('can render the create page', function (): void {
