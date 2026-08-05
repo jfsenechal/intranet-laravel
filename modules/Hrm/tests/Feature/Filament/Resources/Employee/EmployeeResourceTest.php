@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Exports\EmployeeExport;
+use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\CreateEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\EditEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
@@ -359,6 +360,65 @@ describe('emploi tab', function (): void {
             ->assertOk()
             ->assertSee('Prérequis A1')
             ->assertSee('Ingénieur civil');
+    });
+
+    it('links each active contract to its view page', function (): void {
+        $record = Employee::factory()->create();
+        $contract = Contract::factory()->create([
+            'employee_id' => $record->id,
+            'job_title' => 'Agent administratif',
+            'is_suspended' => false,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertSee('Agent administratif')
+            ->assertSee(ViewContract::getUrl(['record' => $contract]), escape: false);
+    });
+
+    it('links the replaced employee of an active contract to their view page', function (): void {
+        $replaced = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $record = Employee::factory()->create();
+        Contract::factory()->create([
+            'employee_id' => $record->id,
+            'replaces_id' => $replaced->id,
+            'is_suspended' => false,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertSee('Remplace')
+            ->assertSee('Dupont Marie')
+            ->assertSee(ViewEmployee::getUrl(['record' => $replaced]), escape: false);
+    });
+
+    it('does not link an active contract the user may not view', function (): void {
+        $readRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_VILLE_READ->value]);
+        $user = User::factory()->create(['is_administrator' => false, 'username' => 'jdoe']);
+        $user->roles()->attach($readRole);
+
+        $ville = AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'ville', 'parent_id' => null]);
+        $cpas = AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'cpas', 'parent_id' => null]);
+
+        $record = Employee::factory()->create(['username' => 'jdoe']);
+        Contract::factory()->create([
+            'employee_id' => $record->id,
+            'employer_id' => $ville->id,
+            'is_suspended' => false,
+        ]);
+        $cpasContract = Contract::factory()->create([
+            'employee_id' => $record->id,
+            'employer_id' => $cpas->id,
+            'job_title' => 'Aide familiale',
+            'is_suspended' => false,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertSee('Aide familiale')
+            ->assertDontSee(ViewContract::getUrl(['record' => $cpasContract]), escape: false);
     });
 });
 

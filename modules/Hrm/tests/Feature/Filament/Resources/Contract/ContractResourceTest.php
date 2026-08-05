@@ -254,6 +254,67 @@ describe('nature filter', function (): void {
     });
 });
 
+describe('replaces column and filter', function (): void {
+    it('shows the replaced agent in the table', function (): void {
+        $replaced = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $contract = Contract::factory()->create(['replaces_id' => $replaced->id]);
+        $other = Contract::factory()->create(['replaces_id' => null]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('replaces.last_name', 'Dupont Marie', $contract)
+            ->assertTableColumnStateSet('replaces.last_name', null, $other);
+    });
+
+    it('only offers agents that are actually replaced as filter options', function (): void {
+        $replaced = Employee::factory()->create();
+        Contract::factory()->create(['replaces_id' => $replaced->id]);
+
+        // Never replaced and without a contract, so the name can only come from
+        // the filter options.
+        Employee::factory()->create(['last_name' => 'Jamaisremplace', 'first_name' => 'Bob']);
+
+        $html = Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->html();
+
+        expect($html)->toContain('value="'.$replaced->id.'"')
+            ->not->toContain('Jamaisremplace');
+    });
+
+    it('shows the replaced agent in the contracts relation manager', function (): void {
+        $employee = Employee::factory()->create();
+        $replaced = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $contract = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'replaces_id' => $replaced->id,
+            'is_closed' => false,
+        ]);
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertTableColumnStateSet('replaces.last_name', 'Dupont Marie', $contract);
+    });
+
+    it('filters contracts by the replaced agent', function (): void {
+        $replaced = Employee::factory()->create();
+        $otherReplaced = Employee::factory()->create();
+
+        $matching = Contract::factory()->create(['replaces_id' => $replaced->id]);
+        $nonMatching = Contract::factory()->create(['replaces_id' => $otherReplaced->id]);
+        $withoutReplacement = Contract::factory()->create(['replaces_id' => null]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->filterTable('replaces', $replaced->id)
+            ->assertCanSeeTableRecords([$matching])
+            ->assertCanNotSeeTableRecords([$nonMatching, $withoutReplacement]);
+    });
+});
+
 describe('export action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListContracts::class)

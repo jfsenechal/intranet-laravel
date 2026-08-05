@@ -7,10 +7,13 @@ namespace AcMarche\Hrm\Filament\Resources\Employees\Schemas;
 use AcMarche\Hrm\Filament\Actions\RequestProfileAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileChangeAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileDeletionAction;
+use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
+use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
@@ -19,6 +22,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Gate;
 
 final class EmployeeInfolist
 {
@@ -123,23 +127,23 @@ final class EmployeeInfolist
                                 Fieldset::make('Contrats actifs')
                                     ->columns(1)
                                     ->schema([
-                                        TextEntry::make('activeContracts')
+                                        RepeatableEntry::make('activeContracts')
                                             ->hiddenLabel()
-                                            ->state(
-                                                fn (Employee $record): array => $record->activeContracts
-                                                    ->map(
-                                                        fn (Contract $contract): string => implode(' • ', array_filter([
-                                                            $contract->service?->name,
-                                                            $contract->payScale?->name,
-                                                            $contract->job_title,
-                                                            $contract->contractType?->name,
-                                                            $contract->hourly_regime,
-                                                        ]))
-                                                    )
-                                                    ->all()
-                                            )
-                                            ->listWithLineBreaks()
-                                            ->placeholder('—'),
+                                            ->placeholder('—')
+                                            ->schema([
+                                                TextEntry::make('summary')
+                                                    ->hiddenLabel()
+                                                    ->state(fn (Contract $record): string => self::contractSummary($record))
+                                                    ->url(fn (Contract $record): ?string => self::contractUrl($record))
+                                                    ->color(fn (Contract $record): ?string => self::contractUrl($record) === null ? null : 'primary'),
+                                                TextEntry::make('replaces')
+                                                    ->label('Remplace')
+                                                    ->visible(fn (Contract $record): bool => $record->replaces instanceof Employee)
+                                                    ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
+                                                    ->icon(Heroicon::OutlinedUser)
+                                                    ->url(fn (Contract $record): ?string => self::employeeUrl($record->replaces))
+                                                    ->color(fn (Contract $record): ?string => self::employeeUrl($record->replaces) === null ? null : 'primary'),
+                                            ]),
                                     ]),
                                 Fieldset::make('Situation')
                                     ->columns(3)
@@ -278,5 +282,43 @@ final class EmployeeInfolist
                             ]),
                     ]),
             ]);
+    }
+
+    private static function contractSummary(Contract $contract): string
+    {
+        return implode(' • ', array_filter([
+            $contract->service?->name,
+            $contract->payScale?->name,
+            $contract->job_title,
+            $contract->contractType?->name,
+            $contract->hourly_regime,
+        ]));
+    }
+
+    /**
+     * The infolist is also rendered outside the HRM panel, so resource URLs are
+     * resolved against the panel that owns them and only linked when the viewer
+     * is allowed to open the record.
+     */
+    private static function contractUrl(Contract $contract): ?string
+    {
+        if (! Gate::allows('view', $contract)) {
+            return null;
+        }
+
+        return ViewContract::getUrl(['record' => $contract], panel: 'hrm-panel');
+    }
+
+    private static function employeeUrl(?Employee $employee): ?string
+    {
+        if (! $employee instanceof Employee) {
+            return null;
+        }
+
+        if (! Gate::allows('view', $employee)) {
+            return null;
+        }
+
+        return ViewEmployee::getUrl(['record' => $employee], panel: 'hrm-panel');
     }
 }

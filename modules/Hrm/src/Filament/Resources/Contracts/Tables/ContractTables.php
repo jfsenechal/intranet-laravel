@@ -13,6 +13,7 @@ use AcMarche\Hrm\Filament\Filters\EmployerFilter;
 use AcMarche\Hrm\Filament\Filters\PayScaleFilter;
 use AcMarche\Hrm\Filament\Filters\ServiceFilter;
 use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Employee;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -62,6 +63,13 @@ final class ContractTables
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('replaces.last_name')
+                    ->label('Remplace')
+                    ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
+                    ->searchable(['last_name', 'first_name'])
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('—'),
                 TextColumn::make('work_regime')
                     ->label('Regime')
                     ->sortable()
@@ -88,6 +96,20 @@ final class ContractTables
                 SelectFilter::make('status')
                     ->label('Statut')
                     ->options(ContractStatusEnum::class),
+                SelectFilter::make('replaces')
+                    ->label('Remplace')
+                    // Only the agents actually replaced by a contract are worth listing.
+                    ->relationship(
+                        'replaces',
+                        'last_name',
+                        fn (Builder $query): Builder => $query->whereIn(
+                            'id',
+                            Contract::query()->whereNotNull('replaces_id')->select('replaces_id'),
+                        ),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn (Employee $record): string => $record->full_name)
+                    ->searchable()
+                    ->preload(),
                 TernaryFilter::make('is_closed')
                     ->label('Clôturé')
                     ->placeholder('Tous')
@@ -162,6 +184,13 @@ final class ContractTables
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('replaces.last_name')
+                    ->label('Remplace')
+                    ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
+                    ->searchable(['last_name', 'first_name'])
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
                 TextColumn::make('work_regime')
                     ->label('Régime')
                     ->sortable()
