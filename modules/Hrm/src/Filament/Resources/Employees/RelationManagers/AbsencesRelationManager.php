@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use AcMarche\Hrm\Filament\Resources\Absences\Tables\AbsenceTables;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\OpensRecordViewPage;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -17,6 +19,7 @@ use Override;
 
 final class AbsencesRelationManager extends RelationManager
 {
+    use OpensRecordViewPage;
     use ReadOnlyUnlessGrhAdmin;
     use VisibleWhenEmployeeIsViewable;
 
@@ -40,6 +43,6 @@ final class AbsencesRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return AbsenceTables::relation($table);
+        return $this->openRecordsOnViewPage(AbsenceTables::relation($table), ViewAbsence::class);
     }
 }

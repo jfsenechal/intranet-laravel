@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\RelationManagers;
 
+use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Schemas\ContractForm;
 use AcMarche\Hrm\Filament\Resources\Contracts\Schemas\ContractInfolist;
 use AcMarche\Hrm\Filament\Resources\Contracts\Tables\ContractTables;
+use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\OpensRecordViewPage;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\ReadOnlyUnlessGrhAdmin;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\Concerns\VisibleWhenEmployeeIsViewable;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -17,6 +19,7 @@ use Override;
 
 final class ContractsRelationManager extends RelationManager
 {
+    use OpensRecordViewPage;
     use ReadOnlyUnlessGrhAdmin;
     use VisibleWhenEmployeeIsViewable;
 
@@ -40,6 +43,6 @@ final class ContractsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return ContractTables::relation($table);
+        return $this->openRecordsOnViewPage(ContractTables::relation($table), ViewContract::class);
     }
 }
