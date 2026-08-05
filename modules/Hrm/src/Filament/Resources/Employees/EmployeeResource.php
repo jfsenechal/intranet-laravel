@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees;
 
+use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\CreateEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\EditEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
@@ -44,6 +45,13 @@ final class EmployeeResource extends Resource
 
     #[Override]
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationUrl(): string
+    {
+        return ListEmployees::getUrl(parameters: [
+            'filters' => ['status' => ['value' => StatusEnum::AGENT->value]],
+        ]);
+    }
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'last_name';
