@@ -35,15 +35,19 @@ final class CitoyenPage extends Page
     {
         return [
             [
-                'command' => 'php artisan citoyen:purge',
-                'description' => 'Nettoyage des adresses mails inactives',
+                'command' => 'php artisan citoyen:purge --min-days=360',
+                'description' => 'Nettoyage des adresses mails basé sur les mails dans Maildir/new',
             ],
             [
                 'command' => 'php artisan citoyen:change-password',
                 'description' => "Changer le mot de passe d'un compte administrateur",
             ],
             [
-                'command' => 'php artisan citoyen:new-mail --only-with-mail',
+                'command' => 'php artisan citoyen:password',
+                'description' => "Changer le mot de passe d'un citoyen",
+            ],
+            [
+                'command' => 'php artisan citoyen:new-mail --only-with-mail --min-days=90',
                 'description' => 'Vérifie si le compte a des mails dans sont dossier Maildir/new',
             ],
             [
