@@ -332,6 +332,28 @@ describe('table scoping by role', function (): void {
             ->assertCanSeeTableRecords([$visible])
             ->assertCanNotSeeTableRecords([$hidden]);
     });
+
+    it('shows a ville reader employees whose ville contracts are all inactive', function (): void {
+        $readRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_VILLE_READ->value]);
+        $reader = User::factory()->create(['is_administrator' => false, 'username' => 'villereader']);
+        $reader->roles()->attach($readRole);
+
+        $ville = AcMarche\Hrm\Models\Employer::factory()->create(['slug' => 'ville', 'parent_id' => null]);
+
+        $employee = Employee::factory()->create();
+        Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'employer_id' => $ville->id,
+            'is_closed' => true,
+            'end_date' => now()->subYear(),
+        ]);
+
+        $this->actingAs($reader);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$employee]);
+    });
 });
 
 describe('relation manager visibility', function (): void {
