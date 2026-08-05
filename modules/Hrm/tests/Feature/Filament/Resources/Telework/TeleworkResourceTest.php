@@ -43,8 +43,8 @@ function directorNamed(string $username, ?string $email): Employee
 {
     $employee = Employee::factory()->create([
         'username' => $username,
-        'last_name' => 'WILMET',
-        'first_name' => 'Quentin',
+        'last_name' => 'DUPONT',
+        'first_name' => 'Jean',
     ]);
 
     $employee->professional_email = $email;
@@ -119,14 +119,14 @@ describe('page rendering', function (): void {
 describe('director who must validate', function (): void {
     it('shows the direction and the director who must validate the request', function (): void {
         $director = Employee::factory()->create([
-            'username' => 'qwilmet',
-            'last_name' => 'WILMET',
-            'first_name' => 'Quentin',
+            'username' => 'jdupont',
+            'last_name' => 'DUPONT',
+            'first_name' => 'Jean',
         ]);
-        $director->professional_email = 'quentin.wilmet@marche.be';
+        $director->professional_email = 'jean.dupont@marche.be';
         $director->save();
 
-        requesterWithDirector($this->adminUser->username, 'qwilmet');
+        requesterWithDirector($this->adminUser->username, 'jdupont');
 
         $record = Telework::factory()->create();
 
@@ -136,8 +136,8 @@ describe('director who must validate', function (): void {
             ->assertOk()
             ->assertSee('Directeur qui doit valider')
             ->assertSee('Direction du Personnel')
-            ->assertSee('WILMET Quentin')
-            ->assertSee('quentin.wilmet@marche.be')
+            ->assertSee('DUPONT Jean')
+            ->assertSee('jean.dupont@marche.be')
             ->assertDontSee('la demande de validation ne lui a pas');
     });
 
@@ -155,8 +155,8 @@ describe('director who must validate', function (): void {
     });
 
     it('warns when the director has no email address', function (): void {
-        directorNamed('qwilmet', null);
-        requesterWithDirector($this->adminUser->username, 'qwilmet');
+        directorNamed('jdupont', null);
+        requesterWithDirector($this->adminUser->username, 'jdupont');
 
         $record = Telework::factory()->create();
 
@@ -164,7 +164,7 @@ describe('director who must validate', function (): void {
             'record' => $record->id,
         ])
             ->assertOk()
-            ->assertSee('WILMET Quentin')
+            ->assertSee('DUPONT Jean')
             ->assertSee('la demande de validation ne lui a pas été envoyée par mail.');
     });
 
@@ -222,31 +222,31 @@ describe('director access to the validation page', function (): void {
     }
 
     it('lets the director of the requester validate the request', function (): void {
-        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
-        actingAsDirector('qwilmet');
+        $record = requestFromAgentOfDirection('jdoe', 'jdupont');
+        actingAsDirector('jdupont');
 
         $this->get(ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
             ->assertOk();
     });
 
     it('lets the director of the requester open the request', function (): void {
-        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
-        actingAsDirector('qwilmet');
+        $record = requestFromAgentOfDirection('jdoe', 'jdupont');
+        actingAsDirector('jdupont');
 
         $this->get(ViewTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
             ->assertOk();
     });
 
     it('lets the director record their decision', function (): void {
-        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
-        actingAsDirector('qwilmet');
+        $record = requestFromAgentOfDirection('jdoe', 'jdupont');
+        actingAsDirector('jdupont');
 
         Livewire::test(ManagerValidateTelework::class, [
             'record' => $record->id,
         ])
             ->fillForm([
                 'manager_validated' => true,
-                'manager_validator_name' => 'WILMET Quentin',
+                'manager_validator_name' => 'DUPONT Jean',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -259,7 +259,7 @@ describe('director access to the validation page', function (): void {
      * user cannot resolve the route binding at all and gets a 404 rather than a 403.
      */
     it('hides the request from a director of another direction', function (): void {
-        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        $record = requestFromAgentOfDirection('jdoe', 'jdupont');
         actingAsDirector('someone-else');
 
         $this->get(ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
@@ -267,7 +267,7 @@ describe('director access to the validation page', function (): void {
     });
 
     it('hides the request from an agent without any director role', function (): void {
-        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        $record = requestFromAgentOfDirection('jdoe', 'jdupont');
 
         $this->actingAs(User::factory()->create(['username' => 'nobody']));
 
@@ -276,18 +276,18 @@ describe('director access to the validation page', function (): void {
     });
 
     it('keeps the full edit form closed to the director', function (): void {
-        $record = requestFromAgentOfDirection('jdoe', 'qwilmet');
-        actingAsDirector('qwilmet');
+        $record = requestFromAgentOfDirection('jdoe', 'jdupont');
+        actingAsDirector('jdupont');
 
         $this->get(EditTelework::getUrl(['record' => $record], panel: 'hrm-panel'))
             ->assertForbidden();
     });
 
     it('lists only the requests of the director own agents', function (): void {
-        $own = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        $own = requestFromAgentOfDirection('jdoe', 'jdupont');
         $other = requestFromAgentOfDirection('asmith', 'another-director');
 
-        actingAsDirector('qwilmet');
+        actingAsDirector('jdupont');
 
         Livewire::test(ListTeleworks::class)
             ->loadTable()
@@ -296,7 +296,7 @@ describe('director access to the validation page', function (): void {
     });
 
     it('still lists every request for a grh administrator', function (): void {
-        $first = requestFromAgentOfDirection('jdoe', 'qwilmet');
+        $first = requestFromAgentOfDirection('jdoe', 'jdupont');
         $second = requestFromAgentOfDirection('asmith', 'another-director');
 
         $this->actingAs($this->adminUser);
@@ -311,8 +311,8 @@ describe('validation request mail', function (): void {
     it('sends the request to the director with a link to the validation page', function (): void {
         Mail::fake();
 
-        directorNamed('qwilmet', 'quentin.wilmet@marche.be');
-        requesterWithDirector($this->adminUser->username, 'qwilmet');
+        directorNamed('jdupont', 'jean.dupont@marche.be');
+        requesterWithDirector($this->adminUser->username, 'jdupont');
 
         $record = Telework::factory()->create();
 
@@ -325,7 +325,7 @@ describe('validation request mail', function (): void {
 
         Mail::assertQueued(
             TeleworkManagerValidationMail::class,
-            fn (TeleworkManagerValidationMail $mail): bool => $mail->hasTo('quentin.wilmet@marche.be')
+            fn (TeleworkManagerValidationMail $mail): bool => $mail->hasTo('jean.dupont@marche.be')
                 && str_contains(
                     $mail->render(),
                     ManagerValidateTelework::getUrl(['record' => $record], panel: 'hrm-panel'),
@@ -351,8 +351,8 @@ describe('validation request mail', function (): void {
     it('reports that nothing was sent when the director has no email', function (): void {
         Mail::fake();
 
-        directorNamed('qwilmet', null);
-        requesterWithDirector($this->adminUser->username, 'qwilmet');
+        directorNamed('jdupont', null);
+        requesterWithDirector($this->adminUser->username, 'jdupont');
 
         $record = Telework::factory()->create();
 
@@ -367,8 +367,8 @@ describe('validation request mail', function (): void {
     });
 
     it('hides the button once the director has decided', function (): void {
-        directorNamed('qwilmet', 'quentin.wilmet@marche.be');
-        requesterWithDirector($this->adminUser->username, 'qwilmet');
+        directorNamed('jdupont', 'jean.dupont@marche.be');
+        requesterWithDirector($this->adminUser->username, 'jdupont');
 
         $record = Telework::factory()->create(['manager_validated' => true]);
 

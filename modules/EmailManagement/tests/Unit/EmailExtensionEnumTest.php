@@ -8,29 +8,29 @@ it('splits an address into its local part and extension', function (string $mail
     expect(EmailExtensionEnum::localPart($mail))->toBe($local)
         ->and(EmailExtensionEnum::fromAddress($mail))->toBe($extension);
 })->with([
-    'ac' => ['ana.aguirre@ac.marche.be', 'ana.aguirre', EmailExtensionEnum::EXTENSION_AC],
+    'ac' => ['alice.martin@ac.marche.be', 'alice.martin', EmailExtensionEnum::EXTENSION_AC],
     'cpas' => ['b.gathy@cpas.marche.be', 'b.gathy', EmailExtensionEnum::EXTENSION_CPAS],
     'marche' => ['info@marche.be', 'info', EmailExtensionEnum::EXTENSION_MARCHE],
 ]);
 
 it('rejoins into the address it was split from', function (): void {
-    $mail = 'ana.aguirre@ac.marche.be';
+    $mail = 'alice.martin@ac.marche.be';
 
     expect(EmailExtensionEnum::localPart($mail).EmailExtensionEnum::fromAddress($mail)->value)->toBe($mail);
 });
 
 it('matches the extension regardless of case', function (): void {
-    expect(EmailExtensionEnum::fromAddress('Ana.Aguirre@AC.Marche.BE'))->toBe(EmailExtensionEnum::EXTENSION_AC);
+    expect(EmailExtensionEnum::fromAddress('Alice.Martin@AC.Marche.BE'))->toBe(EmailExtensionEnum::EXTENSION_AC);
 });
 
 it('reports an unknown domain rather than guessing', function (): void {
-    expect(EmailExtensionEnum::fromAddress('ana@famenneardenne.be'))->toBeNull()
-        ->and(EmailExtensionEnum::localPart('ana@famenneardenne.be'))->toBe('ana');
+    expect(EmailExtensionEnum::fromAddress('alice@famenneardenne.be'))->toBeNull()
+        ->and(EmailExtensionEnum::localPart('alice@famenneardenne.be'))->toBe('alice');
 });
 
 it('treats a value with no domain as a bare local part', function (): void {
-    expect(EmailExtensionEnum::localPart('ana.aguirre'))->toBe('ana.aguirre')
-        ->and(EmailExtensionEnum::fromAddress('ana.aguirre'))->toBeNull();
+    expect(EmailExtensionEnum::localPart('alice.martin'))->toBe('alice.martin')
+        ->and(EmailExtensionEnum::fromAddress('alice.martin'))->toBeNull();
 });
 
 it('splits on the last @, not the first', function (): void {

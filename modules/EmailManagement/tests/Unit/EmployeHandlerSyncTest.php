@@ -32,14 +32,14 @@ function createLdapEmploye(array $attributes): EmployeLdap
 }
 
 it('mirrors directory entries keyed on samaccountname', function (): void {
-    createLdapEmploye(['cn' => 'Ana Aguirre', 'samaccountname' => 'aaguirre', 'givenName' => 'Ana', 'sn' => 'Aguirre', 'mail' => 'ana.aguirre@ac.marche.be']);
+    createLdapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'givenName' => 'Alice', 'sn' => 'Martin', 'mail' => 'alice.martin@ac.marche.be']);
     createLdapEmploye(['cn' => 'Beatrice Gathy', 'samaccountname' => 'bgathy', 'givenName' => 'Beatrice', 'sn' => 'Gathy', 'mail' => 'b.gathy@ac.marche.be']);
 
     $count = app(EmployeHandler::class)->syncFromLdap();
 
     expect($count)->toBe(2)
         ->and(Employe::count())->toBe(2)
-        ->and(Employe::where('samaccountname', 'aaguirre')->first()->mail)->toBe('ana.aguirre@ac.marche.be');
+        ->and(Employe::where('samaccountname', 'amartin')->first()->mail)->toBe('alice.martin@ac.marche.be');
 });
 
 it('imports directory entries that have no mailbox', function (): void {
@@ -54,20 +54,20 @@ it('imports directory entries that have no mailbox', function (): void {
 });
 
 it('updates an existing mirror row rather than duplicating it', function (): void {
-    Employe::factory()->create(['samaccountname' => 'aaguirre', 'sn' => 'Ancien', 'mail' => 'old@ac.marche.be']);
+    Employe::factory()->create(['samaccountname' => 'amartin', 'sn' => 'Ancien', 'mail' => 'old@ac.marche.be']);
 
-    createLdapEmploye(['cn' => 'Ana Aguirre', 'samaccountname' => 'aaguirre', 'givenName' => 'Ana', 'sn' => 'Aguirre', 'mail' => 'ana.aguirre@ac.marche.be']);
+    createLdapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'givenName' => 'Alice', 'sn' => 'Martin', 'mail' => 'alice.martin@ac.marche.be']);
 
     app(EmployeHandler::class)->syncFromLdap();
 
     expect(Employe::count())->toBe(1)
-        ->and(Employe::first()->sn)->toBe('Aguirre');
+        ->and(Employe::first()->sn)->toBe('Martin');
 });
 
 it('prunes mirror rows that are absent from the directory', function (): void {
     Employe::factory()->create(['samaccountname' => 'parti']);
 
-    createLdapEmploye(['cn' => 'Ana Aguirre', 'samaccountname' => 'aaguirre', 'givenName' => 'Ana', 'sn' => 'Aguirre', 'mail' => 'ana.aguirre@ac.marche.be']);
+    createLdapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'givenName' => 'Alice', 'sn' => 'Martin', 'mail' => 'alice.martin@ac.marche.be']);
 
     app(EmployeHandler::class)->syncFromLdap();
 
@@ -86,7 +86,7 @@ it('keeps the mirror intact when the directory returns nothing', function (): vo
 it('keeps the mirror intact when no entry exposes a samaccountname', function (): void {
     Employe::factory(3)->create();
 
-    createLdapEmploye(['cn' => 'Ana Aguirre', 'givenName' => 'Ana', 'sn' => 'Aguirre', 'mail' => 'ana.aguirre@ac.marche.be']);
+    createLdapEmploye(['cn' => 'Alice Martin', 'givenName' => 'Alice', 'sn' => 'Martin', 'mail' => 'alice.martin@ac.marche.be']);
 
     expect(fn (): int => app(EmployeHandler::class)->syncFromLdap())
         ->toThrow(Exception::class)

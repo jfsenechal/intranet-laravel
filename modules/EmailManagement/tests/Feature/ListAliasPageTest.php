@@ -72,7 +72,7 @@ describe('table', function (): void {
 
     it('counts the members of a list', function (): void {
         makeList('conseil', 'conseil@marche.be', [
-            'ana.aguirre@marche.be',
+            'alice.martin@marche.be',
             'jean.dupont@marche.be',
             'luc.martin@marche.be',
         ]);
@@ -94,12 +94,12 @@ describe('table', function (): void {
     });
 
     it('finds a list by one of its members', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be']);
+        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
         makeList('college', 'college@marche.be', ['jean.dupont@marche.be']);
 
         livewire(ListAliasPage::class)
             ->loadTable()
-            ->searchTable('ana.aguirre@marche.be')
+            ->searchTable('alice.martin@marche.be')
             ->assertCanSeeTableRecords(['conseil'])
             ->assertCanNotSeeTableRecords(['college']);
     });
@@ -119,7 +119,7 @@ describe('table', function (): void {
 
 describe('members', function (): void {
     it('writes the new members to the directory', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be']);
+        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
 
         livewire(ListAliasPage::class)
             ->loadTable()
@@ -136,16 +136,16 @@ describe('members', function (): void {
     });
 
     it('fills the form with the current members', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be']);
+        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
 
         livewire(ListAliasPage::class)
             ->loadTable()
             ->mountAction(TestAction::make('editMembers')->table('conseil'))
-            ->assertActionDataSet(['members' => ['ana.aguirre@marche.be']]);
+            ->assertActionDataSet(['members' => ['alice.martin@marche.be']]);
     });
 
     it('refuses a member that is not an email address', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be']);
+        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
 
         livewire(ListAliasPage::class)
             ->loadTable()
@@ -156,14 +156,14 @@ describe('members', function (): void {
 
         $entry = ListAliasLdap::query()->in(LISTS_DN)->findBy('cn', 'conseil');
 
-        expect($entry->getAttribute('proxyaddresses'))->toBe(['ana.aguirre@marche.be']);
+        expect($entry->getAttribute('proxyaddresses'))->toBe(['alice.martin@marche.be']);
     });
 
     /**
      * Destructive, and the helper text promises it, so it is pinned rather than left to chance.
      */
     it('clears every member when saved empty', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be']);
+        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
 
         livewire(ListAliasPage::class)
             ->loadTable()
@@ -209,7 +209,7 @@ describe('view', function (): void {
      * right record rather than the text it will show, as the viewLdap test does.
      */
     it('opens on the list', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be'], 'Le conseil');
+        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be'], 'Le conseil');
 
         livewire(ListAliasPage::class)
             ->loadTable()

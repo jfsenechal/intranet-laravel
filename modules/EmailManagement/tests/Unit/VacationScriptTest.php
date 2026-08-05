@@ -5,12 +5,12 @@ declare(strict_types=1);
 use AcMarche\EmailManagement\Sieve\VacationScript;
 
 it('builds a script the sieve interpreter will accept', function (): void {
-    $script = VacationScript::build('Je suis absent', "A partir du 1er.\n\nMerci.", 3, ['ana@ac.marche.be']);
+    $script = VacationScript::build('Je suis absent', "A partir du 1er.\n\nMerci.", 3, ['alice@ac.marche.be']);
 
     expect($script)
         ->toContain('require ["vacation"];')
         ->toContain(':days 3')
-        ->toContain(':addresses ["ana@ac.marche.be"]')
+        ->toContain(':addresses ["alice@ac.marche.be"]')
         ->toContain(':subject "Je suis absent"')
         ->toContain("text:\nA partir du 1er.\n\nMerci.\n.\n;");
 });

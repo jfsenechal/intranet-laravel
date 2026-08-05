@@ -35,15 +35,15 @@ describe('emails', function (): void {
 
     it('displays the ldap email of the account linked by username', function (): void {
         $userLdap = new UserLdap;
-        $userLdap->cn = 'Ana Aguirre';
-        $userLdap->samaccountname = 'aaguirre';
-        $userLdap->mail = 'ana.aguirre@marche.be';
+        $userLdap->cn = 'Alice Martin';
+        $userLdap->samaccountname = 'amartin';
+        $userLdap->mail = 'alice.martin@marche.be';
         $userLdap->save();
 
-        $profile = Profile::factory()->create(['username' => 'aaguirre']);
+        $profile = Profile::factory()->create(['username' => 'amartin']);
 
         Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
-            ->assertSee('ana.aguirre@marche.be');
+            ->assertSee('alice.martin@marche.be');
     });
 
     it('shows a placeholder when no ldap account matches the username', function (): void {
@@ -55,7 +55,7 @@ describe('emails', function (): void {
 
     it('displays the shared mailboxes stored on the profile', function (): void {
         $profile = Profile::factory()->create([
-            'username' => 'aaguirre',
+            'username' => 'amartin',
             'emails' => ['urbanisme@marche.be', 'travaux@marche.be'],
         ]);
 
