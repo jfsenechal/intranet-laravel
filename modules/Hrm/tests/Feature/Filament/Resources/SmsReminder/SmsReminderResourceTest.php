@@ -7,6 +7,7 @@ use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\CreateSmsReminder;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\EditSmsReminder;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\ListSmsReminders;
 use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\ViewSmsReminder;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\SmsReminder;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -110,6 +111,33 @@ describe('crud operations', function (): void {
         ]);
     });
 
+    it('persists the employee_id passed via the query string when creating', function (): void {
+        $employee = Employee::factory()->create([
+            'private_mobile' => '32476123456',
+        ]);
+        $newData = SmsReminder::factory()->make();
+
+        Livewire::withQueryParams(['employee_id' => $employee->id])
+            ->test(CreateSmsReminder::class)
+            ->assertSchemaStateSet([
+                'employee_id' => $employee->id,
+                'phone_number' => '32476123456',
+            ])
+            ->fillForm([
+                'message' => $newData->message,
+                'reminder_date' => $newData->reminder_date->format('Y-m-d'),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(SmsReminder::class, [
+            'employee_id' => $employee->id,
+            'phone_number' => '32476123456',
+            'message' => $newData->message,
+        ]);
+    });
+
     it('can update a sms reminder', function (): void {
         $record = SmsReminder::factory()->create();
 
@@ -140,6 +168,76 @@ describe('form validation', function (): void {
             ->call('create')
             ->assertHasFormErrors(['reminder_date' => 'required'])
             ->assertNotNotified();
+    });
+
+    it('rejects a reminder_date before today on create', function (): void {
+        Livewire::test(CreateSmsReminder::class)
+            ->fillForm([
+                'phone_number' => '32476123456',
+                'message' => 'Test',
+                'reminder_date' => today()->subDay()->format('Y-m-d'),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['reminder_date' => 'after_or_equal'])
+            ->assertNotNotified();
+    });
+
+    it('rejects an other_reminder_date before today on create', function (): void {
+        Livewire::test(CreateSmsReminder::class)
+            ->fillForm([
+                'phone_number' => '32476123456',
+                'message' => 'Test',
+                'reminder_date' => today()->format('Y-m-d'),
+                'other_reminder_date' => today()->subDay()->format('Y-m-d'),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['other_reminder_date' => 'after_or_equal'])
+            ->assertNotNotified();
+    });
+
+    it('accepts dates from today onwards on create', function (): void {
+        Livewire::test(CreateSmsReminder::class)
+            ->fillForm([
+                'phone_number' => '32476123456',
+                'message' => 'Test',
+                'reminder_date' => today()->format('Y-m-d'),
+                'other_reminder_date' => today()->addMonth()->format('Y-m-d'),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors();
+    });
+
+    it('rejects moving a reminder_date further into the past on edit', function (): void {
+        $record = SmsReminder::factory()->create(['reminder_date' => today()->subWeek()]);
+
+        Livewire::test(EditSmsReminder::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'reminder_date' => today()->subMonth()->format('Y-m-d'),
+            ])
+            ->call('save')
+            ->assertHasFormErrors(['reminder_date' => 'after_or_equal']);
+    });
+
+    it('allows saving an existing reminder that already has a past date', function (): void {
+        $record = SmsReminder::factory()->create(['reminder_date' => today()->subWeek()]);
+
+        Livewire::test(EditSmsReminder::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'message' => 'Updated message',
+            ])
+            ->call('save')
+            ->assertNotified()
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(SmsReminder::class, [
+            'id' => $record->id,
+            'message' => 'Updated message',
+        ]);
     });
 
     it('requires message on create', function (): void {
