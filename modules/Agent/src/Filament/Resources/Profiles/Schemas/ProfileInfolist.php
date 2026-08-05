@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Filament\Resources\Profiles\Schemas;
 
 use AcMarche\Agent\Models\Profile;
+use AcMarche\Security\Repository\LdapRepository;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -40,6 +41,13 @@ final class ProfileInfolist
                             ->columnSpan(9)
                             ->schema([
                                 TextEntry::make('username')->label('Identifiant')->copyable(),
+                                TextEntry::make('ldap_email')
+                                    ->label('Email professionnel')
+                                    ->state(fn (Profile $record): ?string => LdapRepository::emailByUsername(
+                                        $record->username
+                                    ))
+                                    ->copyable()
+                                    ->placeholder('Aucune adresse dans la LDAP'),
                                 TextEntry::make('employee_id')->label('Matricule RH'),
                                 TextEntry::make('location')->label('Emplacement'),
                                 IconEntry::make('no_mail')->label('Pas de mail professionnel nécessaire')
@@ -52,7 +60,10 @@ final class ProfileInfolist
                     ->schema([
                         TextEntry::make('emails')
                             ->label('Mailboxes partagées')
-                            ->listWithLineBreaks(),
+                            ->listWithLineBreaks()
+                            ->bulleted()
+                            ->copyable()
+                            ->placeholder('Aucune mailbox partagée'),
                         TextEntry::make('supervisors')
                             ->label('Responsables')
                             ->listWithLineBreaks(),

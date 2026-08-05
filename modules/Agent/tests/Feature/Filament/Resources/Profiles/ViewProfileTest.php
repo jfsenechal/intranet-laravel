@@ -6,10 +6,12 @@ use AcMarche\Agent\Enums\RolesEnum;
 use AcMarche\Agent\Filament\Resources\Profiles\Pages\ViewProfile;
 use AcMarche\Agent\Mail\WelcomeMail;
 use AcMarche\Agent\Models\Profile;
+use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Mail;
+use LdapRecord\Laravel\Testing\DirectoryEmulator;
 use Livewire\Livewire;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -20,6 +22,47 @@ beforeEach(function (): void {
     $this->adminUser->roles()->attach($adminRole);
     $this->actingAs($this->adminUser);
     config()->set('agent.informatique_email', 'informatique@marche.be');
+});
+
+describe('emails', function (): void {
+    beforeEach(function (): void {
+        DirectoryEmulator::setup('default');
+    });
+
+    afterEach(function (): void {
+        DirectoryEmulator::tearDown();
+    });
+
+    it('displays the ldap email of the account linked by username', function (): void {
+        $userLdap = new UserLdap;
+        $userLdap->cn = 'Ana Aguirre';
+        $userLdap->samaccountname = 'aaguirre';
+        $userLdap->mail = 'ana.aguirre@marche.be';
+        $userLdap->save();
+
+        $profile = Profile::factory()->create(['username' => 'aaguirre']);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('ana.aguirre@marche.be');
+    });
+
+    it('shows a placeholder when no ldap account matches the username', function (): void {
+        $profile = Profile::factory()->create(['username' => 'unknown']);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('Aucune adresse dans la LDAP');
+    });
+
+    it('displays the shared mailboxes stored on the profile', function (): void {
+        $profile = Profile::factory()->create([
+            'username' => 'aaguirre',
+            'emails' => ['urbanisme@marche.be', 'travaux@marche.be'],
+        ]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('urbanisme@marche.be')
+            ->assertSee('travaux@marche.be');
+    });
 });
 
 describe('export resume action', function (): void {

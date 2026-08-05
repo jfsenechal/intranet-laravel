@@ -30,6 +30,26 @@ final class LdapRepository
         return self::findByUsername($username) instanceof Model;
     }
 
+    /**
+     * The professional email address of the LDAP account linked by username.
+     */
+    public static function emailByUsername(?string $username): ?string
+    {
+        if ($username === null || $username === '') {
+            return null;
+        }
+
+        $userLdap = self::findByUsername($username);
+
+        if (! $userLdap instanceof Model) {
+            return null;
+        }
+
+        $email = $userLdap->getFirstAttribute('mail');
+
+        return $email === null || $email === '' ? null : $email;
+    }
+
     public static function lists(): Collection
     {
         return EntryLdap::query()
