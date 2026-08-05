@@ -51,166 +51,18 @@ final class EmployeeInfolist
                                                 )
                                             )
                                             ->columnSpan(['default' => 3]),
-                                        Fieldset::make('Coordonnées')
-                                            ->columns(2)
-                                            ->columnSpan(['default' => 9])
-                                            ->schema([
-                                                TextEntry::make('address')
-                                                    ->label('Adresse')
-                                                    ->state(
-                                                        fn (Employee $record): string => mb_trim(
-                                                            $record->address.' '.$record->postal_code.' '.$record->city
-                                                        )
-                                                    )
-                                                    ->columnSpanFull(),
-                                                Fieldset::make('Privé')
-                                                    ->columns(1)
-                                                    ->schema([
-                                                        TextEntry::make('private_email')
-                                                            ->label('Email')
-                                                            ->icon('heroicon-o-envelope'),
-                                                        TextEntry::make('private_phone')
-                                                            ->label('Téléphone')
-                                                            ->icon('heroicon-o-phone'),
-                                                        TextEntry::make('private_mobile')
-                                                            ->label('GSM')
-                                                            ->icon('heroicon-o-device-phone-mobile'),
-                                                    ]),
-                                                Fieldset::make('Professionnel')
-                                                    ->columns(1)
-                                                    ->schema([
-                                                        TextEntry::make('professional_email')
-                                                            ->label('Email')
-                                                            ->icon('heroicon-o-envelope'),
-                                                        TextEntry::make('professional_phone')
-                                                            ->label('Téléphone')
-                                                            ->icon('heroicon-o-phone')
-                                                            ->state(
-                                                                fn (Employee $record
-                                                                ): ?string => $record->professional_phone === null ? null : mb_trim(
-                                                                    $record->professional_phone.($record->professional_phone_extension !== null ? ' (ext. '.$record->professional_phone_extension.')' : '')
-                                                                )
-                                                            ),
-                                                        TextEntry::make('professional_mobile')
-                                                            ->label('GSM')
-                                                            ->icon('heroicon-o-device-phone-mobile'),
-                                                    ]),
-                                            ]),
+                                        self::contactDetailsFieldset(),
                                     ]),
-                                Section::make('Identité')
-                                    ->columns(2)
-                                    ->schema([
-                                        TextEntry::make('civility')
-                                            ->label('Civilité'),
-                                        TextEntry::make('birth_date')
-                                            ->label('Date de naissance')
-                                            ->date('d/m/Y'),
-                                        TextEntry::make('national_registry_number')
-                                            ->label('Registre national'),
-                                        Grid::make(2)
-                                            ->columnSpanFull()
-                                            ->schema([
-                                                IconEntry::make('show_birthday')
-                                                    ->label('Afficher la date d\' anniversaire')
-                                                    ->helperText('En page d\'accueil et dans qui est qui.')
-                                                    ->boolean(),
-                                                IconEntry::make('show_photo')
-                                                    ->label('Afficher la photo')
-                                                    ->helperText('En page d\'accueil et dans qui est qui.')
-                                                    ->boolean(),
-                                            ]),
-                                    ]),
+                                self::identitySection(),
                             ]),
                         Tab::make('Emploi')
                             ->icon('heroicon-o-briefcase')
                             ->schema([
-                                Fieldset::make('Contrats actifs')
-                                    ->columns(1)
-                                    ->schema([
-                                        RepeatableEntry::make('activeContracts')
-                                            ->hiddenLabel()
-                                            ->placeholder('—')
-                                            ->schema([
-                                                TextEntry::make('summary')
-                                                    ->hiddenLabel()
-                                                    ->state(fn (Contract $record): string => self::contractSummary($record))
-                                                    ->url(fn (Contract $record): ?string => self::contractUrl($record))
-                                                    ->color(fn (Contract $record): ?string => self::contractUrl($record) === null ? null : 'primary'),
-                                                TextEntry::make('replaces')
-                                                    ->label('Remplace')
-                                                    ->visible(fn (Contract $record): bool => $record->replaces instanceof Employee)
-                                                    ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
-                                                    ->icon(Heroicon::OutlinedUser)
-                                                    ->url(fn (Contract $record): ?string => self::employeeUrl($record->replaces))
-                                                    ->color(fn (Contract $record): ?string => self::employeeUrl($record->replaces) === null ? null : 'primary'),
-                                            ]),
-                                    ]),
-                                Fieldset::make('Situation')
-                                    ->columns(3)
-                                    ->schema([
-                                        TextEntry::make('job_title')
-                                            ->label('Fonction')
-                                            ->helperText('Fonction encodée sur la fiche'),
-                                        TextEntry::make('status')
-                                            ->label('Statut')
-                                            ->badge(),
-                                        IconEntry::make('is_archived')
-                                            ->label('Archivé')
-                                            ->boolean(),
-                                        IconEntry::make('is_new_hire')
-                                            ->label('Nouvel agent')
-                                            ->boolean(),
-                                    ]),
-                                Fieldset::make('Dates')
-                                    ->columns(3)
-                                    ->schema([
-                                        TextEntry::make('hired_at')
-                                            ->label('Date entree')
-                                            ->date('d/m/Y'),
-                                        TextEntry::make('left_at')
-                                            ->label('Date sortie')
-                                            ->date('d/m/Y'),
-                                        TextEntry::make('reminder_date')
-                                            ->label('Date de rappel')
-                                            ->date('d/m/Y'),
-                                        TextEntry::make('salary_seniority_date')
-                                            ->label('Ancienneté pécuniaire')
-                                            ->date('d/m/Y'),
-                                        TextEntry::make('scale_seniority_date')
-                                            ->label('Ancienneté d\'échelle')
-                                            ->date('d/m/Y'),
-                                    ]),
-                                Fieldset::make('Barème')
-                                    ->columns(3)
-                                    ->schema([
-                                        TextEntry::make('payScale.name')
-                                            ->label('Echelle'),
-                                        TextEntry::make('pay_scale_code')
-                                            ->label('Code barème'),
-                                        TextEntry::make('allowance')
-                                            ->label('Indemnité'),
-                                        TextEntry::make('local_unit')
-                                            ->label('Unite locale'),
-                                    ]),
-                                Fieldset::make('Prérequis pour l\'évolution de carrière')
-                                    ->columns(3)
-                                    ->schema([
-                                        TextEntry::make('prerequisite.name')
-                                            ->label('Nom')
-                                            ->placeholder('—'),
-                                        TextEntry::make('prerequisite.profession')
-                                            ->label('Profession')
-                                            ->placeholder('—'),
-                                        TextEntry::make('prerequisite.employer.name')
-                                            ->label('Employeur')
-                                            ->placeholder('—'),
-                                        TextEntry::make('prerequisite.description')
-                                            ->label('Description')
-                                            ->html()
-                                            ->prose()
-                                            ->columnSpanFull()
-                                            ->placeholder('—'),
-                                    ]),
+                                self::activeContractsFieldset(),
+                                self::situationFieldset(),
+                                self::datesFieldset(),
+                                self::payScaleFieldset(),
+                                self::prerequisiteFieldset(),
                             ]),
                         Tab::make('Santé')
                             ->icon('heroicon-o-heart')
@@ -237,33 +89,7 @@ final class EmployeeInfolist
                             ->icon(Heroicon::OutlinedUserCircle)
                             ->visible($includeComputerAccountTab)
                             ->schema([
-                                Section::make('Données partagées avec le module Agent')
-                                    ->visible(fn (Employee $record): bool => $record->profile !== null)
-                                    ->description('Informations que le module Agent connaît de cet employé.')
-                                    ->columns(2)
-                                    ->schema([
-                                        TextEntry::make('full_name')
-                                            ->label('Nom complet')
-                                            ->state(
-                                                fn (Employee $record): string => mb_trim(
-                                                    $record->last_name.' '.$record->first_name
-                                                )
-                                            ),
-                                        ImageEntry::make('photo')
-                                            ->label('Photo')
-                                            ->disk('public')
-                                            ->imageHeight(120)
-                                            ->defaultImageUrl(
-                                                fn (Employee $record
-                                                ): string => 'https://ui-avatars.com/api/?size=128&name='.urlencode(
-                                                    mb_trim($record->first_name.' '.$record->last_name)
-                                                )
-                                            ),
-                                        TextEntry::make('activeContracts.service.name')
-                                            ->label('Services (contrats actifs)')
-                                            ->listWithLineBreaks()
-                                            ->placeholder('—'),
-                                    ]),
+                                self::sharedWithAgentModuleSection(),
                                 TextEntry::make('profile.username')
                                     ->label('Nom utilisateur')
                                     ->visible(fn (Employee $record): bool => $record->profile !== null)
@@ -281,6 +107,228 @@ final class EmployeeInfolist
                                     ->suffixAction(RequestProfileAction::make()),
                             ]),
                     ]),
+            ]);
+    }
+
+    private static function identitySection(): Section
+    {
+        return Section::make('Identité')
+            ->columns(2)
+            ->schema([
+                TextEntry::make('civility')
+                    ->label('Civilité'),
+                TextEntry::make('birth_date')
+                    ->label('Date de naissance')
+                    ->date('d/m/Y'),
+                TextEntry::make('national_registry_number')
+                    ->label('Registre national'),
+                Grid::make(2)
+                    ->columnSpanFull()
+                    ->schema([
+                        IconEntry::make('show_birthday')
+                            ->label('Afficher la date d\' anniversaire')
+                            ->helperText('En page d\'accueil et dans qui est qui.')
+                            ->boolean(),
+                        IconEntry::make('show_photo')
+                            ->label('Afficher la photo')
+                            ->helperText('En page d\'accueil et dans qui est qui.')
+                            ->boolean(),
+                    ]),
+            ]);
+    }
+
+    private static function sharedWithAgentModuleSection(): Section
+    {
+        return Section::make('Données partagées avec le module Agent')
+            ->visible(fn (Employee $record): bool => $record->profile !== null)
+            ->description('Informations que le module Agent connaît de cet employé.')
+            ->columns(2)
+            ->schema([
+                TextEntry::make('full_name')
+                    ->label('Nom complet')
+                    ->state(
+                        fn (Employee $record): string => mb_trim(
+                            $record->last_name.' '.$record->first_name
+                        )
+                    ),
+                ImageEntry::make('photo')
+                    ->label('Photo')
+                    ->disk('public')
+                    ->imageHeight(120)
+                    ->defaultImageUrl(
+                        fn (Employee $record): string => 'https://ui-avatars.com/api/?size=128&name='.urlencode(
+                            mb_trim($record->first_name.' '.$record->last_name)
+                        )
+                    ),
+                TextEntry::make('activeContracts.service.name')
+                    ->label('Services (contrats actifs)')
+                    ->listWithLineBreaks()
+                    ->placeholder('—'),
+            ]);
+    }
+
+    private static function contactDetailsFieldset(): Fieldset
+    {
+        return Fieldset::make('Coordonnées')
+            ->columns(2)
+            ->columnSpan(['default' => 9])
+            ->schema([
+                TextEntry::make('address')
+                    ->label('Adresse')
+                    ->state(
+                        fn (Employee $record): string => mb_trim(
+                            $record->address.' '.$record->postal_code.' '.$record->city
+                        )
+                    )
+                    ->columnSpanFull(),
+                self::privateContactFieldset(),
+                self::professionalContactFieldset(),
+            ]);
+    }
+
+    private static function privateContactFieldset(): Fieldset
+    {
+        return Fieldset::make('Privé')
+            ->columns(1)
+            ->schema([
+                TextEntry::make('private_email')
+                    ->label('Email')
+                    ->icon('heroicon-o-envelope'),
+                TextEntry::make('private_phone')
+                    ->label('Téléphone')
+                    ->icon('heroicon-o-phone'),
+                TextEntry::make('private_mobile')
+                    ->label('GSM')
+                    ->icon('heroicon-o-device-phone-mobile'),
+            ]);
+    }
+
+    private static function professionalContactFieldset(): Fieldset
+    {
+        return Fieldset::make('Professionnel')
+            ->columns(1)
+            ->schema([
+                TextEntry::make('professional_email')
+                    ->label('Email')
+                    ->icon('heroicon-o-envelope'),
+                TextEntry::make('professional_phone')
+                    ->label('Téléphone')
+                    ->icon('heroicon-o-phone')
+                    ->state(
+                        fn (Employee $record): ?string => $record->professional_phone === null ? null : mb_trim(
+                            $record->professional_phone.($record->professional_phone_extension !== null ? ' (ext. '.$record->professional_phone_extension.')' : '')
+                        )
+                    ),
+                TextEntry::make('professional_mobile')
+                    ->label('GSM')
+                    ->icon('heroicon-o-device-phone-mobile'),
+            ]);
+    }
+
+    private static function activeContractsFieldset(): Fieldset
+    {
+        return Fieldset::make('Contrats actifs')
+            ->columns(1)
+            ->schema([
+                RepeatableEntry::make('activeContracts')
+                    ->hiddenLabel()
+                    ->placeholder('—')
+                    ->schema([
+                        TextEntry::make('summary')
+                            ->hiddenLabel()
+                            ->state(fn (Contract $record): string => self::contractSummary($record))
+                            ->url(fn (Contract $record): ?string => self::contractUrl($record))
+                            ->color(fn (Contract $record): ?string => self::contractUrl($record) === null ? null : 'primary'),
+                        TextEntry::make('replaces')
+                            ->label('Remplace')
+                            ->visible(fn (Contract $record): bool => $record->replaces instanceof Employee)
+                            ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
+                            ->icon(Heroicon::OutlinedUser)
+                            ->url(fn (Contract $record): ?string => self::employeeUrl($record->replaces))
+                            ->color(fn (Contract $record): ?string => self::employeeUrl($record->replaces) === null ? null : 'primary'),
+                    ]),
+            ]);
+    }
+
+    private static function situationFieldset(): Fieldset
+    {
+        return Fieldset::make('Situation')
+            ->columns(3)
+            ->schema([
+                TextEntry::make('job_title')
+                    ->label('Fonction')
+                    ->helperText('Fonction encodée sur la fiche'),
+                TextEntry::make('status')
+                    ->label('Statut')
+                    ->badge(),
+                IconEntry::make('is_archived')
+                    ->label('Archivé')
+                    ->boolean(),
+                IconEntry::make('is_new_hire')
+                    ->label('Nouvel agent')
+                    ->boolean(),
+            ]);
+    }
+
+    private static function datesFieldset(): Fieldset
+    {
+        return Fieldset::make('Dates')
+            ->columns(3)
+            ->schema([
+                TextEntry::make('hired_at')
+                    ->label('Date entree')
+                    ->date('d/m/Y'),
+                TextEntry::make('left_at')
+                    ->label('Date sortie')
+                    ->date('d/m/Y'),
+                TextEntry::make('reminder_date')
+                    ->label('Date de rappel')
+                    ->date('d/m/Y'),
+                TextEntry::make('salary_seniority_date')
+                    ->label('Ancienneté pécuniaire')
+                    ->date('d/m/Y'),
+                TextEntry::make('scale_seniority_date')
+                    ->label('Ancienneté d\'échelle')
+                    ->date('d/m/Y'),
+            ]);
+    }
+
+    private static function payScaleFieldset(): Fieldset
+    {
+        return Fieldset::make('Barème')
+            ->columns(3)
+            ->schema([
+                TextEntry::make('payScale.name')
+                    ->label('Echelle'),
+                TextEntry::make('pay_scale_code')
+                    ->label('Code barème'),
+                TextEntry::make('allowance')
+                    ->label('Indemnité'),
+                TextEntry::make('local_unit')
+                    ->label('Unite locale'),
+            ]);
+    }
+
+    private static function prerequisiteFieldset(): Fieldset
+    {
+        return Fieldset::make('Prérequis pour l\'évolution de carrière')
+            ->columns(3)
+            ->schema([
+                TextEntry::make('prerequisite.name')
+                    ->label('Nom')
+                    ->placeholder('—'),
+                TextEntry::make('prerequisite.profession')
+                    ->label('Profession')
+                    ->placeholder('—'),
+                TextEntry::make('prerequisite.employer.name')
+                    ->label('Employeur')
+                    ->placeholder('—'),
+                TextEntry::make('prerequisite.description')
+                    ->label('Description')
+                    ->html()
+                    ->prose()
+                    ->columnSpanFull()
+                    ->placeholder('—'),
             ]);
     }
 
