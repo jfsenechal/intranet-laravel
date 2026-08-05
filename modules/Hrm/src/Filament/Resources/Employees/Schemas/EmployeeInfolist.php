@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Employees\Schemas;
 
+use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Actions\RequestProfileAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileChangeAction;
 use AcMarche\Hrm\Filament\Actions\RequestProfileDeletionAction;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Training;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -20,6 +23,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Gate;
@@ -74,6 +78,15 @@ final class EmployeeInfolist
                                     ->label('Affiliation mutuelle'),
                                 TextEntry::make('emergency_contact')
                                     ->label('Contact en cas d\'urgence')
+                                    ->columnSpanFull(),
+                            ]),
+                        Tab::make('Formations')
+                            ->icon(Heroicon::OutlinedAcademicCap)
+                            ->schema([
+                                View::make('hrm::filament.employees.trainings')
+                                    ->viewData(fn (Employee $record): array => [
+                                        'groups' => self::trainingGroups($record),
+                                    ])
                                     ->columnSpanFull(),
                             ]),
                         Tab::make('Notes')
@@ -332,6 +345,41 @@ final class EmployeeInfolist
             ]);
     }
 
+    /**
+     * Trainings of the employee grouped by type, following the enum declaration order.
+     * Types without any training are omitted.
+     *
+     * @return array<int, array{type: TrainingTypeEnum, trainings: \Illuminate\Support\Collection<int, Training>, urls: array<int, string|null>, total: int}>
+     */
+    private static function trainingGroups(Employee $employee): array
+    {
+        $trainings = $employee->trainings()
+            ->orderBy('start_date')
+            ->get()
+            ->groupBy(fn (Training $training): string => $training->training_type->value);
+
+        $groups = [];
+        foreach (TrainingTypeEnum::cases() as $type) {
+            $ofType = $trainings->get($type->value);
+            if ($ofType === null || $ofType->isEmpty()) {
+                continue;
+            }
+
+            $groups[] = [
+                'type' => $type,
+                'trainings' => $ofType,
+                'urls' => $ofType
+                    ->mapWithKeys(fn (Training $training): array => [
+                        $training->id => self::trainingUrl($training),
+                    ])
+                    ->all(),
+                'total' => (int) $ofType->sum('duration_minutes'),
+            ];
+        }
+
+        return $groups;
+    }
+
     private static function contractSummary(Contract $contract): string
     {
         return implode(' • ', array_filter([
@@ -355,6 +403,15 @@ final class EmployeeInfolist
         }
 
         return ViewContract::getUrl(['record' => $contract], panel: 'hrm-panel');
+    }
+
+    private static function trainingUrl(Training $training): ?string
+    {
+        if (! Gate::allows('view', $training)) {
+            return null;
+        }
+
+        return ViewTraining::getUrl(['record' => $training], panel: 'hrm-panel');
     }
 
     private static function employeeUrl(?Employee $employee): ?string

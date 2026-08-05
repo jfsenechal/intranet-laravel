@@ -15,6 +15,13 @@ final class EditModule extends EditRecord
     #[Override]
     protected static string $resource = ModuleResource::class;
 
+    public static function getRelations(): array
+    {
+        return [
+
+        ];
+    }
+
     public function getTitle(): string|Htmlable
     {
         return $this->getRecord()->name;

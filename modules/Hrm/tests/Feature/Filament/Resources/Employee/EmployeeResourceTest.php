@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Enums\StatusEnum;
+use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Exports\EmployeeExport;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\CreateEmployee;
@@ -13,9 +14,11 @@ use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\AbsencesRelationManager;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\TrainingsRelationManager;
+use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Prerequisite;
+use AcMarche\Hrm\Models\Training;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -64,6 +67,56 @@ describe('page rendering', function (): void {
                 'last_name' => $record->last_name,
                 'first_name' => $record->first_name,
             ]);
+    });
+});
+
+describe('trainings tab', function (): void {
+    it('groups the trainings by type with the type description and a total duration', function (): void {
+        $employee = Employee::factory()->create();
+
+        $training = Training::factory()->for($employee)->create([
+            'name' => 'Gestion du temps',
+            'training_type' => TrainingTypeEnum::TYPE1->value,
+            'duration_minutes' => 90,
+            'start_date' => '2026-03-02',
+            'end_date' => '2026-03-04',
+        ]);
+        Training::factory()->for($employee)->create([
+            'name' => 'Secourisme',
+            'training_type' => TrainingTypeEnum::TYPE1->value,
+            'duration_minutes' => 30,
+            'start_date' => '2026-04-10',
+            'end_date' => '2026-04-10',
+        ]);
+        Training::factory()->for($employee)->create([
+            'name' => 'Excel avance',
+            'training_type' => TrainingTypeEnum::TYPE3->value,
+            'duration_minutes' => 60,
+            'start_date' => '2026-05-05',
+            'end_date' => null,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $employee->id])
+            ->assertOk()
+            ->assertSee('Formation '.TrainingTypeEnum::TYPE1->getLabel())
+            ->assertSee('Formation '.TrainingTypeEnum::TYPE3->getLabel())
+            ->assertDontSee('Formation '.TrainingTypeEnum::TYPE2->getLabel())
+            ->assertSee(TrainingTypeEnum::TYPE1->getDescription())
+            ->assertSee('Gestion du temps')
+            ->assertSee('02/03/2026')
+            ->assertSee('04/03/2026')
+            ->assertSee('Excel avance')
+            ->assertSee('2h')
+            ->assertSee('1h')
+            ->assertSee(ViewTraining::getUrl(['record' => $training], panel: 'hrm-panel'));
+    });
+
+    it('shows a placeholder when the employee has no training', function (): void {
+        $employee = Employee::factory()->create();
+
+        Livewire::test(ViewEmployee::class, ['record' => $employee->id])
+            ->assertOk()
+            ->assertSee('Aucune formation encodée pour cet agent.');
     });
 });
 
@@ -344,7 +397,7 @@ describe('relation manager visibility', function (): void {
 
         expect($director->can('viewAny', Contract::class))->toBeFalse()
             ->and($director->can('viewAny', AcMarche\Hrm\Models\Absence::class))->toBeFalse()
-            ->and($director->can('viewAny', AcMarche\Hrm\Models\Training::class))->toBeFalse();
+            ->and($director->can('viewAny', Training::class))->toBeFalse();
     });
 });
 

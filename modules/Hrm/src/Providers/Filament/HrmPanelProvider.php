@@ -42,7 +42,7 @@ final class HrmPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth(Width::Full)
             ->sidebarWidth('17rem')
-            ->brandName('Resources Humaines')
+            ->brandName('Ressources Humaines')
             ->colors([
                 'primary' => Color::Amber,
             ])
