@@ -62,11 +62,24 @@ final class ModuleHandler
         $user->roles()->sync($allRoleIdsToSync);
     }
 
+    /**
+     * Detaches the module and every role belonging to it from the user.
+     */
     public static function revokeModuleFromUser(Model|User $user, int $moduleId): void
     {
-        $user->roles()
+        $roleIds = $user->roles()
             ->where('module_id', $moduleId)
-            ->detach();
+            ->pluck('roles.id')
+            ->all();
+
+        if ($roleIds !== []) {
+            $user->roles()->detach($roleIds);
+        }
+
+        $user->modules()->detach($moduleId);
+
+        $user->unsetRelation('roles');
+        $user->unsetRelation('modules');
     }
 
     private static function addModuleAndRoles(Module $module, User $user, array $data): void
