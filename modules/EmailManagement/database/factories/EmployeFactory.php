@@ -33,7 +33,10 @@ final class EmployeFactory extends Factory
             'mail' => fake()->unique()->safeEmail(),
             'dn' => fn (array $attributes): string => "CN={$attributes['cn']},OU=AC,OU=MUSERS,DC=ad,DC=marche,DC=be",
             'description' => fake()->optional()->sentence(),
-            'telephoneNumber' => fake()->optional()->phoneNumber(),
+            // Not fake()->phoneNumber(): it sometimes appends an extension ("x123"), which the
+            // ->tel() rule on the edit form rejects, so a factory-made employe could not be
+            // saved and the edit test failed at random.
+            'telephoneNumber' => fake()->optional()->numerify('+32 84 ## ## ##'),
             'sync_at' => now(),
         ];
     }

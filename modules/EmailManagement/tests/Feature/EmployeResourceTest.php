@@ -8,6 +8,7 @@ use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
+use AcMarche\EmailManagement\Ldap\ListAliasLdap;
 use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -25,6 +26,18 @@ beforeEach(function (): void {
 
     $this->actingAs($user);
 });
+
+/**
+ * @param  array<int, string>  $members
+ */
+function makeListAlias(string $cn, string $mail, array $members, string $dn): void
+{
+    $entry = new ListAliasLdap;
+    $entry->cn = $cn;
+    $entry->mail = $mail;
+    $entry->proxyAddresses = $members;
+    $entry->inside($dn)->save();
+}
 
 describe('pages render', function (): void {
     it('renders the list page', function (): void {
@@ -85,6 +98,23 @@ describe('edit form', function (): void {
         }
     });
 
+    /**
+     * A factory-made employe has to be saveable through its own form. It was not: the phone
+     * numbers faker produces sometimes carry an extension, which the ->tel() rule rejects, and
+     * the save test below failed at random depending on the number drawn. Enough samples are
+     * drawn here that a factory generating rejected numbers again fails every run.
+     */
+    it('generates a phone number the form accepts', function (): void {
+        $numbers = Employe::factory()
+            ->count(50)
+            ->make()
+            ->pluck('telephoneNumber')
+            ->filter();
+
+        // Filament's default rule behind TextInput::tel().
+        expect($numbers)->each->toMatch('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/');
+    });
+
     it('saves the new identity fields to the mirror', function (): void {
         DirectoryEmulator::setup('default');
 
@@ -115,6 +145,63 @@ describe('edit form', function (): void {
             ->mobile->toBe('+32477320320');
 
         DirectoryEmulator::tearDown();
+    });
+});
+
+describe('member of lists', function (): void {
+    /**
+     * The base DNs come from .env in normal operation. Pinning them keeps the OU scoping
+     * meaningful without depending on a machine's directory configuration.
+     */
+    beforeEach(function (): void {
+        config()->set('email-management.ldap.bases.lists', 'OU=LISTS,OU=MUSERS,dc=ad,DC=marche,DC=be');
+        config()->set('email-management.ldap.bases.services', 'OU=SERVICES,OU=MUSERS,dc=ad,DC=marche,DC=be');
+
+        DirectoryEmulator::setup('default');
+    });
+
+    afterEach(function (): void {
+        DirectoryEmulator::tearDown();
+    });
+
+    it('shows the lists and services delivering to the address', function (): void {
+        $employe = Employe::factory()->create(['mail' => 'ana.aguirre@marche.be']);
+
+        makeListAlias('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be'], config('email-management.ldap.bases.lists'));
+        makeListAlias('informatique', 'informatique@marche.be', ['ana.aguirre@marche.be'], config('email-management.ldap.bases.services'));
+        makeListAlias('college', 'college@marche.be', ['jean.dupont@marche.be'], config('email-management.ldap.bases.lists'));
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->assertSuccessful()
+            ->assertSee('conseil@marche.be')
+            ->assertSee('informatique@marche.be')
+            ->assertDontSee('college@marche.be');
+    });
+
+    /**
+     * A group with no mail of its own is still worth showing, so it falls back to its cn.
+     */
+    it('names a group without an address by its cn', function (): void {
+        $employe = Employe::factory()->create(['mail' => 'ana.aguirre@marche.be']);
+
+        $entry = new ListAliasLdap;
+        $entry->cn = 'conseil';
+        $entry->proxyAddresses = ['ana.aguirre@marche.be'];
+        $entry->inside(config('email-management.ldap.bases.lists'))->save();
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->assertSuccessful()
+            ->assertSee('conseil');
+    });
+
+    it('renders the page when the employe has no address', function (): void {
+        $employe = Employe::factory()->create(['mail' => null]);
+
+        makeListAlias('conseil', 'conseil@marche.be', ['ana.aguirre@marche.be'], config('email-management.ldap.bases.lists'));
+
+        livewire(ViewEmploye::class, ['record' => $employe->id])
+            ->assertSuccessful()
+            ->assertDontSee('conseil@marche.be');
     });
 });
 

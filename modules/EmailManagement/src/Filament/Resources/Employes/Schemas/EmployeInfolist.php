@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Employes\Schemas;
 
+use AcMarche\EmailManagement\Enums\ListOuEnum;
 use AcMarche\EmailManagement\Imap\ImapEmploye;
+use AcMarche\EmailManagement\Ldap\ListAliasLdap;
 use AcMarche\EmailManagement\Models\Employe;
+use AcMarche\EmailManagement\Repository\ListLdapRepository;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -42,6 +45,23 @@ final class EmployeInfolist
                         TextEntry::make('telephoneNumber')
                             ->label('Téléphone')
                             ->placeholder('-'),
+                    ]),
+                Section::make('Membre de')
+                    ->description("Les groupes de l'annuaire qui délivrent vers cette adresse")
+                    ->columns()
+                    ->components([
+                        TextEntry::make('member_of_lists')
+                            ->label(ListOuEnum::LISTS->getLabel())
+                            ->state(fn (Employe $record): array => self::memberOfLists($record->mail, ListOuEnum::LISTS))
+                            ->badge()
+                            ->color('gray')
+                            ->placeholder('Aucune'),
+                        TextEntry::make('member_of_services')
+                            ->label(ListOuEnum::SERVICES->getLabel())
+                            ->state(fn (Employe $record): array => self::memberOfLists($record->mail, ListOuEnum::SERVICES))
+                            ->badge()
+                            ->color('gray')
+                            ->placeholder('Aucun'),
                     ]),
                 Section::make('Connexion')
                     ->columns()
@@ -112,6 +132,42 @@ final class EmployeInfolist
                             ->placeholder('Jamais'),
                     ]),
             ]);
+    }
+
+    /**
+     * The addresses of the groups of one OU that deliver to this address.
+     *
+     * A group is named by its own mail when it has one, and by its cn otherwise, the way the
+     * list page names them. Returns an empty array when the employe has no address or the
+     * directory is unreachable, so the entry renders its placeholder rather than throwing.
+     *
+     * Cached the same way and for the same reason as the quota: the page asks once per OU per
+     * render, and a static cache would outlive the request under Octane.
+     *
+     * @return array<int, string>
+     */
+    private static function memberOfLists(?string $mail, ListOuEnum $ou): array
+    {
+        if ($mail === null || $mail === '') {
+            return [];
+        }
+
+        return Cache::store('array')->remember(
+            "employe-member-of:{$ou->value}:{$mail}",
+            60,
+            function () use ($mail, $ou): array {
+                try {
+                    return app(ListLdapRepository::class)
+                        ->memberOfLists($ou, $mail)
+                        ->map(fn (ListAliasLdap $entry): string => $entry->getFirstAttribute('mail') ?? $entry->getFirstAttribute('cn'))
+                        ->sort()
+                        ->values()
+                        ->all();
+                } catch (Throwable) {
+                    return [];
+                }
+            },
+        );
     }
 
     /**
