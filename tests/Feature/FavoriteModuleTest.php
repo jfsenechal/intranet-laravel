@@ -57,6 +57,8 @@ it('falls back to the default favorites when the user has none', function (): vo
 });
 
 it('returns only the public default favorites for a guest', function (): void {
+    auth()->logout();
+
     $publicId = FavoriteModuleHandler::DEFAULT_FAVORITE_IDS[0];
     $privateId = FavoriteModuleHandler::DEFAULT_FAVORITE_IDS[1];
 
