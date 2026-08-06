@@ -7,6 +7,9 @@ namespace AcMarche\Security\Filament\Resources\Modules\Pages;
 use AcMarche\Security\Filament\Resources\Modules\ModuleResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Illuminate\Contracts\Support\Htmlable;
 use Override;
 
@@ -15,16 +18,18 @@ final class EditModule extends EditRecord
     #[Override]
     protected static string $resource = ModuleResource::class;
 
-    public static function getRelations(): array
-    {
-        return [
-
-        ];
-    }
-
     public function getTitle(): string|Htmlable
     {
         return $this->getRecord()->name;
+    }
+
+    /**
+     * @return array<class-string<RelationManager>|RelationGroup|RelationManagerConfiguration>
+     */
+    #[Override]
+    protected function getAllRelationManagers(): array
+    {
+        return [];
     }
 
     protected function getHeaderActions(): array

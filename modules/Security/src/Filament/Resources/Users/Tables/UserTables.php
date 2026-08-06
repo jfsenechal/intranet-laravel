@@ -42,7 +42,8 @@ final class UserTables
                     ->label('Prénom')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('email'),
+                TextColumn::make('email')
+                    ->toggleable(),
                 TextColumn::make('phone')
                     ->label('Téléphone')
                     ->icon('tabler-phone')
