@@ -6,10 +6,13 @@
     <title>{{ $document->name }} — Documents</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800" rel="stylesheet"/>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/css/document-public.css'])
+    @livewireStyles
+    @filamentStyles
     <style>
         body { font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; }
-        .gradient-documents { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+        /* Same teal as the "Resources" family of the homepage palette. */
+        .gradient-documents { background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); }
     </style>
 </head>
 <body class="min-h-full bg-linear-to-br from-gray-50 to-gray-100 text-gray-900">
@@ -26,11 +29,6 @@
 
         <article class="mt-6 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-200">
             <header class="gradient-documents p-8 text-white">
-                @if ($document->category)
-                    <span class="mb-3 inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-                        {{ $document->category->name }}
-                    </span>
-                @endif
                 <h1 class="text-3xl font-bold leading-tight">{{ $document->name }}</h1>
                 <p class="mt-3 text-sm text-emerald-100">
                     {{ $document->created_at?->translatedFormat('d F Y') }}
@@ -41,46 +39,29 @@
             </header>
 
             <div class="p-8">
-                @if ($document->content)
-                    <div class="prose max-w-none">
-                        {!! $document->content !!}
-                    </div>
-                @endif
-
                 @if ($fileUrl)
-                    <div class="mt-8">
-                        <a
-                            href="{{ $fileUrl }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Télécharger le document
-                        </a>
-
-                        @if ($document->file_mime === 'application/pdf')
-                            <iframe
-                                src="{{ $fileUrl }}"
-                                title="{{ $document->name }}"
-                                class="mt-6 w-full rounded-lg ring-1 ring-gray-200"
-                                style="min-height: 80svh"
-                            ></iframe>
-                        @elseif (str_starts_with((string) $document->file_mime, 'image/'))
-                            <img
-                                src="{{ $fileUrl }}"
-                                alt="{{ $document->name }}"
-                                class="mt-6 w-full rounded-lg shadow-sm"
-                            >
-                        @endif
-                    </div>
+                    <a
+                        href="{{ $fileUrl }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="mb-8 inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Télécharger le document
+                    </a>
                 @else
-                    <p class="mt-8 text-sm text-gray-500">Aucun fichier n'est associé à ce document.</p>
+                    <p class="mb-8 text-sm text-gray-500">Aucun fichier n'est associé à ce document.</p>
                 @endif
+
+                {{-- Category, description and file preview come from the panel infolist. --}}
+                <livewire:document.public-view :document="$document" />
             </div>
         </article>
     </div>
+
+    @livewireScripts
+    @filamentScripts
 </body>
 </html>

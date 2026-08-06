@@ -1,0 +1,20 @@
+/*
+ * Stylesheet for the public document page, which renders the Filament infolist
+ * of the document panel outside of any panel.
+ *
+ * Filament's CSS is kept in this dedicated entry point rather than in app.css:
+ * only this page needs it, and its `dark` variant redefinition would otherwise
+ * change how every other public page reacts to the OS colour scheme.
+ */
+@import 'tailwindcss';
+
+/* Required by all components */
+@import '../../vendor/filament/support/resources/css/index.css';
+
+/* Required by actions and infolists */
+@import '../../vendor/filament/infolists/resources/css/index.css';
+
+/* Required by actions, infolists, forms, schemas and tables */
+@import '../../vendor/filament/schemas/resources/css/index.css';
+
+@variant dark (&:where(.dark, .dark *));
