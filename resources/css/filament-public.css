@@ -1,9 +1,9 @@
 /*
- * Stylesheet for the public document page, which renders the Filament infolist
- * of the document panel outside of any panel.
+ * Stylesheet for the public pages that render a panel infolist outside of any
+ * panel (news and documents).
  *
  * Filament's CSS is kept in this dedicated entry point rather than in app.css:
- * only this page needs it, and its `dark` variant redefinition would otherwise
+ * only those pages need it, and its `dark` variant redefinition would otherwise
  * change how every other public page reacts to the OS colour scheme.
  */
 @import 'tailwindcss';

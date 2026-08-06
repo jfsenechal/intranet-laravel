@@ -9,7 +9,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/css/filament/admin/theme.css',
-                'resources/css/document-public.css',
+                'resources/css/filament-public.css',
             ],
             refresh: true,
         }),
