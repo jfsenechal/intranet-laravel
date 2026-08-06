@@ -48,7 +48,12 @@ it('links a birthday to the who is who page for signed in users', function (): v
         ));
 });
 
-it('shows the birthday as plain text to guests', function (): void {
+/**
+ * The homepage is public (the `/` route carries no auth middleware), so guests
+ * reach this component too. They get the same link: the who-is-who panel enforces
+ * its own auth and bounces them through login to the profile they asked for.
+ */
+it('links a birthday to the who is who page for guests as well', function (): void {
     $employee = birthdayAgent();
 
     // Tests\TestCase signs a default user in, so sign back out to act as a guest.
@@ -57,7 +62,7 @@ it('shows the birthday as plain text to guests', function (): void {
     livewire('home.birthdays')
         ->assertOk()
         ->assertSee($employee->last_name)
-        ->assertDontSeeHtml(EmployeeResource::getUrl(
+        ->assertSeeHtml(EmployeeResource::getUrl(
             'view',
             ['record' => $employee],
             panel: 'who-is-who-panel',
