@@ -1,6 +1,6 @@
 <?php
 
-use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
+use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Models\Employee;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -47,7 +47,7 @@ new class extends Component
     <div class="p-4">
         @forelse ($latestEmployees as $index => $employee)
             <a
-                href="{{ EmployeeResource::getUrl('view', ['record' => $employee->id], panel: 'hrm-panel') }}"
+                href="{{ EmployeeResource::getUrl('view', ['record' => $employee->id], panel: 'who-is-who-panel') }}"
                 class="group flex items-center gap-3 border-b border-gray-100 py-2 last:border-0 animate-fade-in-up"
                 style="--delay: {{ 0.35 + ($index * 0.05) }}s"
             >
