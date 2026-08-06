@@ -86,3 +86,20 @@ it('denies force delete for any user', function (): void {
 
     expect(auth()->user()->can('forceDelete', $news))->toBeFalse();
 });
+
+it('allows an administrator to bulk delete news', function (): void {
+    auth()->user()->update(['is_administrator' => true]);
+
+    expect(auth()->user()->can('deleteAny', News::class))->toBeTrue();
+});
+
+it('allows a user with ROLE_NEWS_ADMIN to bulk delete news', function (): void {
+    $role = Role::create(['name' => RolesEnum::ROLE_NEWS_ADMIN->value]);
+    auth()->user()->roles()->attach($role);
+
+    expect(auth()->user()->can('deleteAny', News::class))->toBeTrue();
+});
+
+it('denies a regular user to bulk delete news', function (): void {
+    expect(auth()->user()->can('deleteAny', News::class))->toBeFalse();
+});

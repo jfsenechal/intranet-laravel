@@ -72,3 +72,13 @@ it('denies force delete for any user', function (): void {
 
     expect(auth()->user()->can('forceDelete', $category))->toBeFalse();
 });
+
+it('allows an administrator to bulk delete categories', function (): void {
+    auth()->user()->update(['is_administrator' => true]);
+
+    expect(auth()->user()->can('deleteAny', Category::class))->toBeTrue();
+});
+
+it('denies a regular user to bulk delete categories', function (): void {
+    expect(auth()->user()->can('deleteAny', Category::class))->toBeFalse();
+});

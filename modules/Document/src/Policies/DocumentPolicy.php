@@ -12,8 +12,11 @@ final class DocumentPolicy
 {
     /**
      * Determine whether the user can view any models.
+     *
+     * The nullable parameter is what lets a guest through: `Gate` only calls a
+     * policy method without a user when its first parameter accepts null.
      */
-    public function viewAny(): bool
+    public function viewAny(?User $user): bool
     {
         return true;
     }
@@ -21,7 +24,7 @@ final class DocumentPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(): bool
+    public function view(?User $user): bool
     {
         return true;
     }
@@ -48,6 +51,22 @@ final class DocumentPolicy
     public function delete(User $user, Document $document): bool
     {
         return $this->isAdministrator($user, $document);
+    }
+
+    /**
+     * Determine whether the user can delete models in bulk.
+     *
+     * Without this method Filament would allow the bulk delete action to
+     * everyone. It cannot check `user_add` per record, so unlike `delete()` it
+     * is limited to administrators and the document admin role.
+     */
+    public function deleteAny(User $user): bool
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return $user->hasOneOfThisRoles([RolesEnum::ROLE_DOCUMENT_ADMIN->value]);
     }
 
     /**

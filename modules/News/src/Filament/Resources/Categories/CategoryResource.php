@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\Categories;
 
+use AcMarche\App\Traits\ReadOnlyForGuestsTrait;
 use AcMarche\News\Filament\Resources\Categories\Pages\CreateCategory;
 use AcMarche\News\Filament\Resources\Categories\Pages\EditCategory;
 use AcMarche\News\Filament\Resources\Categories\Pages\ListCategory;
@@ -20,6 +21,8 @@ use Override;
 
 final class CategoryResource extends Resource
 {
+    use ReadOnlyForGuestsTrait;
+
     #[Override]
     protected static ?string $model = Category::class;
 

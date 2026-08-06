@@ -12,8 +12,11 @@ final class CategoryPolicy
 {
     /**
      * Determine whether the user can view any models.
+     *
+     * The nullable parameter is what lets a guest through: `Gate` only calls a
+     * policy method without a user when its first parameter accepts null.
      */
-    public function viewAny(): bool
+    public function viewAny(?User $user): bool
     {
         return true;
     }
@@ -21,7 +24,7 @@ final class CategoryPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(): bool
+    public function view(?User $user): bool
     {
         return true;
     }
@@ -46,6 +49,17 @@ final class CategoryPolicy
      * Determine whether the user can delete the model.
      */
     public function delete(User $user): bool
+    {
+        return $this->hasRole($user);
+    }
+
+    /**
+     * Determine whether the user can delete models in bulk.
+     *
+     * Without this method Filament would allow the bulk delete action to
+     * everyone.
+     */
+    public function deleteAny(User $user): bool
     {
         return $this->hasRole($user);
     }

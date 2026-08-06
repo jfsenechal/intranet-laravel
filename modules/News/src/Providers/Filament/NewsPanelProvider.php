@@ -6,7 +6,6 @@ namespace AcMarche\News\Providers\Filament;
 
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -18,8 +17,13 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+/**
+ * News is readable without signing in. Writing stays behind the policies and
+ * `ReadOnlyForGuestsTrait` on the resources.
+ */
 final class NewsPanelProvider extends PanelProvider
 {
     use HooksTrait;
@@ -41,6 +45,9 @@ final class NewsPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->resourceCreatePageRedirect('view')
             ->resourceEditPageRedirect('view')
+            // Reads the current user when rendered, so it is only built for a
+            // signed in visitor.
+            ->userMenu(fn (): bool => Auth::check())
 
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\News\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\News\\Filament\\Pages')
@@ -62,8 +69,8 @@ final class NewsPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            // Deliberately empty: no `Authenticate` middleware, so guests reach
+            // the news list, its search and the article pages.
+            ->authMiddleware([]);
     }
 }

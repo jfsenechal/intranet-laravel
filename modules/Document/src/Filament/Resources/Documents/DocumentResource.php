@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Document\Filament\Resources\Documents;
 
+use AcMarche\App\Traits\ReadOnlyForGuestsTrait;
 use AcMarche\Document\Filament\Resources\Documents\Pages\CreateDocument;
 use AcMarche\Document\Filament\Resources\Documents\Pages\EditDocument;
 use AcMarche\Document\Filament\Resources\Documents\Pages\ListDocuments;
@@ -18,6 +19,8 @@ use Override;
 
 final class DocumentResource extends Resource
 {
+    use ReadOnlyForGuestsTrait;
+
     #[Override]
     protected static ?string $model = Document::class;
 

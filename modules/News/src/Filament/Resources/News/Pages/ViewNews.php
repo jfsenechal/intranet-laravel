@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\Facades\Auth;
 use Override;
 
 final class ViewNews extends ViewRecord
@@ -43,7 +44,9 @@ final class ViewNews extends ViewRecord
                 ->label('Archiver')
                 ->color(Color::Slate)
                 ->requiresConfirmation()
-                ->visible(fn (News $record): bool => ! $record->archive)
+                // A custom action carries no policy check of its own, and the
+                // panel is open to guests.
+                ->visible(fn (News $record): bool => Auth::check() && ! $record->archive)
                 ->action(function (News $record): void {
                     $record->update(['archive' => true]);
 

@@ -36,6 +36,7 @@ final class NewsTables
                 Stack::make([
                     TextColumn::make('name')
                         ->label('Intitulé')
+                        ->searchable()
                         ->limit(120)
                         ->weight('bold')
                         ->size('md')

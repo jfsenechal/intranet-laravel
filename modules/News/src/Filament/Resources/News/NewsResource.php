@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Filament\Resources\News;
 
+use AcMarche\App\Traits\ReadOnlyForGuestsTrait;
 use AcMarche\News\Filament\Resources\News\Pages\CreateNews;
 use AcMarche\News\Filament\Resources\News\Pages\EditNews;
 use AcMarche\News\Filament\Resources\News\Pages\ListNews;
@@ -18,6 +19,8 @@ use Override;
 
 final class NewsResource extends Resource
 {
+    use ReadOnlyForGuestsTrait;
+
     #[Override]
     protected static ?string $model = News::class;
 
