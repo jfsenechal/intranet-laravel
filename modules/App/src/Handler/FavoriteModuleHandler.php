@@ -27,6 +27,8 @@ final class FavoriteModuleHandler
     public static function getFavoriteModules(?User $user = null): Collection
     {
         $user ??= auth()->user();
+        $favoriteIds = [];
+
         if ($user instanceof User) {
             $favoriteIds = self::favoriteIds($user);
         }
