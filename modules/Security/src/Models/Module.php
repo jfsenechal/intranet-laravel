@@ -55,11 +55,15 @@ final class Module extends Model
      *
      * Public modules are always included; non-public modules require the user to
      * hold at least one role belonging to that module. Administrators see every
-     * non-skipped module.
+     * non-skipped module. A guest (null user) only sees the public ones.
      */
-    public function scopeAccessibleTo(Builder $query, User $user): Builder
+    public function scopeAccessibleTo(Builder $query, ?User $user): Builder
     {
         $query->whereNotIn('id', self::MODULES_TO_SKIP);
+
+        if (! $user instanceof User) {
+            return $query->where('is_public', true)->orderBy('name');
+        }
 
         if (! $user->isAdministrator()) {
             $query->where(function (Builder $query) use ($user): void {

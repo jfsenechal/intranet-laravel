@@ -20,7 +20,7 @@ final class FavoriteModuleHandler
     /**
      * Resolve the favorite modules to display for the given user, falling back to
      * the default set when the user has none. Only modules the user can access are
-     * returned, with their url and migration status resolved.
+     * returned, in the order of the favorite ids. A guest only sees public modules.
      *
      * @return Collection<int, Module>
      */
@@ -37,9 +37,10 @@ final class FavoriteModuleHandler
             $favoriteIds = self::DEFAULT_FAVORITE_IDS;
         }
 
-        return Module::accessibleTo($user)->get()
+        return Module::accessibleTo($user)
             ->whereIn('id', $favoriteIds)
-            ->sortBy(fn(Module $module): int|false => array_search($module->id, $favoriteIds, true))
+            ->get()
+            ->sortBy(fn (Module $module): int|false => array_search($module->id, $favoriteIds, true))
             ->values();
     }
 

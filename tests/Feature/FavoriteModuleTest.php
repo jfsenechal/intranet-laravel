@@ -56,6 +56,17 @@ it('falls back to the default favorites when the user has none', function (): vo
         ->toBe(FavoriteModuleHandler::DEFAULT_FAVORITE_IDS);
 });
 
+it('returns only the public default favorites for a guest', function (): void {
+    $publicId = FavoriteModuleHandler::DEFAULT_FAVORITE_IDS[0];
+    $privateId = FavoriteModuleHandler::DEFAULT_FAVORITE_IDS[1];
+
+    makeFavoritableModule($publicId);
+    makeFavoritableModule($privateId, ['is_public' => false]);
+
+    expect(FavoriteModuleHandler::getFavoriteModules()->pluck('id')->all())
+        ->toBe([$publicId]);
+});
+
 it('lets a user favorite a module from the launcher', function (): void {
     $user = User::factory()->create(['is_administrator' => true]);
     $module = makeFavoritableModule(103);
