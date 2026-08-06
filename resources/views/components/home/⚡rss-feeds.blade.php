@@ -105,10 +105,11 @@ class extends Component
                 <div class="flex size-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur"></div>
                 <h2 class="text-lg font-bold">Flux d'actualité</h2>
             </div>
-            <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
-                <div class="h-16 animate-pulse rounded bg-gray-200"></div>
-                <div class="h-16 animate-pulse rounded bg-gray-200"></div>
-                <div class="h-16 animate-pulse rounded bg-gray-200"></div>
+            <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-4">
+                <div class="h-32 animate-pulse rounded bg-gray-200"></div>
+                <div class="h-32 animate-pulse rounded bg-gray-200"></div>
+                <div class="h-32 animate-pulse rounded bg-gray-200"></div>
+                <div class="h-32 animate-pulse rounded bg-gray-200"></div>
             </div>
         </div>
         HTML;
@@ -116,7 +117,14 @@ class extends Component
 
     public function with(): array
     {
-        return ['rssItems' => $this->items()];
+        $items = $this->items();
+
+        // Items are collected feed by feed, so groupBy keeps RSS_FEEDS order.
+        // Feeds that failed are simply absent rather than showing an empty column.
+        return [
+            'rssItems' => $items,
+            'feedGroups' => collect($items)->groupBy('source'),
+        ];
     }
 };
 ?>
@@ -135,27 +143,37 @@ class extends Component
             {{ count($rssItems) }}
         </span>
     </div>
-    <div class="grid grid-cols-1 divide-y divide-gray-100 md:grid-cols-2 md:divide-y-0 md:divide-x lg:grid-cols-3">
-        @forelse ($rssItems as $index => $item)
-            <a
-                href="{{ $item['link'] }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group block p-4 transition hover:bg-gray-50 animate-fade-in-up"
-                style="--delay: {{ 0.5 + ($index * 0.03) }}s"
-            >
-                <p class="mb-1  font-semibold uppercase tracking-wide text-purple-600">
-                    {{ $item['source'] }}
-                </p>
-                <p class="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-purple-700">
-                    {{ $item['title'] }}
-                </p>
-                @if ($item['date'])
-                    <p class="mt-1  text-gray-500">
-                        {{ Carbon::parse($item['date'])->translatedFormat('d F Y à H:i') }}
-                    </p>
-                @endif
-            </a>
+    <div class="grid grid-cols-1 divide-y divide-gray-100 md:grid-cols-2 md:divide-y-0 md:divide-x lg:grid-cols-4">
+        @forelse ($feedGroups as $source => $group)
+            <section class="p-4 animate-fade-in-up" style="--delay: {{ 0.5 + ($loop->index * 0.05) }}s">
+                <h3 class="mb-3 flex items-center justify-between gap-2 font-semibold uppercase tracking-wide text-purple-600">
+                    {{ $source }}
+                    <span class="rounded-full bg-purple-50 px-2 py-0.5 font-normal text-purple-700">
+                        {{ $group->count() }}
+                    </span>
+                </h3>
+                <ul class="space-y-3">
+                    @foreach ($group as $item)
+                        <li>
+                            <a
+                                href="{{ $item['link'] }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="group -mx-2 block rounded px-2 py-1 transition hover:bg-gray-50"
+                            >
+                                <p class="line-clamp-2 text-base font-medium text-gray-900 group-hover:text-purple-700">
+                                    {{ $item['title'] }}
+                                </p>
+                                @if ($item['date'])
+                                    <p class="mt-1  text-gray-500 text-sm">
+                                        {{ Carbon::parse($item['date'])->translatedFormat('d F Y à H:i') }}
+                                    </p>
+                                @endif
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
         @empty
             <p class="col-span-full p-6 text-center text-sm text-gray-500">Aucun flux disponible.</p>
         @endforelse

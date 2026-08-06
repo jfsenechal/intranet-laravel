@@ -51,6 +51,39 @@ it('renders entries from every reachable feed', function (): void {
         ->assertDontSee('Aucun flux disponible.');
 });
 
+it('groups entries under their source, in RSS_FEEDS order', function (): void {
+    Http::fake([
+        'www.lesoir.be/*' => Http::response(rssChannel(2, 'Soir')),
+        'www.lavenir.net/*' => Http::response(rssChannel(2, 'Avenir')),
+        'www.uvcw.be/*' => Http::response(rssChannel(2, 'Uvcw')),
+        'www.dhnet.be/*' => Http::response(rssChannel(2, 'Dh')),
+    ]);
+
+    rssFeeds()->assertSeeInOrder([
+        'Le Soir', 'Soir 1', 'Soir 2',
+        "L'Avenir Luxembourg", 'Avenir 1', 'Avenir 2',
+        'UVCW', 'Uvcw 1', 'Uvcw 2',
+        'DH Luxembourg', 'Dh 1', 'Dh 2',
+    ]);
+});
+
+it('names each source once rather than on every entry', function (): void {
+    Http::fake(['*' => Http::response(rssChannel(5))]);
+
+    expect(mb_substr_count(rssFeeds()->html(), 'DH Luxembourg'))->toBe(1);
+});
+
+it('omits a failing feed instead of showing an empty group', function (): void {
+    Http::fake([
+        'www.lesoir.be/*' => Http::response('Access Denied', 403),
+        '*' => Http::response(rssChannel(2, 'Ok')),
+    ]);
+
+    rssFeeds()
+        ->assertDontSee('Le Soir')
+        ->assertSee('UVCW');
+});
+
 it('keeps at most five entries per feed', function (): void {
     Http::fake(['*' => Http::response(rssChannel(9))]);
 
