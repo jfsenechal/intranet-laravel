@@ -18,33 +18,37 @@
     $hasContactInfo = $employee->professional_email
         || $phoneDisplay
         || $employee->professional_mobile;
-    $isFavorite = $this->isFavoriteEmployee($employee->id);
+    $showFavorite = $this->canUseFavoriteEmployees();
 @endphp
 
 <div wire:key="employee-card-{{ $employee->id }}"
      class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm flex gap-4">
-    <button
-        type="button"
-        wire:click="toggleFavoriteEmployee({{ $employee->id }})"
-        aria-label="{{ $isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
-        aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
-        class="absolute right-2 top-2 z-10 rounded-full p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:bg-gray-700"
-    >
-        <x-filament::icon
-            :icon="$isFavorite ? 'heroicon-s-star' : 'heroicon-o-star'"
-            @class([
-                'h-5 w-5',
-                'text-amber-400' => $isFavorite,
-                'text-gray-300 dark:text-gray-600' => ! $isFavorite,
-            ])
-        />
-    </button>
+    @if ($showFavorite)
+        @php $isFavorite = $this->isFavoriteEmployee($employee->id); @endphp
+
+        <button
+            type="button"
+            wire:click="toggleFavoriteEmployee({{ $employee->id }})"
+            aria-label="{{ $isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+            aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
+            class="absolute right-2 top-2 z-10 rounded-full p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:bg-gray-700"
+        >
+            <x-filament::icon
+                :icon="$isFavorite ? 'heroicon-s-star' : 'heroicon-o-star'"
+                @class([
+                    'h-5 w-5',
+                    'text-amber-400' => $isFavorite,
+                    'text-gray-300 dark:text-gray-600' => ! $isFavorite,
+                ])
+            />
+        </button>
+    @endif
 
     <img src="{{ $photoUrl }}"
          alt="{{ $fullName }}"
          class="h-24 w-24 rounded-full object-cover shrink-0 bg-gray-100 dark:bg-gray-800"/>
 
-    <div class="flex-1 min-w-0 pr-8">
+    <div @class(['flex-1 min-w-0', 'pr-8' => $showFavorite])>
         <a
             href="{{ EmployeeResource::getUrl('view', ['record' => $employee]) }}"
             class="block text-base font-semibold text-gray-900 dark:text-gray-100 truncate hover:text-primary-600 dark:hover:text-primary-400 hover:underline"

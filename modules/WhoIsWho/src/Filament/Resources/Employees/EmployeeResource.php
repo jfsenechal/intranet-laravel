@@ -13,7 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Override;
 
 /**
@@ -63,20 +62,21 @@ final class EmployeeResource extends Resource
     }
 
     /**
-     * The directory is open to every authenticated user, exactly like the
-     * Index, Search and Services pages of this panel. The HRM `EmployeePolicy`
-     * is deliberately bypassed: it gates confidential HR records behind HR
-     * roles, whereas this page only repeats the professional contact details
-     * already listed on the directory pages.
+     * The directory is open to everyone reaching the panel, guests included,
+     * exactly like the Index, Search and Services pages. The HRM
+     * `EmployeePolicy` is deliberately bypassed: it gates confidential HR
+     * records behind HR roles, whereas this page only repeats the professional
+     * contact details already listed on the directory pages. `getEloquentQuery()`
+     * keeps archived and non-agent records out of reach.
      */
     public static function canViewAny(): bool
     {
-        return Auth::check();
+        return true;
     }
 
     public static function canView(Model $record): bool
     {
-        return Auth::check();
+        return true;
     }
 
     public static function infolist(Schema $schema): Schema

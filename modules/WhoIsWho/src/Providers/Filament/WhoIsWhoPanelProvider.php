@@ -6,7 +6,6 @@ namespace AcMarche\WhoIsWho\Providers\Filament;
 
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -18,8 +17,14 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+/**
+ * The directory is readable without signing in: it only repeats the
+ * professional contact details of active agents. Everything that needs a user
+ * (user menu, notifications, favorites) is gated on `Auth::check()` instead.
+ */
 final class WhoIsWhoPanelProvider extends PanelProvider
 {
     use HooksTrait;
@@ -41,7 +46,10 @@ final class WhoIsWhoPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->resourceCreatePageRedirect('view')
             ->resourceEditPageRedirect('view')
-            ->databaseNotifications()
+            // Both read the current user when rendered, so they are only built
+            // for a signed in visitor.
+            ->userMenu(fn (): bool => Auth::check())
+            ->databaseNotifications(fn (): bool => Auth::check())
 
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\WhoIsWho\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\WhoIsWho\\Filament\\Pages')
@@ -63,8 +71,8 @@ final class WhoIsWhoPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            // Deliberately empty: no `Authenticate` middleware, so guests reach
+            // the directory pages.
+            ->authMiddleware([]);
     }
 }

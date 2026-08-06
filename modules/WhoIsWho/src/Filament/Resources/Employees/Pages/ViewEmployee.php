@@ -41,6 +41,7 @@ final class ViewEmployee extends ViewRecord
                     ? Heroicon::Star
                     : Heroicon::OutlinedStar)
                 ->color(fn (): string => $this->isFavoriteEmployee($this->employee()->id) ? 'warning' : 'gray')
+                ->visible(fn (): bool => $this->canUseFavoriteEmployees())
                 ->action(function (): void {
                     $this->toggleFavoriteEmployee($this->employee()->id);
                 }),

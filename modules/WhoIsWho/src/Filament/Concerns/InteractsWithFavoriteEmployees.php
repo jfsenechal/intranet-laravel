@@ -24,6 +24,15 @@ trait InteractsWithFavoriteEmployees
     protected ?array $favoriteEmployeeIds = null;
 
     /**
+     * Favorites are personal, so they are hidden from the guests who browse the
+     * directory without signing in.
+     */
+    public function canUseFavoriteEmployees(): bool
+    {
+        return Auth::check();
+    }
+
+    /**
      * @return list<int>
      */
     public function favoriteEmployeeIds(): array
