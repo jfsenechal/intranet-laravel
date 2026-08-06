@@ -19,6 +19,7 @@ new class extends Component
             <h2 class="text-lg font-extrabold">Activités sportives</h2>
         </div>
         <p class="text-sm opacity-90">Pour le personnel</p>
+        <p class="text-sm opacity-90">Bientôt le nouveau programme...</p>
         <div class="flex items-center gap-3 text-3xl">
             <span class="animate-float">⚽</span>
             <span class="animate-float [animation-delay:300ms]">🏃</span>
