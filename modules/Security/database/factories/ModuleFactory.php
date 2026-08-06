@@ -29,7 +29,6 @@ final class ModuleFactory extends Factory
             'description' => fake()->sentence(),
             'is_external' => fake()->boolean(20),
             'is_public' => fake()->boolean(30),
-            'icon' => 'heroicon-o-cube',
             'color' => fake()->hexColor(),
         ];
     }

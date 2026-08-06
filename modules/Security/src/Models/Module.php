@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
-// https://github.com/lukas-frey/filament-icon-picker
 #[UseFactory(ModuleFactory::class)]
 #[Fillable([
     'name',
@@ -27,7 +26,6 @@ use Override;
     'extern',
     'is_public',
     'is_external',
-    'icon',
     'color',
     'allow_multiple_roles',
 ])]

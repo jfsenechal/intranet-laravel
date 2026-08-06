@@ -48,9 +48,6 @@ final class ModuleForm
                 ColorPicker::make('color')
                     ->label('Couleur')
                     ->required(),
-                TextInput::make('icon')
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('description')
                     ->maxLength(255)
                     ->columnSpanFull(),
