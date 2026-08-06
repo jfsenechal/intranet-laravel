@@ -23,6 +23,8 @@ final class ModuleInfolist
                             TextEntry::make('description')
                                 ->label('Description')
                                 ->hiddenLabel()
+                                ->formatStateUsing(fn (?string $state): string => nl2br(e((string) $state)))
+                                ->html()
                                 ->columnSpanFull(),
                             TextEntry::make('role_description')
                                 ->label('Description de l\'attribution des rôles')
