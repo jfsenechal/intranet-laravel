@@ -58,12 +58,23 @@ final class IncomingMailForm
             ->components([
                 Section::make()
                     ->schema([
-                        TextInput::make('reference')
-                            ->label('N° / Référence')
-                            ->placeholder('Identifiant ou numéro de référence'),
-                        TextInput::make('query')
-                            ->label('Recherche par texte')
-                            ->placeholder('Expéditeur, description, contenu…'),
+                        Grid::make(['default' => 1, 'md' => 12])
+                            ->schema([
+                                TextInput::make('reference')
+                                    ->label('N° / Référence')
+                                    ->placeholder('N° ou référence')
+                                    ->columnSpan(['default' => 1, 'md' => 2]),
+                                TextInput::make('sender')
+                                    ->label('Expéditeur')
+                                    ->placeholder('Nom de l\'expéditeur')
+                                    ->datalist(fn (): array => Sender::query()->orderBy('name')->pluck('name')->all())
+                                    ->columnSpan(['default' => 1, 'md' => 5]),
+                                TextInput::make('query')
+                                    ->label('Recherche par texte')
+                                    ->placeholder('Description, contenu…')
+                                    ->columnSpan(['default' => 1, 'md' => 5]),
+                            ])
+                            ->columnSpanFull(),
                         Grid::make(3)
                             ->schema([
                                 DatePicker::make('date_from')

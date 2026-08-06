@@ -80,6 +80,7 @@ final class IncomingMailSearch extends Page implements HasTable
             Auth::user(),
             [
                 'reference' => $state['reference'] ?? null,
+                'sender' => $state['sender'] ?? null,
                 'category' => $state['category'] ?? null,
                 'date_from' => filled($state['date_from'] ?? null) ? Carbon::parse($state['date_from']) : null,
                 'date_to' => filled($state['date_to'] ?? null) ? Carbon::parse($state['date_to']) : null,

@@ -30,7 +30,7 @@ final class MeiliSearcher
     }
 
     /**
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int, department?: ?string}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, sender?: ?string, category?: ?int, department?: ?string}  $filters
      * @return array<int, array<string, mixed>>
      */
     public function search(string $query, User $user, array $filters = [], int $limit = 500): array
@@ -40,11 +40,24 @@ final class MeiliSearcher
             return [];
         }
 
+        $sender = mb_trim((string) ($filters['sender'] ?? ''));
+        if ($sender !== '') {
+            // `sender` is free text, so it cannot be filtered on directly:
+            // resolve it with a search restricted to that attribute, then
+            // narrow the main query to the matching ids.
+            $ids = self::toIds($this->hits($sender, $clauses, $limit, ['sender']));
+            if ($ids === []) {
+                return [];
+            }
+
+            $clauses[] = sprintf('id IN [%s]', implode(', ', $ids));
+        }
+
         return $this->hits($query, $clauses, $limit);
     }
 
     /**
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int, department?: ?string}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, sender?: ?string, category?: ?int, department?: ?string}  $filters
      * @return array<int, int>
      */
     public function searchIds(string $query, User $user, array $filters = [], int $limit = 500): array
@@ -115,18 +128,22 @@ final class MeiliSearcher
      * Run the query against the index and return its raw hits.
      *
      * @param  array<int, string>  $clauses
+     * @param  array<int, string>|null  $attributesToSearchOn  restricts the query to these fields
      * @return array<int, array<string, mixed>>
      */
-    private function hits(string $query, array $clauses, int $limit): array
+    private function hits(string $query, array $clauses, int $limit, ?array $attributesToSearchOn = null): array
     {
-        $result = $this->client->index($this->indexName)->search(
-            mb_trim($query),
-            [
-                'filter' => $clauses,
-                'sort' => ['mail_date_timestamp:desc'],
-                'limit' => $limit,
-            ],
-        );
+        $options = [
+            'filter' => $clauses,
+            'sort' => ['mail_date_timestamp:desc'],
+            'limit' => $limit,
+        ];
+
+        if ($attributesToSearchOn !== null) {
+            $options['attributesToSearchOn'] = $attributesToSearchOn;
+        }
+
+        $result = $this->client->index($this->indexName)->search(mb_trim($query), $options);
 
         return $result->getHits();
     }
@@ -176,7 +193,7 @@ final class MeiliSearcher
     /**
      * Combine the policy clause with the optional user-provided filters.
      *
-     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, category?: ?int, department?: ?string}  $filters
+     * @param  array{date_from?: ?DateTimeInterface, date_to?: ?DateTimeInterface, services?: array<int>, destinataires?: array<int>, recommande?: ?bool, reference?: ?string, sender?: ?string, category?: ?int, department?: ?string}  $filters
      * @return array<int, string>|null null when the user may see nothing
      */
     private function filterClauses(User $user, array $filters): ?array

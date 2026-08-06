@@ -50,6 +50,41 @@ function captureMeiliSearch(array $hits = []): array
     return [$client, $captured];
 }
 
+/**
+ * Same as {@see captureMeiliSearch()} but for a searcher that queries the index
+ * several times: each entry of `$hitsPerCall` is returned by the matching call,
+ * and the options of every call are captured in order.
+ *
+ * @param  array<int, array<int, array<string, mixed>>>  $hitsPerCall
+ * @return array{0: Client, 1: stdClass}
+ */
+function captureMeiliSearches(array $hitsPerCall): array
+{
+    $captured = new stdClass();
+    $captured->options = [];
+    $captured->queries = [];
+    $call = 0;
+
+    $index = Mockery::mock(Indexes::class);
+    $index->shouldReceive('search')
+        ->times(count($hitsPerCall))
+        ->andReturnUsing(function (string $query, array $options) use ($captured, $hitsPerCall, &$call): SearchResult {
+            $captured->options[] = $options;
+            $captured->queries[] = $query;
+
+            $result = Mockery::mock(SearchResult::class);
+            $result->shouldReceive('getHits')->andReturn($hitsPerCall[$call]);
+            $call++;
+
+            return $result;
+        });
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('index')->andReturn($index);
+
+    return [$client, $captured];
+}
+
 beforeEach(function (): void {
     // The Meilisearch master key is provided via env in real environments;
     // set a placeholder so the client can be instantiated under test.
@@ -196,6 +231,34 @@ describe('MeiliSearcher reference and category filters', function (): void {
         expect($captured->options['filter'])->toContain('department = "Cpas"');
     });
 
+    it('resolves the sender with a dedicated search and narrows the main query to its ids', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearches([
+            [['id' => 4], ['id' => 9]],
+            [['id' => 9]],
+        ]);
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        $ids = $searcher->searchIds('facture', $user, ['sender' => 'ACME SA']);
+
+        expect($ids)->toBe([9]);
+        expect($captured->queries)->toBe(['ACME SA', 'facture']);
+        expect($captured->options[0]['attributesToSearchOn'])->toBe(['sender']);
+        expect($captured->options[1])->not->toHaveKey('attributesToSearchOn');
+        expect($captured->options[1]['filter'])->toContain('id IN [4, 9]');
+    });
+
+    it('returns nothing when no mail matches the sender', function (): void {
+        $user = User::factory()->create(['is_administrator' => true]);
+        [$client, $captured] = captureMeiliSearches([[]]);
+        $searcher = new MeiliSearcher();
+        $searcher->client = $client;
+
+        expect($searcher->searchIds('facture', $user, ['sender' => 'Inconnu']))->toBe([]);
+        expect($captured->queries)->toBe(['Inconnu']);
+    });
+
     it('omits reference and category clauses when they are not provided', function (): void {
         $user = User::factory()->create(['is_administrator' => true]);
         [$client, $captured] = captureMeiliSearch();
@@ -246,6 +309,30 @@ describe('MeiliSearcher my mail', function (): void {
 
         expect($searcher->myMailIds($user))->toBe([]);
     });
+});
+
+it('passes the dedicated sender field of the advanced search form to the searcher', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $mail = IncomingMail::factory()->create();
+
+    $this->actingAs($admin);
+
+    [$client, $captured] = captureMeiliSearches([
+        [['id' => $mail->id]],
+        [['id' => $mail->id]],
+    ]);
+    $searcher = new MeiliSearcher();
+    $searcher->client = $client;
+    app()->instance(MeiliSearcher::class, $searcher);
+
+    livewire(IncomingMailSearch::class)
+        ->fillForm(['sender' => 'ACME SA'])
+        ->call('search')
+        ->assertSet('resultIds', [$mail->id]);
+
+    expect($captured->queries)->toBe(['ACME SA', '']);
+    expect($captured->options[0]['attributesToSearchOn'])->toBe(['sender']);
 });
 
 it('mounts the advanced search page with an empty result set before searching', function (): void {
