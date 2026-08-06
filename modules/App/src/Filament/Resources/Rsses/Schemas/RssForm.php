@@ -23,6 +23,16 @@ final class RssForm
                     ->description('Ajoutez un flux RSS personnalisé ou choisissez-en un prédéfini.')
                     ->columns(1)
                     ->schema([
+                        TextInput::make('name')
+                            ->label('Nom')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('url')
+                            ->label('URL')
+                            ->url()
+                            ->required()
+                            ->maxLength(255)
+                            ->rules([new ValidRssFeed]),
                         Select::make('predefined')
                             ->label('Flux prédéfinis')
                             ->helperText('Sélectionnez un flux prédéfini pour pré-remplir le formulaire.')
@@ -44,16 +54,6 @@ final class RssForm
                                 $set('name', $enum->getLabel());
                                 $set('url', $enum->value);
                             }),
-                        TextInput::make('name')
-                            ->label('Nom')
-                            ->required()
-                            ->maxLength(255),
-                        TextInput::make('url')
-                            ->label('URL')
-                            ->url()
-                            ->required()
-                            ->maxLength(255)
-                            ->rules([new ValidRssFeed]),
                     ]),
             ]);
     }
