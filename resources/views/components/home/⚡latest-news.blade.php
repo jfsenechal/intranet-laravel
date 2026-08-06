@@ -14,7 +14,7 @@ new class extends Component {
         return News::query()
             ->with('category')
             ->latest('created_at')
-            ->limit(6)
+            ->limit(11)
             ->get();
     }
 
