@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use AcMarche\Agent\Enums\RolesEnum;
 use AcMarche\Agent\Filament\Resources\Profiles\Pages\ViewProfile;
+use AcMarche\Agent\Mail\ShareProfileMail;
 use AcMarche\Agent\Mail\WelcomeMail;
 use AcMarche\Agent\Models\Profile;
+use AcMarche\Agent\Models\Share;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -162,6 +164,124 @@ describe('welcome mail action', function (): void {
                 'notes' => null,
             ])
             ->assertHasActionErrors(['password']);
+
+        Mail::assertNothingQueued();
+    });
+});
+
+describe('share profile action', function (): void {
+    it('renders the share action for an agent administrator', function (): void {
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertActionExists('shareProfile');
+    });
+
+    it('hides the share action from a non administrator', function (): void {
+        $agentRole = Role::factory()->create(['name' => RolesEnum::ROLE_AGENT->value]);
+        $user = User::factory()->create(['is_administrator' => false]);
+        $user->roles()->attach($agentRole);
+        $this->actingAs($user);
+
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertActionHidden('shareProfile');
+    });
+
+    it('grants the agent role to a recipient who does not have it yet', function (): void {
+        Mail::fake();
+        Role::factory()->create(['name' => RolesEnum::ROLE_AGENT->value]);
+        $outsider = User::factory()->create(['email' => 'outsider@marche.be']);
+
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('shareProfile', data: [
+                'email' => 'outsider@marche.be',
+                'notes' => null,
+            ])
+            ->assertHasNoActionErrors();
+
+        expect($outsider->refresh()->hasRole(RolesEnum::ROLE_AGENT->value))->toBeTrue();
+
+        Mail::assertQueued(ShareProfileMail::class);
+    });
+
+    it('leaves the roles of a recipient who already is an agent untouched', function (): void {
+        Mail::fake();
+        $agentRole = Role::factory()->create(['name' => RolesEnum::ROLE_AGENT->value]);
+        $agent = User::factory()->create(['email' => 'agent@marche.be']);
+        $agent->roles()->attach($agentRole);
+
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('shareProfile', data: [
+                'email' => 'agent@marche.be',
+                'notes' => null,
+            ])
+            ->assertHasNoActionErrors();
+
+        expect($agent->refresh()->roles()->count())->toBe(1);
+    });
+
+    it('records the share and mails the recipient with a copy to the sender', function (): void {
+        Mail::fake();
+        Role::factory()->create(['name' => RolesEnum::ROLE_AGENT->value]);
+        User::factory()->create(['email' => 'agent@marche.be']);
+
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('shareProfile', data: [
+                'email' => 'agent@marche.be',
+                'notes' => 'Merci de compléter la partie matériel',
+            ])
+            ->assertHasNoActionErrors();
+
+        expect(Share::query()->where('profile_id', $profile->getKey())->where('shared_for', 'agent@marche.be')->exists())
+            ->toBeTrue();
+
+        Mail::assertQueued(
+            ShareProfileMail::class,
+            fn (ShareProfileMail $mail): bool => $mail->profile->is($profile)
+                && $mail->notes === 'Merci de compléter la partie matériel'
+                && $mail->hasTo('agent@marche.be')
+                && $mail->hasCc($this->adminUser->email)
+        );
+    });
+
+    it('does not duplicate an existing share', function (): void {
+        Mail::fake();
+        Role::factory()->create(['name' => RolesEnum::ROLE_AGENT->value]);
+        User::factory()->create(['email' => 'agent@marche.be']);
+
+        $profile = Profile::factory()->create();
+        $profile->shares()->save(new Share(['shared_by' => 'someone', 'shared_for' => 'agent@marche.be']));
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('shareProfile', data: [
+                'email' => 'agent@marche.be',
+                'notes' => null,
+            ])
+            ->assertHasNoActionErrors();
+
+        expect(Share::query()->where('profile_id', $profile->getKey())->count())->toBe(1);
+
+        Mail::assertQueued(ShareProfileMail::class);
+    });
+
+    it('requires a recipient', function (): void {
+        Mail::fake();
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('shareProfile', data: [
+                'email' => null,
+                'notes' => null,
+            ])
+            ->assertHasActionErrors(['email']);
 
         Mail::assertNothingQueued();
     });
