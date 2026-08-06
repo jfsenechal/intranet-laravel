@@ -53,7 +53,7 @@ new class extends Component
     <div class="divide-y divide-gray-100">
         @forelse ($latestDocuments as $index => $document)
             <a
-                href="{{ DocumentResource::getUrl('view', ['record' => $document->id], panel: 'document-panel') }}"
+                href="{{ auth()->check() ? DocumentResource::getUrl('view', ['record' => $document->id], panel: 'document-panel') : route('document.show', $document) }}"
                 class="group flex items-start gap-3 p-4 transition hover:bg-gray-50 animate-fade-in-up"
                 style="--delay: {{ 0.4 + ($index * 0.05) }}s"
             >

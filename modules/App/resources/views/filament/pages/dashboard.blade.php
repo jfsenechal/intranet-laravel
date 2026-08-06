@@ -121,7 +121,7 @@
 
             @forelse ($this->latestNews as $news)
                 <a
-                    href="{{ route('filament.news-panel.resources.news.view', ['record' => $news]) }}"
+                    href="{{ auth()->check() ? route('filament.news-panel.resources.news.view', ['record' => $news]) : route('news.show', $news) }}"
                     class="group flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <div class="min-w-0">
                         <p class="truncate font-medium text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
@@ -149,7 +149,7 @@
 
             @forelse ($this->latestDocuments as $document)
                 <a
-                    href="{{ route('filament.document-panel.resources.documents.view', ['record' => $document]) }}"
+                    href="{{ auth()->check() ? route('filament.document-panel.resources.documents.view', ['record' => $document]) : route('document.show', $document) }}"
                     class="group flex items-start justify-between gap-4 border-b border-gray-200 py-2 last:border-0 dark:border-gray-700">
                     <div class="min-w-0">
                         <p class="truncate font-medium text-gray-900 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
