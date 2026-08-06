@@ -762,6 +762,75 @@ describe('IncomingMailNotification Mailable', function (): void {
         $mailable->assertSeeInHtml('href="'.$url.'"', false);
     });
 
+    test('mailable drops the secondary column below 600px', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mails = collect([IncomingMail::factory()->create()]);
+
+        $mailable = new IncomingMailNotification($recipient, $mails);
+
+        $mailable->assertSeeInHtml('@media only screen and (max-width: 600px)', false);
+        $mailable->assertSeeInHtml('display: none !important;', false);
+    });
+
+    test('mailable leads the main column with the sender, then the description, then the numero', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mail = IncomingMail::factory()->create([
+            'reference_number' => 'REF-2026-042',
+            'sender' => 'Service Urbanisme',
+            'description' => 'Demande de permis',
+        ]);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]));
+
+        $html = $mailable->render();
+        $mainStart = (int) mb_strpos($html, 'class="col-main"');
+        $mainColumn = mb_substr($html, $mainStart, (int) mb_strpos($html, 'class="desktop-only"') - $mainStart);
+
+        expect($mainColumn)
+            ->toContain('REF-2026-042')
+            ->toContain('Service Urbanisme')
+            ->toContain('Demande de permis');
+
+        expect(mb_strpos($mainColumn, 'Service Urbanisme'))
+            ->toBeLessThan(mb_strpos($mainColumn, 'Demande de permis'));
+        expect(mb_strpos($mainColumn, 'Demande de permis'))
+            ->toBeLessThan(mb_strpos($mainColumn, 'REF-2026-042'));
+    });
+
+    test('mailable puts the recipients and the badges in the desktop only column', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mail = IncomingMail::factory()->create([
+            'is_registered' => true,
+            'has_acknowledgment' => true,
+        ]);
+
+        $mailable = new IncomingMailNotification($recipient, collect([$mail]));
+
+        $html = $mailable->render();
+        $secondaryColumn = mb_substr($html, (int) mb_strpos($html, 'class="desktop-only"'));
+
+        expect($secondaryColumn)
+            ->toContain('Original a :')
+            ->toContain('Copie a :')
+            ->toContain('Recommande')
+            ->toContain('Accuse');
+    });
+
+    test('mailable falls back to inline styles so style stripping clients stay readable', function (): void {
+        $recipient = Recipient::factory()->create();
+        $mails = collect([IncomingMail::factory()->create()]);
+
+        $mailable = new IncomingMailNotification($recipient, $mails);
+
+        // The two columns sit side by side on inline styles alone, and wrap
+        // when the viewport is narrower than their combined max-width.
+        $mailable->assertSeeInHtml('display:inline-block; width:100%; max-width:470px;', false);
+        $mailable->assertSeeInHtml('display:inline-block; width:100%; max-width:240px;', false);
+
+        // Outlook ignores inline-block, so it gets ghost tables instead.
+        $mailable->assertSeeInHtml('<!--[if mso]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="470" valign="top"><![endif]-->', false);
+    });
+
     test('mailable returns empty attachments when includeAttachments is false', function (): void {
         $recipient = Recipient::factory()->create();
         $mails = collect([IncomingMail::factory()->create()]);
