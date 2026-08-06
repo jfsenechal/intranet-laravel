@@ -43,7 +43,7 @@ new class extends Component
                 class="group flex items-center gap-3 rounded-xl border border-gray-100 p-3 transition hover:border-amber-200 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-400"
             >
                 <span
-                    class="flex size-9 flex-shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm transition group-hover:scale-105"
+                    class="flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm transition group-hover:scale-105"
                     style="background-color: {{ $module->color ?: '#f59e0b' }}"
                     aria-hidden="true"
                 >
@@ -53,7 +53,7 @@ new class extends Component
                     {{ $module->name }}
                 </span>
                 @if ($module->is_external)
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5m0 0v5m0-5L10 14M9 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-3" />
                     </svg>
                 @endif

@@ -27,18 +27,17 @@ final class FavoriteModuleHandler
     public static function getFavoriteModules(?User $user = null): Collection
     {
         $user ??= auth()->user();
-        if (! $user instanceof User) {
-            return collect();
+        if ($user instanceof User) {
+            $favoriteIds = self::favoriteIds($user);
         }
 
-        $favoriteIds = self::favoriteIds($user);
         if ($favoriteIds === []) {
             $favoriteIds = self::DEFAULT_FAVORITE_IDS;
         }
 
         return Module::accessibleTo($user)->get()
             ->whereIn('id', $favoriteIds)
-            ->sortBy(fn (Module $module): int|false => array_search($module->id, $favoriteIds, true))
+            ->sortBy(fn(Module $module): int|false => array_search($module->id, $favoriteIds, true))
             ->values();
     }
 
@@ -50,13 +49,13 @@ final class FavoriteModuleHandler
     public static function favoriteIds(?User $user = null): array
     {
         $user ??= auth()->user();
-        if (! $user instanceof User) {
+        if (!$user instanceof User) {
             return [];
         }
 
         return $user->favoriteModules()
             ->pluck('modules.id')
-            ->map(fn (int $id): int => $id)
+            ->map(fn(int $id): int => $id)
             ->all();
     }
 }
