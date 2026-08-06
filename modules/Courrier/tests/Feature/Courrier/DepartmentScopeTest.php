@@ -21,7 +21,7 @@ describe('RolesEnum department mapping', function (): void {
     test('maps every role to its department regardless of tier', function (): void {
         expect(RolesEnum::ROLE_INDICATEUR_BOURGMESTRE_ADMIN->getDepartment())
             ->toBe(DepartmentCourrierEnum::BGM)
-            ->and(RolesEnum::ROLE_INDICATEUR_VILLE->getDepartment())
+            ->and(RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->getDepartment())
             ->toBe(DepartmentCourrierEnum::VILLE)
             ->and(RolesEnum::ROLE_INDICATEUR_CPAS_READ->getDepartment())
             ->toBe(DepartmentCourrierEnum::CPAS)
