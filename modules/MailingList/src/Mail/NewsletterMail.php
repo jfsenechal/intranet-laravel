@@ -33,7 +33,7 @@ final class NewsletterMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mailing-list-view::emails.newsletter',
+            view: 'mailing-list::emails.newsletter',
             with: [
                 'body' => $this->email->body,
                 'recipientName' => $this->recipientName,

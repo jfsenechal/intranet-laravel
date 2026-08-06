@@ -34,6 +34,12 @@ it('can render the index page', function (): void {
         ->assertOk();
 });
 
+it('can render the rgpd modal content', function (): void {
+    livewire(ListEmails::class)
+        ->mountAction('rgpd')
+        ->assertOk();
+});
+
 it('can render the create page', function (): void {
     livewire(CreateEmail::class)
         ->assertOk();

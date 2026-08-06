@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
-use AcMarche\Pst\Policies\RegisterPolicies;
 use Illuminate\Support\ServiceProvider;
 
 final class MailingListServiceProvider extends ServiceProvider
@@ -21,7 +20,6 @@ final class MailingListServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        RegisterPolicies::register();
         $this->bootModule();
     }
 

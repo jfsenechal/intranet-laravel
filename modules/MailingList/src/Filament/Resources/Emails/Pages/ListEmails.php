@@ -25,7 +25,7 @@ final class ListEmails extends ListRecords
                 ->icon(Heroicon::InformationCircle)
                 ->color('info')
                 ->modalHeading('Un rappel des règles RGPD concernant le Mailing Lists')
-                ->modalContent(fn (): View => view('mailing-list-view::doc'))
+                ->modalContent(fn (): View => view('mailing-list::doc'))
                 ->modalSubmitAction(false),
             CreateAction::make()
                 ->label('Nouvel e-mail')
