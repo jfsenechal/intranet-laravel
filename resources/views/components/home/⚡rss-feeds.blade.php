@@ -11,6 +11,11 @@ new
 class extends Component
 {
     /**
+     * Several publishers reject requests without a browser-like User-Agent.
+     */
+    public const string USER_AGENT = 'Mozilla/5.0 (compatible; IntranetBot/1.0; +https://www.marche.be)';
+
+    /**
      * @var list<array{title: string, url: string}>
      */
     public const array RSS_FEEDS = [
@@ -19,6 +24,29 @@ class extends Component
         ['title' => 'UVCW', 'url' => 'https://www.uvcw.be/rss/fil-rss.xml'],
         ['title' => 'DH Luxembourg', 'url' => 'https://www.dhnet.be/rss/section/regions/luxembourg.xml'],
     ];
+
+    /**
+     * The UVCW feed publishes entities with the ampersand swapped for the word " et ",
+     * so "l&apos;Union" arrives as "l et apos;Union". Rebuild and decode those.
+     *
+     * A candidate is only substituted when it decodes to something else, which leaves
+     * ordinary French text such as "les communes et provinces;" untouched.
+     */
+    public function repairMangledEntities(string $value): string
+    {
+        $repaired = preg_replace_callback(
+            '/ et (#\d{1,7}|#x[0-9a-f]{1,6}|[a-z][a-z0-9]{1,30});/i',
+            function (array $matches): string {
+                $entity = '&'.$matches[1].';';
+                $decoded = html_entity_decode($entity, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                return $decoded === $entity ? $matches[0] : $decoded;
+            },
+            $value,
+        );
+
+        return mb_trim($repaired ?? $value);
+    }
 
     /**
      * @return array<int, array{title: string, link: string, source: string, date: ?string}>
@@ -30,7 +58,9 @@ class extends Component
 
             foreach (self::RSS_FEEDS as $feed) {
                 try {
-                    $response = Http::timeout(5)->get($feed['url']);
+                    $response = Http::timeout(5)
+                        ->withHeaders(['User-Agent' => self::USER_AGENT])
+                        ->get($feed['url']);
 
                     if (! $response->successful()) {
                         continue;
@@ -44,13 +74,15 @@ class extends Component
 
                     $entries = $xml->channel->item ?? $xml->entry ?? [];
 
-                    foreach ($entries as $index => $entry) {
-                        if ($index >= 5) {
+                    $count = 0;
+
+                    foreach ($entries as $entry) {
+                        if ($count++ >= 5) {
                             break;
                         }
 
                         $items[] = [
-                            'title' => mb_trim((string) ($entry->title ?? '')),
+                            'title' => $this->repairMangledEntities((string) ($entry->title ?? '')),
                             'link' => mb_trim((string) ($entry->link ?? '')),
                             'source' => $feed['title'],
                             'date' => (string) ($entry->pubDate ?? $entry->published ?? '') ?: null,
