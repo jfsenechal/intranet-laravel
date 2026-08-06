@@ -9,7 +9,6 @@ use AcMarche\Agent\Filament\Actions\SendWelcomeMailAction;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
 use AcMarche\Agent\Filament\Resources\Profiles\Schemas\ProfileInfolist;
 use AcMarche\Agent\Models\Profile;
-use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -40,14 +39,8 @@ final class ViewProfile extends ViewRecord
         return [
             EditAction::make()
                 ->icon(Heroicon::PencilSquare),
-            ActionGroup::make([
-                ExportResumeAction::make(),
-                SendWelcomeMailAction::make(),
-            ])
-                ->label('Exporter...')
-                ->icon(Heroicon::ArrowUpTray)
-                ->color('success')
-                ->button(),
+            ExportResumeAction::make(),
+            SendWelcomeMailAction::make(),
             DeleteAction::make()
                 ->icon(Heroicon::Trash),
         ];
