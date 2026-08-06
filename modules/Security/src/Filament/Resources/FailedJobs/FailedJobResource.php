@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\FailedJobs;
+namespace AcMarche\Security\Filament\Resources\FailedJobs;
 
-use App\Filament\Resources\FailedJobs\Pages\ListFailedJobs;
+use AcMarche\Security\Filament\Resources\FailedJobs\Pages\ListFailedJobs;
 use App\Models\FailedJob;
 use BackedEnum;
 use Filament\Actions\Action;

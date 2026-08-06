@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\FailedJobs\Pages;
+namespace AcMarche\Security\Filament\Resources\FailedJobs\Pages;
 
-use App\Filament\Resources\FailedJobs\FailedJobResource;
+use AcMarche\Security\Filament\Resources\FailedJobs\FailedJobResource;
 use App\Models\FailedJob;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;

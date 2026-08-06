@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\FailedJobs\FailedJobResource;
-use App\Filament\Resources\Jobs\JobResource;
+use AcMarche\Security\Filament\Resources\FailedJobs\FailedJobResource;
+use AcMarche\Security\Filament\Resources\Jobs\JobResource;
 use App\Models\FailedJob;
 use App\Models\Job;
 use Filament\Support\Icons\Heroicon;
@@ -37,12 +37,12 @@ final class QueueStatsWidget extends BaseWidget
                 ->description($pending > 0 ? 'En file d\'attente' : 'File vide')
                 ->descriptionIcon(Heroicon::OutlinedQueueList)
                 ->color($pending > 0 ? 'info' : 'gray')
-                ->url(JobResource::getUrl()),
+                ->url(JobResource::getUrl(panel: 'security-panel')),
             Stat::make('Jobs échoués', $failed)
                 ->description($failed > 0 ? 'À examiner' : 'Aucun échec')
                 ->descriptionIcon($failed > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
                 ->color($failed > 0 ? 'danger' : 'success')
-                ->url(FailedJobResource::getUrl()),
+                ->url(FailedJobResource::getUrl(panel: 'security-panel')),
         ];
     }
 }

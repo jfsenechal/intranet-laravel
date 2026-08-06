@@ -54,6 +54,15 @@ it('renders the pending and failed counts for administrators', function (): void
         ->assertSee('2');
 });
 
+it('links to the job resources in the security panel', function (): void {
+    $this->actingAs(User::factory()->create(['is_administrator' => true]));
+
+    livewire(QueueStatsWidget::class)
+        ->assertOk()
+        ->assertSee(route('filament.security-panel.resources.jobs.index'))
+        ->assertSee(route('filament.security-panel.resources.failed-jobs.index'));
+});
+
 it('is hidden from non-administrators', function (): void {
     $this->actingAs(User::factory()->create(['is_administrator' => false]));
     expect(QueueStatsWidget::canView())->toBeFalse();

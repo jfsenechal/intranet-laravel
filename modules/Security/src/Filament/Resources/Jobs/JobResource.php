@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\Jobs;
+namespace AcMarche\Security\Filament\Resources\Jobs;
 
-use App\Filament\Resources\Jobs\Pages\ListJobs;
+use AcMarche\Security\Filament\Resources\Jobs\Pages\ListJobs;
 use App\Models\Job;
 use BackedEnum;
 use Filament\Actions\Action;

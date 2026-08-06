@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Filament\Resources\FailedJobs\FailedJobResource;
-use App\Filament\Resources\FailedJobs\Pages\ListFailedJobs;
-use App\Filament\Resources\Jobs\JobResource;
-use App\Filament\Resources\Jobs\Pages\ListJobs;
+use AcMarche\Security\Filament\Resources\FailedJobs\FailedJobResource;
+use AcMarche\Security\Filament\Resources\FailedJobs\Pages\ListFailedJobs;
+use AcMarche\Security\Filament\Resources\Jobs\JobResource;
+use AcMarche\Security\Filament\Resources\Jobs\Pages\ListJobs;
 use App\Models\FailedJob;
 use App\Models\Job;
 use App\Models\User;
@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel('admin-panel');
+    Filament::setCurrentPanel('security-panel');
 });
 
 function insertPendingJob(): void
