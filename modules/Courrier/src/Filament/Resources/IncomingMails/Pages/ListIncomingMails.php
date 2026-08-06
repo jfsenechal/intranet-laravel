@@ -17,6 +17,8 @@ final class ListIncomingMails extends ListRecords
     #[Override]
     protected static string $resource = IncomingMailResource::class;
 
+    protected static ?string $title = 'Courriers du jour';
+
     public function getSubheading(): string|Htmlable|null
     {
         return new HtmlString(
