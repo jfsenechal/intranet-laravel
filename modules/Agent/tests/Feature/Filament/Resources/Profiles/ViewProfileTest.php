@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\Agent\Enums\RolesEnum;
 use AcMarche\Agent\Filament\Resources\Profiles\Pages\ViewProfile;
+use AcMarche\Agent\Mail\ProfileChangesMail;
 use AcMarche\Agent\Mail\ShareProfileMail;
 use AcMarche\Agent\Mail\WelcomeMail;
 use AcMarche\Agent\Models\Profile;
@@ -282,6 +283,73 @@ describe('share profile action', function (): void {
                 'notes' => null,
             ])
             ->assertHasActionErrors(['email']);
+
+        Mail::assertNothingQueued();
+    });
+});
+
+describe('send profile changes action', function (): void {
+    it('renders the send changes action for an agent administrator', function (): void {
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertActionExists('sendProfileChanges');
+    });
+
+    it('hides the send changes action from an agent the profile was not delegated to', function (): void {
+        $agentRole = Role::factory()->create(['name' => RolesEnum::ROLE_AGENT->value]);
+        $user = User::factory()->create(['is_administrator' => false]);
+        $user->roles()->attach($agentRole);
+        $this->actingAs($user);
+
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertActionHidden('sendProfileChanges');
+    });
+
+    it('mails the changes to the it department with a copy to the sender', function (): void {
+        Mail::fake();
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('sendProfileChanges', data: [
+                'notes' => 'Nouveau bureau et nouveau numéro de téléphone',
+            ])
+            ->assertHasNoActionErrors();
+
+        Mail::assertQueued(
+            ProfileChangesMail::class,
+            fn (ProfileChangesMail $mail): bool => $mail->profile->is($profile)
+                && $mail->notes === 'Nouveau bureau et nouveau numéro de téléphone'
+                && $mail->hasTo('informatique@marche.be')
+                && $mail->hasCc($this->adminUser->email)
+        );
+    });
+
+    it('requires the changes to be described', function (): void {
+        Mail::fake();
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('sendProfileChanges', data: [
+                'notes' => null,
+            ])
+            ->assertHasActionErrors(['notes']);
+
+        Mail::assertNothingQueued();
+    });
+
+    it('sends nothing when the it address is not configured', function (): void {
+        Mail::fake();
+        config()->set('agent.informatique_email', null);
+        $profile = Profile::factory()->create();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('sendProfileChanges', data: [
+                'notes' => 'Nouveau bureau',
+            ])
+            ->assertHasNoActionErrors();
 
         Mail::assertNothingQueued();
     });

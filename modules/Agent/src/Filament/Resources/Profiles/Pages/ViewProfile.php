@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Filament\Resources\Profiles\Pages;
 
 use AcMarche\Agent\Filament\Actions\ExportResumeAction;
+use AcMarche\Agent\Filament\Actions\SendProfileChangesAction;
 use AcMarche\Agent\Filament\Actions\SendWelcomeMailAction;
 use AcMarche\Agent\Filament\Actions\ShareProfileAction;
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
@@ -43,6 +44,7 @@ final class ViewProfile extends ViewRecord
             ExportResumeAction::make(),
             SendWelcomeMailAction::make(),
             ShareProfileAction::make(),
+            SendProfileChangesAction::make(),
             DeleteAction::make()
                 ->icon(Heroicon::Trash),
         ];
