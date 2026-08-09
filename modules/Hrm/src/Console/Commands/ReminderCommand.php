@@ -109,15 +109,36 @@ final class ReminderCommand extends Command
     }
 
     /**
-     * Restrict a query to records whose employee has at least one contract
-     * within the given employer set.
+     * Restrict an employee query to the given employer set.
+     *
+     * The department an employee belongs to is read from their active contracts
+     * only: someone who moved between departments keeps their old contracts, and
+     * those must not pull their reminders back into the department they left.
+     * When no active contract answers the question, the department is unknown
+     * rather than none, so the employee is kept in every department run instead
+     * of losing the reminder altogether.
+     *
+     * @param  list<int>  $employerIds
+     */
+    private function scopeEmployeeToEmployers(Builder $employee, array $employerIds): void
+    {
+        $employee->where(function (Builder $query) use ($employerIds): void {
+            $query->whereHas('activeContracts', function (Builder $contracts) use ($employerIds): void {
+                $contracts->whereIn('employer_id', $employerIds);
+            })->orWhereDoesntHave('activeContracts');
+        });
+    }
+
+    /**
+     * Restrict a query to records whose employee belongs to the given employer
+     * set.
      *
      * @param  list<int>  $employerIds
      */
     private function whereEmployeeBelongsToEmployers(Builder $query, array $employerIds): void
     {
-        $query->whereHas('employee.contracts', function (Builder $contracts) use ($employerIds): void {
-            $contracts->whereIn('employer_id', $employerIds);
+        $query->whereHas('employee', function (Builder $employee) use ($employerIds): void {
+            $this->scopeEmployeeToEmployers($employee, $employerIds);
         });
     }
 
@@ -200,9 +221,13 @@ final class ReminderCommand extends Command
      */
     private function sendContracts(Carbon $today, array $employerIds, array $recipients): void
     {
+        // A contract carries its own employer, so it is scoped on that rather
+        // than on the employee: an employee who moved between departments still
+        // has contracts on both sides, and each one belongs to a single
+        // department.
         Contract::query()
             ->whereDate('reminder_date', $today)
-            ->tap(fn (Builder $query) => $this->whereEmployeeBelongsToEmployers($query, $employerIds))
+            ->whereIn('employer_id', $employerIds)
             ->with('employee')
             ->get()
             ->each(function (Contract $contract) use ($recipients): void {
@@ -225,9 +250,7 @@ final class ReminderCommand extends Command
         Employee::query()
             ->where('status', StatusEnum::STUDENT)
             ->whereDate('reminder_date', $today)
-            ->whereHas('activeContracts', function (Builder $contracts) use ($employerIds): void {
-                $contracts->whereIn('employer_id', $employerIds);
-            })
+            ->tap(fn (Builder $query) => $this->scopeEmployeeToEmployers($query, $employerIds))
             ->get()
             ->each(function (Employee $employee) use ($recipients): void {
                 $this->dispatchMail(
@@ -249,10 +272,9 @@ final class ReminderCommand extends Command
         Evaluation::query()
             ->whereDate('next_evaluation_date', $today)
             ->whereHas('employee', function (Builder $employee) use ($employerIds): void {
-                $employee->where('status', StatusEnum::AGENT)
-                    ->whereHas('activeContracts', function (Builder $contracts) use ($employerIds): void {
-                        $contracts->whereIn('employer_id', $employerIds);
-                    });
+                $employee->where('status', StatusEnum::AGENT);
+
+                $this->scopeEmployeeToEmployers($employee, $employerIds);
             })
             ->with('employee')
             ->get()
@@ -276,9 +298,7 @@ final class ReminderCommand extends Command
         Employee::query()
             ->where('status', StatusEnum::AGENT)
             ->whereDate('reminder_date', $today)
-            ->whereHas('activeContracts', function (Builder $contracts) use ($employerIds): void {
-                $contracts->whereIn('employer_id', $employerIds);
-            })
+            ->tap(fn (Builder $query) => $this->scopeEmployeeToEmployers($query, $employerIds))
             ->get()
             ->each(function (Employee $employee) use ($recipients): void {
                 $this->dispatchMail(
@@ -415,10 +435,9 @@ final class ReminderCommand extends Command
         Internship::query()
             ->whereDate('reminder_date', $today)
             ->whereHas('employee', function (Builder $employee) use ($employerIds): void {
-                $employee->where('is_archived', false)
-                    ->whereHas('activeContracts', function (Builder $contracts) use ($employerIds): void {
-                        $contracts->whereIn('employer_id', $employerIds);
-                    });
+                $employee->where('is_archived', false);
+
+                $this->scopeEmployeeToEmployers($employee, $employerIds);
             })
             ->with('employee')
             ->get()
