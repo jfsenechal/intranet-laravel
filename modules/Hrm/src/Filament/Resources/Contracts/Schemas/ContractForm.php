@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Contracts\Schemas;
 
 use AcMarche\Hrm\Enums\ContractStatusEnum;
+use AcMarche\Hrm\Models\PayScale;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -62,9 +63,8 @@ final class ContractForm
                             ->preload(),
                         Select::make('pay_scale_id')
                             ->label('Echelle')
-                            ->relationship('payScale', 'name')
-                            ->searchable()
-                            ->preload(),
+                            ->options(fn (): array => PayScale::groupedSelectOptions())
+                            ->searchable(),
                         TextInput::make('job_title')
                             ->label('Fonction')
                             ->maxLength(250),

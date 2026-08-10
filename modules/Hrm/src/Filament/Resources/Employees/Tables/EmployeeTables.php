@@ -7,9 +7,9 @@ namespace AcMarche\Hrm\Filament\Resources\Employees\Tables;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Filters\DirectionFilter;
 use AcMarche\Hrm\Filament\Filters\EmployerFilter;
+use AcMarche\Hrm\Filament\Filters\PayScaleFilter;
 use AcMarche\Hrm\Filament\Filters\ServiceFilter;
 use AcMarche\Hrm\Models\Employee;
-use AcMarche\Hrm\Models\PayScale;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -96,17 +96,7 @@ final class EmployeeTables
                     ->options(StatusEnum::class)
                     ->default(StatusEnum::AGENT->value),
                 EmployerFilter::makeThrough('contracts'),
-                SelectFilter::make('pay_scale_id')
-                    ->label('Echelle')
-                    ->options(fn (): array => PayScale::query()
-                        ->with('employer')
-                        ->orderBy('employer_id')
-                        ->orderBy('name')
-                        ->get()
-                        ->groupBy(fn (PayScale $payScale): string => $payScale->employer?->name ?? 'Sans employeur')
-                        ->map(fn ($group) => $group->pluck('name', 'id')->all())
-                        ->all())
-                    ->preload(),
+                PayScaleFilter::make(),
                 ServiceFilter::make()
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['value'] ?? null,

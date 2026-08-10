@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Employees\Schemas;
 use AcMarche\Hrm\Enums\InternTypeEnum;
 use AcMarche\Hrm\Enums\ListOptions;
 use AcMarche\Hrm\Enums\StatusEnum;
+use AcMarche\Hrm\Models\PayScale;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -132,9 +133,8 @@ final class EmployeeForm
                                     ->schema([
                                         Select::make('pay_scale_id')
                                             ->label('Echelle')
-                                            ->relationship('payScale', 'name')
-                                            ->searchable()
-                                            ->preload(),
+                                            ->options(fn (): array => PayScale::groupedSelectOptions())
+                                            ->searchable(),
                                         TextInput::make('pay_scale_code')
                                             ->label('Code barème')
                                             ->maxLength(255),
