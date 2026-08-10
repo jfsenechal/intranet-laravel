@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\WebPushServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     AcMarche\ActivityManager\Providers\Filament\ActivityManagerPanelProvider::class,
     AcMarche\Ad\Providers\Filament\AdPanelProvider::class,

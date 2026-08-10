@@ -6,12 +6,24 @@ namespace AcMarche\GuichetHdv\Notifications;
 
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\GuichetHdv\Models\Ticket;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
 
-final class TicketAssignedPush extends Notification
+final class TicketAssignedPush extends Notification implements ShouldQueue
 {
+    use Queueable;
+    use SerializesModels;
+
+    /**
+     * Drop the job instead of failing it when the ticket is gone by the time
+     * the worker picks it up — a push about a deleted ticket is pointless.
+     */
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(public readonly Ticket $ticket) {}
 
     /**
@@ -34,7 +46,10 @@ final class TicketAssignedPush extends Notification
             ))
             ->icon('/images/Marche_logo.png')
             ->badge('/images/Marche_logo.png')
-            ->data(['url' => TicketsOfTheDay::getUrl()])
+            // The panel must be named explicitly: on a queue worker there is no
+            // current panel, so Filament would fall back to the default one and
+            // fail to find this page's route.
+            ->data(['url' => TicketsOfTheDay::getUrl(panel: 'guichet-hdv-panel')])
             ->options(['TTL' => 600]);
     }
 }

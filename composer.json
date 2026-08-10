@@ -269,7 +269,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel-notification-channels/webpush"
+            ]
         }
     },
     "config": {

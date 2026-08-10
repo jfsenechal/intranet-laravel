@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "293e355b3ef2842bb2bf1286dd258678",
+    "content-hash": "d8eb0a6bdb86bc5acef813967e504d09",
     "packages": [
         {
             "name": "acmarche/activity-manager",
