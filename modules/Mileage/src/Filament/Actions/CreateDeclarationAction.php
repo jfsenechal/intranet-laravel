@@ -25,7 +25,7 @@ final class CreateDeclarationAction
                 ->schema([
                     Select::make('budget_article_id')
                         ->label('Article budgétaire')
-                        ->options(BudgetArticle::query()->pluck('name', 'id'))
+                        ->options(BudgetArticle::displayNameOptions('id'))
                         ->required()
                         ->searchable(),
                 ])

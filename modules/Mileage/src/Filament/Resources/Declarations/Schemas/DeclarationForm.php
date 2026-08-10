@@ -96,7 +96,7 @@ final class DeclarationForm
                         Select::make('budget_article')
                             ->label('Article budgétaire')
                             ->required()
-                            ->options(BudgetArticle::query()->pluck('name', 'name'))
+                            ->options(BudgetArticle::displayNameOptions())
                             ->searchable(),
 
                         TextInput::make('departments')
@@ -118,7 +118,7 @@ final class DeclarationForm
                     Select::make('budget_article')
                         ->label('Article budgétaire')
                         ->required()
-                        ->options(BudgetArticle::query()->pluck('name', 'name'))
+                        ->options(BudgetArticle::displayNameOptions())
                         ->searchable(),
                     TextInput::make('iban')
                         ->label('IBAN')

@@ -55,7 +55,7 @@
         <tr>
             <th class="border border-gray-300 p-3 bg-gray-50 text-left">Article budgétaire</th>
             <td class="border border-gray-300 p-3">
-                {{ $declaration->budget_article }}
+                {{ $declaration->display_budget_article }}
             </td>
         </tr>
     </table>

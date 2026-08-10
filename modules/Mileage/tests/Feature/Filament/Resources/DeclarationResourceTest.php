@@ -70,6 +70,41 @@ it('shows the personal information contact details on the view page', function (
         ->assertDontSee('Vieille rue 1');
 });
 
+it('labels the budget article with its codes on the view page', function (): void {
+    BudgetArticle::factory()->create([
+        'name' => 'Frais de déplacement',
+        'functional_code' => '104/123',
+        'economic_code' => '48',
+    ]);
+    $declaration = Declaration::factory()->create([
+        'user_add' => 'jdupont',
+        'budget_article' => 'Frais de déplacement',
+    ]);
+
+    livewire(ViewDeclaration::class, ['record' => $declaration->id])
+        ->assertOk()
+        ->assertSee('104/123 - 48 Frais de déplacement');
+});
+
+it('labels the budget article with its codes in the edit form select', function (): void {
+    BudgetArticle::factory()->create([
+        'name' => 'Frais de déplacement',
+        'functional_code' => '104/123',
+        'economic_code' => '48',
+    ]);
+    $declaration = Declaration::factory()->create([
+        'user_add' => 'jdupont',
+        'budget_article' => 'Frais de déplacement',
+    ]);
+
+    livewire(EditDeclaration::class, ['record' => $declaration->id])
+        ->assertOk()
+        ->assertSchemaComponentStateSet('budget_article', 'Frais de déplacement');
+
+    expect(BudgetArticle::displayNameOptions())
+        ->toBe(['Frais de déplacement' => '104/123 - 48 Frais de déplacement']);
+});
+
 it('can render the edit page', function (): void {
     $declaration = Declaration::factory()->create(['user_add' => 'jdupont']);
 

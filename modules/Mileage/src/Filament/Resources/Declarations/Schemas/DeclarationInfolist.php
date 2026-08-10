@@ -63,7 +63,7 @@ final class DeclarationInfolist
                             ->label('Tarif omnium (€/km)')
                             ->money('EUR', decimalPlaces: 4)
                             ->visible(fn ($record): bool => $record->omnium),
-                        TextEntry::make('budget_article')
+                        TextEntry::make('display_budget_article')
                             ->label('Article budgétaire')
                             ->columnSpanFull(),
                         TextEntry::make('college_date')

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\PersonalInformation;
 use App\Models\User;
@@ -120,6 +121,23 @@ test('hasOutdatedIban is true when the personal information holds another accoun
     ]);
 
     expect($declaration->hasOutdatedIban())->toBeTrue();
+});
+
+test('the budget article is displayed with its codes', function (): void {
+    BudgetArticle::factory()->create([
+        'name' => 'Frais de déplacement',
+        'functional_code' => '104/123',
+        'economic_code' => '48',
+    ]);
+    $declaration = Declaration::factory()->create(['budget_article' => 'Frais de déplacement']);
+
+    expect($declaration->display_budget_article)->toBe('104/123 - 48 Frais de déplacement');
+});
+
+test('the budget article falls back to the name stored on the declaration', function (): void {
+    $declaration = Declaration::factory()->create(['budget_article' => 'Article supprimé']);
+
+    expect($declaration->display_budget_article)->toBe('Article supprimé');
 });
 
 test('hasOutdatedIban ignores formatting differences', function (): void {

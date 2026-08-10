@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Factory\PdfFactory;
+use AcMarche\Mileage\Models\BudgetArticle;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Trip;
@@ -106,4 +107,15 @@ test('the pdf falls back to the declaration contact details when no personal inf
         ->toContain('6900 Marche')
         ->toContain('BE68 5390 0754 7034')
         ->not->toContain('Compte utilisé lors de la déclaration');
+});
+
+test('the pdf shows the budget article with its codes', function (): void {
+    BudgetArticle::factory()->create([
+        'name' => 'Frais de déplacement',
+        'functional_code' => '104/123',
+        'economic_code' => '48',
+    ]);
+    $declaration = Declaration::factory()->create(['budget_article' => 'Frais de déplacement']);
+
+    expect(renderDeclarationPdf($declaration))->toContain('104/123 - 48 Frais de déplacement');
 });

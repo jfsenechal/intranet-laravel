@@ -131,6 +131,17 @@ final class Declaration extends Model
         return Attribute::get(fn (): ?string => $this->fromPersonalInformation('iban') ?? $this->iban);
     }
 
+    /**
+     * The budget article as `functional_code - economic_code name`, or the bare name stored on the
+     * declaration when the article no longer exists.
+     *
+     * @return Attribute<?string, never>
+     */
+    protected function displayBudgetArticle(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->budgetArticle?->display_name ?? $this->budget_article);
+    }
+
     protected function casts(): array
     {
         return [
