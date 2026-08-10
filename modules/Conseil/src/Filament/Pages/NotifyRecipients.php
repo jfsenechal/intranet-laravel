@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Conseil\Filament\Pages;
 
+use AcMarche\Conseil\Enums\RolesEnum;
 use AcMarche\Conseil\Mail\ConseilNotificationMail;
 use AcMarche\Conseil\Models\Attachment;
 use AcMarche\Conseil\Models\Group;
@@ -24,6 +25,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Override;
@@ -46,6 +48,17 @@ final class NotifyRecipients extends Page implements HasForms
 
     #[Override]
     protected static ?string $navigationLabel = 'Notifier les destinataires';
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        $user = Auth::user();
+
+        if ($user?->isAdministrator()) {
+            return true;
+        }
+
+        return $user?->hasRole(RolesEnum::ROLE_CONSEIL_ADMIN->value) ?? false;
+    }
 
     public function getTitle(): string
     {
