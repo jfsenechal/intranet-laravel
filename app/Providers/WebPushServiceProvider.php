@@ -10,13 +10,16 @@ use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushServiceProvider as BaseWebPushServiceProvider;
 
 /**
- * Replaces the package provider (see the "dont-discover" entry in composer.json)
- * so that Minishlink\WebPush is built with a PSR-3 logger.
+ * Rebinds Minishlink\WebPush so it is built with a PSR-3 logger.
  *
  * Without a logger the library reports unmet requirements — such as the optional
  * GMP/BCMath extensions — through trigger_error(). Laravel turns those notices
- * into an ErrorException, so a purely informational advisory aborts the request
- * that sends the notification. With a logger they are written to the log instead.
+ * into an ErrorException, so a purely informational advisory aborts whatever is
+ * sending the notification. With a logger they are written to the log instead.
+ *
+ * The package provider is still auto-discovered; this one extends it and is
+ * registered in bootstrap/providers.php, so it boots afterwards and its binding
+ * wins. Extending also keeps webPushAuth() — the VAPID wiring — owned upstream.
  */
 final class WebPushServiceProvider extends BaseWebPushServiceProvider
 {

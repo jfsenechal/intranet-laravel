@@ -19,12 +19,14 @@ function resolveChannelWebPush(): WebPush
     return $property->getValue($channel);
 }
 
-it('replaces the package provider so the binding stays under our control', function (): void {
+it('boots after the auto-discovered package provider so our binding wins', function (): void {
     $loaded = array_keys(app()->getLoadedProviders());
 
+    // Both are registered; ours is loaded from bootstrap/providers.php, which
+    // Laravel boots after the package-manifest providers.
     expect($loaded)
         ->toContain(App\Providers\WebPushServiceProvider::class)
-        ->not->toContain(PackageWebPushServiceProvider::class);
+        ->toContain(PackageWebPushServiceProvider::class);
 });
 
 it('builds WebPush with a PSR-3 logger so requirement advisories are logged, not thrown', function (): void {
