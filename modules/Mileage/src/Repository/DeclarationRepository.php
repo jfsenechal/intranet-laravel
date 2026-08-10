@@ -42,6 +42,7 @@ final class DeclarationRepository
     public static function getOneDeclarationByUsername(string $username): ?Declaration
     {
         return Declaration::query()
+            ->with('personalInformation')
             ->where('user_add', $username)
             ->first();
     }

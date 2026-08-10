@@ -37,16 +37,19 @@ final class DeclarationInfolist
                                 ->label('Nom'),
                         ])->grow(false),
                         Flex::make([
-                            TextEntry::make('street')
+                            TextEntry::make('display_street')
                                 ->label('Rue'),
-                            TextEntry::make('city')
+                            TextEntry::make('display_city')
                                 ->label('Localité'),
                         ])->grow(false),
                         Flex::make([
-                            TextEntry::make('postal_code')
+                            TextEntry::make('display_postal_code')
                                 ->label('Code postal'),
-                            TextEntry::make('iban')
-                                ->label('Iban'),
+                            TextEntry::make('display_iban')
+                                ->label('Iban')
+                                ->helperText(fn (Declaration $record): ?string => $record->hasOutdatedIban()
+                                    ? 'Compte utilisé lors de la déclaration : '.$record->iban
+                                    : null),
                         ])->grow(false),
                     ]),
                 Section::make('Tarifs et classification')

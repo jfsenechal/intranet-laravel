@@ -21,9 +21,14 @@
 
     @if($declaration)
         <div class="mb-4">
-            <p>{{ $declaration->street }}</p>
-            <p>{{ $declaration->postal_code }} {{ $declaration->city }}</p>
-            <p><strong>Numéro de compte :</strong> {{ $declaration->iban }}</p>
+            <p>{{ $declaration->display_street }}</p>
+            <p>{{ $declaration->display_postal_code }} {{ $declaration->display_city }}</p>
+            <p><strong>Numéro de compte :</strong> {{ $declaration->display_iban }}</p>
+            @if($declaration->hasOutdatedIban())
+                <p class="text-xs text-gray-500">
+                    Compte utilisé lors de la déclaration : {{ $declaration->iban }}
+                </p>
+            @endif
             <p>
                 <strong>Omnium :</strong>
                 @if($declaration->omnium)

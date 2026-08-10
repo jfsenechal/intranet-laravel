@@ -20,7 +20,7 @@ final readonly class PdfFactory
 
     public function createFromDeclaration(Declaration $declaration): array
     {
-        $declaration->load('trips');
+        $declaration->load(['trips', 'personalInformation']);
         $calculator = new DeclarationCalculator($declaration);
         $declarationSummary = $calculator->calculate();
         $name = 'deplacement-'.$declaration->user_add.'-'.$declaration->created_at->format('d-m-Y').'.pdf';

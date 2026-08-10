@@ -6,6 +6,7 @@ use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Factory\PdfFactory;
 use AcMarche\Mileage\Models\Declaration;
+use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Trip;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -63,4 +64,46 @@ test('the pdf header uses the CPAS branding for a CPAS declaration', function ()
         ->toContain('Le C.P.A.S. doit à :')
         ->not->toContain('Administration communale')
         ->not->toContain('Délibération du Collège Communal');
+});
+
+test('the pdf shows the up to date contact details and the account used for the declaration', function (): void {
+    $declaration = Declaration::factory()->create([
+        'street' => 'Vieille rue 1',
+        'postal_code' => '6900',
+        'city' => 'Marche',
+        'iban' => 'BE68 5390 0754 7034',
+    ]);
+    PersonalInformation::factory()->create([
+        'username' => $declaration->user_add,
+        'street' => 'Nouvelle rue 2',
+        'postal_code' => '6987',
+        'city' => 'Rendeux',
+        'iban' => 'BE62 5100 0754 7061',
+    ]);
+
+    $html = renderDeclarationPdf($declaration);
+
+    expect($html)
+        ->toContain('Nouvelle rue 2')
+        ->toContain('6987 Rendeux')
+        ->toContain('BE62 5100 0754 7061')
+        ->toContain('Compte utilisé lors de la déclaration : BE68 5390 0754 7034')
+        ->not->toContain('Vieille rue 1');
+});
+
+test('the pdf falls back to the declaration contact details when no personal information exists', function (): void {
+    $declaration = Declaration::factory()->create([
+        'street' => 'Vieille rue 1',
+        'postal_code' => '6900',
+        'city' => 'Marche',
+        'iban' => 'BE68 5390 0754 7034',
+    ]);
+
+    $html = renderDeclarationPdf($declaration);
+
+    expect($html)
+        ->toContain('Vieille rue 1')
+        ->toContain('6900 Marche')
+        ->toContain('BE68 5390 0754 7034')
+        ->not->toContain('Compte utilisé lors de la déclaration');
 });

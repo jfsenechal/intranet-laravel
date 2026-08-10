@@ -30,11 +30,16 @@
                     </h3>
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <p>{{ $declaration->street }}</p>
-                            <p>{{ $declaration->postal_code }} {{ $declaration->city }}</p>
+                            <p>{{ $declaration->display_street }}</p>
+                            <p>{{ $declaration->display_postal_code }} {{ $declaration->display_city }}</p>
                         </div>
                         <div>
-                            <p><strong>IBAN :</strong> {{ $declaration->iban }}</p>
+                            <p><strong>IBAN :</strong> {{ $declaration->display_iban }}</p>
+                            @if($declaration->hasOutdatedIban())
+                                <p class="text-xs text-gray-500">
+                                    Compte utilisé lors de la déclaration : {{ $declaration->iban }}
+                                </p>
+                            @endif
                             <p><strong>Omnium :</strong> {{ $declaration->omnium ? 'Oui' : 'Non' }}</p>
                             @if($declaration->college_date)
                                 <p><strong>Délibé Collège :</strong> {{ $declaration->college_date->format('d-m-Y') }}</p>

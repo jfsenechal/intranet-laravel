@@ -36,14 +36,20 @@
             </td>
             <td class="border border-gray-300 p-3">
                 {{ strtoupper($declaration->last_name) }} {{ $declaration->first_name }}<br/>
-                {{ $declaration->street }}<br/>
-                {{ $declaration->postal_code }} {{ $declaration->city }}
+                {{ $declaration->display_street }}<br/>
+                {{ $declaration->display_postal_code }} {{ $declaration->display_city }}
             </td>
         </tr>
         <tr>
             <th class="border border-gray-300 p-3 bg-gray-50 text-left">N° de compte IBAN</th>
             <td class="border border-gray-300 p-3">
-                {{ $declaration->iban }}
+                {{ $declaration->display_iban }}
+                @if($declaration->hasOutdatedIban())
+                    <br/>
+                    <span class="text-xs text-gray-500">
+                        Compte utilisé lors de la déclaration : {{ $declaration->iban }}
+                    </span>
+                @endif
             </td>
         </tr>
         <tr>

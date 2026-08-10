@@ -51,6 +51,25 @@ it('can render the view page', function (): void {
         ->assertOk();
 });
 
+it('shows the personal information contact details on the view page', function (): void {
+    $declaration = Declaration::factory()->create([
+        'user_add' => 'jdupont',
+        'street' => 'Vieille rue 1',
+        'iban' => 'BE68 5390 0754 7034',
+    ]);
+    PersonalInformation::where('username', 'jdupont')->update([
+        'street' => 'Nouvelle rue 2',
+        'iban' => 'BE62 5100 0754 7061',
+    ]);
+
+    livewire(ViewDeclaration::class, ['record' => $declaration->id])
+        ->assertOk()
+        ->assertSee('Nouvelle rue 2')
+        ->assertSee('BE62 5100 0754 7061')
+        ->assertSee('Compte utilisé lors de la déclaration : BE68 5390 0754 7034')
+        ->assertDontSee('Vieille rue 1');
+});
+
 it('can render the edit page', function (): void {
     $declaration = Declaration::factory()->create(['user_add' => 'jdupont']);
 
