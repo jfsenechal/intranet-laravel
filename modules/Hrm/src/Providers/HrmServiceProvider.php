@@ -11,6 +11,7 @@ use AcMarche\Hrm\Console\Commands\PurgeCommand;
 use AcMarche\Hrm\Console\Commands\RelocateUploadedFilesCommand;
 use AcMarche\Hrm\Console\Commands\ReminderCommand;
 use AcMarche\Hrm\Console\Commands\SyncEmployeeCommand;
+use AcMarche\Hrm\Console\Commands\WrapRichTextCommand;
 use AcMarche\Hrm\Enums\RolesEnum;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -38,6 +39,7 @@ final class HrmServiceProvider extends ServiceProvider
                 RelocateUploadedFilesCommand::class,
                 ReminderCommand::class,
                 SyncEmployeeCommand::class,
+                WrapRichTextCommand::class,
             ]);
         }
         $this->bootModule();
