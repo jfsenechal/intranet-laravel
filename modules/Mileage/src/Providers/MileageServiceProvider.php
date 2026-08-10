@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
+use AcMarche\Mileage\Console\Commands\FixZeroTripRatesCommand;
 use AcMarche\Mileage\Console\Commands\VerifyTripRatesCommand;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +25,7 @@ final class MileageServiceProvider extends ServiceProvider
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
+                FixZeroTripRatesCommand::class,
                 VerifyTripRatesCommand::class,
             ]);
         }
