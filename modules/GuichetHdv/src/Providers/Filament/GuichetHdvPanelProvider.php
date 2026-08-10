@@ -10,9 +10,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -47,6 +49,15 @@ final class GuichetHdvPanelProvider extends PanelProvider
             ->pages([])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\GuichetHdv\\Filament\\Widgets')
             ->widgets([])
+            ->navigationItems([
+                NavigationItem::make('guichet-screen')
+                    ->label('Page écran Hdv')
+                    ->icon(Heroicon::OutlinedTv)
+                    ->group('Paramètres')
+                    ->sort(4)
+                    ->url(fn (): string => (string) config('guichet-hdv.screen_url'), shouldOpenInNewTab: true)
+                    ->visible(fn (): bool => filled(config('guichet-hdv.screen_url'))),
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
