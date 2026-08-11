@@ -25,7 +25,7 @@ return new class() extends Migration
                 $table->renameColumn('localite', 'city');
                 $table->renameColumn('telephone', 'phone');
                 $table->renameColumn('gsm', 'mobile');
-                $table->removeColumn('user');
+                $table->dropColumn('user');
                 $table->renameColumn('remarque', 'comment');
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');

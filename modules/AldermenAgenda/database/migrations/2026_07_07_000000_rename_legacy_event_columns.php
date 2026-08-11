@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::connection('maria-aldermen-agenda')->table('events', function (Blueprint $table): void {
             if (Schema::connection('maria-aldermen-agenda')->hasColumn('events', 'slugname')) {
-                $table->removeColumn('slugname');
+                $table->dropColumn('slugname');
             }
 
             if (Schema::connection('maria-aldermen-agenda')->hasColumn('events', 'object')) {

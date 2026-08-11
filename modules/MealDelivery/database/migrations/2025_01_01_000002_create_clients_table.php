@@ -21,7 +21,9 @@ return new class extends Migration
                 $table->renameColumn('civilite', 'salutation');
                 $table->renameColumn('nom', 'last_name');
                 $table->renameColumn('prenom', 'first_name');
-                $table->removeColumn('slugname');
+                if (Schema::connection('maria-meal-delivery')->hasColumn('clients', 'slugname')) {
+                    $table->dropColumn('slugname');
+                }
                 $table->renameColumn('rue', 'street');
                 $table->renameColumn('numero', 'number');
                 $table->renameColumn('code_postal', 'postal_code');
@@ -35,7 +37,7 @@ return new class extends Migration
                 $table->renameColumn('remarque', 'notes');
                 $table->renameColumn('commande_recurrente', 'recurring_order');
                 $table->renameColumn('tournee_id', 'route_id');
-                $table->removeColumn('tournee_save');
+                $table->dropColumn('tournee_save');
                 $table->renameColumn('is_actif', 'is_active');
                 $table->renameColumn('createdAt', 'created_at');
                 $table->renameColumn('updatedAt', 'updated_at');

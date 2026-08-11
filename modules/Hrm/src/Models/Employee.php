@@ -55,7 +55,6 @@ use Illuminate\Support\Str;
  * @property \Carbon\CarbonImmutable|null $mail_sent_at
  * @property int|null $mail_count
  * @property string|null $priority
- * @property int|null $employeur_save_id
  * @property string $user_add
  * @property bool $is_archived
  * @property bool|null $show_birthday
@@ -76,8 +75,6 @@ use Illuminate\Support\Str;
  * @property string|null $professional_phone_extension
  * @property string|null $longitude
  * @property string|null $latitude
- * @property string|null $phone_office
- * @property string|null $mobile_office
  * @property bool|null $show_photo
  * @property string|null $emergency_contact
  * @property string|null $note

@@ -64,13 +64,13 @@ return new class extends Migration
                 $table->renameColumn('candi_courrier_nombre', 'mail_count');
                 $table->renameColumn('candi_prioritaire', 'priority');
                 $table->renameColumn('candi_service_id', 'candidate_service_id');
-                $table->removeColumn('employeur_save_id');
+                $table->dropColumn('employeur_save_id');
                 $table->renameColumn('echelle_id', 'pay_scale_id');
                 $table->renameColumn('prerequis_id', 'prerequisite_id');
                 $table->renameColumn('mutuelle_id', 'health_insurance_id');
                 $table->renameColumn('image_display', 'show_photo');
-                $table->removeColumn('phone_office');
-                $table->removeColumn('mobile_office');
+                $table->dropColumn('phone_office');
+                $table->dropColumn('mobile_office');
                 $table->boolean('is_new_hire')->default(false);
             });
         } elseif (! Schema::connection($this->connection)->hasTable('employees')) {

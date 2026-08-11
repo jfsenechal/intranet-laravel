@@ -21,7 +21,7 @@ return new class extends Migration
                 function (Blueprint $table): void {
                     $table->renameColumn('nom', 'last_name');
                     $table->renameColumn('prenom', 'first_name');
-                    $table->removeColumn('slug');
+                    $table->dropColumn('slug');
                 }
             );
         } elseif (! Schema::connection('maria-aldermen-agenda')->hasTable('aldermen_recipients')) {
