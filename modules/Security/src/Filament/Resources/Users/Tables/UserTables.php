@@ -99,6 +99,7 @@ final class UserTables
                 TextColumn::make('email')
                     ->label('Email')
                     ->sortable()
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('roles.name')
                     ->label('Rôles')
