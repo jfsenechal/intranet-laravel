@@ -32,3 +32,5 @@ tests/Browser/Screenshots
 **/caddy
 frankenphp
 frankenphp-worker.php
+rr
+.rr.yaml

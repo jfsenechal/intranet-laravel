@@ -185,6 +185,8 @@
         "spatie/browsershot": "^5.2.3",
         "spatie/laravel-pdf": "^2.1.1",
         "spatie/laravel-sluggable": "^3.8",
+        "spiral/roadrunner-cli": "^2.6.0",
+        "spiral/roadrunner-http": "^3.3.0",
         "stechstudio/filament-impersonate": "^5.3",
         "symfony/process": "^7.4",
         "tangodev-it/filament-emoji-picker": "^3.0"
