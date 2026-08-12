@@ -23,9 +23,11 @@ final class ProfileTables
             ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('last_name')
-                    ->label('Nom'),
+                    ->label('Nom')
+                    ->searchable(),
                 TextColumn::make('first_name')
-                    ->label('Prénom'),
+                    ->label('Prénom')
+                    ->searchable(),
                 TextColumn::make('username')
                     ->label('Identifiant Ldap')
                     ->sortable()
