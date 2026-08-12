@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Filament\Resources\Profiles\Pages;
 
 use AcMarche\Agent\Filament\Resources\Profiles\ProfileResource;
+use AcMarche\Agent\Models\Profile;
+use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Repository\LdapRepository;
 use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -38,7 +41,23 @@ final class CreateProfile extends CreateRecord
     {
         if ($this->employeeId !== null) {
             $this->employee = Employee::query()
+                ->with('activeContracts.service')
                 ->find($this->employeeId);
+
+            $existingProfile = Profile::query()
+                ->where('employee_id', $this->employeeId)
+                ->first();
+
+            if ($existingProfile instanceof Profile) {
+                Notification::make()
+                    ->title('Un profil existe déjà pour cet agent')
+                    ->warning()
+                    ->send();
+
+                $this->redirect(ViewProfile::getUrl(['record' => $existingProfile->getKey()], panel: 'agent-panel'));
+
+                return;
+            }
         }
 
         parent::mount();
@@ -61,7 +80,13 @@ final class CreateProfile extends CreateRecord
         $components = [];
         if ($this->employee instanceof Employee) {
             $services = $this->employee->activeContracts
-                ->map(fn ($contract) => $contract->service?->name)
+                ->map(fn (Contract $contract): ?string => $contract->service?->name)
+                ->filter()
+                ->unique()
+                ->implode(', ');
+
+            $jobFunctions = $this->employee->activeContracts
+                ->pluck('job_title')
                 ->filter()
                 ->unique()
                 ->implode(', ');
@@ -75,6 +100,9 @@ final class CreateProfile extends CreateRecord
                     TextEntry::make('first_name')
                         ->label('Prénom')
                         ->state($this->employee->first_name),
+                    TextEntry::make('job_functions')
+                        ->label('Fonctions (contrats actifs)')
+                        ->state($jobFunctions !== '' ? $jobFunctions : '—'),
                     TextEntry::make('services')
                         ->label('Services (contrats actifs)')
                         ->state($services !== '' ? $services : '—'),
