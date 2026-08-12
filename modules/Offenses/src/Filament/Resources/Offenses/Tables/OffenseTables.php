@@ -24,6 +24,11 @@ final class OffenseTables
             ->defaultSort('decision_date', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
+                TextColumn::make('offenseAct.name')
+                    ->label('Acte')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('offender.last_name')
                     ->label('Nom')
                     ->searchable()
@@ -31,11 +36,6 @@ final class OffenseTables
 
                 TextColumn::make('offender.first_name')
                     ->label('Prénom')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('offenseAct.name')
-                    ->label('Acte')
                     ->searchable()
                     ->sortable(),
 

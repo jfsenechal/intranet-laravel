@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Offenses\Filament\Resources\Offenses\Pages;
 
+use AcMarche\Offenses\Filament\Resources\Offenders\OffenderResource;
 use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
 use AcMarche\Offenses\Models\Offense;
 use Filament\Actions\Action;
@@ -28,6 +29,12 @@ final class ViewOffense extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('backToOffender')
+                ->label('Retour au contrevenant')
+                ->icon(Heroicon::ArrowLeft)
+                ->color('gray')
+                ->visible(fn (Offense $record): bool => $record->offender !== null)
+                ->url(fn (Offense $record): string => OffenderResource::getUrl('view', ['record' => $record->offender_id])),
             Action::make('download')
                 ->label('Télécharger le document')
                 ->icon('tabler-download')
