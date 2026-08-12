@@ -44,17 +44,10 @@ final class CreateProfile extends CreateRecord
                 ->with('activeContracts.service')
                 ->find($this->employeeId);
 
-            $existingProfile = Profile::query()
-                ->where('employee_id', $this->employeeId)
-                ->first();
+            $existingProfile = $this->existingProfileForEmployee();
 
             if ($existingProfile instanceof Profile) {
-                Notification::make()
-                    ->title('Un profil existe déjà pour cet agent')
-                    ->warning()
-                    ->send();
-
-                $this->redirect(ViewProfile::getUrl(['record' => $existingProfile->getKey()], panel: 'agent-panel'));
+                $this->redirectToExistingProfile($existingProfile);
 
                 return;
             }
@@ -124,6 +117,20 @@ final class CreateProfile extends CreateRecord
         return $schema->schema($components);
     }
 
+    /**
+     * The employee may have been given a profile by somebody else while this page was open.
+     */
+    protected function beforeCreate(): void
+    {
+        $existingProfile = $this->existingProfileForEmployee();
+
+        if ($existingProfile instanceof Profile) {
+            $this->redirectToExistingProfile($existingProfile);
+
+            $this->halt();
+        }
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['uuid'] ??= (string) Str::uuid();
@@ -145,5 +152,27 @@ final class CreateProfile extends CreateRecord
         }
 
         return $data;
+    }
+
+    private function existingProfileForEmployee(): ?Profile
+    {
+        if ($this->employeeId === null) {
+            return null;
+        }
+
+        return Profile::query()
+            ->where('employee_id', $this->employeeId)
+            ->first();
+    }
+
+    private function redirectToExistingProfile(Profile $profile): void
+    {
+        Notification::make()
+            ->title('Un profil existe déjà pour cet agent')
+            ->body('Vous avez été redirigé vers le profil existant.')
+            ->warning()
+            ->send();
+
+        $this->redirect(ViewProfile::getUrl(['record' => $profile->getKey()], panel: 'agent-panel'));
     }
 }

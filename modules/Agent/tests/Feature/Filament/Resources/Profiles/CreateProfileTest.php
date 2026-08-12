@@ -50,6 +50,35 @@ it('redirects to the existing profile when the employee already has one', functi
         ->assertRedirect(ViewProfile::getUrl(['record' => $profile->getKey()], panel: 'agent-panel'));
 });
 
+it('creates the profile of an employee who has none', function (): void {
+    $employee = Employee::factory()->create(['first_name' => 'Alice', 'last_name' => 'Martin']);
+
+    Livewire::withQueryParams(['employee_id' => $employee->getKey()])
+        ->test(CreateProfile::class)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Profile::query()->where('employee_id', $employee->getKey())->first())
+        ->not->toBeNull()
+        ->first_name->toBe('Alice')
+        ->last_name->toBe('Martin');
+});
+
+it('does not create a second profile when one appeared for the employee meanwhile', function (): void {
+    $employee = Employee::factory()->create();
+
+    $component = Livewire::withQueryParams(['employee_id' => $employee->getKey()])
+        ->test(CreateProfile::class);
+
+    $profile = Profile::factory()->create(['employee_id' => $employee->getKey()]);
+
+    $component
+        ->call('create')
+        ->assertRedirect(ViewProfile::getUrl(['record' => $profile->getKey()], panel: 'agent-panel'));
+
+    expect(Profile::query()->where('employee_id', $employee->getKey())->count())->toBe(1);
+});
+
 it('shows a placeholder when the employee has no job function', function (): void {
     $employee = Employee::factory()->create();
     Contract::factory()->create([
