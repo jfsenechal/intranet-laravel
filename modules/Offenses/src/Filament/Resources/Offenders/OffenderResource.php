@@ -8,6 +8,7 @@ use AcMarche\Offenses\Filament\Resources\Offenders\Pages\CreateOffender;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\EditOffender;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\ListOffenders;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\ViewOffender;
+use AcMarche\Offenses\Filament\Resources\Offenders\RelationManagers\OffensesRelationManager;
 use AcMarche\Offenses\Filament\Resources\Offenders\Schemas\OffenderForm;
 use AcMarche\Offenses\Filament\Resources\Offenders\Schemas\OffenderInfolist;
 use AcMarche\Offenses\Filament\Resources\Offenders\Tables\OffenderTables;
@@ -48,6 +49,13 @@ final class OffenderResource extends Resource
     public static function table(Table $table): Table
     {
         return OffenderTables::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            OffensesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

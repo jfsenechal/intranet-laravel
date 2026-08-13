@@ -33,8 +33,10 @@ final class ViewOffender extends ViewRecord
                 ->icon(Heroicon::Plus)
                 ->color('success')
                 ->url(OffenseResource::getUrl('create', $id)),
-            EditAction::make()->icon(Heroicon::Pencil),
-            DeleteAction::make()->icon(Heroicon::Trash),
+            EditAction::make()
+                ->icon(Heroicon::Pencil),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 }

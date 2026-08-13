@@ -12,4 +12,6 @@ final class CreateOffender extends CreateRecord
 {
     #[Override]
     protected static string $resource = OffenderResource::class;
+
+    protected static ?string $title = 'Ajouter un contrevenant';
 }
