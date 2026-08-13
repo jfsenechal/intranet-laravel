@@ -47,7 +47,8 @@ it('embeds the attachment preview for a user who can download it', function (): 
 
     livewire(ViewIncomingMail::class, ['record' => $mail->id])
         ->assertSee('Pièce jointe')
-        ->assertSee(route('courrier.attachments.preview-stored', $attachment));
+        ->assertSee(route('courrier.attachments.preview-stored', $attachment))
+        ->assertSee('Ouvrir dans un nouvel onglet');
 });
 
 it('hides the attachment preview from an index user who cannot download it', function (): void {
