@@ -12,33 +12,54 @@ use Override;
 
 final class CreateOffense extends CreateRecord
 {
+    /**
+     * Kept as a Livewire property: the `offender_id` query string is only present on the initial
+     * page load, not on the subsequent Livewire update requests (file uploads, live fields, save).
+     */
+    public ?int $offenderId = null;
+
     #[Override]
     protected static string $resource = OffenseResource::class;
 
+    private ?Offender $offender = null;
+
+    #[Override]
+    public function mount(): void
+    {
+        $offenderId = request()->query('offender_id');
+        $this->offenderId = $offenderId ? (int) $offenderId : null;
+
+        abort_unless($this->getOffender() instanceof Offender, 404, 'Contrevenant introuvable');
+
+        parent::mount();
+    }
+
     public function getTitle(): string|Htmlable
     {
-        if ($offender = $this->getOffenderFromQuery()) {
+        if (($offender = $this->getOffender()) instanceof Offender) {
             return 'Ajouter une incivilité pour '.$offender->last_name.' '.$offender->first_name;
         }
 
-        abort(404, 'Contrevenant introuvable');
+        return 'Ajouter une incivilité';
     }
 
     protected function fillForm(): void
     {
         $data = [];
 
-        if ($offender = $this->getOffenderFromQuery()) {
+        if (($offender = $this->getOffender()) instanceof Offender) {
             $data['offender_id'] = $offender->id;
         }
 
         $this->form->fill($data);
     }
 
-    private function getOffenderFromQuery(): ?Offender
+    private function getOffender(): ?Offender
     {
-        $offenderId = request()->query('offender_id');
+        if ($this->offender instanceof Offender) {
+            return $this->offender;
+        }
 
-        return $offenderId ? Offender::find($offenderId) : null;
+        return $this->offender = $this->offenderId ? Offender::find($this->offenderId) : null;
     }
 }
