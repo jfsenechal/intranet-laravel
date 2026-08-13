@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas;
 
+use AcMarche\Courrier\Models\Attachment;
+use AcMarche\Courrier\Models\IncomingMail;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 final class IncomingMailInfolist
 {
@@ -96,9 +101,60 @@ final class IncomingMailInfolist
                             ->prose(),
                     ])
                     ->visible(fn ($record): bool => filled($record->content)
-                        && $record->attachments->isNotEmpty()
-                        && auth()->user()?->can('download', $record->attachments->first()))
+                        && self::canPreviewAttachment($record))
                     ->collapsed(),
+
+                Section::make('Pièce jointe')
+                    ->icon('tabler-paperclip')
+                    ->schema([
+                        View::make('courrier::components.attachment-preview')
+                            ->viewData(fn ($record): array => self::attachmentPreviewData($record)),
+                    ])
+                    ->visible(fn ($record): bool => self::canPreviewAttachment($record)
+                        && self::hasStoredFile($record)),
             ]);
+    }
+
+    /**
+     * The mail's attachment may only be shown to users allowed to download it;
+     * users who merely index a department can see the mail but not its file.
+     */
+    private static function canPreviewAttachment(IncomingMail $incomingMail): bool
+    {
+        $attachment = $incomingMail->attachments->first();
+
+        return $attachment instanceof Attachment
+            && (Auth::user()?->can('download', $attachment) ?? false);
+    }
+
+    /**
+     * Legacy mail sometimes references a file that is no longer on disk; the
+     * preview route would 404 and leave an empty frame, so hide it instead.
+     */
+    private static function hasStoredFile(IncomingMail $incomingMail): bool
+    {
+        $attachment = $incomingMail->attachments->first();
+
+        return $attachment instanceof Attachment
+            && $attachment->path !== null
+            && Storage::disk(config('courrier.storage.disk'))->exists($attachment->path);
+    }
+
+    /**
+     * @return array{url: string, contentType: string, filename: string}
+     */
+    private static function attachmentPreviewData(IncomingMail $incomingMail): array
+    {
+        $attachment = $incomingMail->attachments->first();
+
+        if (! $attachment instanceof Attachment) {
+            return ['url' => '', 'contentType' => '', 'filename' => ''];
+        }
+
+        return [
+            'url' => route('courrier.attachments.preview-stored', $attachment),
+            'contentType' => $attachment->mime ?? '',
+            'filename' => $attachment->file_name,
+        ];
     }
 }
