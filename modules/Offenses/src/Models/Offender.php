@@ -41,6 +41,14 @@ final class Offender extends Model
                 $offender->slug = self::uniqueSlug($offender);
             }
         });
+
+        /**
+         * `offenses.offender_id` is an ON DELETE RESTRICT foreign key, so the offenses have to go
+         * first. They are deleted one by one on purpose, so each one removes its own uploaded file.
+         */
+        self::deleting(function (self $offender): void {
+            $offender->offenses()->get()->each(fn (Offense $offense): ?bool => $offense->delete());
+        });
     }
 
     protected function casts(): array

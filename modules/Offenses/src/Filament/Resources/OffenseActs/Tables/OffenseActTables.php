@@ -35,7 +35,10 @@ final class OffenseActTables
             ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    // A used act refuses to be deleted, so the bulk action reports it as a failed
+                    // record and the untouched acts stay in the table.
+                    DeleteBulkAction::make()
+                        ->modalDescription("Seuls les types d'actes qui ne sont utilisés par aucune incivilité seront supprimés."),
                 ]),
             ]);
     }

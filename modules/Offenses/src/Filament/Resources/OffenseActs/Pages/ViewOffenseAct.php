@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Offenses\Filament\Resources\OffenseActs\Pages;
 
 use AcMarche\Offenses\Filament\Resources\OffenseActs\OffenseActResource;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
@@ -39,7 +38,7 @@ final class ViewOffenseAct extends ViewRecord
     {
         return [
             EditAction::make()->icon(Heroicon::Pencil),
-            DeleteAction::make()->icon(Heroicon::Trash),
+            OffenseActResource::deleteAction(),
         ];
     }
 }

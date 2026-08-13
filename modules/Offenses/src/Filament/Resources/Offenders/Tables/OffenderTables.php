@@ -56,7 +56,8 @@ final class OffenderTables
             ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->modalDescription('Les incivilités de ces contrevenants et leurs fichiers joints seront également supprimés. Cette action est irréversible.'),
                 ]),
             ]);
     }

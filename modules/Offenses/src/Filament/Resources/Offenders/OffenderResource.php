@@ -51,6 +51,23 @@ final class OffenderResource extends Resource
         return OffenderTables::configure($table);
     }
 
+    /**
+     * Deleting an offender cascades onto its offenses and their uploaded files, so the
+     * confirmation modal has to say how much is about to go.
+     */
+    public static function deletionWarning(int $offenseCount): string
+    {
+        if ($offenseCount === 0) {
+            return 'Êtes-vous sûr de vouloir supprimer ce contrevenant ? Cette action est irréversible.';
+        }
+
+        return trans_choice(
+            '{1} :count incivilité et son fichier joint seront également supprimés.|[2,*] :count incivilités et leurs fichiers joints seront également supprimés.',
+            $offenseCount,
+            ['count' => $offenseCount],
+        ).' Cette action est irréversible.';
+    }
+
     public static function getRelations(): array
     {
         return [

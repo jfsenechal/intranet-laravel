@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Offenses\Filament\Resources\OffenseActs\Pages;
 
 use AcMarche\Offenses\Filament\Resources\OffenseActs\OffenseActResource;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Override;
@@ -19,7 +18,7 @@ final class EditOffenseAct extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            OffenseActResource::deleteAction(),
         ];
     }
 }
