@@ -19,8 +19,14 @@ it('allows a user with courrier admin role to view any services', function (): v
     expect(auth()->user()->can('viewAny', Service::class))->toBeTrue();
 });
 
-it('denies a regular user to view any services', function (): void {
-    expect(auth()->user()->can('viewAny', Service::class))->toBeFalse();
+it('allows a regular user to view any services', function (): void {
+    expect(auth()->user()->can('viewAny', Service::class))->toBeTrue();
+});
+
+it('allows a regular user to view a service', function (): void {
+    $service = Service::factory()->create();
+
+    expect(auth()->user()->can('view', $service))->toBeTrue();
 });
 
 it('allows an administrator to create a service', function (): void {
