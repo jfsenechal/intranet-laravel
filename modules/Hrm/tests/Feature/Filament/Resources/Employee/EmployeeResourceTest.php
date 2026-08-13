@@ -622,7 +622,7 @@ describe('create actions with relationship selects', function (): void {
     });
 });
 
-describe('export csv action', function (): void {
+describe('export xlsx action', function (): void {
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListEmployees::class)
             ->assertActionExists('export');
@@ -648,5 +648,22 @@ describe('export csv action', function (): void {
         Livewire::test(ListEmployees::class)
             ->callAction('export', data: ['columns' => []])
             ->assertHasActionErrors(['columns']);
+    });
+
+    it('streams an xlsx file', function (): void {
+        Employee::factory(2)->create();
+
+        $response = new EmployeeExport(Employee::query())->downloadXlsx('agents.xlsx');
+
+        expect($response->headers->get('Content-Type'))
+            ->toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->and($response->headers->get('Content-Disposition'))
+            ->toContain('agents.xlsx');
+
+        ob_start();
+        $response->sendContent();
+        $content = (string) ob_get_clean();
+
+        expect($content)->toStartWith('PK');
     });
 });
