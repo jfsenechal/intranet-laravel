@@ -10,6 +10,7 @@ use AcMarche\Hrm\Console\Commands\ExpireNewHiresCommand;
 use AcMarche\Hrm\Console\Commands\PurgeCommand;
 use AcMarche\Hrm\Console\Commands\RelocateUploadedFilesCommand;
 use AcMarche\Hrm\Console\Commands\ReminderCommand;
+use AcMarche\Hrm\Console\Commands\SmsReminderCommand;
 use AcMarche\Hrm\Console\Commands\SyncEmployeeCommand;
 use AcMarche\Hrm\Console\Commands\WrapRichTextCommand;
 use AcMarche\Hrm\Enums\RolesEnum;
@@ -38,6 +39,7 @@ final class HrmServiceProvider extends ServiceProvider
                 PurgeCommand::class,
                 RelocateUploadedFilesCommand::class,
                 ReminderCommand::class,
+                SmsReminderCommand::class,
                 SyncEmployeeCommand::class,
                 WrapRichTextCommand::class,
             ]);

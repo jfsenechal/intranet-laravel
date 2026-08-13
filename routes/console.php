@@ -16,3 +16,5 @@ Schedule::command('cpas-library:resume')->weeklyOn(1, '01:00');
 foreach (DepartmentEnum::cases() as $department) {
     Schedule::command('hrm:reminders '.mb_strtolower($department->value))->daily();
 }
+// SMS reaches people on their phone, so it waits until a decent hour.
+Schedule::command('hrm:sms-reminders')->dailyAt('06:00');
