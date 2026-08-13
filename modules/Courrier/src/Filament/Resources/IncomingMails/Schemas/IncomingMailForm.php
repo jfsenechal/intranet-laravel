@@ -10,7 +10,6 @@ use AcMarche\Courrier\Models\Category;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Sender;
-use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\RecipientRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
@@ -92,12 +91,7 @@ final class IncomingMailForm
                                     ),
                             ])
                             ->columnSpanFull(),
-                        Select::make('services')
-                            ->label('Services')
-                            ->multiple()
-                            ->searchable()
-                            ->preload()
-                            ->options(fn (): array => Service::query()->orderBy('name')->pluck('name', 'id')->all()),
+                        self::getServicesSelect('services', 'Services'),
                         Select::make('destinataires')
                             ->label('Destinataires')
                             ->multiple()
@@ -224,18 +218,8 @@ final class IncomingMailForm
                     ->columns(2),
                 Section::make('Affectation')
                     ->schema([
-                        Select::make('primary_services')
-                            ->label('Services principaux')
-                            ->options(ServiceRepository::findAllActiveOrdered())
-                            ->multiple()
-                            ->searchable()
-                            ->preload(),
-                        Select::make('secondary_services')
-                            ->label('Services secondaires')
-                            ->options(ServiceRepository::findAllActiveOrdered())
-                            ->multiple()
-                            ->searchable()
-                            ->preload(),
+                        self::getServicesSelect('primary_services', 'Services principaux'),
+                        self::getServicesSelect('secondary_services', 'Services secondaires'),
                         Select::make('primary_recipients')
                             ->label('Destinataires principaux')
                             ->options(RecipientRepository::getForOptions())
@@ -274,6 +258,26 @@ final class IncomingMailForm
                     ])
                     ->visible(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
             ]);
+    }
+
+    /**
+     * Service picker. Options are preloaded so the full list is browsable, but
+     * typing runs a server-side search that also matches the initials, since
+     * that is how services are usually named day to day.
+     */
+    private static function getServicesSelect(string $name, string $label): Select
+    {
+        return Select::make($name)
+            ->label($label)
+            ->options(ServiceRepository::findAllActiveOrdered())
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->getSearchResultsUsing(
+                fn (string $search): array => ServiceRepository::searchByNameOrInitials($search)->all(),
+            )
+            ->searchPrompt('Rechercher un service par nom ou initiales')
+            ->noSearchResultsMessage('Aucun service trouvé.');
     }
 
     /**
