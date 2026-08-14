@@ -28,8 +28,10 @@ return new class extends Migration
         } elseif (! Schema::connection('maria-offenses')->hasTable('offenses')) {
             Schema::connection('maria-offenses')->create('offenses', function (Blueprint $table): void {
                 $table->id();
-                $table->foreignId('offender_id')->nullable()->constrained('offenders')->nullOnDelete();
-                $table->foreignId('offense_act_id')->nullable()->constrained('offense_acts')->nullOnDelete();
+                // The legacy database restricts both, and the models rely on it: an offender
+                // deletes its offenses first, an act in use refuses to be deleted at all.
+                $table->foreignId('offender_id')->nullable()->constrained('offenders')->restrictOnDelete();
+                $table->foreignId('offense_act_id')->nullable()->constrained('offense_acts')->restrictOnDelete();
                 $table->date('decision_date')->nullable();
                 $table->double('fine_amount')->nullable();
                 $table->boolean('mediation')->default(false);

@@ -49,6 +49,7 @@ uses(
     '../modules/MealDelivery/tests/Feature',
     '../modules/MealDelivery/tests/Unit',
     '../modules/WhoIsWho/tests/Feature',
+    '../modules/Offenses/tests/Feature',
 );
 
 uses(

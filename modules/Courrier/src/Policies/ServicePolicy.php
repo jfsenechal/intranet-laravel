@@ -12,29 +12,33 @@ final class ServicePolicy
     /**
      * Perform pre-authorization checks.
      */
-    public function before(User $user): bool
+    public function before(User $user): ?bool
     {
         if ($user->isAdministrator()) {
             return true;
         }
 
-        return $this->isAdministrator($user);
+        return null;
     }
 
     /**
      * Determine whether the user can view any models.
+     *
+     * Always allowed; the services list is public to every authenticated user.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(): bool
     {
-        return $this->isAdministrator($user);
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
+     *
+     * Always allowed; a service holds no sensitive data.
      */
-    public function view(User $user): bool
+    public function view(): bool
     {
-        return $this->isAdministrator($user);
+        return true;
     }
 
     /**

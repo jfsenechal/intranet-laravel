@@ -6,6 +6,7 @@ namespace AcMarche\Offenses\Filament\Resources\Offenders\Pages;
 
 use AcMarche\Offenses\Filament\Resources\Offenders\OffenderResource;
 use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
+use AcMarche\Offenses\Models\Offender;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -33,8 +34,11 @@ final class ViewOffender extends ViewRecord
                 ->icon(Heroicon::Plus)
                 ->color('success')
                 ->url(OffenseResource::getUrl('create', $id)),
-            EditAction::make()->icon(Heroicon::Pencil),
-            DeleteAction::make()->icon(Heroicon::Trash),
+            EditAction::make()
+                ->icon(Heroicon::Pencil),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash)
+                ->modalDescription(fn (Offender $record): string => OffenderResource::deletionWarning($record->offenses()->count())),
         ];
     }
 }

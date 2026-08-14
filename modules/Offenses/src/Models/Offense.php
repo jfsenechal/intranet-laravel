@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 #[Connection('maria-offenses')]
 #[Fillable([
@@ -38,6 +39,12 @@ final class Offense extends Model
     protected static function booted(): void
     {
         self::bootHasUser();
+
+        self::deleted(function (self $offense): void {
+            if (filled($offense->file_name)) {
+                Storage::disk(config('offenses.storage.disk'))->delete($offense->file_name);
+            }
+        });
     }
 
     protected function casts(): array

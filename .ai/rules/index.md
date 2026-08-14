@@ -6,3 +6,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | modules/**/src/Filament/** | .ai/rules/filament.md |
 | modules/Mileage/** | .ai/rules/mileage.md |
+| modules/*/src/Filament/Resources/**/Pages/*.php | .ai/rules/pages.md |

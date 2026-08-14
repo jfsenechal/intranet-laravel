@@ -8,6 +8,7 @@ use AcMarche\Offenses\Filament\Resources\Offenders\Pages\CreateOffender;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\EditOffender;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\ListOffenders;
 use AcMarche\Offenses\Filament\Resources\Offenders\Pages\ViewOffender;
+use AcMarche\Offenses\Filament\Resources\Offenders\RelationManagers\OffensesRelationManager;
 use AcMarche\Offenses\Filament\Resources\Offenders\Schemas\OffenderForm;
 use AcMarche\Offenses\Filament\Resources\Offenders\Schemas\OffenderInfolist;
 use AcMarche\Offenses\Filament\Resources\Offenders\Tables\OffenderTables;
@@ -48,6 +49,30 @@ final class OffenderResource extends Resource
     public static function table(Table $table): Table
     {
         return OffenderTables::configure($table);
+    }
+
+    /**
+     * Deleting an offender cascades onto its offenses and their uploaded files, so the
+     * confirmation modal has to say how much is about to go.
+     */
+    public static function deletionWarning(int $offenseCount): string
+    {
+        if ($offenseCount === 0) {
+            return 'Êtes-vous sûr de vouloir supprimer ce contrevenant ? Cette action est irréversible.';
+        }
+
+        return trans_choice(
+            '{1} :count incivilité et son fichier joint seront également supprimés.|[2,*] :count incivilités et leurs fichiers joints seront également supprimés.',
+            $offenseCount,
+            ['count' => $offenseCount],
+        ).' Cette action est irréversible.';
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            OffensesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

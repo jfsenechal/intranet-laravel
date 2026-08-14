@@ -4,35 +4,29 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Console\Commands;
 
-use AcMarche\App\Sms\InforiusClient;
+use AcMarche\Hrm\Console\Commands\Concerns\SendsDepartmentReminders;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ViewDeadline;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
-use AcMarche\Hrm\Filament\Resources\SmsReminders\Pages\ViewSmsReminder;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
-use AcMarche\Hrm\Mail\ReminderMail;
 use AcMarche\Hrm\Models\Absence;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Deadline;
 use AcMarche\Hrm\Models\Employee;
-use AcMarche\Hrm\Models\Employer;
 use AcMarche\Hrm\Models\Evaluation;
 use AcMarche\Hrm\Models\Internship;
-use AcMarche\Hrm\Models\SmsReminder;
 use AcMarche\Hrm\Models\Training;
-use Filament\Facades\Filament;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Console\Command\Command as SfCommand;
-use Throwable;
 
 final class ReminderCommand extends Command
 {
+    use SendsDepartmentReminders;
+
     /**
      * The name and signature of the console command.
      *
@@ -45,12 +39,12 @@ final class ReminderCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Send all daily reminders to the requested department';
+    protected $description = 'Send the daily mail reminders to the requested department (SMS reminders have their own command)';
 
     public function handle(): int
     {
         $department = (string) $this->argument('department');
-        $recipients = (array) config("hrm.reminders.recipients.{$department}", []);
+        $recipients = $this->recipientsFor($department);
 
         if ($recipients === []) {
             $this->error("No recipients configured for department '{$department}'.");
@@ -58,10 +52,7 @@ final class ReminderCommand extends Command
             return SfCommand::FAILURE;
         }
 
-        // Filament resource URLs are panel-scoped. There is no "current panel"
-        // in a console context, so resolve them against the HRM panel that owns
-        // these resources instead of the default panel.
-        Filament::setCurrentPanel('hrm-panel');
+        $this->useHrmPanel();
 
         $employerIds = $this->employerIdsFor($department);
 
@@ -81,84 +72,8 @@ final class ReminderCommand extends Command
         $this->sendEvolutions($today, $employerIds, $recipients);
         $this->sendTrainings($today, $employerIds, $recipients);
         $this->sendInternships($today, $employerIds, $recipients);
-        $this->sendSmsReminders($today, $employerIds, $recipients);
 
         return SfCommand::SUCCESS;
-    }
-
-    /**
-     * Build the employer set for a department: the root employer (matched by
-     * slug) plus all of its direct children.
-     *
-     * @return list<int>
-     */
-    private function employerIdsFor(string $department): array
-    {
-        $root = Employer::query()->where('slug', $department)->first();
-
-        if (! $root instanceof Employer) {
-            return [];
-        }
-
-        return Employer::query()
-            ->where('id', $root->id)
-            ->orWhere('parent_id', $root->id)
-            ->orderBy('name')
-            ->pluck('id')
-            ->all();
-    }
-
-    /**
-     * Restrict an employee query to the given employer set.
-     *
-     * The department an employee belongs to is read from their active contracts
-     * only: someone who moved between departments keeps their old contracts, and
-     * those must not pull their reminders back into the department they left.
-     * When no active contract answers the question, the department is unknown
-     * rather than none, so the employee is kept in every department run instead
-     * of losing the reminder altogether.
-     *
-     * @param  list<int>  $employerIds
-     */
-    private function scopeEmployeeToEmployers(Builder $employee, array $employerIds): void
-    {
-        $employee->where(function (Builder $query) use ($employerIds): void {
-            $query->whereHas('activeContracts', function (Builder $contracts) use ($employerIds): void {
-                $contracts->whereIn('employer_id', $employerIds);
-            })->orWhereDoesntHave('activeContracts');
-        });
-    }
-
-    /**
-     * Restrict a query to records whose employee belongs to the given employer
-     * set.
-     *
-     * @param  list<int>  $employerIds
-     */
-    private function whereEmployeeBelongsToEmployers(Builder $query, array $employerIds): void
-    {
-        $query->whereHas('employee', function (Builder $employee) use ($employerIds): void {
-            $this->scopeEmployeeToEmployers($employee, $employerIds);
-        });
-    }
-
-    /**
-     * @param  list<string>  $recipients
-     * @param  bool  $withRecordName  Adds the record's own name to the mail subject
-     */
-    private function dispatchMail(array $recipients, string $reminderType, Model $record, string $url, ?Employee $employee, bool $withRecordName = false): void
-    {
-        Mail::to($recipients)->send(new ReminderMail(
-            reminderType: $reminderType,
-            record: $record,
-            url: $url,
-            employeeName: $employee instanceof Employee
-                ? mb_trim($employee->last_name.' '.$employee->first_name)
-                : null,
-            recordName: $withRecordName
-                ? mb_trim((string) $record->getAttribute('name'))
-                : null,
-        ));
     }
 
     /**
@@ -331,99 +246,6 @@ final class ReminderCommand extends Command
                     $training->employee,
                 );
             });
-    }
-
-    /**
-     * @param  list<int>  $employerIds
-     * @param  list<string>  $recipients
-     */
-    private function sendSmsReminders(Carbon $today, array $employerIds, array $recipients): void
-    {
-        SmsReminder::query()
-            ->where(function (Builder $query) use ($today): void {
-                $query->whereDate('reminder_date', $today)
-                    ->orWhereDate('other_reminder_date', $today);
-            })
-            ->where(function (Builder $query) use ($employerIds): void {
-                $this->whereEmployeeBelongsToEmployers($query, $employerIds);
-
-                // Reminders without an employee are standalone entries tied to
-                // no department, so every department run picks them up.
-                $query->orWhereNull('employee_id');
-            })
-            // The command runs once per department each day, so a reminder
-            // already sent today must not go out a second time.
-            ->where(function (Builder $query) use ($today): void {
-                $query->whereNull('sent_at')
-                    ->orWhereDate('sent_at', '!=', $today);
-            })
-            ->with('employee')
-            ->get()
-            ->each(fn (SmsReminder $sms) => $this->sendSmsReminder($sms, $recipients));
-    }
-
-    /**
-     * Send one reminder through the SMS gateway. The outcome is always recorded
-     * on the reminder; recipients are only mailed when the send fails, so the
-     * failure does not go unnoticed.
-     *
-     * @param  list<string>  $recipients
-     */
-    private function sendSmsReminder(SmsReminder $sms, array $recipients): void
-    {
-        $number = (string) $sms->phone_number;
-        $message = mb_trim(strip_tags((string) $sms->message));
-
-        if ($number === '' || $message === '') {
-            $this->recordSmsFailure($sms, $recipients, 'Numéro et message obligatoires');
-
-            return;
-        }
-
-        try {
-            $response = app(InforiusClient::class)->sendSms(
-                number: $number,
-                message: $message,
-                customerReference: 'reminder-'.$number,
-            );
-        } catch (Throwable $exception) {
-            $this->recordSmsFailure($sms, $recipients, $exception->getMessage());
-
-            return;
-        }
-
-        if (! $response->isSuccessful()) {
-            $this->recordSmsFailure(
-                $sms,
-                $recipients,
-                $response->error ?? $response->messages[0]->errorMessage ?? 'Erreur inconnue',
-            );
-
-            return;
-        }
-
-        $sms->forceFill([
-            'sent_at' => Carbon::now(),
-            'result' => 'OK',
-        ])->save();
-    }
-
-    /**
-     * @param  list<string>  $recipients
-     */
-    private function recordSmsFailure(SmsReminder $sms, array $recipients, string $result): void
-    {
-        $sms->forceFill(['result' => $result])->save();
-
-        $this->error(sprintf('SMS reminder #%s failed: %s', $sms->getKey(), $result));
-
-        $this->dispatchMail(
-            $recipients,
-            'SMS',
-            $sms,
-            ViewSmsReminder::getUrl(['record' => $sms]),
-            $sms->employee,
-        );
     }
 
     /**

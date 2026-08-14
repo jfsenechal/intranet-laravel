@@ -36,7 +36,7 @@ final class ListEmployees extends ListRecords
                 ->icon('tabler-plus')
                 ->color('success'),
             Action::make('export')
-                ->label('Exporter en CSV')
+                ->label('Exporter en XLSX')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('warning')
                 ->schema([
@@ -48,7 +48,7 @@ final class ListEmployees extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new EmployeeExport($this->getFilteredTableQuery(), $data['columns'])->downloadCsv('agents.csv')),
+                ->action(fn (array $data) => new EmployeeExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('agents.xlsx')),
         ];
     }
 }

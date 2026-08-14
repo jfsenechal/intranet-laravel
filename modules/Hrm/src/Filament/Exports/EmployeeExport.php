@@ -7,7 +7,8 @@ namespace AcMarche\Hrm\Filament\Exports;
 use AcMarche\Hrm\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSpout\Common\Entity\Row;
-use OpenSpout\Writer\CSV\Writer;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Writer\XLSX\Writer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class EmployeeExport
@@ -53,12 +54,14 @@ final readonly class EmployeeExport
         return array_map(fn (string $key) => $data[$key], $this->selectedColumns());
     }
 
-    public function downloadCsv(string $filename): StreamedResponse
+    public function downloadXlsx(string $filename): StreamedResponse
     {
         return new StreamedResponse(function (): void {
             $writer = new Writer();
             $writer->openToFile('php://output');
-            $writer->addRow(Row::fromValues($this->headings()));
+
+            $bold = (new Style())->setFontBold();
+            $writer->addRow(Row::fromValues($this->headings(), $bold));
 
             $this->query->lazy()->each(function (Employee $employee) use ($writer): void {
                 $writer->addRow(Row::fromValues($this->map($employee)));
@@ -66,7 +69,7 @@ final readonly class EmployeeExport
 
             $writer->close();
         }, 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
