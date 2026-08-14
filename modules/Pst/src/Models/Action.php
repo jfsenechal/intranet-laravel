@@ -67,7 +67,6 @@ final class Action extends Model
 
     #[Override]
     protected $casts = [
-        'medias' => 'array',
         'due_date' => 'datetime',
         'department' => DepartmentEnum::class,
         'state' => ActionStateEnum::class,
