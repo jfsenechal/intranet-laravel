@@ -386,6 +386,7 @@ final class EmployeeInfolist
             $contract->service?->name,
             $contract->payScale?->name,
             $contract->job_title,
+            $contract->contractNature?->name,
             $contract->contractType?->name,
             $contract->hourly_regime,
         ]));

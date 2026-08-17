@@ -16,12 +16,15 @@ use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\ContractsRelation
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\TrainingsRelationManager;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\ContractNature;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Prerequisite;
 use AcMarche\Hrm\Models\Training;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -473,6 +476,47 @@ describe('emploi tab', function (): void {
             ->assertOk()
             ->assertSee('Agent administratif')
             ->assertSee(ViewContract::getUrl(['record' => $contract]), escape: false);
+    });
+
+    it('shows the nature of each active contract', function (): void {
+        $nature = ContractNature::factory()->create(['name' => 'Statutaire']);
+        $record = Employee::factory()->create();
+        Contract::factory()->create([
+            'employee_id' => $record->id,
+            'contract_nature_id' => $nature->id,
+            'is_suspended' => false,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertSee('Statutaire');
+    });
+
+    it('reads the relations of the active contracts in a single query each', function (): void {
+        $record = Employee::factory()->create();
+        foreach (range(1, 3) as $ignored) {
+            Contract::factory()->create([
+                'employee_id' => $record->id,
+                'contract_nature_id' => ContractNature::factory()->create()->id,
+                'is_suspended' => false,
+            ]);
+        }
+
+        $queries = [];
+        DB::listen(function (QueryExecuted $query) use (&$queries): void {
+            $queries[] = $query->sql;
+        });
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk();
+
+        $natureQueries = array_filter(
+            $queries,
+            fn (string $sql): bool => str_contains($sql, 'contract_natures'),
+        );
+
+        // Relation autoloading batches the whole set: one query, not one per contract.
+        expect($natureQueries)->toHaveCount(1);
     });
 
     it('links the replaced employee of an active contract to their view page', function (): void {
