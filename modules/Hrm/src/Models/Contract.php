@@ -94,12 +94,6 @@ final class Contract extends Model
     use HasUserAdd;
 
     /**
-     * @deprecated The `status` column is deprecated and should not be used.
-     *             Activity is determined by `is_closed`, `is_suspended` and `end_date`.
-     */
-    public const string DEPRECATED_STATUS = 'status';
-
-    /**
      * A contract is active once it has started and as long as it is neither closed,
      * suspended nor expired. A missing date is treated as open ended: no start date
      * means the contract already runs, no end date means it never expires.

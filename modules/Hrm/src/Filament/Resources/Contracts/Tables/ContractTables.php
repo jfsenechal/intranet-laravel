@@ -235,20 +235,4 @@ final class ContractTables
             ])
             ->recordAction(ViewAction::class);
     }
-
-    /**
-     * The agents standing in for the agent of this contract, deduplicated: someone
-     * replacing them twice still belongs on the row once.
-     *
-     * @return list<string>
-     */
-    private static function replacingAgents(Contract $contract): array
-    {
-        return $contract->replacedBy
-            ->map(fn (Contract $replacement): ?string => $replacement->employee?->full_name)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-    }
 }
