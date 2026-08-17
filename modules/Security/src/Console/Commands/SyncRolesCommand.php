@@ -28,6 +28,8 @@ use AcMarche\GuichetHdv\Enums\RolesEnum as RoleEnumGuichetHdv;
 use AcMarche\GuichetHdv\Providers\GuichetHdvServiceProvider;
 use AcMarche\Hrm\Enums\RolesEnum as RoleEnumHrm;
 use AcMarche\Hrm\Providers\HrmServiceProvider;
+use AcMarche\Issep\Enums\RolesEnum as RoleEnumIssep;
+use AcMarche\Issep\Providers\IssepServiceProvider;
 use AcMarche\MealDelivery\Enums\RolesEnum as RoleEnumMealDelivery;
 use AcMarche\MealDelivery\Providers\MealDeliveryServiceProvider;
 use AcMarche\Mediation\Enums\RolesEnum as RoleEnumMediation;
@@ -86,6 +88,7 @@ final class SyncRolesCommand extends Command
             [AdServiceProvider::class, RoleEnumAd::cases()],
             [CpasLibraryServiceProvider::class, RoleEnumCpasLibrary::cases()],
             [GuichetHdvServiceProvider::class, RoleEnumGuichetHdv::cases()],
+            [IssepServiceProvider::class, RoleEnumIssep::cases()],
             [CourrierServiceProvider::class, RoleEnumCourrier::cases()],
             [CollegeServiceProvider::class, RoleEnumCollege::cases()],
             [DocumentServiceProvider::class, RoleEnumDocument::cases()],

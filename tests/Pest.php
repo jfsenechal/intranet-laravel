@@ -50,6 +50,8 @@ uses(
     '../modules/MealDelivery/tests/Unit',
     '../modules/WhoIsWho/tests/Feature',
     '../modules/Offenses/tests/Feature',
+    '../modules/Issep/tests/Feature',
+    '../modules/Issep/tests/Unit',
 );
 
 uses(

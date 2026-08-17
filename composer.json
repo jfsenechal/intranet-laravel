@@ -66,6 +66,10 @@
         },
         {
             "type": "path",
+            "url": "./modules/Issep"
+        },
+        {
+            "type": "path",
             "url": "./modules/MailingList"
         },
         {
@@ -147,6 +151,7 @@
         "acmarche/email-management": "*@dev",
         "acmarche/guichet-hdv": "*@dev",
         "acmarche/hrm": "*@dev",
+        "acmarche/issep": "*@dev",
         "acmarche/mailing-list": "*@dev",
         "acmarche/meal-delivery": "*@dev",
         "acmarche/mediation": "*@dev",

@@ -47,6 +47,9 @@
         <testsuite name="WhoIsWho">
             <directory>modules/WhoIsWho/tests</directory>
         </testsuite>
+        <testsuite name="Issep">
+            <directory>modules/Issep/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
