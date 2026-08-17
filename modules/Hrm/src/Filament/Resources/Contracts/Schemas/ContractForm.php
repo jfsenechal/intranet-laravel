@@ -63,8 +63,7 @@ final class ContractForm
                             ->preload(),
                         Select::make('pay_scale_id')
                             ->label('Echelle')
-                            ->options(fn (): array => PayScale::groupedSelectOptions())
-                            ->searchable(),
+                            ->options(fn(): array => PayScale::groupedSelectOptions()),
                         TextInput::make('job_title')
                             ->label('Fonction')
                             ->maxLength(250),
@@ -98,7 +97,7 @@ final class ContractForm
                             ->label('Remplace')
                             ->relationship('replaces', 'last_name')
                             ->getOptionLabelFromRecordUsing(
-                                fn ($record): string => $record->last_name.' '.$record->first_name
+                                fn($record): string => $record->last_name.' '.$record->first_name
                             )
                             ->searchable()
                             ->preload(),
