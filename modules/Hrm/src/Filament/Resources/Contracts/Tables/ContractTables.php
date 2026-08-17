@@ -80,14 +80,6 @@ final class ContractTables
                     ->sortable()
                     ->toggleable()
                     ->placeholder('—'),
-                TextColumn::make('replaced_by')
-                    ->label('Remplacé par')
-                    ->state(fn (Contract $record): array => self::replacingAgents($record))
-                    ->listWithLineBreaks()
-                    ->limitList(2)
-                    ->expandableLimitedList()
-                    ->toggleable()
-                    ->placeholder('—'),
                 TextColumn::make('work_regime')
                     ->label('Regime')
                     ->sortable()
@@ -217,14 +209,6 @@ final class ContractTables
                     ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
                     ->searchable(['last_name', 'first_name'])
                     ->sortable()
-                    ->toggleable()
-                    ->placeholder('—'),
-                TextColumn::make('replaced_by')
-                    ->label('Remplacé par')
-                    ->state(fn (Contract $record): array => self::replacingAgents($record))
-                    ->listWithLineBreaks()
-                    ->limitList(2)
-                    ->expandableLimitedList()
                     ->toggleable()
                     ->placeholder('—'),
                 TextColumn::make('work_regime')
