@@ -32,7 +32,7 @@
 
                 @if($event->description)
                     <div style="color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
-                        {{ $event->description }}
+                        {!! nl2br(e($event->description)) !!}
                     </div>
                 @endif
 

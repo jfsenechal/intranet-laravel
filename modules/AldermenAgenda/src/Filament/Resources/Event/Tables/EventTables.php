@@ -29,6 +29,7 @@ final class EventTables
                 TextColumn::make('event_type')
                     ->label('Type')
                     ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 TextColumn::make('start_at')
                     ->label('Début')
@@ -40,6 +41,7 @@ final class EventTables
                     ->sortable(),
                 TextColumn::make('organizer')
                     ->label('Organisateur')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 IconColumn::make('sent')
                     ->label('Envoyé')

@@ -34,3 +34,21 @@ it('attaches only the files that are present', function (): void {
 
     expect((new EventEmail($event))->attachments())->toHaveCount(1);
 });
+
+it('renders the description line breaks as html', function (): void {
+    $event = new Event([
+        'name' => 'Manifestation',
+        'description' => "Première ligne\nDeuxième ligne",
+    ]);
+
+    (new EventEmail($event))->assertSeeInHtml('Première ligne<br', escape: false);
+});
+
+it('escapes html in the description', function (): void {
+    $event = new Event([
+        'name' => 'Manifestation',
+        'description' => '<script>alert(1)</script>',
+    ]);
+
+    (new EventEmail($event))->assertDontSeeInHtml('<script>alert(1)</script>', escape: false);
+});

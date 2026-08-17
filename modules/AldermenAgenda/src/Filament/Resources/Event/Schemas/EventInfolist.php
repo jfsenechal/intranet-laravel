@@ -20,6 +20,8 @@ final class EventInfolist
                     ->label('Organisateur'),
                 TextEntry::make('description')
                     ->label('Objet')
+                    ->formatStateUsing(fn (?string $state): string => nl2br(e((string) $state)))
+                    ->html()
                     ->columnSpanFull(),
                 TextEntry::make('start_at')
                     ->label('Date de début')
