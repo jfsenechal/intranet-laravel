@@ -19,6 +19,7 @@ final class OfficeFactory extends Factory
         return [
             'name' => 'Guichet '.$this->faker->numberBetween(1, 10),
             'service' => $this->faker->randomElement(['Population', 'État civil', 'Étrangers']),
+            'color' => $this->faker->hexColor(),
         ];
     }
 }

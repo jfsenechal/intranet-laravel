@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace AcMarche\GuichetHdv\Models;
 
 use AcMarche\GuichetHdv\Database\Factories\TicketFactory;
+use AcMarche\GuichetHdv\Observers\TicketObserver;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'archive',
     'office_id',
 ])]
+#[ObservedBy([TicketObserver::class])]
 final class Ticket extends Model
 {
     use HasFactory;

@@ -113,6 +113,31 @@ it('lists today processing tickets (with office, not archived)', function (): vo
         ->assertSee('Guichet Population');
 });
 
+it('shows the office color next to the office name', function (): void {
+    $office = Office::factory()->create(['name' => 'Guichet Population', 'color' => '#ff0000']);
+    Ticket::factory()->create([
+        'office_id' => $office->id,
+        'archive' => false,
+        'createdAt' => now(),
+    ]);
+
+    livewire(TicketsOfTheDay::class)
+        ->assertSeeHtml('background-color: #ff0000');
+});
+
+it('omits the color dot when the office has no color', function (): void {
+    $office = Office::factory()->create(['name' => 'Guichet Population', 'color' => null]);
+    Ticket::factory()->create([
+        'office_id' => $office->id,
+        'archive' => false,
+        'createdAt' => now(),
+    ]);
+
+    livewire(TicketsOfTheDay::class)
+        ->assertSee('Guichet Population')
+        ->assertDontSeeHtml('background-color:');
+});
+
 it('separates pending from processing tickets', function (): void {
     $office = Office::factory()->create();
     $pending = Ticket::factory()->create(['office_id' => null, 'archive' => false, 'createdAt' => now()]);

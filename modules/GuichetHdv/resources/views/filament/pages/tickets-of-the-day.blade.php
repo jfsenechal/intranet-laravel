@@ -54,7 +54,15 @@
                         <p class="mt-1 truncate text-gray-500 dark:text-gray-400">{{ $ticket->reason }}</p>
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-2 text-right">
-                        <x-filament::badge color="info" size="sm">{{ $ticket->office?->name ?? '—' }}</x-filament::badge>
+                        <x-filament::badge color="info" size="sm">
+                            <span class="inline-flex items-center gap-1.5">
+                                @if (filled($ticket->office?->color))
+                                    <span class="size-2 shrink-0 rounded-full ring-1 ring-inset ring-black/10"
+                                          style="background-color: {{ $ticket->office->color }}"></span>
+                                @endif
+                                {{ $ticket->office?->name ?? '—' }}
+                            </span>
+                        </x-filament::badge>
                         <span class="tabular-nums text-gray-400">{{ display_datetime($ticket->createdAt, 'H:i') }}</span>
                         {{ ($this->cancelTicketAction)(['ticket' => $ticket->id]) }}
                     </div>
@@ -92,6 +100,13 @@
             }
 
             window.Echo.private('guichet-hdv.tickets')
+                .listen('.ticket.created', (e) => {
+                    showNotification(
+                        'Nouveau ticket',
+                        `Ticket #${e.number} (${e.service}) en attente.`,
+                    );
+                    $wire.dispatch('tickets-updated');
+                })
                 .listen('.ticket.assigned', (e) => {
                     playSound();
                     showNotification(

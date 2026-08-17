@@ -40,13 +40,14 @@ it('can render the edit page', function (): void {
         ->assertSchemaStateSet([
             'name' => $office->name,
             'service' => $office->service,
+            'color' => $office->color,
         ]);
 });
 
 it('has columns', function (string $column): void {
     livewire(ListOffice::class)
         ->assertTableColumnExists($column);
-})->with(['name', 'service']);
+})->with(['name', 'service', 'color']);
 
 it('can create an office', function (): void {
     $office = Office::factory()->make();
@@ -55,6 +56,7 @@ it('can create an office', function (): void {
         ->fillForm([
             'name' => $office->name,
             'service' => $office->service,
+            'color' => $office->color,
         ])
         ->call('create')
         ->assertNotified();
@@ -62,7 +64,35 @@ it('can create an office', function (): void {
     assertDatabaseHas(Office::class, [
         'name' => $office->name,
         'service' => $office->service,
+        'color' => $office->color,
     ]);
+});
+
+it('can update the office color', function (): void {
+    $office = Office::factory()->create(['color' => '#ff0000']);
+
+    livewire(EditOffice::class, [
+        'record' => $office->id,
+    ])
+        ->fillForm(['color' => '#00ff00'])
+        ->call('save')
+        ->assertNotified();
+
+    assertDatabaseHas(Office::class, [
+        'id' => $office->id,
+        'color' => '#00ff00',
+    ]);
+});
+
+it('rejects an invalid hex color', function (): void {
+    livewire(CreateOffice::class)
+        ->fillForm([
+            'name' => 'Guichet 1',
+            'color' => 'not-a-color',
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['color'])
+        ->assertNotNotified();
 });
 
 it('can update an office', function (): void {

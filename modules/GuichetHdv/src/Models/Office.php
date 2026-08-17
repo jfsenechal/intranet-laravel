@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Connection('maria-guichet')]
-#[Fillable(['name', 'service'])]
+#[Fillable(['name', 'service', 'color'])]
 final class Office extends Model
 {
     use HasFactory;

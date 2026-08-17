@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Filament\Resources\Office\Schemas;
 
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -21,6 +22,10 @@ final class OfficeForm
                 TextInput::make('service')
                     ->label('Service')
                     ->maxLength(255),
+                ColorPicker::make('color')
+                    ->label('Couleur')
+                    ->hex()
+                    ->rule('hex_color'),
             ]);
     }
 }
