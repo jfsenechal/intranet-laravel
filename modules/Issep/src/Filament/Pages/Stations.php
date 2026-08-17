@@ -108,7 +108,7 @@ final class Stations extends Page implements HasTable
             ->emptyStateIcon(Heroicon::OutlinedSignalSlash)
             ->recordActions([
                 Action::make('h24')
-                    ->label('Relevés 24h')
+                    ->label('Derniers relevés')
                     ->icon(Heroicon::ChartBar)
                     ->color('primary')
                     ->url(fn (array $record): string => StationH24::getUrl(['station' => $record['id']])),

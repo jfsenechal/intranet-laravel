@@ -61,18 +61,33 @@ describe('page', function (): void {
 
 describe('history', function (): void {
     /**
-     * The fixture holds three readings for this station, one of them three days old: the
-     * default period is the last 24 hours, so that one must not show.
+     * The index is hourly but a station publishes few of them a day, so the page opens on
+     * three days rather than the 24 hours its route is named after. The fixture's five day old
+     * reading is outside that window.
      */
-    it('shows only the readings of the last 24 hours by default', function (): void {
+    it('shows the readings of the last three days by default', function (): void {
         livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
             ->loadTable()
             ->assertCanSeeTableRecords([
-                now()->subHour()->setTimezone(IssepApiFake::TIMEZONE)->format('YmdHis'),
-                now()->subHours(5)->setTimezone(IssepApiFake::TIMEZONE)->format('YmdHis'),
+                now()->subHour()->format('YmdHis'),
+                now()->subHours(5)->format('YmdHis'),
+                now()->subDays(2)->format('YmdHis'),
             ])
             ->assertCanNotSeeTableRecords([
-                now()->subDays(3)->setTimezone(IssepApiFake::TIMEZONE)->format('YmdHis'),
+                now()->subDays(5)->format('YmdHis'),
+            ]);
+    });
+
+    it('narrows to the last 24 hours when asked', function (): void {
+        livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->filterTable('period', '24')
+            ->assertCanSeeTableRecords([
+                now()->subHour()->format('YmdHis'),
+                now()->subHours(5)->format('YmdHis'),
+            ])
+            ->assertCanNotSeeTableRecords([
+                now()->subDays(2)->format('YmdHis'),
             ]);
     });
 
@@ -81,7 +96,7 @@ describe('history', function (): void {
             ->loadTable()
             ->filterTable('period', 'all')
             ->assertCanSeeTableRecords([
-                now()->subDays(3)->setTimezone(IssepApiFake::TIMEZONE)->format('YmdHis'),
+                now()->subDays(5)->format('YmdHis'),
             ]);
     });
 

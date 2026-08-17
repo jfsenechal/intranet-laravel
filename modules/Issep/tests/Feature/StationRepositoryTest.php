@@ -96,8 +96,8 @@ describe('index history', function (): void {
     it('returns the readings of one configuration, newest first', function (): void {
         $indices = repository()->belAqiForStation(IssepApiFake::CONFIG_WITH_READING);
 
-        expect($indices)->toHaveCount(3)
-            ->and(array_map(fn (Indice $indice): int => $indice->aqiValue, $indices))->toBe([3, 5, 8]);
+        expect($indices)->toHaveCount(4)
+            ->and(array_map(fn (Indice $indice): int => $indice->aqiValue, $indices))->toBe([3, 5, 8, 10]);
     });
 
     it('keeps only the readings after a given moment', function (): void {

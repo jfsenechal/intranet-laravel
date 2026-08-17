@@ -119,7 +119,7 @@ final class StationConfig extends Page implements HasTable
     {
         return [
             Action::make('h24')
-                ->label('Relevés 24h')
+                ->label('Derniers relevés')
                 ->icon(Heroicon::ChartBar)
                 ->visible(fn (): bool => $this->stationName !== null)
                 ->url(fn (): string => StationH24::getUrl(['station' => $this->stationId])),

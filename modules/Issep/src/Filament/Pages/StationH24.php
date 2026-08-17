@@ -19,14 +19,25 @@ use Filament\Tables\Table;
 use Override;
 
 /**
- * The BelAQI readings of one station over the last 24 hours.
+ * The recent BelAQI readings of one station, over the last three days by default.
+ *
+ * The index is published hourly but a station only reports a handful of them a day, so a
+ * 24 hour window often holds very little; three days is enough to read a trend. Shorter and
+ * longer windows are on the period filter. The whole history is whatever /belaqi still
+ * exposes — it answers with the last thousand readings of the network, about six days.
  *
  * The station is identified by its `id` (as in the stations table), not by its sensor
- * configuration id, so a link stays valid when the station is re-equipped.
+ * configuration id, so a link stays valid when the station is re-equipped. The route keeps
+ * its `h24` slug, which is what the intranet has always linked to.
  */
 final class StationH24 extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    /**
+     * Hours of history the page opens on.
+     */
+    private const DEFAULT_PERIOD_HOURS = '72';
 
     public int $stationId = 0;
 
@@ -98,9 +109,10 @@ final class StationH24 extends Page implements HasTable
                     ->options([
                         '24' => '24 dernières heures',
                         '48' => '48 dernières heures',
+                        '72' => '3 derniers jours',
                         'all' => "Tout l'historique",
                     ])
-                    ->default('24')
+                    ->default(self::DEFAULT_PERIOD_HOURS)
                     ->selectablePlaceholder(false),
             ])
             ->paginated([25, 50, 100])
@@ -182,10 +194,12 @@ final class StationH24 extends Page implements HasTable
             return [];
         }
 
-        $since = match ($filters['period']['value'] ?? '24') {
-            '48' => now()->subHours(48),
-            'all' => null,
-            default => now()->subHours(24),
+        $period = $filters['period']['value'] ?? self::DEFAULT_PERIOD_HOURS;
+
+        $since = match (true) {
+            $period === 'all' => null,
+            is_numeric($period) => now()->subHours((int) $period),
+            default => now()->subHours((int) self::DEFAULT_PERIOD_HOURS),
         };
 
         try {

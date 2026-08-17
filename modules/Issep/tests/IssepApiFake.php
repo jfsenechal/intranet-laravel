@@ -174,7 +174,9 @@ final class IssepApiFake
     }
 
     /**
-     * Three readings for the station that reports: two inside the last 24 hours, one older.
+     * Readings for the station that reports, spread so each window of the period filter keeps
+     * a different number of them: two inside 24 hours, a third inside 3 days, a fourth that
+     * only the whole history reaches. Nothing sits on a boundary.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -200,9 +202,18 @@ final class IssepApiFake
                 'userId' => 7,
             ],
             [
-                'ts' => self::apiTime(Carbon::now()->subDays(3)),
+                'ts' => self::apiTime(Carbon::now()->subDays(2)),
                 'configId' => self::CONFIG_WITH_READING,
                 'aqiValue' => 8,
+                'networkId' => 12,
+                'pointName' => 'Chaussée de Liège (1)',
+                'virtualNetworkId' => 7,
+                'userId' => 7,
+            ],
+            [
+                'ts' => self::apiTime(Carbon::now()->subDays(5)),
+                'configId' => self::CONFIG_WITH_READING,
+                'aqiValue' => 10,
                 'networkId' => 12,
                 'pointName' => 'Chaussée de Liège (1)',
                 'virtualNetworkId' => 7,
