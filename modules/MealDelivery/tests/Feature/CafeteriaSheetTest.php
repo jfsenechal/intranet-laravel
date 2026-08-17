@@ -9,7 +9,9 @@ use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Menu;
 use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
+use AcMarche\MealDelivery\Service\RouteSheetsAggregator;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
@@ -62,4 +64,27 @@ it('renders the cafeteria sheet for a given day with its clients', function (): 
         ->assertOk()
         ->assertSee('BOON Micheline')
         ->assertSee('Cafétariat');
+});
+
+it('explains the RF and DF columns with a legend', function (): void {
+    livewire(CafeteriaSheet::class, [
+        'record' => $this->week,
+        'date' => '2026-06-15',
+    ])
+        ->assertOk()
+        ->assertSee('reprendre la feuille')
+        ->assertSee('donner une nouvelle feuille');
+});
+
+it('explains the RF and DF columns with a legend on the pdf sheet', function (): void {
+    $sheet = (new RouteSheetsAggregator())->build($this->week, '2026-06-15')['cafeteria'];
+
+    $html = view('meal-delivery::filament.resources.weeks.pages.route-sheet-pdf', [
+        'date' => CarbonImmutable::parse('2026-06-15'),
+        'sheet' => $sheet,
+        'heading' => 'Cafétariat',
+    ])->render();
+
+    expect($html)->toContain('reprendre la feuille')
+        ->toContain('donner une nouvelle feuille');
 });

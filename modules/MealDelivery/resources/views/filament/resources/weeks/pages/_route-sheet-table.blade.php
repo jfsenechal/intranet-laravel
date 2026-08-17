@@ -78,3 +78,7 @@
         </tr>
     </tbody>
 </table>
+
+<p class="text-muted" style="font-size:11px;">
+    <strong>RF</strong> = reprendre la feuille &nbsp;—&nbsp; <strong>DF</strong> = donner une nouvelle feuille
+</p>

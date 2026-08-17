@@ -128,5 +128,9 @@
             </tr>
         </tbody>
     </table>
+
+    <p class="text-muted" style="font-size:10px;">
+        <strong>RF</strong> = reprendre la feuille &nbsp;&mdash;&nbsp; <strong>DF</strong> = donner une nouvelle feuille
+    </p>
 </body>
 </html>
