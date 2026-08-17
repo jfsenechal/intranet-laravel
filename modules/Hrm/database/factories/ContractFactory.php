@@ -29,7 +29,7 @@ final class ContractFactory extends Factory
             'start_date' => fake()->dateTimeBetween('-1 year', 'now'),
             'end_date' => fake()->dateTimeBetween('now', '+1 year'),
             'job_title' => fake()->jobTitle(),
-            'is_replacement' => 'non',
+            'is_replacement' => false,
             'is_closed' => false,
             'is_amendment' => false,
             'user_add' => 'tester',

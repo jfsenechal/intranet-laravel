@@ -226,6 +226,14 @@ describe('model behavior', function (): void {
         expect($contract->is_closed)->toBeTrue();
     });
 
+    it('casts is_replacement as boolean', function (): void {
+        $replacement = Contract::factory()->create(['is_replacement' => true]);
+        $regular = Contract::factory()->create(['is_replacement' => false]);
+
+        expect($replacement->fresh()->is_replacement)->toBeTrue()
+            ->and($regular->fresh()->is_replacement)->toBeFalse();
+    });
+
     it('active scope excludes closed contracts', function (): void {
         Contract::factory()->create(['is_closed' => true]);
         $active = Contract::factory()->create(['is_closed' => false, 'is_suspended' => false, 'end_date' => null]);
@@ -344,6 +352,54 @@ describe('replaces column and filter', function (): void {
             ->filterTable('replaces', $replaced->id)
             ->assertCanSeeTableRecords([$matching])
             ->assertCanNotSeeTableRecords([$nonMatching, $withoutReplacement]);
+    });
+});
+
+describe('replacement section', function (): void {
+    it('shows the replaced agent on the view page of a replacement contract', function (): void {
+        $replaced = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $contract = Contract::factory()->create([
+            'is_replacement' => true,
+            'replaces_id' => $replaced->id,
+        ]);
+
+        Livewire::test(ViewContract::class, ['record' => $contract->id])
+            ->assertOk()
+            ->assertSee('Remplacement')
+            ->assertSee('Dupont Marie');
+    });
+
+    it('hides the section when the contract is not a replacement', function (): void {
+        $replaced = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $contract = Contract::factory()->create([
+            'is_replacement' => false,
+            'replaces_id' => $replaced->id,
+        ]);
+
+        Livewire::test(ViewContract::class, ['record' => $contract->id])
+            ->assertOk()
+            ->assertDontSee('Remplacement')
+            ->assertDontSee('Dupont Marie');
+    });
+
+    it('links the replaced agent to their view page', function (): void {
+        $replaced = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $contract = Contract::factory()->create([
+            'is_replacement' => true,
+            'replaces_id' => $replaced->id,
+        ]);
+
+        Livewire::test(ViewContract::class, ['record' => $contract->id])
+            ->assertOk()
+            ->assertSee(ViewEmployee::getUrl(['record' => $replaced], panel: 'hrm-panel'), escape: false);
+    });
+
+    it('does not display the is_replacement flag itself', function (): void {
+        $contract = Contract::factory()->create(['is_replacement' => true]);
+
+        Livewire::test(ViewContract::class, ['record' => $contract->id])
+            ->assertOk()
+            ->assertSchemaComponentDoesNotExist('is_replacement');
     });
 });
 

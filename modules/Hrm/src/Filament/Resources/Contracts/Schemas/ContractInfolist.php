@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Contracts\Schemas;
 
+use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Employee;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 final class ContractInfolist
@@ -65,14 +70,6 @@ final class ContractInfolist
                                     ->label('Date de rappel')
                                     ->date('d/m/Y'),
                             ]),
-                        Section::make('Remplacement')
-                            ->columns(2)
-                            ->schema([
-                                TextEntry::make('is_replacement')
-                                    ->label('Remplacement'),
-                                TextEntry::make('replaces.full_name')
-                                    ->label('Remplace'),
-                            ]),
                         Section::make('Documents')
                             ->columns(2)
                             ->schema([
@@ -115,6 +112,17 @@ final class ContractInfolist
                     ->columnSpan(1)
                     ->columns(1)
                     ->schema([
+                        Section::make('Remplacement')
+                            ->visible(fn (Contract $record): bool => $record->is_replacement)
+                            ->schema([
+                                TextEntry::make('replaces.full_name')
+                                    ->label('Remplace')
+                                    ->hiddenLabel()
+                                    ->placeholder('—')
+                                    ->icon(Heroicon::OutlinedUser)
+                                    ->url(fn (Contract $record): ?string => self::replacedEmployeeUrl($record))
+                                    ->color(fn (Contract $record): ?string => self::replacedEmployeeUrl($record) === null ? null : 'primary'),
+                            ]),
                         Section::make('Options')
                             ->columns(2)
                             ->schema([
@@ -148,5 +156,24 @@ final class ContractInfolist
                             ]),
                     ]),
             ]);
+    }
+
+    /**
+     * The replaced agent is only linked when the viewer is allowed to open their
+     * record; otherwise the name is shown as plain text.
+     */
+    private static function replacedEmployeeUrl(Contract $contract): ?string
+    {
+        $replaced = $contract->replaces;
+
+        if (! $replaced instanceof Employee) {
+            return null;
+        }
+
+        if (! Gate::allows('view', $replaced)) {
+            return null;
+        }
+
+        return ViewEmployee::getUrl(['record' => $replaced], panel: 'hrm-panel');
     }
 }

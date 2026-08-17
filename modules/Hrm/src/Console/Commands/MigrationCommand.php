@@ -18,8 +18,6 @@ final class MigrationCommand extends Command
 
     private int $absenceCount = 0;
 
-    private int $contractCount = 0;
-
     public function handle(): int
     {
         $booleanColumns = ['certimed', 'has_resumed', 'clock_updated', 'acropole', 'agent_file'];
@@ -39,18 +37,9 @@ final class MigrationCommand extends Command
             $this->info("Absences: converted {$updated} rows for column '{$column}'");
         }
 
-        $updated = DB::connection('maria-hrm')
-            ->table('contracts')
-            ->where('is_replacement', 'oui')
-            ->update(['is_replacement' => true]);
-
-        $updated += DB::connection('maria-hrm')
-            ->table('contracts')
-            ->where('is_replacement', 'non')
-            ->update(['is_replacement' => false]);
-
-        $this->contractCount = $updated;
-        $this->info("Contracts: converted {$updated} rows for column 'is_replacement'");
+        // `contracts.is_replacement` used to be converted here too. It is a real
+        // boolean column since the 2026_08_17 migration, which does the conversion
+        // itself: comparing it to 'oui' now matches every row holding false.
 
         $this->info('Migration completed successfully!');
         $this->displaySummary();
@@ -64,7 +53,6 @@ final class MigrationCommand extends Command
             ['Table', 'Rows updated'],
             [
                 ['absences', $this->absenceCount],
-                ['contracts', $this->contractCount],
             ],
         );
     }

@@ -23,7 +23,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $replaces_id
  * @property int $employee_id
  * @property string|null $college
- * @property string $is_replacement
+ * @property bool $is_replacement
  * @property \Carbon\CarbonImmutable|null $start_date
  * @property \Carbon\CarbonImmutable|null $end_date
  * @property bool|null $is_closed
@@ -198,6 +198,7 @@ final class Contract extends Model
             'reminder_date' => 'date',
             'is_closed' => 'boolean',
             'is_amendment' => 'boolean',
+            'is_replacement' => 'boolean',
             'is_suspended' => 'boolean',
             'work_regime' => 'float',
             'status' => ContractStatusEnum::class,
