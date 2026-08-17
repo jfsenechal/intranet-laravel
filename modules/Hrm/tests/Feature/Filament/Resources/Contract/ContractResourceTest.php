@@ -306,6 +306,70 @@ describe('replaces column and filter', function (): void {
             ->assertTableColumnStateSet('replaces.last_name', null, $other);
     });
 
+    it('shows the replacing agents in the table', function (): void {
+        $replaced = Employee::factory()->create();
+        $contract = Contract::factory()->create(['employee_id' => $replaced->id]);
+
+        $standIn = Employee::factory()->create(['last_name' => 'Martin', 'first_name' => 'Luc']);
+        Contract::factory()->create([
+            'employee_id' => $standIn->id,
+            'replaces_id' => $replaced->id,
+            'is_replacement' => true,
+        ]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('replaced_by', ['Martin Luc'], $contract);
+    });
+
+    it('lists each replacing agent once', function (): void {
+        $replaced = Employee::factory()->create();
+        $contract = Contract::factory()->create(['employee_id' => $replaced->id]);
+
+        // The same agent stood in twice, on two successive contracts.
+        $standIn = Employee::factory()->create(['last_name' => 'Martin', 'first_name' => 'Luc']);
+        Contract::factory(2)->create([
+            'employee_id' => $standIn->id,
+            'replaces_id' => $replaced->id,
+            'is_replacement' => true,
+        ]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('replaced_by', ['Martin Luc'], $contract);
+    });
+
+    it('leaves the replacing agents empty for an agent nobody replaces', function (): void {
+        $contract = Contract::factory()->create();
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            // An empty list is normalised to null, so the placeholder shows.
+            ->assertTableColumnStateSet('replaced_by', null, $contract);
+    });
+
+    it('shows the replacing agents in the contracts relation manager', function (): void {
+        $replaced = Employee::factory()->create();
+        $contract = Contract::factory()->create([
+            'employee_id' => $replaced->id,
+            'is_closed' => false,
+        ]);
+
+        $standIn = Employee::factory()->create(['last_name' => 'Martin', 'first_name' => 'Luc']);
+        Contract::factory()->create([
+            'employee_id' => $standIn->id,
+            'replaces_id' => $replaced->id,
+            'is_replacement' => true,
+        ]);
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $replaced,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertTableColumnStateSet('replaced_by', ['Martin Luc'], $contract);
+    });
+
     it('only offers agents that are actually replaced as filter options', function (): void {
         $replaced = Employee::factory()->create();
         Contract::factory()->create(['replaces_id' => $replaced->id]);

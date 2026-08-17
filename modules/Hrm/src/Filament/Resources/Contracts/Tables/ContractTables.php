@@ -80,6 +80,14 @@ final class ContractTables
                     ->sortable()
                     ->toggleable()
                     ->placeholder('—'),
+                TextColumn::make('replaced_by')
+                    ->label('Remplacé par')
+                    ->state(fn (Contract $record): array => self::replacingAgents($record))
+                    ->listWithLineBreaks()
+                    ->limitList(2)
+                    ->expandableLimitedList()
+                    ->toggleable()
+                    ->placeholder('—'),
                 TextColumn::make('work_regime')
                     ->label('Regime')
                     ->sortable()
@@ -211,6 +219,14 @@ final class ContractTables
                     ->sortable()
                     ->toggleable()
                     ->placeholder('—'),
+                TextColumn::make('replaced_by')
+                    ->label('Remplacé par')
+                    ->state(fn (Contract $record): array => self::replacingAgents($record))
+                    ->listWithLineBreaks()
+                    ->limitList(2)
+                    ->expandableLimitedList()
+                    ->toggleable()
+                    ->placeholder('—'),
                 TextColumn::make('work_regime')
                     ->label('Régime')
                     ->sortable()
@@ -234,5 +250,21 @@ final class ContractTables
                 ReplicateContractAction::make(),
             ])
             ->recordAction(ViewAction::class);
+    }
+
+    /**
+     * The agents standing in for the agent of this contract, deduplicated: someone
+     * replacing them twice still belongs on the row once.
+     *
+     * @return list<string>
+     */
+    private static function replacingAgents(Contract $contract): array
+    {
+        return $contract->replacedBy
+            ->map(fn (Contract $replacement): ?string => $replacement->employee?->full_name)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }

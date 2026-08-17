@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -56,6 +57,7 @@ use Illuminate\Support\Carbon;
  * @property-read ContractType|null $contractType
  * @property-read PayScale|null $payScale
  * @property-read Employee|null $replaces
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Contract> $replacedBy
  */
 #[Connection('maria-hrm')]
 #[Fillable([
@@ -183,6 +185,17 @@ final class Contract extends Model
     public function replaces(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'replaces_id');
+    }
+
+    /**
+     * The contracts opened to replace the agent of this contract, whatever their
+     * period: replacements point at the agent, not at one of their contracts.
+     *
+     * @return HasMany<Contract>
+     */
+    public function replacedBy(): HasMany
+    {
+        return $this->hasMany(self::class, 'replaces_id', 'employee_id');
     }
 
     protected static function booted(): void
