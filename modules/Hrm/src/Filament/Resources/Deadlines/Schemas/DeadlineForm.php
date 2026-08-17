@@ -69,6 +69,7 @@ final class DeadlineForm
                     ]),
                 RichEditor::make('note')
                     ->label('Note')
+                    ->helperText('Pour un retour à la ligne MAJ + ENTER')
                     ->columnSpanFull(),
             ]);
     }

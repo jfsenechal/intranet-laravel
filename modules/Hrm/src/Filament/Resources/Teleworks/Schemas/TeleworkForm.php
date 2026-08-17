@@ -59,6 +59,7 @@ final class TeleworkForm
                             ->visible(fn (Get $get): bool => self::dayType($get('day_type')) === DayTypeEnum::Fixe),
                         RichEditor::make('variable_day_reason')
                             ->label('Motivation jour variable')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->columnSpanFull()
                             ->visible(fn (Get $get): bool => self::dayType($get('day_type')) === DayTypeEnum::Variable),
                         RichEditor::make('employee_notes')
@@ -107,6 +108,7 @@ final class TeleworkForm
                             ->maxLength(100),
                         RichEditor::make('manager_validation_notes')
                             ->label('Notes du directeur')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -127,6 +129,7 @@ final class TeleworkForm
                             ->maxLength(100),
                         RichEditor::make('hr_notes')
                             ->label('Notes GRH')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->columnSpanFull(),
                     ]),
             ]);

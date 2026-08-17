@@ -181,6 +181,7 @@ final class EmployeeForm
                             ->icon('heroicon-o-document-text')
                             ->schema([
                                 RichEditor::make('notes')
+                                    ->helperText('Pour un retour à la ligne MAJ + ENTER')
                                     ->label('Remarques')
                                     ->columnSpanFull(),
                             ]),

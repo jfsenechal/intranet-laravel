@@ -23,6 +23,7 @@ final class HrDocumentForm
                 ->directory(config('hrm.uploads.documents'))
                 ->required(),
             RichEditor::make('notes')
+                ->helperText('Pour un retour à la ligne MAJ + ENTER')
                 ->label('Remarques')
                 ->columnSpanFull(),
         ];

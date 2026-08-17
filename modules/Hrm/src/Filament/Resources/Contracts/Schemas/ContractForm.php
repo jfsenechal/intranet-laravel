@@ -127,6 +127,7 @@ final class ContractForm
                     ]),
                 RichEditor::make('college')
                     ->label('College')
+                    ->helperText('Pour un retour à la ligne MAJ + ENTER')
                     ->columnSpanFull(),
             ]);
     }

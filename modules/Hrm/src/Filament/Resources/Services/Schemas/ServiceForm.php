@@ -69,6 +69,7 @@ final class ServiceForm
                     ->schema([
                         RichEditor::make('notes')
                             ->label('Remarques')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->columnSpanFull(),
                     ]),
             ]);

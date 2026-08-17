@@ -72,6 +72,7 @@ final class ApplicationForm
                     ->schema([
                         RichEditor::make('notes')
                             ->label('Notes')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->hiddenLabel()
                             ->columnSpanFull(),
                     ]),

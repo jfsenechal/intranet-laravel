@@ -111,6 +111,7 @@ final class TrainingForm
                     ->schema([
                         RichEditor::make('description')
                             ->label('Description')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->hiddenLabel()
                             ->columnSpanFull(),
                     ]),

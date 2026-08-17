@@ -37,6 +37,7 @@ final class ValorizationForm
                     ->schema([
                         RichEditor::make('content')
                             ->label('Contenu')
+                            ->helperText('Pour un retour à la ligne MAJ + ENTER')
                             ->hiddenLabel()
                             ->columnSpanFull(),
                     ]),
