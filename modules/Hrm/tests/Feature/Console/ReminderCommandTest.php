@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Enums\StatusEnum;
+use AcMarche\Hrm\Filament\Resources\Evaluations\Pages\ViewEvaluation;
 use AcMarche\Hrm\Mail\ReminderMail;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Deadline;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
+use AcMarche\Hrm\Models\Evaluation;
 use AcMarche\Hrm\Models\SmsReminder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -261,6 +264,42 @@ it('sends a contract reminder for a contract of a child employer', function (): 
         ReminderMail::class,
         fn (ReminderMail $mail): bool => $mail->record->is($contract) && $mail->reminderType === 'Contrat',
     );
+});
+
+it('sends an evaluation reminder linking to the evaluation itself', function (): void {
+    $employee = Employee::factory()->create(['status' => StatusEnum::AGENT]);
+    Contract::factory()->create([
+        'employee_id' => $employee->id,
+        'employer_id' => $this->employer->id,
+        'is_suspended' => false,
+    ]);
+
+    $evaluation = Evaluation::factory()->create([
+        'employee_id' => $employee->id,
+        'next_evaluation_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($evaluation)
+            && $mail->reminderType === 'Évaluation'
+            && $mail->url === ViewEvaluation::getUrl(['record' => $evaluation], panel: 'hrm-panel'),
+    );
+});
+
+it('does not send an evaluation reminder whose next date is not today', function (): void {
+    $employee = Employee::factory()->create(['status' => StatusEnum::AGENT]);
+
+    Evaluation::factory()->create([
+        'employee_id' => $employee->id,
+        'next_evaluation_date' => Carbon::tomorrow(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertNotSent(ReminderMail::class);
 });
 
 it('leaves sms reminders to the sms command', function (): void {
