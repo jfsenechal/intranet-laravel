@@ -14,6 +14,6 @@ final class PayScaleFilter
         return SelectFilter::make('pay_scale_id')
             ->label('Echelle')
             ->options(fn (): array => PayScale::groupedSelectOptions())
-            ->searchable();
+            ->preload();
     }
 }

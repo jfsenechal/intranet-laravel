@@ -15,7 +15,6 @@ final class ServiceFilter
         return SelectFilter::make('service_id')
             ->label('Service')
             ->options(fn (): array => Service::groupedSelectOptions())
-            ->searchable()
             ->preload();
     }
 

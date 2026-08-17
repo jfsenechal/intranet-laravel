@@ -15,7 +15,6 @@ final class DirectionFilter
         return SelectFilter::make('direction_id')
             ->label('Direction')
             ->options(fn (): array => Direction::groupedSelectOptions())
-            ->searchable()
             ->preload();
     }
 

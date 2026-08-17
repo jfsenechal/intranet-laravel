@@ -15,7 +15,6 @@ final class ContractNatureFilter
             ->label('Nature')
             ->options(fn (): array => ContractNature::groupedSelectOptions())
             ->multiple()
-            ->searchable()
             ->preload();
     }
 }

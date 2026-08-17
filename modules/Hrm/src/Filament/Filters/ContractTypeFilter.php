@@ -14,7 +14,6 @@ final class ContractTypeFilter
         return SelectFilter::make('contract_type_id')
             ->label('Type')
             ->options(fn (): array => ContractType::groupedSelectOptions())
-            ->searchable()
             ->preload();
     }
 }
