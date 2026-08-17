@@ -7,6 +7,7 @@ namespace AcMarche\Issep\Repository;
 use AcMarche\Issep\Dto\Indice;
 use AcMarche\Issep\Dto\Station;
 use AcMarche\Issep\Exceptions\IssepException;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
 /**
@@ -175,6 +176,32 @@ final class StationRepository
         }
 
         return null;
+    }
+
+    /**
+     * The oldest BelAQI reading the API still exposes for a station.
+     *
+     * /belaqi answers with the last thousand readings of the whole network and takes no date
+     * range, so this is where a station's available history begins — a caller asking for a
+     * longer window than that cannot be served it.
+     *
+     * @throws IssepException
+     */
+    public function oldestBelAqiTimestamp(int $idConfiguration): ?CarbonImmutable
+    {
+        $oldest = null;
+
+        foreach ($this->belAqiForStation($idConfiguration) as $indice) {
+            if (! $indice->ts instanceof CarbonImmutable) {
+                continue;
+            }
+
+            if (! $oldest instanceof CarbonImmutable || $indice->ts->lessThan($oldest)) {
+                $oldest = $indice->ts;
+            }
+        }
+
+        return $oldest;
     }
 
     /**

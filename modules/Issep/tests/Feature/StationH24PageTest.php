@@ -91,10 +91,44 @@ describe('history', function (): void {
             ]);
     });
 
-    it('shows the older readings when the whole history is asked for', function (): void {
+    /**
+     * The windows stop at six days because that is all /belaqi holds; a longer one would have
+     * returned exactly the same rows as the widest.
+     */
+    it('offers windows from 24 hours to six days and nothing longer', function (): void {
+        $filter = livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->instance()
+            ->getTable()
+            ->getFilter('period');
+
+        // PHP normalises the numeric string keys of the options array to integers.
+        expect(array_keys($filter->getOptions()))->toBe([24, 48, 72, 144]);
+    });
+
+    /**
+     * /belaqi holds the last thousand readings of the whole network and takes no date range,
+     * so a long window cannot reach further back than the API itself does. Rather than let a
+     * month look identical to a week, the table says where the history actually starts.
+     */
+    it('says how far back the history really goes when the widest period is asked for', function (): void {
         livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
             ->loadTable()
-            ->filterTable('period', 'all')
+            ->filterTable('period', '144')
+            ->assertSee("L'API ISSEP ne conserve que les 1000 derniers relevés du réseau");
+    });
+
+    it('says nothing about coverage when the period is inside the history', function (): void {
+        livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->filterTable('period', '24')
+            ->assertDontSee("L'API ISSEP ne conserve que");
+    });
+
+    it('reaches the oldest readings on the widest period', function (): void {
+        livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->filterTable('period', '144')
             ->assertCanSeeTableRecords([
                 now()->subDays(5)->format('YmdHis'),
             ]);
