@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers;
 
+use AcMarche\ActivityManager\Filament\Resources\Members\MembersResource;
+use AcMarche\ActivityManager\Filament\Resources\Members\Schemas\MemberForm;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedule;
+use AcMarche\ActivityManager\Models\Member;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -43,7 +47,7 @@ final class MembersRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components([]);
+        return MemberForm::configure($schema);
     }
 
     public function table(Table $table): Table
@@ -73,6 +77,10 @@ final class MembersRelationManager extends RelationManager
                     ->preloadRecordSelect(),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Voir')
+                    ->icon(Heroicon::Eye)
+                    ->url(fn (Member $record): string => MembersResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
@@ -80,6 +88,7 @@ final class MembersRelationManager extends RelationManager
                     ->label('Désinscrire')
                     ->icon(Heroicon::XMark),
             ])
+            ->recordUrl(fn (Member $record): string => MembersResource::getUrl('view', ['record' => $record]))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()

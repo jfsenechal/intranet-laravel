@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
+use AcMarche\ActivityManager\Filament\Resources\Members\MembersResource;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\EditSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\MembersRelationManager;
@@ -11,6 +12,7 @@ use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -62,4 +64,20 @@ it('includes the members count in the relation manager title', function (): void
     $schedule->members()->attach(Member::factory(3)->create());
 
     expect(MembersRelationManager::getTitle($schedule, ViewSchedule::class))->toBe('Inscrits (3)');
+});
+
+it('links the member view action to the ViewMember page', function (): void {
+    $schedule = Schedule::factory()->create();
+    $member = Member::factory()->create();
+    $schedule->members()->attach($member);
+
+    $url = MembersResource::getUrl('view', ['record' => $member]);
+
+    $component = livewire(MembersRelationManager::class, [
+        'ownerRecord' => $schedule,
+        'pageClass' => ViewSchedule::class,
+    ])
+        ->assertActionHasUrl(TestAction::make(ViewAction::getDefaultName())->table($member), $url);
+
+    expect($component->instance()->getTable()->getRecordUrl($member))->toBe($url);
 });
