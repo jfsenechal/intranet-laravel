@@ -75,7 +75,7 @@
     @script
     <script>
         const VAPID_PUBLIC_KEY = @js(config('webpush.vapid.public_key'));
-        const SOUND_URL = @js(asset('storage/456966__funwithsound__success-fanfare-trumpets.mp3'));
+        const SOUND_URL = @js(asset('audio/ticket-assigned.mp3'));
         const LOGO_URL = '/images/Marche_logo.png';
 
         const playSound = () => {

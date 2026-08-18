@@ -229,3 +229,10 @@ it('stores the browser push subscription for the current user', function (): voi
         'endpoint' => $endpoint,
     ]);
 });
+
+it('points the notification sound at a file shipped in public/', function (): void {
+    $component = livewire(TicketsOfTheDay::class)->assertOk();
+
+    expect(implode('', $component->effects['scripts']))->toContain('ticket-assigned.mp3')
+        ->and(public_path('audio/ticket-assigned.mp3'))->toBeFile();
+});

@@ -7,7 +7,7 @@
             subscribed: false,
             busy: false,
             vapid: @js(config('webpush.vapid.public_key')),
-            soundUrl: @js(asset('storage/456966__funwithsound__success-fanfare-trumpets.mp3')),
+            soundUrl: @js(asset('audio/ticket-assigned.mp3')),
             logoUrl: '/images/Marche_logo.png',
 
             async init() {

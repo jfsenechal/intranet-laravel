@@ -32,3 +32,11 @@ it('stores the browser push subscription from the check page', function (): void
         'endpoint' => $endpoint,
     ]);
 });
+
+it('points the test sound at a file shipped in public/', function (): void {
+    livewire(NotificationCheck::class)
+        ->assertOk()
+        ->assertSee('ticket-assigned.mp3');
+
+    expect(public_path('audio/ticket-assigned.mp3'))->toBeFile();
+});
