@@ -29,6 +29,7 @@ final class TicketForm
                         TextInput::make('number')
                             ->label('Numéro')
                             ->required()
+                            ->autocomplete(false)
                             ->maxLength(255)
                             ->unique(
                                 table: 'maria-guichet.tickets',
