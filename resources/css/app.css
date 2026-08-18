@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+/*
+ * Excluded from Tailwind's automatic source detection: user uploads and
+ * build output are not source files, and walking them (storage/app alone is
+ * several GB) dominated the build time.
+ */
+@source not '../../storage';
+@source not '../../public';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';

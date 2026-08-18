@@ -1,8 +1,22 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 
+/*
+ * Excluded from Tailwind's automatic source detection: user uploads and
+ * build output are not source files, and walking them (storage/app alone is
+ * several GB) dominated the build time.
+ */
+@source not '../../../../storage';
+@source not '../../../../public';
+
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../modules/**/views/**/*.blade.php';
+/*
+ * Filament's theme.css imports Tailwind with `source(none)`, so only the globs
+ * listed here are scanned. PHP is required: schemas and tables set utility
+ * classes via `extraAttributes(['class' => ...])`.
+ */
+@source '../../../../modules/**/src/**/*.php';
 @source '../../../../resources/views/components/**/*';
 
 .fi-sidebar-nav {
