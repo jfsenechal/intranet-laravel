@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Filament\Resources\Ticket\Tables;
 
+use AcMarche\GuichetHdv\Models\Ticket;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -65,14 +66,14 @@ final class TicketTables
                     ->boolean()
                     ->trueLabel('Archivés seulement')
                     ->falseLabel('Non archivés seulement')
-                    ->default(false)
+                    ->default(true)
                     ->native(false),
                 SelectFilter::make('office_id')
                     ->label('Guichet')
                     ->relationship('office', 'name'),
                 SelectFilter::make('service')
                     ->label('Service')
-                    ->options(fn (): array => \AcMarche\GuichetHdv\Models\Ticket::query()
+                    ->options(fn (): array => Ticket::query()
                         ->distinct()
                         ->orderBy('service')
                         ->pluck('service', 'service')
