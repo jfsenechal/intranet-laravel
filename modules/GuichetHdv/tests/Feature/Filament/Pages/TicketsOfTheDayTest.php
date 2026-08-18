@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\GuichetHdv\Enums\RolesEnum;
+use AcMarche\GuichetHdv\Enums\ServicesEnum;
 use AcMarche\GuichetHdv\Events\TicketAssigned;
 use AcMarche\GuichetHdv\Events\TicketCancelled;
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
@@ -12,6 +13,7 @@ use AcMarche\GuichetHdv\Notifications\TicketAssignedPush;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 
@@ -235,4 +237,16 @@ it('points the notification sound at a file shipped in public/', function (): vo
 
     expect(implode('', $component->effects['scripts']))->toContain('ticket-assigned.mp3')
         ->and(public_path('audio/ticket-assigned.mp3'))->toBeFile();
+});
+
+it('renders the service badge with the color of the service', function (): void {
+    Ticket::factory()->create([
+        'service' => ServicesEnum::POPULATION->value,
+        'office_id' => null,
+        'archive' => false,
+        'createdAt' => now(),
+    ]);
+
+    livewire(TicketsOfTheDay::class)
+        ->assertSee(Color::hex(ServicesEnum::POPULATION->color())[600], escape: false);
 });

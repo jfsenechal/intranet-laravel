@@ -1,3 +1,5 @@
+@use('AcMarche\GuichetHdv\Enums\ServicesEnum')
+
 <x-filament-panels::page>
     <div class="grid gap-6 lg:grid-cols-2">
         {{-- En attente --}}
@@ -16,7 +18,7 @@
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="text-2xl font-bold leading-tight tabular-nums text-gray-950 dark:text-white">#{{ $ticket->number }}</span>
-                            <x-filament::badge color="gray" size="sm">{{ $ticket->service }}</x-filament::badge>
+                            <x-filament::badge :color="ServicesEnum::tryFrom($ticket->service)?->getColor() ?? 'gray'" size="sm">{{ $ticket->service }}</x-filament::badge>
                         </div>
                         <p class="mt-1 truncate text-gray-500 dark:text-gray-400">{{ $ticket->reason }}</p>
                     </div>
@@ -49,7 +51,7 @@
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="text-2xl font-bold leading-tight tabular-nums text-gray-950 dark:text-white">#{{ $ticket->number }}</span>
-                            <x-filament::badge color="gray" size="sm">{{ $ticket->service }}</x-filament::badge>
+                            <x-filament::badge :color="ServicesEnum::tryFrom($ticket->service)?->getColor() ?? 'gray'" size="sm">{{ $ticket->service }}</x-filament::badge>
                         </div>
                         <p class="mt-1 truncate text-gray-500 dark:text-gray-400">{{ $ticket->reason }}</p>
                     </div>

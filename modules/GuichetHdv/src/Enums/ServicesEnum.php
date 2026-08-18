@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Enums;
 
+use Filament\Support\Colors\Color;
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum ServicesEnum: string implements HasLabel
+enum ServicesEnum: string implements HasColor, HasLabel
 {
     case ETAT_CIVIL = 'État civil';
     case POPULATION = 'Population';
@@ -20,9 +22,19 @@ enum ServicesEnum: string implements HasLabel
     public function color(): string
     {
         return match ($this) {
-            self::ETAT_CIVIL => '#FFAFCC',
-            self::POPULATION => '#52B69A',
-            self::ETRANGERS => '#A2D2FF',
+            self::ETAT_CIVIL => '#eb13bb',
+            self::POPULATION => '#23e61f',
+            self::ETRANGERS => '#1d25f0',
         };
+    }
+
+    /**
+     * Shades generated from the service hex color, consumable by Filament components.
+     *
+     * @return array<int, string>
+     */
+    public function getColor(): array
+    {
+        return Color::hex($this->color());
     }
 }
