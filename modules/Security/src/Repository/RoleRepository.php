@@ -44,10 +44,20 @@ final class RoleRepository
             ->get();
     }
 
+    /**
+     * The roles field is a Radio (single string) when the module does not allow
+     * multiple roles, and a CheckboxList (array) when it does.
+     */
     public static function findRolesByModuleAndRolesName(Module $module, array $dataFromForm): array
     {
+        $roleNames = array_filter((array) ($dataFromForm['roles'] ?? []));
+
+        if ($roleNames === []) {
+            return [];
+        }
+
         return Role::where('module_id', $module->id)
-            ->whereIn('name', $dataFromForm['roles'])
+            ->whereIn('name', $roleNames)
             ->pluck('id')
             ->all();
     }
