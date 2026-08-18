@@ -77,12 +77,14 @@
     @script
     <script>
         const VAPID_PUBLIC_KEY = @js(config('webpush.vapid.public_key'));
-        const SOUND_URL = @js(asset('audio/ticket-assigned.mp3'));
+        const TICKET_CREATED_SOUND_URL = @js(asset('audio/ticket-created.mp3'));
+        const TICKET_ASSIGNED_SOUND_URL = @js(asset('audio/ticket-assigned.mp3'));
+        const IS_GUICHET_AGENT = @js($this->userIsGuichetAgent());
         const LOGO_URL = '/images/Marche_logo.png';
 
-        const playSound = () => {
+        const playSound = (url) => {
             try {
-                new Audio(SOUND_URL).play().catch(() => {});
+                new Audio(url).play().catch(() => {});
             } catch (e) {}
         };
 
@@ -102,6 +104,9 @@
 
             window.Echo.private('guichet-hdv.tickets')
                 .listen('.ticket.created', (e) => {
+                    if (IS_GUICHET_AGENT) {
+                        playSound(TICKET_CREATED_SOUND_URL);
+                    }
                     showNotification(
                         'Nouveau ticket',
                         `Ticket #${e.number} (${e.service}) en attente.`,
@@ -109,7 +114,7 @@
                     $wire.dispatch('tickets-updated');
                 })
                 .listen('.ticket.assigned', (e) => {
-                    playSound();
+                    playSound(TICKET_ASSIGNED_SOUND_URL);
                     showNotification(
                         'Ticket assigné',
                         `Ticket #${e.number} (${e.service}) → guichet ${e.office ?? '—'}`,

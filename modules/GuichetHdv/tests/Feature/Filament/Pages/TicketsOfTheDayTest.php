@@ -239,6 +239,27 @@ it('points the notification sound at a file shipped in public/', function (): vo
         ->and(public_path('audio/ticket-assigned.mp3'))->toBeFile();
 });
 
+it('wires a distinct sound for created and assigned tickets', function (): void {
+    $scripts = implode('', livewire(TicketsOfTheDay::class)->assertOk()->effects['scripts']);
+
+    expect($scripts)->toContain('ticket-created.mp3')
+        ->and($scripts)->toContain('ticket-assigned.mp3')
+        ->and(public_path('audio/ticket-created.mp3'))->toBeFile()
+        ->and(public_path('audio/ticket-assigned.mp3'))->toBeFile();
+});
+
+it('gates the new ticket sound behind the guichet agent role', function (): void {
+    $scripts = implode('', livewire(TicketsOfTheDay::class)->assertOk()->effects['scripts']);
+
+    expect($scripts)->toContain('IS_GUICHET_AGENT = false');
+
+    actingAsGuichetAgent();
+
+    $scripts = implode('', livewire(TicketsOfTheDay::class)->assertOk()->effects['scripts']);
+
+    expect($scripts)->toContain('IS_GUICHET_AGENT = true');
+});
+
 it('renders the service badge with the color of the service', function (): void {
     Ticket::factory()->create([
         'service' => ServicesEnum::POPULATION->value,

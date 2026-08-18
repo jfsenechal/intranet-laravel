@@ -160,6 +160,14 @@ final class TicketsOfTheDay extends Page
     }
 
     /**
+     * Only guichet agents may assign or archive tickets, and only they hear the new ticket sound.
+     */
+    public function userIsGuichetAgent(): bool
+    {
+        return Auth::user()?->hasRole(RolesEnum::ROLE_GUICHET_AGENT->value) ?? false;
+    }
+
+    /**
      * @return array<int, Action>
      */
     protected function getHeaderActions(): array
@@ -200,11 +208,6 @@ final class TicketsOfTheDay extends Page
         if ($recipients->isNotEmpty()) {
             NotificationFacade::send($recipients, new TicketAssignedPush($ticket));
         }
-    }
-
-    private function userIsGuichetAgent(): bool
-    {
-        return Auth::user()?->hasRole(RolesEnum::ROLE_GUICHET_AGENT->value) ?? false;
     }
 
     private function currentUsername(): string
