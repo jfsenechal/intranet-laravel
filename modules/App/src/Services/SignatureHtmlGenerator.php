@@ -15,8 +15,18 @@ final class SignatureHtmlGenerator
 
         return View::make('app::emails.signature', [
             'signature' => $signature,
-            'logoUrl' => $logo ? asset('vendor/app/images/logos/'.$logo->value) : null,
+            'logoUrl' => $logo ? self::logoUrl($logo->value) : null,
             'logoTitle' => $logo?->getTitle() ?? $signature->logo_title,
         ])->render();
+    }
+
+    /**
+     * Logos are hosted publicly so they stay reachable from mail clients.
+     */
+    private static function logoUrl(string $fileName): string
+    {
+        $baseUrl = (string) config('app.signature.logo_base_url');
+
+        return mb_rtrim($baseUrl, '/').'/'.$fileName;
     }
 }

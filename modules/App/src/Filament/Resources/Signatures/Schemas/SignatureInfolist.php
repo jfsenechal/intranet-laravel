@@ -18,6 +18,13 @@ final class SignatureInfolist
         return $schema
             ->columns(1)
             ->components([
+                Section::make('Aperçu HTML')
+                    ->schema([
+                        TextEntry::make('preview')
+                            ->hiddenLabel()
+                            ->html()
+                            ->state(fn (Signature $record): string => SignatureHtmlGenerator::generate($record)),
+                    ]),
                 Fieldset::make('Identité')
                     ->columns(2)
                     ->schema([
@@ -49,13 +56,6 @@ final class SignatureInfolist
                             ->placeholder('—')
                             ->formatStateUsing(fn ($state) => $state?->getTitle() ?? '—'),
                         TextEntry::make('logo_title')->label('Titre du logo')->placeholder('—'),
-                    ]),
-                Section::make('Aperçu HTML')
-                    ->schema([
-                        TextEntry::make('preview')
-                            ->hiddenLabel()
-                            ->html()
-                            ->state(fn (Signature $record): string => SignatureHtmlGenerator::generate($record)),
                     ]),
             ]);
     }

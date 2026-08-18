@@ -12,8 +12,9 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Http\Response;
+use Illuminate\Support\Js;
 use Override;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ViewSignature extends ViewRecord
 {
@@ -33,25 +34,32 @@ final class ViewSignature extends ViewRecord
                 ->label('Télécharger HTML')
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('success')
-                ->action(function (Signature $record): Response {
+                ->action(function (Signature $record): StreamedResponse {
                     $html = SignatureHtmlGenerator::generate($record);
 
-                    return response($html, 200, [
-                        'Content-Type' => 'text/html; charset=UTF-8',
-                        'Content-Disposition' => 'attachment; filename="signature-'.$record->id.'.html"',
-                    ]);
+                    return response()->streamDownload(
+                        function () use ($html): void {
+                            echo $html;
+                        },
+                        'signature-'.$record->id.'.html',
+                        ['Content-Type' => 'text/html; charset=UTF-8'],
+                    );
                 }),
             Action::make('copy')
                 ->label('Copier le code HTML')
                 ->icon(Heroicon::ClipboardDocument)
                 ->color('primary')
-                ->modalHeading('Code HTML de la signature')
-                ->modalDescription('Sélectionnez et copiez le code ci-dessous.')
-                ->modalSubmitAction(false)
-                ->modalCancelActionLabel('Fermer')
-                ->modalContent(fn (Signature $record) => view('app::emails.signature-copy', [
-                    'html' => SignatureHtmlGenerator::generate($record),
-                ])),
+                ->alpineClickHandler(function (Signature $record): string {
+                    $html = Js::from(SignatureHtmlGenerator::generate($record));
+                    $successTitle = Js::from('Signature copiée dans le presse-papiers');
+                    $failureTitle = Js::from('Impossible de copier la signature');
+
+                    return <<<JS
+                        window.navigator.clipboard.writeText({$html})
+                            .then(() => new FilamentNotification().title({$successTitle}).success().send())
+                            .catch(() => new FilamentNotification().title({$failureTitle}).danger().send())
+                        JS;
+                }),
             DeleteAction::make()->icon(Heroicon::Trash),
         ];
     }
