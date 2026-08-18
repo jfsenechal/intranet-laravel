@@ -15,7 +15,7 @@
                 ])>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="font-semibold tabular-nums">#{{ $ticket->number }}</span>
+                            <span class="text-2xl font-bold leading-tight tabular-nums text-gray-950 dark:text-white">#{{ $ticket->number }}</span>
                             <x-filament::badge color="gray" size="sm">{{ $ticket->service }}</x-filament::badge>
                         </div>
                         <p class="mt-1 truncate text-gray-500 dark:text-gray-400">{{ $ticket->reason }}</p>
@@ -48,21 +48,20 @@
                 ])>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="font-semibold tabular-nums">#{{ $ticket->number }}</span>
+                            <span class="text-2xl font-bold leading-tight tabular-nums text-gray-950 dark:text-white">#{{ $ticket->number }}</span>
                             <x-filament::badge color="gray" size="sm">{{ $ticket->service }}</x-filament::badge>
                         </div>
                         <p class="mt-1 truncate text-gray-500 dark:text-gray-400">{{ $ticket->reason }}</p>
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-2 text-right">
-                        <x-filament::badge color="info" size="sm">
-                            <span class="inline-flex items-center gap-1.5">
-                                @if (filled($ticket->office?->color))
-                                    <span class="size-2 shrink-0 rounded-full ring-1 ring-inset ring-black/10"
-                                          style="background-color: {{ $ticket->office->color }}"></span>
-                                @endif
-                                {{ $ticket->office?->name ?? '—' }}
-                            </span>
-                        </x-filament::badge>
+                        <span @class([
+                            'inline-flex items-center rounded-lg border-2 px-3 py-1 text-2xl font-bold leading-tight text-gray-950 dark:text-white',
+                            'border-gray-300 dark:border-white/20' => blank($ticket->office?->color),
+                        ]) @style([
+                            'border-color: '.$ticket->office?->color => filled($ticket->office?->color),
+                        ])>
+                            {{ $ticket->office?->name ?? '—' }}
+                        </span>
                         <span class="tabular-nums text-gray-400">{{ display_datetime($ticket->createdAt, 'H:i') }}</span>
                         {{ ($this->cancelTicketAction)(['ticket' => $ticket->id]) }}
                     </div>
