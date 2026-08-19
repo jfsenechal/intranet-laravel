@@ -116,6 +116,11 @@ final class IncomingMailTables
                     ->html()
                     ->limit(80)
                     ->toggleable(),
+                TextColumn::make('category.name')
+                    ->label('Catégorie')
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(),
                 TextColumn::make('services.name')
                     ->label('Services')
                     ->badge()
@@ -134,6 +139,9 @@ final class IncomingMailTables
                 IconColumn::make('is_registered')
                     ->label('Recommandé')
                     ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('department')
+                    ->label('Département')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordUrl(fn (IncomingMail $record): string => IncomingMailResource::getUrl('view', ['record' => $record])

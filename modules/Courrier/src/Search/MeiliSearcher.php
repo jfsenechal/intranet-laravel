@@ -24,6 +24,14 @@ final class MeiliSearcher
      */
     private const NO_RESTRICTION = '';
 
+    /**
+     * The last query actually sent to the index, for display purposes.
+     * Null until a first query is run.
+     *
+     * @var array{query: string, filter: array<int, string>}|null
+     */
+    public ?array $lastQuery = null;
+
     public function __construct()
     {
         $this->init(config('courrier.meilisearch.index_name'));
@@ -142,6 +150,8 @@ final class MeiliSearcher
         if ($attributesToSearchOn !== null) {
             $options['attributesToSearchOn'] = $attributesToSearchOn;
         }
+
+        $this->lastQuery = ['query' => mb_trim($query), 'filter' => $clauses];
 
         $result = $this->client->index($this->indexName)->search(mb_trim($query), $options);
 

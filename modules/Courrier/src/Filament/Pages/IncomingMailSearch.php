@@ -41,6 +41,12 @@ final class IncomingMailSearch extends Page implements HasTable
      */
     public ?array $resultIds = null;
 
+    /**
+     * Human-readable form of the last query sent to Meilisearch, shown
+     * discreetly under the form. Null until a first search is run.
+     */
+    public ?string $executedQuery = null;
+
     #[Override]
     protected static string|null|BackedEnum $navigationIcon = 'tabler-search';
 
@@ -75,7 +81,9 @@ final class IncomingMailSearch extends Page implements HasTable
     {
         $state = $this->form->getState();
 
-        $this->resultIds = app(MeiliSearcher::class)->searchIds(
+        $searcher = app(MeiliSearcher::class);
+
+        $this->resultIds = $searcher->searchIds(
             (string) ($state['query'] ?? ''),
             Auth::user(),
             [
@@ -90,6 +98,8 @@ final class IncomingMailSearch extends Page implements HasTable
             ],
         );
 
+        $this->executedQuery = self::describeQuery($searcher->lastQuery);
+
         $this->resetTable();
     }
 
@@ -97,6 +107,7 @@ final class IncomingMailSearch extends Page implements HasTable
     {
         $this->form->fill();
         $this->resultIds = null;
+        $this->executedQuery = null;
         $this->resetTable();
     }
 
@@ -107,7 +118,7 @@ final class IncomingMailSearch extends Page implements HasTable
 
     protected function getTableQuery(): Builder
     {
-        $query = IncomingMail::query()->with(['services', 'recipients']);
+        $query = IncomingMail::query()->with(['category', 'services', 'recipients']);
 
         $ids = $this->resultIds ?? [];
         if ($ids === []) {
@@ -131,5 +142,22 @@ final class IncomingMailSearch extends Page implements HasTable
                 ->color('gray')
                 ->action('resetSearch'),
         ];
+    }
+
+    /**
+     * Render the Meilisearch call as a single line: the search terms followed
+     * by every filter clause actually applied, policy clause included.
+     *
+     * @param  array{query: string, filter: array<int, string>}|null  $lastQuery
+     */
+    private static function describeQuery(?array $lastQuery): ?string
+    {
+        if ($lastQuery === null) {
+            return null;
+        }
+
+        $parts = [sprintf('q = "%s"', $lastQuery['query'])];
+
+        return implode(' AND ', [...$parts, ...$lastQuery['filter']]);
     }
 }

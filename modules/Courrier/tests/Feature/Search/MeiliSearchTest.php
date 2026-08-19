@@ -13,6 +13,7 @@ use AcMarche\Courrier\Search\MeiliSearcher;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Carbon;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
@@ -345,4 +346,39 @@ it('mounts the advanced search page with an empty result set before searching', 
     livewire(IncomingMailSearch::class)
         ->assertOk()
         ->assertCanNotSeeTableRecords(IncomingMail::all());
+});
+
+it('displays the query sent to meilisearch and clears it on reset', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $mail = IncomingMail::factory()->create();
+
+    $this->actingAs($admin);
+
+    [$client] = captureMeiliSearch([['id' => $mail->id]]);
+    $searcher = new MeiliSearcher();
+    $searcher->client = $client;
+    app()->instance(MeiliSearcher::class, $searcher);
+
+    livewire(IncomingMailSearch::class)
+        ->fillForm(['query' => 'facture', 'reference' => '2026-42'])
+        ->call('search')
+        ->assertSet('executedQuery', 'q = "facture" AND reference_number = "2026-42"')
+        ->assertSee('reference_number = &quot;2026-42&quot;', escape: false)
+        ->call('resetSearch')
+        ->assertSet('executedQuery', null);
+});
+
+it('exposes a category column on the advanced search table', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+
+    $this->actingAs($admin);
+
+    livewire(IncomingMailSearch::class)
+        ->assertTableColumnExists(
+            'category.name',
+            fn (TextColumn $column): bool => $column->getLabel() === 'Catégorie',
+        )
+        ->assertTableColumnVisible('category.name');
 });
