@@ -26,7 +26,7 @@ enum SignatureEnum: string
             SignatureEnum::CPAS => 'Cpas',
             SignatureEnum::CSL => 'Centre sportif local',
             SignatureEnum::FAM => 'Famenne & Art Museum',
-            SignatureEnum::ESQUARE => 'E-square',
+            SignatureEnum::ESQUARE => 'e-Square',
             default => 'Ville de Marche-en-Famenne'
         };
     }
