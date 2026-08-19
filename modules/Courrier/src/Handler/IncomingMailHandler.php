@@ -37,6 +37,7 @@ final class IncomingMailHandler
                 'sender' => $data['sender'],
                 'mail_date' => $data['mail_date'],
                 'description' => $data['description'] ?? null,
+                'category_id' => $data['category_id'] ?? null,
                 'is_registered' => $data['is_registered'] ?? false,
                 'has_acknowledgment' => $data['has_acknowledgment'] ?? false,
                 'is_notified' => false,

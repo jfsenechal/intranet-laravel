@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\Inbox;
+use AcMarche\Courrier\Models\Category;
+use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use DirectoryTree\ImapEngine\Laravel\ImapManager;
@@ -12,6 +14,7 @@ use DirectoryTree\ImapEngine\Testing\FakeMailbox;
 use DirectoryTree\ImapEngine\Testing\FakeMessage;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Livewire\livewire;
 
@@ -67,7 +70,7 @@ it('pre-fills the next cpas reference number on the process action', function ()
 
     resolve(ImapManager::class)->swap('imap_cpas', $fakeMailbox);
 
-    AcMarche\Courrier\Models\IncomingMail::factory()->create([
+    IncomingMail::factory()->create([
         'department' => AcMarche\Courrier\Enums\DepartmentCourrierEnum::CPAS->value,
     ]);
 
@@ -78,4 +81,30 @@ it('pre-fills the next cpas reference number on the process action', function ()
     livewire(Inbox::class)
         ->mountAction(TestAction::make('process')->table('0'))
         ->assertActionDataSet(['reference_number' => '2']);
+});
+
+it('stores the category chosen when processing an inbox mail', function (): void {
+    Storage::fake(config('courrier.storage.disk'));
+
+    $fakeMailbox = new FakeMailbox(folders: [
+        new FakeFolder('inbox', messages: [fakeMailWithAttachment(1)]),
+    ]);
+
+    resolve(ImapManager::class)->swap('imap_cpas', $fakeMailbox);
+
+    $category = Category::factory()->create(['name' => 'Facture']);
+
+    $user = User::factory()->create();
+    $user->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]));
+    $this->actingAs($user);
+
+    livewire(Inbox::class)
+        ->callAction(TestAction::make('process')->table('0'), [
+            'mail_date' => now()->format('Y-m-d'),
+            'sender' => 'ACME SA',
+            'category_id' => $category->id,
+        ])
+        ->assertHasNoActionErrors();
+
+    expect(IncomingMail::where('sender', 'ACME SA')->value('category_id'))->toBe($category->id);
 });

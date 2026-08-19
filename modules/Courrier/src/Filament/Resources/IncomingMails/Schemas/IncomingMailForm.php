@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas;
 
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Actions\AnalyzeAttachmentAction;
 use AcMarche\Courrier\Filament\Components\DepartmentField;
 use AcMarche\Courrier\Models\Category;
@@ -85,13 +86,7 @@ final class IncomingMailForm
                                 DatePicker::make('date_to')
                                     ->label('Au')
                                     ->native(false),
-                                Select::make('category')
-                                    ->label('Catégorie')
-                                    ->searchable()
-                                    ->preload()
-                                    ->options(
-                                        fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all()
-                                    ),
+                                self::getCategorySelect('category'),
                             ])
                             ->columnSpanFull(),
                         self::getServicesSelect('services', 'Services'),
@@ -226,6 +221,9 @@ final class IncomingMailForm
                         TextInput::make('description')
                             ->label('Description')
                             ->columnSpanFull(),
+                        self::getCategorySelect('category_id')
+                            ->visible(self::canEncodeCategory(...))
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
                 Section::make('Affectation')
@@ -270,6 +268,30 @@ final class IncomingMailForm
                     ])
                     ->visible(fn (IncomingMail|array|null $record): bool => $record instanceof IncomingMail),
             ]);
+    }
+
+    /**
+     * Only the CPAS indexers classify their mail, so they alone are offered the
+     * category field. Hiding it also keeps it out of the saved data, so nobody
+     * else can clear a category already encoded.
+     */
+    private static function canEncodeCategory(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->hasRole(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value);
+    }
+
+    /**
+     * Category picker, shared by the create/edit form (where it writes the
+     * `category_id` column) and the advanced search (where it is a filter).
+     */
+    private static function getCategorySelect(string $name): Select
+    {
+        return Select::make($name)
+            ->label('Catégorie')
+            ->preload()
+            ->options(fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all());
     }
 
     /**
