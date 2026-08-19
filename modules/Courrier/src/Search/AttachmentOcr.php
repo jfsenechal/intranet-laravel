@@ -84,6 +84,33 @@ final class AttachmentOcr
         return $text;
     }
 
+    /**
+     * Extract text from a file sitting on the local filesystem, bypassing the
+     * per-attachment cache. Used by flows holding a file that is not (yet) an
+     * Attachment, such as the AI form completion on a pending upload.
+     */
+    public function textForPath(string $absolutePath, string $mime = ''): string
+    {
+        if (! $this->enabled) {
+            return '';
+        }
+
+        return $this->extract($absolutePath, $mime);
+    }
+
+    /**
+     * Rasterise the first page of a PDF and return the path of the PNG, or null
+     * when it cannot be rendered. The caller owns the file and must delete it.
+     *
+     * Used by flows that need the model to *see* the page rather than read its
+     * text, such as the reception stamp the AI completion picks the reference
+     * number from.
+     */
+    public function renderFirstPage(string $absolutePath): ?string
+    {
+        return $this->rasterize($absolutePath, 1)[0] ?? null;
+    }
+
     private function extract(string $path, string $mime): string
     {
         if (! is_file($path)) {
@@ -126,30 +153,43 @@ final class AttachmentOcr
 
     private function ocrScannedPdf(string $path): string
     {
-        if (! $this->hasBinary('pdftoppm') || ! $this->hasBinary('tesseract')) {
+        if (! $this->hasBinary('tesseract')) {
             return '';
         }
-
-        $prefix = tempnam(sys_get_temp_dir(), 'courrier_ocr_');
-        if ($prefix === false) {
-            return '';
-        }
-        @unlink($prefix);
-
-        $this->run([
-            'pdftoppm', '-png', '-r', (string) $this->dpi, '-l', (string) $this->maxPages, $path, $prefix,
-        ]);
-
-        $pages = glob($prefix.'*.png') ?: [];
-        sort($pages);
 
         $text = '';
-        foreach ($pages as $page) {
+        foreach ($this->rasterize($path, $this->maxPages) as $page) {
             $text .= ' '.$this->runTesseract($page);
             @unlink($page);
         }
 
         return mb_trim($text);
+    }
+
+    /**
+     * @return array<int, string> paths of the rendered pages, in page order.
+     *                            The caller owns them and must delete them.
+     */
+    private function rasterize(string $path, int $maxPages): array
+    {
+        if (! $this->hasBinary('pdftoppm')) {
+            return [];
+        }
+
+        $prefix = tempnam(sys_get_temp_dir(), 'courrier_ocr_');
+        if ($prefix === false) {
+            return [];
+        }
+        @unlink($prefix);
+
+        $this->run([
+            'pdftoppm', '-png', '-r', (string) $this->dpi, '-l', (string) $maxPages, $path, $prefix,
+        ]);
+
+        $pages = glob($prefix.'*.png') ?: [];
+        sort($pages);
+
+        return $pages;
     }
 
     private function runTesseract(string $imagePath): string

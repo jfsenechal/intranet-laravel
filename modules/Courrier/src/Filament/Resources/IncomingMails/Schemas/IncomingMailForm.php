@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas;
 
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Filament\Actions\AnalyzeAttachmentAction;
 use AcMarche\Courrier\Filament\Components\DepartmentField;
 use AcMarche\Courrier\Models\Category;
 use AcMarche\Courrier\Models\IncomingMail;
@@ -39,14 +40,16 @@ final class IncomingMailForm
 
     /**
      * @param  array<string, mixed>|null  $imapPreview  IMAP preview context: ['url', 'contentType', 'filename']
+     * @param  array{uid: int, index: int, mailbox: string}|null  $imapSource  IMAP coordinates of the document, so
+     *                                                                         the AI action can fetch it
      */
-    public static function getComponents(?array $imapPreview = null): array
+    public static function getComponents(?array $imapPreview = null, ?array $imapSource = null): array
     {
         return [
             Grid::make(['default' => 1, 'lg' => 12])
                 ->schema([
                     self::getPreviewColumn($imapPreview),
-                    self::getFieldsColumn(),
+                    self::getFieldsColumn($imapSource),
                 ]),
         ];
     }
@@ -179,8 +182,10 @@ final class IncomingMailForm
     /**
      * Right column: all the mail fields, stacked so they read top-to-bottom
      * alongside the preview.
+     *
+     * @param  array{uid: int, index: int, mailbox: string}|null  $imapSource
      */
-    private static function getFieldsColumn(): Group
+    private static function getFieldsColumn(?array $imapSource): Group
     {
         $isCpas = DepartmentScope::getAssignableDepartment() === DepartmentCourrierEnum::CPAS;
 
@@ -188,6 +193,13 @@ final class IncomingMailForm
             ->columnSpan(['default' => 1, 'lg' => 5])
             ->schema([
                 Section::make('Informations du courrier')
+                    ->afterHeader([
+                        // The action is wrapped in a keyed group rather than the
+                        // section being keyed: keying the section would prefix
+                        // the key of every field it holds.
+                        Group::make([AnalyzeAttachmentAction::make($imapSource)])
+                            ->key('ai-completion'),
+                    ])
                     ->schema([
                         TextInput::make('reference_number')
                             ->label('Numéro')

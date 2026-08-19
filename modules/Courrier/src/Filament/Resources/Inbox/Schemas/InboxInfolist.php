@@ -97,7 +97,7 @@ final class InboxInfolist
                     'reference_number' => '',
                     'sender' => '',
                     'mail_date' => now(),
-                    'description' => $record['subject'] ?? '',
+                    'description' => '',
                     'is_registered' => false,
                     'has_acknowledgment' => false,
                 ])

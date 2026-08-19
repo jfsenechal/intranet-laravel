@@ -70,11 +70,11 @@ final class InboxTables
                     ->visible(fn (array $record): bool => ($record['attachment_count'] ?? 0) === 1)
                     ->modalHeading(fn (array $record): string => $record['attachments'][0]['filename'] ?? 'Pièce jointe')
                     ->modalWidth(Width::SevenExtraLarge)
-                    ->fillForm(fn (array $record): array => [
+                    ->fillForm(fn (): array => [
                         'reference_number' => self::defaultReferenceNumber(),
                         'sender' => '',
                         'mail_date' => now(),
-                        'description' => $record['subject'] ?? '',
+                        'description' => '',
                         'is_registered' => false,
                         'has_acknowledgment' => false,
                     ])

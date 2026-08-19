@@ -18,11 +18,18 @@ final class InboxForm
 
         $previewUrl = route('courrier.attachments.preview', ['uid' => $uid, 'index' => $index, 'mailbox' => $mailbox]);
 
-        return IncomingMailForm::getComponents([
-            'url' => $previewUrl,
-            'contentType' => $contentType,
-            'filename' => $filename,
-        ]);
+        return IncomingMailForm::getComponents(
+            [
+                'url' => $previewUrl,
+                'contentType' => $contentType,
+                'filename' => $filename,
+            ],
+            [
+                'uid' => $uid,
+                'index' => $index,
+                'mailbox' => $mailbox,
+            ],
+        );
 
     }
 }
