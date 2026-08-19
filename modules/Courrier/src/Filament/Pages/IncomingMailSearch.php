@@ -127,7 +127,7 @@ final class IncomingMailSearch extends Page implements HasTable
 
         return $query
             ->whereIn('id', $ids)
-            ->orderByRaw('FIELD(id, '.implode(',', $ids).')');
+            ->orderByRaw(self::relevanceOrdering($ids));
     }
 
     protected function getHeaderActions(): array
@@ -142,6 +142,24 @@ final class IncomingMailSearch extends Page implements HasTable
                 ->color('gray')
                 ->action('resetSearch'),
         ];
+    }
+
+    /**
+     * Keep the rows in the relevance order returned by Meilisearch.
+     *
+     * Expressed as a CASE rather than MySQL's FIELD() so the ordering also
+     * works on the SQLite connection used by the tests.
+     *
+     * @param  array<int, int>  $ids
+     */
+    private static function relevanceOrdering(array $ids): string
+    {
+        $cases = [];
+        foreach (array_values($ids) as $position => $id) {
+            $cases[] = sprintf('WHEN %d THEN %d', $id, $position);
+        }
+
+        return 'CASE id '.implode(' ', $cases).' END';
     }
 
     /**

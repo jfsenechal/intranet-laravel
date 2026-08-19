@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\IncomingMailSearch;
+use AcMarche\Courrier\Models\Category;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
@@ -369,16 +370,29 @@ it('displays the query sent to meilisearch and clears it on reset', function ():
         ->assertSet('executedQuery', null);
 });
 
-it('exposes a category column on the advanced search table', function (): void {
+it('lists the matching mails in relevance order with their category', function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
     $admin = User::factory()->create(['is_administrator' => true]);
+    $category = Category::factory()->create(['name' => 'Facture']);
+    $first = IncomingMail::factory()->create();
+    $second = IncomingMail::factory()->create(['category_id' => $category->id]);
 
     $this->actingAs($admin);
 
+    // Meilisearch ranks the second mail first: the table must keep that order.
+    [$client] = captureMeiliSearch([['id' => $second->id], ['id' => $first->id]]);
+    $searcher = new MeiliSearcher();
+    $searcher->client = $client;
+    app()->instance(MeiliSearcher::class, $searcher);
+
     livewire(IncomingMailSearch::class)
+        ->call('search')
+        ->loadTable()
+        ->assertCanSeeTableRecords([$second, $first], inOrder: true)
         ->assertTableColumnExists(
             'category.name',
             fn (TextColumn $column): bool => $column->getLabel() === 'Catégorie',
         )
-        ->assertTableColumnVisible('category.name');
+        ->assertCanRenderTableColumn('category.name')
+        ->assertTableColumnStateSet('category.name', 'Facture', $second);
 });
