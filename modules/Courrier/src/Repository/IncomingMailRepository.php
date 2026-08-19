@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Gate;
 final class IncomingMailRepository
 {
     /**
+     * Mail dated before this is not classified by category.
+     */
+    public const CATEGORY_START_DATE = '2026-07-01';
+
+    /**
      * Mail for the given date, previewed the way it will be sent.
      *
      * By default only unnotified mail is returned. When $includeNotified is true
@@ -30,6 +35,19 @@ final class IncomingMailRepository
                 $query->whereDate('mail_date', $mailDate);
             })
             ->with(['services', 'recipients', 'attachments', 'category']);
+    }
+
+    /**
+     * CPAS mail still waiting for a category. The category only exists for that
+     * department, so nothing else is worth listing, and only from the date it
+     * was introduced: the older mail is left as it was encoded.
+     */
+    public static function withoutCategory(): Builder
+    {
+        return IncomingMail::query()
+            ->whereNull('category_id')
+            ->where('department', DepartmentCourrierEnum::CPAS->value)
+            ->whereDate('mail_date', '>=', self::CATEGORY_START_DATE);
     }
 
     /**
