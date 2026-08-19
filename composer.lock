@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7601d03b926bdeca4f6243d36eb88034",
+    "content-hash": "88cd30f2b157e2eda370f1be0e26f25c",
     "packages": [
         {
             "name": "acmarche/activity-manager",
@@ -560,6 +560,49 @@
                 }
             ],
             "description": "Human Resource Management module for AcMarche",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "acmarche/issep",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./modules/Issep",
+                "reference": "af4685c0eb35d4fe3d9e7d6efa05c0d7c7b5d886"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^13.0",
+                "php": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AcMarche\\Issep\\Providers\\IssepServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AcMarche\\Issep\\": "src/",
+                    "AcMarche\\Issep\\Database\\Factories\\": "database/factories/",
+                    "AcMarche\\Issep\\Database\\Seeders\\": "database/seeders/",
+                    "AcMarche\\Issep\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AcMarche",
+                    "email": "info@acmarche.be"
+                }
+            ],
+            "description": "Issep ",
             "transport-options": {
                 "relative": true
             }
@@ -21060,6 +21103,7 @@
         "acmarche/email-management": 20,
         "acmarche/guichet-hdv": 20,
         "acmarche/hrm": 20,
+        "acmarche/issep": 20,
         "acmarche/mailing-list": 20,
         "acmarche/meal-delivery": 20,
         "acmarche/mediation": 20,
