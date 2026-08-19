@@ -372,10 +372,15 @@ it('displays the query sent to meilisearch and clears it on reset', function ():
 
 it('lists the matching mails in relevance order with their category', function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    // The category column is reserved to the CPAS administrators.
     $admin = User::factory()->create(['is_administrator' => true]);
+    $admin->roles()->attach(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]));
     $category = Category::factory()->create(['name' => 'Facture']);
-    $first = IncomingMail::factory()->create();
-    $second = IncomingMail::factory()->create(['category_id' => $category->id]);
+    $first = IncomingMail::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+    $second = IncomingMail::factory()->create([
+        'department' => DepartmentCourrierEnum::CPAS->value,
+        'category_id' => $category->id,
+    ]);
 
     $this->actingAs($admin);
 
@@ -395,4 +400,28 @@ it('lists the matching mails in relevance order with their category', function (
         )
         ->assertCanRenderTableColumn('category.name')
         ->assertTableColumnStateSet('category.name', 'Facture', $second);
+});
+
+it('hides the category filter and column from an administrator of another department', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $admin->roles()->attach(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]));
+
+    $this->actingAs($admin);
+
+    livewire(IncomingMailSearch::class)
+        ->assertFormFieldHidden('category')
+        ->assertTableColumnHidden('category.name');
+});
+
+it('offers the category filter to a cpas administrator', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $admin->roles()->attach(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]));
+
+    $this->actingAs($admin);
+
+    livewire(IncomingMailSearch::class)
+        ->assertFormFieldExists('category')
+        ->assertTableColumnVisible('category.name');
 });

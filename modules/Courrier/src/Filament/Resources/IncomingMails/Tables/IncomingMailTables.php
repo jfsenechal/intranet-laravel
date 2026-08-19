@@ -6,6 +6,7 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Tables;
 
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
 use AcMarche\Courrier\Models\IncomingMail;
+use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\IncomingMailRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -118,6 +119,7 @@ final class IncomingMailTables
                     ->toggleable(),
                 TextColumn::make('category.name')
                     ->label('Catégorie')
+                    ->visible(DepartmentScope::currentUserAdministersCpas(...))
                     ->badge()
                     ->color('gray')
                     ->toggleable(),

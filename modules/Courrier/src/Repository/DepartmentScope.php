@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Repository;
 
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
+use AcMarche\Courrier\Enums\RolesEnum;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -37,6 +39,21 @@ final class DepartmentScope implements Scope
         }
 
         return $user->getCourrierAdminDepartment();
+    }
+
+    /**
+     * Whether the current user administers the CPAS department. Only they
+     * classify their mail, so the category field, filter and column are theirs.
+     *
+     * Asks for the role rather than going through getAssignableDepartment(),
+     * which reduces a user to a single admin department.
+     */
+    public static function currentUserAdministersCpas(): bool
+    {
+        $user = auth()->user();
+
+        return $user instanceof User
+            && $user->hasRole(RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value);
     }
 
     /**
