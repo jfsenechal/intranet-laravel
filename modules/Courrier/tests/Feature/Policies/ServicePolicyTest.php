@@ -72,6 +72,23 @@ it('denies a regular user to delete a service', function (): void {
     expect(auth()->user()->can('delete', $service))->toBeFalse();
 });
 
+it('allows an administrator to bulk delete services', function (): void {
+    auth()->user()->update(['is_administrator' => true]);
+
+    expect(auth()->user()->can('deleteAny', Service::class))->toBeTrue();
+});
+
+it('allows a user with a courrier admin role to bulk delete services', function (): void {
+    $role = Role::create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
+    auth()->user()->roles()->attach($role);
+
+    expect(auth()->user()->can('deleteAny', Service::class))->toBeTrue();
+});
+
+it('denies a regular user to bulk delete services', function (): void {
+    expect(auth()->user()->can('deleteAny', Service::class))->toBeFalse();
+});
+
 it('denies restore for any user', function (): void {
     $service = Service::factory()->create();
 

@@ -66,6 +66,18 @@ final class ServicePolicy
     }
 
     /**
+     * Determine whether the user can bulk delete models.
+     *
+     * Filament consults `deleteAny()` — not `delete()` — for DeleteBulkAction.
+     * Without this method the check falls through to `Response::allow()`, so
+     * omitting it hands the bulk delete to every user who can reach the list.
+     */
+    public function deleteAny(User $user): bool
+    {
+        return $this->isAdministrator($user);
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(): bool

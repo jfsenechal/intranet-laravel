@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Resources\Services\Pages\ListServices;
 use AcMarche\Courrier\Filament\Resources\Services\Pages\ViewService;
+use AcMarche\Courrier\Filament\Resources\Services\ServiceResource;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
@@ -129,4 +130,21 @@ test('bulk deleting services detaches their courriers', function (): void {
         expect(IncomingMail::query()->whereKey($mail->getKey())->exists())->toBeTrue()
             ->and($mail->services()->count())->toBe(0);
     }
+});
+
+/**
+ * Filament resolves bulk-action authorization through its own helper, which
+ * falls back to Response::allow() when the policy method is missing — a plain
+ * Gate::allows() check would not catch that. Go through the resource.
+ */
+test('a user without a courrier admin role is denied the services bulk delete', function (): void {
+    $regular = User::factory()->create();
+    $regular->roles()->attach(Role::factory()->create(['name' => 'ROLE_GRH_ADMIN']));
+    $this->actingAs($regular);
+
+    expect(ServiceResource::can('deleteAny'))->toBeFalse();
+});
+
+test('a courrier admin is granted the services bulk delete', function (): void {
+    expect(ServiceResource::can('deleteAny'))->toBeTrue();
 });
