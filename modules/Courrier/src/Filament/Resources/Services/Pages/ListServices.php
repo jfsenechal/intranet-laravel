@@ -21,7 +21,7 @@ final class ListServices extends ListRecords
 
     public function getSubheading(): string
     {
-        return 'Services ou groupes de destinataires';
+        return 'Services et groupes de destinataires';
     }
 
     protected function getHeaderActions(): array
