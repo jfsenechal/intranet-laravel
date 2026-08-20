@@ -36,7 +36,7 @@ function ldapEmploye(array $attributes): EmployeLdap
     return $entry;
 }
 
-function repository(): EmployeLdapRepository
+function employeLdapRepository(): EmployeLdapRepository
 {
     return app(EmployeLdapRepository::class);
 }
@@ -48,7 +48,7 @@ describe('setQuota', function (): void {
 
         app(EmployeHandler::class)->setQuota($employe, 2048);
 
-        expect(repository()->getQuota(repository()->getEntry('amartin')))->toBe(2048.0);
+        expect(employeLdapRepository()->getQuota(employeLdapRepository()->getEntry('amartin')))->toBe(2048.0);
     });
 
     it('refuses a quota of zero or less', function (): void {
@@ -74,7 +74,7 @@ describe('updateAliases', function (): void {
 
         app(EmployeHandler::class)->updateAliases($employe, ['a.martin@ac.marche.be', 'alice@ac.marche.be']);
 
-        expect(repository()->getAliases(repository()->getEntry('amartin')))
+        expect(employeLdapRepository()->getAliases(employeLdapRepository()->getEntry('amartin')))
             ->toBe(['a.martin@ac.marche.be', 'alice@ac.marche.be']);
     });
 
@@ -84,7 +84,7 @@ describe('updateAliases', function (): void {
 
         app(EmployeHandler::class)->updateAliases($employe, []);
 
-        expect(repository()->getAliases(repository()->getEntry('amartin')))->toBe([]);
+        expect(employeLdapRepository()->getAliases(employeLdapRepository()->getEntry('amartin')))->toBe([]);
     });
 
     it('rejects a malformed alias', function (): void {
@@ -112,10 +112,10 @@ describe('createEmail', function (): void {
 
         app(EmployeHandler::class)->createEmail($employe, 'alice.martin@ac.marche.be');
 
-        $entry = repository()->getEntry('amartin');
+        $entry = employeLdapRepository()->getEntry('amartin');
 
         expect($entry->getFirstAttribute('mail'))->toBe('alice.martin@ac.marche.be')
-            ->and(repository()->getQuota($entry))->toBe((float) config('email-management.default_quota_mb'))
+            ->and(employeLdapRepository()->getQuota($entry))->toBe((float) config('email-management.default_quota_mb'))
             ->and($employe->refresh()->mail)->toBe('alice.martin@ac.marche.be');
     });
 
@@ -150,7 +150,7 @@ describe('createEmail', function (): void {
 
         app(EmployeHandler::class)->createEmail($employe, 'occupe@ac.marche.be', force: true);
 
-        expect(repository()->getEntry('amartin')->getFirstAttribute('mail'))->toBe('occupe@ac.marche.be');
+        expect(employeLdapRepository()->getEntry('amartin')->getFirstAttribute('mail'))->toBe('occupe@ac.marche.be');
     });
 
     it('lets an account keep its own address', function (): void {
@@ -159,6 +159,6 @@ describe('createEmail', function (): void {
 
         app(EmployeHandler::class)->createEmail($employe, 'alice.martin@ac.marche.be');
 
-        expect(repository()->getEntry('amartin')->getFirstAttribute('mail'))->toBe('alice.martin@ac.marche.be');
+        expect(employeLdapRepository()->getEntry('amartin')->getFirstAttribute('mail'))->toBe('alice.martin@ac.marche.be');
     });
 });
