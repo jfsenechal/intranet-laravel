@@ -114,6 +114,19 @@ final class MeiliIndexer
     }
 
     /**
+     * Extract the document text and store it on the mail, without indexing it.
+     *
+     * For a draft, which is deliberately kept out of the index until a human
+     * has validated it: the text is still wanted, because suggesting where the
+     * mail should be routed reads it. The extraction is cached on disk per
+     * attachment, so the indexing that follows validation gets it for free.
+     */
+    public function extractAndPersistContent(IncomingMail $incomingMail): void
+    {
+        $this->persistContent($incomingMail, self::cleanData($this->attachmentsText($incomingMail)));
+    }
+
+    /**
      * Store the extracted attachment text on the incoming mail so it is
      * available outside the search index. Persisted quietly to avoid
      * re-dispatching the index job and only when the value changed.

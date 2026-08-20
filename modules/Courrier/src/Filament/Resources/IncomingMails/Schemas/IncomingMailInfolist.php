@@ -48,6 +48,20 @@ final class IncomingMailInfolist
 
                 Section::make('Métas données')
                     ->schema([
+                        // Shown only while it is true: a courrier is a draft
+                        // briefly and validated for the rest of its life, so an
+                        // entry reading "Brouillon : non" on every other mail
+                        // would be noise. The view page is reachable by URL even
+                        // though the draft listing links to the edit form, so
+                        // this is what says the metadata has not been read yet.
+                        TextEntry::make('is_draft')
+                            ->hiddenLabel()
+                            ->badge()
+                            ->color('warning')
+                            ->icon('tabler-sparkles')
+                            ->formatStateUsing(fn (): string => 'Brouillon IA — métadonnées non vérifiées')
+                            ->hidden(fn ($state): bool => ! $state)
+                            ->columnSpanFull(),
                         TextEntry::make('department')
                             ->label('Département')
                             ->badge()

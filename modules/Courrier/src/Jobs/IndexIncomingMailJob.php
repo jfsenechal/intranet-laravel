@@ -60,6 +60,11 @@ final class IndexIncomingMailJob implements ShouldQueue
                 // only a suggestion, so it stays out of the index until it is
                 // validated. Validating updates the record, which dispatches
                 // this job again.
+                //
+                // Its text is still extracted and stored: SimilarMailFinder
+                // reads it to suggest the routing while the draft is verified,
+                // and nothing else would have filled it before then.
+                $indexer->extractAndPersistContent($incomingMail);
                 $indexer->deleteMail($this->incomingMailId);
 
                 return;

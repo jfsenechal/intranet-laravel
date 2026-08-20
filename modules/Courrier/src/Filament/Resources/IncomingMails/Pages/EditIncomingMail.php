@@ -6,10 +6,12 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Pages\DraftIncomingMails;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
+use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailForm;
 use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Sender;
 use AcMarche\Courrier\Repository\IncomingMailRepository;
+use AcMarche\Courrier\Search\SuggestsMailRouting;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -135,7 +137,7 @@ final class EditIncomingMail extends EditRecord
             'recipients.id'
         )->toArray();
 
-        return $data;
+        return [...$data, ...$this->routingSuggestions()];
     }
 
     /**
@@ -157,6 +159,8 @@ final class EditIncomingMail extends EditRecord
             $data['primary_recipients'],
             $data['secondary_recipients'],
             $data['save_sender'],
+            $data[IncomingMailForm::SUGGESTED_RECIPIENTS],
+            $data[IncomingMailForm::SUGGESTED_SERVICES],
         );
 
         return $data;
@@ -206,6 +210,51 @@ final class EditIncomingMail extends EditRecord
         // Pivot writes fire no model event, so nothing has re-indexed the mail
         // when only its recipients or services changed.
         IndexIncomingMailJob::dispatch($this->record->id)->afterCommit();
+    }
+
+    /**
+     * Candidates read off the courriers that resemble this one, for the
+     * services and recipients selects to show above their lists.
+     *
+     * Retrieved once here rather than from the selects' options closures, which
+     * Livewire re-evaluates on every round trip. Skipped once the mail is
+     * routed: a suggestion is for an empty field, and re-ordering a select the
+     * user has already answered only moves things around under them.
+     *
+     * @return array{suggested_recipients: list<int>, suggested_services: list<int>}
+     */
+    private function routingSuggestions(): array
+    {
+        $empty = [
+            IncomingMailForm::SUGGESTED_RECIPIENTS => [],
+            IncomingMailForm::SUGGESTED_SERVICES => [],
+        ];
+
+        if (! $this->record->is_draft) {
+            // The AI encodes a courrier, it does not revisit one. On a mail a
+            // human has already validated, a suggestion could only offer to
+            // undo a routing someone chose deliberately.
+            return $empty;
+        }
+
+        if (blank($this->record->content)) {
+            // Nothing was extracted from the document, so there is nothing to
+            // look up.
+            return $empty;
+        }
+
+        if ($this->record->recipients()->exists() && $this->record->services()->exists()) {
+            // Already routed, on a return visit to the draft. Re-ordering the
+            // selects would move the answers around under the user.
+            return $empty;
+        }
+
+        $suggestion = app(SuggestsMailRouting::class)->suggestFor($this->record);
+
+        return [
+            IncomingMailForm::SUGGESTED_RECIPIENTS => $suggestion->recipientIds,
+            IncomingMailForm::SUGGESTED_SERVICES => $suggestion->serviceIds,
+        ];
     }
 
     /**

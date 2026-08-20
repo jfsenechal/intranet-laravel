@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Actions;
 
 use AcMarche\Courrier\Ai\IncomingMailAnalyzer;
+use AcMarche\Courrier\Dto\MailAnalysis;
 use AcMarche\Courrier\Dto\MailSuggestion;
+use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailForm;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\ImapRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
+use AcMarche\Courrier\Search\SuggestsMailRouting;
 use AcMarche\Security\Enums\RolesEnum;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -50,12 +53,20 @@ final class AnalyzeAttachmentAction
             ->icon('tabler-sparkles')
             ->color(Color::Indigo)
             ->link()
-            ->visible(self::isUnderTrialFor(...))
-            ->action(function (Get $schemaGet, Set $schemaSet, ?IncomingMail $record) use ($imapSource): void {
+            ->visible(fn (IncomingMail|array|null $record): bool => self::isUnderTrialFor()
+                && self::isEncodingRatherThanEditing($record))
+            // $record is an IncomingMail on the resource form, but the Inbox
+            // flow mounts this action inside a modal whose record is the raw
+            // IMAP message array, so the parameter has to accept both.
+            ->action(function (Get $schemaGet, Set $schemaSet, IncomingMail|array|null $record) use ($imapSource): void {
                 $temporaryPath = null;
 
                 try {
-                    [$path, $mime, $temporaryPath] = self::resolveFile($schemaGet, $record, $imapSource);
+                    [$path, $mime, $temporaryPath] = self::resolveFile(
+                        $schemaGet,
+                        $record instanceof IncomingMail ? $record : null,
+                        $imapSource,
+                    );
 
                     if ($path === null) {
                         Notification::make()
@@ -67,7 +78,7 @@ final class AnalyzeAttachmentAction
                         return;
                     }
 
-                    $suggestion = app(IncomingMailAnalyzer::class)->analyze($path, $mime);
+                    $analysis = app(IncomingMailAnalyzer::class)->analyze($path, $mime);
                 } catch (Throwable $e) {
                     report($e);
 
@@ -84,7 +95,8 @@ final class AnalyzeAttachmentAction
                     }
                 }
 
-                self::applySuggestion($suggestion, $schemaGet, $schemaSet);
+                self::applySuggestion($analysis->suggestion, $schemaGet, $schemaSet);
+                self::applyRouting($analysis, $schemaGet, $schemaSet);
             });
     }
 
@@ -99,6 +111,53 @@ final class AnalyzeAttachmentAction
         $user = Auth::user();
 
         return $user instanceof User && $user->hasRole(RolesEnum::INTRANET_ADMIN->value);
+    }
+
+    /**
+     * Whether the form is encoding a mail rather than correcting one already
+     * encoded.
+     *
+     * The AI reads a document to turn it into a courrier, which is a thing that
+     * happens once. On a courrier a human has already validated, its suggestions
+     * would only offer to overwrite decisions someone took on purpose, so the
+     * button is not offered there at all. A draft still counts as encoding: it
+     * has a record, but nobody has read it yet.
+     *
+     * The Inbox passes the raw IMAP message array, which is as "new" as it gets.
+     */
+    private static function isEncodingRatherThanEditing(IncomingMail|array|null $record): bool
+    {
+        return ! $record instanceof IncomingMail || $record->is_draft;
+    }
+
+    /**
+     * Offer the services and recipients that comparable mail was routed to.
+     *
+     * Where a courrier goes is almost never written on the courrier — the name
+     * of the person it ends up with appears in the letter about one time in
+     * eight — so this is retrieved from the mail already encoded rather than
+     * read by the model. It only ever fills the candidate lists the selects
+     * show above their options; the fields themselves are left to the user.
+     */
+    private static function applyRouting(MailAnalysis $analysis, Get $schemaGet, Set $schemaSet): void
+    {
+        if ($analysis->documentText === '') {
+            return;
+        }
+
+        $routing = app(SuggestsMailRouting::class)->suggest(
+            $analysis->documentText,
+            $analysis->suggestion->sender,
+            DepartmentScope::getAssignableDepartment()?->value,
+        );
+
+        if (blank($schemaGet('primary_recipients'))) {
+            $schemaSet(IncomingMailForm::SUGGESTED_RECIPIENTS, $routing->recipientIds);
+        }
+
+        if (blank($schemaGet('primary_services'))) {
+            $schemaSet(IncomingMailForm::SUGGESTED_SERVICES, $routing->serviceIds);
+        }
     }
 
     /**

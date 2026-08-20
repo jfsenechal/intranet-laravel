@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Jobs;
 
 use AcMarche\Courrier\Ai\IncomingMailAnalyzer;
+use AcMarche\Courrier\Dto\MailAnalysis;
 use AcMarche\Courrier\Dto\MailSuggestion;
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Handler\IncomingMailHandler;
@@ -112,7 +113,8 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
         $attachment = $imapRepository->getAttachment($message['uid'], $message['index']);
         $contents = $attachment->contents();
 
-        $suggestion = $this->analyze($analyzer, $contents, $message);
+        $analysis = $this->analyze($analyzer, $contents, $message);
+        $suggestion = $analysis->suggestion;
 
         $incomingMail = IncomingMail::create([
             // The reference number is read off the reception stamp; when the
@@ -125,6 +127,10 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
             // what it receives today; the user corrects it while verifying.
             'mail_date' => today(),
             'description' => $suggestion->description,
+            // Stored now rather than left to the indexing job: the draft's
+            // routing suggestions are looked up from this text, and the user
+            // may well open the draft before that job has run.
+            'content' => $analysis->documentText,
             'is_registered' => $suggestion->isRegistered,
             'has_acknowledgment' => $suggestion->hasAcknowledgment,
             'is_notified' => false,
@@ -161,7 +167,7 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
      *
      * @param  array{uid: int, index: int, filename: string, mime: string}  $message
      */
-    private function analyze(IncomingMailAnalyzer $analyzer, string $contents, array $message): MailSuggestion
+    private function analyze(IncomingMailAnalyzer $analyzer, string $contents, array $message): MailAnalysis
     {
         $temporaryPath = tempnam(sys_get_temp_dir(), 'courrier_ai_');
 

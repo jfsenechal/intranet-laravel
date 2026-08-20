@@ -5,12 +5,17 @@ declare(strict_types=1);
 use AcMarche\Courrier\Ai\IncomingMailAgent;
 use AcMarche\Courrier\Ai\IncomingMailAnalyzer;
 use AcMarche\Courrier\Enums\RolesEnum;
+use AcMarche\Courrier\Filament\Pages\Inbox;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\CreateIncomingMail;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Search\AttachmentOcr;
 use AcMarche\Security\Enums\RolesEnum as SecurityRolesEnum;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
+use DirectoryTree\ImapEngine\Laravel\ImapManager;
+use DirectoryTree\ImapEngine\Testing\FakeFolder;
+use DirectoryTree\ImapEngine\Testing\FakeMailbox;
+use DirectoryTree\ImapEngine\Testing\FakeMessage;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -19,6 +24,28 @@ use Laravel\Ai\Files\LocalImage;
 use Laravel\Ai\Prompts\AgentPrompt;
 
 use function Pest\Livewire\livewire;
+
+/**
+ * An IMAP message carrying the fixture courrier, so the Inbox flow has a real
+ * document to hand the analyser.
+ */
+function inboxMessageWithCourrier(int $uid = 1): FakeMessage
+{
+    $mime = 'Date: '.now()->toRfc2822String()."\r\n"
+        ."From: Copieur <copieur@marche.be>\r\n"
+        ."Subject: SKM_C250\r\n"
+        ."MIME-Version: 1.0\r\n"
+        ."Content-Type: multipart/mixed; boundary=\"BOUND\"\r\n"
+        ."\r\n"
+        ."--BOUND\r\n"
+        ."Content-Type: application/pdf; name=\"courrier.pdf\"\r\n"
+        ."Content-Disposition: attachment; filename=\"courrier.pdf\"\r\n"
+        ."Content-Transfer-Encoding: base64\r\n\r\n"
+        .chunk_split(base64_encode((string) file_get_contents(fixtureMailPath())))
+        .'--BOUND--'."\r\n";
+
+    return new FakeMessage(uid: $uid, contents: $mime);
+}
 
 /**
  * A one-page PDF with a real text layer, so `pdftotext` reads it without OCR.
@@ -80,10 +107,13 @@ beforeEach(function (): void {
 it('prompts the agent with the text extracted from the pdf', function (): void {
     IncomingMailAgent::fake([fakeSuggestion()]);
 
-    $suggestion = (new IncomingMailAnalyzer(new AttachmentOcr(enabled: true)))
+    $analysis = (new IncomingMailAnalyzer(new AttachmentOcr(enabled: true)))
         ->analyze(fixtureMailPath(), 'application/pdf');
 
-    expect($suggestion->referenceNumber)->toBe('002686')
+    $suggestion = $analysis->suggestion;
+
+    expect($analysis->documentText)->toContain('SPRL Toitures Dubois')
+        ->and($suggestion->referenceNumber)->toBe('002686')
         ->and($suggestion->services)->toBe(['RH', 'CEE'])
         ->and($suggestion->sender)->toBe('SPRL Toitures Dubois')
         ->and($suggestion->description)->toBe("Demande de permis d'urbanisme pour une toiture")
@@ -294,4 +324,26 @@ it('keeps the reference number already encoded', function (): void {
         ])
         ->callAction(TestAction::make('analyzeAttachment')->schemaComponent('ai-completion'))
         ->assertSchemaStateSet(['reference_number' => '000001']);
+});
+
+it('fills the form from the inbox modal, where the record is an imap message', function (): void {
+    IncomingMailAgent::fake([fakeSuggestion()]);
+
+    resolve(ImapManager::class)->swap('imap_ville', new FakeMailbox(folders: [
+        new FakeFolder('inbox', messages: [inboxMessageWithCourrier()]),
+    ]));
+
+    // The Inbox mounts the action inside the "Traiter" modal, whose record is
+    // the raw IMAP message array rather than an IncomingMail.
+    livewire(Inbox::class)
+        ->call('loadTable')
+        ->callAction([
+            TestAction::make('process')->table('0'),
+            TestAction::make('analyzeAttachment')->schemaComponent('ai-completion'),
+        ])
+        ->assertNotified('Formulaire complété')
+        ->assertSchemaStateSet([
+            'sender' => 'SPRL Toitures Dubois',
+            'description' => "Demande de permis d'urbanisme pour une toiture",
+        ]);
 });

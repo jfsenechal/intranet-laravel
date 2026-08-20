@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Courrier\Ai;
 
+use AcMarche\Courrier\Dto\MailAnalysis;
 use AcMarche\Courrier\Dto\MailSuggestion;
 use AcMarche\Courrier\Search\AttachmentOcr;
 use Laravel\Ai\Files;
@@ -41,9 +42,13 @@ final readonly class IncomingMailAnalyzer
     public function __construct(private AttachmentOcr $ocr) {}
 
     /**
+     * The text is returned alongside the suggestion: the callers route the mail
+     * from it and store it on the record, and re-extracting it would mean OCRing
+     * the scan a second time.
+     *
      * @throws RuntimeException when the file cannot be read at all
      */
-    public function analyze(string $absolutePath, string $mime = ''): MailSuggestion
+    public function analyze(string $absolutePath, string $mime = ''): MailAnalysis
     {
         if (! is_file($absolutePath)) {
             throw new RuntimeException(sprintf('Le fichier [%s] est introuvable.', $absolutePath));
@@ -70,7 +75,7 @@ final readonly class IncomingMailAnalyzer
             throw new RuntimeException("Le modèle n'a pas renvoyé de réponse structurée.");
         }
 
-        return MailSuggestion::fromStructuredResponse($response->toArray());
+        return new MailAnalysis(MailSuggestion::fromStructuredResponse($response->toArray()), $text);
     }
 
     /**

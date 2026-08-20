@@ -9,6 +9,7 @@ use AcMarche\Courrier\Filament\Pages\DraftIncomingMails;
 use AcMarche\Courrier\Filament\Pages\Inbox;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\EditIncomingMail;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\ListIncomingMails;
+use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\ViewIncomingMail;
 use AcMarche\Courrier\Jobs\AnalyzeInboxMessagesJob;
 use AcMarche\Courrier\Mail\IncomingMailDraftsReady;
 use AcMarche\Courrier\Models\IncomingMail;
@@ -373,4 +374,21 @@ it('discards a draft from the drafts page', function (): void {
         ->callTableBulkAction('delete', [$draft->getKey()]);
 
     expect(IncomingMail::query()->whereKey($draft->getKey())->exists())->toBeFalse();
+});
+
+it('flags a draft on the view page, and says nothing on an encoded courrier', function (): void {
+    actAsInboxAdmin();
+
+    $draft = IncomingMail::factory()->draft()->create([
+        'department' => DepartmentCourrierEnum::VILLE->value,
+    ]);
+    $encoded = IncomingMail::factory()->create([
+        'department' => DepartmentCourrierEnum::VILLE->value,
+    ]);
+
+    livewire(ViewIncomingMail::class, ['record' => $draft->id])
+        ->assertSee('Brouillon IA');
+
+    livewire(ViewIncomingMail::class, ['record' => $encoded->id])
+        ->assertDontSee('Brouillon IA');
 });

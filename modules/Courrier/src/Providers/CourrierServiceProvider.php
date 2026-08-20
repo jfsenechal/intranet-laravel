@@ -10,6 +10,8 @@ use AcMarche\Courrier\Console\Commands\ListPendingNotificationsCommand;
 use AcMarche\Courrier\Console\Commands\MeiliIndexerCommand;
 use AcMarche\Courrier\Console\Commands\SyncCommand;
 use AcMarche\Courrier\Policies\RegisterPolicies;
+use AcMarche\Courrier\Search\SimilarMailFinder;
+use AcMarche\Courrier\Search\SuggestsMailRouting;
 use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +24,10 @@ final class CourrierServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerModuleConfig();
+
+        // Scoped rather than a singleton: the finder holds a Meilisearch client
+        // built from config, and this application runs on Octane.
+        $this->app->scoped(SuggestsMailRouting::class, SimilarMailFinder::class);
     }
 
     public function boot(): void
