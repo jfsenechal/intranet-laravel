@@ -31,7 +31,7 @@ final class ServiceTables
                     ->counts('recipients')
                     ->badge()
                     ->color('gray'),
-                TextColumn::make('department.name')
+                TextColumn::make('department')
                     ->label('Département')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
