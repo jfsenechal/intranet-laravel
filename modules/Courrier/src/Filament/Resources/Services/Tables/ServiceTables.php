@@ -72,8 +72,30 @@ final class ServiceTables
             ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->accessSelectedRecords()
+                        ->modalDescription(self::attachedMailsWarning(...)),
                 ]),
             ]);
+    }
+
+    /**
+     * Warns that every courrier routed to the selected services will be unlinked.
+     * Returning null leaves Filament's default confirmation text in place.
+     */
+    private static function attachedMailsWarning(DeleteBulkAction $action): ?string
+    {
+        $count = (int) $action->getSelectedRecordsQuery()
+            ->withCount('incomingMails')
+            ->get()
+            ->sum('incoming_mails_count');
+
+        if ($count === 0) {
+            return null;
+        }
+
+        return $count === 1
+            ? 'La sélection est liée à 1 courrier. Il sera détaché, mais ne sera pas supprimé. Voulez-vous continuer ?'
+            : "La sélection est liée à {$count} courriers. Ils seront détachés, mais ne seront pas supprimés. Voulez-vous continuer ?";
     }
 }

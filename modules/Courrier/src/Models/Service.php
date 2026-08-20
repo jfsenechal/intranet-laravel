@@ -53,6 +53,20 @@ final class Service extends Model
             ->saveSlugsTo('slugname');
     }
 
+    /**
+     * Detaching keeps the `incoming_mail_service` and `recipient_service` pivots
+     * clean: the courriers belong to the Inbox and the recipients are people,
+     * both outlive the service they were linked to, so they are unlinked here,
+     * never deleted.
+     */
+    protected static function booted(): void
+    {
+        self::deleting(function (self $service): void {
+            $service->incomingMails()->detach();
+            $service->recipients()->detach();
+        });
+    }
+
     protected static function newFactory(): ServiceFactory
     {
         return ServiceFactory::new();
