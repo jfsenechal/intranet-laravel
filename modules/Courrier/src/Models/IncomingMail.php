@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $content
  * @property \Carbon\CarbonImmutable $mail_date
  * @property bool $is_notified
+ * @property bool $is_draft
  * @property bool $is_registered
  * @property bool $has_acknowledgment
  * @property string $user_add
@@ -53,6 +54,7 @@ use Illuminate\Support\Facades\DB;
     'content',
     'mail_date',
     'is_notified',
+    'is_draft',
     'is_registered',
     'has_acknowledgment',
     'user_add',
@@ -164,6 +166,7 @@ final class IncomingMail extends Model
         return [
             'mail_date' => 'date',
             'is_notified' => 'boolean',
+            'is_draft' => 'boolean',
             'is_registered' => 'boolean',
             'has_acknowledgment' => 'boolean',
         ];

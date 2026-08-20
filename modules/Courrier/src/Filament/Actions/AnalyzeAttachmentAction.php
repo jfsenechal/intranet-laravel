@@ -91,8 +91,10 @@ final class AnalyzeAttachmentAction
     /**
      * Who gets to try the AI completion. Hiding the action also refuses it when
      * mounted, so this is the only gate the feature needs while it is a trial.
+     *
+     * Shared with the Inbox bulk analysis, which is the same trial.
      */
-    private static function isUnderTrialFor(): bool
+    public static function isUnderTrialFor(): bool
     {
         $user = Auth::user();
 

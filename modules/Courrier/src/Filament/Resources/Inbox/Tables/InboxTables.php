@@ -7,15 +7,19 @@ namespace AcMarche\Courrier\Filament\Resources\Inbox\Tables;
 use AcMarche\Courrier\Dto\EmailMessage;
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Exception\ImapException;
+use AcMarche\Courrier\Filament\Actions\AnalyzeAttachmentAction;
 use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxForm;
 use AcMarche\Courrier\Filament\Resources\Inbox\Schemas\InboxInfolist;
 use AcMarche\Courrier\Handler\IncomingMailHandler;
+use AcMarche\Courrier\Jobs\AnalyzeInboxMessagesJob;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\ImapRepository;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Notifications\Notification;
+use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -23,6 +27,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 final class InboxTables
 {
@@ -99,6 +104,7 @@ final class InboxTables
                     ->modalSubmitActionLabel('Enregistrer le courrier'),
             ])
             ->toolbarActions([
+                self::analyzeBulkAction($mailbox ?? 'imap_ville'),
                 BulkAction::make('delete')
                     ->label('Supprimer')
                     ->icon('tabler-trash')
@@ -129,6 +135,91 @@ final class InboxTables
                     }),
             ])
             ->paginated([10, 25, 50]);
+    }
+
+    /**
+     * Hand a selection of messages to the AI, which encodes each one as a draft
+     * courrier the user then verifies.
+     *
+     * Only messages carrying exactly one attachment qualify, like the "Traiter"
+     * action: with none there is nothing to read, and with several nothing says
+     * which one is the courrier. The rest of the selection is reported rather
+     * than silently dropped.
+     *
+     * The work is queued: an analysis takes tens of seconds, so a selection of
+     * any size would time the request out. The user is mailed when the batch is
+     * done.
+     */
+    private static function analyzeBulkAction(string $mailbox): BulkAction
+    {
+        return BulkAction::make('analyze')
+            ->label('Traiter avec l\'IA')
+            ->icon('tabler-sparkles')
+            ->color(Color::Indigo)
+            ->visible(AnalyzeAttachmentAction::isUnderTrialFor(...))
+            ->requiresConfirmation()
+            ->modalHeading('Analyser les courriers sélectionnés')
+            ->modalDescription(
+                'Chaque pièce jointe sera lue par l\'IA et enregistrée comme brouillon de courrier. '
+                .'Vous recevrez un mail avec un lien pour les vérifier et les valider.'
+            )
+            ->modalSubmitActionLabel('Lancer l\'analyse')
+            ->action(function (Collection $records, HasTable $livewire) use ($mailbox): void {
+                $user = Auth::user();
+
+                if (! $user instanceof User) {
+                    return;
+                }
+
+                $messages = self::analysableMessages($records);
+                $skipped = $records->count() - count($messages);
+
+                if ($messages === []) {
+                    Notification::make()
+                        ->title('Aucun message analysable')
+                        ->body('Seuls les messages comportant une seule pièce jointe peuvent être analysés.')
+                        ->warning()
+                        ->send();
+
+                    return;
+                }
+
+                AnalyzeInboxMessagesJob::dispatch(
+                    $mailbox,
+                    $messages,
+                    $user->id,
+                    DepartmentScope::getAssignableDepartment(),
+                );
+
+                $livewire->deselectAllTableRecords();
+
+                Notification::make()
+                    ->title(sprintf('Analyse lancée pour %d message(s)', count($messages)))
+                    ->body(
+                        'Vous recevrez un mail dès que les brouillons seront prêts.'
+                        .($skipped > 0 ? sprintf(' %d message(s) ignoré(s) : pièce jointe absente ou multiple.', $skipped) : '')
+                    )
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * @param  Collection<int, array<string, mixed>>  $records
+     * @return list<array{uid: int, index: int, filename: string, mime: string}>
+     */
+    private static function analysableMessages(Collection $records): array
+    {
+        return $records
+            ->filter(fn (array $record): bool => ($record['attachment_count'] ?? 0) === 1)
+            ->map(fn (array $record): array => [
+                'uid' => (int) $record['uid'],
+                'index' => 0,
+                'filename' => $record['attachments'][0]['filename'] ?? 'Sans nom',
+                'mime' => $record['attachments'][0]['content_type'] ?? 'application/octet-stream',
+            ])
+            ->values()
+            ->all();
     }
 
     /**

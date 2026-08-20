@@ -55,6 +55,16 @@ final class IndexIncomingMailJob implements ShouldQueue
                 return;
             }
 
+            if ($incomingMail->is_draft) {
+                // An AI draft has never been read by a human: its metadata is
+                // only a suggestion, so it stays out of the index until it is
+                // validated. Validating updates the record, which dispatches
+                // this job again.
+                $indexer->deleteMail($this->incomingMailId);
+
+                return;
+            }
+
             $indexer->indexMail($incomingMail);
         } catch (Throwable $throwable) {
             report($throwable);

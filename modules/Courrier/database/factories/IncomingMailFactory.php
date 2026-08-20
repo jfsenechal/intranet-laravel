@@ -24,11 +24,22 @@ final class IncomingMailFactory extends Factory
             'description' => fake()->optional()->paragraph(),
             'mail_date' => fake()->date(),
             'is_notified' => fake()->boolean(70),
+            'is_draft' => false,
             'is_registered' => fake()->boolean(20),
             'has_acknowledgment' => fake()->boolean(10),
             'user_add' => 'test_user',
             'department' => null,
         ];
+    }
+
+    /**
+     * A mail the AI encoded from an Inbox attachment, not yet verified.
+     */
+    public function draft(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_draft' => true,
+        ]);
     }
 
     public function notified(): static

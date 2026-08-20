@@ -30,6 +30,7 @@ final class IncomingMailRepository
     public static function findByDateAndNotNotified(?string $mailDate, bool $includeNotified = false): Builder
     {
         return IncomingMail::query()
+            ->where('is_draft', false)
             ->when(! $includeNotified, fn (Builder $query): Builder => $query->where('is_notified', false))
             ->when($mailDate, function (Builder $query) use ($mailDate): void {
                 $query->whereDate('mail_date', $mailDate);
@@ -45,9 +46,42 @@ final class IncomingMailRepository
     public static function withoutCategory(): Builder
     {
         return IncomingMail::query()
+            ->where('is_draft', false)
             ->whereNull('category_id')
             ->where('department', DepartmentCourrierEnum::CPAS->value)
             ->whereDate('mail_date', '>=', self::CATEGORY_START_DATE);
+    }
+
+    /**
+     * Mail the AI encoded from an Inbox attachment that nobody has verified yet.
+     *
+     * The queue is shared across the department rather than private to whoever
+     * ran the analysis: the mail room works one physical pile, so a draft is
+     * work left to do, not the property of the administrator who scanned it.
+     * The model's DepartmentScope is what keeps one department out of another's.
+     *
+     * Ordered by id, which is the order the analysed messages came in.
+     */
+    public static function drafts(): Builder
+    {
+        return IncomingMail::query()
+            ->where('is_draft', true)
+            ->orderBy('id');
+    }
+
+    /**
+     * The draft to open once the given one is validated, so a batch is walked
+     * through without going back to a listing.
+     *
+     * Falls back to the start of the queue when the validated draft was the
+     * last one, so drafts left behind earlier in the pile are still reached.
+     */
+    public static function nextDraftAfter(IncomingMail $incomingMail): ?IncomingMail
+    {
+        return self::drafts()
+            ->where('id', '>', $incomingMail->id)
+            ->first()
+            ?? self::drafts()->whereKeyNot($incomingMail->id)->first();
     }
 
     /**
@@ -60,7 +94,8 @@ final class IncomingMailRepository
      */
     public static function scopeToTodayForCurrentUser(Builder $query): Builder
     {
-        $query->whereDate('incoming_mails.mail_date', today());
+        $query->whereDate('incoming_mails.mail_date', today())
+            ->where('incoming_mails.is_draft', false);
 
         $user = auth()->user();
 
@@ -113,6 +148,7 @@ final class IncomingMailRepository
     public function getIncomingMailsForRecipient(Recipient $recipient, CarbonInterface $mailDate, bool $includeNotified = false, ?DepartmentCourrierEnum $department = null): Collection
     {
         $baseQuery = IncomingMail::query()
+            ->where('incoming_mails.is_draft', false)
             ->when(! $includeNotified, fn (Builder $query): Builder => $query->where('is_notified', false))
             ->whereDate('mail_date', $mailDate)
             ->when(

@@ -112,6 +112,41 @@ final class IncomingMailHandler
         }
     }
 
+    /**
+     * Write the document of a mail to the storage disk and record it.
+     *
+     * Takes the contents rather than the IMAP coordinates so a caller that has
+     * already downloaded the file — the AI analysis reads it before the mail
+     * exists — does not fetch it a second time.
+     */
+    public static function storeAttachmentContents(
+        IncomingMail $incomingMail,
+        string $contents,
+        string $filename,
+        string $mime
+    ): void {
+        // Generate unique filename
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $storedFilename = sprintf(
+            '%d_%s.%s',
+            $incomingMail->id,
+            Str::slug(pathinfo($filename, PATHINFO_FILENAME)),
+            $extension
+        );
+
+        // Save to storage
+        $path = config('courrier.storage.directory')."/attachments/{$storedFilename}";
+        Storage::disk(config('courrier.storage.disk'))->put($path, $contents);
+
+        // Create attachment record
+        Attachment::create([
+            'incoming_mail_id' => $incomingMail->id,
+            'file_name' => $storedFilename,
+            'mime' => $mime,
+            'path' => $path,
+        ]);
+    }
+
     private static function saveAttachment(
         ImapRepository $imapRepository,
         IncomingMail $incomingMail,
@@ -122,28 +157,13 @@ final class IncomingMailHandler
     ): void {
         try {
             $attachment = $imapRepository->getAttachment($uid, $attachmentIndex);
-            $stream = $attachment->contentStream();
 
-            // Generate unique filename
-            $extension = pathinfo($filename, PATHINFO_EXTENSION);
-            $storedFilename = sprintf(
-                '%d_%s.%s',
-                $incomingMail->id,
-                Str::slug(pathinfo($filename, PATHINFO_FILENAME)),
-                $extension
+            self::storeAttachmentContents(
+                $incomingMail,
+                $attachment->contentStream()->getContents(),
+                $filename,
+                $mime,
             );
-
-            // Save to storage
-            $path = config('courrier.storage.directory')."/attachments/{$storedFilename}";
-            Storage::disk(config('courrier.storage.disk'))->put($path, $stream->getContents());
-
-            // Create attachment record
-            Attachment::create([
-                'incoming_mail_id' => $incomingMail->id,
-                'file_name' => $storedFilename,
-                'mime' => $mime,
-                'path' => $path,
-            ]);
         } catch (ImapException $e) {
             Notification::make()
                 ->title('Erreur lors de la sauvegarde de la pièce jointe')

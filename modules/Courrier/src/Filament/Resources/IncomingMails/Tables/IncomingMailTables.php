@@ -166,6 +166,86 @@ final class IncomingMailTables
             ]);
     }
 
+    /**
+     * The drafts the AI encoded, waiting to be verified.
+     *
+     * The row opens the edit form rather than the view page: a draft exists to
+     * be corrected, and validating it there walks on to the next one. What the
+     * model most often gets wrong or leaves empty — the number, the sender, the
+     * routing — is what the columns show, so an obviously bad draft can be
+     * spotted and discarded without opening it.
+     */
+    public static function forDrafts(Table $table): Table
+    {
+        return $table
+            ->query(IncomingMailRepository::drafts(...))
+            ->defaultSort('id')
+            ->defaultPaginationPageOption(50)
+            ->paginated([25, 50, 100])
+            ->emptyStateHeading('Aucun brouillon à vérifier')
+            ->emptyStateDescription(
+                'Les brouillons sont créés depuis la boîte mail, en sélectionnant des messages '
+                .'et en lançant l\'analyse par l\'IA.'
+            )
+            ->emptyStateIcon('tabler-sparkles')
+            ->columns([
+                TextColumn::make('reference_number')
+                    ->label('Numéro')
+                    ->placeholder('Non lu')
+                    ->searchable(),
+                TextColumn::make('sender')
+                    ->label('Expéditeur')
+                    ->placeholder('Non lu')
+                    ->searchable(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->placeholder('Non lue')
+                    ->searchable()
+                    ->limit(60),
+                TextColumn::make('services.name')
+                    ->label('Services')
+                    ->placeholder('À choisir')
+                    ->badge()
+                    ->separator(',')
+                    ->limitList(2)
+                    ->expandableLimitedList()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user_add')
+                    ->label('Analysé par')
+                    ->toggleable(),
+                TextColumn::make('created_at')
+                    ->label('Analysé le')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('department')
+                    ->label('Département')
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->recordActions([
+                EditAction::make()
+                    ->label('Vérifier')
+                    ->icon('tabler-check')
+                    ->url(fn (IncomingMail $record): string => IncomingMailResource::getUrl(
+                        'edit',
+                        ['record' => $record],
+                    )),
+            ])
+            ->recordUrl(fn (IncomingMail $record): string => IncomingMailResource::getUrl(
+                'edit',
+                ['record' => $record],
+            ))
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Supprimer les brouillons')
+                        // The page is not a resource page, so nothing infers the
+                        // policy for it: without this the action refuses to run.
+                        ->authorizeIndividualRecords('delete'),
+                ]),
+            ]);
+    }
+
     public static function forAdvanceSearch(Table $table, Builder $builder): Table
     {
         return $table
