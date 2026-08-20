@@ -20,14 +20,14 @@ beforeEach(function (): void {
     IssepApiFake::fake();
 });
 
-function repository(): StationRepository
+function stationRepository(): StationRepository
 {
     return new StationRepository(IssepApiClient::fromConfig());
 }
 
 describe('stations', function (): void {
     it('sorts the stations by name and keys them by id', function (): void {
-        $stations = repository()->stations();
+        $stations = stationRepository()->stations();
 
         expect(array_keys($stations))->toBe([
             IssepApiFake::STATION_AVENUE_FRANCE,
@@ -37,16 +37,16 @@ describe('stations', function (): void {
     });
 
     it('reads a station by id', function (): void {
-        expect(repository()->station(IssepApiFake::STATION_WITH_READING)?->nom)
+        expect(stationRepository()->station(IssepApiFake::STATION_WITH_READING)?->nom)
             ->toBe('Chaussée de Liège (1)');
     });
 
     it('returns nothing for an unknown station', function (): void {
-        expect(repository()->station(99999))->toBeNull();
+        expect(stationRepository()->station(99999))->toBeNull();
     });
 
     it('reads the station list once per instance', function (): void {
-        $repository = repository();
+        $repository = stationRepository();
         $repository->stations();
         $repository->stations();
 
@@ -56,7 +56,7 @@ describe('stations', function (): void {
 
 describe('last index of a station', function (): void {
     it('takes the index of the station’s own configuration', function (): void {
-        $indice = repository()->lastBelAqiForStation(IssepApiFake::CONFIG_WITH_READING);
+        $indice = stationRepository()->lastBelAqiForStation(IssepApiFake::CONFIG_WITH_READING);
 
         expect($indice)->toBeInstanceOf(Indice::class)
             ->and($indice->aqiValue)->toBe(3)
@@ -64,7 +64,7 @@ describe('last index of a station', function (): void {
     });
 
     it('has no index for a configuration that reports nothing', function (): void {
-        expect(repository()->lastBelAqiForStation(IssepApiFake::CONFIG_WITHOUT_READING))->toBeNull();
+        expect(stationRepository()->lastBelAqiForStation(IssepApiFake::CONFIG_WITHOUT_READING))->toBeNull();
     });
 
     /**
@@ -72,7 +72,7 @@ describe('last index of a station', function (): void {
      * network and is flagged, which is what the stations table shows as "corrigé".
      */
     it('falls back to the network index when asked', function (): void {
-        $indice = repository()->lastBelAqiForStation(
+        $indice = stationRepository()->lastBelAqiForStation(
             IssepApiFake::CONFIG_WITHOUT_READING,
             withFallback: true,
         );
@@ -83,7 +83,7 @@ describe('last index of a station', function (): void {
     });
 
     it('does not flag a configuration that has its own reading', function (): void {
-        $indice = repository()->lastBelAqiForStation(
+        $indice = stationRepository()->lastBelAqiForStation(
             IssepApiFake::CONFIG_WITH_READING,
             withFallback: true,
         );
@@ -94,14 +94,14 @@ describe('last index of a station', function (): void {
 
 describe('index history', function (): void {
     it('returns the readings of one configuration, newest first', function (): void {
-        $indices = repository()->belAqiForStation(IssepApiFake::CONFIG_WITH_READING);
+        $indices = stationRepository()->belAqiForStation(IssepApiFake::CONFIG_WITH_READING);
 
         expect($indices)->toHaveCount(4)
             ->and(array_map(fn (Indice $indice): int => $indice->aqiValue, $indices))->toBe([3, 5, 8, 10]);
     });
 
     it('keeps only the readings after a given moment', function (): void {
-        $indices = repository()->belAqiForStation(
+        $indices = stationRepository()->belAqiForStation(
             IssepApiFake::CONFIG_WITH_READING,
             now()->subHours(24),
         );
@@ -110,7 +110,7 @@ describe('index history', function (): void {
     });
 
     it('reads the timestamps in the API timezone', function (): void {
-        $indice = repository()->lastBelAqiForStation(IssepApiFake::CONFIG_WITH_READING);
+        $indice = stationRepository()->lastBelAqiForStation(IssepApiFake::CONFIG_WITH_READING);
 
         expect($indice->ts->getTimestamp())->toBe(now()->subHour()->getTimestamp());
     });
@@ -118,7 +118,7 @@ describe('index history', function (): void {
 
 describe('sensor configuration', function (): void {
     it('finds the last measurement of a configuration', function (): void {
-        expect(repository()->config(IssepApiFake::CONFIG_WITH_READING))
+        expect(stationRepository()->config(IssepApiFake::CONFIG_WITH_READING))
             ->toHaveKey('bmeT', 21.5);
     });
 
@@ -133,12 +133,12 @@ describe('sensor configuration', function (): void {
             ]),
         ]);
 
-        expect(repository()->config(IssepApiFake::CONFIG_WITH_READING))
+        expect(stationRepository()->config(IssepApiFake::CONFIG_WITH_READING))
             ->toHaveKey('bmeT', 19.5);
     });
 
     it('returns nothing for a configuration that has no measurement', function (): void {
-        expect(repository()->config(123456))->toBeNull();
+        expect(stationRepository()->config(123456))->toBeNull();
     });
 });
 
@@ -146,21 +146,21 @@ describe('failures', function (): void {
     it('refuses to call the API without a token', function (): void {
         config()->set('issep.token', null);
 
-        expect(fn (): array => repository()->stations())
+        expect(fn (): array => stationRepository()->stations())
             ->toThrow(IssepException::class, "n'est pas configuré");
     });
 
     it('explains a refused token', function (): void {
         IssepApiFake::fake(['locations' => Http::response(status: 401)]);
 
-        expect(fn (): array => repository()->stations())
+        expect(fn (): array => stationRepository()->stations())
             ->toThrow(IssepException::class, 'jeton');
     });
 
     it('rejects a body that is not a list', function (): void {
         IssepApiFake::fake(['locations' => Http::response('<html>proxy</html>')]);
 
-        expect(fn (): array => repository()->stations())
+        expect(fn (): array => stationRepository()->stations())
             ->toThrow(IssepException::class, 'liste');
     });
 });
@@ -169,8 +169,8 @@ describe('caching', function (): void {
     it('serves a second reader from the cache', function (): void {
         config()->set('issep.cache_ttl', 300);
 
-        repository()->stations();
-        repository()->stations();
+        stationRepository()->stations();
+        stationRepository()->stations();
 
         Http::assertSentCount(1);
     });
@@ -178,7 +178,7 @@ describe('caching', function (): void {
     it('goes back to the API after a refresh', function (): void {
         config()->set('issep.cache_ttl', 300);
 
-        $repository = repository();
+        $repository = stationRepository();
         $repository->stations();
         $repository->refresh();
         $repository->stations();
