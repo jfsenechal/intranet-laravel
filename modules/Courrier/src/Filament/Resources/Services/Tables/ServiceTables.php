@@ -31,6 +31,12 @@ final class ServiceTables
                     ->counts('recipients')
                     ->badge()
                     ->color('gray'),
+                TextColumn::make('incoming_mails_count')
+                    ->label('Courriers')
+                    ->counts('incomingMails')
+                    ->badge()
+                    ->color('gray')
+                    ->sortable(),
                 TextColumn::make('department')
                     ->label('Département')
                     ->toggleable(isToggledHiddenByDefault: true),
