@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\App\Filament\Resources\Signatures\Schemas;
 
-use App\Enums\SignatureEnum;
+use AcMarche\App\Enums\SignatureEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;

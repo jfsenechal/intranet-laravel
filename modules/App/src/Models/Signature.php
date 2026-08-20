@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\App\Models;
 
-use App\Enums\SignatureEnum;
+use AcMarche\App\Enums\SignatureEnum;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;

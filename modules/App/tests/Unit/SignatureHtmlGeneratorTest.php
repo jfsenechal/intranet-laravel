@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use AcMarche\App\Enums\SignatureEnum;
 use AcMarche\App\Models\Signature;
 use AcMarche\App\Services\SignatureHtmlGenerator;
-use App\Enums\SignatureEnum;
 
 function signatureWithLogo(?SignatureEnum $logo): Signature
 {
