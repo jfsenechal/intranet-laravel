@@ -8,6 +8,8 @@ use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailForm;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Tables\IncomingMailTables;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Search\MeiliSearcher;
+use AcMarche\Security\Enums\RolesEnum;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
@@ -163,6 +165,18 @@ final class IncomingMailSearch extends Page implements HasTable
     }
 
     /**
+     * The raw Meilisearch call is a debugging aid for the intranet
+     * administrators. Gated here rather than in the view, so it never reaches
+     * the component state of anyone else.
+     */
+    private static function canSeeExecutedQuery(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->hasRole(RolesEnum::INTRANET_ADMIN->value);
+    }
+
+    /**
      * Render the Meilisearch call as a single line: the search terms followed
      * by every filter clause actually applied, policy clause included.
      *
@@ -170,7 +184,7 @@ final class IncomingMailSearch extends Page implements HasTable
      */
     private static function describeQuery(?array $lastQuery): ?string
     {
-        if ($lastQuery === null) {
+        if ($lastQuery === null || ! self::canSeeExecutedQuery()) {
             return null;
         }
 

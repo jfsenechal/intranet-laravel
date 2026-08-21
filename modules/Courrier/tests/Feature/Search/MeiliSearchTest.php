@@ -11,6 +11,7 @@ use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Search\MeiliIndexer;
 use AcMarche\Courrier\Search\MeiliSearcher;
+use AcMarche\Security\Enums\RolesEnum as SecurityRolesEnum;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -351,7 +352,9 @@ it('mounts the advanced search page with an empty result set before searching', 
 
 it('displays the query sent to meilisearch and clears it on reset', function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    // The executed query is only shown to the intranet administrators.
     $admin = User::factory()->create(['is_administrator' => true]);
+    $admin->roles()->attach(Role::factory()->create(['name' => SecurityRolesEnum::INTRANET_ADMIN->value]));
     $mail = IncomingMail::factory()->create();
 
     $this->actingAs($admin);
@@ -424,4 +427,24 @@ it('offers the category filter to a cpas administrator', function (): void {
     livewire(IncomingMailSearch::class)
         ->assertFormFieldExists('category')
         ->assertTableColumnVisible('category.name');
+});
+
+it('keeps the executed query from a user who is not an intranet administrator', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $mail = IncomingMail::factory()->create();
+
+    $this->actingAs($admin);
+
+    [$client] = captureMeiliSearch([['id' => $mail->id]]);
+    $searcher = new MeiliSearcher();
+    $searcher->client = $client;
+    app()->instance(MeiliSearcher::class, $searcher);
+
+    livewire(IncomingMailSearch::class)
+        ->fillForm(['query' => 'facture'])
+        ->call('search')
+        ->assertSet('resultIds', [$mail->id])
+        ->assertSet('executedQuery', null)
+        ->assertDontSee('q = ');
 });
