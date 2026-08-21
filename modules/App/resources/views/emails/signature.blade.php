@@ -1,9 +1,12 @@
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.4;">
     <tr>
-        <td style="padding-right: 15px; vertical-align: top;">
+        <td style="padding-right: 15px; vertical-align: top; text-align: center;">
             @if ($logoUrl)
-                <img src="{{ $logoUrl }}" alt="{{ $logoTitle }}" style="max-width: 120px; height: auto; display: block;"/>
+                <img src="{{ $logoUrl }}" alt="{{ $logoTitle }}" style="max-width: 120px; height: auto; display: block; margin: 0 auto;"/>
             @endif
+            <div style="margin-top: 6px;">
+                <a href="https://www.marche.be/disclaimer/" style="color: #d4a017; text-decoration: none;">Disclaimer</a>
+            </div>
         </td>
         <td style="vertical-align: top; border-left: 2px solid #d4a017; padding-left: 15px;">
             <div style="font-size: 14px; font-weight: bold; color: #000;">

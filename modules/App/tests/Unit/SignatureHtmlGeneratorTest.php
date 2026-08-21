@@ -40,3 +40,9 @@ it('omits the image when the signature has no logo', function (): void {
 
     expect($html)->not->toContain('https://www.marche.be/logo/');
 });
+
+it('renders a disclaimer link below the logo', function (): void {
+    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+
+    expect($html)->toContain('<a href="https://www.marche.be/disclaimer/" style="color: #d4a017; text-decoration: none;">Disclaimer</a>');
+});
