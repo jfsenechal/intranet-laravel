@@ -7,9 +7,11 @@ use AcMarche\Hrm\Filament\Resources\Evaluations\Pages\ViewEvaluation;
 use AcMarche\Hrm\Mail\ReminderMail;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Deadline;
+use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
 use AcMarche\Hrm\Models\Evaluation;
+use AcMarche\Hrm\Models\Service;
 use AcMarche\Hrm\Models\SmsReminder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -167,6 +169,108 @@ it('sends a deadline reminder for a deadline without an employee scoped to the d
         fn (ReminderMail $mail): bool => $mail->record->is($deadline)
             && $mail->reminderType === 'Échéance'
             && $mail->employeeName === null,
+    );
+});
+
+it('sends a deadline reminder for a deadline whose department comes from its direction', function (): void {
+    Employer::factory()->create(['slug' => 'cpas']);
+
+    config()->set('hrm.reminders.recipients.cpas', ['cpas@example.com']);
+
+    $direction = Direction::factory()->create(['employer_id' => $this->employer->id]);
+
+    $deadline = Deadline::factory()->create([
+        'employee_id' => null,
+        'employer_id' => null,
+        'direction_id' => $direction->id,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'cpas'])->assertSuccessful();
+
+    Mail::assertNotSent(ReminderMail::class);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline)
+            && $mail->reminderType === 'Échéance'
+            && $mail->hasTo('rh@example.com'),
+    );
+});
+
+it('sends a deadline reminder for a deadline whose department comes from its service', function (): void {
+    $service = Service::factory()->create(['employer_id' => $this->employer->id]);
+
+    $deadline = Deadline::factory()->create([
+        'employee_id' => null,
+        'employer_id' => null,
+        'direction_id' => null,
+        'service_id' => $service->id,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline) && $mail->reminderType === 'Échéance',
+    );
+});
+
+it('keeps the deadline employer authoritative over the direction it is attached to', function (): void {
+    $otherEmployer = Employer::factory()->create(['slug' => 'cpas']);
+
+    config()->set('hrm.reminders.recipients.cpas', ['cpas@example.com']);
+
+    // Stale direction pointing at the department the deadline no longer belongs
+    // to: the employer filled in on the deadline itself wins.
+    $direction = Direction::factory()->create(['employer_id' => $otherEmployer->id]);
+
+    $deadline = Deadline::factory()->create([
+        'employee_id' => null,
+        'employer_id' => $this->employer->id,
+        'direction_id' => $direction->id,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'cpas'])->assertSuccessful();
+
+    Mail::assertNotSent(ReminderMail::class);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline) && $mail->reminderType === 'Échéance',
+    );
+});
+
+it('sends a deadline reminder to every department when nothing tells which one it belongs to', function (): void {
+    Employer::factory()->create(['slug' => 'cpas']);
+
+    config()->set('hrm.reminders.recipients.cpas', ['cpas@example.com']);
+
+    $deadline = Deadline::factory()->create([
+        'employee_id' => null,
+        'employer_id' => null,
+        'direction_id' => null,
+        'service_id' => null,
+        'reminder_date' => Carbon::today(),
+    ]);
+
+    $this->artisan('hrm:reminders', ['department' => 'ville'])->assertSuccessful();
+    $this->artisan('hrm:reminders', ['department' => 'cpas'])->assertSuccessful();
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline) && $mail->hasTo('rh@example.com'),
+    );
+
+    Mail::assertSent(
+        ReminderMail::class,
+        fn (ReminderMail $mail): bool => $mail->record->is($deadline) && $mail->hasTo('cpas@example.com'),
     );
 });
 

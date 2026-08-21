@@ -110,12 +110,9 @@ final class ReminderCommand extends Command
             ->where(function (Builder $query) use ($employerIds): void {
                 $this->whereEmployeeBelongsToEmployers($query, $employerIds);
 
-                // Deadlines without an employee still belong to a department
-                // through their own employer, so include those too.
-                $query->orWhere(function (Builder $unassigned) use ($employerIds): void {
-                    $unassigned->whereNull('employee_id')
-                        ->whereIn('employer_id', $employerIds);
-                });
+                // Deadlines without an employee still belong to a department,
+                // so include those too.
+                $query->orWhere(fn (Builder $unassigned) => $this->scopeUnassignedDeadlineToEmployers($unassigned, $employerIds));
             })
             ->with('employee')
             ->get()
@@ -128,6 +125,49 @@ final class ReminderCommand extends Command
                     $deadline->employee,
                     withRecordName: true,
                 );
+            });
+    }
+
+    /**
+     * Restrict deadlines without an employee to the given employer set.
+     *
+     * The deadline's own employer answers the question when it is filled in.
+     * Otherwise the department is inherited from the direction or the service
+     * the deadline is attached to, which carry an employer of their own. When
+     * none of the three answers it the department is unknown rather than none,
+     * so the deadline is kept in every department run instead of losing the
+     * reminder altogether.
+     *
+     * @param  list<int>  $employerIds
+     */
+    private function scopeUnassignedDeadlineToEmployers(Builder $query, array $employerIds): void
+    {
+        $query->whereNull('employee_id')
+            ->where(function (Builder $department) use ($employerIds): void {
+                $department->whereIn('employer_id', $employerIds)
+                    ->orWhere(function (Builder $inherited) use ($employerIds): void {
+                        $inherited->whereNull('employer_id')
+                            ->where(function (Builder $owner) use ($employerIds): void {
+                                $owner->whereHas(
+                                    'direction',
+                                    fn (Builder $direction) => $direction->whereIn('employer_id', $employerIds),
+                                )
+                                    ->orWhereHas(
+                                        'service',
+                                        fn (Builder $service) => $service->whereIn('employer_id', $employerIds),
+                                    )
+                                    ->orWhere(function (Builder $unknown): void {
+                                        $unknown->whereDoesntHave(
+                                            'direction',
+                                            fn (Builder $direction) => $direction->whereNotNull('employer_id'),
+                                        )
+                                            ->whereDoesntHave(
+                                                'service',
+                                                fn (Builder $service) => $service->whereNotNull('employer_id'),
+                                            );
+                                    });
+                            });
+                    });
             });
     }
 
