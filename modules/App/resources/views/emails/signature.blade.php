@@ -1,6 +1,6 @@
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.4;">
     <tr>
-        <td style="padding-right: 15px; vertical-align: top; text-align: center;">
+        <td align="center" valign="middle" style="padding-right: 15px; vertical-align: middle; text-align: center;">
             @if ($logoUrl)
                 <img src="{{ $logoUrl }}" alt="{{ $logoTitle }}" style="max-width: 120px; height: auto; display: block; margin: 0 auto;"/>
             @endif
