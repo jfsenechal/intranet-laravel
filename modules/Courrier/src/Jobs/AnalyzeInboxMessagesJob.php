@@ -13,6 +13,7 @@ use AcMarche\Courrier\Mail\IncomingMailDraftsReady;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\ImapRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
+use AcMarche\Courrier\Search\SuggestsMailRouting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -65,7 +66,7 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
         public readonly ?DepartmentCourrierEnum $department = null,
     ) {}
 
-    public function handle(IncomingMailAnalyzer $analyzer): void
+    public function handle(IncomingMailAnalyzer $analyzer, SuggestsMailRouting $router): void
     {
         $user = User::query()->find($this->userId);
 
@@ -83,7 +84,7 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
 
         foreach ($this->messages as $message) {
             try {
-                $drafts->push($this->createDraft($analyzer, $imapRepository, $message, $user));
+                $drafts->push($this->createDraft($analyzer, $router, $imapRepository, $message, $user));
             } catch (Throwable $throwable) {
                 report($throwable);
                 $failures[] = $message['filename'];
@@ -106,6 +107,7 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
      */
     private function createDraft(
         IncomingMailAnalyzer $analyzer,
+        SuggestsMailRouting $router,
         ImapRepository $imapRepository,
         array $message,
         User $user,
@@ -142,6 +144,7 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
         ]);
 
         $this->attachServices($incomingMail, $suggestion);
+        $this->attachRouting($incomingMail, $router, $analysis);
 
         IncomingMailHandler::storeAttachmentContents(
             $incomingMail,
@@ -199,6 +202,45 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
     private function attachServices(IncomingMail $incomingMail, MailSuggestion $suggestion): void
     {
         foreach (ServiceRepository::findIdsByCodes($suggestion->services, $this->department) as $serviceId) {
+            $incomingMail->services()->attach($serviceId, ['is_primary' => true]);
+        }
+    }
+
+    /**
+     * Route the draft the way comparable mail was routed.
+     *
+     * Where a courrier goes is not written on the paper, so it is retrieved
+     * from the 166.000 already encoded rather than read by the model. The two
+     * best candidates per field are written straight into the draft, which
+     * nobody sees until a human has verified it — the services only when the
+     * reception stamp named none, since the stamp is the mail room's own word
+     * and outranks a retrieval.
+     */
+    private function attachRouting(
+        IncomingMail $incomingMail,
+        SuggestsMailRouting $router,
+        MailAnalysis $analysis,
+    ): void {
+        if ($analysis->documentText === '') {
+            return;
+        }
+
+        $routing = $router->suggest(
+            $analysis->documentText,
+            $analysis->suggestion->sender,
+            $this->department?->value,
+            $incomingMail->id,
+        );
+
+        foreach ($routing->topRecipientIds() as $recipientId) {
+            $incomingMail->recipients()->attach($recipientId, ['is_primary' => true]);
+        }
+
+        if ($incomingMail->services()->exists()) {
+            return;
+        }
+
+        foreach ($routing->topServiceIds() as $serviceId) {
             $incomingMail->services()->attach($serviceId, ['is_primary' => true]);
         }
     }

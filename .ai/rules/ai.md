@@ -28,6 +28,8 @@ A code is kept only when it matches exactly one service in the mail's department
 
 The model must not infer services from the letter's content either — only what the stamp shows.
 
+One thing changed around this on 2026-08-21: a field the stamp left empty — because it named nothing, or because the code was ambiguous — is now filled from the routing retrieved from similar mail (see `.ai/rules/search.md`). The stamp still wins whenever it resolves; what the rule above forbids is *guessing at the stamp*, which is not what the retrieval does.
+
 ## The prompt leans on the NBN Z 01-002 letter layout
 Belgian administrative mail is typed to NBN Z 01-002:2002 (classement et dactylographie des documents), so `IncomingMailAgent` describes that layout to help the model place each field: sender letterhead top-left, addressee block top-right (always the commune, never the sender), place and date top-right, "Objet"/"Concerne" for the description, signature block at the foot.
 

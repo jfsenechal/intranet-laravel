@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use AcMarche\Courrier\Ai\IncomingMailAgent;
 use AcMarche\Courrier\Ai\IncomingMailAnalyzer;
+use AcMarche\Courrier\Dto\RoutingSuggestion;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\Inbox;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\CreateIncomingMail;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Search\AttachmentOcr;
+use AcMarche\Courrier\Search\SuggestsMailRouting;
 use AcMarche\Security\Enums\RolesEnum as SecurityRolesEnum;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -100,6 +102,15 @@ function actAsCourrierUser(bool $intranetAdmin = true): User
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+
+    // These tests are about what the model reads off the document. The routing
+    // retrieved from similar mail fills the same two selects and is covered by
+    // RoutingSuggestionTest, so it is silenced here rather than left to answer
+    // from whatever the local index happens to hold.
+    $router = Mockery::mock(SuggestsMailRouting::class);
+    $router->shouldReceive('suggest')->andReturn(RoutingSuggestion::empty());
+    $router->shouldReceive('suggestFor')->andReturn(RoutingSuggestion::empty());
+    app()->instance(SuggestsMailRouting::class, $router);
 
     actAsCourrierUser();
 });

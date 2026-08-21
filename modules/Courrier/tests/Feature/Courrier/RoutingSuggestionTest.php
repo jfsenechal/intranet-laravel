@@ -9,7 +9,6 @@ use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\Inbox;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\CreateIncomingMail;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\Pages\EditIncomingMail;
-use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailForm;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
@@ -24,7 +23,6 @@ use DirectoryTree\ImapEngine\Testing\FakeMailbox;
 use DirectoryTree\ImapEngine\Testing\FakeMessage;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Select;
 
 use function Pest\Livewire\livewire;
 
@@ -97,33 +95,26 @@ it('survives the index being unreachable', function (): void {
     expect($suggestion->isEmpty())->toBeTrue();
 });
 
-it('shows the suggested recipients above the full list', function (): void {
-    $suggested = Recipient::factory()->create(['last_name' => 'Simon', 'first_name' => 'Sandrine']);
-    $other = Recipient::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Jean']);
+it('routes a draft with the best candidates read off similar mail', function (): void {
+    $best = Recipient::factory()->create(['last_name' => 'Simon', 'first_name' => 'Sandrine']);
+    $second = Recipient::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Jean']);
+    $third = Recipient::factory()->create(['last_name' => 'Martin', 'first_name' => 'Luc']);
 
-    fakeFinder(new RoutingSuggestion([$suggested->id], []));
+    fakeFinder(new RoutingSuggestion([$best->id, $second->id, $third->id], []));
 
     $mail = IncomingMail::factory()->draft()->create([
         'department' => DepartmentCourrierEnum::VILLE->value,
         'content' => 'permis urbanisme toiture ardoises rénovation façade maison',
     ]);
 
-    $options = livewire(EditIncomingMail::class, ['record' => $mail->id])
-        ->instance()
-        ->form
-        ->getComponent(fn ($component): bool => $component instanceof Select
-            && $component->getName() === 'primary_recipients')
-        ->getOptions();
-
-    expect($options)->toHaveKeys(['Suggérés (courriers similaires)', 'Tous les destinataires'])
-        ->and($options['Suggérés (courriers similaires)'])->toHaveKey($suggested->id)
-        // A candidate must not also appear in the list below it.
-        ->and($options['Tous les destinataires'])->not->toHaveKey($suggested->id)
-        ->and($options['Tous les destinataires'])->toHaveKey($other->id);
+    // Only the two best are written in: the rest of the ranking is made of
+    // alternatives, and every extra row is one the user has to delete.
+    livewire(EditIncomingMail::class, ['record' => $mail->id])
+        ->assertSchemaStateSet(['primary_recipients' => [$best->id, $second->id]]);
 });
 
-it('leaves the select flat when nothing is suggested', function (): void {
-    $recipient = Recipient::factory()->create();
+it('leaves the field empty when nothing is retrieved', function (): void {
+    Recipient::factory()->create();
 
     fakeFinder(RoutingSuggestion::empty());
 
@@ -132,15 +123,8 @@ it('leaves the select flat when nothing is suggested', function (): void {
         'content' => 'permis urbanisme toiture ardoises rénovation façade maison',
     ]);
 
-    $options = livewire(EditIncomingMail::class, ['record' => $mail->id])
-        ->instance()
-        ->form
-        ->getComponent(fn ($component): bool => $component instanceof Select
-            && $component->getName() === 'primary_recipients')
-        ->getOptions();
-
-    expect($options)->toHaveKey($recipient->id)
-        ->and($options)->not->toHaveKey('Suggérés (courriers similaires)');
+    livewire(EditIncomingMail::class, ['record' => $mail->id])
+        ->assertSchemaStateSet(['primary_recipients' => [], 'primary_services' => []]);
 });
 
 it('does not look anything up for a mail with no extracted text', function (): void {
@@ -154,10 +138,10 @@ it('does not look anything up for a mail with no extracted text', function (): v
     ]);
 
     livewire(EditIncomingMail::class, ['record' => $mail->id])
-        ->assertSchemaStateSet([IncomingMailForm::SUGGESTED_RECIPIENTS => []]);
+        ->assertSchemaStateSet(['primary_recipients' => []]);
 });
 
-it('does not suggest a routing the user has already encoded', function (): void {
+it('does not retrieve a routing the user has already encoded', function (): void {
     $fake = Mockery::mock(SuggestsMailRouting::class);
     $fake->shouldNotReceive('suggestFor');
     app()->instance(SuggestsMailRouting::class, $fake);
@@ -166,14 +150,33 @@ it('does not suggest a routing the user has already encoded', function (): void 
         'department' => DepartmentCourrierEnum::VILLE->value,
         'content' => 'permis urbanisme toiture ardoises rénovation façade maison',
     ]);
-    $mail->recipients()->attach(Recipient::factory()->create()->id, ['is_primary' => true]);
-    $mail->services()->attach(Service::factory()->create()->id, ['is_primary' => true]);
+    $recipient = Recipient::factory()->create();
+    $service = Service::factory()->create();
+    $mail->recipients()->attach($recipient->id, ['is_primary' => true]);
+    $mail->services()->attach($service->id, ['is_primary' => true]);
 
     livewire(EditIncomingMail::class, ['record' => $mail->id])
-        ->assertSchemaStateSet([IncomingMailForm::SUGGESTED_SERVICES => []]);
+        ->assertSchemaStateSet([
+            'primary_recipients' => [$recipient->id],
+            'primary_services' => [$service->id],
+        ]);
 });
 
-it('never writes the suggestion keys to the record', function (): void {
+it('never touches a courrier a human has already validated', function (): void {
+    $fake = Mockery::mock(SuggestsMailRouting::class);
+    $fake->shouldNotReceive('suggestFor');
+    app()->instance(SuggestsMailRouting::class, $fake);
+
+    $mail = IncomingMail::factory()->create([
+        'department' => DepartmentCourrierEnum::VILLE->value,
+        'content' => 'permis urbanisme toiture ardoises rénovation façade maison',
+    ]);
+
+    livewire(EditIncomingMail::class, ['record' => $mail->id])
+        ->assertSchemaStateSet(['primary_recipients' => []]);
+});
+
+it('saves the retrieved routing with the draft', function (): void {
     $recipient = Recipient::factory()->create();
 
     fakeFinder(new RoutingSuggestion([$recipient->id], []));
@@ -189,10 +192,10 @@ it('never writes the suggestion keys to the record', function (): void {
         ->assertHasNoFormErrors();
 
     expect($mail->refresh()->sender)->toBe('SPW Territoire')
-        ->and($mail->getAttributes())->not->toHaveKey(IncomingMailForm::SUGGESTED_RECIPIENTS);
+        ->and($mail->recipients->pluck('id')->all())->toBe([$recipient->id]);
 });
 
-it('suggests a routing in the inbox modal, where no record exists yet', function (): void {
+it('fills the routing fields in the inbox modal, where no record exists yet', function (): void {
     IncomingMailAgent::fake([[
         'reference_number' => '002693',
         'services' => [],
@@ -203,7 +206,8 @@ it('suggests a routing in the inbox modal, where no record exists yet', function
     ]]);
 
     $suggested = Recipient::factory()->create(['last_name' => 'Simon', 'first_name' => 'Sandrine']);
-    fakeFinder(new RoutingSuggestion([$suggested->id], []));
+    $service = Service::factory()->create();
+    fakeFinder(new RoutingSuggestion([$suggested->id], [$service->id]));
 
     resolve(ImapManager::class)->swap('imap_ville', new FakeMailbox(folders: [
         new FakeFolder('inbox', messages: [routingInboxMessage()]),
@@ -215,7 +219,10 @@ it('suggests a routing in the inbox modal, where no record exists yet', function
             TestAction::make('process')->table('0'),
             TestAction::make('analyzeAttachment')->schemaComponent('ai-completion'),
         ])
-        ->assertSchemaStateSet([IncomingMailForm::SUGGESTED_RECIPIENTS => [$suggested->id]]);
+        ->assertSchemaStateSet([
+            'primary_recipients' => [$suggested->id],
+            'primary_services' => [$service->id],
+        ]);
 });
 
 it('offers the ai button while encoding, and never on an encoded courrier', function (): void {

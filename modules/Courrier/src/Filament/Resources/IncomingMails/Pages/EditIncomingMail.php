@@ -6,7 +6,6 @@ namespace AcMarche\Courrier\Filament\Resources\IncomingMails\Pages;
 
 use AcMarche\Courrier\Filament\Pages\DraftIncomingMails;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
-use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailForm;
 use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Sender;
@@ -137,7 +136,7 @@ final class EditIncomingMail extends EditRecord
             'recipients.id'
         )->toArray();
 
-        return [...$data, ...$this->routingSuggestions()];
+        return $this->withRetrievedRouting($data);
     }
 
     /**
@@ -159,8 +158,6 @@ final class EditIncomingMail extends EditRecord
             $data['primary_recipients'],
             $data['secondary_recipients'],
             $data['save_sender'],
-            $data[IncomingMailForm::SUGGESTED_RECIPIENTS],
-            $data[IncomingMailForm::SUGGESTED_SERVICES],
         );
 
         return $data;
@@ -213,48 +210,41 @@ final class EditIncomingMail extends EditRecord
     }
 
     /**
-     * Candidates read off the courriers that resemble this one, for the
-     * services and recipients selects to show above their lists.
+     * Route a draft that came back unrouted, from the courriers that resemble
+     * it.
      *
-     * Retrieved once here rather than from the selects' options closures, which
-     * Livewire re-evaluates on every round trip. Skipped once the mail is
-     * routed: a suggestion is for an empty field, and re-ordering a select the
-     * user has already answered only moves things around under them.
+     * Where a courrier goes is not written on the paper, so it is retrieved
+     * from the mail already encoded. The batch normally fills this in when it
+     * creates the draft; this catches the ones it could not — a draft encoded
+     * before the retrieval existed, or one whose text only reached the index
+     * afterwards. Only a field still empty is filled, and never on a courrier a
+     * human has validated: there, a retrieval could only offer to undo a
+     * routing someone chose deliberately.
      *
-     * @return array{suggested_recipients: list<int>, suggested_services: list<int>}
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
-    private function routingSuggestions(): array
+    private function withRetrievedRouting(array $data): array
     {
-        $empty = [
-            IncomingMailForm::SUGGESTED_RECIPIENTS => [],
-            IncomingMailForm::SUGGESTED_SERVICES => [],
-        ];
-
-        if (! $this->record->is_draft) {
-            // The AI encodes a courrier, it does not revisit one. On a mail a
-            // human has already validated, a suggestion could only offer to
-            // undo a routing someone chose deliberately.
-            return $empty;
+        if (! $this->record->is_draft || blank($this->record->content)) {
+            return $data;
         }
 
-        if (blank($this->record->content)) {
-            // Nothing was extracted from the document, so there is nothing to
-            // look up.
-            return $empty;
-        }
-
-        if ($this->record->recipients()->exists() && $this->record->services()->exists()) {
-            // Already routed, on a return visit to the draft. Re-ordering the
-            // selects would move the answers around under the user.
-            return $empty;
+        if ($data['primary_recipients'] !== [] && $data['primary_services'] !== []) {
+            return $data;
         }
 
         $suggestion = app(SuggestsMailRouting::class)->suggestFor($this->record);
 
-        return [
-            IncomingMailForm::SUGGESTED_RECIPIENTS => $suggestion->recipientIds,
-            IncomingMailForm::SUGGESTED_SERVICES => $suggestion->serviceIds,
-        ];
+        if ($data['primary_recipients'] === []) {
+            $data['primary_recipients'] = $suggestion->topRecipientIds();
+        }
+
+        if ($data['primary_services'] === []) {
+            $data['primary_services'] = $suggestion->topServiceIds();
+        }
+
+        return $data;
     }
 
     /**

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Courrier\Ai\IncomingMailAgent;
+use AcMarche\Courrier\Dto\RoutingSuggestion;
 use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Enums\RolesEnum;
 use AcMarche\Courrier\Filament\Pages\DraftIncomingMails;
@@ -16,6 +17,7 @@ use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
 use AcMarche\Courrier\Models\Service;
 use AcMarche\Courrier\Repository\IncomingMailRepository;
+use AcMarche\Courrier\Search\SuggestsMailRouting;
 use AcMarche\Security\Enums\RolesEnum as SecurityRolesEnum;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -91,6 +93,19 @@ function actAsInboxAdmin(bool $intranetAdmin = true): User
     return $user;
 }
 
+/**
+ * The routing retrieval with its Meilisearch round trip replaced, so a batch
+ * run is deterministic and does not depend on what the index holds.
+ */
+function fakeRouting(RoutingSuggestion $suggestion = new RoutingSuggestion()): void
+{
+    $fake = Mockery::mock(SuggestsMailRouting::class);
+    $fake->shouldReceive('suggest')->andReturn($suggestion);
+    $fake->shouldReceive('suggestFor')->andReturn($suggestion);
+
+    app()->instance(SuggestsMailRouting::class, $fake);
+}
+
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
     Storage::fake(config('courrier.storage.disk'));
@@ -153,6 +168,7 @@ it('creates a draft from each analysed attachment and mails the author', functio
     ]);
 
     IncomingMailAgent::fake([draftSuggestion()]);
+    fakeRouting();
     Mail::fake();
 
     (new AnalyzeInboxMessagesJob(
@@ -160,7 +176,7 @@ it('creates a draft from each analysed attachment and mails the author', functio
         [['uid' => 1, 'index' => 0, 'filename' => 'doc.pdf', 'mime' => 'application/pdf']],
         $user->id,
         DepartmentCourrierEnum::VILLE,
-    ))->handle(app(AcMarche\Courrier\Ai\IncomingMailAnalyzer::class));
+    ))->handle(app(AcMarche\Courrier\Ai\IncomingMailAnalyzer::class), app(SuggestsMailRouting::class));
 
     $draft = IncomingMail::query()->where('reference_number', '002693')->firstOrFail();
 
@@ -179,6 +195,69 @@ it('creates a draft from each analysed attachment and mails the author', functio
     );
 });
 
+it('routes each draft it creates from the courriers that resemble it', function (): void {
+    resolve(ImapManager::class)->swap('imap_ville', new FakeMailbox(folders: [
+        new FakeFolder('inbox', messages: [fakeScannedMail(1)]),
+    ]));
+
+    $user = actAsInboxAdmin();
+    $stamped = Service::factory()->create([
+        'name' => 'Ressources Humaines',
+        'initials' => 'RH',
+        'department' => DepartmentCourrierEnum::VILLE->value,
+    ]);
+    $retrieved = Service::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+    $best = Recipient::factory()->create();
+    $second = Recipient::factory()->create();
+    $third = Recipient::factory()->create();
+
+    IncomingMailAgent::fake([draftSuggestion()]);
+    fakeRouting(new RoutingSuggestion([$best->id, $second->id, $third->id], [$retrieved->id]));
+    Mail::fake();
+
+    (new AnalyzeInboxMessagesJob(
+        'imap_ville',
+        [['uid' => 1, 'index' => 0, 'filename' => 'doc.pdf', 'mime' => 'application/pdf']],
+        $user->id,
+        DepartmentCourrierEnum::VILLE,
+    ))->handle(app(AcMarche\Courrier\Ai\IncomingMailAnalyzer::class), app(SuggestsMailRouting::class));
+
+    $draft = IncomingMail::query()->where('reference_number', '002693')->firstOrFail();
+
+    // The two best recipients are written straight into the draft, which no
+    // one sees until it is verified; the third is left out.
+    expect($draft->recipients->pluck('id')->all())->toBe([$best->id, $second->id])
+        // The reception stamp named RH, and the mail room's own word outranks
+        // a retrieval, so the retrieved service is not added on top of it.
+        ->and($draft->services->pluck('id')->all())->toBe([$stamped->id]);
+});
+
+it('falls back to the retrieved services when the stamp named none', function (): void {
+    resolve(ImapManager::class)->swap('imap_ville', new FakeMailbox(folders: [
+        new FakeFolder('inbox', messages: [fakeScannedMail(1)]),
+    ]));
+
+    $user = actAsInboxAdmin();
+    $retrieved = Service::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+
+    // No service is created for the "RH" the stamp names, so the code resolves
+    // to nothing and the draft comes out of the analysis unrouted.
+    IncomingMailAgent::fake([draftSuggestion()]);
+    fakeRouting(new RoutingSuggestion([], [$retrieved->id]));
+    Mail::fake();
+
+    (new AnalyzeInboxMessagesJob(
+        'imap_ville',
+        [['uid' => 1, 'index' => 0, 'filename' => 'doc.pdf', 'mime' => 'application/pdf']],
+        $user->id,
+        DepartmentCourrierEnum::VILLE,
+    ))->handle(app(AcMarche\Courrier\Ai\IncomingMailAnalyzer::class), app(SuggestsMailRouting::class));
+
+    $draft = IncomingMail::query()->where('reference_number', '002693')->firstOrFail();
+
+    expect($draft->services->pluck('id')->all())->toBe([$retrieved->id]);
+});
+
 it('reports the documents the analysis could not read', function (): void {
     resolve(ImapManager::class)->swap('imap_ville', new FakeMailbox(folders: [
         new FakeFolder('inbox', messages: [fakeScannedMail(1)]),
@@ -187,6 +266,7 @@ it('reports the documents the analysis could not read', function (): void {
     $user = actAsInboxAdmin();
 
     IncomingMailAgent::fake([draftSuggestion()]);
+    fakeRouting();
     Mail::fake();
 
     (new AnalyzeInboxMessagesJob(
@@ -195,7 +275,7 @@ it('reports the documents the analysis could not read', function (): void {
         [['uid' => 99, 'index' => 0, 'filename' => 'introuvable.pdf', 'mime' => 'application/pdf']],
         $user->id,
         DepartmentCourrierEnum::VILLE,
-    ))->handle(app(AcMarche\Courrier\Ai\IncomingMailAnalyzer::class));
+    ))->handle(app(AcMarche\Courrier\Ai\IncomingMailAnalyzer::class), app(SuggestsMailRouting::class));
 
     expect(IncomingMail::query()->count())->toBe(0);
 

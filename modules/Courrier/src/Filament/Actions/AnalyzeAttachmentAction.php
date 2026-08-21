@@ -7,7 +7,6 @@ namespace AcMarche\Courrier\Filament\Actions;
 use AcMarche\Courrier\Ai\IncomingMailAnalyzer;
 use AcMarche\Courrier\Dto\MailAnalysis;
 use AcMarche\Courrier\Dto\MailSuggestion;
-use AcMarche\Courrier\Filament\Resources\IncomingMails\Schemas\IncomingMailForm;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\ImapRepository;
@@ -131,13 +130,14 @@ final class AnalyzeAttachmentAction
     }
 
     /**
-     * Offer the services and recipients that comparable mail was routed to.
+     * Fill in the services and recipients that comparable mail was routed to.
      *
      * Where a courrier goes is almost never written on the courrier — the name
      * of the person it ends up with appears in the letter about one time in
      * eight — so this is retrieved from the mail already encoded rather than
-     * read by the model. It only ever fills the candidate lists the selects
-     * show above their options; the fields themselves are left to the user.
+     * read by the model. Only the two best candidates per field are proposed,
+     * and only into a field the user has left empty: the rest of the ranking is
+     * made of alternatives, not of extra destinations.
      */
     private static function applyRouting(MailAnalysis $analysis, Get $schemaGet, Set $schemaSet): void
     {
@@ -151,12 +151,15 @@ final class AnalyzeAttachmentAction
             DepartmentScope::getAssignableDepartment()?->value,
         );
 
-        if (blank($schemaGet('primary_recipients'))) {
-            $schemaSet(IncomingMailForm::SUGGESTED_RECIPIENTS, $routing->recipientIds);
+        if ($routing->recipientIds !== [] && blank($schemaGet('primary_recipients'))) {
+            $schemaSet('primary_recipients', $routing->topRecipientIds());
         }
 
-        if (blank($schemaGet('primary_services'))) {
-            $schemaSet(IncomingMailForm::SUGGESTED_SERVICES, $routing->serviceIds);
+        // The services read off the reception stamp were applied first and are
+        // the better source — they are what the mail room itself wrote down —
+        // so the retrieval only speaks for a field they left empty.
+        if ($routing->serviceIds !== [] && blank($schemaGet('primary_services'))) {
+            $schemaSet('primary_services', $routing->topServiceIds());
         }
     }
 
