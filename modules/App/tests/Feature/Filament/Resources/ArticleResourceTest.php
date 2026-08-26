@@ -10,6 +10,9 @@ use AcMarche\App\Models\Article;
 use AcMarche\Security\Enums\RolesEnum;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -86,26 +89,48 @@ it('views and updates an article', function (): void {
     ]);
 });
 
-it('forbids every crud page to a user without the intranet admin role', function (string $page): void {
-    $stranger = User::factory()->create(['is_administrator' => false]);
-    $this->actingAs($stranger);
+it('lets any authenticated user list and view the articles', function (): void {
+    $reader = User::factory()->create(['is_administrator' => false]);
+    $this->actingAs($reader);
     $article = Article::factory()->create();
 
-    $parameters = $page === ListArticles::class || $page === CreateArticle::class
-        ? []
-        : ['record' => $article->id];
+    livewire(ListArticles::class)
+        ->assertOk()
+        ->loadTable()
+        ->assertCanSeeTableRecords([$article]);
+
+    livewire(ViewArticle::class, ['record' => $article->id])->assertOk();
+});
+
+it('forbids the write pages to a user without the intranet admin role', function (string $page): void {
+    $reader = User::factory()->create(['is_administrator' => false]);
+    $this->actingAs($reader);
+    $article = Article::factory()->create();
+
+    $parameters = $page === CreateArticle::class ? [] : ['record' => $article->id];
 
     livewire($page, $parameters)->assertForbidden();
 })->with([
-    ListArticles::class,
-    CreateArticle::class,
-    ViewArticle::class,
-    EditArticle::class,
+    'create page' => [CreateArticle::class],
+    'edit page' => [EditArticle::class],
 ]);
 
-it('forbids the list page to a global administrator who lacks the role', function (): void {
+it('hides the write actions from a reader', function (): void {
+    $reader = User::factory()->create(['is_administrator' => false]);
+    $this->actingAs($reader);
+    $article = Article::factory()->create();
+
+    livewire(ListArticles::class)
+        ->assertActionHidden(CreateAction::class);
+
+    livewire(ViewArticle::class, ['record' => $article->id])
+        ->assertActionHidden(EditAction::class)
+        ->assertActionHidden(DeleteAction::class);
+});
+
+it('forbids the write pages to a global administrator who lacks the role', function (): void {
     $administrator = User::factory()->create(['is_administrator' => true]);
     $this->actingAs($administrator);
 
-    livewire(ListArticles::class)->assertForbidden();
+    livewire(CreateArticle::class)->assertForbidden();
 });

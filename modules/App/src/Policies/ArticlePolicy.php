@@ -9,14 +9,17 @@ use App\Models\User;
 
 final class ArticlePolicy
 {
-    public function viewAny(User $user): bool
+    /**
+     * Articles are readable by every authenticated user.
+     */
+    public function viewAny(): bool
     {
-        return $this->isIntranetAdmin($user);
+        return true;
     }
 
-    public function view(User $user): bool
+    public function view(): bool
     {
-        return $this->isIntranetAdmin($user);
+        return true;
     }
 
     public function create(User $user): bool
@@ -50,8 +53,8 @@ final class ArticlePolicy
     }
 
     /**
-     * Deliberately not using the SecurityAuthorization concern: articles are reserved
-     * to ROLE_INTRANET_ADMIN alone, the `is_administrator` flag does not grant access.
+     * Deliberately not using the SecurityAuthorization concern: writing articles is
+     * reserved to ROLE_INTRANET_ADMIN alone, the `is_administrator` flag grants nothing.
      */
     private function isIntranetAdmin(User $user): bool
     {
