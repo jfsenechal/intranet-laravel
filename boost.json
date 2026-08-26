@@ -15,11 +15,12 @@
     "sail": false,
     "skills": [
         "infer-conventions",
+        "ai-sdk-development",
         "laravel-best-practices",
+        "testing-best-practices",
         "configure-nightwatch",
         "octane-development",
         "scout-development",
-        "pest-testing",
         "tailwindcss-development",
         "laravel-pdf",
         "filament-security-audit",
