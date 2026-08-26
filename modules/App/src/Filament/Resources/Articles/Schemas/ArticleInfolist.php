@@ -17,9 +17,11 @@ final class ArticleInfolist
             ->components([
                 Section::make('Article')
                     ->columns(2)
+                    ->hiddenLabel()
                     ->schema([
                         TextEntry::make('body')
                             ->label('Contenu')
+                            ->hiddenLabel()
                             ->html()
                             ->columnSpanFull(),
                         TextEntry::make('created_at')->label('Créé le')->dateTime('d/m/Y H:i'),
