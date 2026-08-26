@@ -30,6 +30,13 @@ final class ViewWeek extends ViewRecord
                 ->icon(Heroicon::Plus)
                 ->url(fn (): string => WeekResource::getUrl('add-order', ['record' => $this->record->id])),
 
+            Action::make('print')
+                ->label('Imprimer le récapitulatif')
+                ->icon(Heroicon::Printer)
+                ->color('success')
+                ->url(fn (): string => WeekResource::getUrl('print', ['record' => $this->record->id]))
+                ->openUrlInNewTab(),
+
             EditAction::make()
                 ->icon(Heroicon::Pencil),
 

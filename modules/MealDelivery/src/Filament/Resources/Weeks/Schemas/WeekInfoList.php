@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Schemas;
 
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
-use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Week;
-use Carbon\CarbonImmutable;
+use AcMarche\MealDelivery\Service\WeekDaysSummaryAggregator;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 
 final class WeekInfoList
 {
@@ -93,56 +90,34 @@ final class WeekInfoList
      */
     private static function buildDaysSummary(Week $week): array
     {
-        $days = collect($week->days ?? [])
-            ->map(fn (string $day): string => CarbonImmutable::parse($day)->format('Y-m-d'))
-            ->values();
-
-        if ($days->isEmpty()) {
-            return [];
-        }
-
-        $mealsByDay = Meal::query()
-            ->whereIn('date', $days->all())
-            ->whereHas('order', fn (Builder $query) => $query->where('week_id', $week->id))
-            ->with(['order:id,client_id,week_id', 'menus:id,meal_id,position,quantity'])
-            ->get()
-            ->groupBy(fn (Meal $meal): string => $meal->date->format('Y-m-d'));
-
-        return $days
-            ->map(function (string $day) use ($mealsByDay, $week): array {
-                $meals = $mealsByDay->get($day, collect());
-
-                return [
-                    'date' => Str::title(CarbonImmutable::parse($day)->translatedFormat('l j F Y')),
-                    'date_url' => WeekResource::getUrl('day', [
-                        'record' => $week->id,
-                        'date' => $day,
-                    ], panel: 'meal-delivery-panel'),
-                    'clients_count' => $meals->pluck('order.client_id')->unique()->count(),
-                    'soup_count' => (int) $meals->sum('soup_count'),
-                    'menu1_count' => (int) $meals->sum(
-                        fn (Meal $meal): int => (int) $meal->menus->where('position', 1)->sum('quantity'),
-                    ),
-                    'menu2_count' => (int) $meals->sum(
-                        fn (Meal $meal): int => (int) $meal->menus->where('position', 2)->sum('quantity'),
-                    ),
-                    'kitchen_link' => 'Exporter',
-                    'kitchen_url' => WeekResource::getUrl('kitchen', [
-                        'record' => $week->id,
-                        'date' => $day,
-                    ], panel: 'meal-delivery-panel'),
-                    'routes_link' => 'Feuilles',
-                    'routes_url' => WeekResource::getUrl('routes', [
-                        'record' => $week->id,
-                        'date' => $day,
-                    ], panel: 'meal-delivery-panel'),
-                    'cafeteria_link' => 'Cafétariat',
-                    'cafeteria_url' => WeekResource::getUrl('cafeteria', [
-                        'record' => $week->id,
-                        'date' => $day,
-                    ], panel: 'meal-delivery-panel'),
-                ];
-            })
-            ->all();
+        return array_map(
+            static fn (array $day): array => [
+                'date' => $day['label'],
+                'date_url' => WeekResource::getUrl('day', [
+                    'record' => $week->id,
+                    'date' => $day['date'],
+                ], panel: 'meal-delivery-panel'),
+                'clients_count' => $day['clients_count'],
+                'soup_count' => $day['soup_count'],
+                'menu1_count' => $day['menu1_count'],
+                'menu2_count' => $day['menu2_count'],
+                'kitchen_link' => 'Exporter',
+                'kitchen_url' => WeekResource::getUrl('kitchen', [
+                    'record' => $week->id,
+                    'date' => $day['date'],
+                ], panel: 'meal-delivery-panel'),
+                'routes_link' => 'Feuilles',
+                'routes_url' => WeekResource::getUrl('routes', [
+                    'record' => $week->id,
+                    'date' => $day['date'],
+                ], panel: 'meal-delivery-panel'),
+                'cafeteria_link' => 'Cafétariat',
+                'cafeteria_url' => WeekResource::getUrl('cafeteria', [
+                    'record' => $week->id,
+                    'date' => $day['date'],
+                ], panel: 'meal-delivery-panel'),
+            ],
+            (new WeekDaysSummaryAggregator())->build($week),
+        );
     }
 }
