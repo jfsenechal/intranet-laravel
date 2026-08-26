@@ -1,5 +1,6 @@
 <?php
 
+use AcMarche\App\Filament\Resources\Articles\ArticleResource;
 use AcMarche\App\Models\Article;
 use Livewire\Component;
 
@@ -20,7 +21,7 @@ new class extends Component
 <div class="card-hover relative overflow-hidden rounded-2xl shadow-lg animate-fade-in-up" style="--delay: 0.2s">
     <div class="gradient-sport absolute inset-0"></div>
     @if ($article)
-        <a href="/articles/{{ $article->id }}" class="group relative flex flex-col gap-3 p-5 text-white">
+        <a href="{{ ArticleResource::getUrl('view', ['record' => $article->id], panel: 'app-panel') }}" class="group relative flex flex-col gap-3 p-5 text-white">
             <div class="flex items-center gap-3">
                 <div class="flex size-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur animate-float">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
