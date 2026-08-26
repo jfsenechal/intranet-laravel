@@ -6,7 +6,6 @@ namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use Carbon\CarbonImmutable;
-use Carbon\CarbonPeriod;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
 
@@ -28,10 +27,9 @@ final class CreateWeek extends CreateRecord
     {
         if (empty($data['days']) && ! empty($data['first_day'])) {
             $start = CarbonImmutable::parse($data['first_day'])->startOfWeek();
-            $end = $start->addDays(4);
 
-            $data['days'] = collect(CarbonPeriod::create($start, $end))
-                ->map(fn (CarbonImmutable $day): string => $day->format('Y-m-d'))
+            $data['days'] = collect(range(0, 4))
+                ->map(fn (int $offset): string => $start->addDays($offset)->format('Y-m-d'))
                 ->all();
         }
 
