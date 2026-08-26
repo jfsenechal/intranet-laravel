@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Filament\Resources\BudgetArticles\BudgetArticleResource;
 use AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages\CreateBudgetArticle;
 use AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages\EditBudgetArticle;
 use AcMarche\Mileage\Filament\Resources\BudgetArticles\Pages\ListBudgetArticles;
@@ -54,6 +55,20 @@ it('can render the edit page', function (): void {
             'functional_code' => $budgetArticle->functional_code,
             'economic_code' => $budgetArticle->economic_code,
         ]);
+});
+
+it('titles a budget article with its name and codes', function (): void {
+    $budgetArticle = BudgetArticle::factory()->create([
+        'name' => 'Frais de déplacement',
+        'functional_code' => '104/123',
+        'economic_code' => '01',
+    ]);
+
+    expect(BudgetArticleResource::getRecordTitle($budgetArticle))
+        ->toBe('104/123 - 01 Frais de déplacement');
+
+    livewire(EditBudgetArticle::class, ['record' => $budgetArticle->id])
+        ->assertSee('104/123 - 01 Frais de déplacement');
 });
 
 it('can list budget articles', function (): void {

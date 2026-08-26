@@ -13,6 +13,7 @@ use AcMarche\Mileage\Models\BudgetArticle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Override;
 use UnitEnum;
 
@@ -27,6 +28,9 @@ final class BudgetArticleResource extends Resource
     #[Override]
     protected static ?int $navigationSort = 6;
 
+    #[Override]
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function getNavigationIcon(): string
     {
         return 'tabler-book-2';
@@ -35,6 +39,25 @@ final class BudgetArticleResource extends Resource
     public static function getNavigationLabel(): string
     {
         return 'Articles budgétaires';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Article budgétaire';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Articles budgétaires';
+    }
+
+    public static function getRecordTitle(?Model $record): string
+    {
+        if (! $record instanceof BudgetArticle) {
+            return self::getModelLabel();
+        }
+
+        return $record->display_name;
     }
 
     public static function form(Schema $schema): Schema

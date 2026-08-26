@@ -6,6 +6,7 @@ namespace AcMarche\Mileage\Filament\Pages;
 
 use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
@@ -124,10 +125,7 @@ final class AllDeclarations extends ListRecords
                     ->searchable(),
                 SelectFilter::make('type_movement')
                     ->label('Type de déplacement')
-                    ->options([
-                        'interne' => 'Interne',
-                        'externe' => 'Externe',
-                    ]),
+                    ->options(TypeMovementEnum::class),
                 Filter::make('created_at')
                     ->schema([
                         DatePicker::make('created_from')
@@ -137,11 +135,11 @@ final class AllDeclarations extends ListRecords
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when(
-                            $data['created_from'],
+                            $data['created_from'] ?? null,
                             fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                         )
                         ->when(
-                            $data['created_until'],
+                            $data['created_until'] ?? null,
                             fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                         )),
             ])

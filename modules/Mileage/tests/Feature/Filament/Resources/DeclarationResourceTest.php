@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Filament\Pages\AllDeclarations;
 use AcMarche\Mileage\Filament\Resources\Declarations\Pages\CreateDeclaration;
 use AcMarche\Mileage\Filament\Resources\Declarations\Pages\EditDeclaration;
@@ -146,10 +147,57 @@ it('lists every user declaration on the all declarations page', function (): voi
         ->assertCanSeeTableRecords($mine->merge($others));
 });
 
+it('can filter the all declarations page by type of movement and creation date', function (): void {
+    $internal = Declaration::factory()->create([
+        'type_movement' => TypeMovementEnum::INTERNAL->value,
+        'created_at' => '2026-06-15',
+    ]);
+    $external = Declaration::factory()->create([
+        'type_movement' => TypeMovementEnum::EXTERNAL->value,
+        'created_at' => '2026-06-15',
+    ]);
+    $old = Declaration::factory()->create([
+        'type_movement' => TypeMovementEnum::INTERNAL->value,
+        'created_at' => '2026-01-15',
+    ]);
+
+    livewire(AllDeclarations::class)
+        ->loadTable()
+        ->filterTable('type_movement', TypeMovementEnum::INTERNAL->value)
+        ->assertCanSeeTableRecords([$internal, $old])
+        ->assertCanNotSeeTableRecords([$external])
+        // Only one bound of the range: the other key is absent from the filter state.
+        ->filterTable('created_at', ['created_from' => '2026-06-01'])
+        ->assertCanSeeTableRecords([$internal])
+        ->assertCanNotSeeTableRecords([$old]);
+});
+
 it('has table columns', function (string $column): void {
     livewire(ListDeclarations::class)
         ->assertTableColumnExists($column);
-})->with(['last_name', 'first_name', 'type_movement']);
+})->with(['id', 'last_name', 'first_name', 'type_movement']);
+
+it('can filter declarations by type of movement', function (): void {
+    $internal = Declaration::factory()->create(['user_add' => 'jdupont', 'type_movement' => TypeMovementEnum::INTERNAL->value]);
+    $external = Declaration::factory()->create(['user_add' => 'jdupont', 'type_movement' => TypeMovementEnum::EXTERNAL->value]);
+
+    livewire(ListDeclarations::class)
+        ->loadTable()
+        ->filterTable('type_movement', TypeMovementEnum::INTERNAL->value)
+        ->assertCanSeeTableRecords([$internal])
+        ->assertCanNotSeeTableRecords([$external]);
+});
+
+it('can filter declarations by creation date', function (): void {
+    $old = Declaration::factory()->create(['user_add' => 'jdupont', 'created_at' => '2026-01-15']);
+    $recent = Declaration::factory()->create(['user_add' => 'jdupont', 'created_at' => '2026-06-15']);
+
+    livewire(ListDeclarations::class)
+        ->loadTable()
+        ->filterTable('created_at', ['created_from' => '2026-06-01'])
+        ->assertCanSeeTableRecords([$recent])
+        ->assertCanNotSeeTableRecords([$old]);
+});
 
 it('can search declarations', function (): void {
     $declarations = Declaration::factory(5)->create(['user_add' => 'jdupont']);
