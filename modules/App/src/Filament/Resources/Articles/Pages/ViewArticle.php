@@ -18,7 +18,7 @@ final class ViewArticle extends ViewRecord
 
     public function getTitle(): string
     {
-        return "Détail de l'article";
+        return $this->record->title;
     }
 
     protected function getHeaderActions(): array

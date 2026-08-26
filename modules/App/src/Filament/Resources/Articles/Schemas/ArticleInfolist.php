@@ -16,11 +16,12 @@ final class ArticleInfolist
             ->columns(1)
             ->components([
                 Section::make('Article')
-                    ->columns(1)
+                    ->columns(2)
                     ->schema([
-                        TextEntry::make('title')->label('Titre'),
-                        TextEntry::make('excerpt')->label('Extrait')->placeholder('—'),
-                        TextEntry::make('body')->label('Contenu')->html(),
+                        TextEntry::make('body')
+                            ->label('Contenu')
+                            ->html()
+                            ->columnSpanFull(),
                         TextEntry::make('created_at')->label('Créé le')->dateTime('d/m/Y H:i'),
                         TextEntry::make('updated_at')->label('Modifié le')->dateTime('d/m/Y H:i'),
                     ]),
