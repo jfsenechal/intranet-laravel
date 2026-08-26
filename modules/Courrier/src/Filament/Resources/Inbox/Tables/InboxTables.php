@@ -26,17 +26,29 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 final class InboxTables
 {
+    private const int RECORDS_CACHE_TTL = 60;
+
     public static function configure(Table $table, ?string $mailbox = null): Table
     {
         $imapRepository = $mailbox !== null ? new ImapRepository($mailbox) : null;
 
         return $table
-            ->records(fn (): array => self::getRecords($imapRepository))
+            ->records(fn (?string $search, ?string $sortColumn, ?string $sortDirection, int $page, int $recordsPerPage): LengthAwarePaginator => self::paginateRecords(
+                self::getRecords($imapRepository, $mailbox),
+                $search,
+                $sortColumn,
+                $sortDirection,
+                $page,
+                $recordsPerPage,
+            ))
             ->columns([
                 IconColumn::make('has_attachments')
                     ->label('')
@@ -65,7 +77,11 @@ final class InboxTables
                     ->visible(fn (array $record): bool => ($record['attachment_count'] ?? 0) !== 1)
                     ->modalHeading(fn (array $record): string => $record['subject'] ?? 'Sans objet')
                     ->modalWidth(Width::FiveExtraLarge)
-                    ->schema(fn (?array $record): array => InboxInfolist::getEmailViewSchema($record, $mailbox ?? 'imap_ville'))
+                    ->schema(fn (?array $record): array => InboxInfolist::getEmailViewSchema(
+                        $record,
+                        $mailbox ?? 'imap_ville',
+                        fn (int $uid): array => self::getMessageBody($imapRepository, $uid),
+                    ))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fermer'),
                 Action::make('process')
@@ -90,7 +106,7 @@ final class InboxTables
                         $record['attachments'][0]['filename'] ?? 'Sans nom',
                         $mailbox ?? 'imap_ville'
                     ))
-                    ->action(function (array $data, array $record) use ($mailbox): void {
+                    ->action(function (array $data, array $record, HasTable $livewire) use ($mailbox): void {
                         IncomingMailHandler::handleIncomingMailCreation(
                             $data,
                             $record['uid'],
@@ -100,8 +116,21 @@ final class InboxTables
                             $record['attachments'][0]['content_type'] ?? 'application/octet-stream',
                             $mailbox ?? 'imap_ville'
                         );
+
+                        self::forgetRecords($mailbox);
+                        $livewire->resetTable();
                     })
                     ->modalSubmitActionLabel('Enregistrer le courrier'),
+            ])
+            ->headerActions([
+                Action::make('refresh')
+                    ->label('Actualiser')
+                    ->icon('tabler-refresh')
+                    ->color('gray')
+                    ->action(function (HasTable $livewire) use ($mailbox): void {
+                        self::forgetRecords($mailbox);
+                        $livewire->resetTable();
+                    }),
             ])
             ->toolbarActions([
                 self::analyzeBulkAction($mailbox ?? 'imap_ville'),
@@ -118,8 +147,10 @@ final class InboxTables
                         try {
                             $imapRepository->deleteMessages($records->pluck('uid')->toArray());
 
+                            self::forgetRecords($imapRepository->mailboxName());
+
                             $livewire->deselectAllTableRecords();
-                            $livewire->flushCachedTableRecords();
+                            $livewire->resetTable();
 
                             Notification::make()
                                 ->title('Messages supprimés')
@@ -223,9 +254,6 @@ final class InboxTables
     }
 
     /**
-     * @return array<int, array<string, mixed>>
-     */
-    /**
      * Suggested reference number for the process form. CPAS mail is numbered
      * sequentially, so it is pre-filled; other departments enter it manually.
      */
@@ -236,7 +264,66 @@ final class InboxTables
             : '';
     }
 
-    private static function getRecords(?ImapRepository $imapRepository): array
+    /**
+     * Search, sort and paginate the listing in memory.
+     *
+     * A custom data source gets none of this for free: Filament hands the state
+     * to `records()` and expects the closure to apply it, so without this the
+     * search field, the sortable date column and the page size selector were
+     * inert and every message was rendered on one page.
+     *
+     * @param  array<int, array<string, mixed>>  $records
+     * @return LengthAwarePaginator<int, array<string, mixed>>
+     */
+    private static function paginateRecords(
+        array $records,
+        ?string $search,
+        ?string $sortColumn,
+        ?string $sortDirection,
+        int $page,
+        int $recordsPerPage,
+    ): LengthAwarePaginator {
+        $messages = collect($records)
+            ->when(
+                filled($search),
+                fn (Collection $messages): Collection => $messages->filter(
+                    fn (array $record): bool => Str::contains(
+                        $record['from'].' '.$record['subject'],
+                        (string) $search,
+                        ignoreCase: true,
+                    ),
+                ),
+            )
+            ->sortBy(
+                // The date column is formatted for humans (`d/m/Y H:i`), so it
+                // does not sort as a string; the record carries the instant.
+                $sortColumn === 'date' ? 'timestamp' : ($sortColumn ?? 'timestamp'),
+                SORT_REGULAR,
+                ($sortDirection ?? 'desc') === 'desc',
+            )
+            ->values();
+
+        return new LengthAwarePaginator(
+            $messages->forPage($page, $recordsPerPage),
+            total: $messages->count(),
+            perPage: $recordsPerPage,
+            currentPage: $page,
+        );
+    }
+
+    /**
+     * The listing, cached for the duration of a burst of interactions.
+     *
+     * Filament rebuilds a custom data source on every Livewire request, and a
+     * user opening the "Traiter" modal, filling the form and submitting it
+     * costs several: without this, each one refetched the whole mailbox.
+     * Anything that removes a message from the mailbox calls
+     * `forgetRecords()`, and the "Actualiser" action lets the user pull new
+     * mail in before the entry expires on its own.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function getRecords(?ImapRepository $imapRepository, ?string $mailbox): array
     {
         if (! $imapRepository instanceof ImapRepository) {
             Notification::make()
@@ -248,8 +335,14 @@ final class InboxTables
             return [];
         }
 
+        $cached = Cache::get(self::recordsCacheKey($mailbox));
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
         try {
-            return array_map(
+            $records = array_map(
                 fn (EmailMessage $message): array => $message->toArray(),
                 $imapRepository->getMessages()
             );
@@ -261,6 +354,41 @@ final class InboxTables
                 ->send();
 
             return [];
+        }
+
+        Cache::put(self::recordsCacheKey($mailbox), $records, self::RECORDS_CACHE_TTL);
+
+        return $records;
+    }
+
+    private static function forgetRecords(?string $mailbox): void
+    {
+        Cache::forget(self::recordsCacheKey($mailbox));
+    }
+
+    private static function recordsCacheKey(?string $mailbox): string
+    {
+        return 'courrier.inbox.messages.'.($mailbox ?? 'imap_ville');
+    }
+
+    /**
+     * The body of the message being viewed, fetched now because the listing
+     * does not carry one.
+     *
+     * @return array{html: ?string, text: ?string}
+     */
+    private static function getMessageBody(?ImapRepository $imapRepository, int $uid): array
+    {
+        if (! $imapRepository instanceof ImapRepository) {
+            return ['html' => null, 'text' => null];
+        }
+
+        try {
+            return $imapRepository->getMessageBody($uid);
+        } catch (ImapException $e) {
+            report($e);
+
+            return ['html' => null, 'text' => null];
         }
     }
 }

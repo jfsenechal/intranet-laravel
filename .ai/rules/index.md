@@ -13,5 +13,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | modules/Pst/database/migrations/** | .ai/rules/migrations.md |
 | modules/Mileage/** | .ai/rules/mileage.md |
 | modules/*/src/Filament/Resources/**/Pages/*.php | .ai/rules/pages.md |
+| modules/Courrier/src/Repository/ImapRepository.php | .ai/rules/repository.md |
 | modules/Courrier/src/Search/** | .ai/rules/search.md |
+| modules/Courrier/src/Filament/Resources/Inbox/Tables/InboxTables.php | .ai/rules/tables.md |
 | modules/**/tests/** | .ai/rules/tests.md |

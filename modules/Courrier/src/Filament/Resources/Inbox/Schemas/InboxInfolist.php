@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Filament\Resources\Inbox\Schemas;
 
 use AcMarche\Courrier\Handler\IncomingMailHandler;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -15,9 +16,14 @@ final class InboxInfolist
 {
     /**
      * @param  array<string, mixed>|null  $record
+     * @param  (Closure(int): array{html: ?string, text: ?string})|null  $bodyResolver  Reads the message body from
+     *                                                                                  IMAP. The listing does not carry
+     *                                                                                  one — see `EmailMessage` — so it
+     *                                                                                  is fetched when this modal opens,
+     *                                                                                  for this message alone.
      * @return array<int, mixed>
      */
-    public static function getEmailViewSchema(?array $record, string $mailbox = 'imap_ville'): array
+    public static function getEmailViewSchema(?array $record, string $mailbox = 'imap_ville', ?Closure $bodyResolver = null): array
     {
         if (! $record) {
             return [];
@@ -49,12 +55,17 @@ final class InboxInfolist
         }
 
         // Add content section
-        $content = $record['html'] ?? $record['text'] ?? '';
         $components[] = Section::make('Contenu')
             ->schema([
                 TextEntry::make('content')
                     ->hiddenLabel()
-                    ->state(new HtmlString($content))
+                    ->state(function () use ($record, $bodyResolver): HtmlString {
+                        $body = $bodyResolver instanceof Closure
+                            ? $bodyResolver((int) $record['uid'])
+                            : $record;
+
+                        return new HtmlString($body['html'] ?? $body['text'] ?? '');
+                    })
                     ->html(),
             ]);
 

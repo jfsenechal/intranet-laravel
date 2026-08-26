@@ -15,6 +15,7 @@ use DirectoryTree\ImapEngine\Enums\ImapFetchIdentifier;
 use DirectoryTree\ImapEngine\FolderInterface;
 use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
 use DirectoryTree\ImapEngine\MailboxInterface;
+use DirectoryTree\ImapEngine\Message;
 use DirectoryTree\ImapEngine\MessageInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -31,6 +32,14 @@ final class ImapRepository
     private ?MailboxInterface $mailbox = null;
 
     public function __construct(private readonly string $mailboxName = 'imap_ville') {}
+
+    /**
+     * The name the mailbox is registered under (e.g. `imap_cpas`).
+     */
+    public function mailboxName(): string
+    {
+        return $this->mailboxName;
+    }
 
     /**
      * @throws ImapException
@@ -63,6 +72,14 @@ final class ImapRepository
     }
 
     /**
+     * List the recent messages of the inbox, headers and attachment metadata only.
+     *
+     * `BODYSTRUCTURE` describes the MIME parts without transferring them, so a
+     * mailbox of scanned PDFs costs a few kilobytes here instead of the tens of
+     * megabytes `withBody()` would download to render a table of subjects. The
+     * bodies of the listed messages are fetched one at a time, on demand, by
+     * `getMessageBody()` and `getAttachment()`.
+     *
      * @return array<int, EmailMessage>
      *
      * @throws ImapException
@@ -76,7 +93,7 @@ final class ImapRepository
             ->messages()
             ->since(now()->subDays($daysBack))
             ->withHeaders()
-            ->withBody()
+            ->withBodyStructure()
             ->get();
 
         return collect($messages)
@@ -85,6 +102,41 @@ final class ImapRepository
     }
 
     /**
+     * Read the rendered body of a single message.
+     *
+     * Kept out of `getMessages()`: only the message the user opens needs it.
+     *
+     * @return array{html: ?string, text: ?string}
+     *
+     * @throws ImapException
+     */
+    public function getMessageBody(int $uid): array
+    {
+        $this->ensureConnected();
+
+        $message = $this->mailbox
+            ->inbox()
+            ->messages()
+            ->withHeaders()
+            ->withBody()
+            ->find($uid, ImapFetchIdentifier::Uid);
+
+        if (! $message instanceof MessageInterface) {
+            throw ImapException::messageNotFound($uid);
+        }
+
+        return [
+            'html' => $message->html(),
+            'text' => $message->text(),
+        ];
+    }
+
+    /**
+     * Locate a message by UID without downloading its body.
+     *
+     * Callers that need content read it through the body structure, which lets
+     * them pull the one MIME part they want rather than the whole message.
+     *
      * @throws ImapException
      */
     public function findMessageByUid(int $uid): ?MessageInterface
@@ -94,8 +146,8 @@ final class ImapRepository
         return $this->mailbox
             ->inbox()
             ->messages()
-            ->withBody()
             ->withHeaders()
+            ->withBodyStructure()
             ->withFlags()
             ->find($uid, ImapFetchIdentifier::Uid);
     }
@@ -166,7 +218,7 @@ final class ImapRepository
             throw ImapException::messageNotFound($uid);
         }
 
-        $attachments = $message->attachments();
+        $attachments = $this->attachmentsOf($message);
 
         if (! isset($attachments[$attachmentIndex])) {
             throw ImapException::attachmentNotFound($uid, $attachmentIndex);
@@ -252,19 +304,38 @@ final class ImapRepository
 
     private function mapToEmailMessage(MessageInterface $message): EmailMessage
     {
+        $attachments = $this->attachmentsOf($message);
+
         return new EmailMessage(
             uid: $message->uid(),
             date: display_datetime($message->date()) ?? '',
+            timestamp: $message->date()?->getTimestamp() ?? 0,
             from: $this->formatAddress($message->from()),
             fromEmail: $message->from()?->email() ?? '',
             fromName: $message->from()?->name() ?? '',
             subject: $message->subject() ?? 'Sans objet',
-            hasAttachments: $message->hasAttachments(),
-            attachmentCount: $message->attachmentCount(),
-            html: $message->html(),
-            text: $message->text(),
-            attachments: $this->mapAttachments($message->attachments()),
+            hasAttachments: $attachments !== [],
+            attachmentCount: count($attachments),
+            attachments: $this->mapAttachments($attachments),
         );
+    }
+
+    /**
+     * The attachments of a message, read from its body structure when one was
+     * fetched.
+     *
+     * `Message::attachments(fetch: true)` builds them from the body structure
+     * and defers each part's download until it is read, which is what makes
+     * listing a mailbox cheap. Only the concrete `Message` accepts the flag;
+     * `FakeMessage` (tests) parses the raw source it was handed instead.
+     *
+     * @return array<int, Attachment>
+     */
+    private function attachmentsOf(MessageInterface $message): array
+    {
+        return $message instanceof Message
+            ? $message->attachments(fetch: true)
+            : $message->attachments();
     }
 
     /**
