@@ -64,22 +64,6 @@ it('creates a recipient via the form', function (): void {
     ]);
 });
 
-it('auto-generates the slugname if left empty', function (): void {
-    livewire(CreateRecipient::class)
-        ->fillForm([
-            'last_name' => 'Martin',
-            'first_name' => 'Marie',
-            'email' => 'marie.martin@example.com',
-        ])
-        ->call('create')
-        ->assertHasNoFormErrors();
-
-    assertDatabaseHas(Recipient::class, [
-        'last_name' => 'Martin',
-        'slugname' => 'martin_marie',
-    ]);
-});
-
 it('updates a recipient via the form', function (): void {
     $recipient = Recipient::factory()->create(['pv_college' => false]);
 

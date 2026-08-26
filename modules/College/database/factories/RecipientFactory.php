@@ -6,7 +6,6 @@ namespace AcMarche\College\Database\Factories;
 
 use AcMarche\College\Models\Recipient;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Recipient>
@@ -22,7 +21,6 @@ final class RecipientFactory extends Factory
         $firstName = fake()->firstName();
 
         return [
-            'slugname' => Str::slug($lastName.'_'.$firstName, '_').'_'.fake()->unique()->numberBetween(1, 99999),
             'last_name' => $lastName,
             'first_name' => $firstName,
             'email' => fake()->unique()->safeEmail(),

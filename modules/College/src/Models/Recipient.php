@@ -10,11 +10,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 /**
  * @property int $id
- * @property string $slugname
  * @property string $last_name
  * @property string $first_name
  * @property string $email
@@ -26,7 +24,6 @@ use Illuminate\Support\Str;
 #[UseFactory(RecipientFactory::class)]
 #[Connection('maria-college')]
 #[Fillable([
-    'slugname',
     'last_name',
     'first_name',
     'email',
@@ -42,20 +39,6 @@ final class Recipient extends Model
     public $timestamps = false;
 
     protected $table = 'college_recipients';
-
-    protected static function booted(): void
-    {
-        $assignSlug = function (self $recipient): void {
-            if (! empty($recipient->slugname)) {
-                return;
-            }
-            $base = mb_trim((string) $recipient->last_name).'_'.mb_trim((string) $recipient->first_name);
-            $recipient->slugname = Str::slug($base, '_');
-        };
-
-        self::creating($assignSlug);
-        self::updating($assignSlug);
-    }
 
     /**
      * @return array<string, string>

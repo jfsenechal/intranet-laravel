@@ -23,7 +23,6 @@ return new class() extends Migration
         } elseif (! Schema::connection('maria-college')->hasTable('college_recipients')) {
             Schema::connection('maria-college')->create('college_recipients', function (Blueprint $table): void {
                 $table->id();
-                $table->string('slugname', 70)->nullable();
                 $table->string('last_name', 255);
                 $table->string('first_name', 255);
                 $table->string('email', 255);

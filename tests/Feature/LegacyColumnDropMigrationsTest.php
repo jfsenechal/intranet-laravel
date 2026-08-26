@@ -49,6 +49,12 @@ function legacyColumnDropCases(): array
             ['employeur_save_id', 'phone_office', 'mobile_office'],
             'modules/Hrm/database/migrations/2026_08_11_145304_drop_legacy_employee_office_columns.php',
         ],
+        'college recipients' => [
+            'maria-college',
+            'college_recipients',
+            ['slugname'],
+            'modules/College/database/migrations/2026_08_26_120000_drop_legacy_slugname_column.php',
+        ],
         'sports members' => [
             'maria-rescam',
             'sports_members',

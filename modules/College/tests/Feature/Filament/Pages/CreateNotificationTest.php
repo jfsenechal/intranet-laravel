@@ -11,7 +11,6 @@ use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 use function Pest\Livewire\livewire;
 
@@ -28,7 +27,6 @@ beforeEach(function (): void {
 function makeRecipient(array $flags = []): Recipient
 {
     return Recipient::query()->forceCreate(array_merge([
-        'slugname' => Str::random(12),
         'last_name' => fake()->lastName(),
         'first_name' => fake()->firstName(),
         'email' => fake()->unique()->safeEmail(),
