@@ -33,7 +33,6 @@ return new class extends Migration
                     $table->string('first_name');
                     $table->string('email');
                     $table->boolean('ics')->default(true);
-                    $table->string('token');
                 }
             );
         }
