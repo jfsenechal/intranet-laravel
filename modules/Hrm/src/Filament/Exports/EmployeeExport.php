@@ -26,6 +26,7 @@ final readonly class EmployeeExport
         return [
             'last_name' => 'Nom',
             'first_name' => 'Prenom',
+            'birth_date' => 'Date de naissance',
             'job_title' => 'Fonction',
             'status' => 'Statut',
             'hired_at' => 'Entree',
@@ -95,6 +96,7 @@ final readonly class EmployeeExport
         return [
             'last_name' => $row->last_name,
             'first_name' => $row->first_name,
+            'birth_date' => $row->birth_date?->format('d/m/Y'),
             'job_title' => $row->job_title,
             'status' => $row->status?->getLabel(),
             'hired_at' => $row->hired_at?->format('d/m/Y'),

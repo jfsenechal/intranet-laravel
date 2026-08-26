@@ -688,6 +688,15 @@ describe('export xlsx action', function (): void {
             ->assertHasNoActionErrors();
     });
 
+    it('includes the birth date column', function (): void {
+        $record = Employee::factory()->create(['birth_date' => '1980-05-12']);
+
+        $export = new EmployeeExport(Employee::query(), ['birth_date']);
+
+        expect($export->headings())->toBe(['Date de naissance'])
+            ->and($export->map($record))->toBe(['12/05/1980']);
+    });
+
     it('requires at least one column to be selected', function (): void {
         Livewire::test(ListEmployees::class)
             ->callAction('export', data: ['columns' => []])
