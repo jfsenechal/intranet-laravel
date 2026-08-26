@@ -9,6 +9,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | modules/AldermenAgenda/database/migrations/** | .ai/rules/database-migrations.md |
 | modules/**/src/Filament/** | .ai/rules/filament.md |
 | modules/Issep/** | .ai/rules/issep.md |
+| modules/MealDelivery/** | .ai/rules/meal-delivery.md |
 | modules/Pst/database/migrations/** | .ai/rules/migrations.md |
 | modules/Mileage/** | .ai/rules/mileage.md |
 | modules/*/src/Filament/Resources/**/Pages/*.php | .ai/rules/pages.md |

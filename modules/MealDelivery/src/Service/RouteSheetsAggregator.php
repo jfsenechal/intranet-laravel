@@ -104,10 +104,10 @@ final class RouteSheetsAggregator
 
             $range = $orderDateRanges->get($meal->order_id);
             $newSheet = $range !== null && $dateString === $range['min_date'];
-            $disposableRecipient = (bool) $meal->order->is_last_meal
-                && $range !== null
-                && $dateString === $range['max_date'];
-            $takeBackSheet = $isEqualOrGreaterThanWednesday
+            $isLastMealOfWeek = $range !== null && $dateString === $range['max_date'];
+            $disposableRecipient = (bool) $meal->order->is_last_meal && $isLastMealOfWeek;
+            $takeBackSheet = $isLastMealOfWeek
+                && $isEqualOrGreaterThanWednesday
                 && ! isset($clientsWithNextWeekOrder[$client->id]);
 
             $row = self::buildRow($meal, $newSheet, $takeBackSheet, $disposableRecipient);
@@ -218,7 +218,7 @@ final class RouteSheetsAggregator
     }
 
     /**
-     * Earliest and latest meal date for each order, keyed by order id.
+     * Earliest and latest delivered meal date for each order, keyed by order id.
      *
      * @param  list<int>  $orderIds
      * @return Collection<int, array{min_date: string, max_date: string}>
@@ -231,6 +231,7 @@ final class RouteSheetsAggregator
 
         return Meal::query()
             ->whereIn('order_id', $orderIds)
+            ->tap(self::onlyDelivered(...))
             ->selectRaw('order_id, MIN(date) as min_date, MAX(date) as max_date')
             ->groupBy('order_id')
             ->get()
@@ -264,11 +265,27 @@ final class RouteSheetsAggregator
 
         return Order::query()
             ->whereIn('client_id', $clientIds)
-            ->whereHas('meals', fn (Builder $query) => $query->whereDate('date', '>', $lastDay))
+            ->whereHas('meals', fn (Builder $query) => $query
+                ->whereDate('date', '>', $lastDay)
+                ->tap(self::onlyDelivered(...)))
             ->pluck('client_id')
             ->flip()
             ->map(fn (): bool => true)
             ->all();
+    }
+
+    /**
+     * A meal is only delivered — and therefore only printed on a route sheet — when it
+     * carries at least one menu. Meals kept at zero quantity are placeholders and must
+     * not count when locating the first or last meal of an order.
+     *
+     * @param  Builder<Meal>  $query
+     */
+    private static function onlyDelivered(Builder $query): void
+    {
+        $query->whereHas('menus', fn (Builder $menus) => $menus
+            ->whereIn('position', [1, 2])
+            ->where('quantity', '>', 0));
     }
 
     /**

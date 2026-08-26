@@ -78,6 +78,21 @@ function addRouteMeal(Order $order, string $date): Meal
     return $meal;
 }
 
+function addEmptyRouteMeal(Order $order, string $date): Meal
+{
+    $meal = Meal::create([
+        'date' => $date,
+        'soup_count' => 0,
+        'order_id' => $order->id,
+        'at_cafeteria' => false,
+    ]);
+
+    Menu::create(['position' => 1, 'quantity' => 0, 'meal_id' => $meal->id]);
+    Menu::create(['position' => 2, 'quantity' => 0, 'meal_id' => $meal->id]);
+
+    return $meal;
+}
+
 it('flags the new sheet on the first meal of the week only', function (): void {
     $week = Week::create(['first_day' => '2026-06-15', 'days' => ['2026-06-15', '2026-06-17', '2026-06-19']]);
     $route = DeliveryRoute::create(['name' => 'Tournée 1']);
@@ -221,4 +236,77 @@ it('returns null notes when client and meal have none', function (): void {
 
     expect($row['client_notes'])->toBeNull()
         ->and($row['notes'])->toBeNull();
+});
+
+it('ignores placeholder meals without menus when locating the first meal of the week', function (): void {
+    $week = Week::create([
+        'first_day' => '2026-06-15',
+        'days' => ['2026-06-15', '2026-06-16', '2026-06-17'],
+    ]);
+    $route = DeliveryRoute::create(['name' => 'Tournée 1']);
+    $client = makeRouteClient($route);
+    $order = Order::create(['week_id' => $week->id, 'client_id' => $client->id]);
+
+    addEmptyRouteMeal($order, '2026-06-15');
+    addEmptyRouteMeal($order, '2026-06-16');
+    addRouteMeal($order, '2026-06-17');
+
+    $wednesday = (new RouteSheetsAggregator())->build($week, '2026-06-17')['routes'][0]['rows'][0];
+
+    expect($wednesday['new_sheet'])->toBeTrue();
+});
+
+it('takes back the sheet on the last meal of the week only', function (): void {
+    $week = Week::create([
+        'first_day' => '2026-06-15',
+        'days' => ['2026-06-15', '2026-06-17', '2026-06-19'],
+    ]);
+    $route = DeliveryRoute::create(['name' => 'Tournée 1']);
+    $client = makeRouteClient($route);
+    $order = Order::create(['week_id' => $week->id, 'client_id' => $client->id]);
+
+    addRouteMeal($order, '2026-06-17');
+    addRouteMeal($order, '2026-06-19');
+
+    $wednesday = (new RouteSheetsAggregator())->build($week, '2026-06-17')['routes'][0]['rows'][0];
+    $friday = (new RouteSheetsAggregator())->build($week, '2026-06-19')['routes'][0]['rows'][0];
+
+    expect($wednesday['new_sheet'])->toBeTrue()
+        ->and($wednesday['take_back_sheet'])->toBeFalse()
+        ->and($friday['new_sheet'])->toBeFalse()
+        ->and($friday['take_back_sheet'])->toBeTrue();
+});
+
+it('ignores placeholder meals without menus when looking for an order next week', function (): void {
+    $week = Week::create(['first_day' => '2026-06-15', 'days' => ['2026-06-15', '2026-06-17']]);
+    $nextWeek = Week::create(['first_day' => '2026-06-22', 'days' => ['2026-06-24']]);
+    $route = DeliveryRoute::create(['name' => 'Tournée 1']);
+    $client = makeRouteClient($route);
+
+    $order = Order::create(['week_id' => $week->id, 'client_id' => $client->id]);
+    addRouteMeal($order, '2026-06-17');
+
+    $nextOrder = Order::create(['week_id' => $nextWeek->id, 'client_id' => $client->id]);
+    addEmptyRouteMeal($nextOrder, '2026-06-24');
+
+    $wednesday = (new RouteSheetsAggregator())->build($week, '2026-06-17')['routes'][0]['rows'][0];
+
+    expect($wednesday['take_back_sheet'])->toBeTrue();
+});
+
+it('flags a disposable recipient on the last meal carrying menus', function (): void {
+    $week = Week::create([
+        'first_day' => '2026-06-15',
+        'days' => ['2026-06-15', '2026-06-17', '2026-06-19'],
+    ]);
+    $route = DeliveryRoute::create(['name' => 'Tournée 1']);
+    $client = makeRouteClient($route);
+    $order = Order::create(['week_id' => $week->id, 'client_id' => $client->id, 'is_last_meal' => true]);
+
+    addRouteMeal($order, '2026-06-17');
+    addEmptyRouteMeal($order, '2026-06-19');
+
+    $wednesday = (new RouteSheetsAggregator())->build($week, '2026-06-17')['routes'][0]['rows'][0];
+
+    expect($wednesday['disposable_recipient'])->toBeTrue();
 });
