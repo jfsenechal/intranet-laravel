@@ -44,5 +44,13 @@ it('omits the image when the signature has no logo', function (): void {
 it('renders a disclaimer link below the logo', function (): void {
     $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
 
-    expect($html)->toContain('<a href="https://www.marche.be/disclaimer/" style="color: #d4a017; text-decoration: none;">Disclaimer</a>');
+    expect($html)->toContain('<a href="https://www.marche.be/disclaimer/" style="font-family: \'Century Gothic\', CenturyGothic, \'Apple Gothic\', \'URW Gothic\', \'Futura\', \'Trebuchet MS\', Arial, sans-serif; color: #d4a017; text-decoration: none;">Disclaimer</a>');
+});
+
+it('renders the signature with the Century Gothic font stack', function (): void {
+    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+
+    expect($html)
+        ->toContain("font-family: 'Century Gothic', CenturyGothic, 'Apple Gothic', 'URW Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif")
+        ->and($html)->not->toContain('font-family: Arial, Helvetica, sans-serif');
 });
