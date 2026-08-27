@@ -44,6 +44,7 @@ final class SignatureInfolist
                     ->columns(3)
                     ->schema([
                         TextEntry::make('email')->label('Email'),
+                        TextEntry::make('email_service')->label('Email du service')->placeholder('—'),
                         TextEntry::make('phone')->label('Téléphone')->placeholder('—'),
                         TextEntry::make('mobile')->label('Mobile')->placeholder('—'),
                         TextEntry::make('website')->label('Site web')->placeholder('—'),

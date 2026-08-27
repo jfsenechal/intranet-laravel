@@ -54,3 +54,20 @@ it('renders the signature with the Century Gothic font stack', function (): void
         ->toContain("font-family: 'Century Gothic', CenturyGothic, 'Apple Gothic', 'URW Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif")
         ->and($html)->not->toContain('font-family: Arial, Helvetica, sans-serif');
 });
+
+it('renders the service email next to the personal email', function (): void {
+    $signature = signatureWithLogo(SignatureEnum::CPAS);
+    $signature->email_service = 'gabrielles@cpas.marche.be';
+
+    $html = SignatureHtmlGenerator::generate($signature);
+
+    expect($html)->toContain('mailto:gabrielles@cpas.marche.be');
+});
+
+it('omits the service email when it is not encoded', function (): void {
+    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+
+    expect($html)
+        ->toContain('mailto:catherine.boldo@cpas.marche.be')
+        ->and(mb_substr_count($html, 'mailto:'))->toBe(1);
+});

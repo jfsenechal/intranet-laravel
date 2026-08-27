@@ -34,6 +34,7 @@ it('creates a signature and stores the authenticated username', function (): voi
             'postal_code' => '6900',
             'city' => 'Marche-en-Famenne',
             'email' => 'catherine.boldo@cpas.marche.be',
+            'email_service' => 'gabrielles@cpas.marche.be',
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -43,6 +44,7 @@ it('creates a signature and stores the authenticated username', function (): voi
         'first_name' => 'Catherine',
         'last_name' => 'Boldo',
         'email' => 'catherine.boldo@cpas.marche.be',
+        'email_service' => 'gabrielles@cpas.marche.be',
     ]);
 });
 
@@ -61,4 +63,11 @@ it('requires the mandatory fields before creating a signature', function (): voi
             'address' => 'required',
             'email' => 'required',
         ]);
+});
+
+it('rejects an invalid service email', function (): void {
+    Livewire::test(CreateSignature::class)
+        ->fillForm(['email_service' => 'not-an-email'])
+        ->call('create')
+        ->assertHasFormErrors(['email_service' => 'email']);
 });

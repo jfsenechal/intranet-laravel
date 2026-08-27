@@ -53,6 +53,9 @@ final class SignatureForm
                             ->label('Email')
                             ->email()
                             ->required(),
+                        TextInput::make('email_service')
+                            ->label('Email du service')
+                            ->email(),
                         TextInput::make('website')
                             ->label('Site web')
                             ->url(),

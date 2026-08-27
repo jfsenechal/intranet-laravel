@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'service',
     'job_title',
     'email',
+    'email_service',
     'username',
     'phone',
     'mobile',
