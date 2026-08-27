@@ -65,7 +65,10 @@
                             {{ $ticket->office?->name ?? '—' }}
                         </span>
                         <span class="tabular-nums text-gray-400">{{ display_datetime($ticket->createdAt, 'H:i') }}</span>
-                        {{ ($this->cancelTicketAction)(['ticket' => $ticket->id]) }}
+                        <div class="flex items-center gap-1">
+                            {{ ($this->unassignOfficeAction)(['ticket' => $ticket->id]) }}
+                            {{ ($this->cancelTicketAction)(['ticket' => $ticket->id]) }}
+                        </div>
                     </div>
                 </div>
             @empty
@@ -119,6 +122,9 @@
                         'Ticket assigné',
                         `Ticket #${e.number} (${e.service}) → guichet ${e.office ?? '—'}`,
                     );
+                    $wire.dispatch('tickets-updated');
+                })
+                .listen('.ticket.unassigned', () => {
                     $wire.dispatch('tickets-updated');
                 })
                 .listen('.ticket.cancelled', () => {

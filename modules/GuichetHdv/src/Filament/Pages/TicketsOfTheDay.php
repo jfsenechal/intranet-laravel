@@ -7,6 +7,7 @@ namespace AcMarche\GuichetHdv\Filament\Pages;
 use AcMarche\GuichetHdv\Enums\RolesEnum;
 use AcMarche\GuichetHdv\Events\TicketAssigned;
 use AcMarche\GuichetHdv\Events\TicketCancelled;
+use AcMarche\GuichetHdv\Events\TicketUnassigned;
 use AcMarche\GuichetHdv\Filament\Concerns\InteractsWithWebPush;
 use AcMarche\GuichetHdv\Filament\Resources\Ticket\TicketResource;
 use AcMarche\GuichetHdv\Models\Office;
@@ -112,6 +113,44 @@ final class TicketsOfTheDay extends Page
 
                 Notification::make()
                     ->title('Guichet assigné')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * Send a ticket back to the waiting list (clears office, assignee and date).
+     */
+    public function unassignOfficeAction(): Action
+    {
+        return Action::make('unassignOffice')
+            ->label('Remettre en attente')
+            ->icon('heroicon-o-arrow-uturn-left')
+            ->color('warning')
+            ->size(Size::Small)
+            ->requiresConfirmation()
+            ->modalHeading('Remettre en attente')
+            ->modalDescription('Le ticket retournera dans la liste des tickets en attente.')
+            ->visible(fn (): bool => $this->userIsGuichetAgent())
+            ->action(function (array $arguments): void {
+                $ticket = Ticket::query()->find($arguments['ticket'] ?? null);
+
+                if (! $ticket instanceof Ticket) {
+                    return;
+                }
+
+                $ticket->update([
+                    'office_id' => null,
+                    'assigned_by' => null,
+                    'assigned_date' => null,
+                ]);
+
+                $ticket->unsetRelation('office');
+
+                TicketUnassigned::dispatch($ticket);
+
+                Notification::make()
+                    ->title('Ticket remis en attente')
                     ->success()
                     ->send();
             });
