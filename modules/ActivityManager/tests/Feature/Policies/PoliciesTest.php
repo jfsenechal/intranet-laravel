@@ -20,37 +20,37 @@ beforeEach(function (): void {
     $this->stranger = User::factory()->create();
 });
 
-it('grants viewAny on Activite to role holders and admins', function (): void {
+it('grants viewAny on Activity to role holders and admins', function (): void {
     expect(Gate::forUser($this->admin)->allows('viewAny', Activity::class))->toBeTrue();
     expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Activity::class))->toBeTrue();
     expect(Gate::forUser($this->stranger)->allows('viewAny', Activity::class))->toBeFalse();
 });
 
-it('grants create on Activite to role holders and admins', function (): void {
+it('grants create on Activity to role holders and admins', function (): void {
     expect(Gate::forUser($this->admin)->allows('create', Activity::class))->toBeTrue();
     expect(Gate::forUser($this->mdaAdmin)->allows('create', Activity::class))->toBeTrue();
     expect(Gate::forUser($this->stranger)->allows('create', Activity::class))->toBeFalse();
 });
 
-it('grants viewAny on Cours to role holders and admins', function (): void {
+it('grants viewAny on Schedule to role holders and admins', function (): void {
     expect(Gate::forUser($this->admin)->allows('viewAny', Schedule::class))->toBeTrue();
     expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Schedule::class))->toBeTrue();
     expect(Gate::forUser($this->stranger)->allows('viewAny', Schedule::class))->toBeFalse();
 });
 
-it('grants create on Cours to role holders and admins', function (): void {
+it('grants create on Schedule to role holders and admins', function (): void {
     expect(Gate::forUser($this->admin)->allows('create', Schedule::class))->toBeTrue();
     expect(Gate::forUser($this->mdaAdmin)->allows('create', Schedule::class))->toBeTrue();
     expect(Gate::forUser($this->stranger)->allows('create', Schedule::class))->toBeFalse();
 });
 
-it('grants viewAny on Membre to role holders and admins', function (): void {
+it('grants viewAny on Member to role holders and admins', function (): void {
     expect(Gate::forUser($this->admin)->allows('viewAny', Member::class))->toBeTrue();
     expect(Gate::forUser($this->mdaAdmin)->allows('viewAny', Member::class))->toBeTrue();
     expect(Gate::forUser($this->stranger)->allows('viewAny', Member::class))->toBeFalse();
 });
 
-it('grants create on Membre to role holders and admins', function (): void {
+it('grants create on Member to role holders and admins', function (): void {
     expect(Gate::forUser($this->admin)->allows('create', Member::class))->toBeTrue();
     expect(Gate::forUser($this->mdaAdmin)->allows('create', Member::class))->toBeTrue();
     expect(Gate::forUser($this->stranger)->allows('create', Member::class))->toBeFalse();

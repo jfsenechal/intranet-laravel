@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
-use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\CreateActivite;
-use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\EditActivite;
-use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\ListActivites;
-use AcMarche\ActivityManager\Filament\Resources\Activites\Pages\ViewActivite;
+use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\CreateActivity;
+use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\EditActivity;
+use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\ListActivities;
+use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\ViewActivity;
 use AcMarche\ActivityManager\Models\Activity;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -28,26 +28,26 @@ beforeEach(function (): void {
 });
 
 it('renders list, create, view and edit pages', function (): void {
-    $activite = Activity::factory()->create();
+    $activity = Activity::factory()->create();
 
-    livewire(ListActivites::class)->assertOk();
-    livewire(CreateActivite::class)->assertOk();
-    livewire(ViewActivite::class, ['record' => $activite->id])->assertOk();
-    livewire(EditActivite::class, ['record' => $activite->id])->assertOk();
+    livewire(ListActivities::class)->assertOk();
+    livewire(CreateActivity::class)->assertOk();
+    livewire(ViewActivity::class, ['record' => $activity->id])->assertOk();
+    livewire(EditActivity::class, ['record' => $activity->id])->assertOk();
 });
 
-it('lists activites', function (): void {
-    $activites = Activity::factory(3)->create();
+it('lists activities', function (): void {
+    $activities = Activity::factory(3)->create();
 
-    livewire(ListActivites::class)
+    livewire(ListActivities::class)
         ->loadTable()
-        ->assertCanSeeTableRecords($activites);
+        ->assertCanSeeTableRecords($activities);
 });
 
-it('creates an activite via the form', function (): void {
-    livewire(CreateActivite::class)
+it('creates an activity via the form', function (): void {
+    livewire(CreateActivity::class)
         ->fillForm([
-            'nom' => 'Yoga',
+            'name' => 'Yoga',
             'description' => 'Cours de yoga doux',
         ])
         ->call('create')
@@ -55,38 +55,38 @@ it('creates an activite via the form', function (): void {
         ->assertNotified();
 
     assertDatabaseHas(Activity::class, [
-        'nom' => 'Yoga',
+        'name' => 'Yoga',
         'description' => 'Cours de yoga doux',
     ]);
 });
 
-it('updates an activite via the form', function (): void {
-    $activite = Activity::factory()->create(['nom' => 'Tricot']);
+it('updates an activity via the form', function (): void {
+    $activity = Activity::factory()->create(['name' => 'Tricot']);
 
-    livewire(EditActivite::class, ['record' => $activite->id])
-        ->fillForm(['nom' => 'Tricot Avancé'])
+    livewire(EditActivity::class, ['record' => $activity->id])
+        ->fillForm(['name' => 'Tricot Avancé'])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(Activity::class, [
-        'id' => $activite->id,
-        'nom' => 'Tricot Avancé',
+        'id' => $activity->id,
+        'name' => 'Tricot Avancé',
     ]);
 });
 
 it('validates required fields', function (array $data, array $errors): void {
-    livewire(CreateActivite::class)
+    livewire(CreateActivity::class)
         ->fillForm($data)
         ->call('create')
         ->assertHasFormErrors($errors)
         ->assertNotNotified();
 })->with([
-    '`nom` required' => [['nom' => null], ['nom' => 'required']],
-    '`nom` max 150' => [['nom' => str_repeat('a', 151)], ['nom' => 'max']],
+    '`name` required' => [['name' => null], ['name' => 'required']],
+    '`name` max 150' => [['name' => str_repeat('a', 151)], ['name' => 'max']],
 ]);
 
 it('forbids a stranger from listing', function (): void {
     $this->actingAs(User::factory()->create());
 
-    livewire(ListActivites::class)->assertForbidden();
+    livewire(ListActivities::class)->assertForbidden();
 });

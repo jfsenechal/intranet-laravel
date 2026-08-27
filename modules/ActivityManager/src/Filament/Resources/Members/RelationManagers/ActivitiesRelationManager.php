@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\On;
 use Override;
 
 final class ActivitiesRelationManager extends RelationManager
@@ -29,6 +30,20 @@ final class ActivitiesRelationManager extends RelationManager
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return $pageClass === ViewMember::class;
+    }
+
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Re-render the table when ViewMember registers the member to a new cours.
+     */
+    #[On('member-schedules-updated')]
+    public function refreshSchedules(): void
+    {
+        // Intentionally empty: Livewire re-renders after handling the event.
     }
 
     public function form(Schema $schema): Schema
