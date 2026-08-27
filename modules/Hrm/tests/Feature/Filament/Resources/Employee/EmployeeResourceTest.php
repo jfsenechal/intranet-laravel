@@ -17,8 +17,10 @@ use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\TrainingsRelation
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\ContractNature;
+use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Prerequisite;
+use AcMarche\Hrm\Models\Service;
 use AcMarche\Hrm\Models\Training;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -258,8 +260,8 @@ describe('table scoping by role', function (): void {
         $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
         $director->roles()->attach($directionRole);
 
-        $direction = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'director1']);
-        $otherDirection = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'someone-else']);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+        $otherDirection = Direction::factory()->create(['director' => 'someone-else']);
 
         $visible = Employee::factory()->create();
         Contract::factory()->create([
@@ -389,7 +391,7 @@ describe('relation manager visibility', function (): void {
         $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
         $director->roles()->attach($directionRole);
 
-        $direction = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'director1']);
+        $direction = Direction::factory()->create(['director' => 'director1']);
 
         $employee = Employee::factory()->create();
         Contract::factory()->create([
@@ -412,8 +414,8 @@ describe('relation manager visibility', function (): void {
         $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
         $director->roles()->attach($directionRole);
 
-        AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'director1']);
-        $otherDirection = AcMarche\Hrm\Models\Direction::factory()->create(['director' => 'someone-else']);
+        Direction::factory()->create(['director' => 'director1']);
+        $otherDirection = Direction::factory()->create(['director' => 'someone-else']);
 
         $employee = Employee::factory()->create();
         Contract::factory()->create([
@@ -718,5 +720,163 @@ describe('export xlsx action', function (): void {
         $content = (string) ob_get_clean();
 
         expect($content)->toStartWith('PK');
+    });
+});
+
+describe('active contract filter', function (): void {
+    it('keeps only employees with an active contract when the filter is applied', function (): void {
+        $withActive = Employee::factory()->create(['last_name' => 'Actif']);
+        Contract::factory()->for($withActive)->create([
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $withClosed = Employee::factory()->create(['last_name' => 'Cloture']);
+        Contract::factory()->for($withClosed)->create([
+            'is_closed' => true,
+            'is_suspended' => false,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('has_active_contract', true)
+            ->assertCanSeeTableRecords([$withActive])
+            ->assertCanNotSeeTableRecords([$withClosed]);
+    });
+
+    it('applies the filter from the query string', function (): void {
+        $withActive = Employee::factory()->create(['last_name' => 'Actif']);
+        Contract::factory()->for($withActive)->create([
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $withoutContract = Employee::factory()->create(['last_name' => 'Sans']);
+
+        Livewire::withQueryParams([
+            'filters' => [
+                'status' => ['value' => StatusEnum::AGENT->value],
+                'has_active_contract' => ['value' => '1'],
+            ],
+        ])
+            ->test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$withActive])
+            ->assertCanNotSeeTableRecords([$withoutContract]);
+    });
+
+    it('applies the filter from the query string together with the service filter', function (): void {
+        $service = Service::factory()->create();
+        $otherService = Service::factory()->create();
+
+        $matching = Employee::factory()->create(['last_name' => 'Matching']);
+        Contract::factory()->for($matching)->create([
+            'service_id' => $service->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $otherServiceEmployee = Employee::factory()->create(['last_name' => 'Autre service']);
+        Contract::factory()->for($otherServiceEmployee)->create([
+            'service_id' => $otherService->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $expiredInService = Employee::factory()->create(['last_name' => 'Expire']);
+        Contract::factory()->for($expiredInService)->create([
+            'service_id' => $service->id,
+            'is_closed' => true,
+            'is_suspended' => false,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+
+        Livewire::withQueryParams([
+            'filters' => [
+                'status' => ['value' => StatusEnum::AGENT->value],
+                'service_id' => ['value' => (string) $service->id],
+                'has_active_contract' => ['value' => '1'],
+            ],
+        ])
+            ->test(ListEmployees::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$matching])
+            ->assertCanNotSeeTableRecords([$otherServiceEmployee, $expiredInService]);
+    });
+});
+
+describe('service and direction filters', function (): void {
+    /**
+     * The service and direction filters must be satisfied by an active contract, not by
+     * any contract: an agent who left the service but is still employed elsewhere used to
+     * slip through because the service and the active contract were matched independently.
+     */
+    it('excludes an agent whose only contract in the service is closed', function (): void {
+        $service = Service::factory()->create();
+        $direction = Direction::factory()->create();
+
+        $leaver = Employee::factory()->create(['last_name' => 'Parti']);
+        Contract::factory()->for($leaver)->create([
+            'service_id' => $service->id,
+            'direction_id' => $direction->id,
+            'is_closed' => true,
+            'is_suspended' => false,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+        Contract::factory()->for($leaver)->create([
+            'service_id' => Service::factory()->create()->id,
+            'direction_id' => Direction::factory()->create()->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('service_id', $service->id)
+            ->assertCanNotSeeTableRecords([$leaver]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('direction_id', $direction->id)
+            ->assertCanNotSeeTableRecords([$leaver]);
+    });
+
+    it('keeps an agent whose active contract is in the service and direction', function (): void {
+        $service = Service::factory()->create();
+        $direction = Direction::factory()->create();
+
+        $current = Employee::factory()->create(['last_name' => 'En poste']);
+        Contract::factory()->for($current)->create([
+            'service_id' => $service->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('service_id', $service->id)
+            ->assertCanSeeTableRecords([$current]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('direction_id', $direction->id)
+            ->assertCanSeeTableRecords([$current]);
     });
 });

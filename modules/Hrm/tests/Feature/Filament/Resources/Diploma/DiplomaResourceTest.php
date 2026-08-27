@@ -7,8 +7,11 @@ use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\EditDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ListDiplomas;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ViewDiploma;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
+use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Diploma;
+use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Service;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
@@ -153,5 +156,60 @@ describe('export action', function (): void {
         Livewire::test(ListDiplomas::class)
             ->callAction('export', data: ['columns' => []])
             ->assertHasActionErrors(['columns']);
+    });
+});
+
+describe('service and direction filters', function (): void {
+    /**
+     * The service and direction filters must be satisfied by an active contract, not by
+     * any contract: an agent who left the service but is still employed elsewhere used to
+     * slip through because the service and the active contract were matched independently.
+     */
+    it('excludes a diploma whose agent only has a closed contract in the service', function (): void {
+        $service = Service::factory()->create();
+        $direction = Direction::factory()->create();
+
+        $leaver = Employee::factory()->create();
+        Contract::factory()->for($leaver)->create([
+            'service_id' => $service->id,
+            'direction_id' => $direction->id,
+            'is_closed' => true,
+            'is_suspended' => false,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+        Contract::factory()->for($leaver)->create([
+            'service_id' => Service::factory()->create()->id,
+            'direction_id' => Direction::factory()->create()->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $current = Employee::factory()->create();
+        Contract::factory()->for($current)->create([
+            'service_id' => $service->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $leaverDiploma = Diploma::factory()->for($leaver)->create();
+        $currentDiploma = Diploma::factory()->for($current)->create();
+
+        Livewire::test(ListDiplomas::class)
+            ->loadTable()
+            ->filterTable('service_id', $service->id)
+            ->assertCanSeeTableRecords([$currentDiploma])
+            ->assertCanNotSeeTableRecords([$leaverDiploma]);
+
+        Livewire::test(ListDiplomas::class)
+            ->loadTable()
+            ->filterTable('direction_id', $direction->id)
+            ->assertCanSeeTableRecords([$currentDiploma])
+            ->assertCanNotSeeTableRecords([$leaverDiploma]);
     });
 });

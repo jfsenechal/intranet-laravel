@@ -102,7 +102,7 @@ final class EmployeeTables
                         $data['value'] ?? null,
                         fn (Builder $query, $serviceId): Builder => $query->whereHas(
                             'contracts',
-                            fn (Builder $query) => $query->where('service_id', $serviceId),
+                            fn (Builder $query) => $query->where('service_id', $serviceId)->active(),
                         ),
                     )),
                 DirectionFilter::make()
@@ -110,7 +110,7 @@ final class EmployeeTables
                         $data['value'] ?? null,
                         fn (Builder $query, $directionId): Builder => $query->whereHas(
                             'contracts',
-                            fn (Builder $query) => $query->where('direction_id', $directionId),
+                            fn (Builder $query) => $query->where('direction_id', $directionId)->active(),
                         ),
                     )),
                 TernaryFilter::make('is_archived')

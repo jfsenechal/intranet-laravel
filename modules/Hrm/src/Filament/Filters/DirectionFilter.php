@@ -23,9 +23,9 @@ final class DirectionFilter
         return self::make()
             ->query(fn (Builder $query, array $data): Builder => $query->when(
                 $data['value'] ?? null,
-                fn (Builder $query, $serviceId): Builder => $query->whereHas(
+                fn (Builder $query, $directionId): Builder => $query->whereHas(
                     'employee.contracts',
-                    fn (Builder $query) => $query->where('direction_id', $serviceId),
+                    fn (Builder $query) => $query->where('direction_id', $directionId)->active(),
                 ),
             ));
     }

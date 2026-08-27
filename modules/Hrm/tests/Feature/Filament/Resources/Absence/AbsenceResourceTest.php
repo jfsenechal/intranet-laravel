@@ -11,6 +11,9 @@ use AcMarche\Hrm\Filament\Resources\Absences\Pages\ViewAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceCallouts;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Models\Absence;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\Service;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Callout;
@@ -31,7 +34,7 @@ describe('page rendering', function (): void {
     });
 
     it('can render the create page with an employee in the query string', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
 
         Livewire::withQueryParams(['employee_id' => $employee->id])
             ->test(CreateAbsence::class)
@@ -66,7 +69,7 @@ describe('page rendering', function (): void {
 
 describe('callouts authorization', function (): void {
     it('makes the alert callouts visible only to administrators', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
         $absence = Absence::factory()->create([
             'employee_id' => $employee->id,
             'start_date' => now()->subDays(60),
@@ -94,7 +97,7 @@ describe('callouts authorization', function (): void {
 
 describe('crud operations', function (): void {
     it('creates an absence for the employee passed in the query string', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
 
         Livewire::withQueryParams(['employee_id' => $employee->id])
             ->test(CreateAbsence::class)
@@ -172,5 +175,50 @@ describe('export action', function (): void {
         Livewire::test(ListAbsences::class)
             ->callAction('export', data: ['columns' => []])
             ->assertHasActionErrors(['columns']);
+    });
+});
+
+describe('service filter', function (): void {
+    /**
+     * The service filter must be satisfied by an active contract, not by any contract:
+     * an agent who left the service but is still employed elsewhere used to slip through
+     * because the service and the active contract were matched independently.
+     */
+    it('excludes an absence whose agent only has a closed contract in the service', function (): void {
+        $service = Service::factory()->create();
+
+        $leaver = Employee::factory()->create();
+        Contract::factory()->for($leaver)->create([
+            'service_id' => $service->id,
+            'is_closed' => true,
+            'is_suspended' => false,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+        Contract::factory()->for($leaver)->create([
+            'service_id' => Service::factory()->create()->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $current = Employee::factory()->create();
+        Contract::factory()->for($current)->create([
+            'service_id' => $service->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $leaverAbsence = Absence::factory()->for($leaver)->create(['is_closed' => false]);
+        $currentAbsence = Absence::factory()->for($current)->create(['is_closed' => false]);
+
+        Livewire::test(ListAbsences::class)
+            ->loadTable()
+            ->filterTable('service_id', $service->id)
+            ->assertCanSeeTableRecords([$currentAbsence])
+            ->assertCanNotSeeTableRecords([$leaverAbsence]);
     });
 });
