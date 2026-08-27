@@ -9,6 +9,7 @@ use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Schema;
 
 use function Pest\Livewire\livewire;
 
@@ -78,5 +79,32 @@ describe('reference number field on the create form', function (): void {
             ])
             ->call('create')
             ->assertHasFormErrors(['reference_number' => 'required']);
+    });
+});
+
+describe('next reference number lookup', function (): void {
+    /**
+     * The lookup casts `reference_number` to an integer, which rules out the
+     * single-column index on that column, so without a composite index on
+     * (department, reference_number) it scans the whole table — 1.9s against
+     * production's 166k rows, on every "Traiter" modal a CPAS admin opens.
+     */
+    test('is covered by a composite index on department and reference number', function (): void {
+        expect(Schema::connection('maria-courrier')->hasIndex(
+            'incoming_mails',
+            'incoming_mails_department_reference_number_index',
+        ))->toBeTrue();
+    });
+
+    test('ignores the references of other departments', function (): void {
+        IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+        IncomingMail::factory()->create([
+            'department' => DepartmentCourrierEnum::VILLE->value,
+            'reference_number' => '99999',
+        ]);
+
+        expect(IncomingMail::nextCpasReferenceNumber())->toBe(2);
     });
 });

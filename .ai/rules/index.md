@@ -8,6 +8,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | modules/Courrier/** | .ai/rules/courrier.md |
 | modules/AldermenAgenda/database/migrations/** | .ai/rules/database-migrations.md |
 | modules/**/src/Filament/** | .ai/rules/filament.md |
+| modules/Courrier/src/Filament/Resources/IncomingMails/** | .ai/rules/incoming-mails.md |
 | modules/Issep/** | .ai/rules/issep.md |
 | modules/MealDelivery/** | .ai/rules/meal-delivery.md |
 | modules/Pst/database/migrations/** | .ai/rules/migrations.md |

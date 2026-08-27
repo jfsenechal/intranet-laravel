@@ -10,9 +10,9 @@ use AcMarche\Courrier\Filament\Components\DepartmentField;
 use AcMarche\Courrier\Models\Category;
 use AcMarche\Courrier\Models\IncomingMail;
 use AcMarche\Courrier\Models\Recipient;
-use AcMarche\Courrier\Models\Sender;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Courrier\Repository\RecipientRepository;
+use AcMarche\Courrier\Repository\SenderRepository;
 use AcMarche\Courrier\Repository\ServiceRepository;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
@@ -69,7 +69,7 @@ final class IncomingMailForm
                                 TextInput::make('sender')
                                     ->label('Expéditeur')
                                     ->placeholder('Nom de l\'expéditeur')
-                                    ->datalist(fn (): array => Sender::query()->orderBy('name')->pluck('name')->all())
+                                    ->datalist(SenderRepository::forDatalist(...))
                                     ->columnSpan(['default' => 1, 'md' => 5]),
                                 TextInput::make('query')
                                     ->label('Recherche par texte')
@@ -211,7 +211,7 @@ final class IncomingMailForm
                             ->label('Expéditeur')
                             ->required()
                             ->maxLength(255)
-                            ->datalist(Sender::query()->pluck('name')->toArray())
+                            ->datalist(SenderRepository::forDatalist(...))
                             ->columnSpan(1),
                         Checkbox::make('save_sender')
                             ->label('Enregistrer l\'expéditeur')

@@ -6,6 +6,7 @@ namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\SenderFactory;
 use AcMarche\Courrier\Repository\DepartmentScope;
+use AcMarche\Courrier\Repository\SenderRepository;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -51,6 +52,22 @@ final class Sender extends Model
     public function recipients(): BelongsToMany
     {
         return $this->belongsToMany(Recipient::class, 'recipient_service');
+    }
+
+    /**
+     * The datalist of suggestions is cached per department, so a sender saved
+     * from the mail form has to drop it or it would not be suggested until the
+     * entry expired on its own.
+     */
+    protected static function booted(): void
+    {
+        self::saved(function (Sender $sender): void {
+            SenderRepository::forgetDatalist($sender->department);
+        });
+
+        self::deleted(function (Sender $sender): void {
+            SenderRepository::forgetDatalist($sender->department);
+        });
     }
 
     protected static function newFactory(): SenderFactory
