@@ -23,7 +23,7 @@ final class NoteForm
                     ->columnSpanFull(),
                 Toggle::make('is_encrypted')
                     ->label('Chiffrer le contenu')
-                    ->helperText('Le contenu est stocké chiffré en base de données. Il reste lisible ici, mais pas pour qui consulte la base directement.')
+                    ->helperText('Le contenu est stocké chiffré en base de données.')
                     ->columnSpanFull(),
                 RichEditor::make('content')
                     ->label('Contenu')
