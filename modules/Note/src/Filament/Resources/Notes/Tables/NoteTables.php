@@ -16,7 +16,8 @@ final class NoteTables
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('name', 'asc')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('name')
                     ->label('Titre')
