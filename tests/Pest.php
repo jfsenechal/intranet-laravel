@@ -27,6 +27,7 @@ uses(
     '../modules/Mileage/tests/Feature',
     '../modules/Mileage/tests/Unit',
     '../modules/News/tests/Feature',
+    '../modules/Note/tests/Feature',
     '../modules/Publication/tests/Feature',
     '../modules/Courrier/tests/Feature',
     '../modules/Courrier/tests/Unit',

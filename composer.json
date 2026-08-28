@@ -90,6 +90,10 @@
         },
         {
             "type": "path",
+            "url": "./modules/Note"
+        },
+        {
+            "type": "path",
             "url": "./modules/Offenses"
         },
         {
@@ -157,6 +161,7 @@
         "acmarche/mediation": "*@dev",
         "acmarche/mileage": "*@dev",
         "acmarche/news": "*@dev",
+        "acmarche/note": "*@dev",
         "acmarche/offenses": "*@dev",
         "acmarche/pst": "*@dev",
         "acmarche/publication": "*@dev",

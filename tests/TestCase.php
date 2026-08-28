@@ -55,6 +55,7 @@ abstract class TestCase extends BaseTestCase
         'maria-document',
         'maria-courrier',
         'maria-news',
+        'maria-note',
         'maria-hrm',
         'maria-mileage',
         'maria-publication',

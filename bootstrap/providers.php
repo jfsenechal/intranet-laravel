@@ -25,6 +25,7 @@ return [
     AcMarche\Mediation\Providers\Filament\MediationPanelProvider::class,
     AcMarche\Mileage\Providers\Filament\MileagePanelProvider::class,
     AcMarche\News\Providers\Filament\NewsPanelProvider::class,
+    AcMarche\Note\Providers\Filament\NotePanelProvider::class,
     AcMarche\Offenses\Providers\Filament\OffensesPanelProvider::class,
     AcMarche\Pst\Providers\Filament\PstPanelProvider::class,
     AcMarche\Publication\Providers\Filament\PublicationPanelProvider::class,

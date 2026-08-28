@@ -49,6 +49,7 @@ final class ModuleForm
                     ->label('Couleur')
                     ->required(),
                 TextInput::make('description')
+                    ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Textarea::make('role_description')
