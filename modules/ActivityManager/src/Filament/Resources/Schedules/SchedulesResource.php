@@ -52,6 +52,36 @@ final class SchedulesResource extends Resource
         return SchedulesTable::configure($table);
     }
 
+    /**
+     * Deleting a schedule also deletes its registrations and its sessions, so the confirmation
+     * modal has to say how much goes away with it. The record is null once the deletion has run
+     * and the modal is re-evaluated.
+     */
+    public static function deleteModalDescription(?Schedule $schedule): string
+    {
+        if (! $schedule instanceof Schedule) {
+            return 'Cette action est irréversible.';
+        }
+
+        $parts = [];
+
+        $registrationsCount = $schedule->members()->count();
+        if ($registrationsCount > 0) {
+            $parts[] = $registrationsCount.' inscription'.($registrationsCount > 1 ? 's' : '');
+        }
+
+        $sessionsCount = $schedule->activitySchedules()->count();
+        if ($sessionsCount > 0) {
+            $parts[] = $sessionsCount.' séance'.($sessionsCount > 1 ? 's' : '');
+        }
+
+        if ($parts === []) {
+            return 'Cette action est irréversible.';
+        }
+
+        return 'Ce cours sera supprimé avec '.implode(' et ', $parts).'. Cette action est irréversible.';
+    }
+
     public static function getRelations(): array
     {
         return [

@@ -64,6 +64,25 @@ final class ActivityResource extends Resource
         return ActivitiesTable::configure($table);
     }
 
+    /**
+     * An activity that still has schedules cannot be deleted, because that would take every
+     * schedule and every registration with it. Returns null when the deletion is allowed.
+     */
+    public static function deletionBlockedReason(?Activity $activity): ?string
+    {
+        if (! $activity instanceof Activity) {
+            return null;
+        }
+
+        $schedulesCount = $activity->schedules()->count();
+
+        if ($schedulesCount === 0) {
+            return null;
+        }
+
+        return 'Cette activité compte encore '.$schedulesCount.' cours. Supprimez-les d\'abord.';
+    }
+
     public static function getRelations(): array
     {
         return [

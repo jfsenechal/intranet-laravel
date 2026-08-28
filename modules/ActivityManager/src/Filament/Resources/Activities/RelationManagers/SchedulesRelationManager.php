@@ -83,7 +83,10 @@ final class SchedulesRelationManager extends RelationManager
                     ->icon(Heroicon::PencilSquare),
                 DeleteAction::make()
                     ->label('Supprimer')
-                    ->icon(Heroicon::Trash),
+                    ->icon(Heroicon::Trash)
+                    ->modalDescription(
+                        fn (?Schedule $record): string => SchedulesResource::deleteModalDescription($record)
+                    ),
             ])
             ->recordAction(ViewAction::class)
             ->toolbarActions([

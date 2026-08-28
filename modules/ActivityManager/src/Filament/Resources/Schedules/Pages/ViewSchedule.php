@@ -35,6 +35,12 @@ final class ViewSchedule extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        /**
+         * The page record is set to null once the record has been deleted, so the redirect target
+         * has to be resolved while the schedule is still there.
+         */
+        $activityId = $this->record?->activity_id;
+
         return [
             Action::make('attachMember')
                 ->label('Inscrire un membre')
@@ -63,8 +69,9 @@ final class ViewSchedule extends ViewRecord
             DeleteAction::make()
                 ->label('Supprimer')
                 ->icon(Heroicon::Trash)
-                ->successRedirectUrl(fn (Schedule $record): string => $record->activity_id
-                    ? ActivityResource::getUrl('view', ['record' => $record->activity_id])
+                ->modalDescription(fn (?Schedule $record): string => SchedulesResource::deleteModalDescription($record))
+                ->successRedirectUrl(fn (): string => $activityId
+                    ? ActivityResource::getUrl('view', ['record' => $activityId])
                     : ActivityResource::getUrl('index')),
         ];
     }

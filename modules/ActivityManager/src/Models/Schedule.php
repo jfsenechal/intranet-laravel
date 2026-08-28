@@ -54,6 +54,18 @@ final class Schedule extends Model
         return $this->belongsToMany(Member::class, 'registrations', 'schedule_id', 'member_id');
     }
 
+    protected static function booted(): void
+    {
+        /**
+         * `registrations.schedule_id` and `activity_schedules.schedule_id` are ON DELETE RESTRICT
+         * foreign keys in the legacy database, so the registrations and the sessions have to go first.
+         */
+        self::deleting(function (self $schedule): void {
+            $schedule->members()->detach();
+            $schedule->activitySchedules()->delete();
+        });
+    }
+
     /**
      * @return array<string, string>
      */

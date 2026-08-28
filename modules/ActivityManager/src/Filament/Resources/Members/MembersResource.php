@@ -71,6 +71,23 @@ final class MembersResource extends Resource
         return MembersTable::configure($table);
     }
 
+    /**
+     * Deleting a member also deletes their registrations, so the confirmation modal has to say how
+     * many go away with them. The record is null once the deletion has run and the modal is
+     * re-evaluated.
+     */
+    public static function deleteModalDescription(?Member $member): string
+    {
+        $registrationsCount = $member instanceof Member ? $member->schedules()->count() : 0;
+
+        if ($registrationsCount === 0) {
+            return 'Cette action est irréversible.';
+        }
+
+        return 'Ce membre sera supprimé avec ses '.$registrationsCount.' inscription'
+            .($registrationsCount > 1 ? 's' : '').'. Cette action est irréversible.';
+    }
+
     public static function getRelations(): array
     {
         return [

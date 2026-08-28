@@ -33,4 +33,14 @@ final class Activity extends Model
     {
         return $this->hasMany(Schedule::class, 'activity_id');
     }
+
+    protected static function booted(): void
+    {
+        /**
+         * `schedules.activity_id` is an ON DELETE RESTRICT foreign key, and deleting an activity
+         * would silently take every schedule and every registration with it, so an activity that
+         * still has schedules cannot be deleted. Its schedules have to be deleted one by one first.
+         */
+        self::deleting(fn (self $activity): bool => ! $activity->schedules()->exists());
+    }
 }

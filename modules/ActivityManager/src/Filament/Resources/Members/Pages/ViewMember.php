@@ -6,6 +6,7 @@ namespace AcMarche\ActivityManager\Filament\Resources\Members\Pages;
 
 use AcMarche\ActivityManager\Filament\Resources\Members\MembersResource;
 use AcMarche\ActivityManager\Models\Activity;
+use AcMarche\ActivityManager\Models\Member;
 use AcMarche\ActivityManager\Models\Schedule;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -82,7 +83,8 @@ final class ViewMember extends ViewRecord
                 ->icon(Heroicon::PencilSquare),
             DeleteAction::make()
                 ->label('Supprimer')
-                ->icon(Heroicon::Trash),
+                ->icon(Heroicon::Trash)
+                ->modalDescription(fn (?Member $record): string => MembersResource::deleteModalDescription($record)),
         ];
     }
 }

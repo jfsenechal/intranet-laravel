@@ -46,6 +46,17 @@ final class Member extends Model
         return $this->belongsToMany(Schedule::class, 'registrations', 'member_id', 'schedule_id');
     }
 
+    protected static function booted(): void
+    {
+        /**
+         * `registrations.member_id` is an ON DELETE RESTRICT foreign key in the legacy database,
+         * so the registrations of the member have to go first.
+         */
+        self::deleting(function (self $member): void {
+            $member->schedules()->detach();
+        });
+    }
+
     /**
      * @return array<string, string>
      */

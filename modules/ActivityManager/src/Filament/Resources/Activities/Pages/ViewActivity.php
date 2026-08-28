@@ -6,6 +6,7 @@ namespace AcMarche\ActivityManager\Filament\Resources\Activities\Pages;
 
 use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource;
 use AcMarche\ActivityManager\Filament\Resources\Activities\Schemas\ActivityInfolist;
+use AcMarche\ActivityManager\Models\Activity;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -36,7 +37,13 @@ final class ViewActivity extends ViewRecord
                 ->icon(Heroicon::PencilSquare),
             DeleteAction::make()
                 ->label('Supprimer')
-                ->icon(Heroicon::Trash),
+                ->icon(Heroicon::Trash)
+                ->disabled(fn (?Activity $record): bool => filled(ActivityResource::deletionBlockedReason($record)))
+                ->tooltip(fn (?Activity $record): ?string => ActivityResource::deletionBlockedReason($record))
+                ->failureNotificationTitle(
+                    fn (?Activity $record): string => ActivityResource::deletionBlockedReason($record)
+                        ?? 'La suppression a échoué.'
+                ),
         ];
     }
 }

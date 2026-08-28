@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
+use AcMarche\ActivityManager\Filament\Resources\Members\MembersResource;
 use AcMarche\ActivityManager\Filament\Resources\Members\Pages\EditMember;
 use AcMarche\ActivityManager\Filament\Resources\Members\Pages\ViewMember;
 use AcMarche\ActivityManager\Filament\Resources\Members\RelationManagers\ActivitiesRelationManager;
@@ -12,11 +13,13 @@ use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\AttachAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -131,4 +134,26 @@ it('refreshes the activities relation manager when a schedule is attached', func
     $component
         ->dispatch('member-schedules-updated')
         ->assertCanSeeTableRecords([$schedule]);
+});
+
+it('deletes the registrations along with the member', function (): void {
+    $member = Member::factory()->create();
+    $member->schedules()->attach(Schedule::factory(2)->create());
+
+    livewire(ViewMember::class, ['record' => $member->id])
+        ->callAction(TestAction::make(DeleteAction::getDefaultName()))
+        ->assertHasNoActionErrors();
+
+    assertDatabaseMissing('members', ['id' => $member->id]);
+    assertDatabaseMissing('registrations', ['member_id' => $member->id]);
+});
+
+it('announces the registrations in the delete confirmation', function (): void {
+    $member = Member::factory()->create();
+    $member->schedules()->attach(Schedule::factory(2)->create());
+
+    expect(MembersResource::deleteModalDescription($member))
+        ->toBe('Ce membre sera supprimé avec ses 2 inscriptions. Cette action est irréversible.')
+        ->and(MembersResource::deleteModalDescription(Member::factory()->create()))
+        ->toBe('Cette action est irréversible.');
 });

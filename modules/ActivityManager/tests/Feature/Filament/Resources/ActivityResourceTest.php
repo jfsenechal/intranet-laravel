@@ -3,16 +3,20 @@
 declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
+use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource;
 use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\CreateActivity;
 use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\EditActivity;
 use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\ListActivities;
 use AcMarche\ActivityManager\Filament\Resources\Activities\Pages\ViewActivity;
 use AcMarche\ActivityManager\Models\Activity;
+use AcMarche\ActivityManager\Models\Schedule;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -89,4 +93,32 @@ it('forbids a stranger from listing', function (): void {
     $this->actingAs(User::factory()->create());
 
     livewire(ListActivities::class)->assertForbidden();
+});
+
+it('refuses to delete an activity that still has schedules', function (): void {
+    $activity = Activity::factory()->create();
+    $schedule = Schedule::factory()->create(['activity_id' => $activity->id]);
+
+    livewire(ViewActivity::class, ['record' => $activity->id])
+        ->assertActionDisabled(DeleteAction::getDefaultName());
+
+    expect($activity->delete())->toBeFalse();
+
+    assertDatabaseHas(Activity::class, ['id' => $activity->id]);
+    assertDatabaseHas('schedules', ['id' => $schedule->id]);
+    expect(ActivityResource::deletionBlockedReason($activity))
+        ->toBe('Cette activité compte encore 1 cours. Supprimez-les d\'abord.');
+});
+
+it('deletes an activity without schedules', function (): void {
+    $activity = Activity::factory()->create();
+
+    expect(ActivityResource::deletionBlockedReason($activity))->toBeNull();
+
+    livewire(ViewActivity::class, ['record' => $activity->id])
+        ->assertActionEnabled(DeleteAction::getDefaultName())
+        ->callAction(DeleteAction::getDefaultName())
+        ->assertHasNoActionErrors();
+
+    assertDatabaseMissing('activities', ['id' => $activity->id]);
 });

@@ -3,19 +3,24 @@
 declare(strict_types=1);
 
 use AcMarche\ActivityManager\Enums\RolesEnum;
+use AcMarche\ActivityManager\Filament\Resources\Activities\ActivityResource;
 use AcMarche\ActivityManager\Filament\Resources\Members\MembersResource;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\EditSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\Pages\ViewSchedule;
 use AcMarche\ActivityManager\Filament\Resources\Schedules\RelationManagers\MembersRelationManager;
+use AcMarche\ActivityManager\Filament\Resources\Schedules\SchedulesResource;
 use AcMarche\ActivityManager\Models\Member;
 use AcMarche\ActivityManager\Models\Schedule;
+use AcMarche\ActivityManager\Models\SchedulesActivity;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -80,4 +85,30 @@ it('links the member view action to the ViewMember page', function (): void {
         ->assertActionHasUrl(TestAction::make(ViewAction::getDefaultName())->table($member), $url);
 
     expect($component->instance()->getTable()->getRecordUrl($member))->toBe($url);
+});
+
+it('deletes the registrations and the sessions along with the schedule', function (): void {
+    $schedule = Schedule::factory()->create();
+    $schedule->members()->attach(Member::factory(2)->create());
+    SchedulesActivity::factory(3)->create(['schedule_id' => $schedule->id]);
+
+    livewire(ViewSchedule::class, ['record' => $schedule->id])
+        ->callAction(TestAction::make(DeleteAction::getDefaultName()))
+        ->assertHasNoActionErrors()
+        ->assertRedirect(ActivityResource::getUrl('view', ['record' => $schedule->activity_id]));
+
+    assertDatabaseMissing('schedules', ['id' => $schedule->id]);
+    assertDatabaseMissing('registrations', ['schedule_id' => $schedule->id]);
+    assertDatabaseMissing('activity_schedules', ['schedule_id' => $schedule->id]);
+});
+
+it('announces the registrations and the sessions in the delete confirmation', function (): void {
+    $schedule = Schedule::factory()->create();
+    $schedule->members()->attach(Member::factory(2)->create());
+    SchedulesActivity::factory()->create(['schedule_id' => $schedule->id]);
+
+    expect(SchedulesResource::deleteModalDescription($schedule))
+        ->toBe('Ce cours sera supprimé avec 2 inscriptions et 1 séance. Cette action est irréversible.')
+        ->and(SchedulesResource::deleteModalDescription(Schedule::factory()->create()))
+        ->toBe('Cette action est irréversible.');
 });
