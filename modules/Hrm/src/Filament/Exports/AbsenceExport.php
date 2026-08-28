@@ -27,6 +27,7 @@ final readonly class AbsenceExport
             'agent' => 'Agent',
             'start_date' => 'Début',
             'end_date' => 'Fin',
+            'days' => 'Nombre de jours',
             'reason' => 'Raison',
             'is_closed' => 'Clôturée',
             'reminder_date' => 'Rappel',
@@ -44,13 +45,13 @@ final readonly class AbsenceExport
     }
 
     /**
-     * @return list<null|string>
+     * @return list<int|null|string>
      */
     public function map(Absence $row): array
     {
         $data = $this->row($row);
 
-        return array_map(fn (string $key) => $data[$key], $this->selectedColumns());
+        return array_map(fn (string $key): int|string|null => $data[$key], $this->selectedColumns());
     }
 
     public function downloadXlsx(string $filename): StreamedResponse
@@ -89,7 +90,19 @@ final readonly class AbsenceExport
     }
 
     /**
-     * @return array<string, null|string>
+     * Inclusive number of calendar days covered by the absence, null while it is still open.
+     */
+    private function durationInDays(Absence $row): ?int
+    {
+        if (! $row->start_date || ! $row->end_date) {
+            return null;
+        }
+
+        return (int) $row->start_date->diffInDays($row->end_date, true) + 1;
+    }
+
+    /**
+     * @return array<string, int|null|string>
      */
     private function row(Absence $row): array
     {
@@ -97,6 +110,7 @@ final readonly class AbsenceExport
             'agent' => mb_trim(($row->employee?->last_name ?? '').' '.($row->employee?->first_name ?? '')),
             'start_date' => $row->start_date?->format('d/m/Y'),
             'end_date' => $row->end_date?->format('d/m/Y'),
+            'days' => $this->durationInDays($row),
             'reason' => $row->reason?->getLabel(),
             'is_closed' => $row->is_closed ? 'Oui' : 'Non',
             'reminder_date' => $row->reminder_date?->format('d/m/Y'),

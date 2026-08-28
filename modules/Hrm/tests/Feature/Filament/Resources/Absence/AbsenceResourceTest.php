@@ -176,6 +176,27 @@ describe('export action', function (): void {
             ->callAction('export', data: ['columns' => []])
             ->assertHasActionErrors(['columns']);
     });
+
+    it('exports the inclusive number of days of the absence', function (): void {
+        $absence = Absence::factory()->create([
+            'start_date' => '2026-03-02',
+            'end_date' => '2026-03-06',
+        ]);
+
+        $export = new AbsenceExport(Absence::query(), ['days']);
+
+        expect($export->headings())->toBe(['Nombre de jours'])
+            ->and($export->map($absence))->toBe([5]);
+    });
+
+    it('exports no number of days for an absence without an end date', function (): void {
+        $absence = Absence::factory()->create([
+            'start_date' => '2026-03-02',
+            'end_date' => null,
+        ]);
+
+        expect(new AbsenceExport(Absence::query(), ['days'])->map($absence))->toBe([null]);
+    });
 });
 
 describe('service filter', function (): void {
