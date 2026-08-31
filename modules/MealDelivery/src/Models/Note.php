@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Models;
 
 use AcMarche\Security\Models\HasUserAdd;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,12 @@ final class Note extends Model
     protected static function booted(): void
     {
         self::bootHasUser();
+
+        self::creating(function (self $note): void {
+            if (empty($note->note_date)) {
+                $note->note_date = CarbonImmutable::now()->startOfDay();
+            }
+        });
     }
 
     protected function casts(): array

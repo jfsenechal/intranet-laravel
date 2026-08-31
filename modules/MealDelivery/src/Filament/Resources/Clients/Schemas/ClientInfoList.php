@@ -86,10 +86,10 @@ final class ClientInfoList
                                             ->placeholder('—')
                                             ->columnSpanFull(),
                                     ]),
-                                Section::make('Notes')
+                                Section::make('Remarques')
                                     ->schema([
                                         TextEntry::make('notes')
-                                            ->label('Notes')
+                                            ->label('Remarques')
                                             ->hiddenLabel()
                                             ->placeholder('—')
                                             ->columnSpanFull(),
@@ -116,7 +116,7 @@ final class ClientInfoList
                             ->schema([
                                 Section::make('Options')
                                     ->columnSpanFull()
-                                    ->columns(2)
+                                    ->columns(1)
                                     ->schema([
                                         IconEntry::make('is_active')
                                             ->label('Actif')

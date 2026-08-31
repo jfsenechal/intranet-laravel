@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\ViewClient;
 use AcMarche\MealDelivery\Filament\Resources\Clients\RelationManagers\OrdersRelationManager;
+use AcMarche\MealDelivery\Filament\Resources\Orders\OrderResource;
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\Order;
 use AcMarche\MealDelivery\Models\Week;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
@@ -69,4 +71,20 @@ it('excludes orders belonging to another client', function (): void {
         ->call('loadTable')
         ->assertCanSeeTableRecords([$ownOrder])
         ->assertCanNotSeeTableRecords([$otherOrder]);
+});
+
+it('links the edit action of a row to the order resource', function (): void {
+    $week = Week::create(['first_day' => '2026-06-15', 'days' => ['2026-06-15']]);
+    $order = Order::create(['week_id' => $week->id, 'client_id' => $this->client->id]);
+
+    livewire(OrdersRelationManager::class, [
+        'ownerRecord' => $this->client,
+        'pageClass' => ViewClient::class,
+    ])
+        ->call('loadTable')
+        ->assertActionVisible(TestAction::make('edit')->table($order))
+        ->assertActionHasUrl(
+            TestAction::make('edit')->table($order),
+            OrderResource::getUrl('edit', ['record' => $order]),
+        );
 });

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Notes\Schemas;
 
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -20,15 +18,7 @@ final class NoteForm
             ->schema([
                 Section::make()
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                Hidden::make('client_id'),
-                                DatePicker::make('note_date')
-                                    ->label('Ajouté le')
-                                    ->required()
-                                    ->default(now())
-                                    ->columnSpan(1),
-                            ]),
+                        Hidden::make('client_id'),
 
                         Textarea::make('description')
                             ->label('Description')
@@ -37,7 +27,7 @@ final class NoteForm
                             ->columnSpanFull(),
 
                         Toggle::make('is_done')
-                            ->label('Traité')
+                            ->label('Traitée')
                             ->default(false),
                     ]),
             ]);

@@ -34,7 +34,6 @@ it('creates a note for the client without touching timestamp columns', function 
     livewire(ViewClient::class, ['record' => $this->client->id])
         ->callAction('addNote', [
             'client_id' => $this->client->id,
-            'note_date' => '2026-07-13',
             'description' => 'annulation repas de la semaine',
             'is_done' => false,
         ])
@@ -44,14 +43,13 @@ it('creates a note for the client without touching timestamp columns', function 
 
     expect($note->description)->toBe('annulation repas de la semaine')
         ->and($note->is_done)->toBeFalse()
-        ->and($note->note_date->format('Y-m-d'))->toBe('2026-07-13');
+        ->and($note->note_date->format('Y-m-d'))->toBe(now()->format('Y-m-d'));
 });
 
 it('stamps the note with the username of its author', function (): void {
     livewire(ViewClient::class, ['record' => $this->client->id])
         ->callAction('addNote', [
             'client_id' => $this->client->id,
-            'note_date' => '2026-07-13',
             'description' => 'appel du fils',
             'is_done' => false,
         ])
@@ -63,11 +61,19 @@ it('stamps the note with the username of its author', function (): void {
 
 it('does not let the form overwrite the author', function (): void {
     $note = $this->client->notes()->create([
-        'note_date' => '2026-07-13',
         'description' => 'note initiale',
         'is_done' => false,
         'user_add' => 'someone_else',
     ]);
 
     expect($note->user_add)->toBe('jdupont');
+});
+
+it('keeps an explicitly provided note date', function (): void {
+    $note = $this->client->notes()->create([
+        'note_date' => '2026-07-13',
+        'description' => 'note reprise du dossier papier',
+    ]);
+
+    expect($note->note_date->format('Y-m-d'))->toBe('2026-07-13');
 });

@@ -97,6 +97,12 @@ final class ClientTables
                     ->label('Repas')
                     ->counts('meals')
                     ->sortable(),
+            ])
+            // The relation manager has no schema of its own, so the action leads
+            // to the order resource page rather than to a modal.
+            ->recordActions([
+                EditAction::make()
+                    ->url(fn (Order $record): string => OrderResource::getUrl('edit', ['record' => $record])),
             ]);
     }
 }
