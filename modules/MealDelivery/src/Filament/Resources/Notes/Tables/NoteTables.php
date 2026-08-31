@@ -41,8 +41,8 @@ final class NoteTables
                     ->boolean()
                     ->sortable(),
 
-                TextColumn::make('done_by')
-                    ->label('Done by')
+                TextColumn::make('user_add')
+                    ->label('Ajoutée par')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
