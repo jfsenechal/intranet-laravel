@@ -40,6 +40,7 @@ it('stores the category chosen on the create form', function (): void {
     livewire(CreateIncomingMail::class)
         ->assertFormFieldExists('category_id')
         ->fillForm([
+            'reference_number' => '4321',
             'mail_date' => now()->format('Y-m-d'),
             'sender' => 'Avec catégorie SA',
             'description' => 'Avec catégorie',
@@ -49,7 +50,6 @@ it('stores the category chosen on the create form', function (): void {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    // A CPAS mail is renumbered on create, so it is looked up by its sender.
     expect(IncomingMail::where('sender', 'Avec catégorie SA')->value('category_id'))
         ->toBe($this->category->id);
 });
@@ -59,6 +59,7 @@ it('leaves the category empty when none is chosen', function (): void {
 
     livewire(CreateIncomingMail::class)
         ->fillForm([
+            'reference_number' => '4322',
             'mail_date' => now()->format('Y-m-d'),
             'sender' => 'Sans catégorie SA',
             'attachment_file' => UploadedFile::fake()->create('test.pdf', 100, 'application/pdf'),

@@ -205,6 +205,7 @@ describe('caching the listing', function (): void {
 
         $component
             ->callAction(TestAction::make('process')->table('0'), [
+                'reference_number' => '4321',
                 'mail_date' => now()->format('Y-m-d'),
                 'sender' => 'ACME SA',
             ])

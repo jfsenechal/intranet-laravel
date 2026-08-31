@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Courrier\Models;
 
 use AcMarche\Courrier\Database\Factories\IncomingMailFactory;
-use AcMarche\Courrier\Enums\DepartmentCourrierEnum;
 use AcMarche\Courrier\Jobs\IndexIncomingMailJob;
 use AcMarche\Courrier\Repository\DepartmentScope;
 use AcMarche\Security\Models\HasUserAdd;
@@ -19,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -66,24 +64,6 @@ final class IncomingMail extends Model
     use HasFactory;
     use HasUserAdd;
     use SoftDeletes;
-
-    /**
-     * Compute the next sequential reference number for the CPAS department.
-     *
-     * Numbers are stored as strings but compared numerically so "9" is followed
-     * by "10" rather than being ordered lexicographically. The cast is SIGNED so
-     * legacy values such as "-20180316" stay negative and never win the MAX;
-     * under UNSIGNED they would wrap to a near-UINT64 value and corrupt (and
-     * overflow) the sequence.
-     */
-    public static function nextCpasReferenceNumber(): int
-    {
-        $last = self::withoutGlobalScopes()
-            ->where('department', DepartmentCourrierEnum::CPAS->value)
-            ->max(DB::raw('CAST(reference_number AS SIGNED)'));
-
-        return (int) $last + 1;
-    }
 
     public function category(): BelongsTo
     {
@@ -132,10 +112,6 @@ final class IncomingMail extends Model
                 if ($department) {
                     $model->department = $department->value;
                 }
-            }
-
-            if ($model->department === DepartmentCourrierEnum::CPAS->value) {
-                $model->reference_number = (string) self::nextCpasReferenceNumber();
             }
         });
 
