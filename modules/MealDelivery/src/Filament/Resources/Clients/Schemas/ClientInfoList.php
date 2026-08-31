@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Resources\Clients\Schemas;
 
+use AcMarche\MealDelivery\Filament\Resources\Notes\NoteResource;
+use AcMarche\MealDelivery\Models\Client;
+use AcMarche\MealDelivery\Models\Note;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
@@ -95,6 +100,37 @@ final class ClientInfoList
                                             ->columnSpanFull(),
                                     ]),
 
+                                Section::make('Notes')
+                                    ->schema([
+                                        RepeatableEntry::make('notes_list')
+                                            ->hiddenLabel()
+                                            ->state(fn (Client $record): array => self::buildNotes($record))
+                                            ->placeholder('Aucune note')
+                                            ->table([
+                                                TableColumn::make('Date'),
+                                                TableColumn::make('Description'),
+                                                TableColumn::make('Traitée'),
+                                                TableColumn::make('Ajoutée par'),
+                                            ])
+                                            ->schema([
+                                                TextEntry::make('note_date')
+                                                    ->url(function (TextEntry $component): ?string {
+                                                        $row = $component->getContainer()->getConstantState();
+
+                                                        return is_array($row) ? ($row['note_url'] ?? null) : null;
+                                                    }),
+
+                                                TextEntry::make('description'),
+
+                                                IconEntry::make('is_done')
+                                                    ->boolean(),
+
+                                                TextEntry::make('user_add')
+                                                    ->placeholder('—'),
+                                            ])
+                                            ->columnSpanFull(),
+                                    ]),
+
                                 Section::make('Absence')
                                     ->columns(2)
                                     ->visible(fn ($record): bool => $record->absence !== null)
@@ -148,5 +184,26 @@ final class ClientInfoList
 
                     ]),
             ]);
+    }
+
+    /**
+     * `notes` is also a text column on the client, so `$record->notes` resolves to
+     * that column and the relation has to be queried explicitly.
+     *
+     * @return array<int, array{note_date: string, note_url: string, description: string, is_done: bool, user_add: ?string}>
+     */
+    private static function buildNotes(Client $client): array
+    {
+        return $client->notes()
+            ->orderByDesc('note_date')
+            ->get()
+            ->map(fn (Note $note): array => [
+                'note_date' => $note->note_date?->format('d/m/Y') ?? '',
+                'note_url' => NoteResource::getUrl('view', ['record' => $note->id]),
+                'description' => (string) $note->description,
+                'is_done' => (bool) $note->is_done,
+                'user_add' => $note->user_add,
+            ])
+            ->all();
     }
 }
