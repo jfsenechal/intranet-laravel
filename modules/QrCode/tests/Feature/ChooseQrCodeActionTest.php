@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\QrCode\Enums\QrCodeActionEnum;
 use AcMarche\QrCode\Filament\Pages\ChooseQrCodeAction;
 use AcMarche\QrCode\Filament\Pages\GenerateQrCode;
+use AcMarche\QrCode\Filament\Resources\QrCodes\Pages\ViewQrCode;
 use AcMarche\QrCode\Models\QrCode;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -71,18 +72,16 @@ it('saves the generated QR code, hidden action included', function (): void {
     ]);
 });
 
-it('updates the same record when generating again', function (): void {
-    Livewire::withQueryParams(['action' => QrCodeActionEnum::URL->value])
+it('redirects to the view page of the saved QR code', function (): void {
+    $page = Livewire::withQueryParams(['action' => QrCodeActionEnum::URL->value])
         ->test(GenerateQrCode::class)
         ->fillForm(['name' => 'Site', 'message' => 'https://marche.be'])
         ->call('generate')
-        ->fillForm(['name' => 'Site officiel', 'message' => 'https://marche.be'])
-        ->call('generate')
         ->assertHasNoFormErrors();
 
-    expect(QrCode::query()->count())->toBe(1);
+    $qrCode = QrCode::query()->sole();
 
-    assertDatabaseHas(QrCode::class, ['name' => 'Site officiel']);
+    $page->assertRedirect(ViewQrCode::getUrl(['record' => $qrCode]));
 });
 
 it('shows the action select when no action was chosen before', function (): void {

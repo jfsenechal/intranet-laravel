@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace AcMarche\QrCode\Filament\Pages;
 
 use AcMarche\QrCode\Enums\QrCodeActionEnum;
+use AcMarche\QrCode\Filament\Resources\QrCodes\Pages\ViewQrCode;
 use AcMarche\QrCode\Filament\Resources\QrCodes\Schemas\QrCodeForm;
 use AcMarche\QrCode\Models\QrCode;
-use AcMarche\QrCode\Service\QrCodeGenerator;
 use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class GenerateQrCode extends Page implements HasForms
 {
@@ -26,7 +24,7 @@ final class GenerateQrCode extends Page implements HasForms
 
     /**
      * Kept as a Livewire property: the `action` query string is only present on the initial page
-     * load, not on the subsequent Livewire update requests (live fields, generate, download).
+     * load, not on the subsequent Livewire update requests (live fields, generate).
      */
     public ?string $action = null;
 
@@ -35,16 +33,6 @@ final class GenerateQrCode extends Page implements HasForms
      * field, the choice having already been made on the previous page.
      */
     public bool $isActionLocked = false;
-
-    /**
-     * The record saved by the last generation: regenerating from the same page updates it instead
-     * of piling up a new QR code in the user's collection on every click.
-     */
-    public ?int $qrCodeId = null;
-
-    public ?string $previewMarkup = null;
-
-    public ?string $previewMime = null;
 
     protected string $view = 'qrcode::filament.pages.generate-qr-code';
 
@@ -107,57 +95,18 @@ final class GenerateQrCode extends Page implements HasForms
 
     public function generate(): void
     {
-        $data = $this->form->getState();
-
-        $qrCode = $this->makeModel($data);
-        $generator = app(QrCodeGenerator::class);
-        $content = $generator->render($qrCode);
-
-        $mime = $generator->mimeType($qrCode);
-
-        if (mb_strtolower($qrCode->format ?? 'svg') === 'svg') {
-            $this->previewMarkup = $content;
-        } else {
-            $this->previewMarkup = sprintf(
-                '<img src="data:%s;base64,%s" alt="QR Code" class="max-w-full h-auto" />',
-                $mime,
-                base64_encode($content),
-            );
-        }
-        $this->previewMime = $mime;
-
+        $qrCode = $this->makeModel($this->form->getState());
         $qrCode->user_id = auth()->id();
         $qrCode->username = auth()->user()?->username;
         $qrCode->save();
-
-        $this->qrCodeId = $qrCode->id;
 
         Notification::make()
             ->success()
             ->title('QR code enregistré')
             ->body('Votre QR code a été ajouté à votre collection.')
             ->send();
-    }
 
-    public function downloadAction(): Action
-    {
-        return Action::make('download')
-            ->label('Télécharger')
-            ->icon('heroicon-o-arrow-down-tray')
-            ->visible(fn (): bool => $this->previewMarkup !== null)
-            ->action(function (): StreamedResponse {
-                $data = $this->form->getState();
-                $qrCode = $this->makeModel($data);
-                $generator = app(QrCodeGenerator::class);
-                $content = $generator->render($qrCode);
-                $filename = Str::slug($qrCode->name ?: 'qrcode').'.'.$generator->extension($qrCode);
-
-                return response()->streamDownload(
-                    fn () => print $content,
-                    $filename,
-                    ['Content-Type' => $generator->mimeType($qrCode)],
-                );
-            });
+        $this->redirect(ViewQrCode::getUrl(['record' => $qrCode]));
     }
 
     protected function getHeaderActions(): array
@@ -182,9 +131,6 @@ final class GenerateQrCode extends Page implements HasForms
                 ->label('Réinitialiser')
                 ->color('gray')
                 ->action(function (): void {
-                    $this->qrCodeId = null;
-                    $this->previewMarkup = null;
-                    $this->previewMime = null;
                     $this->mount();
                 }),
         ];
@@ -195,9 +141,7 @@ final class GenerateQrCode extends Page implements HasForms
      */
     private function makeModel(array $data): QrCode
     {
-        $qrCode = QrCode::query()
-            ->where('user_id', auth()->id())
-            ->find($this->qrCodeId) ?? new QrCode();
+        $qrCode = new QrCode();
         $qrCode->fill($data);
         $qrCode->name = $data['name'] ?? 'QR code';
         $qrCode->action = $data['action'] instanceof QrCodeActionEnum
