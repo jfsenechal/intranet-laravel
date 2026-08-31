@@ -121,8 +121,8 @@ final class AnalyzeInboxMessagesJob implements ShouldQueue
         $incomingMail = IncomingMail::create([
             // The reference number is read off the reception stamp; when the
             // model cannot find it the field is left empty and the form, which
-            // requires it, stops the user from validating without one. The CPAS
-            // department overrides it with its own sequence anyway.
+            // requires it, stops the user from validating without one. This
+            // holds for every department, CPAS included.
             'reference_number' => $suggestion->referenceNumber,
             'sender' => $suggestion->sender,
             // The analysis does not date the letter, and the mail room encodes

@@ -169,9 +169,8 @@ final class AnalyzeAttachmentAction
      * wiping what the user already typed.
      *
      * The reference number and the services are only proposed when their field
-     * is still empty: the number must not overwrite one already encoded nor the
-     * sequential number the CPAS department is given by default, and a routing
-     * the user has already chosen outranks a stamp read by a model.
+     * is still empty: the number must not overwrite one already encoded, and a
+     * routing the user has already chosen outranks a stamp read by a model.
      */
     private static function applySuggestion(MailSuggestion $suggestion, Get $schemaGet, Set $schemaSet): void
     {
