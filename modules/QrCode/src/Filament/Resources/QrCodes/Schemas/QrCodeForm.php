@@ -6,6 +6,7 @@ namespace AcMarche\QrCode\Filament\Resources\QrCodes\Schemas;
 
 use AcMarche\QrCode\Enums\QrCodeActionEnum;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -17,27 +18,24 @@ use Filament\Schemas\Schema;
 
 final class QrCodeForm
 {
-    public static function configure(Schema $schema): Schema
+    /**
+     * @param  bool  $isActionSelectable  False when the action was already chosen before the form
+     *                                    (see ChooseQrCodeAction): it is then kept in a hidden
+     *                                    field instead of a select the user could change.
+     */
+    public static function configure(Schema $schema, bool $isActionSelectable = true): Schema
     {
         return $schema
             ->schema([
                 Section::make('Identification')
-                    ->columns(2)
+                    ->columns($isActionSelectable ? 2 : 1)
                     ->schema([
                         TextInput::make('name')
                             ->label('Nom')
+                            ->helperText('Le nom est à titre informatif et servira à retrouver plus facilement le QR code.')
                             ->required()
                             ->maxLength(150),
-                        Select::make('action')
-                            ->label('Action')
-                            ->options(QrCodeActionEnum::class)
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Select $component) => $component
-                                ->getContainer()
-                                ->getComponent('dynamicTypeFields')
-                                ?->getChildSchema()
-                                ?->fill()),
+                        ...($isActionSelectable ? [self::actionSelect()] : [Hidden::make('action')]),
                     ]),
 
                 Grid::make(2)
@@ -234,5 +232,19 @@ final class QrCodeForm
 
             default => [],
         };
+    }
+
+    private static function actionSelect(): Select
+    {
+        return Select::make('action')
+            ->label('Action')
+            ->options(QrCodeActionEnum::class)
+            ->required()
+            ->live()
+            ->afterStateUpdated(fn (Select $component) => $component
+                ->getContainer()
+                ->getComponent('dynamicTypeFields')
+                ?->getChildSchema()
+                ?->fill());
     }
 }

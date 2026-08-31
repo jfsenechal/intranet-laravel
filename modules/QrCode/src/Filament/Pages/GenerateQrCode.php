@@ -9,12 +9,10 @@ use AcMarche\QrCode\Filament\Resources\QrCodes\Schemas\QrCodeForm;
 use AcMarche\QrCode\Models\QrCode;
 use AcMarche\QrCode\Service\QrCodeGenerator;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -25,6 +23,24 @@ final class GenerateQrCode extends Page implements HasForms
 
     /** @var array<string, mixed> */
     public array $data = [];
+
+    /**
+     * Kept as a Livewire property: the `action` query string is only present on the initial page
+     * load, not on the subsequent Livewire update requests (live fields, generate, download).
+     */
+    public ?string $action = null;
+
+    /**
+     * True when the action came from ChooseQrCodeAction: the select is then replaced by a hidden
+     * field, the choice having already been made on the previous page.
+     */
+    public bool $isActionLocked = false;
+
+    /**
+     * The record saved by the last generation: regenerating from the same page updates it instead
+     * of piling up a new QR code in the user's collection on every click.
+     */
+    public ?int $qrCodeId = null;
 
     public ?string $previewMarkup = null;
 
@@ -46,34 +62,47 @@ final class GenerateQrCode extends Page implements HasForms
         return 'Générer un QR code';
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public function mount(): void
     {
+        $chosenAction = QrCodeActionEnum::tryFrom((string) request()->query('action'));
+
+        if ($this->action === null) {
+            $this->action = $chosenAction?->value ?? QrCodeActionEnum::URL->value;
+            $this->isActionLocked = $chosenAction instanceof QrCodeActionEnum;
+        }
+
         $this->form->fill([
-            'action' => QrCodeActionEnum::URL->value,
+            'action' => $this->action,
             'color' => '#000000',
             'background_color' => '#FFFFFF',
             'format' => 'SVG',
             'style' => 'square',
             'pixels' => 400,
             'margin' => 10,
-            'save_to_db' => false,
         ]);
+    }
+
+    public function getTitle(): string
+    {
+        $action = QrCodeActionEnum::tryFrom((string) $this->action);
+
+        return $action instanceof QrCodeActionEnum
+            ? 'Générer un QR code : '.mb_lcfirst($action->getLabel())
+            : 'Générer un QR code';
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->statePath('data')
-            ->components([
-                ...QrCodeForm::configure($schema)->getComponents(),
-                Section::make('Enregistrement')
-                    ->schema([
-                        Toggle::make('save_to_db')
-                            ->label('Enregistrer dans mes QR codes')
-                            ->helperText('Cochez pour conserver ce QR code dans la base de données.')
-                            ->default(false),
-                    ]),
-            ]);
+            ->components(
+                QrCodeForm::configure($schema, isActionSelectable: ! $this->isActionLocked)->getComponents(),
+            );
     }
 
     public function generate(): void
@@ -97,22 +126,17 @@ final class GenerateQrCode extends Page implements HasForms
         }
         $this->previewMime = $mime;
 
-        if (! empty($data['save_to_db'])) {
-            $qrCode->user_id = auth()->id();
-            $qrCode->username = auth()->user()?->username;
-            $qrCode->save();
+        $qrCode->user_id = auth()->id();
+        $qrCode->username = auth()->user()?->username;
+        $qrCode->save();
 
-            Notification::make()
-                ->success()
-                ->title('QR code enregistré')
-                ->body('Votre QR code a été ajouté à votre collection.')
-                ->send();
-        } else {
-            Notification::make()
-                ->success()
-                ->title('QR code généré')
-                ->send();
-        }
+        $this->qrCodeId = $qrCode->id;
+
+        Notification::make()
+            ->success()
+            ->title('QR code enregistré')
+            ->body('Votre QR code a été ajouté à votre collection.')
+            ->send();
     }
 
     public function downloadAction(): Action
@@ -136,6 +160,17 @@ final class GenerateQrCode extends Page implements HasForms
             });
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('changeAction')
+                ->label('Changer d\'action')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('gray')
+                ->url(ChooseQrCodeAction::getUrl()),
+        ];
+    }
+
     protected function getFormActions(): array
     {
         return [
@@ -146,7 +181,12 @@ final class GenerateQrCode extends Page implements HasForms
             Action::make('reset')
                 ->label('Réinitialiser')
                 ->color('gray')
-                ->action(fn () => $this->mount()),
+                ->action(function (): void {
+                    $this->qrCodeId = null;
+                    $this->previewMarkup = null;
+                    $this->previewMime = null;
+                    $this->mount();
+                }),
         ];
     }
 
@@ -155,9 +195,9 @@ final class GenerateQrCode extends Page implements HasForms
      */
     private function makeModel(array $data): QrCode
     {
-        unset($data['save_to_db']);
-
-        $qrCode = new QrCode();
+        $qrCode = QrCode::query()
+            ->where('user_id', auth()->id())
+            ->find($this->qrCodeId) ?? new QrCode();
         $qrCode->fill($data);
         $qrCode->name = $data['name'] ?? 'QR code';
         $qrCode->action = $data['action'] instanceof QrCodeActionEnum
