@@ -9,7 +9,7 @@ enum SignatureEnum: string
     case ADL = 'adl.png';
     case ALE = 'ale.jpg';
     case MARCHE = 'marche.jpg';
-    case MDT = 'mtfa.png';
+    case MDT = 'mtfa.webp';
     case CPAS = 'cpas.jpg';
     case CSL = 'csl.jpg';
     case MDR = 'mdr.jpg';
