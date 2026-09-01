@@ -8,6 +8,7 @@ use AcMarche\App\Enums\SignatureEnum;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -39,10 +40,26 @@ final class Signature extends Model
         return $this->belongsTo(User::class, 'username', 'username');
     }
 
+    /**
+     * Cast the logo by hand rather than with the enum cast: the column holds file
+     * names, and a file name that has been renamed in SignatureEnum must degrade to
+     * the commune logo instead of throwing on every read of the record.
+     *
+     * @return Attribute<SignatureEnum|null, string|null>
+     */
+    protected function logo(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?SignatureEnum => SignatureEnum::fromFileName($value),
+            set: fn (SignatureEnum|string|null $value): ?string => ($value instanceof SignatureEnum
+                ? $value
+                : SignatureEnum::fromFileName($value))?->value,
+        );
+    }
+
     protected function casts(): array
     {
         return [
-            'logo' => SignatureEnum::class,
             'postal_code' => 'integer',
         ];
     }

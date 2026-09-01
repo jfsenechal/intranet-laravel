@@ -16,6 +16,20 @@ enum SignatureEnum: string
     case FAM = 'fam.jpg';
     case ESQUARE = 'esquareLogo.jpg';
 
+    /**
+     * Resolve a stored file name to its case, falling back to the commune logo when
+     * a case has been renamed and the stored value matches none of them. Without
+     * this a renamed case makes every read of the column throw a ValueError.
+     */
+    public static function fromFileName(?string $fileName): ?self
+    {
+        if ($fileName === null || $fileName === '') {
+            return null;
+        }
+
+        return self::tryFrom($fileName) ?? self::MARCHE;
+    }
+
     public function getTitle(): string
     {
         return match ($this) {
