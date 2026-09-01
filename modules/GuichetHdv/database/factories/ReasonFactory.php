@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\GuichetHdv\Database\Factories;
 
+use AcMarche\GuichetHdv\Enums\ServicesEnum;
 use AcMarche\GuichetHdv\Models\Reason;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,6 +19,7 @@ final class ReasonFactory extends Factory
     {
         return [
             'content' => $this->faker->sentence(4),
+            'service' => $this->faker->randomElement(ServicesEnum::cases()),
         ];
     }
 }

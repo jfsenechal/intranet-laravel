@@ -11,8 +11,8 @@ use Filament\Support\Contracts\HasLabel;
 enum ServicesEnum: string implements HasColor, HasLabel
 {
     case ETAT_CIVIL = 'État civil';
-    case POPULATION = 'Population';
     case ETRANGERS = 'Étrangers';
+    case POPULATION = 'Population';
 
     public function getLabel(): string
     {

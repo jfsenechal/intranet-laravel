@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\GuichetHdv\Enums\ServicesEnum;
 use AcMarche\GuichetHdv\Filament\Resources\Reason\Pages\CreateReason;
 use AcMarche\GuichetHdv\Filament\Resources\Reason\Pages\EditReason;
 use AcMarche\GuichetHdv\Filament\Resources\Reason\Pages\ListReason;
@@ -39,38 +40,63 @@ it('can render the edit page', function (): void {
         ->assertOk()
         ->assertSchemaStateSet([
             'content' => $reason->content,
+            'service' => $reason->service,
         ]);
 });
 
 it('has columns', function (string $column): void {
     livewire(ListReason::class)
         ->assertTableColumnExists($column);
-})->with(['id', 'content']);
+})->with(['id', 'content', 'service']);
 
 it('can create a reason', function (): void {
     livewire(CreateReason::class)
-        ->fillForm(['content' => 'Carte d\'identité (DEMANDE/RETRAIT)'])
+        ->fillForm([
+            'content' => 'Carte d\'identité (DEMANDE/RETRAIT)',
+            'service' => ServicesEnum::POPULATION->value,
+        ])
         ->call('create')
         ->assertNotified();
 
     assertDatabaseHas(Reason::class, [
         'content' => 'Carte d\'identité (DEMANDE/RETRAIT)',
+        'service' => ServicesEnum::POPULATION->value,
+    ]);
+});
+
+it('can create a reason without a service', function (): void {
+    livewire(CreateReason::class)
+        ->fillForm([
+            'content' => 'Retrait document',
+            'service' => null,
+        ])
+        ->call('create')
+        ->assertNotified()
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Reason::class, [
+        'content' => 'Retrait document',
+        'service' => null,
     ]);
 });
 
 it('can update a reason', function (): void {
-    $reason = Reason::factory()->create();
+    $reason = Reason::factory()->create(['service' => ServicesEnum::POPULATION]);
 
     livewire(EditReason::class, [
         'record' => $reason->id,
     ])
-        ->fillForm(['content' => 'Passeport (DEMANDE ou RETRAIT)'])
+        ->fillForm([
+            'content' => 'Passeport (DEMANDE ou RETRAIT)',
+            'service' => ServicesEnum::ETAT_CIVIL->value,
+        ])
         ->call('save')
         ->assertNotified();
 
     assertDatabaseHas(Reason::class, [
         'id' => $reason->id,
         'content' => 'Passeport (DEMANDE ou RETRAIT)',
+        'service' => ServicesEnum::ETAT_CIVIL->value,
     ]);
 });
 

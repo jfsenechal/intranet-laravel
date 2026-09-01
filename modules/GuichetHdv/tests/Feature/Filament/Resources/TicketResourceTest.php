@@ -15,6 +15,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -151,11 +152,74 @@ it('can bulk delete tickets', function (): void {
 });
 
 it('copies the suggested reason into the reason field', function (): void {
-    Reason::factory()->create(['content' => 'Passeport (DEMANDE ou RETRAIT)']);
+    Reason::factory()->create([
+        'content' => 'Passeport (DEMANDE ou RETRAIT)',
+        'service' => ServicesEnum::POPULATION,
+    ]);
 
     livewire(CreateTicket::class)
-        ->fillForm(['suggest_reason' => 'Passeport (DEMANDE ou RETRAIT)'])
+        ->fillForm([
+            'service' => ServicesEnum::POPULATION->value,
+            'suggest_reason' => 'Passeport (DEMANDE ou RETRAIT)',
+        ])
         ->assertFormSet(['reason' => 'Passeport (DEMANDE ou RETRAIT)']);
+});
+
+it('only suggests the reasons of the selected service', function (): void {
+    Reason::factory()->create([
+        'content' => 'Passeport (DEMANDE ou RETRAIT)',
+        'service' => ServicesEnum::POPULATION,
+    ]);
+    Reason::factory()->create([
+        'content' => 'Acte de naissance',
+        'service' => ServicesEnum::ETAT_CIVIL,
+    ]);
+    Reason::factory()->create([
+        'content' => 'Retrait document',
+        'service' => null,
+    ]);
+
+    livewire(CreateTicket::class)
+        ->fillForm(['service' => ServicesEnum::POPULATION->value])
+        ->assertFormFieldExists('suggest_reason', fn (Select $field): bool => array_keys($field->getOptions()) === [
+            'Passeport (DEMANDE ou RETRAIT)',
+            'Retrait document',
+        ]);
+});
+
+it('suggests every reason while no service is selected', function (): void {
+    Reason::factory()->create([
+        'content' => 'Passeport (DEMANDE ou RETRAIT)',
+        'service' => ServicesEnum::POPULATION,
+    ]);
+    Reason::factory()->create([
+        'content' => 'Acte de naissance',
+        'service' => ServicesEnum::ETAT_CIVIL,
+    ]);
+
+    livewire(CreateTicket::class)
+        ->assertFormFieldExists('suggest_reason', fn (Select $field): bool => array_keys($field->getOptions()) === [
+            'Acte de naissance',
+            'Passeport (DEMANDE ou RETRAIT)',
+        ]);
+});
+
+it('clears the suggested reason when the service changes', function (): void {
+    Reason::factory()->create([
+        'content' => 'Passeport (DEMANDE ou RETRAIT)',
+        'service' => ServicesEnum::POPULATION,
+    ]);
+
+    livewire(CreateTicket::class)
+        ->fillForm([
+            'service' => ServicesEnum::POPULATION->value,
+            'suggest_reason' => 'Passeport (DEMANDE ou RETRAIT)',
+        ])
+        ->fillForm(['service' => ServicesEnum::ETAT_CIVIL->value])
+        ->assertFormSet([
+            'suggest_reason' => null,
+            'reason' => 'Passeport (DEMANDE ou RETRAIT)',
+        ]);
 });
 
 it('rejects a duplicate ticket number for the same day', function (): void {

@@ -12,8 +12,10 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Unique;
 
@@ -48,15 +50,15 @@ final class TicketForm
                         Select::make('service')
                             ->label('Service')
                             ->options(ServicesEnum::class)
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('suggest_reason', null)),
                         Textarea::make('reason')
                             ->label('Motif')
                             ->required(),
                         Select::make('suggest_reason')
                             ->label('Suggestion de motif')
-                            ->options(
-                                fn (): array => Reason::query()->orderBy('content')->pluck('content', 'content')->all()
-                            )
+                            ->options(fn (Get $get): array => self::reasonOptions($get('service')))
                             ->searchable()
                             ->live()
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('reason', $state))
@@ -71,5 +73,26 @@ final class TicketForm
                         ->default(false),
                 ]),
             ]);
+    }
+
+    /**
+     * Motifs attached to the given service, plus those available to every service.
+     *
+     * @return array<string, string>
+     */
+    private static function reasonOptions(ServicesEnum|string|null $service): array
+    {
+        return Reason::query()
+            ->when(
+                $service,
+                fn (Builder $query, ServicesEnum|string $service): Builder => $query->where(
+                    fn (Builder $query): Builder => $query
+                        ->where('service', $service instanceof ServicesEnum ? $service->value : $service)
+                        ->orWhereNull('service'),
+                ),
+            )
+            ->orderBy('content')
+            ->pluck('content', 'content')
+            ->all();
     }
 }
