@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 use AcMarche\MealDelivery\Filament\Actions\ExportMonthlyOrdersAction;
 use AcMarche\MealDelivery\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
+use AcMarche\MealDelivery\Filament\Resources\Clients\RelationManagers\GuestReservationsRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\Clients\RelationManagers\OrdersRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\Clients\Schemas\ClientInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;
@@ -48,6 +49,7 @@ final class ViewClient extends ViewRecord
     {
         return [
             OrdersRelationManager::class,
+            GuestReservationsRelationManager::class,
         ];
     }
 

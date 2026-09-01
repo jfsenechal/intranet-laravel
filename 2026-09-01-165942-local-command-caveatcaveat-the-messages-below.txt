@@ -1,0 +1,842 @@
+ ▐▛███▛█   Claude Code v2.1.251
+▝▜██████▀  Opus 5 · Claude Pro
+  ▝▝ ▝▝    /var/www/intranet-laravel
+
+
+❯ /clear                                                                        
+
+❯ module MealDelivery                                                           
+  analyse this request                                                          
+  Actuellement, les familles peuvent venir diner avec leurs parents. Jusque-là, 
+  nous encodions les réservations dans notre programme care+.                   
+                                                                                
+  Mais ce programme ne permet pas une vision claire du nombre d’invité déjà     
+  prévus par exemple.                                                           
+                                                                                
+  De plus, à la fin du mois pour extraire les invités pour la facturation,      
+  c’est assez laborieux.                                                        
+                                                                                
+  Penses-tu que tu pourrais, « greffer » ou créer à l’intranet un modèle un peu 
+  comme les repas à domicile ? ou plus même peut-être comme la tournée « cafet  
+  » ?                                                                           
+                                                                                
+  Sachant que actuellement, les informations que nous donnons en cuisine et qui 
+  sont retranscris à la main (voir fichier data/20260618135256244.pdf) du       
+  programme care+ vers la feuille transmis cafet sont :                         
+                                                                                
+  Le nom du résident qui reçoit de la famille et  le nombre de repas en plus.   
+                                                                                
+  Il faudrait alors que l'on encode le nom du résident qui serait dans notre    
+  base de donnée, auquel on pourrait encoder les invites comme on encode les    
+  repas à domicile??                                                            
+                                                                                
+  Nous aimerions aussi, en plus de la vision globale du nombre d'invités, avoir 
+  un système qui nous permets de bloquer les réservations quand le cota         
+  autorisé est atteint... (cette demande est peut-être plus compliquée, et peut 
+  donc arriver plus tard si au moins on a déjà une vision globale)              
+
+● Je vais explorer le module MealDelivery et les règles associées avant
+  d'analyser la demande.
+
+  Listed 2 directories (ctrl+o to expand)
+
+● Il y a aussi un module ResidentMeal. Explorons les deux, plus le PDF
+  référencé.
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● ResidentMeal est un module scaffold vide (juste un panel provider). Lisons le
+  PDF et le scaffold.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Le PDF est la feuille "Cafétariat" du vendredi 19 juin 2026 — clients,
+  Pot/Menu 1/Menu 2, totaux, et en bas les 3 lignes manuscrites : « Mme Lo… + 2
+  repas », « Mme Herget + 1 repas », « M Dolcette + 3 repas ». C'est exactement
+  ce qu'il faut informatiser. Explorons le modèle de données MealDelivery.
+
+  Searched for 1 pattern, read 1 file, listed 1 directory, ran 11 shell commands (ctrl+o to expand)
+
+● J'ai lu le PDF, le module MealDelivery complet et le scaffold ResidentMeal.
+  Voici l'analyse.
+
+  Ce que le PDF montre
+
+  data/20260618135256244.pdf est exactement la sortie de
+  RouteSheetsAggregator::build()['cafeteria'] rendue par
+  route-sheet-pdf.blade.php — clients cafétéria, colonnes Pot / Menu 1 / Menu 2,
+  bloc « Totaux ».
+
+  Les 3 lignes manuscrites en bas (« Mme Lo… + 2 repas », « Mme Herget + 1 repas
+  », « M Dolcette + 3 repas ») sont le seul morceau non informatisé. C'est
+  précisément ça qu'il faut remplacer : nom du résident + nombre de repas 
+  invités, pour une date.
+
+  Faisable — et le squelette existe déjà
+
+  modules/ResidentMeal est déjà là, déclaré dans composer.json, avec son
+  provider (module_id = 55), son panel resident-meal (« Repas des résidents »,
+  rose) et son rôle ROLE_CPAS_MEAL. Il ne contient aucun modèle, migration ni
+  resource. Quelqu'un a déjà posé l'intention ; il reste tout le contenu.
+
+  Ne pas greffer sur les clients de MealDelivery
+
+  C'est la tentation naturelle (« comme les repas à domicile ») mais ça casse
+  concrètement :
+
+  - clients.route_id est foreignId()->constrained('delivery_routes') non 
+    nullable — un résident n'a pas de tournée.
+  - RouteSheetsAggregator::buildRow() construit address_line / city_line /
+    phone, plus les drapeaux RF / DF / « récipient jetable » via
+    orderDateRanges() et clientsWithNextWeekOrder() : tout ça n'a aucun sens
+    pour un invité de résident.
+  - AllClientsMonthlyOrdersAggregator facture tout client ayant des repas dans
+    le mois → les résidents pollueraient la facturation des repas à domicile.
+  - orders porte un unique(['week_id','client_id']) et toute la mécanique Week →
+    Order → Meal → Menu (avec la règle des repas placeholder à quantité 0, cf.
+    .ai/rules/meal-delivery.md). C'est lourd pour ce qu'il faut : une date, un
+    résident, un nombre.
+
+  Une réservation d'invité n'est pas une commande hebdomadaire. Il faut ses
+  propres tables.
+
+  Modèle proposé (dans ResidentMeal)
+
+  residents          : last_name, first_name, room, unit, is_active, notes
+  guest_reservations : resident_id, date, guest_count, soup_count?, notes,
+  user_id, timestamps
+  guest_quotas       : date, max_guests   (+ défaut en config)
+
+  Attention : ResidentMeal/config/database.php est vide → le module tournerait
+  sur la connexion par défaut, alors que MealDelivery est sur
+  maria-meal-delivery (base cpas_repas). Pas de jointure SQL possible entre les
+  deux. Ce n'est pas bloquant — l'agrégation se fait en PHP, comme le fait déjà
+  la feuille — mais c'est un choix à acter : soit on assume les 2 bases, soit on
+  donne à ResidentMeal la connexion maria-meal-delivery.
+
+  Où ça se branche
+
+  1. Encodage — Resource Residents (CRUD) + Resource/page Réservations : on
+     choisit un résident, une date, un nombre. C'est le geste « comme les repas
+     à domicile » demandé.
+  2. Vision globale — page « Invités par jour » : total invités par date sur une
+     période, plus le détail par résident. C'est ce que care+ ne donne pas.
+  3. Feuille cafétariat — un petit service en lecture seule côté ResidentMeal
+     (GuestReservationsForDate) que CafeteriaSheet et route-sheet-pdf.blade.php
+     appellent pour ajouter un bloc « Invités » sous les Totaux. Les 3 lignes
+     manuscrites deviennent imprimées. À protéger par un class_exists()/binding
+     optionnel pour que MealDelivery reste autonome.
+  4. Facturation — décalque de AllClientsMonthlyOrdersAggregator + OrdersByMonth
+     + son PDF, mais par résident. C'est le point « assez laborieux » qui
+     disparaît : un écran, un mois, un PDF.
+
+  Le quota (phase 2, comme vous le pressentez)
+
+  Techniquement pas très compliqué, mais il y a 3 pièges : exclure
+  l'enregistrement courant lors d'une modification, revalider au save et pas
+  seulement à l'affichage (deux personnes qui encodent en même temps), et
+  décider si le quota bloque durement ou avertit. Afficher « il reste N places »
+  en direct dans le formulaire apporte déjà 80 % de la valeur sans blocage.
+
+  Votre instinct de séquencer est le bon : les points 1→4 sont autonomes et
+  livrables sans le quota.
+
+  Questions qui changent le design
+
+  1. Les résidents viennent d'où ? Encodés à la main dans l'intranet, ou
+     export/synchro depuis care+ ? Ça détermine s'il faut juste un CRUD ou aussi
+     une commande d'import.
+  2. Les invités choisissent-ils menu 1 / menu 2 / potage, ou est-ce juste « + N
+     repas » comme sur la note manuscrite ? La cuisine a-t-elle besoin de la
+     ventilation ?
+  3. Midi uniquement, ou aussi le soir ? (« venir dîner » ⇒ je suppose le repas
+     de midi.)
+  4. Facturation : de simples comptages suffisent, ou faut-il un tarif par repas
+     invité pour sortir un montant ?
+  5. Quota : un chiffre global par jour, ou variable selon le jour de la semaine
+     / la salle ?
+  6. Périmètre : uniquement les invités, ou le module « Repas des résidents »
+     doit-il à terme couvrir les repas des résidents eux-mêmes ? Je recommande
+     de s'en tenir aux invités maintenant.
+
+  Dites-moi les réponses aux points 1–3 et je peux passer en mode plan pour la
+  phase 1. Je peux aussi publier cette analyse en page partageable si vous devez
+  la faire valider par la cuisine ou la direction.
+
+✻ Worked for 2m 56s · done 11:25
+
+❯ Encodés à la main, choix menu 1 ou 2, juste "+ N repas", midi uniquement, pas 
+  de quota tout de suite                                                        
+
+● Compris. Je note les réponses :
+
+  - résidents encodés à la main → CRUD simple, pas d'import care+
+  - menu 1 ou 2 → la réservation porte le choix du menu
+  - pas de potage, pas de régimes → juste un nombre de repas
+  - midi uniquement → pas de colonne « service »
+  - pas de quota → on ne crée même pas la table, mais on garde le chemin ouvert
+
+  Je passe en mode plan pour la phase 1.
+
+● Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+● J'ai déjà le modèle de données en tête. Il me manque les conventions de
+  bootstrap d'un module neuf et la structure exacte d'une resource Filament ici.
+
+● 2 background agents launched (↓ to manage)
+   ├ Explore module bootstrap conventions
+   └ Explore Filament resource conventions
+
+● Pendant que les agents explorent, je vérifie un point d'architecture : comment
+  câbler proprement le bloc « Invités » dans la feuille cafétariat de
+  MealDelivery sans créer de dépendance inversée.
+
+  Searched for 1 pattern, listed 1 directory (ctrl+o to expand)
+
+● Point notable : aucun précédent de couplage inter-modules dans ce dépôt — les
+  modules n'importent que leur propre namespace et AcMarche\App. Ça pèse sur le
+  choix d'emplacement. Je regarde la vue cafétariat.
+  Read 1 file (ctrl+o to expand)
+
+● Un point que seul vous pouvez trancher, et qui détermine l'architecture.
+
+● User answered Claude's questions:
+  ⎿  · Qui va encoder les réservations d'invités au quotidien ? → Le service 
+     repas à domicile
+     · Où placer le code des résidents et réservations d'invités ? → Dans 
+     MealDelivery (recommandé si même équipe)
+     · Pour la facturation mensuelle, faut-il un montant ou de simples comptages
+     ? → Comptages uniquement
+
+● Agent "Explore Filament resource conventions" finished · 3m 44s
+
+● Agent "Explore module bootstrap conventions" finished · 4m 17s
+
+● Les deux explorations confirment le choix : l'option ResidentMeal aurait exigé
+  d'insérer une ligne modules id 55 (absente), de réparer le rôle
+  ROLE_CPAS_MEAL (id 40, module_id NULL), d'enregistrer le panel dans
+  bootstrap/providers.php et de déclarer le module dans tests/Pest.php +
+  phpunit.xml. Rester dans MealDelivery évite tout ça.
+
+  Deux vérifications avant d'écrire le plan.
+
+  Read 2 files, ran 1 shell command (ctrl+o to expand)
+
+● Tout est vérifié. J'écris le plan.
+
+● Updated plan
+  ⎿  /plan to preview
+
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/calm-wishing-river.md · /plan to edit
+     Réservations de repas invités pour les résidents
+
+     Contexte
+
+     Les familles des résidents peuvent venir dîner (midi) à la maison de repos.
+     Ces
+     réservations sont aujourd'hui encodées dans care+, qui ne donne aucune
+     vision
+     du nombre d'invités déjà prévus et rend l'extraction mensuelle pour la
+     facturation
+     laborieuse.
+
+     Concrètement, l'information transmise à la cuisine est recopiée à la main
+     en bas
+     de la feuille cafétariat (cf. data/20260618135256244.pdf : « Mme Lo… + 2
+     repas »,
+     « Mme Herget + 1 repas », « M Dolcette + 3 repas »). Cette feuille est
+     produite par
+     RouteSheetsAggregator::build()['cafeteria'] et rendue par
+     route-sheet-pdf.blade.php. Les lignes manuscrites sont le seul morceau non
+     informatisé du processus.
+
+     Résultat visé : encoder résident + date + nombre de repas invités (ventilés
+     menu 1 / menu 2) dans l'intranet, voir les totaux par jour et par mois, et
+     faire
+     apparaître le bloc « Invités » directement sur la feuille cafétariat
+     imprimée.
+
+     Décisions actées
+
+     - Emplacement : module MealDelivery. Ce sont les mêmes personnes (service
+       repas
+       à domicile) qui encodent et qui impriment la feuille cafétariat. Le
+       module est déjà
+       câblé (panel dans bootstrap/providers.php, connexion maria-meal-delivery,
+       suites dans tests/Pest.php et phpunit.xml) : aucun bootstrap à faire.
+       Le scaffold modules/ResidentMeal reste inutilisé — l'activer aurait exigé
+       d'insérer une ligne modules id 55 (absente en base), de réparer le rôle
+       ROLE_CPAS_MEAL (id 40, module_id NULL), d'enregistrer son panel et de
+       déclarer
+       le module dans deux fichiers de test.
+     - Pas de quota pour l'instant (phase 2 éventuelle).
+     - Midi uniquement → pas de colonne « service ».
+     - Pas de potage, pas de régimes → uniquement des quantités menu 1 / menu 2.
+     - Facturation = comptages, pas de montant en euros.
+     - Résidents encodés à la main, pas d'import care+.
+
+     Hypothèse à valider en cours de route
+
+     Une réservation = un résident, une date, N menu 1 + M menu 2 (contrainte
+     d'unicité resident_id + date). Une famille panachant les menus tient donc
+     sur une
+     seule ligne. Le nombre d'invités est la somme des deux colonnes — pas de
+     colonne
+     redondante.
+
+     Implémentation
+
+     1. Migrations — modules/MealDelivery/database/migrations/
+
+     Style greenfield du module : classe anonyme,
+     Schema::connection('maria-meal-delivery'),
+     garde hasTable() en early-return (nécessaire : maria-meal-delivery est dans
+     DEDICATED_CONNECTIONS de tests/TestCase.php précisément parce que ses
+     migrations
+     sont idempotentes).
+
+     - 2026_09_01_000001_create_residents_table.php
+       id, last_name, first_name, room (nullable), is_active (bool, défaut
+       true),
+       notes (text nullable), timestamps.
+     - 2026_09_01_000002_create_guest_reservations_table.php
+       id, resident_id (FK residents, cascadeOnDelete), date (date),
+       menu1_count (int, défaut 0), menu2_count (int, défaut 0), notes (text
+       nullable),
+       user_add (string 100, nullable), timestamps,
+       unique(['resident_id', 'date']).
+
+     2. Modèles — src/Models/
+
+     Conventions du module : final, attributs
+     #[Connection('maria-meal-delivery')] +
+     #[Fillable([...])], __toString(), casts() en méthode, docblocks @return 
+     BelongsTo<X, Y>.
+
+     - Resident.php — hasMany(GuestReservation::class), casts : is_active => 
+       bool.
+       Hook booted() supprimant les réservations à la suppression, comme
+       Client::booted() le fait pour ses commandes (le module ne se repose pas
+       sur la
+       cascade SQL seule).
+     - GuestReservation.php — belongsTo(Resident::class), casts : date => 
+       'date',
+       menu1_count/menu2_count => integer. Utilise le trait
+       AcMarche\Security\Models\HasUserAdd + self::bootHasUser() dans booted()
+       pour renseigner user_add automatiquement (même montage que
+       Models/Note.php).
+       Accesseur total_count = somme des deux menus.
+
+     3. Policies — src/Policies/
+
+     ResidentPolicy.php et GuestReservationPolicy.php : final class, use 
+     MealDeliveryAuthorization;,
+     viewAny/view/create/update/delete renvoyant $this->canAccess($user),
+     restore()/forceDelete() à false. Auto-découvertes par Laravel
+     (Models\X → Policies\XPolicy), rien à enregistrer.
+
+     4. Services d'agrégation — src/Service/
+
+     Deux services, à l'image du couple existant RouteSheetsAggregator (par
+     date) /
+     AllClientsMonthlyOrdersAggregator (par mois). Ne pas toucher à
+     RouteSheetsAggregator : il porte la logique délicate RF/DF/récipient
+     jetable
+     documentée dans .ai/rules/meal-delivery.md.
+
+     - DailyGuestsAggregator::build(string $date): array{date, rows, totals}
+       rows : {resident_name, room, menu1, menu2, total, notes} triées par nom.
+       totals : {residents, menu1, menu2, guests}.
+     - MonthlyGuestsAggregator::build(int $month, int $year): array{period, 
+       rows, totals}
+       rows : {resident, menu1_total, menu2_total, guests_total} par résident.
+
+     5. Intégration à la feuille cafétariat
+
+     C'est le cœur de la demande : remplacer les lignes manuscrites.
+
+     - src/Filament/Resources/Weeks/Pages/CafeteriaSheet.php — ajouter une
+       propriété
+       publique array $guests, hydratée dans mount() via DailyGuestsAggregator
+       (jamais lue depuis la query string au render, cf. .ai/rules/pages.md), et
+       la
+       passer à la vue PDF dans downloadPdf().
+     - Nouveau partiel resources/views/.../weeks/pages/_guests-table.blade.php —
+       bloc
+       « Invités » (Résident | Chambre | Menu 1 | Menu 2 | Total + ligne de
+       totaux),
+       qui ne rend rien si aucune réservation ce jour-là.
+     - cafeteria-sheet.blade.php — inclure le partiel après le @include de
+       _route-sheet-table.
+     - route-sheet-pdf.blade.php — insérer le même bloc après les Totaux, sous 
+       garde
+       @if (! empty($guests['rows'])) avec $guests optionnel. Cette vue est
+       partagée
+       avec RouteSheets::downloadRoutePdf() (feuilles de tournée, sans invités)
+       et est
+       rendue sans $guests par le test existant CafeteriaSheetTest — elle doit
+       tolérer
+       la variable absente.
+
+     6. Resources Filament
+
+     Structure maison : dossier pluriel, classe singulière, Schemas/XForm,
+     Schemas/XInfoList, Tables/XTables avec configure() statique, pages
+     List/Create/Edit/View. Libellés en français. Navigation :
+     getNavigationIcon() /
+     getNavigationLabel() en méthodes statiques, #[Override] $navigationSort en
+     propriété.
+     Les sorts 1–6 sont pris → Résidents 7, Réservations 8, Invités par mois 9,
+     groupés
+     sous $navigationGroup = 'Invités'.
+
+     - src/Filament/Resources/Residents/ — CRUD simple, calqué sur
+       Resources/Diets/.
+       ViewResident déclare un GuestReservationsRelationManager réutilisant
+       GuestReservationTables::inline() — exactement le montage
+       ViewClient + OrdersRelationManager + ClientTables::inline().
+       Le relation manager doit surcharger isReadOnly(): bool { return false; },
+       sinon ses actions sont refusées avant la policy (.ai/rules/filament.md).
+     - src/Filament/Resources/GuestReservations/ — CRUD. Le formulaire porte un
+       Select résident (->relationship('resident', ...), searchable, preload),
+       un DatePicker date, deux TextInput::numeric() menu 1 / menu 2, un
+       Textarea notes.
+       Validation : au moins un des deux compteurs ≥ 1, et unicité résident +
+       date
+       (règle unique ignorant l'enregistrement courant en édition).
+       Table : defaultSort('date', 'desc'), filtre par date et par résident,
+       summarizers Sum sur menu 1 / menu 2 / total → c'est la vision globale par
+       jour.
+
+     7. Page mensuelle — facturation
+
+     - src/Filament/Pages/GuestsByMonth.php — décalque de
+       Filament/Pages/OrdersByMonth.php :
+       props #[Url] $month/$year normalisées dans mount(), action « Rechercher
+       un mois »
+       (deux Select), action « Télécharger PDF » via streamDownload + pdf() +
+       withBrowsershot() en reprenant la config pdf.node_modules_path /
+       pdf.chrome_path.
+     - resources/views/filament/pages/guests-by-month.blade.php —
+       <x-filament-panels::page>,
+       table HTML + <style> scopé, liens vers ResidentResource::getUrl('view', 
+       ...).
+     - resources/views/filament/pages/guests-by-month-pdf.blade.php — document
+       HTML
+       autonome, même charte que orders-by-month-pdf.blade.php.
+
+     8. Tests — modules/MealDelivery/tests/
+
+     Le module n'a pas de factories : les fixtures se construisent en
+     Model::create([...])
+     - fake(). beforeEach :
+       Filament::setCurrentPanel(Filament::getPanel('meal-delivery-panel'))
+       puis actingAs(User::factory()->create(['is_administrator' => true])).
+       Toujours ->loadTable() avant assertCanSeeTableRecords()
+       (.ai/rules/tests.md).
+
+     - Unit/DailyGuestsAggregatorTest.php — totaux, tri, jour sans réservation.
+     - Unit/MonthlyGuestsAggregatorTest.php — regroupement par résident, bornes
+       du mois.
+     - Feature/CreateResidentTest.php, Feature/DeleteResidentTest.php (cascade
+       des réservations).
+     - Feature/CreateGuestReservationTest.php — création, refus si les deux
+       compteurs sont à 0,
+       refus d'un doublon résident + date.
+     - Feature/GuestsByMonthTest.php — rendu de la page et du PDF.
+     - Feature/CafeteriaSheetTest.php — étendre l'existant : le bloc « Invités »
+       apparaît
+       sur la page et dans le PDF quand il y a des réservations, et les 3 tests
+       actuels
+       (dont celui qui rend route-sheet-pdf sans $guests) restent verts.
+
+     Ce qui n'est pas touché
+
+     composer.json, bootstrap/providers.php, phpunit.xml, tests/Pest.php,
+     tests/TestCase.php, modules/ResidentMeal/, RouteSheetsAggregator,
+     KitchenExportAggregator, AllClientsMonthlyOrdersAggregator.
+
+     Les invités n'entrent pas dans l'export cuisine (KitchenExportAggregator,
+     qui
+     filtre at_cafeteria = false) ni dans la facturation des repas à domicile.
+     Si la
+     cuisine doit aussi les voir dans son propre export, c'est un ajout
+     ultérieur d'une
+     ligne — à confirmer avec elle.
+
+     Vérification
+
+     1. php artisan migrate — crée residents et guest_reservations dans
+        cpas_repas.
+     2. vendor/bin/pest modules/MealDelivery/tests --compact — toute la suite du
+        module,
+        pour prouver que l'intégration à la feuille cafétariat n'a rien cassé.
+     3. vendor/bin/pint --dirty --format agent.
+     4. Manuel, dans le panel /meal-delivery :
+        - créer 2–3 résidents, leur ajouter des réservations sur une même date ;
+        - vérifier les summarizers de la table Réservations (vision globale du
+          jour) ;
+        - ouvrir Semaines → une semaine → un jour → Cafétariat et vérifier que
+          le bloc
+          « Invités » remplace les lignes manuscrites, à l'écran, à l'impression
+          navigateur
+          et dans le PDF ;
+        - ouvrir une feuille de tournée classique et confirmer qu'aucun bloc
+          invités
+          n'y apparaît ;
+        - « Invités par mois » → PDF, et comparer aux comptages attendus.
+     5. Demander à l'utilisateur de lancer la suite complète : php artisan test 
+        --compact.
+
+● Le plan est approuvé. Je commence par lire les gabarits exacts dont je vais
+  m'inspirer.
+
+  Searched for 1 pattern, ran 2 shell commands (ctrl+o to expand)
+
+● Je crée les migrations.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Maintenant les modèles.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Les policies, en reprenant le gabarit ClientPolicy.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Maintenant les deux services d'agrégation.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Maintenant la resource Residents.
+
+  Read 1 file, ran 2 shell commands (ctrl+o to expand)
+
+● La resource GuestReservations. Je vérifie d'abord l'API des summarizers
+  Filament v5 pour une colonne calculée.
+
+  Called laravel-boost (ctrl+o to expand)
+
+● Summarizer::make()->using() confirmé, et la première colonne ne peut pas
+  porter de summarizer. Je crée la resource GuestReservations.
+
+  Read 2 files, ran 2 shell commands (ctrl+o to expand)
+● Maintenant l'intégration à la feuille cafétariat — le cœur de la demande.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Reste le PDF partagé avec les feuilles de tournée — il doit tolérer l'absence
+  de $guests.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Maintenant la page mensuelle. Je lis les vues à décalquer.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Vérifions d'abord que l'existant n'est pas cassé, en particulier le PDF
+  partagé rendu sans $guests.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● 83 tests passent — l'existant est intact. J'écris maintenant les tests. Voyons
+  le style exact.
+
+  Read 1 file (ctrl+o to expand)
+
+● Je crée les tests unitaires des agrégateurs.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Les tests unitaires passent. Maintenant les tests fonctionnels.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Les deux règles de validation personnalisées fonctionnent. Reste la page
+  mensuelle et l'extension du test cafétariat.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Enfin, l'extension du test cafétariat — le point qui prouve que les lignes
+  manuscrites sont remplacées.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Ajoutons un test sur la « vision globale » — le summarizer calculé et le
+  relation manager, encore non couverts.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Deux ajustements : les summarizers ont besoin d'un ID explicite, et un
+  relation manager se teste directement (il n'est pas rendu dans la page
+  parente).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Pint puis la suite complète du module.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● 110 tests passent (83 existants + 27 nouveaux). Avant de migrer, voyons ce qui
+  est en attente — migrate toucherait tous les modules.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Seules mes deux migrations sont en attente. Je les applique.
+
+  Called laravel-boost 2 times, ran 1 shell command (ctrl+o to expand)
+● Les deux tables sont créées dans cpas_repas avec l'index unique et la cascade.
+  Récapitulons les changements.
+
+  Called laravel-boost, ran 1 shell command (ctrl+o to expand)
+
+● C'est terminé. Phase 1 livrée dans MealDelivery.
+
+  Ce qui a été fait
+
+  Données — deux tables dans cpas_repas : residents et guest_reservations (index
+  unique resident_id + date, cascade à la suppression). Une réservation = un
+  résident, une date, N menu 1 + M menu 2 ; le nombre d'invités est la somme des
+  deux.
+
+  Encodage — deux resources Filament sous le groupe de navigation « Invités » :
+  Résidents (CRUD, avec les réservations du résident en relation manager) et
+  Réservations invités. Le formulaire refuse une réservation à zéro repas et un
+  doublon résident + date, en interrogeant le modèle directement plutôt que la
+  règle unique de Laravel — celle-ci aurait tapé sur la mauvaise connexion.
+
+  Vision globale — la table des réservations porte des summarizers sur menu 1,
+  menu 2 et le total invités, plus des filtres par résident et « à venir ».
+
+  Feuille cafétariat — le bloc « Invités des résidents » s'imprime désormais
+  sous les totaux, à l'écran et en PDF. C'est le remplacement direct des trois
+  lignes manuscrites de votre PDF.
+
+  Facturation — page « Invités par mois » avec export PDF, par résident, ventilé
+  menu 1 / menu 2.
+
+  Vérification
+
+  110 tests passent dans le module (83 existants + 27 nouveaux), Pint est
+  propre, et les migrations sont appliquées — j'ai confirmé les deux tables en
+  base.
+
+  Un point m'a demandé une attention particulière : route-sheet-pdf.blade.php
+  est partagé avec les feuilles de tournée, qui n'ont pas d'invités. Le bloc est
+  donc sous garde, et un test vérifie explicitement qu'un rendu sans variable
+  $guests reste correct.
+
+  À faire de votre côté
+
+  Lancez la suite complète : php artisan test --compact.
+
+  Ensuite, dans /meal-delivery : créez quelques résidents, encodez des
+  réservations sur une même date, et ouvrez Semaines → un jour → Cafétariat pour
+  comparer avec votre feuille papier.
+
+  Deux points restés ouverts, volontairement hors périmètre : les invités
+  n'entrent pas dans l'export cuisine (KitchenExportAggregator, qui ne regarde
+  que les repas hors cafétéria) — à confirmer avec la cuisine si elle les veut
+  aussi de son côté. Et le quota de réservations viendra en phase 2 : la
+  structure s'y prête, il suffira d'ajouter une table de quotas par date et une
+  règle de validation.
+
+✻ Cooked for 14m 45s · done 15:32
+
+❯ il n'y a pas de résident, ce sont les clients qui utilisent la cafétariat     
+  use_cafetaria property                                                        
+  guestReservation est une bonne idée                                           
+
+● Correction importante — merci. Les « résidents » sont en fait les Client avec
+  use_cafeteria = true, pas une nouvelle entité. Je repointe GuestReservation
+  vers Client et je supprime tout le volet Resident.
+
+  D'abord vérifier que les tables que j'ai créées sont bien vides avant de les
+  annuler.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Les deux tables sont vides. J'annule les migrations et je supprime tout le
+  volet Resident.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● La migration, repointée vers clients.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Le modèle GuestReservation, et la relation côté Client.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Les deux agrégateurs, repointés vers Client.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Le formulaire, filtré sur les clients cafétéria.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Le relation manager passe sous Clients.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Maintenant les vues du bloc « Invités » et la page mensuelle.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Il reste les tests à réécrire.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Maintenant les tests fonctionnels.
+
+  Ran 4 shell commands (ctrl+o to expand)
+
+● Reste le test cafétariat et la cascade de suppression côté client.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Enfin, la cascade de suppression : elle appartient désormais à
+  DeleteClientTest.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Migration appliquée, puis vérification du schéma.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● La migration est passée (DONE) ; l'erreur qui suit vient de l'écriture du log,
+  pas de la migration. Vérifions.
+  Called laravel-boost, ran 1 shell command (ctrl+o to expand)
+
+● La table existe mais sans la clé étrangère ni l'index unique. Ma garde
+  hasTable() a masqué un échec partiel : le premier run a créé la table puis
+  échoué, le second est sorti en avance et a marqué la migration comme faite.
+  J'enquête.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● clients.id est un int(11) signé (base legacy Symfony), pas un bigint unsigned
+  — d'où l'échec de la FK. Voyons comment orders référence clients.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Confirmé : toutes les tables référençant clients utilisent int(11) signé. Mon
+  foreignId() générait un bigint unsigned incompatible. Je nettoie et je
+  corrige.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● 31 ms cette fois (contre 1,5 ms). Vérifions que la FK et l'index unique sont
+  bien là.
+
+  Called laravel-boost (ctrl+o to expand)
+
+● Tout est en place. Suite complète et Pint pour finir.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Corrigé. GuestReservation pointe maintenant vers Client, et tout le volet
+  Resident a disparu (modèle, resource, policy, migration, tests).
+
+  Ce qui a changé
+
+  guest_reservations porte un client_id, avec unicité client_id + date et
+  cascade à la suppression du client. Le formulaire ne propose que les clients
+  use_cafeteria = true et actifs — un test le vérifie explicitement. Les
+  réservations apparaissent sur la fiche client via un relation manager « Repas
+  invités », masqué pour les clients qui ne mangent pas à la cafétéria.
+
+  Le bloc imprimé s'appelle désormais « Repas invités » et affiche nom + adresse
+  du client (rue, numéro, étage), cohérent avec les lignes clients de la même
+  feuille. La page mensuelle liste les clients au lieu des résidents.
+
+  Un piège rencontré, qui mérite votre attention
+
+  Ma première migration utilisait foreignId('client_id'), qui génère un bigint 
+  unsigned. Or clients.id est un int(11) signé hérité du schéma Symfony — comme
+  orders.client_id, notes.client_id, client_diet.client_id. La clé étrangère a
+  donc échoué.
+
+  Le problème est que ma garde d'idempotence hasTable() a masqué l'échec : le
+  premier passage a créé la table puis planté sur l'ALTER TABLE, et le second
+  est ressorti en avance en marquant la migration comme réussie. La table
+  existait, sans FK ni index unique. Les tests ne l'ont pas vu parce qu'ils
+  tournent sur SQLite, où foreignId passe sans broncher.
+
+  Je ne l'ai détecté qu'en inspectant le schéma réel après migration. La
+  migration utilise maintenant integer('client_id') avec la FK déclarée
+  explicitement, et j'ai confirmé en base la présence de
+  guest_reservations_client_id_foreign (cascade) et de l'index unique.
+
+  C'est une leçon qui dépasse ce ticket : dans ce module, toute nouvelle table
+  référençant clients doit utiliser integer(), pas foreignId(). Voulez-vous que
+  je l'enregistre dans .ai/rules/meal-delivery.md via record-rule ?
+
+  État
+
+  109 tests passent dans le module, Pint est propre, la migration est appliquée
+  et le schéma vérifié en base.
+
+  À faire de votre côté : php artisan test --compact pour la suite complète,
+  puis un essai réel — encodez une réservation pour un client cafétéria et
+  ouvrez Semaines → un jour → Cafétariat.
+
+  Deux points restent hors périmètre, comme convenu : les invités n'entrent pas
+  dans l'export cuisine, et le quota viendra en phase 2.
+
+✻ Worked for 7m 42s · done 15:49
+
+❯ les invités mangeront toujours à la cafétariat, donc sur place, il n'y aura   
+  jamais de transport pour ces repas, pas de route sheet pour eux               
+  les clients sont des soit des résidents du home, soit des "citoyens" qui      
+  commande au home                                                              
+
+● Ces deux précisions confirment la conception, mais je veux vérifier un point :
+  la page « Feuilles de route » affiche aussi une section cafétéria. Regardons
+  si le bloc invités doit y apparaître.
+
+  Read 1 file (ctrl+o to expand)
+
+● La vue « Feuilles de route » n'itère que $sheets['routes'] — la section
+  cafétéria n'y est pas rendue, donc les invités n'y apparaissent jamais. Votre
+  invariant est déjà respecté, mais il n'était pas verrouillé par un test. Je
+  l'ajoute.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Vos deux précisions confirment la conception en place. J'ai vérifié plutôt que
+  supposé.
+
+  Pas de feuille de route pour les invités — c'était déjà le cas, à trois
+  niveaux : RouteSheetsAggregator ignore complètement les invités,
+  route-sheets.blade.php n'itère que $sheets['routes'] (la section cafétéria n'y
+  est même pas rendue), et RouteSheets::downloadRoutePdf() ne passe pas
+  $guests, donc le bloc reste sous sa garde dans le PDF partagé.
+
+  Ce n'était en revanche verrouillé par aucun test. J'en ai ajouté un : avec 5
+  repas invités encodés ce jour-là, la page « Feuilles de route » ne doit rien
+  afficher. 110 tests passent, Pint est propre.
+
+  La taxonomie des clients confirme que use_cafeteria est bien le bon filtre :
+  les résidents du home mangent sur place, les citoyens sont livrés. Le
+  formulaire ne propose donc que les résidents, ce qui est exactement le
+  comportement voulu.
+
+  Un point de vocabulaire que je vous laisse trancher : l'interface dit « Client
+  » partout, avec l'aide « Seuls les clients qui mangent à la cafétéria sont
+  proposés ». Puisque dans ce contexte il ne peut s'agir que de résidents, je
+  peux relibeller le champ et les colonnes en « Résident » — sans rien changer
+  au modèle, qui reste Client. Dites-moi si vous le voulez, sinon je laisse tel
+  quel.
+
+  Reste ouvert, comme convenu : les invités hors export cuisine, et le quota en
+  phase 2. Et il y a toujours la règle sur integer('client_id') plutôt que
+  foreignId() que je peux enregistrer dans .ai/rules/meal-delivery.md si vous le
+  souhaitez.
+
+✻ Brewed for 1m 17s · done 16:32

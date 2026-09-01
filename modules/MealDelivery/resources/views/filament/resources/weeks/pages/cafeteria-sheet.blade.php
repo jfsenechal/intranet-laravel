@@ -71,5 +71,7 @@
         <h3 class="text-success" style="font-size:18px; font-weight:600;">Cafétariat : {{ $formattedDate }} - {{ $sheet['totals']['clients'] }} {{ \Illuminate\Support\Str::plural('client', $sheet['totals']['clients']) }}</h3>
 
         @include('meal-delivery::filament.resources.weeks.pages._route-sheet-table', ['sheet' => $sheet])
+
+        @include('meal-delivery::filament.resources.weeks.pages._guests-table', ['guests' => $guests])
     </div>
 </x-filament-panels::page>
