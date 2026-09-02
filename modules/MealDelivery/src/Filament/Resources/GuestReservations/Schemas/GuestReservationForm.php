@@ -86,9 +86,10 @@ final class GuestReservationForm
 
     /**
      * A client books at most one guest reservation per day, so the two menu
-     * counts always live on the same row.
+     * counts always live on the same row. Reused by the shortcut action on the
+     * order page, which feeds `client_id` through a hidden field.
      */
-    private static function uniquePerClientAndDate(): Closure
+    public static function uniquePerClientAndDate(): Closure
     {
         return static fn (Get $get, ?Model $record): Closure => static function (
             string $attribute,
@@ -105,7 +106,7 @@ final class GuestReservationForm
                 ->where('client_id', $clientId)
                 ->whereDate('date', CarbonImmutable::parse((string) $value)->format('Y-m-d'))
                 ->when(
-                    $record !== null,
+                    $record instanceof GuestReservation,
                     fn (Builder $query): Builder => $query->whereKeyNot($record->getKey()),
                 )
                 ->exists();
@@ -116,7 +117,7 @@ final class GuestReservationForm
         };
     }
 
-    private static function atLeastOneMeal(): Closure
+    public static function atLeastOneMeal(): Closure
     {
         return static fn (Get $get): Closure => static function (
             string $attribute,

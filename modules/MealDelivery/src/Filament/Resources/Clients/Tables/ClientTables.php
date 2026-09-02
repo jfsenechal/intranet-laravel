@@ -69,6 +69,10 @@ final class ClientTables
                     ->label('Active clients')
                     ->query(fn (Builder $query) => $query->where('is_active', true))
                     ->default(),
+
+                Filter::make('use_cafeteria')
+                    ->label('Mange à la cafétéria')
+                    ->query(fn (Builder $query) => $query->where('use_cafeteria', true)),
             ])
             ->recordActions([
                 ViewAction::make(),

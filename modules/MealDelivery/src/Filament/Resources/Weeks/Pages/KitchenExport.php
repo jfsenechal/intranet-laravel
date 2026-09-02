@@ -32,7 +32,8 @@ final class KitchenExport extends Page
      *     date: CarbonImmutable,
      *     soup_total: int,
      *     menus_total: int,
-     *     menus: array<int, array{position: int, total: int, diets: array<int, array{label: string, total: int}>}>
+     *     menus: array<int, array{position: int, total: int, diets: array<int, array{label: string, total: int}>}>,
+     *     guests: array{menu1: int, menu2: int, total: int}
      * }
      */
     public array $summary;

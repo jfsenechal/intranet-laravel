@@ -73,7 +73,7 @@
         <h3 class="text-success">REPAS A DOMICILE : <strong>{{ $formattedDate }}</strong></h3>
 
         <h4><strong>Potages :</strong> {{ $summary['soup_total'] }}</h4>
-        <h4><strong>Menus :</strong> {{ $summary['menus_total'] }}</h4>
+        <h4><strong>Menus :</strong> {{ $summary['menus_total'] }}@if ($summary['guests']['total'] > 0) <span style="font-weight: 400;">(dont {{ $summary['guests']['total'] }} {{ \Illuminate\Support\Str::plural('invité', $summary['guests']['total']) }})</span>@endif</h4>
 
         <div class="menus-grid">
             @foreach ($summary['menus'] as $menu)
@@ -104,5 +104,7 @@
                 </table>
             @endforeach
         </div>
+
+        @include('meal-delivery::filament.resources.weeks.pages._kitchen-guests-table', ['guests' => $summary['guests']])
     </div>
 </x-filament-panels::page>

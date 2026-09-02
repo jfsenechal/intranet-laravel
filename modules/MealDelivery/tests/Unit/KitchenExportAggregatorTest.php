@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\Diet;
+use AcMarche\MealDelivery\Models\GuestReservation;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Menu;
 use AcMarche\MealDelivery\Models\Order;
@@ -78,4 +79,64 @@ it('aggregates diet labels only for non-cafeteria meals', function (): void {
         ->and($summary['menus'][0]['diets'])->toBe([
             ['label' => 'Sans sel', 'total' => 2],
         ]);
+});
+
+it('adds guest menus to the total but keeps them out of the diet breakdown', function (): void {
+    $week = Week::create(['first_day' => '2026-06-15']);
+
+    $delivered = createMeal($week, atCafeteria: false, soupCount: 2, menus: [1 => 3, 2 => 1]);
+    $delivered->menus()->where('position', 1)->first()->diets()->attach(Diet::create(['name' => 'Sans sel'])->id);
+
+    GuestReservation::create([
+        'client_id' => $delivered->order->client_id,
+        'date' => '2026-06-15',
+        'menu1_count' => 2,
+        'menu2_count' => 1,
+    ]);
+
+    $summary = (new KitchenExportAggregator())->build($week, '2026-06-15');
+
+    expect($summary['menus_total'])->toBe(7)
+        ->and($summary['guests'])->toBe(['menu1' => 2, 'menu2' => 1, 'total' => 3])
+        ->and($summary['menus'][0]['total'])->toBe(3)
+        ->and($summary['menus'][0]['diets'])->toBe([['label' => 'Sans sel', 'total' => 3]])
+        ->and($summary['menus'][1]['total'])->toBe(1)
+        ->and($summary['soup_total'])->toBe(2);
+});
+
+it('counts guest menus even though guests eat at the cafeteria', function (): void {
+    $week = Week::create(['first_day' => '2026-06-15']);
+
+    $cafeteria = createMeal($week, atCafeteria: true, soupCount: 4, menus: [1 => 9]);
+
+    GuestReservation::create([
+        'client_id' => $cafeteria->order->client_id,
+        'date' => '2026-06-15',
+        'menu1_count' => 1,
+        'menu2_count' => 0,
+    ]);
+
+    $summary = (new KitchenExportAggregator())->build($week, '2026-06-15');
+
+    expect($summary['menus_total'])->toBe(1)
+        ->and($summary['guests']['total'])->toBe(1)
+        ->and($summary['menus'][0]['total'])->toBe(0);
+});
+
+it('ignores guest reservations booked on another day', function (): void {
+    $week = Week::create(['first_day' => '2026-06-15']);
+
+    $delivered = createMeal($week, atCafeteria: false, soupCount: 0, menus: [1 => 2]);
+
+    GuestReservation::create([
+        'client_id' => $delivered->order->client_id,
+        'date' => '2026-06-16',
+        'menu1_count' => 5,
+        'menu2_count' => 5,
+    ]);
+
+    $summary = (new KitchenExportAggregator())->build($week, '2026-06-15');
+
+    expect($summary['menus_total'])->toBe(2)
+        ->and($summary['guests'])->toBe(['menu1' => 0, 'menu2' => 0, 'total' => 0]);
 });
