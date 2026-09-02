@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Notes\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -41,8 +42,8 @@ final class NoteTables
                     ->boolean()
                     ->sortable(),
 
-                TextColumn::make('done_by')
-                    ->label('Done by')
+                TextColumn::make('user_add')
+                    ->label('Ajoutée par')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -52,8 +53,10 @@ final class NoteTables
                     ->default(),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

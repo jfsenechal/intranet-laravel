@@ -59,65 +59,16 @@ describe('IncomingMail Model', function (): void {
         expect($mail->mail_date)->toBeInstanceOf(CarbonImmutable::class);
     });
 
-    test('assigns first reference number for cpas department', function (): void {
+    test('keeps the reference number given to a cpas mail', function (): void {
         $mail = IncomingMail::factory()->create([
             'department' => DepartmentCourrierEnum::CPAS->value,
+            'reference_number' => '4321',
         ]);
 
-        expect($mail->reference_number)->toBe('1');
+        expect($mail->refresh()->reference_number)->toBe('4321');
     });
 
-    test('increments reference number for cpas department, ignoring any provided value', function (): void {
-        $first = IncomingMail::factory()->create([
-            'department' => DepartmentCourrierEnum::CPAS->value,
-            'reference_number' => '5',
-        ]);
-
-        $second = IncomingMail::factory()->create([
-            'department' => DepartmentCourrierEnum::CPAS->value,
-        ]);
-
-        expect($first->reference_number)->toBe('1')
-            ->and($second->reference_number)->toBe('2');
-    });
-
-    test('orders cpas reference numbers numerically not lexicographically', function (): void {
-        foreach (range(1, 9) as $number) {
-            IncomingMail::factory()->create([
-                'department' => DepartmentCourrierEnum::CPAS->value,
-            ]);
-        }
-
-        $mail = IncomingMail::factory()->create([
-            'department' => DepartmentCourrierEnum::CPAS->value,
-        ]);
-
-        expect($mail->reference_number)->toBe('10');
-    });
-
-    test('ignores non-numeric legacy references when computing the next cpas number', function (): void {
-        // Legacy rows carry values such as "-20180316" that wrap to a near
-        // UINT64 value under CAST(... AS UNSIGNED). Bypass the creating hook so
-        // the bogus value is persisted as-is.
-        IncomingMail::withoutEvents(function (): void {
-            IncomingMail::factory()->create([
-                'department' => DepartmentCourrierEnum::CPAS->value,
-                'reference_number' => '-20180316',
-            ]);
-            IncomingMail::factory()->create([
-                'department' => DepartmentCourrierEnum::CPAS->value,
-                'reference_number' => '42',
-            ]);
-        });
-
-        $mail = IncomingMail::factory()->create([
-            'department' => DepartmentCourrierEnum::CPAS->value,
-        ]);
-
-        expect($mail->reference_number)->toBe('43');
-    });
-
-    test('does not auto-assign reference number for non-cpas departments', function (): void {
+    test('keeps the reference number given to a non-cpas mail', function (): void {
         $mail = IncomingMail::factory()->create([
             'department' => DepartmentCourrierEnum::VILLE->value,
             'reference_number' => 'VILLE-2024-001',

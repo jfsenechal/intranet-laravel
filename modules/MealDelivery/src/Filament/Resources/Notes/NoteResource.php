@@ -7,7 +7,9 @@ namespace AcMarche\MealDelivery\Filament\Resources\Notes;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Pages\CreateNote;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Pages\EditNote;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Pages\ListNotes;
+use AcMarche\MealDelivery\Filament\Resources\Notes\Pages\ViewNote;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteForm;
+use AcMarche\MealDelivery\Filament\Resources\Notes\Schemas\NoteInfoList;
 use AcMarche\MealDelivery\Filament\Resources\Notes\Tables\NoteTables;
 use AcMarche\MealDelivery\Models\Note;
 use Filament\Resources\Resource;
@@ -43,6 +45,11 @@ final class NoteResource extends Resource
         return NoteForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return NoteInfoList::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return NoteTables::configure($table);
@@ -53,6 +60,7 @@ final class NoteResource extends Resource
         return [
             'index' => ListNotes::route('/'),
             'create' => CreateNote::route('/create'),
+            'view' => ViewNote::route('/{record}/view'),
             'edit' => EditNote::route('/{record}/edit'),
         ];
     }

@@ -181,8 +181,6 @@ final class IncomingMailForm
      */
     private static function getFieldsColumn(?array $imapSource): Group
     {
-        $isCpas = DepartmentScope::getAssignableDepartment() === DepartmentCourrierEnum::CPAS;
-
         return Group::make()
             ->columnSpan(['default' => 1, 'lg' => 5])
             ->schema([
@@ -198,7 +196,6 @@ final class IncomingMailForm
                         TextInput::make('reference_number')
                             ->label('Numéro')
                             ->required()
-                            ->default(fn (): ?string => $isCpas ? (string) IncomingMail::nextCpasReferenceNumber() : null)
                             ->maxLength(255)
                             ->columnSpan(1),
                         DatePicker::make('mail_date')

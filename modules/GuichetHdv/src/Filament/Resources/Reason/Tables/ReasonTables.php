@@ -24,6 +24,11 @@ final class ReasonTables
                     ->label('Motif')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('service')
+                    ->label('Service')
+                    ->badge()
+                    ->placeholder('Tous')
+                    ->sortable(),
             ])
             ->defaultSort('content')
             ->recordActions([

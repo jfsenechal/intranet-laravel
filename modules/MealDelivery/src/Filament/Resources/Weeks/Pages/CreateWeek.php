@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Pages;
 
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
-use Carbon\CarbonImmutable;
+use AcMarche\MealDelivery\Service\WeekDaysBuilder;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
 
@@ -26,11 +26,7 @@ final class CreateWeek extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if (empty($data['days']) && ! empty($data['first_day'])) {
-            $start = CarbonImmutable::parse($data['first_day'])->startOfWeek();
-
-            $data['days'] = collect(range(0, 4))
-                ->map(fn (int $offset): string => $start->addDays($offset)->format('Y-m-d'))
-                ->all();
+            $data['days'] = (new WeekDaysBuilder())->fullWeek($data['first_day']);
         }
 
         return $data;

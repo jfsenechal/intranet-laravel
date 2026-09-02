@@ -20,8 +20,3 @@ Only the attachment holds the real content. Never seed form fields from `$record
 Add the same exclusion to any new query that lists or notifies mail.
 
 `EditIncomingMail::validateDraft()` clears the flag from `afterSave()`, never inline: `EditRecord::save()` swallows a validation failure and returns, so clearing it next to the `save()` call would publish a mail the form rejected. The method checks `$this->record->is_draft` afterwards to decide whether to redirect.
-
-## The CPAS reference lookup needs its composite index
-`IncomingMail::nextCpasReferenceNumber()` does `max(CAST(reference_number AS SIGNED))` filtered on `department`. The cast makes the single-column `reference_number` index unusable, and there is no index on `department`, so the query full-scans `incoming_mails` — 1.9s against production's 166k rows. It runs on every "Traiter" modal a CPAS admin opens (InboxTables `fillForm`) and on every CPAS insert (the `creating` hook), so it is felt as "the modal is slow".
-
-`incoming_mails_department_reference_number_index` on `(department, reference_number)` turns it into an index-only ref lookup: 1.9s → 8ms. Keep it. If the lookup is ever rewritten, keep the leading `department` column and read only `reference_number`, or the covering plan is lost.

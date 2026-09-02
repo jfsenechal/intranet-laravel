@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Weeks\Pages;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\MealDelivery\Models\Week;
 use AcMarche\MealDelivery\Policies\Concerns\MealDeliveryAuthorization;
+use AcMarche\MealDelivery\Service\DailyGuestsAggregator;
 use AcMarche\MealDelivery\Service\RouteSheetsAggregator;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -30,6 +31,14 @@ final class CafeteriaSheet extends Page
      */
     public array $sheet;
 
+    /**
+     * Guest meals booked by cafeteria clients for that day. They used to be written by
+     * hand at the bottom of this sheet before being handed to the kitchen.
+     *
+     * @var array{date: CarbonImmutable, rows: list<array<string, mixed>>, totals: array<string, int>}
+     */
+    public array $guests;
+
     #[Override]
     protected static string $resource = WeekResource::class;
 
@@ -47,6 +56,7 @@ final class CafeteriaSheet extends Page
         $this->record = $record;
         $this->date = CarbonImmutable::parse($date)->format('Y-m-d');
         $this->sheet = (new RouteSheetsAggregator())->build($record, $this->date)['cafeteria'];
+        $this->guests = (new DailyGuestsAggregator())->build($this->date);
     }
 
     public function getTitle(): string
@@ -74,6 +84,7 @@ final class CafeteriaSheet extends Page
                     ->view('meal-delivery::filament.resources.weeks.pages.route-sheet-pdf', [
                         'date' => CarbonImmutable::parse($this->date),
                         'sheet' => $this->sheet,
+                        'guests' => $this->guests,
                         'heading' => 'Cafétariat : '.CarbonImmutable::parse($this->date)->translatedFormat('l j F Y'),
                     ])
                     ->withBrowsershot(function (Browsershot $browsershot): void {

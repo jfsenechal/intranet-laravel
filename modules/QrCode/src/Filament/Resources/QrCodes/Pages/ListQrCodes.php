@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\QrCode\Filament\Resources\QrCodes\Pages;
 
-use AcMarche\QrCode\Filament\Pages\GenerateQrCode;
+use AcMarche\QrCode\Filament\Pages\ChooseQrCodeAction;
 use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
@@ -26,7 +26,7 @@ final class ListQrCodes extends ListRecords
             Action::make('generate')
                 ->label('Générer un QR code')
                 ->icon('heroicon-o-plus')
-                ->url(GenerateQrCode::getUrl()),
+                ->url(ChooseQrCodeAction::getUrl()),
         ];
     }
 }

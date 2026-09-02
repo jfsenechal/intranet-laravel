@@ -20,6 +20,15 @@ final class OrdersRelationManager extends RelationManager
         return 'Commandes ('.$ownerRecord->orders()->count().')';
     }
 
+    /**
+     * The panel makes relation managers read-only on resource view pages, which
+     * denies every EditAction; the orders listed here are meant to be editable.
+     */
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     public function table(Table $table): Table
     {
         return ClientTables::inline($table);

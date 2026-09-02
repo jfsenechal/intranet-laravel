@@ -15,7 +15,7 @@ beforeEach(function (): void {
     $this->actingAs(User::factory()->create(['is_administrator' => true]));
 });
 
-it('fills the five week days when creating a week', function (): void {
+it('fills the seven week days when creating a week', function (): void {
     livewire(CreateWeek::class)
         ->fillForm(['first_day' => '2026-06-17'])
         ->call('create')
@@ -29,5 +29,7 @@ it('fills the five week days when creating a week', function (): void {
         '2026-06-17',
         '2026-06-18',
         '2026-06-19',
+        '2026-06-20',
+        '2026-06-21',
     ]);
 });

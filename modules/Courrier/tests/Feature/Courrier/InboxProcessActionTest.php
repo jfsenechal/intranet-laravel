@@ -63,7 +63,7 @@ it('mounts the process action for a mail with a single attachment', function ():
         ->assertHasNoActionErrors();
 });
 
-it('pre-fills the next cpas reference number on the process action', function (): void {
+it('leaves the reference number empty on the process action', function (): void {
     $fakeMailbox = new FakeMailbox(folders: [
         new FakeFolder('inbox', messages: [fakeMailWithAttachment(1)]),
     ]);
@@ -80,7 +80,7 @@ it('pre-fills the next cpas reference number on the process action', function ()
 
     livewire(Inbox::class)
         ->mountAction(TestAction::make('process')->table('0'))
-        ->assertActionDataSet(['reference_number' => '2']);
+        ->assertActionDataSet(['reference_number' => '']);
 });
 
 it('stores the category chosen when processing an inbox mail', function (): void {
@@ -100,6 +100,7 @@ it('stores the category chosen when processing an inbox mail', function (): void
 
     livewire(Inbox::class)
         ->callAction(TestAction::make('process')->table('0'), [
+            'reference_number' => '4321',
             'mail_date' => now()->format('Y-m-d'),
             'sender' => 'ACME SA',
             'category_id' => $category->id,

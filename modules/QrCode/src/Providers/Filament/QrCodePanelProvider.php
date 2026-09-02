@@ -46,6 +46,7 @@ final class QrCodePanelProvider extends PanelProvider
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\QrCode\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\QrCode\\Filament\\Pages')
             ->pages([
+                \AcMarche\QrCode\Filament\Pages\ChooseQrCodeAction::class,
                 \AcMarche\QrCode\Filament\Pages\GenerateQrCode::class,
             ])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\QrCode\\Filament\\Widgets')
