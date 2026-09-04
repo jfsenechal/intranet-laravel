@@ -7,7 +7,9 @@ use AcMarche\Issep\Filament\Pages\StationH24;
 use AcMarche\Issep\Tests\IssepApiFake;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
 use function Pest\Livewire\livewire;
@@ -147,5 +149,75 @@ describe('history', function (): void {
             ->assertSuccessful()
             ->loadTable()
             ->assertNotified();
+    });
+});
+
+describe('raw data', function (): void {
+    /**
+     * The table shows the index decoded and translated; the modal is where the fields it was
+     * built from can be read, so it holds the /belaqi row as the API spelled it.
+     */
+    it('shows the payload of the readings as the API sent them', function (): void {
+        $payload = livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->assertActionVisible(TestAction::make('raw')->table())
+            ->instance()
+            ->getRawPayload();
+
+        expect($payload)
+            ->toContain('"configId": '.IssepApiFake::CONFIG_WITH_READING)
+            ->toContain('"aqiValue": 3')
+            ->toContain(IssepApiFake::apiTime(Carbon::now()->subHour()));
+    });
+
+    it('holds the same window as the table', function (): void {
+        $component = livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->filterTable('period', '24');
+
+        expect($component->instance()->getRawPayload())
+            ->not->toContain(IssepApiFake::apiTime(Carbon::now()->subDays(2)));
+
+        expect($component->filterTable('period', '144')->instance()->getRawPayload())
+            ->toContain(IssepApiFake::apiTime(Carbon::now()->subDays(2)));
+    });
+
+    /**
+     * The payload never travels back to the server to be copied: the modal's copy button
+     * carries it in the click handler the browser runs, so that is what is asserted.
+     */
+    it('offers a copy button carrying the payload to the clipboard', function (): void {
+        $rawAction = livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->loadTable()
+            ->assertActionVisible(TestAction::make('raw')->table())
+            ->instance()
+            ->getTable()
+            ->getAction('raw');
+
+        $copyAction = $rawAction->getExtraModalFooterActions()['copy'];
+
+        expect($copyAction->getAlpineClickHandler())
+            ->toContain('clipboard.writeText')
+            ->toContain('FilamentNotification')
+            ->toContain('aqiValue');
+    });
+
+    it('says so when the station has nothing on the period', function (): void {
+        $payload = livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITHOUT_READING])
+            ->loadTable()
+            ->instance()
+            ->getRawPayload();
+
+        expect($payload)->toBe('Aucun relevé sur la période.');
+    });
+
+    it('reports a failure of the history endpoint instead of a payload', function (): void {
+        IssepApiFake::fake(['belaqi' => Http::response(status: 500)]);
+
+        $payload = livewire(StationH24::class, ['station' => IssepApiFake::STATION_WITH_READING])
+            ->instance()
+            ->getRawPayload();
+
+        expect($payload)->toContain('HTTP 500');
     });
 });

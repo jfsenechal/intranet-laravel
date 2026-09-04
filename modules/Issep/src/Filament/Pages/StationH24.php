@@ -12,12 +12,15 @@ use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Js;
 use Override;
 
 /**
@@ -131,6 +134,29 @@ final class StationH24 extends Page implements HasTable
                     ->label('Valeur'),
             ])
             ->description(fn (): ?string => $this->getCoverageNotice())
+            ->headerActions([
+                Action::make('raw')
+                    ->label('Données brutes')
+                    ->icon(Heroicon::CodeBracket)
+                    ->color('gray')
+                    ->modalHeading('Données brutes')
+                    ->modalDescription('Les relevés de la période affichée, tels que /belaqi les a envoyés.')
+                    ->modalWidth(Width::TwoExtraLarge)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Fermer')
+                    ->modalContent(fn (): HtmlString => new HtmlString(
+                        '<pre class="max-h-[60vh] overflow-auto text-xs whitespace-pre-wrap">'
+                        .e($this->getRawPayload())
+                        .'</pre>',
+                    ))
+                    ->extraModalFooterActions([
+                        Action::make('copy')
+                            ->label('Copier')
+                            ->icon(Heroicon::ClipboardDocument)
+                            ->color('gray')
+                            ->alpineClickHandler(fn (): string => self::copyToClipboardJs($this->getRawPayload())),
+                    ]),
+            ])
             ->filters([
                 SelectFilter::make('period')
                     ->label('Période')
@@ -186,6 +212,37 @@ final class StationH24 extends Page implements HasTable
     }
 
     /**
+     * The rows behind the history, as the API sent them.
+     *
+     * The table shows the index decoded and translated, which hides the fields it was built
+     * from. The window is read from the filter state so the payload matches what is on screen.
+     */
+    public function getRawPayload(): string
+    {
+        if ($this->idConfiguration === null) {
+            return $this->apiError ?? 'Aucune configuration de capteur pour cette station.';
+        }
+
+        try {
+            $indices = app(StationRepository::class)->belAqiForStation(
+                $this->idConfiguration,
+                self::sinceFromFilters($this->tableFilters ?? []),
+            );
+        } catch (IssepException $issepException) {
+            return $issepException->getMessage();
+        }
+
+        if ($indices === []) {
+            return 'Aucun relevé sur la période.';
+        }
+
+        return json_encode(
+            array_map(fn (Indice $indice): array => $indice->raw, $indices),
+            JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
+        );
+    }
+
+    /**
      * @return array<int, Action>
      */
     #[Override]
@@ -215,6 +272,23 @@ final class StationH24 extends Page implements HasTable
         return [
             'lastIndice' => $this->getLastIndice(),
         ];
+    }
+
+    /**
+     * Hands the payload to the clipboard from the browser, so nothing has to travel back to
+     * the server to be copied.
+     */
+    private static function copyToClipboardJs(string $payload): string
+    {
+        $payloadJs = Js::from($payload);
+        $successTitle = Js::from('Données brutes copiées dans le presse-papiers');
+        $failureTitle = Js::from('Impossible de copier les données brutes');
+
+        return <<<JS
+            window.navigator.clipboard.writeText({$payloadJs})
+                .then(() => new FilamentNotification().title({$successTitle}).success().send())
+                .catch(() => new FilamentNotification().title({$failureTitle}).danger().send())
+            JS;
     }
 
     /**

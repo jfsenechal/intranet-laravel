@@ -24,6 +24,13 @@ final readonly class Indice
          * fallback network. The legacy intranet labelled such a row "corrigé".
          */
         public bool $isFixed = false,
+        /**
+         * The row as the endpoint sent it, kept so a page can show the payload the reading
+         * was decoded from.
+         *
+         * @var array<string, mixed>
+         */
+        public array $raw = [],
     ) {}
 
     /**
@@ -37,6 +44,7 @@ final readonly class Indice
             aqiValue: (int) ($data['aqiValue'] ?? IndiceEnum::NO_DATA->value),
             pointName: (string) ($data['pointName'] ?? ''),
             ts: self::parseTimestamp($data['ts'] ?? null),
+            raw: $data,
         );
     }
 
@@ -72,6 +80,7 @@ final readonly class Indice
             pointName: $this->pointName,
             ts: $this->ts,
             isFixed: true,
+            raw: $this->raw,
         );
     }
 
