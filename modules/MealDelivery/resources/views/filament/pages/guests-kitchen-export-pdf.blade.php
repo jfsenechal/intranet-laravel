@@ -47,7 +47,6 @@
             <thead>
                 <tr>
                     <th>Résident</th>
-                    <th>Chambre</th>
                     <th>Menu 1</th>
                     <th>Menu 2</th>
                     <th>Total</th>
@@ -58,7 +57,6 @@
                 @foreach ($summary['rows'] as $row)
                     <tr>
                         <td>{{ $row['resident_name'] }}</td>
-                        <td>{{ $row['room'] ?? '—' }}</td>
                         <td>{{ $row['menu1'] > 0 ? $row['menu1'] : '' }}</td>
                         <td>{{ $row['menu2'] > 0 ? $row['menu2'] : '' }}</td>
                         <td>{{ $row['total'] }}</td>
@@ -68,7 +66,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="2">Totaux</th>
+                    <th>Totaux</th>
                     <td>{{ $summary['totals']['menu1'] }}</td>
                     <td>{{ $summary['totals']['menu2'] }}</td>
                     <td>{{ $summary['totals']['guests'] }}</td>

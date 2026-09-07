@@ -20,7 +20,6 @@ final class DailyGuestsAggregator
      *     date: CarbonImmutable,
      *     rows: list<array{
      *         resident_name: string,
-     *         room: ?string,
      *         menu1: int,
      *         menu2: int,
      *         total: int,
@@ -44,7 +43,6 @@ final class DailyGuestsAggregator
             ->sortBy(fn (GuestReservation $reservation): string => $reservation->resident->last_name)
             ->map(fn (GuestReservation $reservation): array => [
                 'resident_name' => $reservation->resident->fullName(),
-                'room' => self::room($reservation),
                 'menu1' => (int) $reservation->menu1_count,
                 'menu2' => (int) $reservation->menu2_count,
                 'total' => $reservation->totalCount(),
@@ -58,13 +56,6 @@ final class DailyGuestsAggregator
             'rows' => $rows,
             'totals' => self::computeTotals($rows),
         ];
-    }
-
-    private static function room(GuestReservation $reservation): ?string
-    {
-        $room = mb_trim((string) ($reservation->resident->room ?? ''));
-
-        return $room !== '' ? $room : null;
     }
 
     private static function notes(GuestReservation $reservation): ?string

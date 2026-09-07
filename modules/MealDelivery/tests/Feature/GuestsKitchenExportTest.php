@@ -35,7 +35,7 @@ it('lists the guest meals of the day with their totals', function (): void {
     livewire(GuestsKitchenExport::class, ['date' => '2026-06-19'])
         ->assertOk()
         ->assertSee('DOLCETTE Marcel')
-        ->assertSee('112')
+        ->assertDontSee('112')
         ->assertSee('Arrivée 11h30');
 });
 

@@ -69,22 +69,14 @@ it('skips reservations that carry no meal at all', function (): void {
         ->and($result['totals']['residents'])->toBe(0);
 });
 
-it('carries the room and the notes onto the row', function (): void {
+it('carries the notes onto the row', function (): void {
     $resident = createResident('HERGOT', ['room' => '204']);
     $reservation = createGuestReservation($resident, '2026-06-19', menu1: 2);
     $reservation->update(['notes' => 'Table près de la fenêtre']);
 
     $result = (new DailyGuestsAggregator())->build('2026-06-19');
 
-    expect($result['rows'][0]['room'])->toBe('204')
+    expect($result['rows'][0])->not->toHaveKey('room')
         ->and($result['rows'][0]['notes'])->toBe('Table près de la fenêtre')
         ->and($result['rows'][0]['total'])->toBe(2);
-});
-
-it('leaves the room empty rather than blank for a resident without one', function (): void {
-    createGuestReservation(createResident('HERGOT', ['room' => null]), '2026-06-19', menu1: 1);
-
-    $result = (new DailyGuestsAggregator())->build('2026-06-19');
-
-    expect($result['rows'][0]['room'])->toBeNull();
 });

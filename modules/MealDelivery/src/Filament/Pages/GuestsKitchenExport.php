@@ -70,7 +70,7 @@ final class GuestsKitchenExport extends Page
     /**
      * @return array{
      *     date: CarbonImmutable,
-     *     rows: list<array{resident_name: string, room: ?string, menu1: int, menu2: int, total: int, notes: ?string}>,
+     *     rows: list<array{resident_name: string, menu1: int, menu2: int, total: int, notes: ?string}>,
      *     totals: array{residents: int, menu1: int, menu2: int, guests: int}
      * }
      */
