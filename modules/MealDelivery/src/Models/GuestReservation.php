@@ -11,15 +11,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Extra meals booked by the family of a cafeteria client for a given day. Guests
- * always eat at midday alongside the client, so only the two menu positions are
- * recorded. These used to be handwritten at the bottom of the cafeteria sheet.
+ * Extra meals booked by the family of a resident for a given day. Guests always
+ * eat at midday at the home, so only the two menu positions are recorded. The
+ * resident's own meal is not part of this: it is covered by the home's catering
+ * and never billed. Only the guests pay.
  *
  * @property string|null $user_add
  */
 #[Connection('maria-meal-delivery')]
 #[Fillable([
-    'client_id',
+    'resident_id',
     'date',
     'menu1_count',
     'menu2_count',
@@ -43,11 +44,11 @@ final class GuestReservation extends Model
     }
 
     /**
-     * @return BelongsTo<Client, GuestReservation>
+     * @return BelongsTo<Resident, GuestReservation>
      */
-    public function client(): BelongsTo
+    public function resident(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Resident::class);
     }
 
     protected static function booted(): void

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MealDelivery\Filament\Pages;
 
-use AcMarche\MealDelivery\Models\Resident;
 use AcMarche\MealDelivery\Policies\Concerns\MealDeliveryAuthorization;
-use AcMarche\MealDelivery\Service\MonthlyGuestsAggregator;
+use AcMarche\MealDelivery\Service\DailyGuestsAggregator;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
@@ -21,32 +20,34 @@ use UnitEnum;
 
 use function Spatie\LaravelPdf\Support\pdf;
 
-final class GuestsByMonth extends Page
+/**
+ * The daily sheet handed to the kitchen for the guest meals of the home. It is
+ * deliberately kept apart from the meal delivery exports: guests eat on the spot,
+ * are never delivered, and their residents are not clients of the service.
+ */
+final class GuestsKitchenExport extends Page
 {
     use MealDeliveryAuthorization;
 
-    #[Url(as: 'month')]
-    public int $month = 0;
+    #[Url(as: 'date')]
+    public string $date = '';
 
-    #[Url(as: 'year')]
-    public int $year = 0;
+    protected static ?string $slug = 'guests-kitchen-export';
 
-    protected static ?string $slug = 'guests-by-month';
-
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 9;
 
     protected static string|UnitEnum|null $navigationGroup = 'Invités';
 
-    protected string $view = 'meal-delivery::filament.pages.guests-by-month';
+    protected string $view = 'meal-delivery::filament.pages.guests-kitchen-export';
 
     public static function getNavigationIcon(): string
     {
-        return 'heroicon-o-document-currency-euro';
+        return 'heroicon-o-clipboard-document-list';
     }
 
     public static function getNavigationLabel(): string
     {
-        return 'Invités par mois';
+        return 'Export cuisine invités';
     }
 
     public static function canAccess(array $parameters = []): bool
@@ -58,69 +59,51 @@ final class GuestsByMonth extends Page
 
     public function mount(): void
     {
-        if ($this->month < 1 || $this->month > 12) {
-            $this->month = (int) CarbonImmutable::now()->format('n');
-        }
-
-        if ($this->year < 2000) {
-            $this->year = (int) CarbonImmutable::now()->format('Y');
-        }
+        $this->date = self::normalizeDate($this->date);
     }
 
     public function getTitle(): string
     {
-        return 'Invités par mois — '.$this->formattedPeriod();
+        return 'Repas invités du '.$this->formattedDate();
     }
 
     /**
      * @return array{
-     *     period: CarbonImmutable,
-     *     rows: list<array{resident: Resident, menu1_total: int, menu2_total: int, guests_total: int}>,
-     *     totals: array{menu1: int, menu2: int, guests: int}
+     *     date: CarbonImmutable,
+     *     rows: list<array{resident_name: string, room: ?string, menu1: int, menu2: int, total: int, notes: ?string}>,
+     *     totals: array{residents: int, menu1: int, menu2: int, guests: int}
      * }
      */
     public function getSummary(): array
     {
-        return (new MonthlyGuestsAggregator())->build($this->month, $this->year);
+        return (new DailyGuestsAggregator())->build($this->date);
+    }
+
+    public function formattedDate(): string
+    {
+        return Str::title(CarbonImmutable::parse($this->date)->translatedFormat('l j F Y'));
     }
 
     protected function getHeaderActions(): array
     {
-        $currentYear = (int) CarbonImmutable::now()->format('Y');
-
-        $monthOptions = collect(range(1, 12))
-            ->mapWithKeys(fn (int $month): array => [
-                $month => Str::title(CarbonImmutable::create(null, $month, 1)->translatedFormat('F')),
-            ])
-            ->all();
-
-        $yearOptions = collect(range($currentYear - 5, $currentYear + 1))
-            ->mapWithKeys(fn (int $year): array => [$year => (string) $year])
-            ->all();
-
         return [
             Action::make('search')
-                ->label('Rechercher un mois')
+                ->label('Choisir une date')
                 ->icon('tabler-search')
                 ->color('primary')
                 ->modal()
-                ->modalHeading('Choisir le mois et l\'année')
+                ->modalHeading('Choisir le jour')
                 ->modalSubmitActionLabel('Afficher')
-                ->fillForm(fn (): array => ['month' => $this->month, 'year' => $this->year])
+                ->fillForm(fn (): array => ['date' => $this->date])
                 ->schema([
-                    Select::make('month')
-                        ->label('Mois')
-                        ->options($monthOptions)
-                        ->required(),
-                    Select::make('year')
-                        ->label('Année')
-                        ->options($yearOptions)
+                    DatePicker::make('date')
+                        ->label('Date')
                         ->required(),
                 ])
                 ->action(function (array $data): void {
-                    $this->month = (int) $data['month'];
-                    $this->year = (int) $data['year'];
+                    $this->date = self::normalizeDate((string) $data['date']);
                 }),
+
             Action::make('downloadPdf')
                 ->label('Télécharger PDF')
                 ->icon(Heroicon::ArrowDownTray)
@@ -129,21 +112,25 @@ final class GuestsByMonth extends Page
         ];
     }
 
-    private function formattedPeriod(): string
+    private static function normalizeDate(string $date): string
     {
-        return Str::title(CarbonImmutable::create($this->year, $this->month, 1)->translatedFormat('F Y'));
+        if (mb_trim($date) === '') {
+            return CarbonImmutable::now()->format('Y-m-d');
+        }
+
+        return CarbonImmutable::parse($date)->format('Y-m-d');
     }
 
     private function downloadPdf(): StreamedResponse
     {
-        $filename = sprintf('invites-%02d-%d.pdf', $this->month, $this->year);
+        $filename = 'invites-'.$this->date.'.pdf';
 
         return response()->streamDownload(
             function () use ($filename): void {
                 echo pdf()
-                    ->view('meal-delivery::filament.pages.guests-by-month-pdf', [
+                    ->view('meal-delivery::filament.pages.guests-kitchen-export-pdf', [
                         'summary' => $this->getSummary(),
-                        'period' => $this->formattedPeriod(),
+                        'formattedDate' => $this->formattedDate(),
                     ])
                     ->withBrowsershot(function (Browsershot $browsershot): void {
                         if ($path = config('pdf.node_modules_path')) {

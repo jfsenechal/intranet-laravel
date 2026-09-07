@@ -2,39 +2,32 @@
 
 declare(strict_types=1);
 
-use AcMarche\MealDelivery\Models\Client;
-use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\GuestReservation;
+use AcMarche\MealDelivery\Models\Resident;
 use AcMarche\MealDelivery\Service\MonthlyGuestsAggregator;
 
-function createClientWithGuestReservations(string $lastName, array $reservations): Client
+function createResidentWithGuestReservations(string $lastName, array $reservations): Resident
 {
-    $client = Client::create([
+    $resident = Resident::create([
         'last_name' => $lastName,
         'first_name' => fake()->firstName(),
-        'street' => fake()->streetName(),
-        'number' => (string) fake()->buildingNumber(),
-        'postal_code' => 6900,
-        'city' => 'MARCHE',
-        'route_id' => DeliveryRoute::create(['name' => fake()->unique()->word()])->id,
         'is_active' => true,
-        'use_cafeteria' => true,
     ]);
 
     foreach ($reservations as $date => $counts) {
         GuestReservation::create([
-            'client_id' => $client->id,
+            'resident_id' => $resident->id,
             'date' => $date,
             'menu1_count' => $counts[0],
             'menu2_count' => $counts[1],
         ]);
     }
 
-    return $client;
+    return $resident;
 }
 
-it('sums the guest meals of each client over the month', function (): void {
-    createClientWithGuestReservations('HERGOT', [
+it('sums the guest meals of each resident over the month', function (): void {
+    createResidentWithGuestReservations('HERGOT', [
         '2026-06-05' => [1, 0],
         '2026-06-19' => [2, 1],
     ]);
@@ -49,7 +42,7 @@ it('sums the guest meals of each client over the month', function (): void {
 });
 
 it('excludes reservations outside the requested month', function (): void {
-    createClientWithGuestReservations('HERGOT', [
+    createResidentWithGuestReservations('HERGOT', [
         '2026-05-31' => [4, 0],
         '2026-07-01' => [5, 0],
         '2026-06-15' => [1, 0],
@@ -60,8 +53,8 @@ it('excludes reservations outside the requested month', function (): void {
     expect($result['totals']['guests'])->toBe(1);
 });
 
-it('excludes clients without any guest meal in the month', function (): void {
-    createClientWithGuestReservations('SANSINVITE', []);
+it('excludes residents without any guest meal in the month', function (): void {
+    createResidentWithGuestReservations('SANSINVITE', []);
 
     $result = (new MonthlyGuestsAggregator())->build(6, 2026);
 
@@ -69,12 +62,12 @@ it('excludes clients without any guest meal in the month', function (): void {
         ->and($result['totals']['guests'])->toBe(0);
 });
 
-it('orders clients by last name', function (): void {
-    createClientWithGuestReservations('ZANDER', ['2026-06-10' => [1, 0]]);
-    createClientWithGuestReservations('ALBERT', ['2026-06-10' => [1, 0]]);
+it('orders residents by last name', function (): void {
+    createResidentWithGuestReservations('ZANDER', ['2026-06-10' => [1, 0]]);
+    createResidentWithGuestReservations('ALBERT', ['2026-06-10' => [1, 0]]);
 
     $result = (new MonthlyGuestsAggregator())->build(6, 2026);
 
-    expect($result['rows'][0]['client']->last_name)->toBe('ALBERT')
-        ->and($result['rows'][1]['client']->last_name)->toBe('ZANDER');
+    expect($result['rows'][0]['resident']->last_name)->toBe('ALBERT')
+        ->and($result['rows'][1]['resident']->last_name)->toBe('ZANDER');
 });

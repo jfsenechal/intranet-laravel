@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MealDelivery\Filament\Resources\GuestReservations\Schemas;
 
 use AcMarche\MealDelivery\Models\GuestReservation;
+use AcMarche\MealDelivery\Models\Resident;
 use Carbon\CarbonImmutable;
 use Closure;
 use Filament\Forms\Components\DatePicker;
@@ -22,88 +23,41 @@ final class GuestReservationForm
 {
     public static function configure(Schema $schema): Schema
     {
-        return $schema
-            ->schema([
-                Section::make('Réservation')
-                    ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('client_id')
-                                    ->label('Client')
-                                    ->helperText('Seuls les clients qui mangent à la cafétéria sont proposés.')
-                                    ->relationship(
-                                        'client',
-                                        'last_name',
-                                        fn (Builder $query): Builder => $query
-                                            ->where('use_cafeteria', true)
-                                            ->where('is_active', true)
-                                            ->orderBy('last_name')
-                                            ->orderBy('first_name'),
-                                    )
-                                    ->getOptionLabelFromRecordUsing(
-                                        fn (Model $record): string => mb_trim(
-                                            $record->last_name.' '.$record->first_name,
-                                        ),
-                                    )
-                                    ->searchable(['last_name', 'first_name'])
-                                    ->preload()
-                                    ->required(),
-
-                                DatePicker::make('date')
-                                    ->label('Date du repas')
-                                    ->helperText('Repas de midi.')
-                                    ->required()
-                                    ->rule(self::uniquePerClientAndDate()),
-                            ]),
-
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('menu1_count')
-                                    ->label('Menu 1')
-                                    ->helperText('Nombre de repas invités au menu 1.')
-                                    ->numeric()
-                                    ->minValue(0)
-                                    ->default(0)
-                                    ->required()
-                                    ->rule(self::atLeastOneMeal()),
-
-                                TextInput::make('menu2_count')
-                                    ->label('Menu 2')
-                                    ->helperText('Nombre de repas invités au menu 2.')
-                                    ->numeric()
-                                    ->minValue(0)
-                                    ->default(0)
-                                    ->required(),
-                            ]),
-
-                        Textarea::make('notes')
-                            ->label('Remarques')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-            ]);
+        return $schema->schema([self::section(null)]);
     }
 
     /**
-     * A client books at most one guest reservation per day, so the two menu
-     * counts always live on the same row. Reused by the shortcut action on the
-     * order page, which feeds `client_id` through a hidden field.
+     * The same form, nested under a resident who is already known: the relation
+     * manager hangs the reservation off the owner record itself, so the select
+     * would be noise — and the uniqueness rule has no field left to read the
+     * resident from, hence the explicit id.
      */
-    public static function uniquePerClientAndDate(): Closure
+    public static function configureForResident(Schema $schema, Resident $resident): Schema
+    {
+        return $schema->schema([self::section($resident)]);
+    }
+
+    /**
+     * A resident books at most one guest reservation per day, so the two menu
+     * counts always live on the same row. The rule is written by hand rather than
+     * with Laravel's `unique`, which would query the default connection instead of
+     * `maria-meal-delivery`.
+     */
+    public static function uniquePerResidentAndDate(?int $residentId = null): Closure
     {
         return static fn (Get $get, ?Model $record): Closure => static function (
             string $attribute,
             mixed $value,
             Closure $fail,
-        ) use ($get, $record): void {
-            $clientId = $get('client_id');
+        ) use ($get, $record, $residentId): void {
+            $resident = $residentId ?? $get('resident_id');
 
-            if (blank($clientId) || blank($value)) {
+            if (blank($resident) || blank($value)) {
                 return;
             }
 
             $exists = GuestReservation::query()
-                ->where('client_id', $clientId)
+                ->where('resident_id', $resident)
                 ->whereDate('date', CarbonImmutable::parse((string) $value)->format('Y-m-d'))
                 ->when(
                     $record instanceof GuestReservation,
@@ -112,7 +66,7 @@ final class GuestReservationForm
                 ->exists();
 
             if ($exists) {
-                $fail('Une réservation existe déjà pour ce client à cette date.');
+                $fail('Une réservation existe déjà pour ce résident à cette date.');
             }
         };
     }
@@ -128,5 +82,70 @@ final class GuestReservationForm
                 $fail('Encodez au moins un repas invité.');
             }
         };
+    }
+
+    private static function section(?Resident $resident): Section
+    {
+        return Section::make('Réservation')
+            ->schema([
+                Grid::make(2)
+                    ->schema(array_values(array_filter([
+                        $resident instanceof Resident ? null : self::residentSelect(),
+                        self::datePicker($resident?->id),
+                    ]))),
+
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('menu1_count')
+                            ->label('Menu 1')
+                            ->helperText('Nombre de repas invités au menu 1.')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(0)
+                            ->required()
+                            ->rule(self::atLeastOneMeal()),
+
+                        TextInput::make('menu2_count')
+                            ->label('Menu 2')
+                            ->helperText('Nombre de repas invités au menu 2.')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(0)
+                            ->required(),
+                    ]),
+
+                Textarea::make('notes')
+                    ->label('Remarques')
+                    ->rows(3)
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    private static function residentSelect(): Select
+    {
+        return Select::make('resident_id')
+            ->label('Résident')
+            ->helperText('Le résident qui reçoit de la famille.')
+            ->relationship(
+                'resident',
+                'last_name',
+                fn (Builder $query): Builder => $query
+                    ->where('is_active', true)
+                    ->orderBy('last_name')
+                    ->orderBy('first_name'),
+            )
+            ->getOptionLabelFromRecordUsing(fn (Model $record): string => $record->fullName())
+            ->searchable(['last_name', 'first_name'])
+            ->preload()
+            ->required();
+    }
+
+    private static function datePicker(?int $residentId): DatePicker
+    {
+        return DatePicker::make('date')
+            ->label('Date du repas')
+            ->helperText('Repas de midi.')
+            ->required()
+            ->rule(self::uniquePerResidentAndDate($residentId));
     }
 }

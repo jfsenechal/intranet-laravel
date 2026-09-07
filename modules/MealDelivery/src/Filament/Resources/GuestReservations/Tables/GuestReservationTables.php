@@ -32,19 +32,22 @@ final class GuestReservationTables
                     ->date('d/m/Y')
                     ->sortable(),
 
-                TextColumn::make('client_name')
-                    ->label('Client')
-                    ->state(fn (GuestReservation $record): string => mb_trim(
-                        ($record->client?->last_name ?? '').' '.($record->client?->first_name ?? ''),
-                    ))
+                TextColumn::make('resident_name')
+                    ->label('Résident')
+                    ->state(fn (GuestReservation $record): string => $record->resident?->fullName() ?? '')
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query
                         ->whereHas(
-                            'client',
-                            fn (Builder $client): Builder => $client
+                            'resident',
+                            fn (Builder $resident): Builder => $resident
                                 ->where('last_name', 'like', '%'.$search.'%')
                                 ->orWhere('first_name', 'like', '%'.$search.'%'),
                         ))
-                    ->sortable(['client_id']),
+                    ->sortable(['resident_id']),
+
+                TextColumn::make('resident.room')
+                    ->label('Chambre')
+                    ->placeholder('—')
+                    ->toggleable(),
 
                 ...self::countColumns(),
 
@@ -55,13 +58,9 @@ final class GuestReservationTables
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('client_id')
-                    ->label('Client')
-                    ->relationship(
-                        'client',
-                        'last_name',
-                        fn (Builder $query): Builder => $query->where('use_cafeteria', true),
-                    )
+                SelectFilter::make('resident_id')
+                    ->label('Résident')
+                    ->relationship('resident', 'last_name')
                     ->searchable()
                     ->preload(),
 
@@ -82,7 +81,7 @@ final class GuestReservationTables
     }
 
     /**
-     * Same table nested under a client, where the client column is noise.
+     * Same table nested under a resident, where the resident column is noise.
      */
     public static function inline(Table $table): Table
     {

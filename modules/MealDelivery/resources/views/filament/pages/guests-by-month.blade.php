@@ -35,8 +35,8 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Client</th>
-                        <th>Adresse</th>
+                        <th>Résident</th>
+                        <th>Chambre</th>
                         <th>Menu 1</th>
                         <th>Menu 2</th>
                         <th>Total repas invités</th>
@@ -44,14 +44,14 @@
                 </thead>
                 <tbody>
                     @foreach ($summary['rows'] as $row)
-                        @php($client = $row['client'])
+                        @php($resident = $row['resident'])
                         <tr>
                             <td>
-                                <a href="{{ \AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource::getUrl('view', ['record' => $client->id]) }}">
-                                    {{ $client->last_name }} {{ $client->first_name }}
+                                <a href="{{ \AcMarche\MealDelivery\Filament\Resources\Residents\ResidentResource::getUrl('view', ['record' => $resident->id]) }}">
+                                    {{ $resident->fullName() }}
                                 </a>
                             </td>
-                            <td>{{ trim($client->street.' '.$client->number) }}</td>
+                            <td>{{ $resident->room ?: '—' }}</td>
                             <td>{{ $row['menu1_total'] }}</td>
                             <td>{{ $row['menu2_total'] }}</td>
                             <td>{{ $row['guests_total'] }}</td>

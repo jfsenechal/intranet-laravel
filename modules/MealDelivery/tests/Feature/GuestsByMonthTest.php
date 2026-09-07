@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use AcMarche\MealDelivery\Filament\Pages\GuestsByMonth;
-use AcMarche\MealDelivery\Models\Client;
-use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\GuestReservation;
+use AcMarche\MealDelivery\Models\Resident;
 use App\Models\User;
 use Filament\Facades\Filament;
 
@@ -16,20 +15,15 @@ beforeEach(function (): void {
 
     $this->actingAs(User::factory()->create(['is_administrator' => true]));
 
-    $this->client = Client::create([
+    $this->resident = Resident::create([
         'last_name' => 'DOLCETTE',
         'first_name' => 'Marcel',
-        'street' => 'Chaussée de Liège',
-        'number' => '39/11',
-        'postal_code' => 6900,
-        'city' => 'MARCHE',
-        'route_id' => DeliveryRoute::create(['name' => fake()->unique()->word()])->id,
+        'room' => '112',
         'is_active' => true,
-        'use_cafeteria' => true,
     ]);
 
     GuestReservation::create([
-        'client_id' => $this->client->id,
+        'resident_id' => $this->resident->id,
         'date' => '2026-06-19',
         'menu1_count' => 2,
         'menu2_count' => 1,
@@ -40,7 +34,7 @@ it('lists the guest meals of the month for billing', function (): void {
     livewire(GuestsByMonth::class, ['month' => 6, 'year' => 2026])
         ->assertOk()
         ->assertSee('DOLCETTE')
-        ->assertSee('Chaussée de Liège 39/11');
+        ->assertSee('112');
 });
 
 it('reports an empty month without failing', function (): void {
@@ -49,7 +43,7 @@ it('reports an empty month without failing', function (): void {
         ->assertSee('Aucun repas invité pour cette période.');
 });
 
-it('totals the guest meals per client on the pdf', function (): void {
+it('totals the guest meals per resident on the pdf', function (): void {
     $summary = livewire(GuestsByMonth::class, ['month' => 6, 'year' => 2026])
         ->instance()
         ->getSummary();

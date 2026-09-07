@@ -10,8 +10,8 @@ use AcMarche\MealDelivery\Models\GuestReservation;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Menu;
 use AcMarche\MealDelivery\Models\Order;
+use AcMarche\MealDelivery\Models\Resident;
 use AcMarche\MealDelivery\Models\Week;
-use AcMarche\MealDelivery\Service\DailyGuestsAggregator;
 use AcMarche\MealDelivery\Service\RouteSheetsAggregator;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -93,12 +93,18 @@ it('explains the RF and DF columns with a legend on the pdf sheet', function ():
         ->toContain('donner une nouvelle feuille');
 });
 
-it('prints the guest meals that used to be handwritten on the sheet', function (): void {
+it('never shows guest meals on the cafeteria sheet', function (): void {
+    $resident = Resident::create([
+        'last_name' => 'DOLCETTE',
+        'first_name' => 'Marcel',
+        'is_active' => true,
+    ]);
+
     GuestReservation::create([
-        'client_id' => $this->cafeteriaClient->id,
+        'resident_id' => $resident->id,
         'date' => '2026-06-15',
-        'menu1_count' => 2,
-        'menu2_count' => 1,
+        'menu1_count' => 3,
+        'menu2_count' => 2,
     ]);
 
     livewire(CafeteriaSheet::class, [
@@ -106,51 +112,19 @@ it('prints the guest meals that used to be handwritten on the sheet', function (
         'date' => '2026-06-15',
     ])
         ->assertOk()
-        ->assertSee('Repas invités')
-        ->assertSee('BOON Micheline');
-});
-
-it('omits the guest block entirely when nobody receives family', function (): void {
-    livewire(CafeteriaSheet::class, [
-        'record' => $this->week,
-        'date' => '2026-06-15',
-    ])
-        ->assertOk()
-        ->assertDontSee('Repas invités');
-});
-
-it('prints the guest block on the pdf sheet', function (): void {
-    GuestReservation::create([
-        'client_id' => $this->cafeteriaClient->id,
-        'date' => '2026-06-15',
-        'menu1_count' => 1,
-        'menu2_count' => 0,
-    ]);
-
-    $html = view('meal-delivery::filament.resources.weeks.pages.route-sheet-pdf', [
-        'date' => CarbonImmutable::parse('2026-06-15'),
-        'sheet' => (new RouteSheetsAggregator())->build($this->week, '2026-06-15')['cafeteria'],
-        'guests' => (new DailyGuestsAggregator())->build('2026-06-15'),
-        'heading' => 'Cafétariat',
-    ])->render();
-
-    expect($html)->toContain('Repas invités')
-        ->toContain('BOON Micheline');
-});
-
-it('renders the shared route sheet pdf when no guest data is passed at all', function (): void {
-    $html = view('meal-delivery::filament.resources.weeks.pages.route-sheet-pdf', [
-        'date' => CarbonImmutable::parse('2026-06-15'),
-        'sheet' => (new RouteSheetsAggregator())->build($this->week, '2026-06-15')['routes'][0],
-        'heading' => 'Tournée 1',
-    ])->render();
-
-    expect($html)->not->toContain('Repas invités');
+        ->assertDontSee('Repas invités')
+        ->assertDontSee('DOLCETTE');
 });
 
 it('never shows guest meals on the delivery route sheets', function (): void {
+    $resident = Resident::create([
+        'last_name' => 'DOLCETTE',
+        'first_name' => 'Marcel',
+        'is_active' => true,
+    ]);
+
     GuestReservation::create([
-        'client_id' => $this->cafeteriaClient->id,
+        'resident_id' => $resident->id,
         'date' => '2026-06-15',
         'menu1_count' => 3,
         'menu2_count' => 2,
@@ -161,5 +135,6 @@ it('never shows guest meals on the delivery route sheets', function (): void {
         'date' => '2026-06-15',
     ])
         ->assertOk()
-        ->assertDontSee('Repas invités');
+        ->assertDontSee('Repas invités')
+        ->assertDontSee('DOLCETTE');
 });

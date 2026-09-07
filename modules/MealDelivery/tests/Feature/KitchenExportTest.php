@@ -9,6 +9,7 @@ use AcMarche\MealDelivery\Models\GuestReservation;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Menu;
 use AcMarche\MealDelivery\Models\Order;
+use AcMarche\MealDelivery\Models\Resident;
 use AcMarche\MealDelivery\Models\Week;
 use AcMarche\MealDelivery\Service\KitchenExportAggregator;
 use App\Models\User;
@@ -55,9 +56,24 @@ beforeEach(function (): void {
     ]);
 });
 
-it('adds the guest menus to the kitchen total and details them in their own table', function (): void {
+it('counts the delivered menus only', function (): void {
+    livewire(KitchenExport::class, [
+        'record' => $this->week,
+        'date' => '2026-06-15',
+    ])
+        ->assertOk()
+        ->assertSeeHtml('<strong>Menus :</strong> 4');
+});
+
+it('never counts the guest meals of the home, which have their own export', function (): void {
+    $resident = Resident::create([
+        'last_name' => 'DOLCETTE',
+        'first_name' => 'Marcel',
+        'is_active' => true,
+    ]);
+
     GuestReservation::create([
-        'client_id' => $this->client->id,
+        'resident_id' => $resident->id,
         'date' => '2026-06-15',
         'menu1_count' => 2,
         'menu2_count' => 1,
@@ -68,34 +84,12 @@ it('adds the guest menus to the kitchen total and details them in their own tabl
         'date' => '2026-06-15',
     ])
         ->assertOk()
-        ->assertSee('Repas invités')
-        ->assertSee('aucun régime pour ces menus')
-        ->assertSee('dont 3 invités')
-        ->assertSeeHtml('<strong>Menus :</strong> 7');
-});
-
-it('omits the guest table when nobody receives family', function (): void {
-    livewire(KitchenExport::class, [
-        'record' => $this->week,
-        'date' => '2026-06-15',
-    ])
-        ->assertOk()
         ->assertDontSee('invité')
         ->assertSeeHtml('<strong>Menus :</strong> 4');
-});
-
-it('prints the guest table on the pdf export', function (): void {
-    GuestReservation::create([
-        'client_id' => $this->client->id,
-        'date' => '2026-06-15',
-        'menu1_count' => 0,
-        'menu2_count' => 5,
-    ]);
 
     $html = view('meal-delivery::filament.resources.weeks.pages.kitchen-export-pdf', [
         'summary' => (new KitchenExportAggregator())->build($this->week, '2026-06-15'),
     ])->render();
 
-    expect($html)->toContain('Repas invités')
-        ->toContain('dont 5 invités');
+    expect($html)->not->toContain('invité');
 });

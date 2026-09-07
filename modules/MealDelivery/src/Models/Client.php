@@ -82,14 +82,6 @@ final class Client extends Model
         return $this->hasMany(Note::class);
     }
 
-    /**
-     * @return HasMany<GuestReservation, Client>
-     */
-    public function guestReservations(): HasMany
-    {
-        return $this->hasMany(GuestReservation::class);
-    }
-
     protected static function booted(): void
     {
         self::deleting(function (Client $client): void {
@@ -97,9 +89,6 @@ final class Client extends Model
             // `notes` is also a text column, so the relation must be queried explicitly.
             $client->notes()->get()->each(fn (Note $note): ?bool => $note->delete());
             $client->absence?->delete();
-            $client->guestReservations->each(
-                fn (GuestReservation $reservation): ?bool => $reservation->delete(),
-            );
             $client->diets()->detach();
         });
     }

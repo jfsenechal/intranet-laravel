@@ -20,11 +20,9 @@ final class GuestReservationInfoList
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextEntry::make('client.last_name')
-                                    ->label('Client')
-                                    ->state(fn (GuestReservation $record): string => mb_trim(
-                                        ($record->client?->last_name ?? '').' '.($record->client?->first_name ?? ''),
-                                    ))
+                                TextEntry::make('resident.last_name')
+                                    ->label('Résident')
+                                    ->state(fn (GuestReservation $record): string => $record->resident?->fullName() ?? '')
                                     ->placeholder('—'),
 
                                 TextEntry::make('date')

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use AcMarche\MealDelivery\Filament\Resources\Clients\Pages\ViewClient;
-use AcMarche\MealDelivery\Filament\Resources\Clients\RelationManagers\GuestReservationsRelationManager;
 use AcMarche\MealDelivery\Filament\Resources\GuestReservations\Pages\ListGuestReservations;
-use AcMarche\MealDelivery\Models\Client;
-use AcMarche\MealDelivery\Models\DeliveryRoute;
+use AcMarche\MealDelivery\Filament\Resources\Residents\Pages\ViewResident;
+use AcMarche\MealDelivery\Filament\Resources\Residents\RelationManagers\GuestReservationsRelationManager;
 use AcMarche\MealDelivery\Models\GuestReservation;
+use AcMarche\MealDelivery\Models\Resident;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
@@ -18,27 +18,22 @@ beforeEach(function (): void {
 
     $this->actingAs(User::factory()->create(['is_administrator' => true]));
 
-    $this->client = Client::create([
+    $this->resident = Resident::create([
         'last_name' => 'DOLCETTE',
         'first_name' => 'Marcel',
-        'street' => 'Chaussée de Liège',
-        'number' => '39/11',
-        'postal_code' => 6900,
-        'city' => 'MARCHE',
-        'route_id' => DeliveryRoute::create(['name' => fake()->unique()->word()])->id,
+        'room' => '112',
         'is_active' => true,
-        'use_cafeteria' => true,
     ]);
 
     $this->first = GuestReservation::create([
-        'client_id' => $this->client->id,
+        'resident_id' => $this->resident->id,
         'date' => '2026-06-19',
         'menu1_count' => 2,
         'menu2_count' => 1,
     ]);
 
     $this->second = GuestReservation::create([
-        'client_id' => $this->client->id,
+        'resident_id' => $this->resident->id,
         'date' => '2026-06-20',
         'menu1_count' => 1,
         'menu2_count' => 3,
@@ -59,18 +54,50 @@ it('sums the expected head count across the table', function (): void {
         ->assertTableColumnSummarySet('total', 'sum', 7);
 });
 
-it('lists a client own guest reservations under their page', function (): void {
+it('lists a resident own guest reservations under their page', function (): void {
     livewire(GuestReservationsRelationManager::class, [
-        'ownerRecord' => $this->client,
-        'pageClass' => ViewClient::class,
+        'ownerRecord' => $this->resident,
+        'pageClass' => ViewResident::class,
     ])
         ->loadTable()
         ->assertCanSeeTableRecords([$this->first, $this->second]);
 });
 
-it('hides the guest reservations of a client who does not eat at the cafeteria', function (): void {
-    $this->client->update(['use_cafeteria' => false]);
+it('books a guest meal straight from the resident page', function (): void {
+    livewire(GuestReservationsRelationManager::class, [
+        'ownerRecord' => $this->resident,
+        'pageClass' => ViewResident::class,
+    ])
+        ->loadTable()
+        ->assertActionVisible(TestAction::make('create')->table())
+        ->callAction(TestAction::make('create')->table(), [
+            'date' => '2026-06-21',
+            'menu1_count' => 3,
+            'menu2_count' => 0,
+        ])
+        ->assertHasNoActionErrors();
 
-    expect(GuestReservationsRelationManager::canViewForRecord($this->client, ViewClient::class))
-        ->toBeFalse();
+    $booked = GuestReservation::query()
+        ->where('resident_id', $this->resident->id)
+        ->whereDate('date', '2026-06-21')
+        ->sole();
+
+    expect($booked->menu1_count)->toBe(3)
+        ->and($booked->menu2_count)->toBe(0);
+});
+
+it('still refuses a duplicate date when booking from the resident page', function (): void {
+    livewire(GuestReservationsRelationManager::class, [
+        'ownerRecord' => $this->resident,
+        'pageClass' => ViewResident::class,
+    ])
+        ->loadTable()
+        ->callAction(TestAction::make('create')->table(), [
+            'date' => '2026-06-19',
+            'menu1_count' => 1,
+            'menu2_count' => 0,
+        ])
+        ->assertHasActionErrors(['date']);
+
+    expect(GuestReservation::query()->where('resident_id', $this->resident->id)->count())->toBe(2);
 });

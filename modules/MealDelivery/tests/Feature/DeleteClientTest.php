@@ -7,7 +7,6 @@ use AcMarche\MealDelivery\Models\Absence;
 use AcMarche\MealDelivery\Models\Client;
 use AcMarche\MealDelivery\Models\DeliveryRoute;
 use AcMarche\MealDelivery\Models\Diet;
-use AcMarche\MealDelivery\Models\GuestReservation;
 use AcMarche\MealDelivery\Models\Meal;
 use AcMarche\MealDelivery\Models\Menu;
 use AcMarche\MealDelivery\Models\Note;
@@ -68,18 +67,11 @@ beforeEach(function (): void {
         'end_date' => '2026-06-20',
     ]);
 
-    $this->guestReservation = GuestReservation::create([
-        'client_id' => $this->client->id,
-        'date' => '2026-06-15',
-        'menu1_count' => 2,
-        'menu2_count' => 1,
-    ]);
-
     $this->diet = Diet::create(['name' => 'Sans sel']);
     $this->client->diets()->attach($this->diet->id);
 });
 
-it('cascades deletion to orders, notes, absence, guest reservations and diet links when a client is deleted', function (): void {
+it('cascades deletion to orders, notes, absence and diet links when a client is deleted', function (): void {
     livewire(ViewClient::class, ['record' => $this->client->id])
         ->callAction(DeleteAction::class)
         ->assertHasNoActionErrors();
@@ -90,7 +82,6 @@ it('cascades deletion to orders, notes, absence, guest reservations and diet lin
         ->and(Menu::query()->whereKey($this->menu->id)->exists())->toBeFalse()
         ->and(Note::query()->whereKey($this->note->id)->exists())->toBeFalse()
         ->and(Absence::query()->whereKey($this->absence->id)->exists())->toBeFalse()
-        ->and(GuestReservation::query()->whereKey($this->guestReservation->id)->exists())->toBeFalse()
         ->and(DB::connection('maria-meal-delivery')->table('client_diet')->where('client_id', $this->client->id)->exists())->toBeFalse();
 
     expect(Diet::query()->whereKey($this->diet->id)->exists())->toBeTrue();
