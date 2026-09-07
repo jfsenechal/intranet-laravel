@@ -57,11 +57,18 @@
  * Rich editor: keep the toolbar reachable while scrolling through long content.
  * It sticks within the editor's own box, below the panel's sticky topbar.
  * The background is required because the toolbar is transparent by default.
+ *
+ * The z-index must stay below Filament's field overlay layer: date pickers
+ * (10), select and dropdown panels (20) and the editor's own floating toolbar
+ * (20) all render there, and an opaque sticky toolbar at the same level wins
+ * the tie by DOM order and hides an overlay opened by a field above it — the
+ * calendar of a DatePicker sitting over a RichEditor, for instance. Level 1
+ * is enough to stay above the editor's own (unpositioned) content.
  */
 .fi-fo-rich-editor-toolbar {
     position: sticky;
     top: 4rem;
-    z-index: 10;
+    z-index: 1;
     background-color: var(--color-white);
 }
 
