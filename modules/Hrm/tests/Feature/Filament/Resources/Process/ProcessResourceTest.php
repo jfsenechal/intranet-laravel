@@ -114,6 +114,22 @@ describe('table', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        Process::factory()->create(['name' => 'Bernard']);
+        Process::factory()->create(['name' => 'Albert']);
+        Process::factory()->create(['name' => 'Colin']);
+
+        $component = Livewire::test(ListProcesses::class)
+            ->loadTable()
+            ->sortTable('name', 'desc')
+            ->callAction('export', data: ['columns' => ['name']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Nom'], ['Colin'], ['Bernard'], ['Albert']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListProcesses::class)
             ->assertActionExists('export');

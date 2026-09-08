@@ -107,6 +107,22 @@ describe('form validation', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        Contact::factory()->create(['last_name' => 'Bernard']);
+        Contact::factory()->create(['last_name' => 'Albert']);
+        Contact::factory()->create(['last_name' => 'Colin']);
+
+        $component = Livewire::test(ListContacts::class)
+            ->loadTable()
+            ->sortTable('last_name', 'desc')
+            ->callAction('export', data: ['columns' => ['last_name']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Nom'], ['Colin'], ['Bernard'], ['Albert']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListContacts::class)
             ->assertActionExists('export');

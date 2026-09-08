@@ -150,6 +150,22 @@ describe('model behavior', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        foreach (['2026-01-05', '2026-03-05', '2026-02-05'] as $date) {
+            Absence::factory()->create(['start_date' => $date, 'is_closed' => false]);
+        }
+
+        $component = Livewire::test(ListAbsences::class)
+            ->loadTable()
+            ->sortTable('start_date', 'desc')
+            ->callAction('export', data: ['columns' => ['start_date']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Début'], ['05/03/2026'], ['05/02/2026'], ['05/01/2026']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListAbsences::class)
             ->assertActionExists('export');

@@ -39,7 +39,7 @@ final class ListTrainings extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new TrainingExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('formations.xlsx')),
+                ->action(fn (array $data) => new TrainingExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('formations.xlsx')),
         ];
     }
 }

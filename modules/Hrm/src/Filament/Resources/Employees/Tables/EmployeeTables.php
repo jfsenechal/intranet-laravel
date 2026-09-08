@@ -95,7 +95,7 @@ final class EmployeeTables
                     ->label('Statut')
                     ->options(StatusEnum::class)
                     ->default(StatusEnum::AGENT->value),
-                EmployerFilter::makeThrough('contracts'),
+                EmployerFilter::makeThrough('contracts', activeOnly: true),
                 PayScaleFilter::make(),
                 ServiceFilter::make()
                     ->query(fn (Builder $query, array $data): Builder => $query->when(

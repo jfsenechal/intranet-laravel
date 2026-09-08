@@ -43,7 +43,7 @@ final class ListDeadlines extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new DeadlineExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('echeances.xlsx')),
+                ->action(fn (array $data) => new DeadlineExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('echeances.xlsx')),
         ];
     }
 }

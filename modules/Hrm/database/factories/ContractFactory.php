@@ -31,6 +31,7 @@ final class ContractFactory extends Factory
             'job_title' => fake()->jobTitle(),
             'is_replacement' => false,
             'is_closed' => false,
+            'is_suspended' => false,
             'is_amendment' => false,
             'user_add' => 'tester',
         ];

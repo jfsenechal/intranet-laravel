@@ -271,6 +271,25 @@ describe('date range filters', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        AcMarche\Hrm\Models\Contract::factory()->for($employee)->create(['is_closed' => false, 'end_date' => null]);
+
+        foreach (['Bernard', 'Albert', 'Colin'] as $name) {
+            Deadline::factory()->for($employee)->create(['name' => $name, 'is_closed' => false]);
+        }
+
+        $component = Livewire::test(ListDeadlines::class)
+            ->loadTable()
+            ->sortTable('name', 'desc')
+            ->callAction('export', data: ['columns' => ['name']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Intitulé'], ['Colin'], ['Bernard'], ['Albert']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListDeadlines::class)
             ->assertActionExists('export');

@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 final readonly class EmployeeExport
 {
     /**
+     * @param  Builder<Employee>  $query
      * @param  list<string>  $columns  Selected column keys; empty = all.
      */
     public function __construct(private Builder $query, private array $columns = []) {}
@@ -27,7 +28,7 @@ final readonly class EmployeeExport
             'last_name' => 'Nom',
             'first_name' => 'Prenom',
             'birth_date' => 'Date de naissance',
-            'job_title' => 'Fonction',
+            'active_functions' => 'Fonction',
             'status' => 'Statut',
             'hired_at' => 'Entree',
             'private_email' => 'Email',
@@ -64,7 +65,7 @@ final readonly class EmployeeExport
             $bold = (new Style())->setFontBold();
             $writer->addRow(Row::fromValues($this->headings(), $bold));
 
-            $this->query->lazy()->each(function (Employee $employee) use ($writer): void {
+            $this->rowsQuery()->lazy()->each(function (Employee $employee) use ($writer): void {
                 $writer->addRow(Row::fromValues($this->map($employee)));
             });
 
@@ -73,6 +74,22 @@ final readonly class EmployeeExport
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    /**
+     * The function column is read from the active contracts, so they are eager
+     * loaded here. The primary key is appended to the sort to keep the chunks
+     * `lazy()` walks deterministic: the table sorts on `last_name`, which is
+     * not unique, and ties would otherwise let rows repeat or vanish between
+     * two pages.
+     *
+     * @return Builder<Employee>
+     */
+    private function rowsQuery(): Builder
+    {
+        return (clone $this->query)
+            ->with('activeContracts')
+            ->orderBy(new Employee()->getQualifiedKeyName());
     }
 
     /**
@@ -97,7 +114,11 @@ final readonly class EmployeeExport
             'last_name' => $row->last_name,
             'first_name' => $row->first_name,
             'birth_date' => $row->birth_date?->format('d/m/Y'),
-            'job_title' => $row->job_title,
+            'active_functions' => $row->activeContracts
+                ->pluck('job_title')
+                ->filter()
+                ->unique()
+                ->implode(', '),
             'status' => $row->status?->getLabel(),
             'hired_at' => $row->hired_at?->format('d/m/Y'),
             'private_email' => $row->private_email,

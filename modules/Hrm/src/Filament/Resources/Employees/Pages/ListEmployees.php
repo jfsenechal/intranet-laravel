@@ -48,7 +48,7 @@ final class ListEmployees extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new EmployeeExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('agents.xlsx')),
+                ->action(fn (array $data) => new EmployeeExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('agents.xlsx')),
         ];
     }
 }

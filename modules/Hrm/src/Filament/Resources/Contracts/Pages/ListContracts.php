@@ -39,7 +39,7 @@ final class ListContracts extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new ContractExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('contrats.xlsx')),
+                ->action(fn (array $data) => new ContractExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('contrats.xlsx')),
         ];
     }
 }

@@ -106,12 +106,17 @@ final readonly class EmployeeDirectoryExport
 
     /**
      * The directory query only eager loads the service; the direction is read
-     * from the contract here too.
+     * from the contract here too. The primary key is appended to the sort so
+     * the chunks `lazy()` walks stay deterministic: the directory sorts on
+     * `last_name, first_name`, which is not unique, and ties would otherwise
+     * let rows repeat or vanish between two pages.
      *
      * @return Builder<Employee>
      */
     private function rowsQuery(): Builder
     {
-        return (clone $this->query)->with(['activeContracts.service', 'activeContracts.direction']);
+        return (clone $this->query)
+            ->with(['activeContracts.service', 'activeContracts.direction'])
+            ->orderBy(new Employee()->getQualifiedKeyName());
     }
 }

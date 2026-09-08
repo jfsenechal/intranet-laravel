@@ -39,7 +39,7 @@ final class ListDiplomas extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new DiplomaExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('diplomes.xlsx')),
+                ->action(fn (array $data) => new DiplomaExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('diplomes.xlsx')),
         ];
     }
 }

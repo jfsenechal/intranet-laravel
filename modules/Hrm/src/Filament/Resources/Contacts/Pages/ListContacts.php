@@ -37,7 +37,7 @@ final class ListContacts extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new ContactExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('contacts.xlsx')),
+                ->action(fn (array $data) => new ContactExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('contacts.xlsx')),
         ];
     }
 }

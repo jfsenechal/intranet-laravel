@@ -252,6 +252,39 @@ describe('table', function (): void {
             ->assertCanSeeTableRecords([$matching])
             ->assertCanNotSeeTableRecords([$nonMatching]);
     });
+
+    it('ignores contracts that are no longer running when filtering by employer', function (): void {
+        $employer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
+        $otherEmployer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
+
+        $movedAway = Employee::factory()->create(['last_name' => 'Parti']);
+        Contract::factory()->for($movedAway)->create([
+            'employer_id' => $employer->id,
+            'is_closed' => true,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+        Contract::factory()->for($movedAway)->create([
+            'employer_id' => $otherEmployer->id,
+            'is_closed' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => null,
+        ]);
+
+        $stillThere = Employee::factory()->create(['last_name' => 'Reste']);
+        Contract::factory()->for($stillThere)->create([
+            'employer_id' => $employer->id,
+            'is_closed' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => null,
+        ]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('employer_id', $employer->id)
+            ->assertCanSeeTableRecords([$stillThere])
+            ->assertCanNotSeeTableRecords([$movedAway]);
+    });
 });
 
 describe('table scoping by role', function (): void {
@@ -697,6 +730,77 @@ describe('export xlsx action', function (): void {
 
         expect($export->headings())->toBe(['Date de naissance'])
             ->and($export->map($record))->toBe(['12/05/1980']);
+    });
+
+    it('reads the function from the active contracts instead of the deprecated employee column', function (): void {
+        $record = Employee::factory()->create([Employee::DEPRECATED_JOB_TITLE => 'Personnel soignant']);
+        Contract::factory()->for($record)->create([
+            'job_title' => 'Educatrice specialisee',
+            'is_closed' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => null,
+        ]);
+        Contract::factory()->for($record)->create([
+            'job_title' => 'Ancienne fonction',
+            'is_closed' => true,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->headings())->toBe(['Fonction'])
+            ->and($export->map($record->fresh()))->toBe(['Educatrice specialisee']);
+    });
+
+    it('exports the function of an employee whose employee column is empty', function (): void {
+        $record = Employee::factory()->create([Employee::DEPRECATED_JOB_TITLE => null]);
+        Contract::factory()->for($record)->create([
+            'job_title' => 'Directeur MRS',
+            'is_closed' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => null,
+        ]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->map($record->fresh()))->toBe(['Directeur MRS']);
+    });
+
+    it('joins the functions of an employee holding several active contracts', function (): void {
+        $record = Employee::factory()->create();
+        Contract::factory()->for($record)->create([
+            'job_title' => 'Cuisiniere',
+            'is_closed' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => null,
+        ]);
+        Contract::factory()->for($record)->create([
+            'job_title' => 'Aide-soignante',
+            'is_closed' => false,
+            'start_date' => now()->subYear(),
+            'end_date' => null,
+        ]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->map($record->fresh()))->toBe(['Cuisiniere, Aide-soignante']);
+    });
+
+    it('exports the rows in the order the table is sorted', function (): void {
+        Employee::factory()->create(['last_name' => 'Bernard']);
+        Employee::factory()->create(['last_name' => 'Albert']);
+        Employee::factory()->create(['last_name' => 'Colin']);
+
+        $component = Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->sortTable('last_name', 'desc')
+            ->callAction('export', data: ['columns' => ['last_name']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Nom'], ['Colin'], ['Bernard'], ['Albert']]);
     });
 
     it('requires at least one column to be selected', function (): void {

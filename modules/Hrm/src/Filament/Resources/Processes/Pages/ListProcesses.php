@@ -37,7 +37,7 @@ final class ListProcesses extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new ProcessExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('processus.xlsx')),
+                ->action(fn (array $data) => new ProcessExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('processus.xlsx')),
         ];
     }
 }

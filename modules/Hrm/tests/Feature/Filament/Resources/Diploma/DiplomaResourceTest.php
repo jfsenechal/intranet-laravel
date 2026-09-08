@@ -131,6 +131,22 @@ describe('file upload storage', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        Diploma::factory()->create(['name' => 'Bernard']);
+        Diploma::factory()->create(['name' => 'Albert']);
+        Diploma::factory()->create(['name' => 'Colin']);
+
+        $component = Livewire::test(ListDiplomas::class)
+            ->loadTable()
+            ->sortTable('name', 'desc')
+            ->callAction('export', data: ['columns' => ['name']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Intitulé'], ['Colin'], ['Bernard'], ['Albert']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListDiplomas::class)
             ->assertActionExists('export');

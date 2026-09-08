@@ -290,6 +290,22 @@ describe('reminder date filter', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        foreach (['2026-01-05', '2026-03-05', '2026-02-05'] as $date) {
+            SmsReminder::factory()->create(['reminder_date' => $date, 'sent_at' => null]);
+        }
+
+        $component = Livewire::test(ListSmsReminders::class)
+            ->loadTable()
+            ->sortTable('reminder_date', 'desc')
+            ->callAction('export', data: ['columns' => ['reminder_date']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Date de rappel'], ['05/03/2026'], ['05/02/2026'], ['05/01/2026']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListSmsReminders::class)
             ->assertActionExists('export');

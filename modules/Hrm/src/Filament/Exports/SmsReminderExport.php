@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 final readonly class SmsReminderExport
 {
     /**
+     * @param  Builder<SmsReminder>  $query
      * @param  list<string>  $columns  Selected column keys; empty = all.
      */
     public function __construct(private Builder $query, private array $columns = []) {}
@@ -63,7 +64,7 @@ final readonly class SmsReminderExport
             $bold = (new Style())->setFontBold();
             $writer->addRow(Row::fromValues($this->headings(), $bold));
 
-            $this->query->with(['employee'])
+            $this->rowsQuery()
                 ->lazy()
                 ->each(function (SmsReminder $reminder) use ($writer): void {
                     $writer->addRow(Row::fromValues($this->map($reminder)));
@@ -74,6 +75,21 @@ final readonly class SmsReminderExport
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    /**
+     * The relations the rows read are eager loaded here. The primary key is
+     * appended to the sort so the chunks `lazy()` walks stay deterministic:
+     * the table sorts on a column that is not unique, and ties would otherwise
+     * let rows repeat or vanish between two pages.
+     *
+     * @return Builder<SmsReminder>
+     */
+    private function rowsQuery(): Builder
+    {
+        return (clone $this->query)
+            ->with(['employee'])
+            ->orderBy(new SmsReminder()->getQualifiedKeyName());
     }
 
     /**

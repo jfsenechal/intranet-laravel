@@ -39,7 +39,7 @@ final class ListTeleworks extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new TeleworkExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('teletravail.xlsx')),
+                ->action(fn (array $data) => new TeleworkExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('teletravail.xlsx')),
         ];
     }
 }

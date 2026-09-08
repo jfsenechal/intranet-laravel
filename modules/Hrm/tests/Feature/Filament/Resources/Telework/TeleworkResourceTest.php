@@ -416,6 +416,22 @@ describe('model behavior', function (): void {
 });
 
 describe('export action', function (): void {
+    it('exports the rows in the order the table is sorted', function (): void {
+        foreach (['2026-01-05', '2026-03-05', '2026-02-05'] as $date) {
+            Telework::factory()->create(['manager_validated_at' => $date]);
+        }
+
+        $component = Livewire::test(ListTeleworks::class)
+            ->loadTable()
+            ->sortTable('manager_validated_at', 'desc')
+            ->callAction('export', data: ['columns' => ['manager_validated_at']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Validé le'], ['05/03/2026'], ['05/02/2026'], ['05/01/2026']]);
+    });
+
     it('renders the export action on the index page', function (): void {
         Livewire::test(ListTeleworks::class)
             ->assertActionExists('export');

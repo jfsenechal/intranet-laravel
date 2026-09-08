@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 final readonly class ProcessExport
 {
     /**
+     * @param  Builder<Process>  $query
      * @param  list<string>  $columns  Selected column keys; empty = all.
      */
     public function __construct(private Builder $query, private array $columns = []) {}
@@ -60,7 +61,7 @@ final readonly class ProcessExport
             $bold = (new Style())->setFontBold();
             $writer->addRow(Row::fromValues($this->headings(), $bold));
 
-            $this->query->lazy()->each(function (Process $process) use ($writer): void {
+            $this->rowsQuery()->lazy()->each(function (Process $process) use ($writer): void {
                 $writer->addRow(Row::fromValues($this->map($process)));
             });
 
@@ -69,6 +70,19 @@ final readonly class ProcessExport
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    /**
+     * The primary key is appended to the sort so the chunks `lazy()` walks stay
+     * deterministic: the table sorts on a column that is not unique, and ties
+     * would otherwise let rows repeat or vanish between two pages.
+     *
+     * @return Builder<Process>
+     */
+    private function rowsQuery(): Builder
+    {
+        return (clone $this->query)
+            ->orderBy(new Process()->getQualifiedKeyName());
     }
 
     /**

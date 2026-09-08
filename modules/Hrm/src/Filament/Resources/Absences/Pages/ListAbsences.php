@@ -39,7 +39,7 @@ final class ListAbsences extends ListRecords
                         ->bulkToggleable()
                         ->required(),
                 ])
-                ->action(fn (array $data) => new AbsenceExport($this->getFilteredTableQuery(), $data['columns'])->downloadXlsx('absences.xlsx')),
+                ->action(fn (array $data) => new AbsenceExport($this->getTableQueryForExport(), $data['columns'])->downloadXlsx('absences.xlsx')),
         ];
     }
 }
