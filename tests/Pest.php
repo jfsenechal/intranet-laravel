@@ -68,3 +68,34 @@ uses(
 )->in(
     '../modules/Conseil/tests/Feature',
 );
+
+/**
+ * Reads back the raw bytes of an XLSX export, header row included. Livewire
+ * captures a `StreamedResponse` returned by an action into the `download`
+ * effect, so a test reaches the bytes with
+ * `base64_decode(data_get($component->effects, 'download.content'))`.
+ *
+ * @return list<list<string>>
+ */
+function xlsxRows(string $content): array
+{
+    $path = tempnam(sys_get_temp_dir(), 'xlsx');
+    file_put_contents($path, $content);
+
+    $reader = new OpenSpout\Reader\XLSX\Reader();
+    $reader->open($path);
+
+    $rows = [];
+    foreach ($reader->getSheetIterator() as $sheet) {
+        foreach ($sheet->getRowIterator() as $row) {
+            $rows[] = array_map(strval(...), $row->toArray());
+        }
+
+        break;
+    }
+
+    $reader->close();
+    unlink($path);
+
+    return $rows;
+}
