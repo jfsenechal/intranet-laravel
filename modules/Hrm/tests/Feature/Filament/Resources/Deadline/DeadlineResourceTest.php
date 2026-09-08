@@ -11,6 +11,7 @@ use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\DeadlinesRelationManager;
 use AcMarche\Hrm\Models\Deadline;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Str;
@@ -111,6 +112,33 @@ describe('crud operations', function (): void {
         ])
             ->set($deepPath, 'Nested list item')
             ->assertOk();
+    });
+
+    it('returns 404 instead of fataling on a livewire update issued after the record was deleted', function (): void {
+        // Deleting from the view page makes Filament null the `record` property
+        // (InteractsWithRecord::afterActionCalled), and Livewire's hydrateProperties() refuses to
+        // write null back into a typed property. Without a default on ViewDeadline::$record the
+        // property comes back *uninitialized* on the next update from that stale snapshot, and
+        // getRecord() fatals with "Typed property ...::$record must not be accessed before
+        // initialization" (500) instead of aborting with 404.
+        $record = Deadline::factory()->create();
+
+        $component = Livewire::test(ViewDeadline::class, [
+            'record' => $record->id,
+        ])
+            ->callAction(DeleteAction::class);
+
+        expect($component->snapshot['data']['record'])->toBeNull();
+
+        $this->postJson(Livewire::getUpdateUri(), [
+            '_token' => csrf_token(),
+            'components' => [[
+                'snapshot' => json_encode($component->snapshot),
+                'updates' => [],
+                'calls' => [['method' => '$refresh', 'params' => [], 'path' => '']],
+            ]],
+        ], ['X-Livewire' => '1'])
+            ->assertNotFound();
     });
 
     it('can replicate a deadline from the view page', function (): void {
