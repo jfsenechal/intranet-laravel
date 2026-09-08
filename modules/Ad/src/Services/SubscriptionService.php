@@ -7,6 +7,7 @@ namespace AcMarche\Ad\Services;
 use AcMarche\Ad\Models\Subscriber;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Models\Employee;
+use Illuminate\Database\Eloquent\Builder;
 
 final class SubscriptionService
 {
@@ -21,14 +22,41 @@ final class SubscriptionService
             return null;
         }
 
-        return Employee::query()
-            ->where('status', StatusEnum::AGENT->value)
-            ->where(function ($query) use ($email): void {
+        return $this->eligibleEmployeesQuery()
+            ->where(function (Builder $query) use ($email): void {
                 $query->whereRaw('LOWER(professional_email) = ?', [$email])
                     ->orWhereRaw('LOWER(private_email) = ?', [$email]);
             })
-            ->whereHas('activeContracts')
             ->first();
+    }
+
+    /**
+     * Every employee allowed to subscribe: an active "Agent" still under contract.
+     *
+     * @return Builder<Employee>
+     */
+    public function eligibleEmployeesQuery(): Builder
+    {
+        return Employee::query()
+            ->where('status', StatusEnum::AGENT->value)
+            ->whereHas('activeContracts');
+    }
+
+    /**
+     * Eligible employees the intranet can only reach on their private address,
+     * because no professional email was ever encoded for them.
+     *
+     * @return Builder<Employee>
+     */
+    public function eligibleEmployeesWithoutProfessionalEmailQuery(): Builder
+    {
+        return $this->eligibleEmployeesQuery()
+            ->where(function (Builder $query): void {
+                $query->whereNull('professional_email')
+                    ->orWhere('professional_email', '');
+            })
+            ->whereNotNull('private_email')
+            ->where('private_email', '!=', '');
     }
 
     public function subscribe(string $email): Subscriber
