@@ -1,5 +1,5 @@
 @php
-    /** @var array<int, array{type: \AcMarche\Hrm\Enums\TrainingTypeEnum, trainings: \Illuminate\Support\Collection<int, \AcMarche\Hrm\Models\Training>, urls: array<int, string|null>, total: int}> $groups */
+    /** @var array<int, array{type: \AcMarche\Hrm\Enums\TrainingTypeEnum, trainings: \Illuminate\Support\Collection<int, \AcMarche\Hrm\Models\Training>, urls: array<int, string|null>, total: int, uncounted: int}> $groups */
 @endphp
 
 <div class="space-y-6">
@@ -14,9 +14,17 @@
                     <h3 class="text-base font-semibold text-pink-500 dark:text-white">
                         Formation {{ $type->getLabel() }}
                     </h3>
-                    <span class="fi-badge inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-600/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/30">
-                        {{ $group['trainings']->count() }} formation(s) · {{ \AcMarche\Hrm\Models\Training::formatDuration($group['total']) ?: '0min' }}
-                    </span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="fi-badge inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-600/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/30">
+                            {{ $group['trainings']->count() }} formation(s) · {{ \AcMarche\Hrm\Models\Training::formatDuration($group['total']) ?: '0min' }}
+                        </span>
+
+                        @if ($group['uncounted'] > 0)
+                            <span class="fi-badge inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-600/10 dark:bg-white/5 dark:text-gray-400 dark:ring-white/10">
+                                {{ \AcMarche\Hrm\Models\Training::formatDuration($group['uncounted']) }} non comptabilisée(s)
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
                     {{ $type->getDescription() }}
@@ -72,7 +80,7 @@
                                         <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
                                     @endif
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-3 text-end tabular-nums text-gray-600 dark:text-gray-300">
+                                <td class="whitespace-nowrap px-6 py-3 text-end tabular-nums {{ $training->certificate_received ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 line-through dark:text-gray-500' }}">
                                     {{ \AcMarche\Hrm\Models\Training::formatDuration($training->duration_minutes) ?: '—' }}
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-3 text-center">
@@ -97,13 +105,25 @@
                     <tfoot class="border-t border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5">
                         <tr>
                             <td colspan="2" class="px-6 py-3 text-end text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                                Total
+                                Total comptabilisé
                             </td>
                             <td class="whitespace-nowrap px-6 py-3 text-end font-semibold tabular-nums text-gray-950 dark:text-white">
                                 {{ \AcMarche\Hrm\Models\Training::formatDuration($group['total']) ?: '0min' }}
                             </td>
                             <td></td>
                         </tr>
+
+                        @if ($group['uncounted'] > 0)
+                            <tr>
+                                <td colspan="2" class="px-6 py-3 text-end text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                    Hors quota (attestation non reçue)
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-3 text-end tabular-nums text-gray-400 dark:text-gray-500">
+                                    {{ \AcMarche\Hrm\Models\Training::formatDuration($group['uncounted']) }}
+                                </td>
+                                <td></td>
+                            </tr>
+                        @endif
                     </tfoot>
                 </table>
             </div>

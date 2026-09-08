@@ -268,6 +268,28 @@ describe('default filters', function (): void {
     });
 });
 
+describe('duration total', function (): void {
+    it('keeps the hours of a training without certificate out of the column total', function (): void {
+        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+
+        Training::factory()->for($employee)->create([
+            'duration_minutes' => 120,
+            'certificate_received' => true,
+        ]);
+        Training::factory()->for($employee)->create([
+            'duration_minutes' => 180,
+            'certificate_received' => false,
+        ]);
+
+        Livewire::test(TrainingsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertTableColumnSummarySet('duration_minutes', 'counted_duration', '2h');
+    });
+});
+
 describe('export action', function (): void {
     it('exports the rows in the order the table is sorted', function (): void {
         $employee = AcMarche\Hrm\Models\Employee::factory()->create();

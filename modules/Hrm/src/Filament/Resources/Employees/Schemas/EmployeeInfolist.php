@@ -349,7 +349,10 @@ final class EmployeeInfolist
      * Trainings of the employee grouped by type, following the enum declaration order.
      * Types without any training are omitted.
      *
-     * @return array<int, array{type: TrainingTypeEnum, trainings: \Illuminate\Support\Collection<int, Training>, urls: array<int, string|null>, total: int}>
+     * Only trainings whose certificate has been received count towards the hours
+     * quota; the others are still listed, with their duration reported apart.
+     *
+     * @return array<int, array{type: TrainingTypeEnum, trainings: \Illuminate\Support\Collection<int, Training>, urls: array<int, string|null>, total: int, uncounted: int}>
      */
     private static function trainingGroups(Employee $employee): array
     {
@@ -373,7 +376,12 @@ final class EmployeeInfolist
                         $training->id => self::trainingUrl($training),
                     ])
                     ->all(),
-                'total' => (int) $ofType->sum('duration_minutes'),
+                'total' => (int) $ofType
+                    ->filter(fn (Training $training): bool => $training->certificate_received)
+                    ->sum('duration_minutes'),
+                'uncounted' => (int) $ofType
+                    ->reject(fn (Training $training): bool => $training->certificate_received)
+                    ->sum('duration_minutes'),
             ];
         }
 

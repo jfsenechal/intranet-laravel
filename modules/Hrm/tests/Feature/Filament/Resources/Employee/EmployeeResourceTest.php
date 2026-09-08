@@ -85,6 +85,7 @@ describe('trainings tab', function (): void {
             'duration_minutes' => 90,
             'start_date' => '2026-03-02',
             'end_date' => '2026-03-04',
+            'certificate_received' => true,
         ]);
         Training::factory()->for($employee)->create([
             'name' => 'Secourisme',
@@ -92,6 +93,7 @@ describe('trainings tab', function (): void {
             'duration_minutes' => 30,
             'start_date' => '2026-04-10',
             'end_date' => '2026-04-10',
+            'certificate_received' => true,
         ]);
         Training::factory()->for($employee)->create([
             'name' => 'Excel avance',
@@ -99,6 +101,7 @@ describe('trainings tab', function (): void {
             'duration_minutes' => 60,
             'start_date' => '2026-05-05',
             'end_date' => null,
+            'certificate_received' => true,
         ]);
 
         Livewire::test(ViewEmployee::class, ['record' => $employee->id])
@@ -114,6 +117,30 @@ describe('trainings tab', function (): void {
             ->assertSee('2h')
             ->assertSee('1h')
             ->assertSee(ViewTraining::getUrl(['record' => $training], panel: 'hrm-panel'));
+    });
+
+    it('keeps the hours of a training without certificate out of the total', function (): void {
+        $employee = Employee::factory()->create();
+
+        Training::factory()->for($employee)->create([
+            'name' => 'Gestion du temps',
+            'training_type' => TrainingTypeEnum::TYPE1->value,
+            'duration_minutes' => 120,
+            'certificate_received' => true,
+        ]);
+        Training::factory()->for($employee)->create([
+            'name' => 'Aromatherapie',
+            'training_type' => TrainingTypeEnum::TYPE1->value,
+            'duration_minutes' => 180,
+            'certificate_received' => false,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $employee->id])
+            ->assertOk()
+            ->assertSee('Aromatherapie')
+            ->assertSee('2 formation(s) · 2h')
+            ->assertSee('3h non comptabilisée(s)')
+            ->assertSee('Hors quota (attestation non reçue)');
     });
 
     it('shows a placeholder when the employee has no training', function (): void {

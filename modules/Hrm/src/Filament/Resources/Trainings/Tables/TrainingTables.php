@@ -59,15 +59,7 @@ final class TrainingTables
                 TextColumn::make('duration_minutes')
                     ->label('Durée')
                     ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state))
-                    ->summarize(
-                        Summarizer::make()
-                            ->label('Total')
-                            ->using(
-                                fn (Builder $query): string => Training::formatDuration(
-                                    (int) $query->sum('duration_minutes')
-                                )
-                            )
-                    )
+                    ->summarize(self::countedDurationSummarizer())
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('certificate_received')
@@ -138,15 +130,7 @@ final class TrainingTables
                 TextColumn::make('duration_minutes')
                     ->label('Durée')
                     ->formatStateUsing(fn (?int $state): string => Training::formatDuration($state))
-                    ->summarize(
-                        Summarizer::make()
-                            ->label('Total')
-                            ->using(
-                                fn (Builder $query): string => Training::formatDuration(
-                                    (int) $query->sum('duration_minutes')
-                                )
-                            )
-                    )
+                    ->summarize(self::countedDurationSummarizer())
                     ->sortable()
                     ->toggleable(),
                 IconColumn::make('certificate_received')
@@ -178,5 +162,20 @@ final class TrainingTables
                 ReplicateTrainingAction::make(),
             ])
             ->recordAction(ViewAction::class);
+    }
+
+    /**
+     * Hours of a training without its certificate never count towards the quota,
+     * so the column total only sums the trainings whose certificate came back.
+     */
+    private static function countedDurationSummarizer(): Summarizer
+    {
+        return Summarizer::make('counted_duration')
+            ->label('Total comptabilisé')
+            ->using(
+                fn (Builder $query): string => Training::formatDuration(
+                    (int) $query->where('certificate_received', true)->sum('duration_minutes')
+                )
+            );
     }
 }
