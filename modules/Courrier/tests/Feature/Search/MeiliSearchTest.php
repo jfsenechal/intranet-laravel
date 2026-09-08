@@ -448,3 +448,57 @@ it('keeps the executed query from a user who is not an intranet administrator', 
         ->assertSet('executedQuery', null)
         ->assertDontSee('q = ');
 });
+
+it('restores the last search criteria when the page is mounted again', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $mail = IncomingMail::factory()->create();
+
+    $this->actingAs($admin);
+
+    // One call for the search itself, one for the search replayed on mount.
+    [$client, $captured] = captureMeiliSearches([
+        [['id' => $mail->id]],
+        [['id' => $mail->id]],
+    ]);
+    $searcher = new MeiliSearcher();
+    $searcher->client = $client;
+    app()->instance(MeiliSearcher::class, $searcher);
+
+    livewire(IncomingMailSearch::class)
+        ->fillForm(['query' => 'facture', 'reference' => '2026-42'])
+        ->call('search')
+        ->assertSet('resultIds', [$mail->id]);
+
+    livewire(IncomingMailSearch::class)
+        ->assertFormSet(['query' => 'facture', 'reference' => '2026-42'])
+        ->assertSet('resultIds', [$mail->id])
+        ->loadTable()
+        ->assertCanSeeTableRecords([$mail]);
+
+    expect($captured->queries)->toBe(['facture', 'facture']);
+});
+
+it('forgets the persisted criteria when the search is reset', function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('courrier-panel'));
+    $admin = User::factory()->create(['is_administrator' => true]);
+    $mail = IncomingMail::factory()->create();
+
+    $this->actingAs($admin);
+
+    // The reset drops the criteria, so the second mount searches nothing.
+    [$client] = captureMeiliSearch([['id' => $mail->id]]);
+    $searcher = new MeiliSearcher();
+    $searcher->client = $client;
+    app()->instance(MeiliSearcher::class, $searcher);
+
+    livewire(IncomingMailSearch::class)
+        ->fillForm(['query' => 'facture'])
+        ->call('search')
+        ->call('resetSearch')
+        ->assertSet('resultIds', null);
+
+    livewire(IncomingMailSearch::class)
+        ->assertFormSet(['query' => null])
+        ->assertSet('resultIds', null);
+});

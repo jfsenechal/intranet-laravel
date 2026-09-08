@@ -31,6 +31,13 @@ final class IncomingMailSearch extends Page implements HasTable
     use InteractsWithTable;
 
     /**
+     * Where the last search criteria are kept, so coming back to the page
+     * (after opening one of the results, typically) restores the filters
+     * instead of an empty form.
+     */
+    private const string CRITERIA_SESSION_KEY = 'courrier.incoming_mail_search.criteria';
+
+    /**
      * @var array<string, mixed>|null
      */
     public ?array $data = [];
@@ -71,7 +78,16 @@ final class IncomingMailSearch extends Page implements HasTable
 
     public function mount(): void
     {
-        $this->form->fill();
+        $criteria = session(self::CRITERIA_SESSION_KEY);
+
+        if (! is_array($criteria) || ! self::hasCriteria($criteria)) {
+            $this->form->fill();
+
+            return;
+        }
+
+        $this->form->fill($criteria);
+        $this->search();
     }
 
     public function form(Schema $schema): Schema
@@ -82,6 +98,10 @@ final class IncomingMailSearch extends Page implements HasTable
     public function search(): void
     {
         $state = $this->form->getState();
+
+        self::hasCriteria($state)
+            ? session()->put(self::CRITERIA_SESSION_KEY, $state)
+            : session()->forget(self::CRITERIA_SESSION_KEY);
 
         $searcher = app(MeiliSearcher::class);
 
@@ -107,6 +127,8 @@ final class IncomingMailSearch extends Page implements HasTable
 
     public function resetSearch(): void
     {
+        session()->forget(self::CRITERIA_SESSION_KEY);
+
         $this->form->fill();
         $this->resultIds = null;
         $this->executedQuery = null;
@@ -144,6 +166,22 @@ final class IncomingMailSearch extends Page implements HasTable
                 ->color('gray')
                 ->action('resetSearch'),
         ];
+    }
+
+    /**
+     * A form where nothing is filled in is not a search worth remembering.
+     *
+     * @param  array<string, mixed>  $state
+     */
+    private static function hasCriteria(array $state): bool
+    {
+        foreach ($state as $value) {
+            if (filled($value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
