@@ -9,6 +9,8 @@ use AcMarche\Courrier\Repository\ImapRepository;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Carbon\CarbonInterface;
+use DirectoryTree\ImapEngine\Exceptions\ImapConnectionClosedException;
+use DirectoryTree\ImapEngine\FolderInterface;
 use DirectoryTree\ImapEngine\Laravel\ImapManager;
 use DirectoryTree\ImapEngine\Testing\FakeFolder;
 use DirectoryTree\ImapEngine\Testing\FakeMailbox;
@@ -68,6 +70,25 @@ function actAsCpasIndicateur(array $messages): FakeFolder
     test()->actingAs($user);
 
     return $folder;
+}
+
+/**
+ * A mailbox whose session dies the moment a command is sent, the way a server
+ * dropping the connection during LOGIN does in production.
+ */
+function actAsCpasIndicateurWithBrokenMailbox(): void
+{
+    resolve(ImapManager::class)->swap('imap_cpas', new class extends FakeMailbox
+    {
+        public function inbox(): FolderInterface
+        {
+            throw new ImapConnectionClosedException('Server closed the connection (EOF)');
+        }
+    });
+
+    $user = User::factory()->create();
+    $user->addRole(Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_CPAS_ADMIN->value]));
+    test()->actingAs($user);
 }
 
 describe('listing without downloading bodies', function (): void {
@@ -211,5 +232,22 @@ describe('caching the listing', function (): void {
             ])
             ->assertHasNoActionErrors()
             ->assertSee('Message arrive ensuite');
+    });
+});
+
+describe('a broken IMAP session', function (): void {
+    it('reports a dropped connection as an ImapException instead of letting the library one escape', function (): void {
+        actAsCpasIndicateurWithBrokenMailbox();
+
+        new ImapRepository('imap_cpas')->getMessages();
+    })->throws(ImapException::class, 'IMAP operation failed: Server closed the connection (EOF)');
+
+    it('renders the Inbox with a notification rather than failing the Livewire request', function (): void {
+        actAsCpasIndicateurWithBrokenMailbox();
+
+        livewire(Inbox::class)
+            ->loadTable()
+            ->assertOk()
+            ->assertNotified('Erreur de connexion IMAP');
     });
 });

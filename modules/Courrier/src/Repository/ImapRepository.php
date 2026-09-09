@@ -12,6 +12,7 @@ use DirectoryTree\ImapEngine\Address;
 use DirectoryTree\ImapEngine\Attachment;
 use DirectoryTree\ImapEngine\Collections\FolderCollection;
 use DirectoryTree\ImapEngine\Enums\ImapFetchIdentifier;
+use DirectoryTree\ImapEngine\Exceptions\Exception as ImapEngineException;
 use DirectoryTree\ImapEngine\FolderInterface;
 use DirectoryTree\ImapEngine\Laravel\Facades\Imap;
 use DirectoryTree\ImapEngine\MailboxInterface;
@@ -42,6 +43,13 @@ final class ImapRepository
     }
 
     /**
+     * Open the session now, rather than letting the library open it on the
+     * first command.
+     *
+     * `Imap::mailbox()` only builds the object; ImapEngine connects and logs in
+     * lazily, so without the explicit `connect()` a bad host or a refused login
+     * surfaced from `inbox()` deep inside a table render instead of from here.
+     *
      * @throws ImapException
      */
     public function connect(): void
@@ -51,11 +59,15 @@ final class ImapRepository
         }
 
         try {
-            $this->mailbox = Imap::mailbox($this->mailboxName);
+            $mailbox = Imap::mailbox($this->mailboxName);
+            $mailbox->connect();
         } catch (Exception $e) {
+            $this->mailbox = null;
             report($e);
             throw ImapException::connectionFailed($e->getMessage());
         }
+
+        $this->mailbox = $mailbox;
     }
 
     public function disconnect(): void
@@ -86,19 +98,19 @@ final class ImapRepository
      */
     public function getMessages(int $daysBack = self::DEFAULT_DAYS_BACK): array
     {
-        $this->ensureConnected();
+        return $this->onMailbox(function (MailboxInterface $mailbox) use ($daysBack): array {
+            $messages = $mailbox
+                ->inbox()
+                ->messages()
+                ->since(now()->subDays($daysBack))
+                ->withHeaders()
+                ->withBodyStructure()
+                ->get();
 
-        $messages = $this->mailbox
-            ->inbox()
-            ->messages()
-            ->since(now()->subDays($daysBack))
-            ->withHeaders()
-            ->withBodyStructure()
-            ->get();
-
-        return collect($messages)
-            ->map(fn (MessageInterface $message): EmailMessage => $this->mapToEmailMessage($message))
-            ->all();
+            return collect($messages)
+                ->map(fn (MessageInterface $message): EmailMessage => $this->mapToEmailMessage($message))
+                ->all();
+        });
     }
 
     /**
@@ -112,23 +124,23 @@ final class ImapRepository
      */
     public function getMessageBody(int $uid): array
     {
-        $this->ensureConnected();
+        return $this->onMailbox(function (MailboxInterface $mailbox) use ($uid): array {
+            $message = $mailbox
+                ->inbox()
+                ->messages()
+                ->withHeaders()
+                ->withBody()
+                ->find($uid, ImapFetchIdentifier::Uid);
 
-        $message = $this->mailbox
-            ->inbox()
-            ->messages()
-            ->withHeaders()
-            ->withBody()
-            ->find($uid, ImapFetchIdentifier::Uid);
+            if (! $message instanceof MessageInterface) {
+                throw ImapException::messageNotFound($uid);
+            }
 
-        if (! $message instanceof MessageInterface) {
-            throw ImapException::messageNotFound($uid);
-        }
-
-        return [
-            'html' => $message->html(),
-            'text' => $message->text(),
-        ];
+            return [
+                'html' => $message->html(),
+                'text' => $message->text(),
+            ];
+        });
     }
 
     /**
@@ -141,15 +153,13 @@ final class ImapRepository
      */
     public function findMessageByUid(int $uid): ?MessageInterface
     {
-        $this->ensureConnected();
-
-        return $this->mailbox
+        return $this->onMailbox(fn (MailboxInterface $mailbox): ?MessageInterface => $mailbox
             ->inbox()
             ->messages()
             ->withHeaders()
             ->withBodyStructure()
             ->withFlags()
-            ->find($uid, ImapFetchIdentifier::Uid);
+            ->find($uid, ImapFetchIdentifier::Uid));
     }
 
     /**
@@ -163,7 +173,9 @@ final class ImapRepository
             throw ImapException::messageNotFound($uid);
         }
 
-        $message->markDeleted(true);
+        $this->onMailbox(function () use ($message): void {
+            $message->markDeleted(true);
+        });
     }
 
     /**
@@ -177,12 +189,12 @@ final class ImapRepository
             return;
         }
 
-        $this->ensureConnected();
-
-        $this->mailbox
-            ->inbox()
-            ->messages()
-            ->destroy(array_map('intval', $uids), expunge: true);
+        $this->onMailbox(function (MailboxInterface $mailbox) use ($uids): void {
+            $mailbox
+                ->inbox()
+                ->messages()
+                ->destroy(array_map('intval', $uids), expunge: true);
+        });
     }
 
     /**
@@ -190,9 +202,7 @@ final class ImapRepository
      */
     public function getFolder(string $folderName): FolderInterface
     {
-        $this->ensureConnected();
-
-        return $this->mailbox->folders()->findOrFail($folderName);
+        return $this->onMailbox(fn (MailboxInterface $mailbox): FolderInterface => $mailbox->folders()->findOrFail($folderName));
     }
 
     /**
@@ -200,9 +210,7 @@ final class ImapRepository
      */
     public function listFolders(): FolderCollection
     {
-        $this->ensureConnected();
-
-        return $this->mailbox->folders()->get();
+        return $this->onMailbox(fn (MailboxInterface $mailbox): FolderCollection => $mailbox->folders()->get());
     }
 
     /**
@@ -210,15 +218,13 @@ final class ImapRepository
      */
     public function getAttachment(int $uid, int $attachmentIndex): Attachment
     {
-        $this->ensureConnected();
-
         $message = $this->findMessageByUid($uid);
 
         if (! $message instanceof MessageInterface) {
             throw ImapException::messageNotFound($uid);
         }
 
-        $attachments = $this->attachmentsOf($message);
+        $attachments = $this->onMailbox(fn (): array => $this->attachmentsOf($message));
 
         if (! isset($attachments[$attachmentIndex])) {
             throw ImapException::attachmentNotFound($uid, $attachmentIndex);
@@ -232,9 +238,7 @@ final class ImapRepository
      */
     public function getQuota(): MailboxQuota
     {
-        $this->ensureConnected();
-
-        $data = $this->mailbox->inbox()->quota();
+        $data = $this->onMailbox(fn (MailboxInterface $mailbox): array => $mailbox->inbox()->quota());
         $usage = $data['INBOX']['STORAGE']['usage'];
         $limit = $data['INBOX']['STORAGE']['limit'];
 
@@ -299,6 +303,35 @@ final class ImapRepository
 
         if (! $this->mailbox instanceof MailboxInterface) {
             throw ImapException::notConnected();
+        }
+    }
+
+    /**
+     * Run an operation against the connected mailbox, as the single place where
+     * ImapEngine failures become an `ImapException`.
+     *
+     * ImapEngine throws its own exception hierarchy, which no caller catches:
+     * a server closing the connection mid-command escaped every
+     * `catch (ImapException)` and reached the user as a Livewire 500 while the
+     * Inbox table was rendering. Every command goes through here so a broken
+     * session always leaves as an `ImapException`.
+     *
+     * @template TReturn
+     *
+     * @param  callable(MailboxInterface): TReturn  $operation
+     * @return TReturn
+     *
+     * @throws ImapException
+     */
+    private function onMailbox(callable $operation): mixed
+    {
+        $this->ensureConnected();
+
+        try {
+            return $operation($this->mailbox);
+        } catch (ImapEngineException $e) {
+            report($e);
+            throw ImapException::operationFailed($e->getMessage());
         }
     }
 
