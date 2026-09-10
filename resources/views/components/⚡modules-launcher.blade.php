@@ -46,10 +46,11 @@ new class extends Component {
             x-data
             @click="window.dispatchEvent(new CustomEvent('toggle-modules-launcher'))"
             type="button"
-            class="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg bg-pink-400 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-900 focus:ring-offset-2 dark:bg-purple-700 dark:hover:bg-purple-600"
+            title="Applications"
+            class="fi-sidebar-shortcut cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg bg-pink-400 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-900 focus:ring-offset-2 dark:bg-purple-700 dark:hover:bg-purple-600"
         >
-            <x-filament::icon icon="heroicon-m-squares-2x2" class="h-5 w-5"/>
-            Applications
+            <x-filament::icon icon="heroicon-m-squares-2x2" class="h-5 w-5 shrink-0"/>
+            <span class="fi-sidebar-shortcut-label">Applications</span>
         </button>
 
     @php

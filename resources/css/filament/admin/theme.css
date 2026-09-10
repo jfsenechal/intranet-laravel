@@ -75,3 +75,35 @@
 .dark .fi-fo-rich-editor-toolbar {
     background-color: var(--gray-900);
 }
+
+/*
+ * Sidebar shortcuts (Accueil / Applications), rendered at SIDEBAR_NAV_START.
+ * The desktop-collapsed sidebar is only as wide as a nav icon, so the labelled
+ * buttons overflow it. Collapse them to the same 2.25rem icon square as the nav
+ * items below, and drop the labels (the `title` attribute keeps them nameable).
+ * The `-0.5rem` inline start margin mirrors the `-mx-2` of `.fi-sidebar-nav-groups`
+ * so the shortcut icons line up with the navigation icons.
+ */
+@media (min-width: 1024px) {
+    .fi-body-has-sidebar-collapsible-on-desktop
+        .fi-main-sidebar:not(.fi-sidebar-open)
+        .fi-sidebar-shortcuts {
+        align-items: flex-start;
+        margin-inline-start: -0.5rem;
+        gap: 0.5rem;
+    }
+
+    .fi-body-has-sidebar-collapsible-on-desktop
+        .fi-main-sidebar:not(.fi-sidebar-open)
+        .fi-sidebar-shortcut {
+        width: 2.25rem;
+        height: 2.25rem;
+        padding: 0;
+    }
+
+    .fi-body-has-sidebar-collapsible-on-desktop
+        .fi-main-sidebar:not(.fi-sidebar-open)
+        .fi-sidebar-shortcut-label {
+        display: none;
+    }
+}

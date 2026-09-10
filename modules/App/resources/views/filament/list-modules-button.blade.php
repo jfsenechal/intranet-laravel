@@ -1,4 +1,4 @@
-<div class="flex flex-col items-center justify-center gap-4">
+<div class="fi-sidebar-shortcuts flex flex-col items-stretch justify-center gap-4">
     <x-home-button/>
     <livewire:modules-launcher/>
 </div>
