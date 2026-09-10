@@ -197,6 +197,44 @@ it('accepts the trip when all three external movement fields are filled', functi
         ->assertNotified();
 });
 
+it('stores the departure and arrival of an external movement on the Belgian clock', function (): void {
+    // The dates are a wall clock, not an instant: Filament's display timezone
+    // must not turn a departure typed at 00h00 on 08-09 into 07-09 22:00.
+    $trip = Trip::factory()->make(['user_add' => 'jdupont']);
+
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'distance' => $trip->distance,
+            'content' => $trip->content,
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
+            'departure_date' => '2026-09-08 00:00:00',
+            'arrival_date' => '2026-09-08 08:50:00',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    assertDatabaseHas(Trip::class, [
+        'content' => $trip->content,
+        'departure_date' => '2026-09-08 00:00:00',
+        'arrival_date' => '2026-09-08 08:50:00',
+    ]);
+});
+
+it('displays the stored departure date without shifting it', function (): void {
+    // A late departure is the case that separates the two: rendered as a
+    // datetime it would be pushed to the next day by the display timezone.
+    $trip = Trip::factory()->create([
+        'user_add' => 'jdupont',
+        'departure_date' => '2026-09-08 22:30:00',
+    ]);
+
+    livewire(ListTrips::class)
+        ->loadTable()
+        ->assertTableColumnFormattedStateSet('departure_date', '08/09/2026', $trip);
+});
+
 it('renders the table for a non-admin owner without missing attribute error', function (): void {
     $owner = User::factory()->create(['username' => 'rhoubrechts', 'is_administrator' => false]);
     $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);

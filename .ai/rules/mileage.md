@@ -24,3 +24,12 @@ The other Mileage policies *are* auto-discovered (`AcMarche\Mileage\Models\X` â†
 
 ## Budget article label
 A budget article is always shown as `functional_code - economic_code name` (`BudgetArticle::$display_name`). Select options come from `BudgetArticle::displayNameOptions()` â€” pass `'id'` when the field stores the id instead of the name. On a declaration use `display_budget_article`, which resolves the article from the name stored in `budget_article` and falls back to that bare name when the article is gone.
+
+## Trip dates are a Belgian wall clock, not a UTC instant
+`trips.departure_date` and `trips.arrival_date` store the date and time the beneficiary typed, on the Belgian clock. Ten years of rows (and every export, `TripAttributeResolver::resolveRate()`, `RateMismatchRepository`) read them raw, so they must never be converted.
+
+`FilamentTimezone::set(config('app.display_timezone'))` in `AppServiceProvider` would convert them: both `DateTimePicker`s in `TripForm` therefore pin `->timezone(config('app.timezone'))`, and the table column uses `->date('d/m/Y')` (not `dateTime()`, which applies the display timezone). Same for any new column, entry or picker on these two fields.
+
+Only external trips were ever hit: on an internal trip the time inputs are hidden and Filament skips the timezone on a picker that stores no time. `mileage:fix-trip-timezone-shift` repaired the 20 rows written between the `FilamentTimezone` commit (2026-08-04) and the fix; it is one-off, re-running it over the same window shifts them twice.
+
+`created_at`/`updated_at` are genuine UTC timestamps and keep converting for display.

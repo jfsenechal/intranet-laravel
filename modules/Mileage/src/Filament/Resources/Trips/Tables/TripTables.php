@@ -31,7 +31,9 @@ final class TripTables
             ->columns([
                 TextColumn::make('departure_date')
                     ->label('Date')
-                    ->dateTime('d/m/Y')
+                    // date() rather than dateTime(): the column carries a Belgian wall
+                    // clock, so Filament's display timezone must not shift it.
+                    ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('departure_location')
                     ->label('Départ')

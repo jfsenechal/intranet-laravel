@@ -34,6 +34,9 @@ final class TripForm
                             ->time(fn (Get $get): bool => filled($get('departure_location'))
                                 && filled($get('arrival_location'))
                                 && filled($get('arrival_date')))
+                            // A trip date is a Belgian wall clock, not an instant: it is stored
+                            // and read back verbatim, so the picker must not convert it.
+                            ->timezone(config('app.timezone'))
                             ->required(),
                         Textarea::make('content')
                             ->label('Détail des courses')
@@ -65,6 +68,8 @@ final class TripForm
                             ->label('Date/heure d\'arrivée')
                             ->seconds(false)
                             ->live(onBlur: true)
+                            // Stored verbatim like departure_date, see above.
+                            ->timezone(config('app.timezone'))
                             ->requiredWith('departure_location,arrival_location'),
                         TextInput::make('meal_expense')
                             ->label('Frais de repas')
