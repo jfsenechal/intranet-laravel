@@ -22,8 +22,10 @@
         "octane-development",
         "scout-development",
         "tailwindcss-development",
+        "filament-development",
         "laravel-pdf",
         "filament-security-audit",
+        "planning-filament",
         "debug-using-debugbar"
     ]
 }

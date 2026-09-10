@@ -1416,16 +1416,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.394.9",
+            "version": "3.394.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "c5e7a247fa6aeac7355d5be88f38873480789c71"
+                "reference": "0a16c43453b30b5ec4025293f33028e299cf448e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c5e7a247fa6aeac7355d5be88f38873480789c71",
-                "reference": "c5e7a247fa6aeac7355d5be88f38873480789c71",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0a16c43453b30b5ec4025293f33028e299cf448e",
+                "reference": "0a16c43453b30b5ec4025293f33028e299cf448e",
                 "shasum": ""
             },
             "require": {
@@ -1507,9 +1507,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.394.9"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.394.11"
             },
-            "time": "2026-09-04T18:07:00+00:00"
+            "time": "2026-09-09T18:06:19+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -2712,16 +2712,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v4.0.6",
+            "version": "v4.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "75f25c84f8ffc4b10029be8a310c72fc0d46bf71"
+                "reference": "afb2485393a0596f61efcdda8ca5dccd5369b28a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/75f25c84f8ffc4b10029be8a310c72fc0d46bf71",
-                "reference": "75f25c84f8ffc4b10029be8a310c72fc0d46bf71",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/afb2485393a0596f61efcdda8ca5dccd5369b28a",
+                "reference": "afb2485393a0596f61efcdda8ca5dccd5369b28a",
                 "shasum": ""
             },
             "require": {
@@ -2784,7 +2784,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-28T13:39:48+00:00"
+            "time": "2026-09-10T01:55:01+00:00"
         },
         {
             "name": "directorytree/ldaprecord-laravel",
@@ -6630,16 +6630,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "3.11.0",
+            "version": "3.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "147f303310f06334f03f409e49d7ad1e275ff05a"
+                "reference": "72c534fc0ab181ef52d92a68382318631e301608"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/147f303310f06334f03f409e49d7ad1e275ff05a",
-                "reference": "147f303310f06334f03f409e49d7ad1e275ff05a",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/72c534fc0ab181ef52d92a68382318631e301608",
+                "reference": "72c534fc0ab181ef52d92a68382318631e301608",
                 "shasum": ""
             },
             "require": {
@@ -6665,6 +6665,7 @@
                 "phpstan/phpstan-strict-rules": "^2",
                 "phpunit/phpunit": "^10.5.17 || ^11.0.7",
                 "predis/predis": "^1.1 || ^2",
+                "psr/clock": "^1.0",
                 "rollbar/rollbar": "^4.0",
                 "ruflin/elastica": "^7 || ^8",
                 "symfony/mailer": "^5.4 || ^6",
@@ -6683,6 +6684,7 @@
                 "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
                 "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
                 "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
+                "psr/clock": "Required to pass a clock to the Logger and control the timestamp of log records",
                 "rollbar/rollbar": "Allow sending log messages to Rollbar",
                 "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
             },
@@ -6717,7 +6719,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Seldaek/monolog/issues",
-                "source": "https://github.com/Seldaek/monolog/tree/3.11.0"
+                "source": "https://github.com/Seldaek/monolog/tree/3.12.0"
             },
             "funding": [
                 {
@@ -6729,7 +6731,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-02T12:39:56+00:00"
+            "time": "2026-09-09T08:34:20+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -15022,16 +15024,16 @@
         },
         {
             "name": "zbateson/mail-mime-parser",
-            "version": "4.0.3",
+            "version": "4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zbateson/mail-mime-parser.git",
-                "reference": "f0f7ea3d5fc07471187e6369a7f32dbfea6220e0"
+                "reference": "4cc63e42154d0062812a11aac13f2772e4a5de55"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zbateson/mail-mime-parser/zipball/f0f7ea3d5fc07471187e6369a7f32dbfea6220e0",
-                "reference": "f0f7ea3d5fc07471187e6369a7f32dbfea6220e0",
+                "url": "https://api.github.com/repos/zbateson/mail-mime-parser/zipball/4cc63e42154d0062812a11aac13f2772e4a5de55",
+                "reference": "4cc63e42154d0062812a11aac13f2772e4a5de55",
                 "shasum": ""
             },
             "require": {
@@ -15094,7 +15096,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-30T17:53:06+00:00"
+            "time": "2026-09-09T17:40:56+00:00"
         },
         {
             "name": "zbateson/mb-wrapper",
@@ -17532,16 +17534,16 @@
         },
         {
             "name": "laravel/boost",
-            "version": "v2.7.1",
+            "version": "v2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/boost.git",
-                "reference": "1ffcccb0f5f041c68bebea4d907cc15533d0838f"
+                "reference": "ac0b51fbaf3cc19453aef7a1b188bce19a1ec049"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/boost/zipball/1ffcccb0f5f041c68bebea4d907cc15533d0838f",
-                "reference": "1ffcccb0f5f041c68bebea4d907cc15533d0838f",
+                "url": "https://api.github.com/repos/laravel/boost/zipball/ac0b51fbaf3cc19453aef7a1b188bce19a1ec049",
+                "reference": "ac0b51fbaf3cc19453aef7a1b188bce19a1ec049",
                 "shasum": ""
             },
             "require": {
@@ -17594,20 +17596,20 @@
                 "issues": "https://github.com/laravel/boost/issues",
                 "source": "https://github.com/laravel/boost"
             },
-            "time": "2026-09-07T04:38:53+00:00"
+            "time": "2026-09-08T17:07:40+00:00"
         },
         {
             "name": "laravel/mcp",
-            "version": "v0.9.4",
+            "version": "v0.9.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/mcp.git",
-                "reference": "7ca5b923630118696602d14348cd0466a5e853ec"
+                "reference": "923d8d8cd9ed46766d1a8b5269f8b4afc4c91c53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/mcp/zipball/7ca5b923630118696602d14348cd0466a5e853ec",
-                "reference": "7ca5b923630118696602d14348cd0466a5e853ec",
+                "url": "https://api.github.com/repos/laravel/mcp/zipball/923d8d8cd9ed46766d1a8b5269f8b4afc4c91c53",
+                "reference": "923d8d8cd9ed46766d1a8b5269f8b4afc4c91c53",
                 "shasum": ""
             },
             "require": {
@@ -17668,7 +17670,7 @@
                 "issues": "https://github.com/laravel/mcp/issues",
                 "source": "https://github.com/laravel/mcp"
             },
-            "time": "2026-08-13T15:01:07+00:00"
+            "time": "2026-09-09T12:56:57+00:00"
         },
         {
             "name": "laravel/pail",
@@ -17837,16 +17839,16 @@
         },
         {
             "name": "laravel/pint",
-            "version": "v1.31.0",
+            "version": "v1.32.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pint.git",
-                "reference": "0730363418ad06a7b267d8f2a4f87eed0ab7f610"
+                "reference": "dea4e95f0f1722b8fec9eaabc8fdd676d71e8841"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pint/zipball/0730363418ad06a7b267d8f2a4f87eed0ab7f610",
-                "reference": "0730363418ad06a7b267d8f2a4f87eed0ab7f610",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/dea4e95f0f1722b8fec9eaabc8fdd676d71e8841",
+                "reference": "dea4e95f0f1722b8fec9eaabc8fdd676d71e8841",
                 "shasum": ""
             },
             "require": {
@@ -17858,8 +17860,8 @@
             },
             "require-dev": {
                 "composer/semver": "^3.4.4",
-                "friendsofphp/php-cs-fixer": "^3.95.24",
-                "illuminate/view": "^13.30.1",
+                "friendsofphp/php-cs-fixer": "^3.95.25",
+                "illuminate/view": "^13.31.0",
                 "larastan/larastan": "^3.11.0",
                 "laravel-zero/framework": "^13.0.0",
                 "laravel/agent-detector": "^2.0.2",
@@ -17903,7 +17905,7 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
-            "time": "2026-09-07T15:03:30+00:00"
+            "time": "2026-09-09T16:26:47+00:00"
         },
         {
             "name": "laravel/roster",
