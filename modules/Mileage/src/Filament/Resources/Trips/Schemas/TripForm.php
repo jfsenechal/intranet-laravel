@@ -9,7 +9,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 
 final class TripForm
 {
@@ -57,19 +59,22 @@ final class TripForm
                             ->maxLength(255)
                             ->minLength(2)
                             ->live(onBlur: true)
+                            ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
                             ->requiredWith('arrival_location,arrival_date'),
                         TextInput::make('arrival_location')
                             ->label('Lieu d\'arrivée')
                             ->maxLength(255)
                             ->minLength(2)
                             ->live(onBlur: true)
+                            ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
                             ->requiredWith('departure_location,arrival_date'),
                         DateTimePicker::make('arrival_date')
-                            ->label('Date/heure d\'arrivée')
+                            ->label('Date/heure de retour')
                             ->seconds(false)
                             ->live(onBlur: true)
                             // Stored verbatim like departure_date, see above.
                             ->timezone(config('app.timezone'))
+                            ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
                             ->requiredWith('departure_location,arrival_location'),
                         TextInput::make('meal_expense')
                             ->label('Frais de repas')
@@ -88,5 +93,27 @@ final class TripForm
                     ])
                     ->columns(3),
             ]);
+    }
+
+    /**
+     * An external movement is encoded from its arrival, so leaving the
+     * departure empty only makes the beneficiary retype the same day: as soon
+     * as the three external fields are filled, default it to the arrival day
+     * at 08h00. A departure already encoded is never overwritten.
+     */
+    private static function defaultDepartureDateToArrivalDay(Get $get, Set $set): void
+    {
+        if (filled($get('departure_date'))) {
+            return;
+        }
+
+        if (blank($get('departure_location')) || blank($get('arrival_location')) || blank($get('arrival_date'))) {
+            return;
+        }
+
+        $set(
+            'departure_date',
+            Carbon::parse($get('arrival_date'))->setTime(8, 0)->format('Y-m-d H:i:s'),
+        );
     }
 }

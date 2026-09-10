@@ -197,6 +197,40 @@ it('accepts the trip when all three external movement fields are filled', functi
         ->assertNotified();
 });
 
+it('defaults an empty departure date to the arrival day at 08h00', function (): void {
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'departure_date' => null,
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
+            'arrival_date' => '2026-09-08 17:30:00',
+        ])
+        // seconds(false) normalises the picker state to the minute.
+        ->assertFormSet(['departure_date' => '2026-09-08 08:00']);
+});
+
+it('keeps a departure date already encoded when the external fields are filled', function (): void {
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'departure_date' => '2026-09-07 06:15:00',
+            'departure_location' => 'Marche',
+            'arrival_location' => 'Namur',
+            'arrival_date' => '2026-09-08 17:30:00',
+        ])
+        ->assertFormSet(['departure_date' => '2026-09-07 06:15']);
+});
+
+it('leaves the departure date empty while the movement is not external', function (): void {
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'departure_date' => null,
+            'departure_location' => 'Marche',
+            'arrival_location' => null,
+            'arrival_date' => '2026-09-08 17:30:00',
+        ])
+        ->assertFormSet(['departure_date' => null]);
+});
+
 it('stores the departure and arrival of an external movement on the Belgian clock', function (): void {
     // The dates are a wall clock, not an instant: Filament's display timezone
     // must not turn a departure typed at 00h00 on 08-09 into 07-09 22:00.
