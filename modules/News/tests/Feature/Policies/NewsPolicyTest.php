@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Enums\RolesEnum;
 use AcMarche\News\Models\News;
 use AcMarche\Security\Models\Role;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 
 beforeEach(function (): void {
@@ -15,11 +17,38 @@ it('allows any user to view any news', function (): void {
     expect(auth()->user()->can('viewAny', News::class))->toBeTrue();
 });
 
-it('allows any user to view a news', function (): void {
-    $news = News::factory()->create();
+it('lets a user view common news and news of their department', function (DepartmentEnum $department): void {
+    auth()->user()->update(['departments' => [DepartmentEnum::CPAS->value]]);
+    $news = News::factory()->create(['department' => $department->value]);
+
+    expect(auth()->user()->can('view', $news))->toBeTrue();
+})->with([DepartmentEnum::COMMON, DepartmentEnum::CPAS]);
+
+it('denies a user to view news of another department', function (): void {
+    auth()->user()->update(['departments' => [DepartmentEnum::CPAS->value]]);
+    $news = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
+
+    expect(auth()->user()->can('view', $news))->toBeFalse();
+});
+
+it('lets a news admin view news of any department', function (): void {
+    auth()->user()->update(['departments' => [DepartmentEnum::VILLE->value]]);
+    auth()->user()->roles()->attach(Role::create(['name' => RolesEnum::ROLE_NEWS_ADMIN->value]));
+    $news = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
 
     expect(auth()->user()->can('view', $news))->toBeTrue();
 });
+
+it('lets a guest view common and ville news only', function (DepartmentEnum $department, bool $allowed): void {
+    $news = News::factory()->create(['department' => $department->value]);
+    auth()->logout();
+
+    expect(Gate::allows('view', $news))->toBe($allowed);
+})->with([
+    'common' => [DepartmentEnum::COMMON, true],
+    'ville' => [DepartmentEnum::VILLE, true],
+    'cpas' => [DepartmentEnum::CPAS, false],
+]);
 
 it('allows any user to create news', function (): void {
     expect(auth()->user()->can('create', News::class))->toBeTrue();

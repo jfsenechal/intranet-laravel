@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Filament\Resources\Categories\CategoryResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use AcMarche\News\Filament\Resources\News\Pages\ListNews;
@@ -54,6 +55,34 @@ it('shows a guest an article and its category', function (): void {
     $this->get(CategoryResource::getUrl('view', ['record' => $category]))
         ->assertOk()
         ->assertSee('Communication');
+});
+
+it('lists only common and ville news to a guest', function (): void {
+    $common = News::factory()->create(['department' => DepartmentEnum::COMMON->value]);
+    $ville = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
+    $cpas = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+
+    auth()->logout();
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords([$common, $ville])
+        ->assertCanNotSeeTableRecords([$cpas]);
+
+    $this->get(NewsResource::getUrl('view', ['record' => $cpas]))->assertNotFound();
+});
+
+it('lists common news and news of their department to a user', function (): void {
+    $common = News::factory()->create(['department' => DepartmentEnum::COMMON->value]);
+    $cpas = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $ville = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
+
+    $this->actingAs(User::factory()->create(['departments' => [DepartmentEnum::CPAS->value]]));
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords([$common, $cpas])
+        ->assertCanNotSeeTableRecords([$ville]);
 });
 
 it('lets a guest search the news list from the search box', function (): void {

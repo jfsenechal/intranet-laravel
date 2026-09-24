@@ -15,6 +15,8 @@ use AcMarche\News\Models\News;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Override;
 
 final class NewsResource extends Resource
@@ -45,6 +47,14 @@ final class NewsResource extends Resource
     public static function table(Table $table): Table
     {
         return NewsTables::configure($table);
+    }
+
+    /**
+     * @return Builder<News>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->visibleTo(Auth::user());
     }
 
     public static function getPages(): array

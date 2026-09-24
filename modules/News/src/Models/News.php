@@ -8,9 +8,11 @@ use AcMarche\News\Database\Factories\NewsFactory;
 use AcMarche\News\Enums\DepartmentEnum;
 use AcMarche\News\Observers\NewsObserver;
 use AcMarche\Security\Models\HasUserAdd;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +61,18 @@ final class News extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Legacy news without a department are treated as COMMON.
+     */
+    public function isVisibleTo(?User $user): bool
+    {
+        $department = $this->department instanceof DepartmentEnum
+            ? $this->department->value
+            : DepartmentEnum::COMMON->value;
+
+        return in_array($department, DepartmentEnum::visibleTo($user), true);
+    }
+
     public function prunable(): Builder
     {
         return self::query()->where('published_at', '<', now()->subDays(720));
@@ -72,6 +86,18 @@ final class News extends Model
     protected static function newFactory(): NewsFactory
     {
         return NewsFactory::new();
+    }
+
+    /**
+     * Limit the query to the news the given user may read, see DepartmentEnum::visibleTo().
+     */
+    #[Scope]
+    protected function visibleTo(Builder $query, ?User $user): void
+    {
+        $query->where(function (Builder $query) use ($user): void {
+            $query->whereIn('department', DepartmentEnum::visibleTo($user))
+                ->orWhereNull('department');
+        });
     }
 
     protected function casts(): array

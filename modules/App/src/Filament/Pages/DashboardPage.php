@@ -82,6 +82,7 @@ final class DashboardPage extends BaseDashboard
         $this->favoriteEmployees = FavoriteEmployeeRepository::favorites();
 
         $this->latestNews = News::query()
+            ->visibleTo(Auth::user())
             ->latest('created_at')
             ->limit(5)
             ->get();

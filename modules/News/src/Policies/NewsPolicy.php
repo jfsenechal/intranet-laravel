@@ -14,7 +14,8 @@ final class NewsPolicy
      * Determine whether the user can view any models.
      *
      * The nullable parameter is what lets a guest through: `Gate` only calls a
-     * policy method without a user when its first parameter accepts null.
+     * policy method without a user when its first parameter accepts null. The
+     * listed records are narrowed by department in `NewsResource::getEloquentQuery()`.
      */
     public function viewAny(?User $user): bool
     {
@@ -24,9 +25,9 @@ final class NewsPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(?User $user): bool
+    public function view(?User $user, News $news): bool
     {
-        return true;
+        return $news->isVisibleTo($user);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\News\Enums;
 
+use App\Models\User;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
@@ -22,6 +23,27 @@ enum DepartmentEnum: string implements HasColor, HasIcon, HasLabel
         }
 
         return $values;
+    }
+
+    /**
+     * The departments whose news the given user may read, following the rule
+     * NewsNotification uses to pick recipients: COMMON news reaches everyone,
+     * other news only the users of that department. Guests read COMMON and
+     * VILLE news, administrators and news admins read everything.
+     *
+     * @return list<string>
+     */
+    public static function visibleTo(?User $user): array
+    {
+        if (! $user instanceof User) {
+            return [self::COMMON->value, self::VILLE->value];
+        }
+
+        if ($user->isAdministrator() || $user->hasOneOfThisRoles([RolesEnum::ROLE_NEWS_ADMIN->value])) {
+            return self::toArray();
+        }
+
+        return array_values(array_unique([self::COMMON->value, ...($user->departments ?? [])]));
     }
 
     public function getLabel(): string
