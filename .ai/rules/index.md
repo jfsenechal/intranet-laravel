@@ -6,6 +6,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | modules/Courrier/src/Ai/** | .ai/rules/ai.md |
 | modules/Courrier/** | .ai/rules/courrier.md |
+| modules/CpasLibrary/** | .ai/rules/cpas-library.md |
 | modules/AldermenAgenda/database/migrations/** | .ai/rules/database-migrations.md |
 | modules/**/src/Filament/** | .ai/rules/filament.md |
 | modules/Hrm/** | .ai/rules/hrm.md |

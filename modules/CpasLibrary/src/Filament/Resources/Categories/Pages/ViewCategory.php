@@ -37,7 +37,6 @@ final class ViewCategory extends ViewRecord
                         TextEntry::make('parent.name')
                             ->label('Catégorie parente')
                             ->placeholder('—'),
-                        TextEntry::make('slug')->label('Slug'),
                         TextEntry::make('description')
                             ->label('Description')
                             ->columnSpanFull(),

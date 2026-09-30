@@ -20,7 +20,6 @@ use Override;
     'parent_id',
     'name',
     'description',
-    'slug',
     'icon',
     'color',
     'departments',
@@ -33,6 +32,16 @@ final class Category extends Model
 
     #[Override]
     public $timestamps = false;
+
+    /**
+     * The legacy `public` column is NOT NULL without a database default.
+     *
+     * @var array<string, mixed>
+     */
+    #[Override]
+    protected $attributes = [
+        'public' => false,
+    ];
 
     /**
      * @return BelongsTo<Category, $this>

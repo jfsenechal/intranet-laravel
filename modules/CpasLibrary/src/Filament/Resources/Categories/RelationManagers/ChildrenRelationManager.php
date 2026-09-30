@@ -34,9 +34,6 @@ final class ChildrenRelationManager extends RelationManager
                 ->label('Nom')
                 ->required()
                 ->maxLength(255),
-            TextInput::make('slug')
-                ->label('Slug')
-                ->maxLength(255),
             TextInput::make('description')
                 ->label('Description')
                 ->maxLength(255),
@@ -55,9 +52,6 @@ final class ChildrenRelationManager extends RelationManager
                     ->label('Nom')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('slug')
-                    ->label('Slug')
-                    ->toggleable(),
                 IconColumn::make('public')
                     ->label('Public')
                     ->boolean(),

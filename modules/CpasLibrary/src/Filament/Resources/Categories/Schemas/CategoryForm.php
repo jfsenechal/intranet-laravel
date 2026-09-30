@@ -11,7 +11,6 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -26,12 +25,7 @@ final class CategoryForm
                 TextInput::make('name')
                     ->label('Nom')
                     ->required()
-                    ->maxLength(255)
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set(
-                        'slug',
-                        Str::slug($state ?? ''),
-                    )),
+                    ->maxLength(255),
                 Select::make('parent_id')
                     ->label('Catégorie parente')
                     ->relationship(

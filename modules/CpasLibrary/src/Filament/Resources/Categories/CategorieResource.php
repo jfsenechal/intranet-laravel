@@ -51,7 +51,6 @@ final class CategorieResource extends Resource
     {
         return [
             'name',
-            'slug',
         ];
     }
 

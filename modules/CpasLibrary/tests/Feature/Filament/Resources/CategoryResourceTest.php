@@ -17,6 +17,7 @@ use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -93,6 +94,14 @@ it('creates a categorie via the form', function (): void {
     $categorie = Category::query()->where('name', 'Aide sociale')->first();
 
     expect($categorie->departments)->toBe([DepartmentEnum::CPAS->value]);
+});
+
+it('no longer has a slug column', function (): void {
+    expect(Schema::connection('maria-cpas-library')->hasColumn('categories', 'slug'))->toBeFalse();
+});
+
+it('sends public = false on insert since the legacy column has no database default', function (): void {
+    expect((new Category())->getAttributes())->toMatchArray(['public' => false]);
 });
 
 it('updates a categorie via the form', function (): void {
