@@ -56,6 +56,16 @@ describe('page rendering', function (): void {
                 'name' => $record->name,
             ]);
     });
+
+    it('places the closed toggle at the bottom of the form, next to the save buttons', function (): void {
+        $record = Deadline::factory()->create();
+
+        $components = Livewire::test(EditDeadline::class, [
+            'record' => $record->id,
+        ])->instance()->form->getComponents();
+
+        expect(end($components)->getName())->toBe('is_closed');
+    });
 });
 
 describe('crud operations', function (): void {

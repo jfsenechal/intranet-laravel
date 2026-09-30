@@ -9,7 +9,6 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -20,14 +19,10 @@ final class DeadlineForm
         return $schema
             ->columns(1)
             ->components([
-                Flex::make([
-                    TextInput::make('name')
-                        ->label('Intitulé')
-                        ->required()
-                        ->maxLength(250),
-                    Toggle::make('is_closed')
-                        ->label('Clôturée'),
-                ]),
+                TextInput::make('name')
+                    ->label('Intitulé')
+                    ->required()
+                    ->maxLength(250),
                 Section::make('Agent et employeur')
                     ->columns(2)
                     ->schema([
@@ -71,6 +66,8 @@ final class DeadlineForm
                     ->label('Note')
                     ->helperText('Pour un retour à la ligne MAJ + ENTER')
                     ->columnSpanFull(),
+                Toggle::make('is_closed')
+                    ->label('Clôturée'),
             ]);
     }
 }
