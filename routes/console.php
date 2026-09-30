@@ -8,6 +8,7 @@ Schedule::command('agent:prune-profiles')->daily();
 Schedule::command('intranet:sync-users')->daily();
 Schedule::command('meal-delivery:prune-absences')->daily();
 Schedule::command('hrm:expire-new-hires')->daily();
+Schedule::command('hrm:sync-employees')->daily();
 Schedule::command('courrier:sync')->daily();
 Schedule::command('courrier:meili-indexer')->dailyAt('03:00')->withoutOverlapping();
 Schedule::command('cpas-library:reminder')->dailyAt('01:00');
