@@ -26,6 +26,7 @@
         "laravel-pdf",
         "filament-security-audit",
         "planning-filament",
+        "reviewing-filament-plans",
         "debug-using-debugbar"
     ]
 }
