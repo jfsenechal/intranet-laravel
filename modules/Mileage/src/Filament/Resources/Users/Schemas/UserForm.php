@@ -25,7 +25,7 @@ final class UserForm
             ->components([
                 Select::make('username')
                     ->label('Agent')
-                    ->options(fn (UserRepository $repository): array => $repository->listLocalUsersForSelect())
+                    ->options(fn (UserRepository $repository): array => $repository->listLocalUsersForSelectByUsername())
                     ->searchable()
                     ->required()
                     ->columnSpanFull()

@@ -121,3 +121,27 @@ it('grants access to a mileage admin who is not a global administrator', functio
 
     livewire(ListUsers::class)->assertOk();
 });
+
+it('enrolls an existing agent into the mileage module', function (): void {
+    $module = Module::factory()->create([
+        'id' => MileageServiceProvider::$module_id,
+        'allow_multiple_roles' => true,
+    ]);
+    $role = Role::factory()->create([
+        'name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value,
+        'module_id' => $module->id,
+    ]);
+    $agent = User::factory()->create();
+
+    livewire(CreateUser::class)
+        ->fillForm([
+            'username' => $agent->username,
+            'omnium' => true,
+            'roles' => [$role->name],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect($agent->roles()->pluck('name')->all())->toBe([$role->name])
+        ->and(PersonalInformation::where('username', $agent->username)->value('omnium'))->toBeTruthy();
+});

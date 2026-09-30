@@ -43,7 +43,7 @@ final class CreateUser extends CreateRecord
         $user = $this->record;
 
         try {
-            ModuleHandler::addModuleFromUser($user, MileageServiceProvider::$module_id, $this->data['roles'] ?? []);
+            ModuleHandler::addModuleFromUser($user, MileageServiceProvider::$module_id, $this->data);
             PersonalInformationService::createPersonalInformation($user, $this->data);
         } catch (Exception $e) {
             Notification::make()
