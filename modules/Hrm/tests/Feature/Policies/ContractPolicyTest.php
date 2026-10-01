@@ -77,7 +77,18 @@ describe('direction head authorization', function (): void {
 
         expect($this->policy->create($director))->toBeFalse()
             ->and($this->policy->update($director))->toBeFalse()
-            ->and($this->policy->delete($director))->toBeFalse();
+            ->and($this->policy->delete($director))->toBeFalse()
+            ->and($this->policy->replicate($director))->toBeFalse();
+    });
+
+    it('grants replicate to a ROLE_GRH_ADMIN user only', function (): void {
+        $director = ($this->directionHead)();
+        $grhAdmin = User::factory()->create(['is_administrator' => false]);
+        $grhAdmin->roles()->attach(Role::factory()->create(['name' => RolesEnum::ROLE_GRH_ADMIN->value]));
+
+        expect($this->policy->replicate($grhAdmin))->toBeTrue()
+            ->and($this->policy->replicate($director))->toBeFalse()
+            ->and($this->policy->replicate(User::factory()->create(['is_administrator' => false])))->toBeFalse();
     });
 
     it('grants viewAny so the record pages stay reachable', function (): void {

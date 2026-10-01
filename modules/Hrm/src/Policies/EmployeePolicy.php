@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Policies;
 
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Policies\Concerns\AdminOnlyImplicitAbilities;
 use AcMarche\Hrm\Policies\Concerns\HrmAuthorization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 final class EmployeePolicy
 {
+    use AdminOnlyImplicitAbilities;
     use HrmAuthorization;
 
     public function viewAny(User $user): bool

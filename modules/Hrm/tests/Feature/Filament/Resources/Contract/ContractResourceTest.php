@@ -507,3 +507,52 @@ describe('export action', function (): void {
             ->assertHasActionErrors(['columns']);
     });
 });
+
+describe('replicate action authorization', function (): void {
+    it('shows the replicate action to a ROLE_GRH_ADMIN user', function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_ADMIN->value]);
+        $grhAdmin = User::factory()->create(['is_administrator' => false]);
+        $grhAdmin->roles()->attach($role);
+        $this->actingAs($grhAdmin);
+
+        $employee = Employee::factory()->create();
+        $record = Contract::factory()->create(['employee_id' => $employee->id]);
+
+        Livewire::test(ViewContract::class, ['record' => $record->getKey()])
+            ->assertActionVisible('replicate');
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertActionVisible(TestAction::make('replicate')->table($record));
+    });
+
+    it('hides the replicate action from a direction head', function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($role);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+        $this->actingAs($director);
+
+        $employee = Employee::factory()->create();
+        $record = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        Livewire::test(ViewContract::class, ['record' => $record->getKey()])
+            ->assertActionHidden('replicate');
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertActionHidden(TestAction::make('replicate')->table($record));
+    });
+});

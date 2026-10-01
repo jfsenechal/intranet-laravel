@@ -6,12 +6,14 @@ namespace AcMarche\Hrm\Policies;
 
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Telework;
+use AcMarche\Hrm\Policies\Concerns\AdminOnlyImplicitAbilities;
 use AcMarche\Hrm\Policies\Concerns\HrmAuthorization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 final class TeleworkPolicy
 {
+    use AdminOnlyImplicitAbilities;
     use HrmAuthorization;
 
     public function viewAny(User $user): bool
