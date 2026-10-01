@@ -102,6 +102,7 @@ describe('crud operations', function (): void {
         Livewire::withQueryParams(['employee_id' => $employee->id])
             ->test(CreateAbsence::class)
             ->fillForm([
+                'start_date' => '2026-03-02',
                 'reason' => ReasonsEnum::SICKNESS->value,
             ])
             ->call('create')
@@ -109,8 +110,33 @@ describe('crud operations', function (): void {
 
         assertDatabaseHas(Absence::class, [
             'employee_id' => $employee->id,
+            'start_date' => '2026-03-02 00:00:00',
             'reason' => ReasonsEnum::SICKNESS->value,
         ]);
+    });
+
+    it('requires a start date to create an absence', function (): void {
+        $employee = Employee::factory()->create();
+
+        Livewire::withQueryParams(['employee_id' => $employee->id])
+            ->test(CreateAbsence::class)
+            ->fillForm([
+                'start_date' => null,
+                'reason' => ReasonsEnum::SICKNESS->value,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['start_date' => 'required']);
+    });
+
+    it('requires a start date to update an absence', function (): void {
+        $record = Absence::factory()->create();
+
+        Livewire::test(EditAbsence::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm(['start_date' => null])
+            ->call('save')
+            ->assertHasFormErrors(['start_date' => 'required']);
     });
 
     it('can update an absence', function (): void {

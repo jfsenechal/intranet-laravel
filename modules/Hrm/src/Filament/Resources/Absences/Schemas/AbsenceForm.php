@@ -28,7 +28,8 @@ final class AbsenceForm
                     ->columns(2)
                     ->schema([
                         DatePicker::make('start_date')
-                            ->label('Date de début'),
+                            ->label('Date de début')
+                            ->required(),
                         DatePicker::make('end_date')
                             ->label('Date de fin'),
                         DatePicker::make('reminder_date')

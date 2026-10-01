@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $employee_id
- * @property \Carbon\CarbonImmutable|null $start_date
+ * @property \Carbon\CarbonImmutable $start_date
  * @property \Carbon\CarbonImmutable|null $end_date
  * @property \Carbon\CarbonImmutable|null $reminder_date
  * @property \Carbon\CarbonImmutable|null $closed_date
