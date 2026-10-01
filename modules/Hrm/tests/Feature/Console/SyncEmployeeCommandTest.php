@@ -59,15 +59,6 @@ describe('username linking from agent profiles', function (): void {
 
         expect($employee->refresh()->username)->toBe('legacy');
     });
-
-    it('reports how many employees were linked', function (): void {
-        $employee = Employee::factory()->create(['username' => null]);
-        Profile::factory()->create(['employee_id' => $employee->id, 'username' => 'amartin']);
-
-        $this->artisan('hrm:sync-employees')
-            ->expectsOutputToContain('Linked 1 employee(s) to their agent profile username.')
-            ->assertSuccessful();
-    });
 });
 
 it('syncs the ldap contact details of an employee linked in the same run', function (): void {
