@@ -48,7 +48,7 @@ it('keeps the declared employee column order regardless of selection order', fun
 });
 
 it('ignores unknown employee column keys', function (): void {
-    $export = new EmployeeExport(Employee::query(), ['job_title', 'does_not_exist']);
+    $export = new EmployeeExport(Employee::query(), ['active_functions', 'does_not_exist']);
 
     expect($export->headings())->toBe(['Fonction']);
 });

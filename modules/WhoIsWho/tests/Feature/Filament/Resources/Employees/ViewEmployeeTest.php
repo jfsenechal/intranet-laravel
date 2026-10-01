@@ -10,7 +10,6 @@ use AcMarche\Hrm\Models\Service;
 use AcMarche\WhoIsWho\Filament\Resources\Employees\Pages\ViewEmployee;
 use App\Models\User;
 use Filament\Facades\Filament;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Livewire\livewire;
 
@@ -152,15 +151,13 @@ it('offers the profile link only on the agent own entry', function (): void {
 it('does not expose an archived employee', function (): void {
     $employee = activeAgent(['is_archived' => true]);
 
-    expect(fn () => livewire(ViewEmployee::class, ['record' => $employee->id]))
-        ->toThrow(ModelNotFoundException::class);
+    livewire(ViewEmployee::class, ['record' => $employee->id])->assertNotFound();
 });
 
 it('does not expose an employee who is not an agent', function (): void {
     $employee = activeAgent(['status' => StatusEnum::APPLICATION->value]);
 
-    expect(fn () => livewire(ViewEmployee::class, ['record' => $employee->id]))
-        ->toThrow(ModelNotFoundException::class);
+    livewire(ViewEmployee::class, ['record' => $employee->id])->assertNotFound();
 });
 
 it('does not expose an employee without an active contract', function (): void {
@@ -169,6 +166,5 @@ it('does not expose an employee without an active contract', function (): void {
         'is_archived' => false,
     ]);
 
-    expect(fn () => livewire(ViewEmployee::class, ['record' => $employee->id]))
-        ->toThrow(ModelNotFoundException::class);
+    livewire(ViewEmployee::class, ['record' => $employee->id])->assertNotFound();
 });

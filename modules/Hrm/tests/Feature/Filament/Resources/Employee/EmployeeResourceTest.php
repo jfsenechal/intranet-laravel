@@ -772,8 +772,8 @@ describe('export xlsx action', function (): void {
             ->and($export->map($record))->toBe(['12/05/1980']);
     });
 
-    it('reads the function from the active contracts instead of the deprecated employee column', function (): void {
-        $record = Employee::factory()->create([Employee::DEPRECATED_JOB_TITLE => 'Personnel soignant']);
+    it('reads the function from the active contracts and ignores the closed ones', function (): void {
+        $record = Employee::factory()->create();
         Contract::factory()->for($record)->create([
             'job_title' => 'Educatrice specialisee',
             'is_closed' => false,
@@ -793,8 +793,8 @@ describe('export xlsx action', function (): void {
             ->and($export->map($record->fresh()))->toBe(['Educatrice specialisee']);
     });
 
-    it('exports the function of an employee whose employee column is empty', function (): void {
-        $record = Employee::factory()->create([Employee::DEPRECATED_JOB_TITLE => null]);
+    it('exports the function of an employee holding a single active contract', function (): void {
+        $record = Employee::factory()->create();
         Contract::factory()->for($record)->create([
             'job_title' => 'Directeur MRS',
             'is_closed' => false,

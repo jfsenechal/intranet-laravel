@@ -268,9 +268,6 @@ final class EmployeeInfolist
         return Fieldset::make('Situation')
             ->columns(3)
             ->schema([
-                TextEntry::make('job_title')
-                    ->label('Fonction')
-                    ->helperText('Fonction encodée sur la fiche'),
                 TextEntry::make('status')
                     ->label('Statut')
                     ->badge(),

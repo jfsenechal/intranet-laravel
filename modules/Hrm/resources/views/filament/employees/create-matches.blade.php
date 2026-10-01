@@ -32,11 +32,6 @@
                                 — né(e) le {{ $match->birth_date->format('d/m/Y') }}
                             </span>
                         @endif
-                        @if ($match->job_title)
-                            <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">
-                                · {{ $match->job_title }}
-                            </span>
-                        @endif
                     </li>
                 @endforeach
             </ul>

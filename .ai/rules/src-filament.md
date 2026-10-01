@@ -6,7 +6,7 @@ paths:
 # Src Filament
 
 ## XLSX exports: read the function from active contracts, and use getTableQueryForExport()
-`employees.job_title` is deprecated (see `Employee::DEPRECATED_JOB_TITLE`): half the rows are empty and the rest hold stale values. An agent's function comes from `activeContracts->pluck('job_title')`, like the `active_functions` table column and `EmployeeDirectoryExport`. Never put `$employee->job_title` in an export or an infolist.
+The `employees.job_title` column still exists in the database but is abandoned: half the rows are empty and the rest hold stale values. Every code reference to it was removed (the `Employee` model no longer declares it as fillable or in its docblock), so do not reintroduce `$employee->job_title` anywhere. An agent's function comes from `activeContracts->pluck('job_title')`, like the `active_functions` table column and `EmployeeDirectoryExport`.
 
 `getFilteredTableQuery()` applies filters and search but NOT sorting, so an export built on it ignores the sort the user set on screen. Every Hrm list page now passes `getTableQueryForExport()`; keep it that way for new exports.
 

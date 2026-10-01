@@ -26,7 +26,6 @@ use Illuminate\Support\Str;
  * @property string|null $uid
  * @property string $last_name
  * @property string $first_name
- * @property string|null $job_title
  * @property \Carbon\CarbonImmutable|null $birth_date
  * @property string|null $private_email
  * @property string|null $private_phone
@@ -107,7 +106,6 @@ use Illuminate\Support\Str;
     'civility',
     'last_name',
     'first_name',
-    'job_title',
     'birth_date',
     'show_birthday',
     'private_email',
@@ -156,12 +154,6 @@ final class Employee extends Model
 {
     use HasFactory;
     use HasUserAdd;
-
-    /**
-     * @deprecated The `job_title` column on employees is deprecated and should not be used.
-     *             Functions are derived from active contracts via the `activeContracts` relation.
-     */
-    public const string DEPRECATED_JOB_TITLE = 'job_title';
 
     /**
      * @return BelongsTo<PayScale>
