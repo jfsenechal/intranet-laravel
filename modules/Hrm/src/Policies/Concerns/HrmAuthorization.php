@@ -143,6 +143,10 @@ trait HrmAuthorization
         });
     }
 
+    /**
+     * A direction head reads the contracts of their own direction, plus every
+     * contract of an employee {@see canViewEmployee()} already grants them.
+     */
     protected function canViewContract(User $user, Contract $contract): bool
     {
         if ($this->isAdmin($user)) {
@@ -162,7 +166,12 @@ trait HrmAuthorization
         }
 
         if ($this->isDirectionHead($user)) {
-            return in_array($contract->direction_id, $this->directionIdsForUser($user), true);
+            if (in_array($contract->direction_id, $this->directionIdsForUser($user), true)) {
+                return true;
+            }
+
+            return $contract->employee instanceof Employee
+                && $this->canViewEmployee($user, $contract->employee);
         }
 
         return false;

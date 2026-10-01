@@ -16,6 +16,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | modules/Pst/database/migrations/** | .ai/rules/migrations.md |
 | modules/Mileage/** | .ai/rules/mileage.md |
 | modules/*/src/Filament/Resources/**/Pages/*.php | .ai/rules/pages.md |
+| modules/Hrm/src/Policies/** | .ai/rules/policies.md |
 | modules/Courrier/src/Repository/ImapRepository.php | .ai/rules/repository.md |
 | modules/Courrier/src/Search/** | .ai/rules/search.md |
 | modules/Hrm/src/Filament/** | .ai/rules/src-filament.md |
