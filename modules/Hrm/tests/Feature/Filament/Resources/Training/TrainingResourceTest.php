@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Exports\TrainingExport;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
@@ -10,7 +11,11 @@ use AcMarche\Hrm\Filament\Resources\Trainings\Pages\CreateTraining;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\EditTraining;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ListTrainings;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Direction;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Training;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -24,6 +29,56 @@ beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('hrm-panel'));
     $this->adminUser = User::factory()->create(['is_administrator' => true]);
     $this->actingAs($this->adminUser);
+});
+
+describe('direction head access', function (): void {
+    beforeEach(function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $this->director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $this->director->roles()->attach($role);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+
+        $this->ownAgent = function () use ($direction): Employee {
+            $employee = Employee::factory()->create();
+            Contract::factory()->create([
+                'employee_id' => $employee->id,
+                'direction_id' => $direction->id,
+                'is_closed' => false,
+                'is_suspended' => false,
+                'end_date' => null,
+            ]);
+
+            return $employee;
+        };
+
+        $this->actingAs($this->director);
+    });
+
+    it('can render the view page of a training of one of their own agents', function (): void {
+        $record = Training::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+
+        Livewire::test(ViewTraining::class, ['record' => $record->getKey()])
+            ->assertOk();
+    });
+
+    it('returns 404 on the view page of a training of an agent outside their direction', function (): void {
+        $record = Training::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        // The scoped resource query never resolves the record, so its existence
+        // is not disclosed by a 403.
+        Livewire::test(ViewTraining::class, ['record' => $record->getKey()])
+            ->assertNotFound();
+    });
+
+    it('lists only the trainings of their own agents', function (): void {
+        $own = Training::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+        $foreign = Training::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        Livewire::test(ListTrainings::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$own])
+            ->assertCanNotSeeTableRecords([$foreign]);
+    });
 });
 
 describe('page rendering', function (): void {
@@ -85,7 +140,7 @@ describe('crud operations', function (): void {
             'is_closed' => true,
             'certificate_received' => true,
         ]);
-        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $targetEmployee = Employee::factory()->create();
 
         Livewire::test(ViewTraining::class, [
             'record' => $record->id,
@@ -128,12 +183,12 @@ describe('crud operations', function (): void {
     });
 
     it('can replicate a training to another employee from the employee relation manager', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
         $record = Training::factory()->create([
             'employee_id' => $employee->id,
             'name' => 'Relation Training',
         ]);
-        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $targetEmployee = Employee::factory()->create();
 
         Livewire::test(TrainingsRelationManager::class, [
             'ownerRecord' => $employee,
@@ -161,7 +216,7 @@ describe('crud operations', function (): void {
             'name' => 'Certified Training',
             'certificate_file' => $originalFile,
         ]);
-        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $targetEmployee = Employee::factory()->create();
 
         Livewire::test(ViewTraining::class, [
             'record' => $record->id,
@@ -181,7 +236,7 @@ describe('crud operations', function (): void {
 
 describe('crud create', function (): void {
     it('persists the employee_id from the query string', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
 
         Livewire::withQueryParams(['employee_id' => $employee->id])
             ->test(CreateTraining::class)
@@ -243,10 +298,10 @@ describe('model behavior', function (): void {
 
 describe('default filters', function (): void {
     it('shows only open trainings for employees with an active contract by default', function (): void {
-        $activeEmployee = AcMarche\Hrm\Models\Employee::factory()
-            ->has(AcMarche\Hrm\Models\Contract::factory()->state(['is_closed' => false, 'is_suspended' => false]))
+        $activeEmployee = Employee::factory()
+            ->has(Contract::factory()->state(['is_closed' => false, 'is_suspended' => false]))
             ->create();
-        $inactiveEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $inactiveEmployee = Employee::factory()->create();
 
         $visible = Training::factory()->create([
             'is_closed' => false,
@@ -270,7 +325,7 @@ describe('default filters', function (): void {
 
 describe('duration total', function (): void {
     it('keeps the hours of a training without certificate out of the column total', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
 
         Training::factory()->for($employee)->create([
             'duration_minutes' => 120,
@@ -292,8 +347,8 @@ describe('duration total', function (): void {
 
 describe('export action', function (): void {
     it('exports the rows in the order the table is sorted', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->for($employee)->create(['is_closed' => false, 'end_date' => null]);
+        $employee = Employee::factory()->create();
+        Contract::factory()->for($employee)->create(['is_closed' => false, 'end_date' => null]);
 
         foreach (['Bernard', 'Albert', 'Colin'] as $name) {
             Training::factory()->for($employee)->create(['name' => $name, 'is_closed' => false]);

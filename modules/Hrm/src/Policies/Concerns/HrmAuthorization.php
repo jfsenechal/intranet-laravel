@@ -144,6 +144,30 @@ trait HrmAuthorization
     }
 
     /**
+     * Restrict a query on a model that belongs to an Employee to the records
+     * whose employee the user may read.
+     *
+     * Mirrors, at the query level, the policies whose `view()` grant is
+     * {@see canViewEmployee()} on the record's own employee.
+     *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
+     */
+    protected function scopeRecordsOfVisibleEmployees(Builder $query, User $user): Builder
+    {
+        if ($this->isAdmin($user)) {
+            return $query;
+        }
+
+        return $query->whereHas(
+            'employee',
+            fn (Builder $query): Builder => $this->scopeVisibleEmployees($query, $user),
+        );
+    }
+
+    /**
      * A direction head reads the contracts of their own direction, plus every
      * contract of an employee {@see canViewEmployee()} already grants them.
      */

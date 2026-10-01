@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\ReasonsEnum;
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Filament\Exports\AbsenceExport;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\CreateAbsence;
 use AcMarche\Hrm\Filament\Resources\Absences\Pages\EditAbsence;
@@ -12,8 +13,10 @@ use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceCallouts;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Models\Absence;
 use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Service;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Callout;
@@ -25,6 +28,56 @@ beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('hrm-panel'));
     $this->adminUser = User::factory()->create(['is_administrator' => true]);
     $this->actingAs($this->adminUser);
+});
+
+describe('direction head access', function (): void {
+    beforeEach(function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $this->director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $this->director->roles()->attach($role);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+
+        $this->ownAgent = function () use ($direction): Employee {
+            $employee = Employee::factory()->create();
+            Contract::factory()->create([
+                'employee_id' => $employee->id,
+                'direction_id' => $direction->id,
+                'is_closed' => false,
+                'is_suspended' => false,
+                'end_date' => null,
+            ]);
+
+            return $employee;
+        };
+
+        $this->actingAs($this->director);
+    });
+
+    it('can render the view page of a absence of one of their own agents', function (): void {
+        $record = Absence::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+
+        Livewire::test(ViewAbsence::class, ['record' => $record->getKey()])
+            ->assertOk();
+    });
+
+    it('returns 404 on the view page of a absence of an agent outside their direction', function (): void {
+        $record = Absence::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        // The scoped resource query never resolves the record, so its existence
+        // is not disclosed by a 403.
+        Livewire::test(ViewAbsence::class, ['record' => $record->getKey()])
+            ->assertNotFound();
+    });
+
+    it('lists only the absences of their own agents', function (): void {
+        $own = Absence::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+        $foreign = Absence::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        Livewire::test(ListAbsences::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$own])
+            ->assertCanNotSeeTableRecords([$foreign]);
+    });
 });
 
 describe('page rendering', function (): void {

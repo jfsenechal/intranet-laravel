@@ -12,9 +12,13 @@ use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingForm;
 use AcMarche\Hrm\Filament\Resources\Trainings\Schemas\TrainingInfolist;
 use AcMarche\Hrm\Filament\Resources\Trainings\Tables\TrainingTables;
 use AcMarche\Hrm\Models\Training;
+use AcMarche\Hrm\Policies\TrainingPolicy;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
@@ -62,6 +66,22 @@ final class TrainingResource extends Resource
     public static function table(Table $table): Table
     {
         return TrainingTables::configure($table);
+    }
+
+    /**
+     * @return Builder<Training>
+     */
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user instanceof User) {
+            return app(TrainingPolicy::class)->scopeVisibleTo($query, $user);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array

@@ -8,9 +8,13 @@ use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceForm;
 use AcMarche\Hrm\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use AcMarche\Hrm\Filament\Resources\Absences\Tables\AbsenceTables;
 use AcMarche\Hrm\Models\Absence;
+use AcMarche\Hrm\Policies\AbsencePolicy;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
@@ -58,6 +62,22 @@ final class AbsenceResource extends Resource
     public static function table(Table $table): Table
     {
         return AbsenceTables::configure($table);
+    }
+
+    /**
+     * @return Builder<Absence>
+     */
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user instanceof User) {
+            return app(AbsencePolicy::class)->scopeVisibleTo($query, $user);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array
