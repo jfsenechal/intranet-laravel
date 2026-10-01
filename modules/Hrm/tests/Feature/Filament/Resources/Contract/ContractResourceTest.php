@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Filament\Exports\ContractExport;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\CreateContract;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\EditContract;
@@ -11,9 +12,11 @@ use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\ContractNature;
+use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
 use AcMarche\Hrm\Models\PayScale;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -400,6 +403,63 @@ describe('replacement section', function (): void {
         Livewire::test(ViewContract::class, ['record' => $contract->id])
             ->assertOk()
             ->assertSchemaComponentDoesNotExist('is_replacement');
+    });
+});
+
+describe('direction head access', function (): void {
+    beforeEach(function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $this->director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $this->director->roles()->attach($role);
+        $this->direction = Direction::factory()->create(['director' => 'director1']);
+
+        $this->actingAs($this->director);
+    });
+
+    it('can render the view page of a contract of their own direction', function (): void {
+        $record = Contract::factory()->create(['direction_id' => $this->direction->id]);
+
+        Livewire::test(ViewContract::class, ['record' => $record->getKey()])
+            ->assertOk();
+    });
+
+    it('can open a contract of their own direction from the employee relation manager', function (): void {
+        $employee = Employee::factory()->create();
+        $record = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'direction_id' => $this->direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertCanSeeTableRecords([$record]);
+    });
+
+    it('returns 404 on the view page of a contract outside their direction', function (): void {
+        $otherDirection = Direction::factory()->create(['director' => 'someone-else']);
+        $record = Contract::factory()->create(['direction_id' => $otherDirection->id]);
+
+        // The scoped resource query never resolves the record, so its existence
+        // is not disclosed by a 403.
+        Livewire::test(ViewContract::class, ['record' => $record->getKey()])
+            ->assertNotFound();
+    });
+
+    it('lists only the contracts of their own direction', function (): void {
+        $own = Contract::factory()->create(['direction_id' => $this->direction->id]);
+        $otherDirection = Direction::factory()->create(['director' => 'someone-else']);
+        $foreign = Contract::factory()->create(['direction_id' => $otherDirection->id]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$own])
+            ->assertCanNotSeeTableRecords([$foreign]);
     });
 });
 

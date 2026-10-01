@@ -12,9 +12,13 @@ use AcMarche\Hrm\Filament\Resources\Contracts\Schemas\ContractForm;
 use AcMarche\Hrm\Filament\Resources\Contracts\Schemas\ContractInfolist;
 use AcMarche\Hrm\Filament\Resources\Contracts\Tables\ContractTables;
 use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Policies\ContractPolicy;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
@@ -62,6 +66,22 @@ final class ContractResource extends Resource
     public static function table(Table $table): Table
     {
         return ContractTables::configure($table);
+    }
+
+    /**
+     * @return Builder<Contract>
+     */
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user instanceof User) {
+            return app(ContractPolicy::class)->scopeVisibleTo($query, $user);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array

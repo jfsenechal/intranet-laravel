@@ -506,9 +506,21 @@ describe('relation manager visibility', function (): void {
         $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
         $director->roles()->attach($directionRole);
 
-        expect($director->can('viewAny', Contract::class))->toBeFalse()
-            ->and($director->can('viewAny', AcMarche\Hrm\Models\Absence::class))->toBeFalse()
+        expect($director->can('viewAny', AcMarche\Hrm\Models\Absence::class))->toBeFalse()
             ->and($director->can('viewAny', Training::class))->toBeFalse();
+    });
+
+    it('lets a direction head reach the contract pages of their own agents', function (): void {
+        $directionRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($directionRole);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+        $contract = Contract::factory()->create(['direction_id' => $direction->id]);
+
+        // Filament gates the contract view page on `viewAny` before checking the
+        // record, so the director needs both to open one of their contracts.
+        expect($director->can('viewAny', Contract::class))->toBeTrue()
+            ->and($director->can('view', $contract))->toBeTrue();
     });
 });
 

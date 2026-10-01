@@ -72,12 +72,72 @@ describe('direction head authorization', function (): void {
             ->and($this->policy->view($director, $contract))->toBeFalse();
     });
 
-    it('keeps viewAny and the write abilities restricted to administrators', function (): void {
+    it('keeps the write abilities restricted to administrators', function (): void {
         $director = ($this->directionHead)();
 
-        expect($this->policy->viewAny($director))->toBeFalse()
-            ->and($this->policy->create($director))->toBeFalse()
+        expect($this->policy->create($director))->toBeFalse()
             ->and($this->policy->update($director))->toBeFalse()
             ->and($this->policy->delete($director))->toBeFalse();
+    });
+
+    it('grants viewAny so the record pages stay reachable', function (): void {
+        $director = ($this->directionHead)();
+        $agent = User::factory()->create(['is_administrator' => false]);
+
+        expect($this->policy->viewAny($director))->toBeTrue()
+            ->and($this->policy->viewAny($agent))->toBeFalse();
+    });
+});
+
+describe('scopeVisibleTo', function (): void {
+    it('keeps a direction head to the contracts of their own direction', function (): void {
+        $director = ($this->directionHead)();
+        $direction = Direction::factory()->create(['director' => 'director1']);
+        $otherDirection = Direction::factory()->create(['director' => 'someone-else']);
+
+        $own = Contract::factory()->create(['direction_id' => $direction->id]);
+        $foreign = Contract::factory()->create(['direction_id' => $otherDirection->id]);
+
+        $visibleIds = $this->policy->scopeVisibleTo(Contract::query(), $director)->pluck('id');
+
+        expect($visibleIds)->toContain($own->id)
+            ->and($visibleIds)->not->toContain($foreign->id);
+    });
+
+    it('includes the other contracts of an employee the direction head can view', function (): void {
+        $director = ($this->directionHead)();
+        $direction = Direction::factory()->create(['director' => 'director1']);
+        $otherDirection = Direction::factory()->create(['director' => 'someone-else']);
+
+        $employee = Employee::factory()->create();
+        Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+        $otherContract = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'direction_id' => $otherDirection->id,
+        ]);
+
+        $visibleIds = $this->policy->scopeVisibleTo(Contract::query(), $director)->pluck('id');
+
+        expect($visibleIds)->toContain($otherContract->id);
+    });
+
+    it('returns every contract to an administrator', function (): void {
+        $admin = User::factory()->create(['is_administrator' => true]);
+        Contract::factory()->count(3)->create();
+
+        expect($this->policy->scopeVisibleTo(Contract::query(), $admin)->count())->toBe(3);
+    });
+
+    it('returns no contract to a user without an HRM role', function (): void {
+        $agent = User::factory()->create(['is_administrator' => false]);
+        Contract::factory()->count(3)->create();
+
+        expect($this->policy->scopeVisibleTo(Contract::query(), $agent)->count())->toBe(0);
     });
 });
