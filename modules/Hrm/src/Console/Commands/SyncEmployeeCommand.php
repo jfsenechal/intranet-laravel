@@ -34,9 +34,6 @@ final class SyncEmployeeCommand extends Command
     public function handle(): int
     {
         $linked = $this->syncUsernamesFromProfiles();
-        $this->info("Linked {$linked} employee(s) to their agent profile username.");
-
-        $synced = 0;
 
         foreach (Employee::query()->whereNotNull('username')->cursor() as $employee) {
             $model = LdapRepository::findByUsername($employee->username);
@@ -53,10 +50,7 @@ final class SyncEmployeeCommand extends Command
             }
 
             $employee->save();
-            $synced++;
         }
-
-        $this->info("Synced {$synced} employee(s) with ldap.");
 
         return SfCommand::SUCCESS;
     }
