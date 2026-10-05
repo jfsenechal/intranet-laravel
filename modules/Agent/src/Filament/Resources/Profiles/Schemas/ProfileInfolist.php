@@ -48,7 +48,6 @@ final class ProfileInfolist
                                     ))
                                     ->copyable()
                                     ->placeholder('Aucune adresse dans la LDAP'),
-                                TextEntry::make('employee_id')->label('Matricule RH'),
                                 TextEntry::make('employee.hired_at')
                                     ->label('Date d\'entrée')
                                     ->date('d/m/Y')
@@ -58,6 +57,7 @@ final class ProfileInfolist
                                     ->date('d/m/Y')
                                     ->placeholder('—'),
                                 TextEntry::make('location')->label('Emplacement'),
+                                TextEntry::make('employee_id')->label('Matricule RH'),
                                 IconEntry::make('no_mail')->label('Pas de mail professionnel nécessaire')
                                     ->visible(fn (Model $record) => $record->no_mail === true),
                                 TextEntry::make('notes')->label('Remarques')->columnSpanFull(),
