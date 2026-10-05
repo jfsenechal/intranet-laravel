@@ -61,10 +61,11 @@
                     @endforeach
                 </div>
             @endif
-            @if(! empty($profile->supervisors))
+            @php($supervisorNames = $profile->supervisorNames())
+            @if($supervisorNames !== [])
                 <div class="p-3 border-t border-gray-200">
                     <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Responsable(s)</p>
-                    <p class="text-sm">{{ implode(', ', $profile->supervisors) }}</p>
+                    <p class="text-sm">{{ implode(', ', $supervisorNames) }}</p>
                 </div>
             @endif
             @if($profile->notes)

@@ -6,9 +6,11 @@ use AcMarche\Agent\Enums\RolesEnum;
 use AcMarche\Agent\Filament\Resources\Profiles\Pages\EditProfile;
 use AcMarche\Agent\Models\Profile;
 use AcMarche\Agent\Models\Share;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Livewire\Livewire;
 
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('agent-panel'));
@@ -78,4 +80,34 @@ it('forbids the edit page for an agent the profile was not shared with', functio
     $this->actingAs($agent)
         ->get(EditProfile::getUrl(['record' => $profile->getKey()], panel: 'agent-panel'))
         ->assertForbidden();
+});
+
+describe('supervisors', function (): void {
+    beforeEach(function (): void {
+        $adminRole = Role::factory()->create(['name' => RolesEnum::ROLE_AGENT_ADMIN->value]);
+        $admin = User::factory()->create(['is_administrator' => true]);
+        $admin->roles()->attach($adminRole);
+        $this->actingAs($admin);
+    });
+
+    it('preselects the supervising employees and drops empty legacy entries', function (): void {
+        $supervisor = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $profile = Profile::factory()->create(['supervisors' => [(string) $supervisor->getKey(), null]]);
+
+        Livewire::test(EditProfile::class, ['record' => $profile->getKey()])
+            ->assertSchemaStateSet(['supervisors' => [(string) $supervisor->getKey()]])
+            ->assertSee('Dupont Marie');
+    });
+
+    it('saves the selected employee ids as supervisors', function (): void {
+        $supervisor = Employee::factory()->create();
+        $profile = Profile::factory()->create(['supervisors' => [], 'username' => null, 'emails' => []]);
+
+        Livewire::test(EditProfile::class, ['record' => $profile->getKey()])
+            ->fillForm(['supervisors' => [$supervisor->getKey()]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($profile->refresh()->supervisors)->toEqual([$supervisor->getKey()]);
+    });
 });

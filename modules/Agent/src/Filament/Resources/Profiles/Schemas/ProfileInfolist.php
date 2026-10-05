@@ -72,11 +72,13 @@ final class ProfileInfolist
                             ->placeholder('Aucune mailbox partagée'),
                         TextEntry::make('supervisors')
                             ->label('Responsables')
+                            ->state(fn (Profile $record): array => $record->supervisorNames())
                             ->listWithLineBreaks(),
                     ]),
                 Grid::make(2)->schema([
                     Section::make('Matériel')
                         ->relationship('hardware')
+                        ->columns(2)
                         ->schema([
                             TextEntry::make('existing_pc')->label('PC existant'),
                             TextEntry::make('new_pc')->label('Nouveau PC'),
@@ -85,6 +87,7 @@ final class ProfileInfolist
                         ]),
                     Section::make('Téléphonie')
                         ->relationship('phone')
+                        ->columns(2)
                         ->schema([
                             TextEntry::make('existing_number')->label('Numéro existant'),
                             TextEntry::make('mobile_number')->label('Numéro mobile'),

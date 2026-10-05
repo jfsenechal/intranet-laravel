@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Filament\Resources\Profiles\Schemas;
 
 use AcMarche\Agent\Filament\Forms\Components\FolderBrowser;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Models\Module;
 use AcMarche\Security\Repository\LdapRepository;
 use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -40,8 +40,15 @@ final class ProfileForm
                             TextInput::make('location')
                                 ->label('Dans quel local travaillera-t-il ?')
                                 ->columnSpanFull(),
-                            TagsInput::make('supervisors')
+                            Select::make('supervisors')
                                 ->label('Responsable(s)')
+                                ->multiple()
+                                ->searchable()
+                                ->getSearchResultsUsing(fn (string $search): array => self::searchEmployees($search))
+                                ->getOptionLabelsUsing(fn (array $values): array => self::employeeLabels($values))
+                                ->afterStateHydrated(fn (Select $component, ?array $state) => $component->state(
+                                    array_values(array_filter($state ?? [], filled(...)))
+                                ))
                                 ->columnSpanFull(),
                         ]),
                     Step::make('Email')
@@ -155,5 +162,40 @@ final class ProfileForm
                     ->persistStepInQueryString()
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function searchEmployees(string $search): array
+    {
+        return Employee::query()
+            ->where(fn ($query) => $query
+                ->where('last_name', 'like', "%{$search}%")
+                ->orWhere('first_name', 'like', "%{$search}%"))
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->getKey() => self::employeeLabel($employee)])
+            ->all();
+    }
+
+    /**
+     * @param  array<int, string|int>  $ids
+     * @return array<int, string>
+     */
+    private static function employeeLabels(array $ids): array
+    {
+        return Employee::query()
+            ->whereKey($ids)
+            ->get()
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->getKey() => self::employeeLabel($employee)])
+            ->all();
+    }
+
+    private static function employeeLabel(Employee $employee): string
+    {
+        return mb_trim($employee->last_name.' '.$employee->first_name);
     }
 }

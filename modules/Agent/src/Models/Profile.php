@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $last_name
  * @property string $first_name
  * @property list<string> $emails
- * @property list<string>|null $supervisors
+ * @property list<string|int|null>|null $supervisors HRM employee ids
  * @property string|null $location
  * @property string|null $notes
  * @property list<int> $modules
@@ -63,6 +63,29 @@ final class Profile extends Model
     public function fullName(): string
     {
         return $this->last_name.' '.$this->first_name;
+    }
+
+    /**
+     * Supervisors are stored as HRM employee ids; unknown ids are shown as-is.
+     *
+     * @return list<string>
+     */
+    public function supervisorNames(): array
+    {
+        $ids = array_values(array_filter($this->supervisors ?? [], filled(...)));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $employees = Employee::query()->whereKey($ids)->get()->keyBy('id');
+
+        return array_map(
+            fn (string|int $id): string => ($employee = $employees->get((int) $id)) instanceof Employee
+                ? mb_trim($employee->last_name.' '.$employee->first_name)
+                : (string) $id,
+            $ids,
+        );
     }
 
     /**

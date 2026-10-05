@@ -116,6 +116,16 @@ describe('photo', function (): void {
     });
 });
 
+describe('supervisors', function (): void {
+    it('displays the names of the supervising employees instead of their ids', function (): void {
+        $supervisor = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $profile = Profile::factory()->create(['supervisors' => [(string) $supervisor->getKey()]]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('Dupont Marie');
+    });
+});
+
 describe('export resume action', function (): void {
     it('renders the export resume action on the view page', function (): void {
         $profile = Profile::factory()->create();
@@ -136,6 +146,22 @@ describe('export resume action', function (): void {
             fn (Spatie\LaravelPdf\PdfBuilder $pdf): bool => $pdf->viewName === 'agent::pdf.resume'
                 && ($pdf->viewData['profile'] ?? null)?->is($profile) === true
                 && str_contains($pdf->getHtml(), $profile->fullName())
+        );
+    });
+});
+
+describe('resume pdf view', function (): void {
+    it('lists the supervisors by name instead of employee id', function (): void {
+        $supervisor = Employee::factory()->create(['last_name' => 'Dupont', 'first_name' => 'Marie']);
+        $profile = Profile::factory()->create(['supervisors' => [(string) $supervisor->getKey(), null]]);
+
+        Pdf::fake();
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->callAction('exportResume');
+
+        Pdf::assertRespondedWithPdf(
+            fn (Spatie\LaravelPdf\PdfBuilder $pdf): bool => str_contains($pdf->getHtml(), 'Dupont Marie')
         );
     });
 });
