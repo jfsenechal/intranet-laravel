@@ -83,6 +83,39 @@ describe('employee dates', function (): void {
     });
 });
 
+describe('photo', function (): void {
+    it('shows the directory photo of the linked hrm employee', function (): void {
+        $employee = Employee::factory()->create([
+            'show_photo' => true,
+            'photo' => 'employees/alice.jpg',
+        ]);
+        $profile = Profile::factory()->create(['employee_id' => $employee->getKey()]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('employees/alice.jpg');
+    });
+
+    it('falls back to the avatar of the user sharing the username', function (): void {
+        User::factory()->create(['username' => 'amartin', 'avatar_url' => 'avatars/amartin.png']);
+        $profile = Profile::factory()->create(['username' => 'amartin', 'employee_id' => null]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('avatars/amartin.png');
+    });
+
+    it('falls back to a generated avatar without employee nor user', function (): void {
+        $profile = Profile::factory()->create([
+            'username' => 'nobody',
+            'employee_id' => null,
+            'first_name' => 'Alice',
+            'last_name' => 'Martin',
+        ]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('ui-avatars.com/api/?size=160&amp;name=Alice+Martin', false);
+    });
+});
+
 describe('export resume action', function (): void {
     it('renders the export resume action on the view page', function (): void {
         $profile = Profile::factory()->create();

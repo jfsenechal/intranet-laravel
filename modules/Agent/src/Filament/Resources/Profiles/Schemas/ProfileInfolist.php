@@ -6,6 +6,7 @@ namespace AcMarche\Agent\Filament\Resources\Profiles\Schemas;
 
 use AcMarche\Agent\Models\Profile;
 use AcMarche\Security\Repository\LdapRepository;
+use AcMarche\WhoIsWho\Repository\EmployeeRepository;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -14,6 +15,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 final class ProfileInfolist
 {
@@ -27,14 +29,10 @@ final class ProfileInfolist
                     ->schema([
                         ImageEntry::make('photo')
                             ->label('Photo')
-                            ->disk('public')
-                            ->imageHeight(260)
-                            ->defaultImageUrl(
-                                fn (Profile $record
-                                ): string => 'https://ui-avatars.com/api/?size=256&name='.urlencode(
-                                    mb_trim($record->first_name.' '.$record->last_name)
-                                )
-                            )
+                            ->hiddenLabel()
+                            ->circular()
+                            ->imageSize(160)
+                            ->state(fn (Profile $record): string => self::photoUrl($record))
                             ->columnSpan(3),
                         Fieldset::make('Coordonnées')
                             ->columns(2)
@@ -95,5 +93,23 @@ final class ProfileInfolist
                         ]),
                 ]),
             ]);
+    }
+
+    /**
+     * Same photo as the WhoIsWho directory when the profile is linked to an
+     * HRM employee; otherwise the avatar of the User sharing the username,
+     * falling back to a generated initials avatar.
+     */
+    private static function photoUrl(Profile $profile): string
+    {
+        if ($profile->employee !== null) {
+            return EmployeeRepository::photoUrl($profile->employee);
+        }
+
+        if (filled($profile->user?->avatar_url)) {
+            return Storage::disk('public')->url($profile->user->avatar_url);
+        }
+
+        return 'https://ui-avatars.com/api/?size=160&name='.urlencode(mb_trim($profile->first_name.' '.$profile->last_name));
     }
 }
