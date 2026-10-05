@@ -9,6 +9,7 @@ use AcMarche\Agent\Mail\ShareProfileMail;
 use AcMarche\Agent\Mail\WelcomeMail;
 use AcMarche\Agent\Models\Profile;
 use AcMarche\Agent\Models\Share;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -65,6 +66,20 @@ describe('emails', function (): void {
         Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
             ->assertSee('urbanisme@marche.be')
             ->assertSee('travaux@marche.be');
+    });
+});
+
+describe('employee dates', function (): void {
+    it('displays the hire and leave dates of the linked hrm employee', function (): void {
+        $employee = Employee::factory()->create([
+            'hired_at' => '2015-03-01',
+            'left_at' => '2026-09-30',
+        ]);
+        $profile = Profile::factory()->create(['employee_id' => $employee->getKey()]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('01/03/2015')
+            ->assertSee('30/09/2026');
     });
 });
 

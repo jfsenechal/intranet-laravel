@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Models;
 
 use AcMarche\Agent\Database\Factories\ProfileFactory;
+use AcMarche\Hrm\Models\Employee;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property \Carbon\CarbonImmutable|null $created_at
  * @property \Carbon\CarbonImmutable|null $updated_at
  * @property-read User|null $user
+ * @property-read Employee|null $employee
  * @property-read ProfileHardware|null $hardware
  * @property-read ProfilePhone|null $phone
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ExternalApplication> $externalApplications
@@ -77,6 +79,14 @@ final class Profile extends Model
             'username',
             'user',
         );
+    }
+
+    /**
+     * @return BelongsTo<Employee>
+     */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     /**
