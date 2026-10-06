@@ -1,4 +1,4 @@
-@component('cpas-library::mail._layout', ['title' => 'Rappels du jour', 'logo' => $logo])
+@component('cpas-library::mail._layout', ['title' => 'Rappels du jour', 'logo' => $logo, 'message' => $message])
     <p>Bonjour,</p>
 
     <p>

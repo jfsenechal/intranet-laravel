@@ -1,4 +1,4 @@
-@component('cpas-library::mail._layout', ['title' => 'Résumé de la semaine', 'logo' => $logo])
+@component('cpas-library::mail._layout', ['title' => 'Résumé de la semaine', 'logo' => $logo, 'message' => $message])
     <p>Bonjour,</p>
 
     <p>

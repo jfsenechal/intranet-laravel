@@ -6,11 +6,14 @@ namespace AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages;
 
 use AcMarche\CpasLibrary\Enums\FicheTypeEnum;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\FicheResource;
+use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\Concerns\NotifiesLibraryUsers;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
 
 final class CreateFiche extends CreateRecord
 {
+    use NotifiesLibraryUsers;
+
     #[Override]
     protected static string $resource = FicheResource::class;
 
@@ -33,5 +36,10 @@ final class CreateFiche extends CreateRecord
         return $type instanceof FicheTypeEnum
             ? 'Nouvelle fiche — '.$type->getLabel()
             : 'Nouvelle fiche';
+    }
+
+    protected function afterCreate(): void
+    {
+        $this->notifyLibraryUsers();
     }
 }

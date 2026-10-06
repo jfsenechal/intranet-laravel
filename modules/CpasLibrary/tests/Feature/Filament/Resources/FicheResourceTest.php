@@ -7,6 +7,7 @@ use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\CreateFiche;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\EditFiche;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ListFiches;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ViewFiche;
+use AcMarche\CpasLibrary\Mail\FicheMail;
 use AcMarche\CpasLibrary\Models\Category;
 use AcMarche\CpasLibrary\Models\Fiche;
 use AcMarche\CpasLibrary\Models\Tag;
@@ -16,6 +17,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -322,4 +324,60 @@ it('hides the delete action for a non-owner ROLE_LIBRARY user', function (): voi
     livewire(ListFiches::class)
         ->loadTable()
         ->assertActionHidden(TestAction::make(DeleteAction::class)->table($fiche));
+});
+
+it('mails the new fiche to every library user when notify_users is checked', function (): void {
+    Mail::fake();
+    $stranger = User::factory()->create();
+
+    livewire(CreateFiche::class)
+        ->fillForm([
+            'name' => 'Shared fiche',
+            'notify_users' => true,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    Mail::assertQueuedCount(2);
+    Mail::assertQueued(FicheMail::class, fn (FicheMail $mail): bool => $mail->hasTo($this->admin->email)
+        && $mail->fiche->name === 'Shared fiche');
+    Mail::assertQueued(FicheMail::class, fn (FicheMail $mail): bool => $mail->hasTo($this->member->email));
+    Mail::assertNotQueued(FicheMail::class, fn (FicheMail $mail): bool => $mail->hasTo($stranger->email));
+});
+
+it('does not mail the fiche when notify_users is unchecked', function (): void {
+    Mail::fake();
+
+    livewire(CreateFiche::class)
+        ->fillForm(['name' => 'Quiet fiche'])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    Mail::assertNothingQueued();
+});
+
+it('mails the fiche to library users when saved with notify_users checked', function (): void {
+    Mail::fake();
+    $fiche = Fiche::factory()->create();
+
+    livewire(EditFiche::class, ['record' => $fiche->id])
+        ->fillForm(['notify_users' => true])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    Mail::assertQueuedCount(2);
+});
+
+it('renders the fiche mail with its name and link', function (): void {
+    $fiche = Fiche::factory()->create(['name' => 'Rendered fiche']);
+
+    config(['mail.default' => 'array']);
+
+    Mail::to('someone@example.test')->send(new FicheMail($fiche, 'https://example.test/fiche'));
+
+    $html = app('mailer')->getSymfonyTransport()->messages()->first()->getOriginalMessage()->getHtmlBody();
+
+    expect($html)
+        ->toContain('Rendered fiche')
+        ->toContain('https://example.test/fiche');
 });

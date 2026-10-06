@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\CpasLibrary\Filament\Resources\Fiches\Schemas;
 
 use AcMarche\CpasLibrary\Enums\FicheTypeEnum;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -116,6 +117,15 @@ final class FicheForm
                         DatePicker::make('date_rappel')
                             ->label('Date de rappel')
                             ->helperText('Un mail sera envoyé aux utilisateurs ayant accès à la librairie à cette date choisie'),
+                    ]),
+
+                Section::make('Notification')
+                    ->schema([
+                        Checkbox::make('notify_users')
+                            ->label('Envoyer la fiche par mail aux utilisateurs de la bibliothèque')
+                            ->helperText('Un mail sera envoyé à chaque utilisateur ayant accès à la bibliothèque après l\'enregistrement.')
+                            ->default(false)
+                            ->dehydrated(false),
                     ]),
 
                 Section::make('Absence')
