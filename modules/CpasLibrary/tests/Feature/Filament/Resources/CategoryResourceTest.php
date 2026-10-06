@@ -60,14 +60,17 @@ it('has the expected table columns', function (string $column): void {
 })->with(['name', 'parent.name', 'public', 'fiches_count']);
 
 it('searches by name', function (): void {
-    $categories = Category::factory(3)->create();
-    $needle = $categories->first()->name;
+    $match = Category::factory()->create(['name' => 'Aide sociale']);
+    $others = collect([
+        Category::factory()->create(['name' => 'Logement']),
+        Category::factory()->create(['name' => 'Énergie']),
+    ]);
 
     livewire(ListCategories::class)
         ->loadTable()
-        ->searchTable($needle)
-        ->assertCanSeeTableRecords($categories->where('name', $needle))
-        ->assertCanNotSeeTableRecords($categories->where('name', '!=', $needle));
+        ->searchTable('Aide sociale')
+        ->assertCanSeeTableRecords([$match])
+        ->assertCanNotSeeTableRecords($others);
 });
 
 it('filters by parent', function (): void {
@@ -231,4 +234,28 @@ it('renders the children relation manager with subcategories', function (): void
         ->assertOk()
         ->loadTable()
         ->assertCanSeeTableRecords($children);
+});
+
+it('prefixes the view page heading with a link to the parent category', function (): void {
+    $parent = Category::factory()->create(['name' => 'Parent']);
+    $child = Category::factory()->create(['name' => 'Child', 'parent_id' => $parent->id]);
+
+    livewire(ViewCategory::class, ['record' => $child->id])
+        ->assertSeeHtml('<a href="'.e(ViewCategory::getUrl(['record' => $parent])).'" style="color: var(--primary-600)">Parent</a> › Child');
+
+    livewire(ViewCategory::class, ['record' => $parent->id])
+        ->assertDontSee('›');
+});
+
+it('shows the fiche count of each sub-category', function (): void {
+    $parent = Category::factory()->create();
+    $child = Category::factory()->create(['parent_id' => $parent->id]);
+    Fiche::factory(3)->create(['category_id' => $child->id]);
+
+    livewire(ChildrenRelationManager::class, [
+        'ownerRecord' => $parent,
+        'pageClass' => ViewCategory::class,
+    ])
+        ->loadTable()
+        ->assertTableColumnStateSet('fiches_count', 3, $child);
 });

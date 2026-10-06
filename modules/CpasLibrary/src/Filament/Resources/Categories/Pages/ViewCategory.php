@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace AcMarche\CpasLibrary\Filament\Resources\Categories\Pages;
 
 use AcMarche\CpasLibrary\Filament\Resources\Categories\CategorieResource;
+use AcMarche\CpasLibrary\Filament\Resources\Categories\Schemas\CategoryInfolist;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\ColorEntry;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 use Override;
 
 final class ViewCategory extends ViewRecord
@@ -23,36 +22,36 @@ final class ViewCategory extends ViewRecord
 
     public function getTitle(): string
     {
-        return (string) $this->record->name;
+        $parentName = $this->record->parent?->name;
+
+        return $parentName !== null
+            ? $parentName.' › '.$this->record->name
+            : (string) $this->record->name;
+    }
+
+    /**
+     * Same as the title, but the parent name links to its own view page,
+     * like a breadcrumb. The title stays plain text for the browser tab.
+     */
+    public function getHeading(): string|Htmlable
+    {
+        $parent = $this->record->parent;
+
+        if ($parent === null) {
+            return (string) $this->record->name;
+        }
+
+        return new HtmlString(sprintf(
+            '<a href="%s" style="color: var(--primary-600)">%s</a> › %s',
+            e(self::getUrl(['record' => $parent])),
+            e($parent->name),
+            e($this->record->name),
+        ));
     }
 
     public function infolist(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Section::make('Informations')
-                    ->columns(2)
-                    ->schema([
-                        TextEntry::make('name')->label('Nom'),
-                        TextEntry::make('parent.name')
-                            ->label('Catégorie parente')
-                            ->placeholder('—'),
-                        TextEntry::make('description')
-                            ->label('Description')
-                            ->columnSpanFull(),
-                        IconEntry::make('icon')
-                            ->label('Icône')
-                            ->icon(fn (?string $state): ?string => $state),
-                        ColorEntry::make('color')->label('Couleur'),
-                        TextEntry::make('departments')
-                            ->label('Départements')
-                            ->badge()
-                            ->separator(','),
-                        IconEntry::make('public')
-                            ->label('Public')
-                            ->boolean(),
-                    ]),
-            ]);
+        return CategoryInfolist::configure($schema);
     }
 
     protected function getHeaderActions(): array

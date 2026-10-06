@@ -9,6 +9,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -55,6 +56,10 @@ final class ChildrenRelationManager extends RelationManager
                 IconColumn::make('public')
                     ->label('Public')
                     ->boolean(),
+                TextColumn::make('fiches_count')
+                    ->counts('fiches')
+                    ->label('Fiches')
+                    ->sortable(),
             ])
             ->headerActions([
                 CreateAction::make()
@@ -62,6 +67,7 @@ final class ChildrenRelationManager extends RelationManager
                     ->icon(Heroicon::Plus),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
@@ -69,6 +75,7 @@ final class ChildrenRelationManager extends RelationManager
                     ->label('Supprimer')
                     ->icon(Heroicon::Trash),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
