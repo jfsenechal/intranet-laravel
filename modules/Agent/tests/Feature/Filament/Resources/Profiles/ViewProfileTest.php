@@ -9,6 +9,7 @@ use AcMarche\Agent\Mail\ShareProfileMail;
 use AcMarche\Agent\Mail\WelcomeMail;
 use AcMarche\Agent\Models\Profile;
 use AcMarche\Agent\Models\Share;
+use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Models\Role;
@@ -80,6 +81,34 @@ describe('employee dates', function (): void {
         Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
             ->assertSee('01/03/2015')
             ->assertSee('30/09/2026');
+    });
+});
+
+describe('active contracts', function (): void {
+    it('lists only the active contracts of the linked hrm employee', function (): void {
+        $employee = Employee::factory()->create();
+        Contract::factory()->for($employee)->create([
+            'job_title' => 'Agent administratif',
+            'is_closed' => false,
+            'is_suspended' => false,
+        ]);
+        Contract::factory()->for($employee)->create([
+            'job_title' => 'Ouvrier communal',
+            'is_closed' => true,
+        ]);
+        $profile = Profile::factory()->create(['employee_id' => $employee->getKey()]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertSee('Contrats actifs')
+            ->assertSee('Agent administratif')
+            ->assertDontSee('Ouvrier communal');
+    });
+
+    it('hides the active contracts without a linked hrm employee', function (): void {
+        $profile = Profile::factory()->create(['employee_id' => null]);
+
+        Livewire::test(ViewProfile::class, ['record' => $profile->getKey()])
+            ->assertDontSee('Contrats actifs');
     });
 });
 

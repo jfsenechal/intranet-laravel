@@ -123,6 +123,35 @@ final class EmployeeInfolist
             ]);
     }
 
+    /**
+     * Also rendered on the Agent profile view, where the contracts are reached
+     * through the profile's `employee` relation.
+     */
+    public static function activeContractsFieldset(string $relationship = 'activeContracts'): Fieldset
+    {
+        return Fieldset::make('Contrats actifs')
+            ->columns(1)
+            ->schema([
+                RepeatableEntry::make($relationship)
+                    ->hiddenLabel()
+                    ->placeholder('—')
+                    ->schema([
+                        TextEntry::make('summary')
+                            ->hiddenLabel()
+                            ->state(fn (Contract $record): string => self::contractSummary($record))
+                            ->url(fn (Contract $record): ?string => self::contractUrl($record))
+                            ->color(fn (Contract $record): ?string => self::contractUrl($record) === null ? null : 'primary'),
+                        TextEntry::make('replaces')
+                            ->label('Remplace')
+                            ->visible(fn (Contract $record): bool => $record->replaces instanceof Employee)
+                            ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
+                            ->icon(Heroicon::OutlinedUser)
+                            ->url(fn (Contract $record): ?string => self::employeeUrl($record->replaces))
+                            ->color(fn (Contract $record): ?string => self::employeeUrl($record->replaces) === null ? null : 'primary'),
+                    ]),
+            ]);
+    }
+
     private static function identitySection(): Section
     {
         return Section::make('Identité')
@@ -235,31 +264,6 @@ final class EmployeeInfolist
                 TextEntry::make('professional_mobile')
                     ->label('GSM')
                     ->icon('heroicon-o-device-phone-mobile'),
-            ]);
-    }
-
-    private static function activeContractsFieldset(): Fieldset
-    {
-        return Fieldset::make('Contrats actifs')
-            ->columns(1)
-            ->schema([
-                RepeatableEntry::make('activeContracts')
-                    ->hiddenLabel()
-                    ->placeholder('—')
-                    ->schema([
-                        TextEntry::make('summary')
-                            ->hiddenLabel()
-                            ->state(fn (Contract $record): string => self::contractSummary($record))
-                            ->url(fn (Contract $record): ?string => self::contractUrl($record))
-                            ->color(fn (Contract $record): ?string => self::contractUrl($record) === null ? null : 'primary'),
-                        TextEntry::make('replaces')
-                            ->label('Remplace')
-                            ->visible(fn (Contract $record): bool => $record->replaces instanceof Employee)
-                            ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
-                            ->icon(Heroicon::OutlinedUser)
-                            ->url(fn (Contract $record): ?string => self::employeeUrl($record->replaces))
-                            ->color(fn (Contract $record): ?string => self::employeeUrl($record->replaces) === null ? null : 'primary'),
-                    ]),
             ]);
     }
 

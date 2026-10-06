@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Filament\Resources\Profiles\Schemas;
 
 use AcMarche\Agent\Models\Profile;
+use AcMarche\Hrm\Filament\Resources\Employees\Schemas\EmployeeInfolist;
 use AcMarche\Security\Repository\LdapRepository;
 use AcMarche\WhoIsWho\Repository\EmployeeRepository;
 use Filament\Infolists\Components\IconEntry;
@@ -60,6 +61,9 @@ final class ProfileInfolist
                                     ->visible(fn (Model $record) => $record->no_mail === true),
                                 TextEntry::make('notes')->label('Remarques')->columnSpanFull(),
                             ]),
+                        EmployeeInfolist::activeContractsFieldset('employee.activeContracts')
+                            ->visible(fn (Profile $record): bool => $record->employee !== null)
+                            ->columnSpanFull(),
                     ]),
                 Section::make('Accès')
                     ->columns(2)
