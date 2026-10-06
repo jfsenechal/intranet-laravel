@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace AcMarche\Agent\Filament\Resources\Profiles\Schemas;
 
 use AcMarche\Agent\Models\Profile;
-use AcMarche\Hrm\Filament\Resources\Employees\Schemas\EmployeeInfolist;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Security\Repository\LdapRepository;
 use AcMarche\WhoIsWho\Repository\EmployeeRepository;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,7 +64,7 @@ final class ProfileInfolist
                                     ->visible(fn (Model $record) => $record->no_mail === true),
                                 TextEntry::make('notes')->label('Remarques')->columnSpanFull(),
                             ]),
-                        EmployeeInfolist::activeContractsFieldset('employee.activeContracts')
+                        self::activeContractsFieldset()
                             ->visible(fn (Profile $record): bool => $record->employee !== null)
                             ->columnSpanFull(),
                     ]),
@@ -103,6 +106,40 @@ final class ProfileInfolist
     }
 
     /**
+     * Read-only summary of the linked HRM employee's active contracts, without
+     * links to the HRM panel.
+     */
+    private static function activeContractsFieldset(): Fieldset
+    {
+        return Fieldset::make('Contrats actifs')
+            ->columns(1)
+            ->schema([
+                RepeatableEntry::make('employee.activeContracts')
+                    ->hiddenLabel()
+                    ->placeholder('—')
+                    ->schema([
+                        TextEntry::make('summary')
+                            ->hiddenLabel()
+                            ->state(fn (Contract $record): string => self::contractSummary($record)),
+                        TextEntry::make('replaces')
+                            ->label('Remplace')
+                            ->visible(fn (Contract $record): bool => $record->replaces instanceof Employee)
+                            ->state(fn (Contract $record): ?string => $record->replaces?->full_name)
+                            ->icon(Heroicon::OutlinedUser),
+                    ]),
+            ]);
+    }
+
+    private static function contractSummary(Contract $contract): string
+    {
+        return implode(' • ', array_filter([
+            $contract->service?->name,
+            $contract->job_title,
+            $contract->contractNature?->name,
+        ]));
+    }
+
+    /**
      * Same photo as the WhoIsWho directory when the profile is linked to an
      * HRM employee; otherwise the avatar of the User sharing the username,
      * falling back to a generated initials avatar.
@@ -117,6 +154,8 @@ final class ProfileInfolist
             return Storage::disk('public')->url($profile->user->avatar_url);
         }
 
-        return 'https://ui-avatars.com/api/?size=160&name='.urlencode(mb_trim($profile->first_name.' '.$profile->last_name));
+        return 'https://ui-avatars.com/api/?size=160&name='.urlencode(
+            mb_trim($profile->first_name.' '.$profile->last_name)
+        );
     }
 }

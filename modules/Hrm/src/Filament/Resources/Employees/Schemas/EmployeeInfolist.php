@@ -47,7 +47,9 @@ final class EmployeeInfolist
                                             ->disk('public')
                                             ->imageWidth('100%')
                                             ->imageHeight('14rem')
-                                            ->extraImgAttributes(['class' => 'min-h-56 h-auto rounded-lg object-contain'])
+                                            ->extraImgAttributes(
+                                                ['class' => 'min-h-56 h-auto rounded-lg object-contain']
+                                            )
                                             ->defaultImageUrl(
                                                 fn (Employee $record
                                                 ): string => 'https://ui-avatars.com/api/?size=256&name='.urlencode(
@@ -123,16 +125,12 @@ final class EmployeeInfolist
             ]);
     }
 
-    /**
-     * Also rendered on the Agent profile view, where the contracts are reached
-     * through the profile's `employee` relation.
-     */
-    public static function activeContractsFieldset(string $relationship = 'activeContracts'): Fieldset
+    private static function activeContractsFieldset(): Fieldset
     {
         return Fieldset::make('Contrats actifs')
             ->columns(1)
             ->schema([
-                RepeatableEntry::make($relationship)
+                RepeatableEntry::make('activeContracts')
                     ->hiddenLabel()
                     ->placeholder('—')
                     ->schema([
