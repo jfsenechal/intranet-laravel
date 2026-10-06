@@ -59,7 +59,7 @@ final class ProfileInfolist
                                     ->date('d/m/Y')
                                     ->placeholder('—'),
                                 TextEntry::make('location')->label('Emplacement'),
-                                TextEntry::make('employee_id')->label('Matricule RH'),
+                                TextEntry::make('employee_id')->label('Matricule RH')->helperText('Id db'),
                                 IconEntry::make('no_mail')->label('Pas de mail professionnel nécessaire')
                                     ->visible(fn (Model $record) => $record->no_mail === true),
                                 TextEntry::make('notes')->label('Remarques')->columnSpanFull(),
