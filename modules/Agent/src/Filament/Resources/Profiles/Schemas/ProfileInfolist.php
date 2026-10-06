@@ -135,7 +135,7 @@ final class ProfileInfolist
         return implode(' • ', array_filter([
             $contract->service?->name,
             $contract->job_title,
-            $contract->contractNature?->name,
+            $contract->contractType?->name,
         ]));
     }
 
