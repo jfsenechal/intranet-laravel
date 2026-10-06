@@ -27,12 +27,14 @@ final readonly class ContractExport
         return [
             'agent' => 'Agent',
             'employer' => 'Employeur',
+            'contract_nature' => 'Nature',
             'contract_type' => 'Type',
             'job_title' => 'Fonction',
             'start_date' => 'Débute le',
             'end_date' => 'Prend fin le',
             'reminder_date' => 'Rappel le',
-            'work_regime' => 'Régime',
+            'weekly_hours' => 'Régime (heures)',
+            'work_regime' => 'Régime (ETP)',
             'status' => 'Statut',
             'is_closed' => 'Clôturé',
         ];
@@ -91,7 +93,7 @@ final readonly class ContractExport
     private function rowsQuery(): Builder
     {
         return (clone $this->query)
-            ->with(['employee', 'employer', 'contractType'])
+            ->with(['employee', 'employer', 'contractNature', 'contractType'])
             ->orderBy(new Contract()->getQualifiedKeyName());
     }
 
@@ -116,11 +118,13 @@ final readonly class ContractExport
         return [
             'agent' => mb_trim(($row->employee?->last_name ?? '').' '.($row->employee?->first_name ?? '')),
             'employer' => $row->employer?->name,
+            'contract_nature' => $row->contractNature?->name,
             'contract_type' => $row->contractType?->name,
             'job_title' => $row->job_title,
             'start_date' => $row->start_date?->format('d/m/Y'),
             'end_date' => $row->end_date?->format('d/m/Y'),
             'reminder_date' => $row->reminder_date?->format('d/m/Y'),
+            'weekly_hours' => $row->weeklyHoursLabel(),
             'work_regime' => $row->work_regime !== null ? (string) $row->work_regime : null,
             'status' => $row->status?->getLabel(),
             'is_closed' => $row->is_closed ? 'Oui' : 'Non',

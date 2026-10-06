@@ -67,6 +67,41 @@ describe('page rendering', function (): void {
             ->assertTableColumnStateSet('payScale.name', $payScale->name, $record);
     });
 
+    it('shows the regime as weekly hours', function (): void {
+        $record = Contract::factory()->create(['hourly_regime' => '19/38', 'work_regime' => 0.5]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('hourly_regime', '19h/38', $record)
+            ->assertTableColumnHasDescription('hourly_regime', '0.5', $record)
+            ->assertTableColumnVisible('contractNature.name');
+    });
+
+    it('shows the regime as weekly hours in the employee relation manager', function (): void {
+        $employee = Employee::factory()->create();
+        $record = Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'hourly_regime' => '9,5/38',
+            'work_regime' => 0.25,
+        ]);
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertTableColumnStateSet('hourly_regime', '9,5h/38', $record)
+            ->assertTableColumnHasDescription('hourly_regime', '0.25', $record)
+            ->assertTableColumnVisible('contractNature.name');
+    });
+
+    it('shows the regime as weekly hours with the raw value on the view page', function (): void {
+        $record = Contract::factory()->create(['hourly_regime' => '19/38', 'work_regime' => 0.5]);
+
+        Livewire::test(ViewContract::class, ['record' => $record->id])
+            ->assertSeeInOrder(['Régime', '19h/38', '0.5']);
+    });
+
     it('can render the create page', function (): void {
         Livewire::test(CreateContract::class)
             ->assertOk();
@@ -236,6 +271,21 @@ describe('model behavior', function (): void {
         expect($replacement->fresh()->is_replacement)->toBeTrue()
             ->and($regular->fresh()->is_replacement)->toBeFalse();
     });
+
+    it('formats the weekly hours label', function (?string $hourlyRegime, ?float $workRegime, ?string $expected): void {
+        $contract = new Contract(['hourly_regime' => $hourlyRegime, 'work_regime' => $workRegime]);
+
+        expect($contract->weeklyHoursLabel())->toBe($expected);
+    })->with([
+        'hours over base' => ['19/38', 0.5, '19h/38'],
+        'decimal comma' => ['9,5/38', 0.25, '9,5h/38'],
+        'trailing zeros' => ['28.50/38', 0.75, '28,5h/38'],
+        'free text kept' => ['19/38 APE', 0.5, '19/38 APE'],
+        'derived from FTE' => [null, 0.5, '19h/38'],
+        'derived from FTE with decimals' => ['', 0.8, '30,4h/38'],
+        'out of range FTE' => [null, 38.0, null],
+        'nothing' => [null, null, null],
+    ]);
 
     it('active scope excludes closed contracts', function (): void {
         Contract::factory()->create(['is_closed' => true]);
@@ -478,6 +528,25 @@ describe('export action', function (): void {
         $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
 
         expect($rows)->toBe([['Débute le'], ['05/03/2026'], ['05/02/2026'], ['05/01/2026']]);
+    });
+
+    it('exports the nature and the regime as hours and as raw value', function (): void {
+        $nature = ContractNature::factory()->create();
+        Contract::factory()->create([
+            'contract_nature_id' => $nature->id,
+            'hourly_regime' => '19/38',
+            'work_regime' => 0.5,
+            'is_closed' => false,
+        ]);
+
+        $component = Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->callAction('export', data: ['columns' => ['contract_nature', 'weekly_hours', 'work_regime']])
+            ->assertHasNoActionErrors();
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows)->toBe([['Nature', 'Régime (heures)', 'Régime (ETP)'], [$nature->name, '19h/38', '0.5']]);
     });
 
     it('renders the export action on the index page', function (): void {

@@ -179,6 +179,30 @@ final class Contract extends Model
         return $this->belongsTo(Employee::class, 'replaces_id');
     }
 
+    /**
+     * Weekly hours as "19h/38". The free-text `hourly_regime` wins when filled
+     * ("9,5/38" becomes "9,5h/38", other wordings are kept as typed); otherwise
+     * the hours are derived from the full-time equivalent on a 38h week.
+     */
+    public function weeklyHoursLabel(): ?string
+    {
+        $hourlyRegime = mb_trim((string) $this->hourly_regime);
+
+        if ($hourlyRegime !== '') {
+            if (preg_match('#^(\d+(?:[.,]\d+)?)\s*/\s*(\d+)$#', $hourlyRegime, $matches) === 1) {
+                return self::formatHours((float) str_replace(',', '.', $matches[1])).'h/'.$matches[2];
+            }
+
+            return $hourlyRegime;
+        }
+
+        if ($this->work_regime === null || $this->work_regime <= 0 || $this->work_regime > 1) {
+            return null;
+        }
+
+        return self::formatHours($this->work_regime * 38).'h/38';
+    }
+
     protected static function booted(): void
     {
         self::bootHasUser();
@@ -197,5 +221,10 @@ final class Contract extends Model
             'work_regime' => 'float',
             'status' => ContractStatusEnum::class,
         ];
+    }
+
+    private static function formatHours(float $hours): string
+    {
+        return mb_rtrim(mb_rtrim(number_format($hours, 2, ',', ''), '0'), ',');
     }
 }

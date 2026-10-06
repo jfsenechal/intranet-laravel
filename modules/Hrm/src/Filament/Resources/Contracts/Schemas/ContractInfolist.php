@@ -52,10 +52,11 @@ final class ContractInfolist
                                     ->label('Fonction'),
                                 TextEntry::make('status')
                                     ->label('Statut'),
-                                TextEntry::make('work_regime')
-                                    ->label('Régime de travail (ETP)'),
                                 TextEntry::make('hourly_regime')
-                                    ->label('Régime horaire'),
+                                    ->label('Régime')
+                                    ->state(fn (Contract $record): ?string => $record->weeklyHoursLabel())
+                                    ->belowContent(fn (Contract $record): ?string => $record->work_regime !== null ? (string) $record->work_regime : null)
+                                    ->placeholder('—'),
                             ]),
                         Section::make('Dates')
                             ->columns(3)

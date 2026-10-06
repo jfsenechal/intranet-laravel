@@ -48,7 +48,7 @@ final class ContractTables
                 TextColumn::make('contractNature.name')
                     ->label('Nature')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->placeholder('—'),
                 TextColumn::make('contractType.name')
                     ->label('Type')
@@ -80,10 +80,7 @@ final class ContractTables
                     ->sortable()
                     ->toggleable()
                     ->placeholder('—'),
-                TextColumn::make('work_regime')
-                    ->label('Regime')
-                    ->sortable()
-                    ->toggleable(),
+                self::weeklyHoursColumn(),
                 TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
@@ -180,7 +177,7 @@ final class ContractTables
                 TextColumn::make('contractNature.name')
                     ->label('Nature')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->placeholder('—'),
                 TextColumn::make('contractType.name')
                     ->label('Type')
@@ -211,10 +208,7 @@ final class ContractTables
                     ->sortable()
                     ->toggleable()
                     ->placeholder('—'),
-                TextColumn::make('work_regime')
-                    ->label('Régime')
-                    ->sortable()
-                    ->toggleable(),
+                self::weeklyHoursColumn(),
                 IconColumn::make('is_closed')
                     ->label('Clôturé')
                     ->boolean()
@@ -234,5 +228,16 @@ final class ContractTables
                 ReplicateContractAction::make(),
             ])
             ->recordAction(ViewAction::class);
+    }
+
+    private static function weeklyHoursColumn(): TextColumn
+    {
+        return TextColumn::make('hourly_regime')
+            ->label('Régime')
+            ->state(fn (Contract $record): ?string => $record->weeklyHoursLabel())
+            ->description(fn (Contract $record): ?string => $record->work_regime !== null ? (string) $record->work_regime : null)
+            ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('work_regime', $direction))
+            ->toggleable()
+            ->placeholder('—');
     }
 }
