@@ -6,7 +6,7 @@ paths:
 # Meal Delivery
 
 ## Meals with zero menus are placeholders, not deliveries
-A `Meal` row exists for every day of an order's week, even when nothing is ordered (both `menus` rows sit at `quantity = 0`). The legacy Symfony app deleted those rows on save, so any logic ported from `data/CpasRepas` that means "first/last meal of the order" must filter to meals having a menu with `quantity > 0` at position 1 or 2 — a plain `MIN(date)`/`MAX(date)` over `meals` lands on a placeholder and silently breaks the DF / RF / "récipient jetable" flags on the route sheets. See `RouteSheetsAggregator::onlyDelivered()`.
+A `Meal` row exists for every day of an order's week, even when nothing is ordered (both `menus` rows sit at `quantity = 0`). The legacy Symfony app deleted those rows on save, so any logic ported from `data/CpasRepas` that means "first/last meal of the order" must filter to meals having a menu with `quantity > 0` at position 1 or 2 — a plain `MIN(date)`/`MAX(date)` over `meals` lands on a placeholder and silently breaks the DF / "récipient jetable" flags on the route sheets. See `RouteSheetsAggregator::onlyDelivered()`.
 
 ## Reference clients with integer(), never foreignId()
 `clients.id` is a signed `int(11)` inherited from the legacy Symfony/Doctrine schema, like every column that references it (`orders`, `notes`, `client_diet`, `delivery_absences`). `foreignId('client_id')` generates a `bigint unsigned` and the foreign key is rejected by MariaDB. Use `$table->integer('client_id')` plus an explicit `$table->foreign('client_id')->references('id')->on('clients')`.
@@ -21,3 +21,6 @@ Converting `clients.id` to `bigint unsigned` was considered and rejected (2026-0
 Nothing links the two. Guest meals stay off the cafeteria sheet, off the route sheets and out of `KitchenExportAggregator`; they have their own daily kitchen export (`GuestsKitchenExport`) and their own monthly billing page (`GuestsByMonth`). Do not re-add a guest block to a client sheet — it was tried, then removed on purpose.
 
 `residents` is created by this module, so its key is the Laravel default `bigint unsigned` and `foreignId('resident_id')->constrained('residents')` is correct there. The `integer()` rule above applies to `clients` only.
+
+## "Reprendre la feuille" (RF) repeats until next week is encoded
+`take_back_sheet` is printed on every delivery from Wednesday onward as long as the client has no delivered meal after the current week — exactly like the legacy `ClientManager::setRepas()`. Do not restrict it to the last meal of the week: that was tried (2026-08-26) and meant a sheet the driver missed was never asked for again, so next week's orders were never encoded. The flag disappears by itself once the sheet is encoded.

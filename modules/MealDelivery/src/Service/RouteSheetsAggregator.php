@@ -106,8 +106,7 @@ final class RouteSheetsAggregator
             $newSheet = $range !== null && $dateString === $range['min_date'];
             $isLastMealOfWeek = $range !== null && $dateString === $range['max_date'];
             $disposableRecipient = (bool) $meal->order->is_last_meal && $isLastMealOfWeek;
-            $takeBackSheet = $isLastMealOfWeek
-                && $isEqualOrGreaterThanWednesday
+            $takeBackSheet = $isEqualOrGreaterThanWednesday
                 && ! isset($clientsWithNextWeekOrder[$client->id]);
 
             $row = self::buildRow($meal, $newSheet, $takeBackSheet, $disposableRecipient);

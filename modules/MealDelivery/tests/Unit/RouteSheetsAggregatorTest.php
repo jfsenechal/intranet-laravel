@@ -256,7 +256,7 @@ it('ignores placeholder meals without menus when locating the first meal of the 
     expect($wednesday['new_sheet'])->toBeTrue();
 });
 
-it('takes back the sheet on the last meal of the week only', function (): void {
+it('keeps asking to take back the sheet on every meal from Wednesday until next week is encoded', function (): void {
     $week = Week::create([
         'first_day' => '2026-06-15',
         'days' => ['2026-06-15', '2026-06-17', '2026-06-19'],
@@ -272,7 +272,7 @@ it('takes back the sheet on the last meal of the week only', function (): void {
     $friday = (new RouteSheetsAggregator())->build($week, '2026-06-19')['routes'][0]['rows'][0];
 
     expect($wednesday['new_sheet'])->toBeTrue()
-        ->and($wednesday['take_back_sheet'])->toBeFalse()
+        ->and($wednesday['take_back_sheet'])->toBeTrue()
         ->and($friday['new_sheet'])->toBeFalse()
         ->and($friday['take_back_sheet'])->toBeTrue();
 });
