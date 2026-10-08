@@ -30,13 +30,13 @@ final class EmailResource extends Resource
     protected static ?int $navigationSort = 1;
 
     #[Override]
-    protected static ?string $navigationLabel = 'E-mails';
+    protected static ?string $navigationLabel = 'Campagnes';
 
     #[Override]
-    protected static ?string $modelLabel = 'e-mail';
+    protected static ?string $modelLabel = 'campagne';
 
     #[Override]
-    protected static ?string $pluralModelLabel = 'e-mails';
+    protected static ?string $pluralModelLabel = 'campagnes';
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'subject';

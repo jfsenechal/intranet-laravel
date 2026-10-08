@@ -21,6 +21,11 @@ final class MailingListServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->bootModule();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+            ]);
+        }
     }
 
     protected function moduleName(): string

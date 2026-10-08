@@ -10,6 +10,7 @@ use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Component;
 use Override;
 
 final class ContactImporter extends Importer
@@ -43,7 +44,7 @@ final class ContactImporter extends Importer
     }
 
     /**
-     * @return array<\Filament\Forms\Components\Component>
+     * @return array<Component>
      */
     public static function getOptionsFormComponents(): array
     {

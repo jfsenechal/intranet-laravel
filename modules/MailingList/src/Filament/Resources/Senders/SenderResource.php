@@ -7,6 +7,7 @@ namespace AcMarche\MailingList\Filament\Resources\Senders;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\CreateSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\EditSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\ListSenders;
+use AcMarche\MailingList\Filament\Resources\Senders\Pages\ViewSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Schemas\SenderForm;
 use AcMarche\MailingList\Filament\Resources\Senders\Tables\SendersTable;
 use AcMarche\MailingList\Models\Sender;
@@ -70,6 +71,7 @@ final class SenderResource extends Resource
         return [
             'index' => ListSenders::route('/'),
             'create' => CreateSender::route('/create'),
+            'view' => ViewSender::route('/{record}'),
             'edit' => EditSender::route('/{record}/edit'),
         ];
     }

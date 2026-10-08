@@ -8,6 +8,7 @@ use AcMarche\MailingList\Enums\EmailStatus;
 use AcMarche\MailingList\Enums\RecipientStatus;
 use AcMarche\MailingList\Filament\Actions\SendAction;
 use AcMarche\MailingList\Models\Email;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Callout;
@@ -71,6 +72,9 @@ final class EmailInfolist
                                 }),
                             TextEntry::make('total_count')
                                 ->label('Destinataires'),
+                            IconEntry::make('unsubscribe_enabled')
+                                ->label('Lien de désabonnement')
+                                ->boolean(),
                         ])
                         ->grow(false),
                 ])->from('md')

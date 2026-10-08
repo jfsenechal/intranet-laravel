@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\URL;
 
 #[UseFactory(EmailRecipientFactory::class)]
+
 #[Connection('maria-mailing-list')]
 #[Fillable([
     'email_id',
@@ -23,11 +25,42 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'status',
     'error',
     'sent_at',
+    'unsubscribed_at',
 ])]
 final class EmailRecipient extends Model
 {
     /** @use HasFactory<EmailRecipientFactory> */
     use HasFactory;
+
+    /**
+     * Generate a signed, public URL the recipient can use to unsubscribe.
+     */
+    public function unsubscribeUrl(): string
+    {
+        return URL::signedRoute('unsubscribe.show', ['recipient' => $this->getKey()]);
+    }
+
+    public function isUnsubscribed(): bool
+    {
+        return $this->unsubscribed_at !== null;
+    }
+
+    /**
+     * Mark this recipient (and its linked contact) as unsubscribed.
+     */
+    public function markAsUnsubscribed(): void
+    {
+        if ($this->isUnsubscribed()) {
+            return;
+        }
+
+        $this->forceFill(['unsubscribed_at' => now()])->save();
+
+        $this->contact()
+            ->withoutGlobalScopes()
+            ->whereNull('unsubscribed_at')
+            ->update(['unsubscribed_at' => now()]);
+    }
 
     /**
      * @return BelongsTo<Email, $this>
@@ -53,6 +86,7 @@ final class EmailRecipient extends Model
         return [
             'status' => RecipientStatus::class,
             'sent_at' => 'datetime',
+            'unsubscribed_at' => 'datetime',
         ];
     }
 }

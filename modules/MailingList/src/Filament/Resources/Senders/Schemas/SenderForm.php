@@ -9,6 +9,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 final class SenderForm
@@ -46,6 +47,34 @@ final class SenderForm
                 RichEditor::make('footer')
                     ->label('Pied de page')
                     ->helperText('Il sera affiché dans le pied page.')
+                    ->columnSpanFull(),
+                Section::make('Configuration SMTP')
+                    ->description('Paramètres SMTP propres à cet expéditeur. Si vides, la configuration globale de l\'application est utilisée.')
+                    ->collapsed()
+                    ->schema([
+                        Flex::make([
+                            TextInput::make('smtp_host')
+                                ->label('Hôte SMTP')
+                                ->maxLength(255)
+                                ->placeholder('smtp.example.com'),
+                            TextInput::make('smtp_port')
+                                ->label('Port SMTP')
+                                ->numeric()
+                                ->minValue(1)
+                                ->maxValue(65535)
+                                ->placeholder('587'),
+                        ]),
+                        Flex::make([
+                            TextInput::make('smtp_username')
+                                ->label('Identifiant SMTP')
+                                ->maxLength(255),
+                            TextInput::make('smtp_password')
+                                ->label('Mot de passe SMTP')
+                                ->password()
+                                ->revealable()
+                                ->maxLength(255),
+                        ]),
+                    ])
                     ->columnSpanFull(),
                 Hidden::make('username')
                     ->default(fn (): ?string => auth()->user()?->username),

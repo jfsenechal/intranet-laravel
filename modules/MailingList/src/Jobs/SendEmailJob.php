@@ -8,6 +8,7 @@ use AcMarche\MailingList\Enums\RecipientStatus;
 use AcMarche\MailingList\Mail\NewsletterMail;
 use AcMarche\MailingList\Models\Email;
 use AcMarche\MailingList\Models\EmailRecipient;
+use AcMarche\MailingList\Models\Sender;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -30,8 +31,15 @@ final class SendEmailJob implements ShouldQueue
         }
 
         try {
-            Mail::to($this->recipient->email_address)
-                ->send(new NewsletterMail($this->email, $this->recipient->name ?? ''));
+            $sender = $this->email->sender ?? $this->email->load('sender')->sender;
+
+            $mailer = $sender instanceof Sender
+                ? $sender->resolveMailer()
+                : Mail::mailer(config('mail.default'));
+
+            $mailer
+                ->to($this->recipient->email_address)
+                ->send(new NewsletterMail($this->email, $this->recipient));
 
             $this->recipient->update([
                 'status' => RecipientStatus::Sent,

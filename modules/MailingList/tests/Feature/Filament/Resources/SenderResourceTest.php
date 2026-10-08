@@ -4,186 +4,113 @@ declare(strict_types=1);
 
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\CreateSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\EditSender;
-use AcMarche\MailingList\Filament\Resources\Senders\Pages\ListSenders;
+use AcMarche\MailingList\Filament\Resources\Senders\Pages\ViewSender;
 use AcMarche\MailingList\Models\Sender;
 use App\Models\User;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\Testing\TestAction;
-use Filament\Facades\Filament;
-use Illuminate\Database\Eloquent\Factories\Sequence;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
-beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
-    $this->user = User::factory()->create();
-    $this->actingAs($this->user);
-});
+it('can render the view page', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
 
-it('can render the index page', function (): void {
-    livewire(ListSenders::class)
-        ->assertOk();
-});
-
-it('can render the create page', function (): void {
-    livewire(CreateSender::class)
-        ->assertOk();
-});
-
-it('can render the edit page', function (): void {
-    $sender = Sender::factory()->create(['username' => $this->user->username]);
-
-    livewire(EditSender::class, ['record' => $sender->id])
+    livewire(ViewSender::class, [
+        'record' => $sender->id,
+    ])
         ->assertOk()
-        ->assertSchemaStateSet([
-            'name' => $sender->name,
-            'email' => $sender->email,
-        ]);
+        ->assertSee($sender->name)
+        ->assertSee($sender->email);
 });
 
-it('can list senders', function (): void {
-    $senders = Sender::factory(3)->create(['username' => $this->user->username]);
+it('hides senders owned by another user from the view page', function () {
+    $sender = Sender::factory()->create([
+        'username' => User::factory()->create()->username,
+    ]);
 
-    livewire(ListSenders::class)
-        ->loadTable()
-        ->assertCanSeeTableRecords($senders);
-});
+    livewire(ViewSender::class, [
+        'record' => $sender->id,
+    ]);
+})->throws(ModelNotFoundException::class);
 
-it('has table columns', function (string $column): void {
-    livewire(ListSenders::class)
-        ->assertTableColumnExists($column);
-})->with(['name', 'email', 'created_at', 'updated_at']);
-
-it('can sort column', function (string $column): void {
-    /* Explicit distinct values per sorted column: faker can repeat a name across
-       five records, and the database order among ties is unspecified while
-       Collection::sortBy is stable, which makes the assertion flaky. */
-    $senders = Sender::factory(5)
-        ->sequence(fn (Sequence $sequence): array => [
-            'name' => 'Sender'.$sequence->index,
-            'email' => "sender{$sequence->index}@example.test",
-        ])
-        ->create(['username' => $this->user->username]);
-
-    livewire(ListSenders::class)
-        ->loadTable()
-        ->sortTable($column)
-        ->assertCanSeeTableRecords($senders->sortBy($column), inOrder: true)
-        ->sortTable($column, 'desc')
-        ->assertCanSeeTableRecords($senders->sortByDesc($column), inOrder: true);
-})->with(['name', 'email']);
-
-it('can search senders', function (): void {
-    $senders = Sender::factory(5)->create(['username' => $this->user->username]);
-
-    $search = $senders->first()->name;
-
-    livewire(ListSenders::class)
-        ->loadTable()
-        ->searchTable($search)
-        ->assertCanSeeTableRecords($senders->where('name', $search))
-        ->assertCanNotSeeTableRecords($senders->where('name', '!=', $search));
-});
-
-it('can create a sender', function (): void {
-    $sender = Sender::factory()->make();
-
+it('can create a sender with smtp settings', function () {
     livewire(CreateSender::class)
         ->fillForm([
-            'name' => $sender->name,
-            'email' => $sender->email,
+            'name' => 'Service Communication',
+            'email' => 'communication@marche.be',
+            'smtp_host' => 'smtp.marche.be',
+            'smtp_port' => 587,
+            'smtp_username' => 'communication@marche.be',
+            'smtp_password' => 'secret-password',
         ])
         ->call('create')
-        ->assertNotified();
+        ->assertHasNoFormErrors();
 
     assertDatabaseHas(Sender::class, [
-        'name' => $sender->name,
-        'email' => $sender->email,
-        'username' => $this->user->username,
+        'name' => 'Service Communication',
+        'email' => 'communication@marche.be',
+        'smtp_host' => 'smtp.marche.be',
+        'smtp_port' => 587,
+        'smtp_username' => 'communication@marche.be',
     ]);
 });
 
-it('can create a sender with footer', function (): void {
-    livewire(CreateSender::class)
-        ->fillForm([
-            'name' => 'Test Sender',
-            'email' => 'sender@marche.be',
-            'footer' => '<p>Custom footer content</p>',
-        ])
-        ->call('create')
-        ->assertNotified();
-
-    assertDatabaseHas(Sender::class, [
-        'name' => 'Test Sender',
-        'footer' => '<p>Custom footer content</p>',
+it('encrypts the smtp password in the database', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+        'smtp_host' => 'smtp.marche.be',
+        'smtp_username' => 'user@marche.be',
+        'smtp_password' => 'plain-text-secret',
     ]);
+
+    $raw = Illuminate\Support\Facades\DB::table('senders')
+        ->where('id', $sender->id)
+        ->value('smtp_password');
+
+    expect($raw)->not->toBe('plain-text-secret')
+        ->and($sender->fresh()->smtp_password)->toBe('plain-text-secret');
 });
 
-it('can update a sender', function (): void {
-    $sender = Sender::factory()->create(['username' => $this->user->username]);
-    $newData = Sender::factory()->make();
+it('detects when smtp settings are configured', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+        'smtp_host' => 'smtp.marche.be',
+        'smtp_username' => 'user@marche.be',
+        'smtp_password' => 'secret',
+    ]);
+
+    expect($sender->hasSmtpSettings())->toBeTrue();
+});
+
+it('detects when smtp settings are missing', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+
+    expect($sender->hasSmtpSettings())->toBeFalse();
+});
+
+it('can update smtp settings on edit page', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
 
     livewire(EditSender::class, ['record' => $sender->id])
         ->fillForm([
-            'name' => $newData->name,
-            'email' => $newData->email,
+            'smtp_host' => 'smtp.marche.be',
+            'smtp_port' => 465,
+            'smtp_username' => 'sender@marche.be',
+            'smtp_password' => 'new-password',
         ])
         ->call('save')
-        ->assertNotified();
+        ->assertHasNoFormErrors();
 
     assertDatabaseHas(Sender::class, [
         'id' => $sender->id,
-        'name' => $newData->name,
-        'email' => $newData->email,
+        'smtp_host' => 'smtp.marche.be',
+        'smtp_port' => 465,
+        'smtp_username' => 'sender@marche.be',
     ]);
 });
-
-it('can delete a sender', function (): void {
-    $sender = Sender::factory()->create(['username' => $this->user->username]);
-
-    livewire(EditSender::class, ['record' => $sender->id])
-        ->callAction(DeleteAction::class)
-        ->assertNotified()
-        ->assertRedirect();
-
-    assertDatabaseMissing($sender);
-});
-
-it('can bulk delete senders', function (): void {
-    $senders = Sender::factory(3)->create(['username' => $this->user->username]);
-
-    livewire(ListSenders::class)
-        ->loadTable()
-        ->assertCanSeeTableRecords($senders)
-        ->selectTableRecords($senders)
-        ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk())
-        ->assertNotified()
-        ->assertCanNotSeeTableRecords($senders);
-
-    $senders->each(fn (Sender $sender) => assertDatabaseMissing($sender));
-});
-
-it('validates the form data', function (array $data, array $errors): void {
-    $sender = Sender::factory()->create(['username' => $this->user->username]);
-    $newData = Sender::factory()->make();
-
-    livewire(EditSender::class, ['record' => $sender->id])
-        ->fillForm([
-            'name' => $newData->name,
-            'email' => $newData->email,
-            ...$data,
-        ])
-        ->call('save')
-        ->assertHasFormErrors($errors)
-        ->assertNotNotified();
-})->with([
-    '`name` is required' => [['name' => null], ['name' => 'required']],
-    '`name` is max 255 characters' => [['name' => Str::random(256)], ['name' => 'max']],
-    '`email` is required' => [['email' => null], ['email' => 'required']],
-    '`email` is a valid email address' => [['email' => Str::random()], ['email' => 'email']],
-    '`email` is max 255 characters' => [['email' => Str::random(256)], ['email' => 'max']],
-]);

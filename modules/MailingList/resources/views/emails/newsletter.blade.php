@@ -42,6 +42,15 @@
             color: #999;
             text-align: center;
         }
+        .email-unsubscribe {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+        .email-unsubscribe a {
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +70,11 @@
                 &copy; {{ date('Y') }} {{ config('app.name') }}
             @endif
         </div>
+        @if(!empty($unsubscribeUrl))
+            <div class="email-unsubscribe">
+                <a href="{{ $unsubscribeUrl }}">Se désabonner</a>
+            </div>
+        @endif
     </div>
 </body>
 </html>

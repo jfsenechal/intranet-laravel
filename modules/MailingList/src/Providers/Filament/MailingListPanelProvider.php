@@ -10,11 +10,9 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\Platform;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -34,25 +32,21 @@ final class MailingListPanelProvider extends PanelProvider
         return $panel
             ->id('mailing-list-panel')
             ->path('mailing-list')
-            ->spa()
             ->brandName('Carnets et liste de diffusion')
+            ->font('Instrument Sans')
             ->sidebarCollapsibleOnDesktop()
-//            ->topNavigation()
             ->colors([
-                'primary' => Color::Slate,
-                'secondary' => Color::Pink,
+                'primary' => Color::Blue,
             ])
-            ->unsavedChangesAlerts()
-            ->databaseNotifications()
-
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->unsavedChangesAlerts()
+            ->resourceCreatePageRedirect('view')
+            ->resourceEditPageRedirect('view')
+            ->databaseNotifications()
             ->discoverResources(in: $path.'Filament/Resources', for: 'AcMarche\\MailingList\\Filament\\Resources')
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\MailingList\\Filament\\Pages')
             ->pages([
 
-            ])
-            ->pages([
-                Dashboard::class,
             ])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\MailingList\\Filament\\Widgets')
             ->widgets([
@@ -71,10 +65,6 @@ final class MailingListPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
-                Platform::Windows, Platform::Linux => 'CTRL + K',
-                Platform::Mac => '⌘ + K',
-                default => null,
-            });
+            ]);
     }
 }

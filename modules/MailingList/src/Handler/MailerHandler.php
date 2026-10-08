@@ -89,6 +89,7 @@ final class MailerHandler
 
         if ($addressBookIds !== []) {
             $addressBookContacts = Contact::query()
+                ->subscribed()
                 ->whereHas('addressBooks', fn ($query) => $query->whereIn('address_books.id', $addressBookIds))
                 ->get();
             $contacts = $contacts->merge($addressBookContacts);
@@ -96,6 +97,7 @@ final class MailerHandler
 
         if ($contactIds !== []) {
             $individualContacts = Contact::query()
+                ->subscribed()
                 ->whereIn('id', $contactIds)
                 ->get();
             $contacts = $contacts->merge($individualContacts);

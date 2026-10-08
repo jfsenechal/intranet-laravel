@@ -6,7 +6,7 @@ namespace AcMarche\MailingList\Filament\Resources\AddressBooks\Pages;
 
 use AcMarche\MailingList\Filament\Resources\AddressBooks\AddressBookResource;
 use AcMarche\MailingList\Models\AddressBookShare;
-use App\Models\User;
+use AcMarche\MailingList\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\RepeatableEntry;

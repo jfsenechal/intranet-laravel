@@ -11,6 +11,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 final class EmailForm
@@ -41,6 +42,11 @@ final class EmailForm
                     ->fileAttachmentsDisk('public')
                     ->fileAttachmentsDirectory(config('mailing-list.uploads.email_attachments'))
                     ->required()
+                    ->columnSpanFull(),
+                Toggle::make('unsubscribe_enabled')
+                    ->label('Lien de désabonnement')
+                    ->helperText('Ajoute un lien de désabonnement au bas de l\'e-mail.')
+                    ->default(true)
                     ->columnSpanFull(),
                 FileUpload::make('attachments')
                     ->label('Pièces jointes')

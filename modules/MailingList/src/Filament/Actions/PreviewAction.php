@@ -6,12 +6,12 @@ namespace AcMarche\MailingList\Filament\Actions;
 
 use AcMarche\MailingList\Mail\NewsletterMail;
 use AcMarche\MailingList\Models\Email;
+use AcMarche\MailingList\Models\EmailRecipient;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Mail;
 
 final class PreviewAction
 {
@@ -32,8 +32,14 @@ final class PreviewAction
             ->action(function (array $data) use ($record): void {
                 $record->load('sender');
 
-                Mail::to($data['email'])
-                    ->send(new NewsletterMail($record, 'Apercu'));
+                $recipient = new EmailRecipient([
+                    'email_address' => $data['email'],
+                    'name' => 'Apercu',
+                ]);
+
+                $record->sender->resolveMailer()
+                    ->to($data['email'])
+                    ->send(new NewsletterMail($record, $recipient));
 
                 Notification::make()
                     ->title('Apercu envoyé')

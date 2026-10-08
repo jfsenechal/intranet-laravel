@@ -17,6 +17,9 @@ final class ListEmails extends ListRecords
     #[Override]
     protected static string $resource = EmailResource::class;
 
+    #[Override]
+    protected static ?string $title = 'Listes des campagnes';
+
     protected function getHeaderActions(): array
     {
         return [
@@ -28,7 +31,7 @@ final class ListEmails extends ListRecords
                 ->modalContent(fn (): View => view('mailing-list::doc'))
                 ->modalSubmitAction(false),
             CreateAction::make()
-                ->label('Nouvel e-mail')
+                ->label('Nouvelle campagne')
                 ->icon(Heroicon::Plus),
         ];
     }

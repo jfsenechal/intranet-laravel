@@ -26,7 +26,15 @@ final class EmailFactory extends Factory
             'body' => fake()->paragraphs(3, true),
             'attachments' => null,
             'status' => EmailStatus::Draft,
+            'unsubscribe_enabled' => true,
         ];
+    }
+
+    public function withoutUnsubscribe(): static
+    {
+        return $this->state(fn (): array => [
+            'unsubscribe_enabled' => false,
+        ]);
     }
 
     public function sent(): static

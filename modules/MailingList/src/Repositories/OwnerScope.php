@@ -7,7 +7,6 @@ namespace AcMarche\MailingList\Repositories;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
-use Illuminate\Support\Facades\DB;
 
 final class OwnerScope implements Scope
 {
@@ -17,7 +16,7 @@ final class OwnerScope implements Scope
         $username = $currentUser->username;
         $table = $model->getTable();
 
-        $builder->where(function (Builder $query) use ($table, $username): void {
+        $builder->where(function (Builder $query) use ($model, $table, $username): void {
             // Show items owned by the user
             $query->where($table.'.username', '=', $username);
 
@@ -27,7 +26,7 @@ final class OwnerScope implements Scope
                 $pkeyName = $this->getPrimaryKeyName($table);
                 $query->orWhereIn(
                     $table.'.id',
-                    DB::connection('maria-mailing-list')
+                    $model->getConnection()
                         ->table($shareTable)
                         ->select($pkeyName)
                         ->where('username', '=', $username)

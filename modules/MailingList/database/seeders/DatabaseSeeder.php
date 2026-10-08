@@ -7,7 +7,8 @@ namespace AcMarche\MailingList\Database\Seeders;
 use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Sender;
-use App\Models\User;
+use AcMarche\MailingList\Models\User;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 final class DatabaseSeeder extends Seeder
@@ -15,8 +16,8 @@ final class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $admin = User::factory()->create([
-            'name' => config('app.default_user.name'),
             'email' => config('app.default_user.email'),
+            'username' => config('app.default_user.email'),
             'password' => bcrypt(config('app.default_user.password')),
         ]);
 

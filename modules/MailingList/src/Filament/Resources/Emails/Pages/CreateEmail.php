@@ -17,6 +17,12 @@ final class CreateEmail extends CreateRecord
     #[Override]
     protected static string $resource = EmailResource::class;
 
+    #[Override]
+    protected static ?string $title = 'Nouvelle campagne';
+
+    #[Override]
+    protected static bool $canCreateAnother = false;
+
     protected function handleRecordCreation(array $data): Model
     {
         /** @var Email $email */
@@ -34,6 +40,7 @@ final class CreateEmail extends CreateRecord
         $addressBookIds = $this->data['address_book_ids'] ?? [];
         if (! empty($addressBookIds)) {
             $addressBookContacts = Contact::query()
+                ->subscribed()
                 ->whereHas('addressBooks', fn ($query) => $query->whereIn('address_books.id', $addressBookIds))
                 ->get();
             $contacts = $contacts->merge($addressBookContacts);
@@ -42,6 +49,7 @@ final class CreateEmail extends CreateRecord
         $contactIds = $this->data['contact_ids'] ?? [];
         if (! empty($contactIds)) {
             $individualContacts = Contact::query()
+                ->subscribed()
                 ->whereIn('id', $contactIds)
                 ->get();
             $contacts = $contacts->merge($individualContacts);
