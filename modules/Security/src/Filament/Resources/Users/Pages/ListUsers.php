@@ -33,6 +33,7 @@ final class ListUsers extends ListRecords
                 ->label('Importer un agent')
                 ->icon('tabler-user-plus')
                 ->modal()
+                ->color('success')
                 ->modalHeading('Importer un agent de la LDAP')
                 ->schema(fn (Schema $schema): Schema => UserForm::add($schema))
                 ->action(function (array $data): void {
