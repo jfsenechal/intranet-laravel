@@ -53,35 +53,4 @@ final class NewsObserver
     {
         // ...
     }
-
-    /**
-     * Resolve the users who should be notified about the given news.
-     *
-     * @return Collection<int, User>
-     */
-    private function recipientsFor(News $news): Collection
-    {
-        $department = $this->departmentValue($news);
-
-        $query = User::query()->whereNotNull('email');
-
-        if ($department !== DepartmentEnum::COMMON->value) {
-            $query->whereJsonContains('departments', $department);
-        }
-
-        return $query->get();
-    }
-
-    /**
-     * Normalize the news department to its enum string value, tolerating both a
-     * DepartmentEnum instance (as set by the Filament form) and a raw string.
-     */
-    private function departmentValue(News $news): string
-    {
-        if ($news->department instanceof DepartmentEnum) {
-            return $news->department->value;
-        }
-
-        return mb_strtoupper((string) $news->department);
-    }
 }

@@ -53,7 +53,7 @@ it('can load the table', function (): void {
 it('has table columns', function (string $column): void {
     livewire(ListUsers::class)
         ->assertTableColumnExists($column);
-})->with(['email', 'last_name', 'first_name', 'departments']);
+})->with(['email', 'last_name', 'first_name']);
 
 it('can load the create form with components', function (): void {
     livewire(CreateUser::class)

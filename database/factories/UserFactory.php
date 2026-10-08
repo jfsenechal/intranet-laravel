@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use AcMarche\App\Enums\DepartmentEnum;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+/**
+ * @extends Factory<User>
+ */
 #[UseModel(User::class)]
 final class UserFactory extends Factory
 {
@@ -33,7 +36,6 @@ final class UserFactory extends Factory
             'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'departments' => [DepartmentEnum::VILLE->value],
             'password' => self::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'is_administrator' => false,
@@ -51,5 +53,17 @@ final class UserFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Give the user the named roles, creating the missing ones.
+     */
+    public function withRoles(string ...$roleNames): static
+    {
+        return $this->afterCreating(function (User $user) use ($roleNames): void {
+            foreach ($roleNames as $roleName) {
+                $user->addRole(Role::query()->firstOrCreate(['name' => $roleName]));
+            }
+        });
     }
 }

@@ -15,7 +15,8 @@ function createPstModuleWithRoles(): Module
     $module = Module::factory()->create(['id' => PstServiceProvider::$module_id]);
 
     foreach (RolesEnum::cases() as $role) {
-        Role::factory()->create(['name' => $role->value, 'module_id' => $module->id]);
+        // The department roles already exist, created by their migration.
+        Role::query()->updateOrCreate(['name' => $role->value], ['module_id' => $module->id]);
     }
 
     return $module;
@@ -48,7 +49,7 @@ function writeLegacyDump(string $usersRows, string $roleUserRows = ''): string
     return $file;
 }
 
-it('gives ROLE_PST to every legacy user and maps ROLE_ADMIN to ROLE_PST_ADMIN', function (): void {
+it('gives every legacy user the PST role of their department and maps ROLE_ADMIN to ROLE_PST_ADMIN', function (): void {
     $module = createPstModuleWithRoles();
 
     $admin = User::factory()->create(['username' => 'jfsenechal']);
@@ -66,13 +67,36 @@ it('gives ROLE_PST to every legacy user and maps ROLE_ADMIN to ROLE_PST_ADMIN', 
         ->assertSuccessful();
 
     expect($admin->fresh()->roles->pluck('name')->all())
-        ->toEqualCanonicalizing([RolesEnum::PST->value, RolesEnum::ADMIN->value])
+        ->toEqualCanonicalizing([RolesEnum::VILLE->value, RolesEnum::ADMIN->value])
         ->and($mandatary->fresh()->roles->pluck('name')->all())
-        ->toEqualCanonicalizing([RolesEnum::PST->value, RolesEnum::MANDATAIRE->value])
+        ->toEqualCanonicalizing([RolesEnum::VILLE->value, RolesEnum::MANDATAIRE->value])
         ->and($plain->fresh()->roles->pluck('name')->all())
-        ->toBe([RolesEnum::PST->value])
+        ->toBe([RolesEnum::VILLE->value])
         ->and($plain->fresh()->modules->pluck('id')->all())
         ->toBe([$module->id]);
+
+    unlink($file);
+});
+
+it('gives the PST role of each department of a legacy user', function (): void {
+    createPstModuleWithRoles();
+
+    $cpas = User::factory()->create(['username' => 'cpasuser']);
+    $both = User::factory()->create(['username' => 'bothuser']);
+
+    $file = writeLegacyDump(
+        usersRows: "(1, 'Cpas', 'User', 'cpasuser', '[\\\"CPAS\\\"]', NULL),\n".
+            "(2, 'Both', 'User', 'bothuser', '[\\\"VILLE\\\",\\\"CPAS\\\"]', NULL)",
+        roleUserRows: '(1, 9, 1)',
+    );
+
+    $this->artisan('pst:migrate-roles', ['--file' => $file])
+        ->assertSuccessful();
+
+    expect($cpas->fresh()->roles->pluck('name')->all())
+        ->toBe([RolesEnum::CPAS->value])
+        ->and($both->fresh()->roles->pluck('name')->all())
+        ->toEqualCanonicalizing([RolesEnum::VILLE->value, RolesEnum::CPAS->value]);
 
     unlink($file);
 });
@@ -92,7 +116,7 @@ it('reports legacy users without an intranet account and leaves the others alone
         ->expectsOutputToContain('jfsenechal')
         ->assertSuccessful();
 
-    expect($known->fresh()->roles->pluck('name')->all())->toBe([RolesEnum::PST->value]);
+    expect($known->fresh()->roles->pluck('name')->all())->toBe([RolesEnum::VILLE->value]);
 
     unlink($file);
 });
@@ -130,7 +154,7 @@ it('is idempotent', function (): void {
     $this->artisan('pst:migrate-roles', ['--file' => $file])->assertSuccessful();
 
     expect($user->fresh()->roles->pluck('name')->all())
-        ->toEqualCanonicalizing([RolesEnum::PST->value, RolesEnum::ADMIN->value])
+        ->toEqualCanonicalizing([RolesEnum::VILLE->value, RolesEnum::ADMIN->value])
         ->and($user->fresh()->modules)->toHaveCount(1);
 
     unlink($file);

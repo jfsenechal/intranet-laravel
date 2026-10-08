@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AcMarche\Security\Filament\Resources\Users\Tables;
 
 use AcMarche\App\Enums\DepartmentEnum;
+use AcMarche\News\Enums\DepartmentEnum as NewsDepartmentEnum;
+use AcMarche\Pst\Enums\RolesEnum as PstRolesEnum;
 use AcMarche\Security\Filament\Actions\RevokeAction;
 use AcMarche\Security\Filament\Resources\Modules\Schemas\ModuleForm;
 use AcMarche\Security\Handler\ModuleHandler;
@@ -60,12 +62,18 @@ final class UserTables
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('departments')
+                SelectFilter::make('department')
                     ->label('Département')
                     ->options(DepartmentEnum::class)
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['value'] ?? null,
-                        fn (Builder $query, string $value): Builder => $query->whereJsonContains('departments', $value),
+                        fn (Builder $query, string $value): Builder => $query->whereHas(
+                            'roles',
+                            fn (Builder $query): Builder => $query->whereIn('name', [
+                                NewsDepartmentEnum::from($value)->role()?->value,
+                                PstRolesEnum::forDepartment(DepartmentEnum::from($value))->value,
+                            ]),
+                        ),
                     )),
                 TernaryFilter::make('is_administrator')
                     ->label('Administrateur'),

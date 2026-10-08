@@ -34,9 +34,6 @@ final class UsersTable
                 TextColumn::make('first_name')
                     ->label('Prénom')
                     ->searchable(),
-                TextColumn::make('departments')
-                    ->label('Départements')
-                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

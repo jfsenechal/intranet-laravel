@@ -8,6 +8,7 @@ use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Pst\Models\Service;
 use AcMarche\Security\Models\Role;
 use AcMarche\Security\Repository\UserRepository;
+use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
@@ -23,17 +24,18 @@ final class UserForm
                     ->label('Rôles')
                     ->options(fn () => Role::pluck('name', 'id'))
                     ->dehydrated(false),
-                ToggleButtons::make('departments')
+                ToggleButtons::make('pst_departments')
                     ->label('Département(s)')
-                    ->default(DepartmentEnum::VILLE->value)
-                    ->options(
-                        [
-                            DepartmentEnum::VILLE->value => DepartmentEnum::VILLE->getLabel(),
-                            DepartmentEnum::CPAS->value => DepartmentEnum::CPAS->getLabel(),
-                        ]
-                    )
+                    ->helperText('Donne le rôle PST Ville et/ou PST Cpas')
+                    ->options([
+                        DepartmentEnum::VILLE->value => DepartmentEnum::VILLE->getLabel(),
+                        DepartmentEnum::CPAS->value => DepartmentEnum::CPAS->getLabel(),
+                    ])
                     ->multiple()
-                    ->required(),
+                    ->required()
+                    ->afterStateHydrated(fn (ToggleButtons $component, ?User $record) => $component->state($record?->pstDepartments() ?? []))
+                    ->saveRelationshipsUsing(fn (User $record, array $state) => $record->syncPstDepartments($state))
+                    ->dehydrated(false),
                 CheckboxList::make('user_services')
                     ->label('Services')
                     ->options(fn () => Service::pluck('name', 'id'))
@@ -50,17 +52,6 @@ final class UserForm
                     ->label('Nom')
                     ->options(UserRepository::listLdapUsersForSelect())
                     ->searchable(),
-                ToggleButtons::make('departments')
-                    ->label('Département(s)')
-                    ->default(DepartmentEnum::VILLE->value)
-                    ->options(
-                        [
-                            DepartmentEnum::VILLE->value => DepartmentEnum::VILLE->getLabel(),
-                            DepartmentEnum::CPAS->value => DepartmentEnum::CPAS->getLabel(),
-                        ]
-                    )
-                    ->multiple()
-                    ->required(),
                 CheckboxList::make('user_roles')
                     ->label('Rôles')
                     ->options(fn () => Role::pluck('name', 'id')),

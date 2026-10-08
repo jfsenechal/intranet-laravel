@@ -60,9 +60,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_user_with_ville_department_sees_only_ville_actions(): void
     {
-        $userWithVille = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $userWithVille = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $userWithVille->roles()->attach($this->adminRole);
 
         $this->actingAs($userWithVille);
@@ -94,9 +92,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_user_with_cpas_department_sees_cpas_actions(): void
     {
-        $userWithCpas = User::factory()->create([
-            'departments' => [DepartmentEnum::CPAS->value],
-        ]);
+        $userWithCpas = User::factory()->withRoles(RolesEnum::CPAS->value)->create();
         $userWithCpas->roles()->attach($this->adminRole);
 
         $cpasObjective = $this->createOperationalObjective(DepartmentEnum::CPAS->value);
@@ -132,9 +128,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_user_with_both_departments_sees_actions_based_on_selected_department(): void
     {
-        $userWithBoth = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value, DepartmentEnum::CPAS->value],
-        ]);
+        $userWithBoth = User::factory()->withRoles(RolesEnum::VILLE->value, RolesEnum::CPAS->value)->create();
         $userWithBoth->roles()->attach($this->adminRole);
 
         $this->actingAs($userWithBoth);
@@ -155,9 +149,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_can_filter_actions_by_state_start(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -187,9 +179,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_can_filter_actions_by_state_pending(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -219,9 +209,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_tabs_show_correct_count_for_all_tab(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -244,9 +232,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_tabs_show_correct_count_for_not_validated_tab_for_admin(): void
     {
-        $adminUser = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $adminUser = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $adminUser->roles()->attach($this->adminRole);
 
         $this->actingAs($adminUser);
@@ -276,9 +262,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_admin_has_correct_number_of_tabs(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -292,9 +276,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_non_admin_user_has_correct_number_of_tabs(): void
     {
-        $regularUser = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $regularUser = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $regularUser->roles()->attach($this->mandataireRole);
 
         $this->actingAs($regularUser);
@@ -308,9 +290,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_state_tabs_only_count_validated_actions(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -343,9 +323,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_all_tab_counts_both_validated_and_non_validated(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -374,9 +352,7 @@ final class ActionDepartmentTest extends TestCase
 
     public function test_user_with_both_departments_creates_action_with_cpas_department_when_cpas_selected(): void
     {
-        $userWithBoth = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value, DepartmentEnum::CPAS->value],
-        ]);
+        $userWithBoth = User::factory()->withRoles(RolesEnum::VILLE->value, RolesEnum::CPAS->value)->create();
         $userWithBoth->roles()->attach($this->adminRole);
 
         $this->actingAs($userWithBoth);

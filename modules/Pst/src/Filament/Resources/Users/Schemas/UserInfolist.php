@@ -24,9 +24,6 @@ final class UserInfolist
             TextEntry::make('extension')
                 ->label('Extension')
                 ->icon('tabler-device-landline-phone'),
-            TextEntry::make('departments')
-                ->label('Départements')
-                ->icon('tabler-device-mobile'),
             TextEntry::make('roles_list')
                 ->label('Rôles')
                 ->state(fn ($record) => $record->roles()->pluck('name')->join(', '))

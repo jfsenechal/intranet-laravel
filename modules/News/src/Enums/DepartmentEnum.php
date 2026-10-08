@@ -28,8 +28,8 @@ enum DepartmentEnum: string implements HasColor, HasIcon, HasLabel
     /**
      * The departments whose news the given user may read, following the rule
      * NewsNotification uses to pick recipients: COMMON news reaches everyone,
-     * other news only the users of that department. Guests read COMMON and
-     * VILLE news, administrators and news admins read everything.
+     * other news only the users holding that department's role. Guests read
+     * COMMON and VILLE news, administrators and news admins read everything.
      *
      * @return list<string>
      */
@@ -43,7 +43,27 @@ enum DepartmentEnum: string implements HasColor, HasIcon, HasLabel
             return self::toArray();
         }
 
-        return array_values(array_unique([self::COMMON->value, ...($user->departments ?? [])]));
+        $departments = [self::COMMON->value];
+        foreach ([self::VILLE, self::CPAS] as $department) {
+            if ($user->hasRole($department->role()->value)) {
+                $departments[] = $department->value;
+            }
+        }
+
+        return $departments;
+    }
+
+    /**
+     * The role whose holders read and receive this department's news. COMMON
+     * news reaches everyone, so it has none.
+     */
+    public function role(): ?RolesEnum
+    {
+        return match ($this) {
+            self::COMMON => null,
+            self::CPAS => RolesEnum::ROLE_NEWS_CPAS,
+            self::VILLE => RolesEnum::ROLE_NEWS_VILLE,
+        };
     }
 
     public function getLabel(): string

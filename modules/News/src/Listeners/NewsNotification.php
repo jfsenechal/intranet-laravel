@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace AcMarche\News\Listeners;
 
 use AcMarche\News\Enums\DepartmentEnum;
+use AcMarche\News\Enums\RolesEnum;
 use AcMarche\News\Events\NewsProcessed;
 use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\News;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -48,15 +50,18 @@ final class NewsNotification
      */
     private function recipientsFor(News $news): Collection
     {
-        $department = $this->departmentValue($news);
+        $role = DepartmentEnum::tryFrom($this->departmentValue($news))?->role();
 
-        $query = User::query()->whereNotNull('email');
-
-        if ($department !== DepartmentEnum::COMMON->value) {
-            $query->whereJsonContains('departments', $department);
-        }
-
-        return $query->get();
+        return User::query()
+            ->whereNotNull('email')
+            ->when(
+                $role instanceof RolesEnum,
+                fn (Builder $query): Builder => $query->whereHas(
+                    'roles',
+                    fn (Builder $query): Builder => $query->where('name', $role->value),
+                ),
+            )
+            ->get();
     }
 
     /**

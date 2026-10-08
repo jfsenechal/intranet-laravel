@@ -18,14 +18,14 @@ it('allows any user to view any news', function (): void {
 });
 
 it('lets a user view common news and news of their department', function (DepartmentEnum $department): void {
-    auth()->user()->update(['departments' => [DepartmentEnum::CPAS->value]]);
+    auth()->user()->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_CPAS->value]));
     $news = News::factory()->create(['department' => $department->value]);
 
     expect(auth()->user()->can('view', $news))->toBeTrue();
 })->with([DepartmentEnum::COMMON, DepartmentEnum::CPAS]);
 
 it('denies a user to view news of another department', function (): void {
-    auth()->user()->update(['departments' => [DepartmentEnum::CPAS->value]]);
+    auth()->user()->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_CPAS->value]));
     $news = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
     $news->updateQuietly(['user_add' => 'other-user']);
 
@@ -34,7 +34,7 @@ it('denies a user to view news of another department', function (): void {
 
 it('lets the author view their own news of another department', function (): void {
     $user = auth()->user();
-    $user->update(['departments' => [DepartmentEnum::CPAS->value]]);
+    $user->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_CPAS->value]));
     $news = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
     $news->updateQuietly(['user_add' => $user->username]);
 
@@ -42,10 +42,8 @@ it('lets the author view their own news of another department', function (): voi
 });
 
 it('lets an administrator view news of any department', function (): void {
-    auth()->user()->update([
-        'departments' => [DepartmentEnum::VILLE->value],
-        'is_administrator' => true,
-    ]);
+    auth()->user()->update(['is_administrator' => true]);
+    auth()->user()->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_VILLE->value]));
     $news = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
     $news->updateQuietly(['user_add' => 'other-user']);
 
@@ -53,7 +51,7 @@ it('lets an administrator view news of any department', function (): void {
 });
 
 it('lets a news admin view news of any department', function (): void {
-    auth()->user()->update(['departments' => [DepartmentEnum::VILLE->value]]);
+    auth()->user()->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_VILLE->value]));
     auth()->user()->roles()->attach(Role::create(['name' => RolesEnum::ROLE_NEWS_ADMIN->value]));
     $news = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
     $news->updateQuietly(['user_add' => 'other-user']);

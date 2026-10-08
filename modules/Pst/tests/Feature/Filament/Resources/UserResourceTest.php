@@ -11,8 +11,6 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 
-use function Pest\Laravel\assertDatabaseHas;
-
 beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
     $adminRole = Role::factory()->create(['name' => RolesEnum::ADMIN->value]);
@@ -27,15 +25,15 @@ it('can render the index page', function (): void {
         ->assertOk();
 });
 
-it('can render the edit page', function (): void {
-    $user = User::factory()->create();
+it('can render the edit page with the PST departments of the user', function (): void {
+    $user = User::factory()->withRoles(RolesEnum::CPAS->value)->create();
 
     Livewire::test(EditUser::class, [
         'record' => $user->id,
     ])
         ->assertOk()
         ->assertSchemaStateSet([
-            'departments' => $user->departments,
+            'pst_departments' => [DepartmentEnum::CPAS->value],
         ]);
 });
 
@@ -73,22 +71,20 @@ it('can search column', function (string $column): void {
         ->assertCanNotSeeTableRecords($records->where($column, '!=', $value));
 })->with(['last_name']);
 
-it('can update a user', function (): void {
-    $user = User::factory()->create();
+it('swaps the PST department roles of a user and keeps their other roles', function (): void {
+    $user = User::factory()->withRoles(RolesEnum::VILLE->value, RolesEnum::MANDATAIRE->value)->create();
 
     Livewire::test(EditUser::class, [
         'record' => $user->id,
     ])
         ->fillForm([
-            'departments' => [DepartmentEnum::CPAS->value],
+            'pst_departments' => [DepartmentEnum::CPAS->value],
         ])
         ->call('save')
         ->assertNotified();
 
-    assertDatabaseHas(User::class, [
-        'id' => $user->id,
-        'departments' => json_encode([DepartmentEnum::CPAS->value]),
-    ]);
+    expect($user->fresh()->roles->pluck('name')->all())
+        ->toEqualCanonicalizing([RolesEnum::CPAS->value, RolesEnum::MANDATAIRE->value]);
 });
 
 it('validates the form data', function (array $data, array $errors): void {
@@ -98,12 +94,12 @@ it('validates the form data', function (array $data, array $errors): void {
         'record' => $user->id,
     ])
         ->fillForm([
-            'departments' => [DepartmentEnum::VILLE->value],
+            'pst_departments' => [DepartmentEnum::VILLE->value],
             ...$data,
         ])
         ->call('save')
         ->assertHasFormErrors($errors)
         ->assertNotNotified();
 })->with([
-    '`departments` is required' => [['departments' => null], ['departments' => 'required']],
+    '`pst_departments` is required' => [['pst_departments' => []], ['pst_departments' => 'required']],
 ]);

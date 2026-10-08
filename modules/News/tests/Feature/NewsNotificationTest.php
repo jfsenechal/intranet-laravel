@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\News\Enums\DepartmentEnum;
+use AcMarche\News\Enums\RolesEnum;
 use AcMarche\News\Events\NewsProcessed;
 use AcMarche\News\Filament\Resources\News\Pages\ViewNews;
 use AcMarche\News\Listeners\NewsNotification;
@@ -50,8 +51,8 @@ it('sends a common news notification to every user with an email', function (): 
 });
 
 it('sends a department news notification only to users of that department', function (): void {
-    $cpasUser = User::factory()->create(['departments' => [DepartmentEnum::CPAS->value]]);
-    $villeUser = User::factory()->create(['departments' => [DepartmentEnum::VILLE->value]]);
+    $cpasUser = User::factory()->withRoles(RolesEnum::ROLE_NEWS_CPAS->value)->create();
+    $villeUser = User::factory()->withRoles(RolesEnum::ROLE_NEWS_VILLE->value)->create();
 
     $news = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
 
@@ -70,7 +71,6 @@ it('sends a department news notification only to users of that department', func
 
 it('attaches the medias for a user who opted in to attachments', function (): void {
     User::factory()->create([
-        'departments' => [DepartmentEnum::COMMON->value],
         'news_attachment' => true,
     ]);
 
@@ -87,7 +87,6 @@ it('attaches the medias for a user who opted in to attachments', function (): vo
 
 it('does not attach the medias for a user who opted out of attachments', function (): void {
     User::factory()->create([
-        'departments' => [DepartmentEnum::COMMON->value],
         'news_attachment' => false,
     ]);
 

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\News\Enums\DepartmentEnum;
+use AcMarche\News\Enums\RolesEnum;
 use AcMarche\News\Filament\Resources\News\Pages\CreateNews;
 use AcMarche\News\Filament\Resources\News\Pages\EditNews;
 use AcMarche\News\Filament\Resources\News\Pages\ListNews;
@@ -10,6 +11,7 @@ use AcMarche\News\Filament\Resources\News\Pages\ViewNews;
 use AcMarche\News\Mail\NewsEmail;
 use AcMarche\News\Models\Category;
 use AcMarche\News\Models\News;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -165,7 +167,8 @@ it('can list every news item when the archive filter is cleared', function (): v
 
 it('lists the author own news of another department but not the others', function (): void {
     $user = auth()->user();
-    $user->update(['is_administrator' => false, 'departments' => [DepartmentEnum::VILLE->value]]);
+    $user->update(['is_administrator' => false]);
+    $user->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_VILLE->value]));
     $own = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
     $own->updateQuietly(['user_add' => $user->username]);
     $other = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
@@ -179,7 +182,8 @@ it('lists the author own news of another department but not the others', functio
 
 it('lets the author open their own news of another department', function (): void {
     $user = auth()->user();
-    $user->update(['is_administrator' => false, 'departments' => [DepartmentEnum::VILLE->value]]);
+    $user->update(['is_administrator' => false]);
+    $user->addRole(Role::query()->firstOrCreate(['name' => RolesEnum::ROLE_NEWS_VILLE->value]));
     $own = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
     $own->updateQuietly(['user_add' => $user->username]);
     $other = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
@@ -308,7 +312,7 @@ it('does not resend the mail when the checkbox is left unchecked', function (): 
 });
 
 it('resends the mail when the checkbox is checked', function (): void {
-    $recipient = User::factory()->create(['departments' => [DepartmentEnum::COMMON->value]]);
+    $recipient = User::factory()->create();
 
     $news = News::factory()->create(['department' => DepartmentEnum::COMMON->value]);
 

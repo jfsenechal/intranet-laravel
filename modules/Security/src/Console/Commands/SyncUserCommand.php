@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Console\Commands;
 
+use AcMarche\Security\Ldap\UserHandler;
 use AcMarche\Security\Ldap\UserLdap;
 use AcMarche\Security\Repository\LdapRepository;
 use App\Models\User;
@@ -64,6 +65,7 @@ final class SyncUserCommand extends Command
         $data['username'] = $username;
         $data['password'] = Str::password();
         $user = User::create($data);
+        UserHandler::assignNewsRole($user);
         // $user->addRole('ROLE_ADMIN');
         $this->info('Add '.$user->first_name.' '.$user->last_name);
     }

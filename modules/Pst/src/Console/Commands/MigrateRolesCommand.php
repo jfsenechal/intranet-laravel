@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Console\Commands;
 
+use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Providers\PstServiceProvider;
 use AcMarche\Security\Models\Module;
@@ -171,8 +172,8 @@ final class MigrateRolesCommand extends Command
     }
 
     /**
-     * Every legacy user gets ROLE_PST, plus the module counterpart of each
-     * legacy role they held.
+     * Every legacy user gets the PST role of each department they belonged to,
+     * plus the module counterpart of each legacy role they held.
      *
      * @return array<string, list<string>> username => role names
      */
@@ -184,13 +185,11 @@ final class MigrateRolesCommand extends Command
         }
 
         $usernames = [];
-        foreach ($this->parseInsertedRows($sql, 'users') as $row) {
-            $usernames[(int) $row['id']] = (string) $row['username'];
-        }
-
         $rolesToAttach = [];
-        foreach ($usernames as $username) {
-            $rolesToAttach[$username] = [RolesEnum::PST->value];
+        foreach ($this->parseInsertedRows($sql, 'users') as $row) {
+            $username = (string) $row['username'];
+            $usernames[(int) $row['id']] = $username;
+            $rolesToAttach[$username] = $this->departmentRoles($row['departments'] ?? null);
         }
 
         foreach ($this->parseInsertedRows($sql, 'role_user') as $row) {
@@ -218,6 +217,25 @@ final class MigrateRolesCommand extends Command
             static fn (array $roleNames): array => array_values(array_unique($roleNames)),
             $rolesToAttach,
         );
+    }
+
+    /**
+     * The PST department roles matching the legacy `departments` json column,
+     * read loosely since the dump keeps its quotes escaped. A user without any
+     * department belonged to the Ville, the legacy application's default.
+     *
+     * @return list<string>
+     */
+    private function departmentRoles(?string $departments): array
+    {
+        $roleNames = [];
+        foreach (DepartmentEnum::cases() as $department) {
+            if (str_contains(mb_strtoupper((string) $departments), $department->value)) {
+                $roleNames[] = RolesEnum::forDepartment($department)->value;
+            }
+        }
+
+        return $roleNames !== [] ? $roleNames : [RolesEnum::VILLE->value];
     }
 
     /**

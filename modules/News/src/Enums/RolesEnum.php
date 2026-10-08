@@ -10,6 +10,8 @@ use Illuminate\Contracts\Support\Htmlable;
 enum RolesEnum: string implements HasLabel
 {
     case ROLE_NEWS_ADMIN = 'ROLE_NEWS_ADMIN';
+    case ROLE_NEWS_VILLE = 'ROLE_NEWS_VILLE';
+    case ROLE_NEWS_CPAS = 'ROLE_NEWS_CPAS';
 
     /**
      * @return array<string, string>
@@ -28,7 +30,8 @@ enum RolesEnum: string implements HasLabel
     {
         return match ($this) {
             self::ROLE_NEWS_ADMIN => 'Admin news',
-            default => null
+            self::ROLE_NEWS_VILLE => 'News Ville',
+            self::ROLE_NEWS_CPAS => 'News Cpas',
         };
     }
 }

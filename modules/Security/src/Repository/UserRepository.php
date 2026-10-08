@@ -73,8 +73,8 @@ final class UserRepository
             return $department;
         }
 
-        if (auth()->user() && count(auth()->user()->departments) > 0) {
-            return auth()->user()->departments[0];
+        if (auth()->user() && auth()->user()->pstDepartments() !== []) {
+            return auth()->user()->pstDepartments()[0];
         }
 
         return DepartmentEnum::VILLE->value;

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Courrier\Models\UserCourrierTrait;
 use AcMarche\MailingList\Models\UserMailingListTrait;
 use AcMarche\Pst\Models\UserPstTrait;
@@ -45,7 +44,6 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
     'mobile',
     'username',
     'uuid',
-    'departments',
     'mandatory',
     'color_primary',
     'color_secondary',
@@ -68,19 +66,10 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
     public static function generateDataFromLdap(UserLdap $userLdap): array
     {
-        $email = $userLdap->getFirstAttribute('mail');
-
-        $department = match (true) {
-            str_contains((string) $email, 'cpas.marche') => DepartmentEnum::CPAS->value,
-            str_contains((string) $email, 'ac.marche') => DepartmentEnum::VILLE->value,
-            default => DepartmentEnum::VILLE->value,
-        };
-
         return [
             'first_name' => $userLdap->getFirstAttribute('givenname'),
             'last_name' => $userLdap->getFirstAttribute('sn'),
-            'email' => $email,
-            'departments' => [$department],
+            'email' => $userLdap->getFirstAttribute('mail'),
             'mobile' => $userLdap->getFirstAttribute('mobile'),
             'phone' => $userLdap->getFirstAttribute('telephoneNumber'),
             'extension' => $userLdap->getFirstAttribute('ipPhone'),
@@ -329,7 +318,6 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
             'password' => 'hashed',
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
-            'departments' => 'array',
             'is_administrator' => 'boolean',
             'news_attachment' => 'boolean',
         ];

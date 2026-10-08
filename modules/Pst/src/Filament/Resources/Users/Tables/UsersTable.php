@@ -51,9 +51,6 @@ final class UsersTable
                     ->label('Nbre de services')
                     ->counts('services')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('departments')
-                    ->label('Départements')
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('username')
                     ->label('Nom d\'utilisateur')
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -87,12 +87,12 @@ final class PstPanelProvider extends PanelProvider
                     ->label('Ville')
                     ->url(fn (): string => route('select.department', ['department' => DepartmentEnum::VILLE->value]))
                     ->icon('tabler-switch')
-                    ->visible(fn (): bool => count(auth()->user()->departments) > 1),
+                    ->visible(fn (): bool => count(auth()->user()->pstDepartments()) > 1),
                 Action::make('view-cpas')
                     ->label('Cpas')
                     ->url(fn (): string => route('select.department', ['department' => DepartmentEnum::CPAS->value]))
                     ->icon('tabler-switch')
-                    ->visible(fn (): bool => count(auth()->user()->departments) > 1),
+                    ->visible(fn (): bool => count(auth()->user()->pstDepartments()) > 1),
             ]);
     }
 }

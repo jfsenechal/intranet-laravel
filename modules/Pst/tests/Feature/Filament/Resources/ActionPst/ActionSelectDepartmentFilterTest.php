@@ -46,9 +46,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
 
     public function test_user_can_select_operational_objective_from_same_department(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -71,9 +69,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
 
     public function test_user_cannot_select_operational_objective_from_different_department(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -96,9 +92,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
 
     public function test_user_can_select_internal_operational_objective_regardless_of_department(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -122,9 +116,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
 
     public function test_cpas_user_can_select_operational_objective_from_cpas_department(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::CPAS->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::CPAS->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -147,9 +139,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
 
     public function test_cpas_user_cannot_select_operational_objective_from_ville_department(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::CPAS->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::CPAS->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);
@@ -171,9 +161,7 @@ final class ActionSelectDepartmentFilterTest extends TestCase
 
     public function test_table_filter_shows_only_objectives_from_user_department(): void
     {
-        $user = User::factory()->create([
-            'departments' => [DepartmentEnum::VILLE->value],
-        ]);
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $user->roles()->attach($this->adminRole);
 
         $this->actingAs($user);

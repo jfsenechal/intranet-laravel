@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Tests\Feature\Filament\Widgets;
 
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Filament\Widgets\ActionsByServicesTableWidget;
 use AcMarche\Pst\Models\Action;
 use AcMarche\Pst\Models\OperationalObjective;
@@ -27,7 +28,7 @@ final class ActionsByServicesTableWidgetTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('pst-panel'));
 
-        $this->user = User::factory()->create(['departments' => ['VILLE']]);
+        $this->user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
     }
 
     public function test_it_lists_actions_of_the_services_the_user_belongs_to(): void

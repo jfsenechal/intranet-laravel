@@ -44,7 +44,7 @@ final class ActionHistoryTrackingTest extends TestCase
 
     public function test_adding_agent_user_creates_history_record(): void
     {
-        $newUser = User::factory()->create([
+        $newUser = User::factory()->withRoles(RolesEnum::VILLE->value)->create([
             'first_name' => 'Jean',
             'last_name' => 'Dupont',
         ]);
@@ -67,7 +67,7 @@ final class ActionHistoryTrackingTest extends TestCase
 
     public function test_removing_agent_user_creates_history_record(): void
     {
-        $existingUser = User::factory()->create([
+        $existingUser = User::factory()->withRoles(RolesEnum::VILLE->value)->create([
             'first_name' => 'Marie',
             'last_name' => 'Martin',
         ]);
@@ -153,7 +153,7 @@ final class ActionHistoryTrackingTest extends TestCase
     public function test_adding_mandataire_creates_history_record(): void
     {
         $mandataireRole = Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]);
-        $mandataire = User::factory()->create([
+        $mandataire = User::factory()->withRoles(RolesEnum::VILLE->value)->create([
             'first_name' => 'Pierre',
             'last_name' => 'Durand',
         ]);
@@ -177,7 +177,7 @@ final class ActionHistoryTrackingTest extends TestCase
 
     public function test_no_history_when_relationships_unchanged(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->withRoles(RolesEnum::VILLE->value)->create();
         $this->action->users()->attach($user);
 
         $historyCountBefore = History::where('action_id', $this->action->id)->count();

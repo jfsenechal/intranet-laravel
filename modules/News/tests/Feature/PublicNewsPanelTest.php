@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\News\Enums\DepartmentEnum;
+use AcMarche\News\Enums\RolesEnum;
 use AcMarche\News\Filament\Resources\Categories\CategoryResource;
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use AcMarche\News\Filament\Resources\News\Pages\ListNews;
@@ -77,7 +78,7 @@ it('lists common news and news of their department to a user', function (): void
     $cpas = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
     $ville = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
 
-    $this->actingAs(User::factory()->create(['departments' => [DepartmentEnum::CPAS->value]]));
+    $this->actingAs(User::factory()->withRoles(RolesEnum::ROLE_NEWS_CPAS->value)->create());
 
     livewire(ListNews::class)
         ->loadTable()

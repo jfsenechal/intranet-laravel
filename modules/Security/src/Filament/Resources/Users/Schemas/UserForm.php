@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Security\Filament\Resources\Users\Schemas;
 
-use AcMarche\App\Enums\DepartmentEnum;
 use AcMarche\Security\Repository\UserRepository;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -21,13 +19,6 @@ final class UserForm
                 Toggle::make('news_attachment')
                     ->label('Pièce jointe news')
                     ->helperText('L\'agent recevra les pièces jointes de la news par mail')
-                    ->columnSpanFull(),
-                CheckboxList::make('departments')
-                    ->label('Départements')
-                    ->helperText('Uniquement utilisé pour le module PST')
-                    ->options(DepartmentEnum::class)
-                    ->columns(2)
-                    ->required()
                     ->columnSpanFull(),
                 Toggle::make('is_administrator')
                     ->label('Administrateur')
