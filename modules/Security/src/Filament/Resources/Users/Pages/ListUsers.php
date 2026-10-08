@@ -13,6 +13,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Artisan;
 use Override;
 
 final class ListUsers extends ListRecords
@@ -44,6 +45,26 @@ final class ListUsers extends ListRecords
                         if ($user instanceof User) {
                             $this->redirect(UserResource::getUrl('view', ['record' => $user], panel: 'security-panel'));
                         }
+                    } catch (Exception $exception) {
+                        Notification::make()
+                            ->danger()
+                            ->title($exception->getMessage())
+                            ->send();
+                    }
+                }),
+            Action::make('syncUsers')
+                ->label('Synchroniser avec la LDAP')
+                ->icon('tabler-refresh')
+                ->requiresConfirmation()
+                ->modalHeading('Synchroniser les agents avec la LDAP ?')
+                ->modalDescription('Les agents actifs absents seront ajoutés et les existants mis à jour.')
+                ->action(function (): void {
+                    try {
+                        Artisan::call('intranet:sync-users');
+                        Notification::make()
+                            ->success()
+                            ->title('Agents synchronisés')
+                            ->send();
                     } catch (Exception $exception) {
                         Notification::make()
                             ->danger()
