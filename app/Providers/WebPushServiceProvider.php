@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Support\Facades\Log;
 use Minishlink\WebPush\WebPush;
 use NotificationChannels\WebPush\WebPushChannel;
@@ -19,7 +20,8 @@ use NotificationChannels\WebPush\WebPushServiceProvider as BaseWebPushServicePro
  *
  * The package provider is still auto-discovered; this one extends it and is
  * registered in bootstrap/providers.php, so it boots afterwards and its binding
- * wins. Extending also keeps webPushAuth() — the VAPID wiring — owned upstream.
+ * wins. Extending also keeps webPushAuth(), webPushClient() and webPushConfig()
+ * — the VAPID and HTTP client wiring — owned upstream.
  */
 final class WebPushServiceProvider extends BaseWebPushServiceProvider
 {
@@ -27,15 +29,18 @@ final class WebPushServiceProvider extends BaseWebPushServiceProvider
     {
         parent::boot();
 
+        $config = $this->webPushConfig();
+
         $this->app->when(WebPushChannel::class)
             ->needs(WebPush::class)
             ->give(fn (): WebPush => (new WebPush(
                 auth: $this->webPushAuth(),
-                timeout: 30,
-                clientOptions: config('webpush.client_options', []),
+                client: $this->webPushClient($config['client_options']),
+                requestFactory: new HttpFactory,
+                streamFactory: new HttpFactory,
                 logger: Log::channel(),
             ))
                 ->setReuseVAPIDHeaders(true)
-                ->setAutomaticPadding(config('webpush.automatic_padding')));
+                ->setAutomaticPadding($config['automatic_padding']));
     }
 }
