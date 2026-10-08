@@ -41,7 +41,11 @@ final class ViewAddressBook extends ViewRecord
                 ->color('success')
                 ->modal()
                 ->modalHeading('Ajouter un contact au carnet')
-                ->schema(fn (Schema $schema): Schema => $schema->components(ContactForm::columns())->model(Contact::class))
+                ->schema(fn (Schema $schema): Schema =>
+                $schema
+                    ->columns(2)
+                    ->components(ContactForm::columns())
+                    ->model(Contact::class))
                 ->action(function (array $data, AddressBook $record): void {
                     $record->contacts()->create([
                         ...$data,
