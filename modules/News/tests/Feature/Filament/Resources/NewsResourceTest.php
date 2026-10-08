@@ -163,6 +163,32 @@ it('can list every news item when the archive filter is cleared', function (): v
         ->assertCanSeeTableRecords([$archived, $notArchived]);
 });
 
+it('lists the author own news of another department but not the others', function (): void {
+    $user = auth()->user();
+    $user->update(['is_administrator' => false, 'departments' => [DepartmentEnum::VILLE->value]]);
+    $own = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $own->updateQuietly(['user_add' => $user->username]);
+    $other = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $other->updateQuietly(['user_add' => 'other-user']);
+
+    livewire(ListNews::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords([$own])
+        ->assertCanNotSeeTableRecords([$other]);
+});
+
+it('lets the author open their own news of another department', function (): void {
+    $user = auth()->user();
+    $user->update(['is_administrator' => false, 'departments' => [DepartmentEnum::VILLE->value]]);
+    $own = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $own->updateQuietly(['user_add' => $user->username]);
+    $other = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $other->updateQuietly(['user_add' => 'other-user']);
+
+    livewire(ViewNews::class, ['record' => $own->id])->assertOk();
+    livewire(ViewNews::class, ['record' => $other->id])->assertNotFound();
+});
+
 it('can load the create form', function (): void {
     livewire(CreateNews::class)
         ->assertSchemaComponentExists('name')

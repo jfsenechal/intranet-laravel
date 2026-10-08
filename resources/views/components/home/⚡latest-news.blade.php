@@ -3,6 +3,7 @@
 use AcMarche\News\Filament\Resources\News\NewsResource;
 use AcMarche\News\Models\News;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 new class extends Component {
@@ -13,6 +14,7 @@ new class extends Component {
     {
         return News::query()
             ->with('category')
+            ->visibleTo(Auth::user())
             ->latest('created_at')
             ->limit(11)
             ->get();

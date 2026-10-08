@@ -90,6 +90,7 @@ final class News extends Model
 
     /**
      * Limit the query to the news the given user may read, see DepartmentEnum::visibleTo().
+     * An author always reads their own news, whatever its department.
      */
     #[Scope]
     protected function visibleTo(Builder $query, ?User $user): void
@@ -97,6 +98,10 @@ final class News extends Model
         $query->where(function (Builder $query) use ($user): void {
             $query->whereIn('department', DepartmentEnum::visibleTo($user))
                 ->orWhereNull('department');
+
+            if ($user instanceof User) {
+                $query->orWhere('user_add', $user->username);
+            }
         });
     }
 
