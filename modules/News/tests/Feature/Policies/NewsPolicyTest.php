@@ -27,14 +27,36 @@ it('lets a user view common news and news of their department', function (Depart
 it('denies a user to view news of another department', function (): void {
     auth()->user()->update(['departments' => [DepartmentEnum::CPAS->value]]);
     $news = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
+    $news->updateQuietly(['user_add' => 'other-user']);
 
     expect(auth()->user()->can('view', $news))->toBeFalse();
+});
+
+it('lets the author view their own news of another department', function (): void {
+    $user = auth()->user();
+    $user->update(['departments' => [DepartmentEnum::CPAS->value]]);
+    $news = News::factory()->create(['department' => DepartmentEnum::VILLE->value]);
+    $news->updateQuietly(['user_add' => $user->username]);
+
+    expect($user->can('view', $news))->toBeTrue();
+});
+
+it('lets an administrator view news of any department', function (): void {
+    auth()->user()->update([
+        'departments' => [DepartmentEnum::VILLE->value],
+        'is_administrator' => true,
+    ]);
+    $news = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $news->updateQuietly(['user_add' => 'other-user']);
+
+    expect(auth()->user()->can('view', $news))->toBeTrue();
 });
 
 it('lets a news admin view news of any department', function (): void {
     auth()->user()->update(['departments' => [DepartmentEnum::VILLE->value]]);
     auth()->user()->roles()->attach(Role::create(['name' => RolesEnum::ROLE_NEWS_ADMIN->value]));
     $news = News::factory()->create(['department' => DepartmentEnum::CPAS->value]);
+    $news->updateQuietly(['user_add' => 'other-user']);
 
     expect(auth()->user()->can('view', $news))->toBeTrue();
 });

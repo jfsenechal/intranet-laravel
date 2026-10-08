@@ -27,6 +27,10 @@ final class NewsPolicy
      */
     public function view(?User $user, News $news): bool
     {
+        if ($user instanceof User && $this->hasRole($user, $news)) {
+            return true;
+        }
+
         return $news->isVisibleTo($user);
     }
 
