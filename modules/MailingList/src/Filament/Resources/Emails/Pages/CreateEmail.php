@@ -6,8 +6,11 @@ namespace AcMarche\MailingList\Filament\Resources\Emails\Pages;
 
 use AcMarche\MailingList\Enums\RecipientStatus;
 use AcMarche\MailingList\Filament\Resources\Emails\EmailResource;
+use AcMarche\MailingList\Filament\Resources\Senders\SenderResource;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Email;
+use AcMarche\MailingList\Models\Sender;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -22,6 +25,24 @@ final class CreateEmail extends CreateRecord
 
     #[Override]
     protected static bool $canCreateAnother = false;
+
+    public function mount(): void
+    {
+        if (! Sender::query()->where('username', auth()->user()?->username)->exists()) {
+            Notification::make()
+                ->warning()
+                ->title('Aucun expéditeur')
+                ->body('Vous devez créer un expéditeur avant de pouvoir créer une campagne.')
+                ->persistent()
+                ->send();
+
+            $this->redirect(SenderResource::getUrl('create'));
+
+            return;
+        }
+
+        parent::mount();
+    }
 
     protected function handleRecordCreation(array $data): Model
     {

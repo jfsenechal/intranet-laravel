@@ -7,10 +7,14 @@ use AcMarche\MailingList\Filament\Resources\Senders\Pages\EditSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\ViewSender;
 use AcMarche\MailingList\Models\Sender;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Filament\Facades\Filament;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
+
+beforeEach(function () {
+    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
+});
 
 it('can render the view page', function () {
     $sender = Sender::factory()->create([
@@ -32,8 +36,8 @@ it('hides senders owned by another user from the view page', function () {
 
     livewire(ViewSender::class, [
         'record' => $sender->id,
-    ]);
-})->throws(ModelNotFoundException::class);
+    ])->assertNotFound();
+});
 
 it('can create a sender with smtp settings', function () {
     livewire(CreateSender::class)

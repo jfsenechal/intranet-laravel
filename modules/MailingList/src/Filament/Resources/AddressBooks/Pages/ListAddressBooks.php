@@ -16,6 +16,11 @@ final class ListAddressBooks extends ListRecords
     #[Override]
     protected static string $resource = AddressBookResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Carnets d\'adresse';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

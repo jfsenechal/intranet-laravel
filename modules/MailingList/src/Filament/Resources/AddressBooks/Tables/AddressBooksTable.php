@@ -20,6 +20,10 @@ final class AddressBooksTable
                 TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('contacts_count')
+                    ->counts('contacts')
+                    ->label('Contacts')
+                    ->sortable(),
                 TextColumn::make('is_shared')
                     ->label('Partagé')
                     ->badge()
@@ -28,10 +32,6 @@ final class AddressBooksTable
                         'Owned' => 'blue',
                         'Shared' => 'green',
                     }),
-                TextColumn::make('contacts_count')
-                    ->counts('contacts')
-                    ->label('Contacts')
-                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -20,6 +20,8 @@ final class ListEmails extends ListRecords
     #[Override]
     protected static ?string $title = 'Listes des campagnes';
 
+    protected ?string $subheading = 'Créez et envoyez un nouveau mail à une liste de diffusion.';
+
     protected function getHeaderActions(): array
     {
         return [
