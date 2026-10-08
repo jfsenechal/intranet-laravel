@@ -57,7 +57,7 @@ final class ViewAddressBook extends ViewRecord
                 ->label('Modifier')
                 ->icon(Heroicon::PencilSquare),
             DeleteAction::make()
-                ->label('Supprimer')
+                ->label('Supprimer le carnet')
                 ->icon(Heroicon::Trash),
         ];
     }
