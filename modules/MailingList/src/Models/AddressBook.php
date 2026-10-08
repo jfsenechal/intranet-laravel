@@ -6,6 +6,7 @@ namespace AcMarche\MailingList\Models;
 
 use AcMarche\MailingList\Database\Factories\AddressBookFactory;
 use AcMarche\MailingList\Repositories\OwnerScope;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
