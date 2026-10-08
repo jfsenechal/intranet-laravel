@@ -10,7 +10,8 @@
         "filament/filament",
         "filament/blueprint",
         "spatie/laravel-pdf",
-        "fruitcake/laravel-debugbar"
+        "fruitcake/laravel-debugbar",
+        "spatie/laravel-sluggable"
     ],
     "sail": false,
     "skills": [
@@ -24,6 +25,7 @@
         "tailwindcss-development",
         "filament-development",
         "laravel-pdf",
+        "sluggable-development",
         "filament-security-audit",
         "planning-filament",
         "reviewing-filament-plans",
