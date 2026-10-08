@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
+use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\EditAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ViewAddressBook;
 use AcMarche\MailingList\Models\AddressBook;
+use AcMarche\MailingList\Models\AddressBookShare;
 use AcMarche\MailingList\Models\Contact;
+use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
@@ -50,4 +54,38 @@ it('rejects a contact whose email already exists', function () {
         ->assertHasFormErrors(['email' => 'unique']);
 
     expect($addressBook->contacts()->count())->toBe(0);
+});
+
+it('stores the username when sharing an address book', function () {
+    $addressBook = AddressBook::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+    $colleague = User::factory()->create();
+
+    livewire(EditAddressBook::class, ['record' => $addressBook->id])
+        ->fillForm(['sharedWithUsers' => [$colleague->username]])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(AddressBookShare::class, [
+        'address_book_id' => $addressBook->id,
+        'username' => $colleague->username,
+    ]);
+});
+
+it('displays the users the address book is shared with', function () {
+    $addressBook = AddressBook::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+    $colleague = User::factory()->create();
+    AddressBookShare::query()->create([
+        'address_book_id' => $addressBook->id,
+        'username' => $colleague->username,
+        'permission' => 'read',
+    ]);
+
+    livewire(ViewAddressBook::class, ['record' => $addressBook->id])
+        ->assertOk()
+        ->assertSee($colleague->last_name)
+        ->assertSee($colleague->email);
 });

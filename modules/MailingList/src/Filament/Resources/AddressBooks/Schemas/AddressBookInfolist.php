@@ -37,10 +37,11 @@ final class AddressBookInfolist
                             ->get();
                     })
                     ->schema([
-                        TextEntry::make('name'),
+                        TextEntry::make('last_name')->label('Nom'),
+                        TextEntry::make('first_name')->label('Prénom'),
                         TextEntry::make('email'),
                     ])
-                    ->columns(2)
+                    ->columns(3)
                     ->columnSpanFull(),
             ]);
     }
