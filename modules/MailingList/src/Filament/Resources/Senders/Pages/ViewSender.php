@@ -20,7 +20,7 @@ final class ViewSender extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record->name;
+        return $this->record->name.' / '. $this->record->email;
     }
 
     public function infolist(Schema $schema): Schema

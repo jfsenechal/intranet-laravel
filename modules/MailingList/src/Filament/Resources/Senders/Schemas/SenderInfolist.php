@@ -19,14 +19,11 @@ final class SenderInfolist
         return $schema
             ->components([
                 Flex::make([
-                    Section::make('Informations')
+                    Section::make('Pied de page')
                         ->schema([
-                            TextEntry::make('name')
-                                ->label('Nom'),
-                            TextEntry::make('email')
-                                ->label('E-mail'),
                             TextEntry::make('footer')
                                 ->label('Pied de page')
+                                ->hiddenLabel()
                                 ->html()
                                 ->prose()
                                 ->placeholder('Aucun pied de page')
@@ -40,6 +37,12 @@ final class SenderInfolist
                                 ->disk('public')
                                 ->placeholder('Aucun logo')
                                 ->hiddenLabel(),
+                            TextEntry::make('created_at')
+                                ->label('Créé le')
+                                ->dateTime(),
+                            TextEntry::make('updated_at')
+                                ->label('Modifié le')
+                                ->dateTime(),
                         ])
                         ->grow(false),
                 ])->from('md')
@@ -62,7 +65,7 @@ final class SenderInfolist
                                 ->placeholder('—'),
                             IconEntry::make('smtp_password')
                                 ->label('Mot de passe SMTP')
-                                ->state(fn ($record): bool => filled($record->smtp_password))
+                                ->state(fn($record): bool => filled($record->smtp_password))
                                 ->boolean()
                                 ->trueIcon('heroicon-o-lock-closed')
                                 ->falseIcon('heroicon-o-lock-open')
@@ -71,14 +74,6 @@ final class SenderInfolist
                         ]),
                     ])
                     ->columnSpanFull(),
-                Flex::make([
-                    TextEntry::make('created_at')
-                        ->label('Créé le')
-                        ->dateTime(),
-                    TextEntry::make('updated_at')
-                        ->label('Modifié le')
-                        ->dateTime(),
-                ])->columnSpanFull(),
             ]);
     }
 }

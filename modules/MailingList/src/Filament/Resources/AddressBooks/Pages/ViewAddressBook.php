@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Filament\Resources\AddressBooks\Pages;
 
 use AcMarche\MailingList\Filament\Resources\AddressBooks\AddressBookResource;
-use AcMarche\MailingList\Models\AddressBookShare;
-use AcMarche\MailingList\Models\User;
+use AcMarche\MailingList\Filament\Resources\AddressBooks\Schemas\AddressBookInfolist;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -28,35 +25,7 @@ final class ViewAddressBook extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                RepeatableEntry::make('contacts')
-                    ->schema([
-                        TextEntry::make('first_name')->label('Prénom'),
-                        TextEntry::make('last_name')->label('Nom'),
-                        TextEntry::make('email'),
-                        TextEntry::make('phone')->label('Téléphone'),
-                    ])
-                    ->columns(4)
-                    ->columnSpanFull(),
-                RepeatableEntry::make('sharedUsers')
-                    ->label('Partagé avec')
-                    ->state(function () {
-                        $usernames = AddressBookShare::query()
-                            ->where('address_book_id', $this->record->id)
-                            ->pluck('username');
-
-                        return User::query()
-                            ->whereIn('username', $usernames)
-                            ->get();
-                    })
-                    ->schema([
-                        TextEntry::make('name'),
-                        TextEntry::make('email'),
-                    ])
-                    ->columns(2)
-                    ->columnSpanFull(),
-            ]);
+        return AddressBookInfolist::configure($schema,$this->record->id);
     }
 
     protected function getHeaderActions(): array
