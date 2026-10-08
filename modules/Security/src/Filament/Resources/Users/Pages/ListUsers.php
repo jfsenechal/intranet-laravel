@@ -55,6 +55,7 @@ final class ListUsers extends ListRecords
             Action::make('syncUsers')
                 ->label('Synchroniser avec la LDAP')
                 ->icon('tabler-refresh')
+                ->color('primary')
                 ->requiresConfirmation()
                 ->modalHeading('Synchroniser les agents avec la LDAP ?')
                 ->modalDescription('Les agents actifs absents seront ajoutés et les existants mis à jour.')
