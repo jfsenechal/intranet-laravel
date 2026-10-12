@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers;
 
+use AcMarche\MailingList\Filament\Actions\ExportContactsAction;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ViewAddressBook;
 use AcMarche\MailingList\Filament\Resources\Contacts\ContactResource;
 use AcMarche\MailingList\Filament\Resources\Contacts\Schemas\ContactForm;
@@ -19,6 +20,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Override;
 
 final class ContactsRelationManager extends RelationManager
@@ -83,6 +85,10 @@ final class ContactsRelationManager extends RelationManager
                     ->toggleable(),
             ])
             ->headerActions([
+                ExportContactsAction::make(
+                    query: fn (): Builder => $this->getTableQueryForExport(),
+                    filename: fn (): string => Str::slug($this->getOwnerRecord()->name).'.xlsx',
+                ),
                 CreateAction::make('addContact')
                     ->label('Ajouter un contact')
                     ->icon(Heroicon::UserPlus)

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Filament\Resources\Contacts\Pages;
 
+use AcMarche\MailingList\Filament\Actions\ExportContactsAction;
 use AcMarche\MailingList\Filament\Resources\Contacts\ContactResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 use Override;
 
 final class ListContacts extends ListRecords
@@ -21,6 +23,10 @@ final class ListContacts extends ListRecords
             CreateAction::make()
                 ->label('Nouveau contact')
                 ->icon(Heroicon::Plus),
+            ExportContactsAction::make(
+                query: fn (): Builder => $this->getTableQueryForExport(),
+                filename: fn (): string => 'contacts.xlsx',
+            ),
         ];
     }
 }

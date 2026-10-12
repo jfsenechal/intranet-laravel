@@ -193,3 +193,35 @@ it('loads users from the default database connection', function (string $modelCl
     Email::class,
     Sender::class,
 ]);
+
+it('exports the contacts of the address book to xlsx', function () {
+    $addressBook = AddressBook::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+    $dupont = Contact::factory()->create([
+        'username' => auth()->user()->username,
+        'last_name' => 'Dupont',
+        'first_name' => 'Marie',
+        'email' => 'marie.dupont@marche.be',
+    ]);
+    $martin = Contact::factory()->create([
+        'username' => auth()->user()->username,
+        'last_name' => 'Martin',
+        'first_name' => 'Paul',
+        'email' => 'paul.martin@marche.be',
+    ]);
+    Contact::factory()->create(['username' => auth()->user()->username, 'last_name' => 'Horscarnet']);
+    $addressBook->contacts()->attach([$martin->id, $dupont->id]);
+
+    $component = livewire(ContactsRelationManager::class, ['ownerRecord' => $addressBook, 'pageClass' => ViewAddressBook::class])
+        ->callAction(TestAction::make('export')->table(), data: [
+            'columns' => ['last_name', 'first_name', 'email'],
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(xlsxRows(base64_decode(data_get($component->effects, 'download.content'))))->toBe([
+        ['Nom', 'Prénom', 'Email'],
+        ['Dupont', 'Marie', 'marie.dupont@marche.be'],
+        ['Martin', 'Paul', 'paul.martin@marche.be'],
+    ]);
+});

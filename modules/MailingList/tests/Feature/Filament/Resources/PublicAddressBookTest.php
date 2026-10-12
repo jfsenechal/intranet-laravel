@@ -55,7 +55,8 @@ it('lists the contacts of a public address book without any write action', funct
         ->assertCanSeeTableRecords([$contact])
         ->assertActionHidden(TestAction::make('addContact')->table())
         ->assertActionHidden(TestAction::make('edit')->table($contact))
-        ->assertActionHidden(TestAction::make('detach')->table($contact));
+        ->assertActionHidden(TestAction::make('detach')->table($contact))
+        ->assertActionVisible(TestAction::make('export')->table());
 });
 
 it('does not bulk delete a public address book of another user', function () {
