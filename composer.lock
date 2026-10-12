@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b027c5bebf3827649c16bd6cfaec01b",
+    "content-hash": "7b6cdd044101f568c619bbadb2fff662",
     "packages": [
         {
             "name": "acmarche/activity-manager",
@@ -2707,16 +2707,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v4.1.0",
+            "version": "v4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "5da13156bf9c444f4a3a325a39a809f1a6d094b7"
+                "reference": "589dddf46c1ece00933268bcdc4ec7a0769eed9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/5da13156bf9c444f4a3a325a39a809f1a6d094b7",
-                "reference": "5da13156bf9c444f4a3a325a39a809f1a6d094b7",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/589dddf46c1ece00933268bcdc4ec7a0769eed9b",
+                "reference": "589dddf46c1ece00933268bcdc4ec7a0769eed9b",
                 "shasum": ""
             },
             "require": {
@@ -2779,7 +2779,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-04T18:40:36+00:00"
+            "time": "2026-10-08T15:26:21+00:00"
         },
         {
             "name": "directorytree/ldaprecord-laravel",
@@ -9340,16 +9340,16 @@
         },
         {
             "name": "roadrunner-php/roadrunner-api-dto",
-            "version": "v1.17.0",
+            "version": "v1.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roadrunner-php/roadrunner-api-dto.git",
-                "reference": "2f66cf73b4378a5a9fa538cc85a7ed0543999761"
+                "reference": "81d8247894cd3f75a4e0fba2b619f9d7efa03d27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roadrunner-php/roadrunner-api-dto/zipball/2f66cf73b4378a5a9fa538cc85a7ed0543999761",
-                "reference": "2f66cf73b4378a5a9fa538cc85a7ed0543999761",
+                "url": "https://api.github.com/repos/roadrunner-php/roadrunner-api-dto/zipball/81d8247894cd3f75a4e0fba2b619f9d7efa03d27",
+                "reference": "81d8247894cd3f75a4e0fba2b619f9d7efa03d27",
                 "shasum": ""
             },
             "require": {
@@ -9395,7 +9395,7 @@
                 "docs": "https://docs.roadrunner.dev",
                 "forum": "https://forum.roadrunner.dev",
                 "issues": "https://github.com/roadrunner-server/roadrunner/issues",
-                "source": "https://github.com/roadrunner-php/roadrunner-api-dto/tree/v1.17.0"
+                "source": "https://github.com/roadrunner-php/roadrunner-api-dto/tree/v1.18.0"
             },
             "funding": [
                 {
@@ -9403,7 +9403,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-16T11:44:04+00:00"
+            "time": "2026-10-09T15:32:54+00:00"
         },
         {
             "name": "ryangjchandler/blade-capture-directive",
@@ -14861,12 +14861,12 @@
             "version": "v5.7.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/vlucas/phpdotenv.git",
+                "url": "https://github.com/phpdotenv/phpdotenv.git",
                 "reference": "301c07936b16d88628b126b01d082ba153cf4c40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/301c07936b16d88628b126b01d082ba153cf4c40",
+                "url": "https://api.github.com/repos/phpdotenv/phpdotenv/zipball/301c07936b16d88628b126b01d082ba153cf4c40",
                 "reference": "301c07936b16d88628b126b01d082ba153cf4c40",
                 "shasum": ""
             },
@@ -15861,16 +15861,16 @@
         },
         {
             "name": "amphp/http-server",
-            "version": "v3.4.6",
+            "version": "v3.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/http-server.git",
-                "reference": "8a971bf92cf8cf2bc511f37a75b39126d5305315"
+                "reference": "aa96ca38c5f822a827236543d5417d0c2a782ef0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/http-server/zipball/8a971bf92cf8cf2bc511f37a75b39126d5305315",
-                "reference": "8a971bf92cf8cf2bc511f37a75b39126d5305315",
+                "url": "https://api.github.com/repos/amphp/http-server/zipball/aa96ca38c5f822a827236543d5417d0c2a782ef0",
+                "reference": "aa96ca38c5f822a827236543d5417d0c2a782ef0",
                 "shasum": ""
             },
             "require": {
@@ -15946,7 +15946,7 @@
             ],
             "support": {
                 "issues": "https://github.com/amphp/http-server/issues",
-                "source": "https://github.com/amphp/http-server/tree/v3.4.6"
+                "source": "https://github.com/amphp/http-server/tree/v3.4.7"
             },
             "funding": [
                 {
@@ -15954,7 +15954,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-27T10:31:48+00:00"
+            "time": "2026-10-04T15:14:17+00:00"
         },
         {
             "name": "amphp/parser",
@@ -19409,11 +19409,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.0",
+            "version": "2.3.1",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b1f9890d9af53a25c58129e78f0aadd31f90d7f4",
-                "reference": "b1f9890d9af53a25c58129e78f0aadd31f90d7f4",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6155239b488e95d26d1ebd95c6b4bb294d7f09db",
+                "reference": "6155239b488e95d26d1ebd95c6b4bb294d7f09db",
                 "shasum": ""
             },
             "require": {
@@ -19469,7 +19469,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-06T06:15:36+00:00"
+            "time": "2026-10-08T21:09:11+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
