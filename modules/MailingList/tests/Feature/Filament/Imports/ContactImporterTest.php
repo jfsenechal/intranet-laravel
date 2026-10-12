@@ -3,11 +3,17 @@
 declare(strict_types=1);
 
 use AcMarche\MailingList\Filament\Imports\ContactImporter;
+use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ListAddressBooks;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\Contact;
+use Filament\Actions\Imports\Jobs\ImportCsv;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
@@ -101,4 +107,36 @@ it('allows creating a contact whose email belongs to another user', function () 
         ->assertHasNoFormErrors();
 
     expect(Contact::withoutGlobalScopes()->where('email', 'marie.dupont@marche.be')->count())->toBe(2);
+});
+
+it('imports a csv with repeated column names by keeping the first one', function () {
+    Queue::fake();
+    $user = auth()->user();
+    $addressBook = AddressBook::factory()->create(['username' => auth()->user()->username]);
+
+    $csvFile = UploadedFile::fake()->createWithContent('contacts.csv', implode("\n", [
+        'Prénom,Nom de famille,Nom à afficher,Adresse e-mail principale,Ville,Code postal,Ville,Code postal',
+        ',,Alain Dantinne,familledantinne@gmail.com,Marche,6900,Namur,5000',
+    ]));
+
+    livewire(ListAddressBooks::class)
+        ->mountAction(TestAction::make('import'))
+        ->setActionData(['file' => $csvFile])
+        ->assertActionDataSet([
+            'columnMap.email' => 'Adresse e-mail principale',
+            'columnMap.display_name' => 'Nom à afficher',
+        ])
+        ->setActionData(['address_book_id' => $addressBook->id])
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    // The import job logs the user out when it finishes, so log back in afterwards.
+    Queue::pushed(ImportCsv::class)->each(fn (ImportCsv $job) => $job->handle());
+    actingAs($user);
+
+    $contact = Contact::query()->where('email', 'familledantinne@gmail.com')->sole();
+
+    expect($contact->first_name)->toBe('Alain')
+        ->and($contact->last_name)->toBe('Dantinne')
+        ->and($contact->addressBooks->pluck('id')->all())->toBe([$addressBook->id]);
 });
