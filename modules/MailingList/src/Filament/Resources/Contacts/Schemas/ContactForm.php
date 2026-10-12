@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Filament\Resources\Contacts\Schemas;
 
+use AcMarche\MailingList\Models\Contact;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 final class ContactForm
 {
@@ -37,7 +39,13 @@ final class ContactForm
                 ->maxLength(255),
             TextInput::make('email')
                 ->email()
-                ->unique(ignoreRecord: true)
+                ->unique(
+                    ignoreRecord: true,
+                    modifyRuleUsing: fn (Unique $rule, ?Contact $record): Unique => $rule->where(
+                        'username',
+                        $record?->username ?? auth()->user()?->username,
+                    ),
+                )
                 ->maxLength(255)
                 ->required(),
             TextInput::make('phone')

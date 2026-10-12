@@ -26,20 +26,29 @@ final class ContactImporter extends Importer
         return [
             ImportColumn::make('last_name')
                 ->label('Nom')
+                ->guess(['Nom de famille'])
                 ->example('Dupont'),
             ImportColumn::make('first_name')
                 ->label('Prénom')
                 ->example('Jean'),
+            ImportColumn::make('display_name')
+                ->label('Nom à afficher')
+                ->helperText('Utilisé pour le nom et le prénom lorsque ceux-ci sont vides.')
+                ->fillRecordUsing(fn (): null => null)
+                ->example('Jean Dupont'),
             ImportColumn::make('email')
                 ->label('Email')
                 ->requiredMapping()
                 ->rules(['required', 'email', 'max:255'])
+                ->guess(['Adresse e-mail principale', 'E-mail', 'Adresse e-mail', 'Courriel'])
                 ->example('jean.dupont@example.com'),
             ImportColumn::make('phone')
                 ->label('Téléphone')
+                ->guess(['Portable', 'Tél. personnel', 'Tél. professionnel', 'GSM'])
                 ->example('+32 123 456 789'),
             ImportColumn::make('description')
-                ->label('Description'),
+                ->label('Description')
+                ->guess(['Notes']),
         ];
     }
 
@@ -75,8 +84,29 @@ final class ContactImporter extends Importer
     public function resolveRecord(): ?Contact
     {
         return Contact::firstOrNew(
-            ['email' => $this->data['email']],
+            [
+                'email' => $this->data['email'],
+                'username' => auth()->user()?->username,
+            ],
         );
+    }
+
+    /**
+     * Splits the display name ("Jean Dupont") into first and last name
+     * when the file provides neither, as in Thunderbird exports.
+     */
+    protected function afterFill(): void
+    {
+        $displayName = mb_trim((string) ($this->data['display_name'] ?? ''));
+
+        if ($displayName === '' || filled($this->record->first_name) || filled($this->record->last_name)) {
+            return;
+        }
+
+        $nameParts = preg_split('/\s+/', $displayName, 2);
+
+        $this->record->first_name = count($nameParts) === 2 ? $nameParts[0] : null;
+        $this->record->last_name = $nameParts[count($nameParts) - 1];
     }
 
     protected function beforeSave(): void
