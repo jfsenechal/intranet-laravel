@@ -63,6 +63,7 @@ final class ContactsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('email')
             ->defaultSort('last_name')
+            ->defaultPaginationPageOption(50)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScope(OwnerScope::class))
             ->recordUrl(fn (Contact $record): ?string => $this->ownsContact($record)
                 ? ContactResource::getUrl('view', ['record' => $record])

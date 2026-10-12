@@ -17,12 +17,6 @@ final class ContactInfolist
             ->components([
                 Section::make('Coordonnées')
                     ->schema([
-                        TextEntry::make('last_name')
-                            ->label('Nom')
-                            ->placeholder('-'),
-                        TextEntry::make('first_name')
-                            ->label('Prénom')
-                            ->placeholder('-'),
                         TextEntry::make('email')
                             ->copyable(),
                         TextEntry::make('phone')
