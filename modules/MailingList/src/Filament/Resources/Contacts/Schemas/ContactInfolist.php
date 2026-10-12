@@ -28,6 +28,16 @@ final class ContactInfolist
                         TextEntry::make('phone')
                             ->label('Téléphone')
                             ->placeholder('-'),
+                        TextEntry::make('mobile')
+                            ->label('GSM')
+                            ->placeholder('-'),
+                        TextEntry::make('street')
+                            ->label('Rue')
+                            ->placeholder('-'),
+                        TextEntry::make('locality')
+                            ->label('Localité')
+                            ->state(fn (Contact $record): ?string => mb_trim($record->postal_code.' '.$record->city) ?: null)
+                            ->placeholder('-'),
                         TextEntry::make('description')
                             ->placeholder('-')
                             ->columnSpanFull(),

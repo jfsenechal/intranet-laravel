@@ -27,7 +27,11 @@ it('guesses the columns of a Thunderbird export', function () {
     expect($columns['email'])->toContain('adresse e-mail principale')
         ->and($columns['last_name'])->toContain('nom de famille')
         ->and($columns['display_name'])->toContain('nom à afficher')
-        ->and($columns['phone'])->toContain('portable')
+        ->and($columns['phone'])->toContain('tél. personnel')
+        ->and($columns['mobile'])->toContain('portable')
+        ->and($columns['street'])->toContain('adresse privée')
+        ->and($columns['postal_code'])->toContain('code postal')
+        ->and($columns['city'])->toContain('ville')
         ->and($columns['description'])->toContain('notes');
 });
 
@@ -115,8 +119,8 @@ it('imports a csv with repeated column names by keeping the first one', function
     $addressBook = AddressBook::factory()->create(['username' => auth()->user()->username]);
 
     $csvFile = UploadedFile::fake()->createWithContent('contacts.csv', implode("\n", [
-        'Prénom,Nom de famille,Nom à afficher,Adresse e-mail principale,Ville,Code postal,Ville,Code postal',
-        ',,Alain Dantinne,familledantinne@gmail.com,Marche,6900,Namur,5000',
+        'Prénom,Nom de famille,Nom à afficher,Adresse e-mail principale,Portable,Adresse privée,Ville,Code postal,Ville,Code postal',
+        ',,Alain Dantinne,familledantinne@gmail.com,0470 12 34 56,Rue des Écoles 1,Marche,6900,Namur,5000',
     ]));
 
     livewire(ListAddressBooks::class)
@@ -125,6 +129,10 @@ it('imports a csv with repeated column names by keeping the first one', function
         ->assertActionDataSet([
             'columnMap.email' => 'Adresse e-mail principale',
             'columnMap.display_name' => 'Nom à afficher',
+            'columnMap.mobile' => 'Portable',
+            'columnMap.street' => 'Adresse privée',
+            'columnMap.postal_code' => 'Code postal',
+            'columnMap.city' => 'Ville',
         ])
         ->setActionData(['address_book_id' => $addressBook->id])
         ->callMountedAction()
@@ -138,5 +146,9 @@ it('imports a csv with repeated column names by keeping the first one', function
 
     expect($contact->first_name)->toBe('Alain')
         ->and($contact->last_name)->toBe('Dantinne')
+        ->and($contact->mobile)->toBe('0470 12 34 56')
+        ->and($contact->street)->toBe('Rue des Écoles 1')
+        ->and($contact->postal_code)->toBe('6900')
+        ->and($contact->city)->toBe('Marche')
         ->and($contact->addressBooks->pluck('id')->all())->toBe([$addressBook->id]);
 });

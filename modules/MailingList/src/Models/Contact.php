@@ -27,6 +27,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'email',
     'description',
     'phone',
+    'mobile',
+    'street',
+    'postal_code',
+    'city',
     'unsubscribed_at',
 ])]
 final class Contact extends Model

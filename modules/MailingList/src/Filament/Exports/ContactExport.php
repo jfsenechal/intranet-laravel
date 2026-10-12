@@ -29,6 +29,10 @@ final readonly class ContactExport
             'first_name' => 'Prénom',
             'email' => 'Email',
             'phone' => 'Téléphone',
+            'mobile' => 'GSM',
+            'street' => 'Rue',
+            'postal_code' => 'Code postal',
+            'city' => 'Localité',
             'description' => 'Description',
             'unsubscribed_at' => 'Désinscrit le',
         ];
@@ -110,6 +114,10 @@ final readonly class ContactExport
             'first_name' => $row->first_name,
             'email' => $row->email,
             'phone' => $row->phone,
+            'mobile' => $row->mobile,
+            'street' => $row->street,
+            'postal_code' => $row->postal_code,
+            'city' => $row->city,
             'description' => $row->description,
             'unsubscribed_at' => display_datetime($row->unsubscribed_at),
         ];

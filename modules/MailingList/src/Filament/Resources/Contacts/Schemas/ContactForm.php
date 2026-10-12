@@ -52,6 +52,19 @@ final class ContactForm
                 ->label('Téléphone')
                 ->tel()
                 ->maxLength(255),
+            TextInput::make('mobile')
+                ->label('GSM')
+                ->tel()
+                ->maxLength(255),
+            TextInput::make('street')
+                ->label('Rue')
+                ->maxLength(255),
+            TextInput::make('postal_code')
+                ->label('Code postal')
+                ->maxLength(20),
+            TextInput::make('city')
+                ->label('Localité')
+                ->maxLength(255),
             Textarea::make('description')
                 ->rows(3),
         ];

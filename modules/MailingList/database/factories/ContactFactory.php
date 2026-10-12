@@ -26,6 +26,10 @@ final class ContactFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'description' => fake()->optional()->sentence(),
             'phone' => fake()->optional()->phoneNumber(),
+            'mobile' => fake()->optional()->phoneNumber(),
+            'street' => fake()->optional()->streetAddress(),
+            'postal_code' => fake()->optional()->postcode(),
+            'city' => fake()->optional()->city(),
         ];
     }
 }

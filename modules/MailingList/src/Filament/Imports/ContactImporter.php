@@ -44,8 +44,23 @@ final class ContactImporter extends Importer
                 ->example('jean.dupont@example.com'),
             ImportColumn::make('phone')
                 ->label('Téléphone')
-                ->guess(['Portable', 'Tél. personnel', 'Tél. professionnel', 'GSM'])
-                ->example('+32 123 456 789'),
+                ->guess(['Tél. personnel', 'Tél. professionnel'])
+                ->example('+32 84 12 34 56'),
+            ImportColumn::make('mobile')
+                ->label('GSM')
+                ->guess(['Portable', 'Mobile', 'Tél. mobile'])
+                ->example('+32 470 12 34 56'),
+            ImportColumn::make('street')
+                ->label('Rue')
+                ->guess(['Adresse privée', 'Adresse'])
+                ->example('Rue des Écoles 1'),
+            ImportColumn::make('postal_code')
+                ->label('Code postal')
+                ->example('6900'),
+            ImportColumn::make('city')
+                ->label('Localité')
+                ->guess(['Ville'])
+                ->example('Marche-en-Famenne'),
             ImportColumn::make('description')
                 ->label('Description')
                 ->guess(['Notes']),

@@ -17,6 +17,7 @@ final class ContactsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('last_name')
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')
@@ -33,6 +34,21 @@ final class ContactsTable
                     ->label('Téléphone')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('mobile')
+                    ->label('GSM')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('street')
+                    ->label('Rue')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('postal_code')
+                    ->label('Code postal')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city')
+                    ->label('Localité')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('is_shared')
                     ->label('Partagé')
                     ->badge()

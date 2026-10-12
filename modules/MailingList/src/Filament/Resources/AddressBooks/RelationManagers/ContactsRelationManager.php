@@ -83,6 +83,21 @@ final class ContactsRelationManager extends RelationManager
                     ->label('Téléphone')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('mobile')
+                    ->label('GSM')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('street')
+                    ->label('Rue')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('postal_code')
+                    ->label('Code postal')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city')
+                    ->label('Localité')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
                 ExportContactsAction::make(
