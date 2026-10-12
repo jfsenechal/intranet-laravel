@@ -16,7 +16,7 @@ new class extends Component {
             ->with('category')
             ->visibleTo(Auth::user())
             ->latest('created_at')
-            ->limit(11)
+            ->limit(7)
             ->get();
     }
 
@@ -28,7 +28,7 @@ new class extends Component {
 ?>
 
 <div
-    class="card-hover overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 animate-fade-in-up lg:col-span-2"
+    class="card-hover overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 animate-fade-in-up"
     style="--delay: 0.1s">
     <div class="gradient-news flex items-center justify-between p-5 text-white">
         <div class="flex items-center gap-3">

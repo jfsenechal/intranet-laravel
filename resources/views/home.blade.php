@@ -48,6 +48,7 @@
 
         /* Resources */
         .gradient-documents { background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); }
+        .gradient-address-book { background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); }
 
         /* People / HR */
         .gradient-birthday { background: linear-gradient(135deg, #c2410c 0%, #7c2d12 100%); }
@@ -113,13 +114,19 @@
         <livewire:home.hero-banner />
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <livewire:home.latest-news />
+            <div class="space-y-6 lg:col-span-2">
+                <livewire:home.latest-news />
+
+                <div class="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
+                    <livewire:home.latest-employees />
+                    <livewire:home.public-address-books />
+                </div>
+            </div>
 
             <div class="space-y-6">
                 <livewire:home.birthdays />
                 <livewire:home.favorites />
                 <livewire:home.classified-ads />
-                <livewire:home.latest-employees />
                 <livewire:home.sport-activities />
             </div>
         </div>
