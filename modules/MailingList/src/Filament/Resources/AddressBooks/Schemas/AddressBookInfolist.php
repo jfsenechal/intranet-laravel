@@ -16,15 +16,6 @@ final class AddressBookInfolist
     {
         return $schema
             ->components([
-                RepeatableEntry::make('contacts')
-                    ->schema([
-                        TextEntry::make('first_name')->label('Prénom'),
-                        TextEntry::make('last_name')->label('Nom'),
-                        TextEntry::make('email'),
-                        TextEntry::make('phone')->label('Téléphone'),
-                    ])
-                    ->columns(4)
-                    ->columnSpanFull(),
                 RepeatableEntry::make('sharedUsers')
                     ->label('Partagé avec')
                     ->state(function () use ($recordId) {

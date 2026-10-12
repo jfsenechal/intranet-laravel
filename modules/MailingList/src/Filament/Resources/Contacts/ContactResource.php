@@ -7,7 +7,9 @@ namespace AcMarche\MailingList\Filament\Resources\Contacts;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\EditContact;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\ListContacts;
+use AcMarche\MailingList\Filament\Resources\Contacts\Pages\ViewContact;
 use AcMarche\MailingList\Filament\Resources\Contacts\Schemas\ContactForm;
+use AcMarche\MailingList\Filament\Resources\Contacts\Schemas\ContactInfolist;
 use AcMarche\MailingList\Filament\Resources\Contacts\Tables\ContactsTable;
 use AcMarche\MailingList\Models\Contact;
 use BackedEnum;
@@ -54,6 +56,11 @@ final class ContactResource extends Resource
         return ContactForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return ContactInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return ContactsTable::configure($table);
@@ -71,6 +78,7 @@ final class ContactResource extends Resource
         return [
             'index' => ListContacts::route('/'),
             'create' => CreateContact::route('/create'),
+            'view' => ViewContact::route('/{record}'),
             'edit' => EditContact::route('/{record}/edit'),
         ];
     }

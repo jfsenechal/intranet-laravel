@@ -6,10 +6,6 @@ namespace AcMarche\MailingList\Filament\Resources\AddressBooks\Pages;
 
 use AcMarche\MailingList\Filament\Resources\AddressBooks\AddressBookResource;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Schemas\AddressBookInfolist;
-use AcMarche\MailingList\Filament\Resources\Contacts\Schemas\ContactForm;
-use AcMarche\MailingList\Models\AddressBook;
-use AcMarche\MailingList\Models\Contact;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -35,24 +31,6 @@ final class ViewAddressBook extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make('addContact')
-                ->label('Ajouter un contact')
-                ->icon(Heroicon::UserPlus)
-                ->color('success')
-                ->modal()
-                ->modalHeading('Ajouter un contact au carnet')
-                ->schema(fn (Schema $schema): Schema =>
-                $schema
-                    ->columns(2)
-                    ->components(ContactForm::columns())
-                    ->model(Contact::class))
-                ->action(function (array $data, AddressBook $record): void {
-                    $record->contacts()->create([
-                        ...$data,
-                        'username' => auth()->user()?->username,
-                    ]);
-                })
-                ->successNotificationTitle('Contact ajouté'),
             EditAction::make()
                 ->label('Modifier')
                 ->icon(Heroicon::PencilSquare),
