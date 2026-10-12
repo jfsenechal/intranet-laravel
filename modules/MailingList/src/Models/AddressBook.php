@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,10 +25,40 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'username',
     'name',
+    'is_public',
 ])]
 final class AddressBook extends Model
 {
     use HasFactory;
+
+    /**
+     * Only the owner may manage the address book; users it is shared with,
+     * and everyone when it is public, only read it.
+     */
+    public function isOwnedBy(User $user): bool
+    {
+        return $this->username === $user->username;
+    }
+
+    public function isSharedWith(User $user): bool
+    {
+        return $this->shares()->where('username', $user->username)->exists();
+    }
+
+    /**
+     * Address books a user may send emails to: their own, the ones shared
+     * with them and the public ones.
+     *
+     * @param  Builder<AddressBook>  $query
+     */
+    public function scopeMailableBy(Builder $query, User $user): void
+    {
+        $query->where(function (Builder $query) use ($user): void {
+            $query->where('username', $user->username)
+                ->orWhere('is_public', true)
+                ->orWhereHas('shares', fn (Builder $query) => $query->where('username', $user->username));
+        });
+    }
 
     /**
      * @return BelongsTo<User, $this>
@@ -61,5 +92,15 @@ final class AddressBook extends Model
         return $this->belongsToMany(User::class, 'address_book_shares', 'address_book_id', 'username', 'id', 'username')
             ->withPivot('permission')
             ->withTimestamps();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+        ];
     }
 }

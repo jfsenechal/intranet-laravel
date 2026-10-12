@@ -7,7 +7,9 @@ namespace AcMarche\MailingList\Filament\Resources\Emails\Pages;
 use AcMarche\MailingList\Filament\Resources\Emails\EmailResource;
 use AcMarche\MailingList\Handler\MailerHandler;
 use AcMarche\MailingList\Models\Email;
+use AcMarche\MailingList\Repositories\OwnerScope;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Override;
 
 final class EditEmail extends EditRecord
@@ -36,7 +38,10 @@ final class EditEmail extends EditRecord
 
         $addressBookIds = $email->recipients()
             ->whereNotNull('contact_id')
-            ->with('contact.addressBooks')
+            ->with([
+                'contact' => fn (Relation $query) => $query->withoutGlobalScope(OwnerScope::class),
+                'contact.addressBooks',
+            ])
             ->get()
             ->pluck('contact.addressBooks')
             ->flatten()

@@ -32,6 +32,11 @@ final class OwnerScope implements Scope
                         ->where('username', '=', $username)
                 );
             }
+
+            // Show public address books to every authenticated user
+            if ($table === 'address_books') {
+                $query->orWhere($table.'.is_public', '=', true);
+            }
         });
     }
 

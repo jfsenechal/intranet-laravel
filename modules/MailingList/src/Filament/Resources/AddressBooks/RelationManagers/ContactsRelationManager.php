@@ -8,6 +8,7 @@ use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ViewAddressBook;
 use AcMarche\MailingList\Filament\Resources\Contacts\ContactResource;
 use AcMarche\MailingList\Filament\Resources\Contacts\Schemas\ContactForm;
 use AcMarche\MailingList\Models\Contact;
+use AcMarche\MailingList\Repositories\OwnerScope;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\EditAction;
@@ -16,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
@@ -39,11 +41,12 @@ final class ContactsRelationManager extends RelationManager
 
     /**
      * The panel makes relation managers read-only on resource view pages, which
-     * denies every EditAction; the contacts listed here are meant to be editable.
+     * denies every EditAction; the contacts stay editable for users who may
+     * manage the address book (its owner), and read-only for everyone else.
      */
     public function isReadOnly(): bool
     {
-        return false;
+        return ! $this->canManageAddressBook();
     }
 
     public function form(Schema $schema): Schema
@@ -58,7 +61,12 @@ final class ContactsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('email')
             ->defaultSort('last_name')
-            ->recordUrl(fn (Contact $record): string => ContactResource::getUrl('view', ['record' => $record]))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $this->canManageAddressBook()
+                ? $query
+                : $query->withoutGlobalScope(OwnerScope::class))
+            ->recordUrl(fn (Contact $record): ?string => $this->canManageAddressBook()
+                ? ContactResource::getUrl('view', ['record' => $record])
+                : null)
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')
@@ -99,5 +107,13 @@ final class ContactsRelationManager extends RelationManager
                     ->modalHeading('Retirer le contact du carnet')
                     ->successNotificationTitle('Contact retiré du carnet'),
             ]);
+    }
+
+    /**
+     * Users reading a shared or public address book see all of its contacts, read-only.
+     */
+    private function canManageAddressBook(): bool
+    {
+        return auth()->user()?->can('update', $this->getOwnerRecord()) ?? false;
     }
 }

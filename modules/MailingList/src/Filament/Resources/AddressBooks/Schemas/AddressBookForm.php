@@ -11,6 +11,7 @@ use AcMarche\Security\Repository\UserRepository;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 final class AddressBookForm
@@ -23,6 +24,10 @@ final class AddressBookForm
                     ->label('Nom')
                     ->maxLength(255)
                     ->required(),
+                Toggle::make('is_public')
+                    ->label('Public')
+                    ->helperText('Visible en lecture seule par tous les utilisateurs.')
+                    ->default(false),
                 Hidden::make('username')
                     ->default(fn (): ?string => auth()->user()?->username),
                 Select::make('sharedWithUsers')

@@ -22,6 +22,14 @@ final class AddressBookFactory extends Factory
         return [
             'username' => fake()->userName(),
             'name' => fake()->words(2, true),
+            'is_public' => false,
         ];
+    }
+
+    public function public(): static
+    {
+        return $this->state(fn (): array => [
+            'is_public' => true,
+        ]);
     }
 }

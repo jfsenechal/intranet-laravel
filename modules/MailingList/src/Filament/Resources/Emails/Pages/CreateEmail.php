@@ -7,6 +7,7 @@ namespace AcMarche\MailingList\Filament\Resources\Emails\Pages;
 use AcMarche\MailingList\Enums\RecipientStatus;
 use AcMarche\MailingList\Filament\Resources\Emails\EmailResource;
 use AcMarche\MailingList\Filament\Resources\Senders\SenderResource;
+use AcMarche\MailingList\Handler\MailerHandler;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Email;
 use AcMarche\MailingList\Models\Sender;
@@ -60,11 +61,7 @@ final class CreateEmail extends CreateRecord
 
         $addressBookIds = $this->data['address_book_ids'] ?? [];
         if (! empty($addressBookIds)) {
-            $addressBookContacts = Contact::query()
-                ->subscribed()
-                ->whereHas('addressBooks', fn ($query) => $query->whereIn('address_books.id', $addressBookIds))
-                ->get();
-            $contacts = $contacts->merge($addressBookContacts);
+            $contacts = $contacts->merge(MailerHandler::subscribedContactsOfAddressBooks($addressBookIds));
         }
 
         $contactIds = $this->data['contact_ids'] ?? [];

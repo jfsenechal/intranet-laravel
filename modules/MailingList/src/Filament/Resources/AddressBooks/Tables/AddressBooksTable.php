@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Filament\Resources\AddressBooks\Tables;
 
+use AcMarche\MailingList\Models\AddressBook;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -27,11 +29,20 @@ final class AddressBooksTable
                 TextColumn::make('is_shared')
                     ->label('Partagé')
                     ->badge()
-                    ->state(fn ($record): string => $record->username === auth()->user()->username ? 'Owned' : 'Shared')
+                    ->state(fn (AddressBook $record): string => match (true) {
+                        $record->isOwnedBy(auth()->user()) => 'Owned',
+                        $record->isSharedWith(auth()->user()) => 'Shared',
+                        default => 'Public',
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'Owned' => 'blue',
                         'Shared' => 'green',
+                        'Public' => 'gray',
                     }),
+                IconColumn::make('is_public')
+                    ->label('Public')
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

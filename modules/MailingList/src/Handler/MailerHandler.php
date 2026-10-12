@@ -7,9 +7,13 @@ namespace AcMarche\MailingList\Handler;
 use AcMarche\MailingList\Enums\EmailStatus;
 use AcMarche\MailingList\Enums\RecipientStatus;
 use AcMarche\MailingList\Jobs\SendEmailJob;
+use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Email;
+use AcMarche\MailingList\Repositories\OwnerScope;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
 
@@ -79,6 +83,34 @@ final class MailerHandler
             ->send();
     }
 
+    /**
+     * Every subscribed contact of the given address books, including contacts
+     * owned by someone else when the address book is shared or public. Address
+     * books the current user may not mail are ignored.
+     *
+     * @param  array<int|string>  $addressBookIds
+     * @return Collection<int, Contact>
+     */
+    public static function subscribedContactsOfAddressBooks(array $addressBookIds): Collection
+    {
+        $user = auth()->user();
+
+        if ($user === null || $addressBookIds === []) {
+            return new Collection();
+        }
+
+        $mailableAddressBookIds = AddressBook::query()
+            ->mailableBy($user)
+            ->whereIn('id', $addressBookIds)
+            ->pluck('id');
+
+        return Contact::query()
+            ->withoutGlobalScope(OwnerScope::class)
+            ->subscribed()
+            ->whereHas('addressBooks', fn (Builder $query) => $query->whereIn('address_books.id', $mailableAddressBookIds))
+            ->get();
+    }
+
     public static function syncRecipients(Email|Model $email, array $addressBookIds = [], array $contactIds = []): void
     {
         if ($email->status !== EmailStatus::Draft) {
@@ -88,11 +120,7 @@ final class MailerHandler
         $contacts = collect();
 
         if ($addressBookIds !== []) {
-            $addressBookContacts = Contact::query()
-                ->subscribed()
-                ->whereHas('addressBooks', fn ($query) => $query->whereIn('address_books.id', $addressBookIds))
-                ->get();
-            $contacts = $contacts->merge($addressBookContacts);
+            $contacts = $contacts->merge(self::subscribedContactsOfAddressBooks($addressBookIds));
         }
 
         if ($contactIds !== []) {
