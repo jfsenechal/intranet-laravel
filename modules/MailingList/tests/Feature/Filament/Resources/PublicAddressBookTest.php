@@ -185,3 +185,14 @@ it('lets a write share edit the address book and its contacts but not delete it 
         ->assertActionHidden(TestAction::make('edit')->table($share))
         ->assertActionHidden(TestAction::make('delete')->table($share));
 });
+
+it('counts every contact of a public address book of another user', function () {
+    $addressBook = AddressBook::factory()->public()->create(['username' => 'someone-else']);
+    $addressBook->contacts()->attach(Contact::factory()->count(3)->create(['username' => 'someone-else']));
+
+    livewire(ListAddressBooks::class)
+        ->loadTable()
+        ->assertTableColumnStateSet('contacts_count', 3, $addressBook);
+
+    expect(ContactsRelationManager::getTitle($addressBook, ViewAddressBook::class))->toBe('Contacts (3)');
+});

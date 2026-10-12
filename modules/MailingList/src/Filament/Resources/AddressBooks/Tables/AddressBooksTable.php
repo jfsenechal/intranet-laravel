@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Filament\Resources\AddressBooks\Tables;
 
 use AcMarche\MailingList\Models\AddressBook;
+use AcMarche\MailingList\Repositories\OwnerScope;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
@@ -12,6 +13,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class AddressBooksTable
 {
@@ -23,7 +25,7 @@ final class AddressBooksTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('contacts_count')
-                    ->counts('contacts')
+                    ->counts(['contacts' => fn (Builder $query): Builder => $query->withoutGlobalScope(OwnerScope::class)])
                     ->label('Contacts')
                     ->sortable(),
                 TextColumn::make('is_shared')

@@ -30,7 +30,7 @@ final class ContactsRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return 'Contacts ('.$ownerRecord->contacts()->count().')';
+        return 'Contacts ('.$ownerRecord->contacts()->withoutGlobalScope(OwnerScope::class)->count().')';
     }
 
     /**
