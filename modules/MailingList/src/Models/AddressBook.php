@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Models;
 
 use AcMarche\MailingList\Database\Factories\AddressBookFactory;
+use AcMarche\MailingList\Enums\SharePermission;
 use AcMarche\MailingList\Repositories\OwnerScope;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Connection;
@@ -31,13 +32,25 @@ final class AddressBook extends Model
 {
     use HasFactory;
 
-    /**
-     * Only the owner may manage the address book; users it is shared with,
-     * and everyone when it is public, only read it.
-     */
     public function isOwnedBy(User $user): bool
     {
         return $this->username === $user->username;
+    }
+
+    /**
+     * The owner and the users it is shared with in write mode may edit the
+     * address book and its contacts; read shares and public viewers only read it.
+     */
+    public function isEditableBy(User $user): bool
+    {
+        if ($this->isOwnedBy($user)) {
+            return true;
+        }
+
+        return $this->shares()
+            ->where('username', $user->username)
+            ->where('permission', SharePermission::Write)
+            ->exists();
     }
 
     public function isSharedWith(User $user): bool

@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use AcMarche\MailingList\Enums\SharePermission;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\EditAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ListAddressBooks;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ViewAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers\ContactsRelationManager;
+use AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers\SharesRelationManager;
 use AcMarche\MailingList\Filament\Resources\Emails\Pages\EditEmail;
 use AcMarche\MailingList\Handler\MailerHandler;
 use AcMarche\MailingList\Models\AddressBook;
@@ -147,4 +149,38 @@ it('sends to every contact of an address book shared with the user', function ()
 
     expect($email->recipients()->pluck('email_address')->all())->toBe([$contact->email])
         ->and(AddressBook::query()->mailableBy(auth()->user())->pluck('id')->all())->toBe([$addressBook->id]);
+});
+
+it('lets a write share edit the address book and its contacts but not delete it or manage shares', function () {
+    $addressBook = AddressBook::factory()->create(['username' => 'someone-else']);
+    $share = AddressBookShare::query()->create([
+        'address_book_id' => $addressBook->id,
+        'username' => auth()->user()->username,
+        'permission' => SharePermission::Write,
+    ]);
+    $contact = Contact::factory()->create(['username' => 'someone-else']);
+    $addressBook->contacts()->attach($contact);
+
+    livewire(ViewAddressBook::class, ['record' => $addressBook->id])
+        ->assertActionVisible(TestAction::make('edit'))
+        ->assertActionHidden(TestAction::make('delete'));
+
+    livewire(EditAddressBook::class, ['record' => $addressBook->id])
+        ->assertOk()
+        ->assertFormFieldDisabled('is_public');
+
+    livewire(ContactsRelationManager::class, ['ownerRecord' => $addressBook, 'pageClass' => ViewAddressBook::class])
+        ->loadTable()
+        ->assertCanSeeTableRecords([$contact])
+        ->callAction(TestAction::make('edit')->table($contact), data: ['phone' => '0470 12 34 56'])
+        ->assertHasNoFormErrors()
+        ->assertActionVisible(TestAction::make('detach')->table($contact));
+
+    expect($contact->fresh()->phone)->toBe('0470 12 34 56');
+
+    livewire(SharesRelationManager::class, ['ownerRecord' => $addressBook, 'pageClass' => ViewAddressBook::class])
+        ->loadTable()
+        ->assertActionHidden(TestAction::make('share')->table())
+        ->assertActionHidden(TestAction::make('edit')->table($share))
+        ->assertActionHidden(TestAction::make('delete')->table($share));
 });

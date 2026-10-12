@@ -42,7 +42,7 @@ final class ContactsRelationManager extends RelationManager
     /**
      * The panel makes relation managers read-only on resource view pages, which
      * denies every EditAction; the contacts stay editable for users who may
-     * manage the address book (its owner), and read-only for everyone else.
+     * edit the address book (its owner and write shares), read-only otherwise.
      */
     public function isReadOnly(): bool
     {
@@ -61,10 +61,8 @@ final class ContactsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('email')
             ->defaultSort('last_name')
-            ->modifyQueryUsing(fn (Builder $query): Builder => $this->canManageAddressBook()
-                ? $query
-                : $query->withoutGlobalScope(OwnerScope::class))
-            ->recordUrl(fn (Contact $record): ?string => $this->canManageAddressBook()
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScope(OwnerScope::class))
+            ->recordUrl(fn (Contact $record): ?string => $this->ownsContact($record)
                 ? ContactResource::getUrl('view', ['record' => $record])
                 : null)
             ->columns([
@@ -100,7 +98,9 @@ final class ContactsRelationManager extends RelationManager
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare)
-                    ->url(fn (Contact $record): string => ContactResource::getUrl('edit', ['record' => $record])),
+                    ->url(fn (Contact $record): ?string => $this->ownsContact($record)
+                        ? ContactResource::getUrl('edit', ['record' => $record])
+                        : null),
                 DetachAction::make()
                     ->label('Retirer du carnet')
                     ->icon(Heroicon::UserMinus)
@@ -109,11 +109,17 @@ final class ContactsRelationManager extends RelationManager
             ]);
     }
 
-    /**
-     * Users reading a shared or public address book see all of its contacts, read-only.
-     */
     private function canManageAddressBook(): bool
     {
         return auth()->user()?->can('update', $this->getOwnerRecord()) ?? false;
+    }
+
+    /**
+     * Every contact of the address book is listed, but the contact pages only
+     * open the user's own contacts; others are edited in a modal.
+     */
+    private function ownsContact(Contact $contact): bool
+    {
+        return $contact->username === auth()->user()?->username;
     }
 }

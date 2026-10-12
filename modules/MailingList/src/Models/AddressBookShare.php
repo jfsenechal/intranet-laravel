@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Models;
 
+use AcMarche\MailingList\Enums\SharePermission;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,5 +36,15 @@ final class AddressBookShare extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'username', 'username');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'permission' => SharePermission::class,
+        ];
     }
 }

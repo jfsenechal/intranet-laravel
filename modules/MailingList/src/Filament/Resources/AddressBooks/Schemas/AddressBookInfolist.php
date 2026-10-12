@@ -4,36 +4,23 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Filament\Resources\AddressBooks\Schemas;
 
-use AcMarche\MailingList\Models\AddressBookShare;
-use App\Models\User;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Schemas\Schema;
 
+/**
+ * The name is already the page title; contacts and shares are shown by the
+ * relation managers below the infolist.
+ */
 final class AddressBookInfolist
 {
-    public static function configure(Schema $schema, int $recordId): Schema
+    public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                RepeatableEntry::make('sharedUsers')
-                    ->label('Partagé avec')
-                    ->state(function () use ($recordId) {
-                        $usernames = AddressBookShare::query()
-                            ->where('address_book_id', $recordId)
-                            ->pluck('username');
-
-                        return User::query()
-                            ->whereIn('username', $usernames)
-                            ->get();
-                    })
-                    ->schema([
-                        TextEntry::make('last_name')->label('Nom'),
-                        TextEntry::make('first_name')->label('Prénom'),
-                        TextEntry::make('email'),
-                    ])
-                    ->columns(3)
-                    ->columnSpanFull(),
+                IconEntry::make('is_public')
+                    ->label('Publique')
+                    ->helperText('Visible en lecture seule par tous les utilisateurs.')
+                    ->boolean(),
             ]);
     }
 }

@@ -9,8 +9,8 @@ use App\Models\User;
 
 /**
  * Visibility is handled by OwnerScope (owned, shared or public address books).
- * Only the owner may update or delete an address book: shared and public
- * address books are read-only for everyone else.
+ * The owner and write shares may update an address book; only the owner may
+ * delete it or manage its shares. Read shares and public viewers only read it.
  */
 final class AddressBookPolicy
 {
@@ -31,10 +31,18 @@ final class AddressBookPolicy
 
     public function update(User $user, AddressBook $addressBook): bool
     {
-        return $addressBook->isOwnedBy($user);
+        return $addressBook->isEditableBy($user);
     }
 
     public function delete(User $user, AddressBook $addressBook): bool
+    {
+        return $addressBook->isOwnedBy($user);
+    }
+
+    /**
+     * Only the owner decides who the address book is shared with.
+     */
+    public function manageShares(User $user, AddressBook $addressBook): bool
     {
         return $addressBook->isOwnedBy($user);
     }

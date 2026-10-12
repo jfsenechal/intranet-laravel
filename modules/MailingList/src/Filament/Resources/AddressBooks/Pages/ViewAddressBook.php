@@ -25,7 +25,7 @@ final class ViewAddressBook extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        return AddressBookInfolist::configure($schema, $this->record->id);
+        return AddressBookInfolist::configure($schema);
     }
 
     protected function getHeaderActions(): array

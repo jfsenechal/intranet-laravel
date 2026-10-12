@@ -9,6 +9,7 @@ use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\EditAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ListAddressBooks;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ViewAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers\ContactsRelationManager;
+use AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers\SharesRelationManager;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Schemas\AddressBookForm;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Tables\AddressBooksTable;
 use AcMarche\MailingList\Models\AddressBook;
@@ -63,6 +64,7 @@ final class AddressBookResource extends Resource
     {
         return [
             ContactsRelationManager::class,
+            SharesRelationManager::class,
         ];
     }
 

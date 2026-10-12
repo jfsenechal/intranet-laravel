@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use AcMarche\MailingList\Enums\SharePermission;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\EditAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\Pages\ViewAddressBook;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers\ContactsRelationManager;
+use AcMarche\MailingList\Filament\Resources\AddressBooks\RelationManagers\SharesRelationManager;
 use AcMarche\MailingList\Filament\Resources\Contacts\ContactResource;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\ViewContact;
 use AcMarche\MailingList\Models\AddressBook;
@@ -59,18 +61,22 @@ it('rejects a contact whose email already exists', function () {
     expect($addressBook->contacts()->count())->toBe(0);
 });
 
-it('stores the username when sharing an address book', function () {
+it('shares an address book from the shares relation manager', function () {
     $addressBook = AddressBook::factory()->create([
         'username' => auth()->user()->username,
     ]);
     $colleague = User::factory()->create();
 
-    livewire(EditAddressBook::class, ['record' => $addressBook->id])
-        ->fillForm(['sharedWithUsers' => [$colleague->username]])
-        ->call('save')
-        ->assertHasNoFormErrors();
+    livewire(SharesRelationManager::class, ['ownerRecord' => $addressBook, 'pageClass' => ViewAddressBook::class])
+        ->callAction(TestAction::make('share')->table(), data: [
+            'username' => $colleague->username,
+            'permission' => SharePermission::Write->value,
+        ])
+        ->assertHasNoFormErrors()
+        ->assertNotified('Carnet partagé');
 
     assertDatabaseHas(AddressBookShare::class, [
+        'permission' => SharePermission::Write->value,
         'address_book_id' => $addressBook->id,
         'username' => $colleague->username,
     ]);
@@ -87,10 +93,15 @@ it('displays the users the address book is shared with', function () {
         'permission' => 'read',
     ]);
 
-    livewire(ViewAddressBook::class, ['record' => $addressBook->id])
-        ->assertOk()
+    $share = AddressBookShare::query()->where('username', $colleague->username)->sole();
+
+    livewire(SharesRelationManager::class, ['ownerRecord' => $addressBook, 'pageClass' => ViewAddressBook::class])
+        ->loadTable()
+        ->assertCanSeeTableRecords([$share])
         ->assertSee($colleague->last_name)
         ->assertSee($colleague->email);
+
+    expect(SharesRelationManager::canViewForRecord($addressBook, EditAddressBook::class))->toBeFalse();
 });
 
 it('lists the contacts of the address book with edit and detach actions', function () {
@@ -140,4 +151,27 @@ it('shows the contacts relation manager on the view page only', function () {
 
     expect(ContactsRelationManager::canViewForRecord($addressBook, ViewAddressBook::class))->toBeTrue()
         ->and(ContactsRelationManager::canViewForRecord($addressBook, EditAddressBook::class))->toBeFalse();
+});
+
+it('changes the permission of a share and removes it', function () {
+    $addressBook = AddressBook::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+    $share = AddressBookShare::query()->create([
+        'address_book_id' => $addressBook->id,
+        'username' => User::factory()->create()->username,
+        'permission' => SharePermission::Read,
+    ]);
+
+    $sharesManager = livewire(SharesRelationManager::class, ['ownerRecord' => $addressBook, 'pageClass' => ViewAddressBook::class])
+        ->callAction(TestAction::make('edit')->table($share), data: [
+            'permission' => SharePermission::Write->value,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($share->fresh()->permission)->toBe(SharePermission::Write);
+
+    $sharesManager->callAction(TestAction::make('delete')->table($share));
+
+    expect(AddressBookShare::query()->find($share->id))->toBeNull();
 });
