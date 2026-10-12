@@ -47,6 +47,14 @@ final class UserRepository
         return User::find($userId);
     }
 
+    /**
+     * For module rows that reference their owner by username rather than by id.
+     */
+    public static function findByUsername(string $username): ?User
+    {
+        return User::query()->where('username', $username)->first();
+    }
+
     public static function listLdapUsersForSelect(): array
     {
         $users = [];

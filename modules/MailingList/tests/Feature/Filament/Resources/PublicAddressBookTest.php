@@ -14,6 +14,7 @@ use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\AddressBookShare;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Email;
+use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
@@ -195,4 +196,21 @@ it('counts every contact of a public address book of another user', function () 
         ->assertTableColumnStateSet('contacts_count', 3, $addressBook);
 
     expect(ContactsRelationManager::getTitle($addressBook, ViewAddressBook::class))->toBe('Contacts (3)');
+});
+
+it('displays the full name of the address book owner', function () {
+    $owner = User::factory()->create(['last_name' => 'Druez', 'first_name' => 'Nathalie']);
+    $addressBook = AddressBook::factory()->public()->create(['username' => $owner->username]);
+
+    livewire(ViewAddressBook::class, ['record' => $addressBook->id])
+        ->assertOk()
+        ->assertSee('Druez Nathalie');
+});
+
+it('falls back to the username when the owner account no longer exists', function () {
+    $addressBook = AddressBook::factory()->public()->create(['username' => 'departed-user']);
+
+    livewire(ViewAddressBook::class, ['record' => $addressBook->id])
+        ->assertOk()
+        ->assertSee('departed-user');
 });
