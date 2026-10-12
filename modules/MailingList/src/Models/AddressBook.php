@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -30,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 final class AddressBook extends Model
 {
+    use BelongsToUserTrait;
     use HasFactory;
 
     public function isOwnedBy(User $user): bool
@@ -74,14 +74,6 @@ final class AddressBook extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'username', 'username');
-    }
-
-    /**
      * @return BelongsToMany<Contact, $this>
      */
     public function contacts(): BelongsToMany
@@ -95,16 +87,6 @@ final class AddressBook extends Model
     public function shares(): HasMany
     {
         return $this->hasMany(AddressBookShare::class);
-    }
-
-    /**
-     * @return BelongsToMany<User, $this>
-     */
-    public function sharedWithUsers(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'address_book_shares', 'address_book_id', 'username', 'id', 'username')
-            ->withPivot('permission')
-            ->withTimestamps();
     }
 
     /**

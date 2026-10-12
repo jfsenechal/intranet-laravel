@@ -12,6 +12,9 @@ use AcMarche\MailingList\Filament\Resources\Contacts\Pages\ViewContact;
 use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\AddressBookShare;
 use AcMarche\MailingList\Models\Contact;
+use AcMarche\MailingList\Models\ContactShare;
+use AcMarche\MailingList\Models\Email;
+use AcMarche\MailingList\Models\Sender;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -175,3 +178,18 @@ it('changes the permission of a share and removes it', function () {
 
     expect(AddressBookShare::query()->find($share->id))->toBeNull();
 });
+
+it('loads users from the default database connection', function (string $modelClass) {
+    $model = new $modelClass;
+
+    expect($model->user()->getRelated())->toBeInstanceOf(User::class)
+        ->and($model->user()->getRelated()->getConnectionName())
+        ->toBe(config('database.default'))
+        ->not->toBe($model->getConnectionName());
+})->with([
+    AddressBook::class,
+    AddressBookShare::class,
+    ContactShare::class,
+    Email::class,
+    Sender::class,
+]);

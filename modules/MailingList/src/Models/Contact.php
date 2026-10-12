@@ -64,16 +64,6 @@ final class Contact extends Model
     }
 
     /**
-     * @return BelongsToMany<User, $this>
-     */
-    public function sharedWithUsers(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'contact_shares', 'contact_id', 'username', 'id', 'username')
-            ->withPivot('permission')
-            ->withTimestamps();
-    }
-
-    /**
      * @return array<string, string>
      */
     protected function casts(): array

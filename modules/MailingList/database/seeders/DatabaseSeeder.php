@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Database\Seeders;
 
+use AcMarche\MailingList\Enums\SharePermission;
 use AcMarche\MailingList\Models\AddressBook;
+use AcMarche\MailingList\Models\AddressBookShare;
 use AcMarche\MailingList\Models\Contact;
 use AcMarche\MailingList\Models\Sender;
-use AcMarche\MailingList\Models\User;
+use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -38,7 +40,11 @@ final class DatabaseSeeder extends Seeder
         Sender::factory(2)->create(['username' => $admin->username]);
 
         // Share first address book with another user (read access)
-        $adminAddressBooks->first()->sharedWithUsers()->attach($otherUsers->first()->username, ['permission' => 'read']);
+        AddressBookShare::query()->create([
+            'address_book_id' => $adminAddressBooks->first()->id,
+            'username' => $otherUsers->first()->username,
+            'permission' => SharePermission::Read,
+        ]);
 
         // Create data for other users
         foreach ($otherUsers as $user) {

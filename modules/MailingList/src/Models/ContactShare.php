@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 final class ContactShare extends Model
 {
+    use BelongsToUserTrait;
     use HasFactory;
 
     /**
@@ -26,13 +27,5 @@ final class ContactShare extends Model
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'username', 'username');
     }
 }

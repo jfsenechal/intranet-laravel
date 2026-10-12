@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Mail;
 
 #[UseFactory(SenderFactory::class)]
@@ -33,6 +32,8 @@ use Illuminate\Support\Facades\Mail;
 ])]
 final class Sender extends Model
 {
+    use BelongsToUserTrait;
+
     /** @use HasFactory<SenderFactory> */
     use HasFactory;
 
@@ -66,14 +67,6 @@ final class Sender extends Model
         ]);
 
         return Mail::mailer($mailerName);
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'username', 'username');
     }
 
     /**

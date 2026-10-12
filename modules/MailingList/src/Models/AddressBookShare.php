@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Models;
 
 use AcMarche\MailingList\Enums\SharePermission;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 final class AddressBookShare extends Model
 {
+    use BelongsToUserTrait;
     use HasFactory;
 
     /**
@@ -28,14 +28,6 @@ final class AddressBookShare extends Model
     public function addressBook(): BelongsTo
     {
         return $this->belongsTo(AddressBook::class);
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'username', 'username');
     }
 
     /**

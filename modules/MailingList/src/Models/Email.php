@@ -34,16 +34,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 final class Email extends Model
 {
+    use BelongsToUserTrait;
+
     /** @use HasFactory<EmailFactory> */
     use HasFactory;
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'username', 'username');
-    }
 
     /**
      * @return BelongsTo<Sender, $this>
