@@ -18,6 +18,7 @@ final class SignatureTables
                 TextColumn::make('first_name')->label('Prénom'),
                 TextColumn::make('last_name')->label('Nom'),
                 TextColumn::make('email')->label('Email'),
+                TextColumn::make('service')->label('Service'),
                 TextColumn::make('job_title')->label('Fonction')->toggleable(),
             ])
             ->recordActions([

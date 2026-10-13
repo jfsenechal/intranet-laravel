@@ -11,7 +11,6 @@ use AcMarche\App\Filament\Pages\ClaimRequestPage;
 use AcMarche\App\Filament\Pages\EmailsListPage;
 use AcMarche\App\Filament\Pages\TeleworkPage;
 use AcMarche\App\Filament\Pages\VacationPage;
-use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\College\Filament\Resources\Notifications\Pages\CreateNotification;
 use AcMarche\Conseil\Filament\Resources\Agendas\AgendaResource;
 use AcMarche\Courrier\Filament\Resources\IncomingMails\IncomingMailResource;
@@ -20,6 +19,7 @@ use AcMarche\Document\Filament\Resources\Documents\DocumentResource;
 use AcMarche\GuichetHdv\Filament\Pages\TicketsOfTheDay;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\MailingList\Filament\Resources\AddressBooks\AddressBookResource;
+use AcMarche\MailingList\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\MealDelivery\Filament\Resources\Weeks\WeekResource;
 use AcMarche\Mediation\Filament\Resources\CaseFiles\CaseFileResource;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
@@ -128,7 +128,7 @@ final class SetModuleUrlCommand extends Command
             18 => CaseFileResource::getUrl('index', panel: 'mediation-panel'),
             19 => CreateNotification::getUrl(panel: 'college-panel'),
             20 => ActivitySportResource::getUrl('index', panel: 'sports-activities-panel'),
-            21 => SignatureResource::getUrl('index', panel: 'app-panel'),
+            21 => SignatureResource::getUrl('index', panel: 'mailing-list-panel'),
             22 => 'https://agenda.marche.be',
             25 => AgendaResource::getUrl('index', panel: 'conseil-panel'),
             26 => VacationPage::getUrl(panel: 'app-panel'),

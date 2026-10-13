@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('app-panel'));
+    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
     $this->user = User::factory()->create(['username' => 'cboldo']);
     $this->actingAs($this->user);
 

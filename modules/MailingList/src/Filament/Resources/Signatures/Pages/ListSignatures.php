@@ -20,21 +20,20 @@ final class ListSignatures extends ListRecords
     {
         parent::mount();
 
-        $signature = Signature::query()->where('username', Auth::user()->username)->first();
-
-        if ($signature instanceof Signature) {
-            $this->redirect(SignatureResource::getUrl('view', ['record' => $signature]));
-
-            return;
+        if (! Signature::query()->where('username', Auth::user()->username)->exists()) {
+            $this->redirect(SignatureResource::getUrl('create'));
         }
+    }
 
-        $this->redirect(SignatureResource::getUrl('create'));
+    public function getTitle(): string
+    {
+        return 'Mes signatures';
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()->label('Nouvelle signature'),
         ];
     }
 }

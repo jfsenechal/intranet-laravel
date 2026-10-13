@@ -11,7 +11,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('app-panel'));
+    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
     $this->user = User::factory()->create([
         'first_name' => 'Catherine',
         'last_name' => 'Boldo',
