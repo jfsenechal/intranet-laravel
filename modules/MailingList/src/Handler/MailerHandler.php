@@ -55,12 +55,14 @@ final class MailerHandler
                 ->delay(now()->addSeconds((int) round($index * $secondsPerEmail)))
         )->all();
 
+        $batchEmail = $email->withoutRelations();
+
         $batch = Bus::batch($jobs)
-            ->then(function () use ($email): void {
-                $email->update(['status' => EmailStatus::Sent]);
+            ->then(function () use ($batchEmail): void {
+                $batchEmail->update(['status' => EmailStatus::Sent]);
             })
-            ->catch(function () use ($email): void {
-                $email->update(['status' => EmailStatus::Failed]);
+            ->catch(function () use ($batchEmail): void {
+                $batchEmail->update(['status' => EmailStatus::Failed]);
             })
             ->allowFailures()
             ->dispatch();

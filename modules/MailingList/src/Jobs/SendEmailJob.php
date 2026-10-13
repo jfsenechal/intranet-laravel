@@ -9,12 +9,19 @@ use AcMarche\MailingList\Mail\NewsletterMail;
 use AcMarche\MailingList\Models\Email;
 use AcMarche\MailingList\Models\EmailRecipient;
 use AcMarche\MailingList\Models\Sender;
+use AcMarche\MailingList\Repositories\OwnerScope;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
+/**
+ * Runs on a queue worker without an authenticated user, so relations guarded by
+ * OwnerScope are never serialized and must be resolved without that scope.
+ */
+#[WithoutRelations]
 final class SendEmailJob implements ShouldQueue
 {
     use Batchable, Queueable;
@@ -31,7 +38,8 @@ final class SendEmailJob implements ShouldQueue
         }
 
         try {
-            $sender = $this->email->sender ?? $this->email->load('sender')->sender;
+            $sender = $this->email->sender()->withoutGlobalScope(OwnerScope::class)->first();
+            $this->email->setRelation('sender', $sender);
 
             $mailer = $sender instanceof Sender
                 ? $sender->resolveMailer()
