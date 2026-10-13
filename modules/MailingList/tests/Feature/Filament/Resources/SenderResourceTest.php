@@ -118,3 +118,26 @@ it('can update smtp settings on edit page', function () {
         'smtp_username' => 'sender@marche.be',
     ]);
 });
+
+it('prefills the create form with the current user when they have no sender', function () {
+    $user = auth()->user();
+
+    livewire(CreateSender::class)
+        ->assertSchemaStateSet([
+            'name' => mb_trim($user->first_name.' '.$user->last_name),
+            'email' => $user->email,
+            'username' => $user->username,
+        ]);
+});
+
+it('does not prefill the create form when the user already has a sender', function () {
+    Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+
+    livewire(CreateSender::class)
+        ->assertSchemaStateSet([
+            'name' => null,
+            'email' => null,
+        ]);
+});
