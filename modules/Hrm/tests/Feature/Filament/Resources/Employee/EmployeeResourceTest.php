@@ -7,6 +7,7 @@ use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Enums\TrainingTypeEnum;
 use AcMarche\Hrm\Filament\Exports\EmployeeExport;
 use AcMarche\Hrm\Filament\Resources\Contracts\Pages\ViewContract;
+use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\CreateEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\EditEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
@@ -1133,5 +1134,41 @@ describe('service and direction filters', function (): void {
             ->loadTable()
             ->filterTable('direction_id', $direction->id)
             ->assertCanSeeTableRecords([$current]);
+    });
+});
+
+describe('navigation', function (): void {
+    /**
+     * @return array<string, bool>
+     */
+    function hrmPersonnelNavigationActiveStates(): array
+    {
+        return collect(Filament::getPanel('hrm-panel')->getNavigationItems())
+            ->merge(EmployeeResource::getNavigationItems())
+            ->filter(fn ($item): bool => $item->getGroup() === 'Personnel')
+            ->mapWithKeys(fn ($item): array => [$item->getLabel() => $item->isActive()])
+            ->all();
+    }
+
+    it('highlights the navigation item matching the status filter of the list page', function (StatusEnum $status, string $expectedLabel): void {
+        $this->get(ListEmployees::getUrl(parameters: [
+            'filters' => ['status' => ['value' => $status->value]],
+        ]))->assertOk();
+
+        expect(array_keys(array_filter(hrmPersonnelNavigationActiveStates())))->toBe([$expectedLabel]);
+    })->with([
+        'agents' => [StatusEnum::AGENT, 'Agents'],
+        'candidates' => [StatusEnum::APPLICATION, 'Candidats'],
+        'students' => [StatusEnum::STUDENT, 'Etudiants'],
+        'interns' => [StatusEnum::INTERN, 'Stagiaires'],
+        'other status falls back to agents' => [StatusEnum::RETIRED, 'Agents'],
+    ]);
+
+    it('highlights the navigation item matching the status of the viewed employee', function (): void {
+        $student = Employee::factory()->create(['status' => StatusEnum::STUDENT]);
+
+        $this->get(ViewEmployee::getUrl(['record' => $student]))->assertOk();
+
+        expect(array_keys(array_filter(hrmPersonnelNavigationActiveStates())))->toBe(['Etudiants']);
     });
 });

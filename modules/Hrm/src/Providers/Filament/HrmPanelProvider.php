@@ -8,6 +8,7 @@ use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Filament\Pages\HrmDashboard;
+use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ListEmployees;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -76,7 +77,8 @@ final class HrmPanelProvider extends PanelProvider
                     ->sort(2)
                     ->url(fn (): string => ListEmployees::getUrl(parameters: [
                         'filters' => ['status' => ['value' => StatusEnum::APPLICATION->value]],
-                    ])),
+                    ]))
+                    ->isActiveWhen(fn (): bool => EmployeeResource::isNavigationActiveFor(StatusEnum::APPLICATION)),
                 NavigationItem::make(StatusEnum::STUDENT->value)
                     ->label('Etudiants')
                     ->icon(Heroicon::OutlinedAcademicCap)
@@ -84,7 +86,8 @@ final class HrmPanelProvider extends PanelProvider
                     ->sort(3)
                     ->url(fn (): string => ListEmployees::getUrl(parameters: [
                         'filters' => ['status' => ['value' => StatusEnum::STUDENT->value]],
-                    ])),
+                    ]))
+                    ->isActiveWhen(fn (): bool => EmployeeResource::isNavigationActiveFor(StatusEnum::STUDENT)),
                 NavigationItem::make(StatusEnum::INTERN->value)
                     ->label('Stagiaires')
                     ->icon(Heroicon::OutlinedBriefcase)
@@ -92,7 +95,8 @@ final class HrmPanelProvider extends PanelProvider
                     ->sort(4)
                     ->url(fn (): string => ListEmployees::getUrl(parameters: [
                         'filters' => ['status' => ['value' => StatusEnum::INTERN->value]],
-                    ])),
+                    ]))
+                    ->isActiveWhen(fn (): bool => EmployeeResource::isNavigationActiveFor(StatusEnum::INTERN)),
             ])
             ->middleware([
                 EncryptCookies::class,

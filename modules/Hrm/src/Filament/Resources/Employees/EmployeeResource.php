@@ -25,6 +25,7 @@ use AcMarche\Hrm\Filament\Resources\Employees\Tables\EmployeeTables;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Policies\EmployeePolicy;
 use App\Models\User;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -34,6 +35,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
+
+use function Filament\Support\original_request;
 
 final class EmployeeResource extends Resource
 {
@@ -54,6 +57,49 @@ final class EmployeeResource extends Resource
         return ListEmployees::getUrl(parameters: [
             'filters' => ['status' => ['value' => StatusEnum::AGENT->value]],
         ]);
+    }
+
+    /**
+     * @return array<NavigationItem>
+     */
+    public static function getNavigationItems(): array
+    {
+        return array_map(
+            fn (NavigationItem $item): NavigationItem => $item->isActiveWhen(
+                fn (): bool => self::isNavigationActiveFor(StatusEnum::AGENT),
+            ),
+            parent::getNavigationItems(),
+        );
+    }
+
+    /**
+     * Candidats, Etudiants and Stagiaires have their own navigation item pointing
+     * to the same list page; every other status highlights Agents.
+     */
+    public static function isNavigationActiveFor(StatusEnum $status): bool
+    {
+        $request = original_request();
+
+        if (! $request->routeIs(self::getNavigationItemActiveRoutePattern())) {
+            return false;
+        }
+
+        $currentStatus = StatusEnum::tryFrom((string) data_get($request->query(), 'filters.status.value'));
+
+        if (! $currentStatus instanceof StatusEnum && $request->route('record') !== null) {
+            $record = $request->route('record');
+            $currentStatus = $record instanceof Employee
+                ? $record->status
+                : Employee::query()->whereKey($record)->value('status');
+        }
+
+        $dedicatedStatuses = [StatusEnum::APPLICATION, StatusEnum::STUDENT, StatusEnum::INTERN];
+
+        if ($status === StatusEnum::AGENT) {
+            return ! in_array($currentStatus, $dedicatedStatuses, true);
+        }
+
+        return $currentStatus === $status;
     }
 
     public static function getNavigationIcon(): string
