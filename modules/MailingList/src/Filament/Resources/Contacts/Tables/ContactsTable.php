@@ -18,6 +18,7 @@ final class ContactsTable
     {
         return $table
             ->defaultSort('last_name')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('last_name')
                     ->label('Nom')
