@@ -86,3 +86,19 @@ it('appends the sender signature to the newsletter only when one is selected', f
     expect((new NewsletterMail($email->fresh()->load('sender'), $recipient))->render())
         ->toContain('catherine.boldo@cpas.marche.be');
 });
+
+it('renders the subject as a title before the content', function (): void {
+    $sender = Sender::factory()->create(['username' => auth()->user()->username]);
+    $email = Email::factory()->create([
+        'username' => auth()->user()->username,
+        'sender_id' => $sender->id,
+        'subject' => 'Conseil communal du 20 octobre',
+        'body' => '<p>Ordre du jour</p>',
+    ]);
+    $recipient = EmailRecipient::factory()->for($email)->create();
+
+    $rendered = (new NewsletterMail($email, $recipient))->render();
+
+    expect($rendered)->toContain('<h1 class="email-title">Conseil communal du 20 octobre</h1>')
+        ->and(mb_strpos($rendered, '<h1 class="email-title">'))->toBeLessThan(mb_strpos($rendered, 'Ordre du jour'));
+});

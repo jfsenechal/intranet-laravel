@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $subject }}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -18,6 +19,12 @@
             border-radius: 8px;
             padding: 32px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .email-title {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.3;
+            color: #222;
         }
         .email-body {
             margin-top: 16px;
@@ -59,6 +66,9 @@
             <div class="email-logo">
                 <img src="{{ $logoUrl }}" alt="Logo">
             </div>
+        @endif
+        @if(!empty($subject))
+            <h1 class="email-title">{{ $subject }}</h1>
         @endif
         <div class="email-body">
             {!! $body !!}

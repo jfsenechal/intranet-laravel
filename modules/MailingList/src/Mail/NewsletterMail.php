@@ -42,6 +42,7 @@ final class NewsletterMail extends Mailable
         return new Content(
             view: 'mailing-list::emails.newsletter',
             with: [
+                'subject' => $this->email->subject,
                 'body' => $this->email->body,
                 'recipientName' => $this->recipient->name ?? '',
                 'signature' => $signature instanceof Signature
