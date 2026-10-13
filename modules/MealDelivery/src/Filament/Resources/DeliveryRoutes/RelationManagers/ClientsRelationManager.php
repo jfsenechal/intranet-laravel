@@ -8,6 +8,7 @@ use AcMarche\MealDelivery\Models\Client;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class ClientsRelationManager extends RelationManager
 {
@@ -21,6 +22,9 @@ final class ClientsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->where('is_active', true)
+                ->where('use_cafeteria', false))
             ->columns([
                 Tables\Columns\TextColumn::make('last_name')
                     ->label('Nom'),

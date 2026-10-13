@@ -39,3 +39,49 @@ it('displays the client address combining street, number and city', function ():
         ->assertCanSeeTableRecords([$client])
         ->assertTableColumnStateSet('address', 'Rue de la Viorne 3/11, MARCHE', $client);
 });
+
+it('hides inactive and cafeteria clients from the route', function (): void {
+    $route = DeliveryRoute::create(['name' => fake()->unique()->word()]);
+
+    $activeClient = Client::create([
+        'last_name' => fake()->lastName(),
+        'first_name' => fake()->firstName(),
+        'street' => fake()->streetName(),
+        'number' => fake()->buildingNumber(),
+        'postal_code' => 6900,
+        'city' => 'MARCHE',
+        'route_id' => $route->id,
+        'is_active' => true,
+    ]);
+
+    $inactiveClient = Client::create([
+        'last_name' => fake()->lastName(),
+        'first_name' => fake()->firstName(),
+        'street' => fake()->streetName(),
+        'number' => fake()->buildingNumber(),
+        'postal_code' => 6900,
+        'city' => 'MARCHE',
+        'route_id' => $route->id,
+        'is_active' => false,
+    ]);
+
+    $cafeteriaClient = Client::create([
+        'last_name' => fake()->lastName(),
+        'first_name' => fake()->firstName(),
+        'street' => fake()->streetName(),
+        'number' => fake()->buildingNumber(),
+        'postal_code' => 6900,
+        'city' => 'MARCHE',
+        'route_id' => $route->id,
+        'is_active' => true,
+        'use_cafeteria' => true,
+    ]);
+
+    livewire(ClientsRelationManager::class, [
+        'ownerRecord' => $route,
+        'pageClass' => ViewDeliveryRoute::class,
+    ])
+        ->call('loadTable')
+        ->assertCanSeeTableRecords([$activeClient])
+        ->assertCanNotSeeTableRecords([$inactiveClient, $cafeteriaClient]);
+});
