@@ -24,7 +24,7 @@ final class AddressBookInfolist
                     ->label('Propriétaire')
                     ->formatStateUsing(fn (string $state): string => UserRepository::findByUsername($state)?->full_name ?? $state),
                 IconEntry::make('is_public')
-                    ->label('Publique')
+                    ->label('Public')
                     ->helperText('Visible en lecture seule par tous les utilisateurs.')
                     ->boolean(),
             ]);
