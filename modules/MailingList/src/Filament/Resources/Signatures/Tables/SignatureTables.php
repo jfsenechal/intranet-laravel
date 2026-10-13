@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Filament\Resources\Signatures\Tables;
+namespace AcMarche\MailingList\Filament\Resources\Signatures\Tables;
 
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use AcMarche\App\Enums\SignatureEnum;
-use AcMarche\App\Filament\Resources\Signatures\Pages\ViewSignature;
-use AcMarche\App\Models\Signature;
+use AcMarche\MailingList\Enums\SignatureEnum;
+use AcMarche\MailingList\Filament\Resources\Signatures\Pages\ViewSignature;
+use AcMarche\MailingList\Models\Signature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;

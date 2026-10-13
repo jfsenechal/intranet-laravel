@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Models;
+namespace AcMarche\MailingList\Models;
 
-use AcMarche\App\Enums\SignatureEnum;
+use AcMarche\MailingList\Enums\SignatureEnum;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Connection('maria-mailing-list')]
 #[Table(name: 'signatures')]
 #[Fillable([
     'last_name',

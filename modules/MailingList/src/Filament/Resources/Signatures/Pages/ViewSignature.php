@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Filament\Resources\Signatures\Pages;
+namespace AcMarche\MailingList\Filament\Resources\Signatures\Pages;
 
-use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
-use AcMarche\App\Models\Signature;
-use AcMarche\App\Services\SignatureHtmlGenerator;
+use AcMarche\MailingList\Filament\Resources\Signatures\SignatureResource;
+use AcMarche\MailingList\Models\Signature;
+use AcMarche\MailingList\Services\SignatureHtmlGenerator;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;

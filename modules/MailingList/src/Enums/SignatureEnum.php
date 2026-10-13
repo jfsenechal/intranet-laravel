@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Enums;
+namespace AcMarche\MailingList\Enums;
 
 enum SignatureEnum: string
 {

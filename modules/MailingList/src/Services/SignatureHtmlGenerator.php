@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Services;
+namespace AcMarche\MailingList\Services;
 
-use AcMarche\App\Models\Signature;
+use AcMarche\MailingList\Models\Signature;
 use Illuminate\Support\Facades\View;
 
 final class SignatureHtmlGenerator

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use AcMarche\App\Filament\Resources\Signatures\Pages\CreateSignature;
-use AcMarche\App\Models\Signature;
+use AcMarche\MailingList\Filament\Resources\Signatures\Pages\CreateSignature;
+use AcMarche\MailingList\Models\Signature;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;

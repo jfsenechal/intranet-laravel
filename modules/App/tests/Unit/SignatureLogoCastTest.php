@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use AcMarche\App\Enums\SignatureEnum;
-use AcMarche\App\Models\Signature;
+use AcMarche\MailingList\Enums\SignatureEnum;
+use AcMarche\MailingList\Models\Signature;
 
 /**
  * Build a model straight from a stored row so the logo goes through the accessor

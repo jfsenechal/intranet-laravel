@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Filament\Resources\Signatures;
+namespace AcMarche\MailingList\Filament\Resources\Signatures;
 
-use AcMarche\App\Filament\Resources\Signatures\Pages\CreateSignature;
-use AcMarche\App\Filament\Resources\Signatures\Pages\EditSignature;
-use AcMarche\App\Filament\Resources\Signatures\Pages\ListSignatures;
-use AcMarche\App\Filament\Resources\Signatures\Pages\ViewSignature;
-use AcMarche\App\Filament\Resources\Signatures\Schemas\SignatureForm;
-use AcMarche\App\Filament\Resources\Signatures\Schemas\SignatureInfolist;
-use AcMarche\App\Filament\Resources\Signatures\Tables\SignatureTables;
-use AcMarche\App\Models\Signature;
+use AcMarche\MailingList\Filament\Resources\Signatures\Pages\CreateSignature;
+use AcMarche\MailingList\Filament\Resources\Signatures\Pages\EditSignature;
+use AcMarche\MailingList\Filament\Resources\Signatures\Pages\ListSignatures;
+use AcMarche\MailingList\Filament\Resources\Signatures\Pages\ViewSignature;
+use AcMarche\MailingList\Filament\Resources\Signatures\Schemas\SignatureForm;
+use AcMarche\MailingList\Filament\Resources\Signatures\Schemas\SignatureInfolist;
+use AcMarche\MailingList\Filament\Resources\Signatures\Tables\SignatureTables;
+use AcMarche\MailingList\Models\Signature;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -30,16 +30,19 @@ final class SignatureResource extends Resource
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-identification';
 
     #[Override]
+    protected static ?int $navigationSort = 4;
+
+    #[Override]
     protected static string|null|UnitEnum $navigationGroup = 'Mon profil';
 
     public static function getNavigationLabel(): string
     {
-        return 'Ma signature mail';
+        return 'Mes signatures mail';
     }
 
     public static function getModelLabel(): string
     {
-        return 'Signature mail';
+        return 'Signatures mail';
     }
 
     public static function getPluralModelLabel(): string

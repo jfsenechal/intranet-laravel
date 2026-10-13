@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Filament\Resources\Signatures\Pages;
+namespace AcMarche\MailingList\Filament\Resources\Signatures\Pages;
 
-use AcMarche\App\Filament\Resources\Signatures\SignatureResource;
+use AcMarche\MailingList\Filament\Resources\Signatures\SignatureResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;

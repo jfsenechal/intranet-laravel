@@ -18,7 +18,7 @@ final class ListAddressBooks extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Carnets d\'adresse';
+        return 'Carnets d\'adresses';
     }
 
     protected function getHeaderActions(): array

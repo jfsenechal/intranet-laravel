@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\App\Filament\Resources\Signatures\Schemas;
+namespace AcMarche\MailingList\Filament\Resources\Signatures\Schemas;
 
-use AcMarche\App\Models\Signature;
-use AcMarche\App\Services\SignatureHtmlGenerator;
+use AcMarche\MailingList\Models\Signature;
+use AcMarche\MailingList\Services\SignatureHtmlGenerator;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;

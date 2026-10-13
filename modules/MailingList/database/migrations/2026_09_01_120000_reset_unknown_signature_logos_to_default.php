@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-use AcMarche\App\Enums\SignatureEnum;
+use AcMarche\MailingList\Enums\SignatureEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    protected $connection = 'maria-mailing-list';
+
     /**
      * Renaming a case of SignatureEnum leaves rows holding a file name the enum no
      * longer knows, and the cast on Signature::$logo then throws on every read.

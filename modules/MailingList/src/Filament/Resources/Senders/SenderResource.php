@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Override;
+use UnitEnum;
 
 final class SenderResource extends Resource
 {
@@ -27,7 +28,10 @@ final class SenderResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPaperAirplane;
 
     #[Override]
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 3;
+
+    #[Override]
+    protected static string|null|UnitEnum $navigationGroup = 'Mon profil';
 
     #[Override]
     protected static ?string $navigationLabel = 'Expediteurs';
