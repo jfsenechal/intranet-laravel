@@ -6,7 +6,7 @@ paths:
 # Src Filament
 
 ## XLSX exports: read the function from active contracts, and use getTableQueryForExport()
-The `employees.job_title` column still exists in the database but is abandoned: half the rows are empty and the rest hold stale values. Every code reference to it was removed (the `Employee` model no longer declares it as fillable or in its docblock), so do not reintroduce `$employee->job_title` anywhere. An agent's function comes from `activeContracts->pluck('job_title')`, like the `active_functions` table column and `EmployeeDirectoryExport`.
+The `employees.job_title` column is not an agent's function: half the rows are empty and the rest hold stale values. Its only use is the free-text "Fonction" field of the `Candidat` tab in `EmployeeForm` (restored at the user's request on 2026-10-13), which `Employee::displayedFunctions()` merges with the requested functions for a candidate; do not read `$employee->job_title` anywhere else, and never for an agent. An agent's function comes from `activeContracts->pluck('job_title')`, like the `active_functions` table column and `EmployeeDirectoryExport`. Exception: a candidate (`StatusEnum::APPLICATION`) has no contract, so the `active_functions` column in `EmployeeTables` and `EmployeeExport` shows the requested functions instead, from `applications->pluck('jobFunction.name')`. Both call `Employee::displayedFunctions()`; reuse it rather than re-implementing the switch.
 
 `getFilteredTableQuery()` applies filters and search but NOT sorting, so an export built on it ignores the sort the user set on screen. Every Hrm list page now passes `getTableQueryForExport()`; keep it that way for new exports.
 

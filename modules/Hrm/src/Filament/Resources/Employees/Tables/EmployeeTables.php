@@ -31,6 +31,7 @@ final class EmployeeTables
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with([
                 'activeContracts.employer',
                 'activeContracts.direction',
+                'applications.jobFunction',
             ]))
             ->columns([
                 TextColumn::make('last_name')
@@ -45,11 +46,7 @@ final class EmployeeTables
                     ->limit(70),
                 TextColumn::make('active_functions')
                     ->label('Fonctions')
-                    ->state(fn (Employee $record): string => $record->activeContracts
-                        ->pluck('job_title')
-                        ->filter()
-                        ->unique()
-                        ->implode(', '))
+                    ->state(fn (Employee $record): string => $record->displayedFunctions())
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('active_employers')

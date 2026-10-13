@@ -189,6 +189,10 @@ final class EmployeeForm
                             ->icon('heroicon-o-identification')
                             ->columns(2)
                             ->schema([
+                                TextInput::make('job_title')
+                                    ->label('Fonction')
+                                    ->helperText('Ce champ est uniquement pour les candidats, pour les autres indiquez la fonction sur les contrats')
+                                    ->maxLength(255),
                                 Select::make('diploma_level')
                                     ->label('Niveau de diplôme')
                                     ->options(ListOptions::getNiveauxDiplomes()),

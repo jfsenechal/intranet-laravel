@@ -15,10 +15,12 @@ use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\AbsencesRelationM
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\TrainingsRelationManager;
 use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
+use AcMarche\Hrm\Models\Application;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\ContractNature;
 use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\Hrm\Models\JobFunction;
 use AcMarche\Hrm\Models\Prerequisite;
 use AcMarche\Hrm\Models\Service;
 use AcMarche\Hrm\Models\Training;
@@ -205,6 +207,24 @@ describe('crud operations', function (): void {
             'emergency_contact' => 'Jane Doe - 0470 12 34 56',
         ]);
     });
+
+    it('can save the function of a candidate', function (): void {
+        $record = Employee::factory()->create(['status' => StatusEnum::APPLICATION]);
+
+        Livewire::test(EditEmployee::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'job_title' => 'Aide-soignante',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(Employee::class, [
+            'id' => $record->id,
+            'job_title' => 'Aide-soignante',
+        ]);
+    });
 });
 
 describe('form validation', function (): void {
@@ -311,6 +331,38 @@ describe('table', function (): void {
             ->filterTable('employer_id', $employer->id)
             ->assertCanSeeTableRecords([$stillThere])
             ->assertCanNotSeeTableRecords([$movedAway]);
+    });
+
+    it('shows the requested functions of a candidate in the functions column', function (): void {
+        $candidate = Employee::factory()->create(['status' => StatusEnum::APPLICATION]);
+        $nurse = JobFunction::factory()->create(['name' => 'Aide-soignant']);
+        $childcare = JobFunction::factory()->create(['name' => 'Puériculteur']);
+        Application::factory()->for($candidate)->create(['job_function_id' => $nurse->id]);
+        Application::factory()->for($candidate)->create(['job_function_id' => $nurse->id]);
+        Application::factory()->for($candidate)->create(['job_function_id' => $childcare->id]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('status', StatusEnum::APPLICATION->value)
+            ->assertTableColumnStateSet('active_functions', 'Aide-soignant, Puériculteur', $candidate);
+    });
+
+    it('shows the active contract functions of an agent, not the requested ones', function (): void {
+        $agent = Employee::factory()->create(['status' => StatusEnum::AGENT]);
+        Contract::factory()->for($agent)->create([
+            'job_title' => 'Educatrice',
+            'is_closed' => false,
+            'start_date' => now()->subMonth(),
+            'end_date' => null,
+        ]);
+        Application::factory()->for($agent)->create([
+            'job_function_id' => JobFunction::factory()->create(['name' => 'Cuisinier'])->id,
+        ]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('status', StatusEnum::AGENT->value)
+            ->assertTableColumnStateSet('active_functions', 'Educatrice', $agent);
     });
 });
 
@@ -825,6 +877,65 @@ describe('export xlsx action', function (): void {
         $export = new EmployeeExport(Employee::query(), ['active_functions']);
 
         expect($export->map($record->fresh()))->toBe(['Cuisiniere, Aide-soignante']);
+    });
+
+    it('exports the requested functions of a candidate', function (): void {
+        $candidate = Employee::factory()->create(['status' => StatusEnum::APPLICATION]);
+        $nurse = JobFunction::factory()->create(['name' => 'Aide-soignant']);
+        Application::factory()->for($candidate)->create(['job_function_id' => $nurse->id]);
+        Application::factory()->for($candidate)->create(['job_function_id' => $nurse->id]);
+        Application::factory()->for($candidate)->create([
+            'job_function_id' => JobFunction::factory()->create(['name' => 'Puériculteur'])->id,
+        ]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->map($candidate->fresh()))->toBe(['Aide-soignant, Puériculteur']);
+    });
+
+    it('exports the function typed on the candidate tab when no application names one', function (): void {
+        $withoutApplication = Employee::factory()->create([
+            'status' => StatusEnum::APPLICATION,
+            'job_title' => 'Ouvrier polyvalent',
+        ]);
+        $withUnnamedApplication = Employee::factory()->create([
+            'status' => StatusEnum::APPLICATION,
+            'job_title' => 'Cuisinier',
+        ]);
+        Application::factory()->for($withUnnamedApplication)->create(['job_function_id' => null]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->map($withoutApplication->fresh()))->toBe(['Ouvrier polyvalent'])
+            ->and($export->map($withUnnamedApplication->fresh()))->toBe(['Cuisinier']);
+    });
+
+    it('merges the requested functions with the one typed on the candidate tab', function (): void {
+        $candidate = Employee::factory()->create([
+            'status' => StatusEnum::APPLICATION,
+            'job_title' => 'Chauffeur',
+        ]);
+        Application::factory()->for($candidate)->create([
+            'job_function_id' => JobFunction::factory()->create(['name' => 'Ouvrier'])->id,
+        ]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->map($candidate->fresh()))->toBe(['Ouvrier, Chauffeur']);
+    });
+
+    it('lists a typed function only once when it matches a requested one', function (): void {
+        $candidate = Employee::factory()->create([
+            'status' => StatusEnum::APPLICATION,
+            'job_title' => 'Aide-soignant',
+        ]);
+        Application::factory()->for($candidate)->create([
+            'job_function_id' => JobFunction::factory()->create(['name' => 'Aide-soignant'])->id,
+        ]);
+
+        $export = new EmployeeExport(Employee::query(), ['active_functions']);
+
+        expect($export->map($candidate->fresh()))->toBe(['Aide-soignant']);
     });
 
     it('exports the rows in the order the table is sorted', function (): void {

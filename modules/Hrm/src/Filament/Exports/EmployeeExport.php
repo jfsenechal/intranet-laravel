@@ -77,8 +77,8 @@ final readonly class EmployeeExport
     }
 
     /**
-     * The function column is read from the active contracts, so they are eager
-     * loaded here. The primary key is appended to the sort to keep the chunks
+     * The function column is read from the active contracts, or from the
+     * applications for a candidate, so both are eager loaded here. The primary key is appended to the sort to keep the chunks
      * `lazy()` walks deterministic: the table sorts on `last_name`, which is
      * not unique, and ties would otherwise let rows repeat or vanish between
      * two pages.
@@ -88,7 +88,7 @@ final readonly class EmployeeExport
     private function rowsQuery(): Builder
     {
         return (clone $this->query)
-            ->with('activeContracts')
+            ->with(['activeContracts', 'applications.jobFunction'])
             ->orderBy(new Employee()->getQualifiedKeyName());
     }
 
@@ -114,11 +114,7 @@ final readonly class EmployeeExport
             'last_name' => $row->last_name,
             'first_name' => $row->first_name,
             'birth_date' => $row->birth_date?->format('d/m/Y'),
-            'active_functions' => $row->activeContracts
-                ->pluck('job_title')
-                ->filter()
-                ->unique()
-                ->implode(', '),
+            'active_functions' => $row->displayedFunctions(),
             'status' => $row->status?->getLabel(),
             'hired_at' => $row->hired_at?->format('d/m/Y'),
             'private_email' => $row->private_email,
