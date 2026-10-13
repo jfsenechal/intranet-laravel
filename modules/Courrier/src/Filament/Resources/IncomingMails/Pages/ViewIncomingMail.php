@@ -49,6 +49,4 @@ final class ViewIncomingMail extends ViewRecord
                 ->icon('tabler-trash'),
         ];
     }
-
-
 }

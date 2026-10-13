@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\EmailManagement\Filament\Actions;
 
 use AcMarche\EmailManagement\Ldap\EmployeHandler;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use LdapRecord\LdapRecordException;
 
-class SyncFromLdapAction
+final class SyncFromLdapAction
 {
     public static function make(): Action
     {
@@ -29,7 +32,7 @@ class SyncFromLdapAction
                         ->title("{$count} employés synchronisés")
                         ->success()
                         ->send();
-                } catch (\Exception|LdapRecordException $e) {
+                } catch (Exception|LdapRecordException $e) {
                     Notification::make()
                         ->title('Erreur de synchronisation')
                         ->body($e->getMessage())

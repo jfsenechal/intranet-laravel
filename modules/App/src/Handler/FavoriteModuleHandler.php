@@ -52,13 +52,13 @@ final class FavoriteModuleHandler
     public static function favoriteIds(?User $user = null): array
     {
         $user ??= auth()->user();
-        if (!$user instanceof User) {
+        if (! $user instanceof User) {
             return [];
         }
 
         return $user->favoriteModules()
             ->pluck('modules.id')
-            ->map(fn(int $id): int => $id)
+            ->map(fn (int $id): int => $id)
             ->all();
     }
 }

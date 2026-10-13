@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AcMarche\EmailManagement\Filament\Actions;
 
 use AcMarche\EmailManagement\Models\Employe;
@@ -10,7 +12,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 
-class ViewLdapAction
+final class ViewLdapAction
 {
     public static function make(Model|Employe $record): Action
     {
@@ -24,7 +26,7 @@ class ViewLdapAction
             ->schema(function (EmployeLdapRepository $ldapEmployeRepository) use ($record): array {
                 $ldapEntry = $ldapEmployeRepository->getEntry($record->samaccountname);
 
-                if (!$ldapEntry) {
+                if (! $ldapEntry) {
                     return [
                         TextEntry::make('error')
                             ->label('Erreur')

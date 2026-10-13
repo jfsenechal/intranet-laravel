@@ -46,7 +46,7 @@ final class WelcomeMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         $this->logo = public_path('images/Marche_logo.png');
-        if (!file_exists($this->logo)) {
+        if (! file_exists($this->logo)) {
             $this->logo = null;
         }
 

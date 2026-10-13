@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Ldap;
 
+use Exception;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\ActiveDirectory\User;
 
@@ -19,7 +20,7 @@ final class EmployeLdap extends User
 {
     protected ?string $connection = 'default';
 
-    public static function describe(\Exception|LdapRecordException $e): string
+    public static function describe(Exception|LdapRecordException $e): string
     {
         $error = $e->getMessage();
 

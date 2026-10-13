@@ -65,7 +65,7 @@ final class SenderInfolist
                                 ->placeholder('—'),
                             IconEntry::make('smtp_password')
                                 ->label('Mot de passe SMTP')
-                                ->state(fn($record): bool => filled($record->smtp_password))
+                                ->state(fn ($record): bool => filled($record->smtp_password))
                                 ->boolean()
                                 ->trueIcon('heroicon-o-lock-closed')
                                 ->falseIcon('heroicon-o-lock-open')

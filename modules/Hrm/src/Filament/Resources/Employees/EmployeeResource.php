@@ -46,15 +46,15 @@ final class EmployeeResource extends Resource
     #[Override]
     protected static ?int $navigationSort = 1;
 
+    #[Override]
+    protected static ?string $recordTitleAttribute = 'last_name';
+
     public static function getNavigationUrl(): string
     {
         return ListEmployees::getUrl(parameters: [
             'filters' => ['status' => ['value' => StatusEnum::AGENT->value]],
         ]);
     }
-
-    #[Override]
-    protected static ?string $recordTitleAttribute = 'last_name';
 
     public static function getNavigationIcon(): string
     {
