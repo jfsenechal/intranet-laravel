@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use AcMarche\MailingList\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\EditContact;
 use AcMarche\MailingList\Filament\Resources\Contacts\Pages\ListContacts;
 use AcMarche\MailingList\Models\Contact;
+use App\Models\User;
 use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
@@ -93,4 +95,12 @@ it('sorts the contacts by last name by default', function () {
     livewire(ListContacts::class)
         ->loadTable()
         ->assertCanSeeTableRecords([$dupont, $martin], inOrder: true);
+});
+
+it('suggests the email addresses of the users on the email field', function () {
+    $user = User::factory()->create(['email' => 'colleague@marche.be']);
+
+    livewire(CreateContact::class)
+        ->assertOk()
+        ->assertSeeHtml('<option value="'.$user->email.'"');
 });

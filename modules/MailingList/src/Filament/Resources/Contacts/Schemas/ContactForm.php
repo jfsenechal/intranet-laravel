@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Filament\Resources\Contacts\Schemas;
 
 use AcMarche\MailingList\Models\Contact;
+use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
@@ -39,6 +40,12 @@ final class ContactForm
                 ->maxLength(255),
             TextInput::make('email')
                 ->email()
+                ->datalist(fn (): array => User::query()
+                    ->whereNotNull('email')
+                    ->orderBy('email')
+                    ->distinct()
+                    ->pluck('email')
+                    ->all())
                 ->unique(
                     ignoreRecord: true,
                     modifyRuleUsing: fn (Unique $rule, ?Contact $record): Unique => $rule->where(
