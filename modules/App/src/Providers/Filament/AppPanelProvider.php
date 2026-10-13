@@ -7,15 +7,18 @@ namespace AcMarche\App\Providers\Filament;
 use AcMarche\App\Filament\Pages\Auth\EditProfile;
 use AcMarche\App\Traits\HooksTrait;
 use AcMarche\App\Traits\PluginTrait;
+use AcMarche\MailingList\Filament\Resources\Signatures\SignatureResource;
 use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -57,6 +60,14 @@ final class AppPanelProvider extends PanelProvider
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\App\\Filament\\Widgets')
             ->widgets([
 
+            ])
+            ->navigationItems([
+                NavigationItem::make('signatures')
+                    ->label('Mes signatures mail')
+                    ->icon(Heroicon::OutlinedIdentification)
+                    ->group('Mon profil')
+                    ->sort(4)
+                    ->url(fn (): string => SignatureResource::getUrl('index', panel: 'mailing-list-panel')),
             ])
             ->middleware([
                 EncryptCookies::class,

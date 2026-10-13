@@ -7,6 +7,7 @@ use AcMarche\Document\Models\Document;
 use AcMarche\Hrm\Enums\StatusEnum;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Employee;
+use AcMarche\MailingList\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\News\Models\News;
 use AcMarche\WhoIsWho\Filament\Pages\Index as WhoIsWhoIndex;
 use AcMarche\WhoIsWho\Filament\Resources\Employees\EmployeeResource;
@@ -86,4 +87,13 @@ it('invites the user to pick favorite agents when there is none', function (): v
         ->assertOk()
         ->assertSee('Aucun collègue en favori', escape: false)
         ->assertSeeHtml(WhoIsWhoIndex::getUrl(panel: 'who-is-who-panel'));
+});
+
+it('links to the user signatures of the mailing list panel from the navigation', function (): void {
+    $signaturesItem = collect(Filament::getPanel('app-panel')->getNavigationItems())
+        ->first(fn ($item): bool => $item->getLabel() === 'Mes signatures mail');
+
+    expect($signaturesItem)->not->toBeNull()
+        ->and($signaturesItem->getGroup())->toBe('Mon profil')
+        ->and($signaturesItem->getUrl())->toBe(SignatureResource::getUrl('index', panel: 'mailing-list-panel'));
 });
