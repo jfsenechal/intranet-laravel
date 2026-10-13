@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\MailingList\Enums\SignatureEnum;
 use AcMarche\MailingList\Models\Signature;
-use AcMarche\MailingList\Services\SignatureHtmlGenerator;
+use AcMarche\MailingList\Services\SignatureHtmlService;
 
 function signatureWithLogo(?SignatureEnum $logo): Signature
 {
@@ -20,7 +20,7 @@ function signatureWithLogo(?SignatureEnum $logo): Signature
 }
 
 it('points the logo to the remote marche.be url', function (): void {
-    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+    $html = SignatureHtmlService::generate(signatureWithLogo(SignatureEnum::CPAS));
 
     expect($html)
         ->toContain('src="https://www.marche.be/logo/cpas.jpg"')
@@ -30,19 +30,19 @@ it('points the logo to the remote marche.be url', function (): void {
 it('honours a configured logo base url without a trailing slash', function (): void {
     config()->set('app.signature.logo_base_url', 'https://cdn.example.test/logos');
 
-    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::ADL));
+    $html = SignatureHtmlService::generate(signatureWithLogo(SignatureEnum::ADL));
 
     expect($html)->toContain('src="https://cdn.example.test/logos/adl.png"');
 });
 
 it('omits the image when the signature has no logo', function (): void {
-    $html = SignatureHtmlGenerator::generate(signatureWithLogo(null));
+    $html = SignatureHtmlService::generate(signatureWithLogo(null));
 
     expect($html)->not->toContain('https://www.marche.be/logo/');
 });
 
 it('renders a disclaimer link below the logo', function (): void {
-    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+    $html = SignatureHtmlService::generate(signatureWithLogo(SignatureEnum::CPAS));
 
     expect($html)
         ->toContain('href="https://www.marche.be/disclaimer/"')
@@ -52,7 +52,7 @@ it('renders a disclaimer link below the logo', function (): void {
 });
 
 it('renders the signature with the Century Gothic font stack', function (): void {
-    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+    $html = SignatureHtmlService::generate(signatureWithLogo(SignatureEnum::CPAS));
 
     expect($html)
         ->toContain("font-family: 'Century Gothic', CenturyGothic, 'Apple Gothic', 'URW Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif")
@@ -63,13 +63,13 @@ it('renders the service email next to the personal email', function (): void {
     $signature = signatureWithLogo(SignatureEnum::CPAS);
     $signature->email_service = 'gabrielles@cpas.marche.be';
 
-    $html = SignatureHtmlGenerator::generate($signature);
+    $html = SignatureHtmlService::generate($signature);
 
     expect($html)->toContain('mailto:gabrielles@cpas.marche.be');
 });
 
 it('omits the service email when it is not encoded', function (): void {
-    $html = SignatureHtmlGenerator::generate(signatureWithLogo(SignatureEnum::CPAS));
+    $html = SignatureHtmlService::generate(signatureWithLogo(SignatureEnum::CPAS));
 
     expect($html)
         ->toContain('mailto:catherine.boldo@cpas.marche.be')

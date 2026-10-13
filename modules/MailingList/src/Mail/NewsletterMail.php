@@ -6,6 +6,8 @@ namespace AcMarche\MailingList\Mail;
 
 use AcMarche\MailingList\Models\Email;
 use AcMarche\MailingList\Models\EmailRecipient;
+use AcMarche\MailingList\Models\Signature;
+use AcMarche\MailingList\Services\SignatureHtmlService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -35,11 +37,16 @@ final class NewsletterMail extends Mailable
 
     public function content(): Content
     {
+        $signature = $this->email->sender->signature;
+
         return new Content(
             view: 'mailing-list::emails.newsletter',
             with: [
                 'body' => $this->email->body,
                 'recipientName' => $this->recipient->name ?? '',
+                'signature' => $signature instanceof Signature
+                    ? SignatureHtmlService::generate($signature)
+                    : null,
                 'footer' => $this->email->sender->footer,
                 'logoUrl' => $this->email->sender->logo
                     ? asset('storage/'.$this->email->sender->logo)

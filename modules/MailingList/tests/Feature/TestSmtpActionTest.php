@@ -5,9 +5,14 @@ declare(strict_types=1);
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\ViewSender;
 use AcMarche\MailingList\Models\Sender;
 use Filament\Actions\Testing\TestAction;
+use Filament\Facades\Filament;
 use Illuminate\Mail\Mailer;
 
 use function Pest\Livewire\livewire;
+
+beforeEach(function (): void {
+    Filament::setCurrentPanel(Filament::getPanel('mailing-list-panel'));
+});
 
 it('shows the test SMTP action in the configuration section', function (): void {
     $sender = Sender::factory()->create(['username' => auth()->user()->username]);

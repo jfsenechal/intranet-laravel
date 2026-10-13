@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Mail;
 
 #[UseFactory(SenderFactory::class)]
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Mail;
     'name',
     'email',
     'footer',
+    'signature_id',
     'logo',
     'smtp_host',
     'smtp_port',
@@ -36,6 +38,14 @@ final class Sender extends Model
 
     /** @use HasFactory<SenderFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<Signature, $this>
+     */
+    public function signature(): BelongsTo
+    {
+        return $this->belongsTo(Signature::class);
+    }
 
     public function hasSmtpSettings(): bool
     {

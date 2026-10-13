@@ -7,7 +7,7 @@ namespace AcMarche\MailingList\Services;
 use AcMarche\MailingList\Models\Signature;
 use Illuminate\Support\Facades\View;
 
-final class SignatureHtmlGenerator
+final class SignatureHtmlService
 {
     public static function generate(Signature $signature): string
     {

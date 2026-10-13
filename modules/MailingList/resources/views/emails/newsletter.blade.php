@@ -63,6 +63,11 @@
         <div class="email-body">
             {!! $body !!}
         </div>
+        @if(!empty($signature))
+            <div class="email-signature">
+                {!! $signature !!}
+            </div>
+        @endif
         <div class="email-footer">
             @if(!empty($footer))
                 {!! $footer !!}

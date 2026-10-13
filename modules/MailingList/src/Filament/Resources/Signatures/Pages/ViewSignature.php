@@ -6,7 +6,7 @@ namespace AcMarche\MailingList\Filament\Resources\Signatures\Pages;
 
 use AcMarche\MailingList\Filament\Resources\Signatures\SignatureResource;
 use AcMarche\MailingList\Models\Signature;
-use AcMarche\MailingList\Services\SignatureHtmlGenerator;
+use AcMarche\MailingList\Services\SignatureHtmlService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -35,7 +35,7 @@ final class ViewSignature extends ViewRecord
                 ->icon(Heroicon::ArrowDownTray)
                 ->color('success')
                 ->action(function (Signature $record): StreamedResponse {
-                    $html = SignatureHtmlGenerator::generate($record);
+                    $html = SignatureHtmlService::generate($record);
 
                     return response()->streamDownload(
                         function () use ($html): void {
@@ -50,7 +50,7 @@ final class ViewSignature extends ViewRecord
                 ->icon(Heroicon::ClipboardDocument)
                 ->color('primary')
                 ->alpineClickHandler(function (Signature $record): string {
-                    $html = Js::from(SignatureHtmlGenerator::generate($record));
+                    $html = Js::from(SignatureHtmlService::generate($record));
                     $successTitle = Js::from('Signature copiée dans le presse-papiers');
                     $failureTitle = Js::from('Impossible de copier la signature');
 

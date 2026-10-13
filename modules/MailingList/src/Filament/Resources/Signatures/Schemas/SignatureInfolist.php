@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Filament\Resources\Signatures\Schemas;
 
 use AcMarche\MailingList\Models\Signature;
-use AcMarche\MailingList\Services\SignatureHtmlGenerator;
+use AcMarche\MailingList\Services\SignatureHtmlService;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
@@ -23,7 +23,7 @@ final class SignatureInfolist
                         TextEntry::make('preview')
                             ->hiddenLabel()
                             ->html()
-                            ->state(fn (Signature $record): string => SignatureHtmlGenerator::generate($record)),
+                            ->state(fn (Signature $record): string => SignatureHtmlService::generate($record)),
                     ]),
                 Fieldset::make('Identité')
                     ->columns(2)

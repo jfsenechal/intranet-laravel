@@ -6,6 +6,7 @@ use AcMarche\MailingList\Filament\Resources\Senders\Pages\CreateSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\EditSender;
 use AcMarche\MailingList\Filament\Resources\Senders\Pages\ViewSender;
 use AcMarche\MailingList\Models\Sender;
+use AcMarche\MailingList\Models\Signature;
 use App\Models\User;
 use Filament\Facades\Filament;
 
@@ -140,4 +141,59 @@ it('does not prefill the create form when the user already has a sender', functi
             'name' => null,
             'email' => null,
         ]);
+});
+
+function makeSignatureFor(string $username): Signature
+{
+    return Signature::create([
+        'username' => $username,
+        'first_name' => 'Catherine',
+        'last_name' => 'Boldo',
+        'address' => 'Boulevard du Midi 20',
+        'postal_code' => '6900',
+        'city' => 'Marche-en-Famenne',
+        'email' => 'catherine.boldo@cpas.marche.be',
+    ]);
+}
+
+it('attaches one of the user signatures to a sender', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+    $signature = makeSignatureFor(auth()->user()->username);
+
+    livewire(EditSender::class, ['record' => $sender->id])
+        ->fillForm(['signature_id' => $signature->id])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($sender->refresh()->signature_id)->toBe($signature->id);
+});
+
+it('detaches the signature from a sender', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+        'signature_id' => makeSignatureFor(auth()->user()->username)->id,
+    ]);
+
+    livewire(EditSender::class, ['record' => $sender->id])
+        ->fillForm(['signature_id' => null])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($sender->refresh()->signature_id)->toBeNull();
+});
+
+it('rejects a signature owned by another user', function () {
+    $sender = Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+    $foreignSignature = makeSignatureFor(User::factory()->create()->username);
+
+    livewire(EditSender::class, ['record' => $sender->id])
+        ->fillForm(['signature_id' => $foreignSignature->id])
+        ->call('save')
+        ->assertHasFormErrors(['signature_id']);
+
+    expect($sender->refresh()->signature_id)->toBeNull();
 });

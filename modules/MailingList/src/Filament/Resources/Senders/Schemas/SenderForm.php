@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace AcMarche\MailingList\Filament\Resources\Senders\Schemas;
 
+use AcMarche\MailingList\Models\Signature;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 final class SenderForm
 {
@@ -47,6 +50,21 @@ final class SenderForm
                 RichEditor::make('footer')
                     ->label('Pied de page')
                     ->helperText('Il sera affiché dans le pied page.')
+                    ->columnSpanFull(),
+                Select::make('signature_id')
+                    ->label('Signature')
+                    ->helperText('Ajoutée sous le contenu de chaque mail envoyé par cet expéditeur.')
+                    ->relationship(
+                        'signature',
+                        'email',
+                        modifyQueryUsing: fn (Builder $query): Builder => $query->where('username', auth()->user()?->username),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn (Signature $record): string => collect([
+                        $record->first_name.' '.$record->last_name,
+                        $record->service,
+                        $record->email,
+                    ])->filter()->implode(' - '))
+                    ->placeholder('Aucune signature')
                     ->columnSpanFull(),
                 Section::make('Configuration SMTP')
                     ->description('Paramètres SMTP propres à cet expéditeur. Si vides, la configuration globale de l\'application est utilisée.')
