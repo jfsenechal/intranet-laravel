@@ -49,10 +49,9 @@ final class TripForm
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make('Si déplacement externe')
+                Section::make('Si vous avez quitté la zone 6900')
                     ->icon('heroicon-o-exclamation-triangle')
-                    ->iconColor('warning')
-                    ->description('Si vous avez quitté la zone 6900')
+                    ->iconColor('danger')
                     ->schema([
                         TextInput::make('departure_location')
                             ->label('Lieu de départ')
@@ -68,14 +67,6 @@ final class TripForm
                             ->live(onBlur: true)
                             ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
                             ->requiredWith('departure_location,arrival_date'),
-                        DateTimePicker::make('arrival_date')
-                            ->label('Date/heure de retour')
-                            ->seconds(false)
-                            ->live(onBlur: true)
-                            // Stored verbatim like departure_date, see above.
-                            ->timezone(config('app.timezone'))
-                            ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
-                            ->requiredWith('departure_location,arrival_location'),
                         TextInput::make('meal_expense')
                             ->label('Frais de repas')
                             ->helperText('Max 12,30 euros')
