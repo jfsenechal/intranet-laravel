@@ -46,6 +46,8 @@ it('hides the unsubscribe toggle when the feature is turned off', function () {
         'username' => auth()->user()->username,
     ]);
 
+    config(['mailing-list.unsubscribe.enabled' => true]);
+
     livewire(CreateEmail::class)
         ->assertFormFieldVisible('unsubscribe_enabled');
 

@@ -144,6 +144,10 @@ final class MailerHandler
             ]);
         }
 
-        $email->update(['total_count' => $contacts->count()]);
+        $email->update([
+            'address_book_ids' => array_values($addressBookIds),
+            'contact_ids' => array_values($contactIds),
+            'total_count' => $contacts->count(),
+        ]);
     }
 }

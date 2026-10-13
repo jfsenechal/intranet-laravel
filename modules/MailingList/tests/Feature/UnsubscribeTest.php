@@ -35,6 +35,8 @@ function emailForCurrentUser(array $attributes = []): Email
 }
 
 it('includes an unsubscribe link in the email when enabled', function () {
+    config(['mailing-list.unsubscribe.enabled' => true]);
+
     $email = emailForCurrentUser(['unsubscribe_enabled' => true]);
     $recipient = EmailRecipient::factory()->for($email)->create();
 
@@ -44,6 +46,8 @@ it('includes an unsubscribe link in the email when enabled', function () {
 });
 
 it('omits the unsubscribe link when disabled', function () {
+    config(['mailing-list.unsubscribe.enabled' => true]);
+
     $email = emailForCurrentUser(['unsubscribe_enabled' => false]);
     $recipient = EmailRecipient::factory()->for($email)->create();
 
@@ -116,6 +120,8 @@ it('omits the unsubscribe link and headers when the feature is turned off', func
 });
 
 it('drops the unsubscribe column from the contact export when the feature is turned off', function () {
+    config(['mailing-list.unsubscribe.enabled' => true]);
+
     expect(ContactExport::columns())->toHaveKey('unsubscribed_at');
 
     config(['mailing-list.unsubscribe.enabled' => false]);

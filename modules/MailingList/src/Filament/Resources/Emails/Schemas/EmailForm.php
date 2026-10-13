@@ -68,8 +68,7 @@ final class EmailForm
                         ->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
-                    ->columnSpanFull()
-                    ->dehydrated(false),
+                    ->columnSpanFull(),
                 Select::make('contact_ids')
                     ->label('Contacts individuels')
                     ->helperText('Envoyer aux contacts suivants')
@@ -82,8 +81,7 @@ final class EmailForm
                         ]))
                     ->searchable()
                     ->preload()
-                    ->columnSpanFull()
-                    ->dehydrated(false),
+                    ->columnSpanFull(),
             ]);
     }
 }

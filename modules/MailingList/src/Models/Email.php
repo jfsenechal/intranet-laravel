@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'subject',
     'body',
     'attachments',
+    'address_book_ids',
+    'contact_ids',
     'status',
     'unsubscribe_enabled',
     'batch_id',
@@ -78,6 +80,8 @@ final class Email extends Model
     {
         return [
             'attachments' => 'array',
+            'address_book_ids' => 'array',
+            'contact_ids' => 'array',
             'status' => EmailStatus::class,
             'unsubscribe_enabled' => 'boolean',
         ];

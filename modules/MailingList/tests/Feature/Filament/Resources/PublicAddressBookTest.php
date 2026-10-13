@@ -109,6 +109,22 @@ it('keeps the public address book selected when editing a draft', function () {
         ->assertSet('data.address_book_ids', [$addressBook->id]);
 });
 
+it('keeps only the selected address book and contacts when editing a draft', function () {
+    $selectedAddressBook = AddressBook::factory()->public()->create(['username' => 'someone-else']);
+    $otherAddressBook = AddressBook::factory()->public()->create(['username' => 'someone-else']);
+    $sharedContact = Contact::factory()->create(['username' => 'someone-else']);
+    $selectedAddressBook->contacts()->attach($sharedContact);
+    $otherAddressBook->contacts()->attach($sharedContact);
+    $ownContact = Contact::factory()->create(['username' => auth()->user()->username]);
+
+    $email = Email::factory()->create(['username' => auth()->user()->username]);
+    MailerHandler::syncRecipients($email, [$selectedAddressBook->id], [$ownContact->id]);
+
+    livewire(EditEmail::class, ['record' => $email->id])
+        ->assertSet('data.address_book_ids', [$selectedAddressBook->id])
+        ->assertSet('data.contact_ids', [$ownContact->id]);
+});
+
 it('makes a shared address book read-only for the users it is shared with', function () {
     $addressBook = AddressBook::factory()->create(['username' => 'someone-else']);
     AddressBookShare::query()->create([
