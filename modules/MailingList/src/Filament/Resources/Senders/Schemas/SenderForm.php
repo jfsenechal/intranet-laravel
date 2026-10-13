@@ -36,7 +36,7 @@ final class SenderForm
                         ->rules(['regex:/^.+@(marche\.be|ac\.marche\.be|cpas\.marche\.be)$/i']),
                     FileUpload::make('logo')
                         ->label('Logo')
-                        ->helperText('Le logo sera joint au mail')
+                        ->helperText('Le logo sera placé en-entête de l\'e-mail')
                         ->image()
                         ->disk('public')
                         ->directory(config('mailing-list.uploads.senders_logos'))
