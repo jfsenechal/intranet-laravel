@@ -6,6 +6,7 @@ namespace AcMarche\MailingList\Filament\Resources\Emails\Schemas;
 
 use AcMarche\MailingList\Models\AddressBook;
 use AcMarche\MailingList\Models\Contact;
+use AcMarche\MailingList\Models\Email;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
@@ -47,6 +48,7 @@ final class EmailForm
                     ->label('Lien de désabonnement')
                     ->helperText('Ajoute un lien de désabonnement au bas de l\'e-mail.')
                     ->default(true)
+                    ->visible(Email::unsubscribeFeatureEnabled())
                     ->columnSpanFull(),
                 FileUpload::make('attachments')
                     ->label('Pièces jointes')

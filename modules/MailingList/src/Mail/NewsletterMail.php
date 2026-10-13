@@ -51,7 +51,7 @@ final class NewsletterMail extends Mailable
                 'logoUrl' => $this->email->sender->logo
                     ? asset('storage/'.$this->email->sender->logo)
                     : null,
-                'unsubscribeUrl' => $this->email->unsubscribe_enabled && $this->recipient->exists
+                'unsubscribeUrl' => $this->email->offersUnsubscribe() && $this->recipient->exists
                     ? $this->recipient->unsubscribeUrl()
                     : null,
             ],
@@ -60,7 +60,7 @@ final class NewsletterMail extends Mailable
 
     public function headers(): Headers
     {
-        if (! $this->email->unsubscribe_enabled || ! $this->recipient->exists) {
+        if (! $this->email->offersUnsubscribe() || ! $this->recipient->exists) {
             return new Headers();
         }
 

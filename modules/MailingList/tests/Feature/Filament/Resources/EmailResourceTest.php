@@ -40,3 +40,17 @@ it('renders the create page when the user has a sender', function () {
         ->assertOk()
         ->assertNoRedirect();
 });
+
+it('hides the unsubscribe toggle when the feature is turned off', function () {
+    Sender::factory()->create([
+        'username' => auth()->user()->username,
+    ]);
+
+    livewire(CreateEmail::class)
+        ->assertFormFieldVisible('unsubscribe_enabled');
+
+    config(['mailing-list.unsubscribe.enabled' => false]);
+
+    livewire(CreateEmail::class)
+        ->assertFormFieldHidden('unsubscribe_enabled');
+});

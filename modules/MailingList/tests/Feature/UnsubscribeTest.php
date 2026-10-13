@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\MailingList\Filament\Exports\ContactExport;
 use AcMarche\MailingList\Handler\MailerHandler;
 use AcMarche\MailingList\Mail\NewsletterMail;
 use AcMarche\MailingList\Models\AddressBook;
@@ -101,4 +102,23 @@ it('skips unsubscribed contacts when syncing recipients', function () {
 
     expect($email->recipients()->count())->toBe(1);
     expect($email->recipients()->first()->email_address)->toBe($subscribed->email);
+});
+
+it('omits the unsubscribe link and headers when the feature is turned off', function () {
+    config(['mailing-list.unsubscribe.enabled' => false]);
+
+    $email = emailForCurrentUser(['unsubscribe_enabled' => true]);
+    $recipient = EmailRecipient::factory()->for($email)->create();
+    $mailable = new NewsletterMail($email, $recipient);
+
+    expect($mailable->render())->not->toContain('Se désabonner')
+        ->and($mailable->headers()->text)->toBe([]);
+});
+
+it('drops the unsubscribe column from the contact export when the feature is turned off', function () {
+    expect(ContactExport::columns())->toHaveKey('unsubscribed_at');
+
+    config(['mailing-list.unsubscribe.enabled' => false]);
+
+    expect(ContactExport::columns())->not->toHaveKey('unsubscribed_at');
 });

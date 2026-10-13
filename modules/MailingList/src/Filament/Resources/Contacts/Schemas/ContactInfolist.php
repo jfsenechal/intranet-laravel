@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Filament\Resources\Contacts\Schemas;
 
 use AcMarche\MailingList\Models\Contact;
+use AcMarche\MailingList\Models\Email;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -46,7 +47,8 @@ final class ContactInfolist
                         TextEntry::make('unsubscribed_at')
                             ->label('Désinscrit le')
                             ->dateTime()
-                            ->placeholder('Abonné'),
+                            ->placeholder('Abonné')
+                            ->visible(Email::unsubscribeFeatureEnabled()),
                         TextEntry::make('username')
                             ->label('Propriétaire')
                             ->visible(fn (Contact $record): bool => $record->username !== auth()->user()?->username),

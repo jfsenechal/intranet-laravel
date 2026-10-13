@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\MailingList\Filament\Exports;
 
 use AcMarche\MailingList\Models\Contact;
+use AcMarche\MailingList\Models\Email;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Style;
@@ -24,7 +25,7 @@ final readonly class ContactExport
      */
     public static function columns(): array
     {
-        return [
+        $columns = [
             'last_name' => 'Nom',
             'first_name' => 'Prénom',
             'email' => 'Email',
@@ -36,6 +37,12 @@ final readonly class ContactExport
             'description' => 'Description',
             'unsubscribed_at' => 'Désinscrit le',
         ];
+
+        if (! Email::unsubscribeFeatureEnabled()) {
+            unset($columns['unsubscribed_at']);
+        }
+
+        return $columns;
     }
 
     /**

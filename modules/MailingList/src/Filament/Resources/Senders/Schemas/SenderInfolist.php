@@ -21,6 +21,16 @@ final class SenderInfolist
         return $schema
             ->components([
                 Flex::make([
+                    Section::make('Signature')
+                        ->schema([
+                            TextEntry::make('signature')
+                                ->hiddenLabel()
+                                ->state(fn (Sender $record): ?string => $record->signature
+                                    ? SignatureHtmlService::generate($record->signature)
+                                    : null)
+                                ->html()
+                                ->placeholder('Aucune signature'),
+                        ]),
                     Section::make('Pied de page')
                         ->schema([
                             TextEntry::make('footer')
@@ -49,17 +59,7 @@ final class SenderInfolist
                         ->grow(false),
                 ])->from('md')
                     ->columnSpanFull(),
-                Section::make('Signature')
-                    ->schema([
-                        TextEntry::make('signature')
-                            ->hiddenLabel()
-                            ->state(fn (Sender $record): ?string => $record->signature
-                                ? SignatureHtmlService::generate($record->signature)
-                                : null)
-                            ->html()
-                            ->placeholder('Aucune signature'),
-                    ])
-                    ->columnSpanFull(),
+
                 Section::make('Configuration SMTP')
                     ->key('smtpConfiguration')
                     ->afterHeader([

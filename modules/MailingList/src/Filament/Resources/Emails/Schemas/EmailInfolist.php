@@ -74,7 +74,8 @@ final class EmailInfolist
                                 ->label('Destinataires'),
                             IconEntry::make('unsubscribe_enabled')
                                 ->label('Lien de désabonnement')
-                                ->boolean(),
+                                ->boolean()
+                                ->visible(Email::unsubscribeFeatureEnabled()),
                         ])
                         ->grow(false),
                 ])->from('md')

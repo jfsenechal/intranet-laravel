@@ -40,6 +40,17 @@ final class Email extends Model
     use HasFactory;
 
     /**
+     * @return array<string, string>
+     */
+    /**
+     * Whether the unsubscribe feature is turned on for the whole application.
+     */
+    public static function unsubscribeFeatureEnabled(): bool
+    {
+        return (bool) config('mailing-list.unsubscribe.enabled');
+    }
+
+    /**
      * @return BelongsTo<Sender, $this>
      */
     public function sender(): BelongsTo
@@ -56,8 +67,13 @@ final class Email extends Model
     }
 
     /**
-     * @return array<string, string>
+     * Whether this email must carry an unsubscribe link and headers.
      */
+    public function offersUnsubscribe(): bool
+    {
+        return self::unsubscribeFeatureEnabled() && $this->unsubscribe_enabled;
+    }
+
     protected function casts(): array
     {
         return [
