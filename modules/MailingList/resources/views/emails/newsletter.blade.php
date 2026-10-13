@@ -33,12 +33,22 @@
             max-width: 100%;
             height: auto;
         }
+        .email-header {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .email-header td {
+            padding: 0;
+            vertical-align: middle;
+        }
         .email-logo {
-            text-align: center;
-            margin-bottom: 24px;
+            width: 96px;
+            padding-right: 16px !important;
         }
         .email-logo img {
-            max-width: 300px;
+            display: block;
+            width: 96px;
+            max-width: 96px;
             height: auto;
         }
         .email-footer {
@@ -63,11 +73,19 @@
 <body>
     <div class="email-container">
         @if(!empty($logoUrl))
-            <div class="email-logo">
-                <img src="{{ $logoUrl }}" alt="Logo">
-            </div>
-        @endif
-        @if(!empty($subject))
+            <table class="email-header" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <td class="email-logo" width="96" style="width: 96px; padding-right: 16px; vertical-align: middle;">
+                        <img src="{{ $logoUrl }}" alt="Logo" width="96" style="display: block; width: 96px; max-width: 96px; height: auto;">
+                    </td>
+                    @if(!empty($subject))
+                        <td style="vertical-align: middle;">
+                            <h1 class="email-title">{{ $subject }}</h1>
+                        </td>
+                    @endif
+                </tr>
+            </table>
+        @elseif(!empty($subject))
             <h1 class="email-title">{{ $subject }}</h1>
         @endif
         <div class="email-body">
