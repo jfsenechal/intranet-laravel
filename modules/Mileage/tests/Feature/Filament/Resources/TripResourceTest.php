@@ -132,7 +132,7 @@ it('validates the form data', function (array $data, array $errors): void {
     '`content` is required' => [['content' => null], ['content' => 'required']],
 ]);
 
-it('does not display the departure time inputs for an internal movement', function (array $data): void {
+it('never displays the departure time inputs', function (array $data): void {
     livewire(CreateTrip::class)
         ->fillForm($data)
         ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => ! $field->hasTime());
@@ -140,16 +140,8 @@ it('does not display the departure time inputs for an internal movement', functi
     'nothing filled' => [['departure_location' => null, 'arrival_location' => null]],
     'only departure_location' => [['departure_location' => 'Marche', 'arrival_location' => null]],
     'only arrival_location' => [['departure_location' => null, 'arrival_location' => 'Namur']],
+    'external movement' => [['departure_location' => 'Marche', 'arrival_location' => 'Namur']],
 ]);
-
-it('displays the departure time inputs for an external movement', function (): void {
-    livewire(CreateTrip::class)
-        ->fillForm([
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-        ])
-        ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => $field->hasTime());
-});
 
 it('requires both locations when one is filled', function (array $data, array $errors): void {
     $trip = Trip::factory()->make(['user_add' => 'jdupont']);
@@ -191,9 +183,9 @@ it('accepts the trip when both locations are filled', function (): void {
         ->assertNotified();
 });
 
-it('stores the departure of an external movement on the Belgian clock', function (): void {
+it('stores the departure day at 08h00 on the Belgian clock', function (): void {
     // The dates are a wall clock, not an instant: Filament's display timezone
-    // must not turn a departure typed at 00h00 on 08-09 into 07-09 22:00.
+    // must not move a departure encoded on 08-09 to the previous day.
     $trip = Trip::factory()->make(['user_add' => 'jdupont']);
 
     livewire(CreateTrip::class)
@@ -210,7 +202,7 @@ it('stores the departure of an external movement on the Belgian clock', function
 
     assertDatabaseHas(Trip::class, [
         'content' => $trip->content,
-        'departure_date' => '2026-09-08 00:00:00',
+        'departure_date' => '2026-09-08 08:00:00',
     ]);
 });
 

@@ -8,8 +8,8 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 
 final class TripForm
 {
@@ -28,11 +28,12 @@ final class TripForm
                             ->label('Date du déplacement')
                             ->helperText('')
                             ->date()
+                            ->time(false)
                             ->seconds(false)
-                            // The hour and minute are only relevant for external movements,
-                            // so display the time inputs when both external locations are filled.
-                            ->time(fn (Get $get): bool => filled($get('departure_location'))
-                                && filled($get('arrival_location')))
+                            // Only the day is encoded: store it at 08h00 rather than midnight.
+                            ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
+                                ? Carbon::parse($state)->setTime(8, 0)->format('Y-m-d H:i:s')
+                                : null)
                             // A trip date is a Belgian wall clock, not an instant: it is stored
                             // and read back verbatim, so the picker must not convert it.
                             ->timezone(config('app.timezone'))
