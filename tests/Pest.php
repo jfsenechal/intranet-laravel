@@ -53,6 +53,7 @@ uses(
     '../modules/Offenses/tests/Feature',
     '../modules/Issep/tests/Feature',
     '../modules/Issep/tests/Unit',
+    '../modules/KnowledgeBase/tests/Feature',
 );
 
 uses(

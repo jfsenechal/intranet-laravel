@@ -53,6 +53,9 @@
         <testsuite name="Note">
             <directory>modules/Note/tests</directory>
         </testsuite>
+        <testsuite name="KnowledgeBase">
+            <directory>modules/KnowledgeBase/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

@@ -107,3 +107,22 @@
         display: none;
     }
 }
+
+/*
+ * Knowledge base: Phiki renders the dark theme into CSS variables. Filament
+ * toggles dark mode with a `.dark` class, not with prefers-color-scheme.
+ */
+.dark .phiki,
+.dark .phiki span {
+    color: var(--phiki-dark-color) !important;
+    background-color: var(--phiki-dark-background-color) !important;
+    font-style: var(--phiki-dark-font-style) !important;
+    font-weight: var(--phiki-dark-font-weight) !important;
+    text-decoration: var(--phiki-dark-text-decoration) !important;
+}
+
+.fi-prose pre.phiki {
+    overflow-x: auto;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
