@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use Override;
 
 /**
  * @property int $id
@@ -321,6 +322,16 @@ final class Employee extends Model
             ->implode(', ');
     }
 
+    /**
+     * Runs the deleting hook, which removes the related records, and the
+     * delete of the employee itself in a single transaction.
+     */
+    #[Override]
+    public function delete(): ?bool
+    {
+        return $this->getConnection()->transaction(fn (): ?bool => parent::delete());
+    }
+
     protected static function booted(): void
     {
         self::bootHasUser();
@@ -339,6 +350,10 @@ final class Employee extends Model
             ) {
                 $employee->is_new_hire_updated_at = now();
             }
+        });
+
+        self::deleting(function (Employee $employee): void {
+            $employee->deleteRelatedRecords();
         });
     }
 
@@ -365,5 +380,25 @@ final class Employee extends Model
             'status' => StatusEnum::class,
             'intern_type' => InternTypeEnum::class,
         ];
+    }
+
+    /**
+     * Legacy tables reference employees with RESTRICT foreign keys (or none at
+     * all), so related rows must be removed before the employee. SMS reminders
+     * are kept as a history of what was sent: their employee_id is nullable.
+     */
+    private function deleteRelatedRecords(): void
+    {
+        $this->contracts()->delete();
+        $this->absences()->delete();
+        $this->trainings()->delete();
+        $this->evaluations()->delete();
+        $this->diplomas()->delete();
+        $this->internships()->delete();
+        $this->applications()->delete();
+        $this->documents()->delete();
+        $this->valorizations()->delete();
+        $this->deadlines()->delete();
+        $this->smsMessages()->update(['employee_id' => null]);
     }
 }

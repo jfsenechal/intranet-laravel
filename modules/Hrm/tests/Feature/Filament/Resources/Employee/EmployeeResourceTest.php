@@ -19,11 +19,13 @@ use AcMarche\Hrm\Filament\Resources\Trainings\Pages\ViewTraining;
 use AcMarche\Hrm\Models\Application;
 use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\ContractNature;
+use AcMarche\Hrm\Models\Deadline;
 use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\JobFunction;
 use AcMarche\Hrm\Models\Prerequisite;
 use AcMarche\Hrm\Models\Service;
+use AcMarche\Hrm\Models\SmsReminder;
 use AcMarche\Hrm\Models\Training;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -747,6 +749,26 @@ describe('header actions authorization', function (): void {
             ->assertOk()
             ->assertActionDoesNotExist('edit')
             ->assertActionDoesNotExist('delete');
+    });
+});
+
+describe('delete action', function (): void {
+    it('deletes the employee together with its related records', function (): void {
+        $record = Employee::factory()->create();
+        $contract = Contract::factory()->create(['employee_id' => $record->id]);
+        $deadline = Deadline::factory()->create(['employee_id' => $record->id]);
+        $application = Application::factory()->create(['employee_id' => $record->id]);
+        $smsReminder = SmsReminder::factory()->create(['employee_id' => $record->id]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->callAction('delete')
+            ->assertHasNoActionErrors();
+
+        expect(Employee::query()->find($record->id))->toBeNull()
+            ->and(Contract::query()->find($contract->id))->toBeNull()
+            ->and(Deadline::query()->find($deadline->id))->toBeNull()
+            ->and(Application::query()->find($application->id))->toBeNull()
+            ->and($smsReminder->fresh()->employee_id)->toBeNull();
     });
 });
 
