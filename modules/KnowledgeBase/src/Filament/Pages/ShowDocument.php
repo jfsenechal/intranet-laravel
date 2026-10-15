@@ -84,10 +84,11 @@ final class ShowDocument extends Page
     protected function getViewData(): array
     {
         $documentation = app(Documentation::class);
+        $page = $documentation->render($this->document);
 
         return [
-            'html' => $documentation->render($this->document),
-            'navigation' => $documentation->navigation(),
+            'html' => $page['html'],
+            'menu' => $page['menu'],
             'updatedAt' => $documentation->lastModified($this->document),
             'vaultUrl' => config('knowledge-base.vault_url'),
         ];

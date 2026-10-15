@@ -121,6 +121,10 @@
     text-decoration: var(--phiki-dark-text-decoration) !important;
 }
 
+.kb-article [id] {
+    scroll-margin-top: 5rem;
+}
+
 .fi-prose pre.phiki {
     overflow-x: auto;
     padding: 1rem;

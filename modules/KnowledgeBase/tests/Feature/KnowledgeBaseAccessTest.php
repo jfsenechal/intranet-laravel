@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use AcMarche\KnowledgeBase\Filament\Pages\CreateDocument;
 use AcMarche\KnowledgeBase\Filament\Pages\EditDocument;
-use AcMarche\KnowledgeBase\Filament\Pages\EditNavigation;
 use AcMarche\KnowledgeBase\Filament\Pages\ListDocuments;
 use AcMarche\KnowledgeBase\Filament\Pages\ShowDocument;
 use AcMarche\KnowledgeBase\KnowledgeBaseAccess;
@@ -50,11 +49,9 @@ it('forbids writing pages to a reader and hides the write actions', function ():
         ->assertActionHidden('delete');
     livewire(ListDocuments::class)
         ->assertOk()
-        ->assertActionHidden('create')
-        ->assertActionHidden('navigation');
+        ->assertActionHidden('create');
     livewire(CreateDocument::class)->assertForbidden();
     livewire(EditDocument::class, ['document' => 'vpn-forticlient'])->assertForbidden();
-    livewire(EditNavigation::class)->assertForbidden();
 });
 
 it('lets an editor and an intranet administrator open every page', function (string $profile): void {
@@ -64,5 +61,4 @@ it('lets an editor and an intranet administrator open every page', function (str
     livewire(ShowDocument::class, ['document' => 'vpn-forticlient'])->assertOk()->assertActionVisible('edit');
     livewire(CreateDocument::class)->assertOk();
     livewire(EditDocument::class, ['document' => 'vpn-forticlient'])->assertOk();
-    livewire(EditNavigation::class)->assertOk();
 })->with(['editor', 'administrator', 'intranet admin role']);

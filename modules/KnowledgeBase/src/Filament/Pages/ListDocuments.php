@@ -57,11 +57,6 @@ final class ListDocuments extends Page implements HasTable
                     ->label('Titre')
                     ->weight(FontWeight::SemiBold)
                     ->sortable(),
-                TextColumn::make('section')
-                    ->label('Section')
-                    ->badge()
-                    ->placeholder('Non classé')
-                    ->sortable(),
                 TextColumn::make('updated_at')
                     ->label('Modifié')
                     ->since()
@@ -79,19 +74,11 @@ final class ListDocuments extends Page implements HasTable
      */
     protected function getHeaderActions(): array
     {
-        $canWrite = KnowledgeBaseAccess::canWrite(auth()->user());
-
         return [
-            Action::make('navigation')
-                ->label('Modifier le sommaire')
-                ->icon(Heroicon::OutlinedListBullet)
-                ->color('gray')
-                ->visible($canWrite)
-                ->url(EditNavigation::getUrl()),
             Action::make('create')
                 ->label('Nouvelle page')
                 ->icon(Heroicon::Plus)
-                ->visible($canWrite)
+                ->visible(KnowledgeBaseAccess::canWrite(auth()->user()))
                 ->url(CreateDocument::getUrl()),
         ];
     }
@@ -110,7 +97,7 @@ final class ListDocuments extends Page implements HasTable
             );
         }
 
-        $sortColumn = in_array($sortColumn, ['title', 'section', 'updated_at'], true) ? $sortColumn : 'title';
+        $sortColumn = in_array($sortColumn, ['title', 'updated_at'], true) ? $sortColumn : 'title';
 
         return $documents->sortBy(
             fn (array $document): string => (string) $document[$sortColumn],

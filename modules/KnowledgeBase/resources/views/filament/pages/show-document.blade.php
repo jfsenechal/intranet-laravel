@@ -1,8 +1,13 @@
 <x-filament-panels::page>
-    <div class="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside class="lg:sticky lg:top-20 lg:self-start">
-            @include('knowledge-base::filament.pages.partials.sidebar', ['navigation' => $navigation, 'current' => $this->document])
-        </aside>
+    <div @class([
+        'grid gap-8',
+        'lg:grid-cols-[16rem_minmax(0,1fr)]' => $menu !== [],
+    ])>
+        @if ($menu !== [])
+            <aside class="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
+                @include('knowledge-base::filament.pages.partials.page-menu', ['menu' => $menu])
+            </aside>
+        @endif
 
         <div class="min-w-0 space-y-6">
             @if (filled($vaultUrl))
@@ -13,7 +18,7 @@
             @endif
 
             <x-filament::section>
-                <article class="fi-prose max-w-none">
+                <article class="kb-article fi-prose max-w-none">
                     {{-- Raw HTML is escaped by CommonMark (html_input = escape) before reaching this point. --}}
                     {!! $html !!}
                 </article>

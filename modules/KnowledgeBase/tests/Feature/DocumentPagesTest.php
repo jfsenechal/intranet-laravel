@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use AcMarche\KnowledgeBase\Filament\Pages\CreateDocument;
 use AcMarche\KnowledgeBase\Filament\Pages\EditDocument;
-use AcMarche\KnowledgeBase\Filament\Pages\EditNavigation;
 use AcMarche\KnowledgeBase\Filament\Pages\ListDocuments;
 use AcMarche\KnowledgeBase\Filament\Pages\ShowDocument;
 use AcMarche\KnowledgeBase\Tests\KnowledgeBaseUsers;
@@ -31,18 +30,19 @@ it('lists the pages and searches their content', function (): void {
         ->assertCanNotSeeTableRecords(['vpn-forticlient']);
 });
 
-it('shows a page with its rendered content and sidebar', function (): void {
-    $this->disk->put('documentation.md', "- ## Réseau\n    - [VPN FortiClient](vpn-forticlient)\n");
+it('shows a page with a menu built only from that page', function (): void {
+    $this->disk->put('vpn-forticlient.md', "# VPN FortiClient\n\n## Installation\n\nTexte.\n");
 
     livewire(ShowDocument::class, ['document' => 'vpn-forticlient'])
         ->assertOk()
         ->assertSee('<h1>VPN FortiClient</h1>', escape: false)
-        ->assertSee('Réseau');
+        ->assertSee('href="#installation"', escape: false)
+        ->assertDontSee('Workflow Git');
 });
 
 it('returns not found for an unknown or invalid page', function (string $slug): void {
     livewire(ShowDocument::class, ['document' => $slug])->assertNotFound();
-})->with(['unknown-page', 'Bad Slug', 'documentation']);
+})->with(['unknown-page', 'Bad Slug', 'create']);
 
 it('creates a page and reopens it through its slug', function (): void {
     livewire(CreateDocument::class)
@@ -69,7 +69,7 @@ it('rejects an invalid, reserved or existing slug without writing', function (st
 })->with([
     'existing' => ['vpn-forticlient', 'Une page avec cet identifiant existe déjà.'],
     'malformed' => ['Bad Slug', 'Utilisez uniquement des minuscules, des chiffres et des tirets simples.'],
-    'reserved' => ['documentation', 'Cet identifiant est réservé.'],
+    'reserved' => ['create', 'Cet identifiant est réservé.'],
 ]);
 
 it('saves an edited page', function (): void {
@@ -112,14 +112,4 @@ it('deletes a page', function (): void {
         ->assertRedirect(ListDocuments::getUrl());
 
     expect($this->disk->exists('vpn-forticlient.md'))->toBeFalse();
-});
-
-it('saves the sidebar index', function (): void {
-    livewire(EditNavigation::class)
-        ->fillForm(['source' => "- ## Réseau\n    - [VPN](vpn-forticlient)"])
-        ->call('save')
-        ->assertHasNoFormErrors()
-        ->assertRedirect(ListDocuments::getUrl());
-
-    expect($this->disk->get('documentation.md'))->toBe("- ## Réseau\n    - [VPN](vpn-forticlient)\n");
 });

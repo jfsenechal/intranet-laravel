@@ -25,17 +25,15 @@ against installed source (`filament/filament` 5.10.1,
 
 ## 0. Content layout (inspired by laravel/docs)
 
-The `laravel/docs` repository is **flat**. Each page is one `{slug}.md` file in the
-root, and a single `documentation.md` file defines the sidebar (sections and
-order) as a nested Markdown list. Laravel keeps each version in its own git branch.
-We copy the flat layout and the `documentation.md` index, with no versions.
+The `laravel/docs` repository is **flat**: each page is one `{slug}.md` file in the
+root. We copy that layout, with no versions and **no global index or sections**:
+every file is a standalone page that carries its own menu (see §3.3a).
 Images go in an `images/` folder.
 
 Disk `knowledge-base` → `storage/app/private/knowledge-base/`:
 
 ```
 storage/app/private/knowledge-base/
-├── documentation.md          # sidebar index (sections + order), edited in the panel
 ├── vpn-forticlient.md        # one page = one file, slug = filename
 ├── firewall-rules.md
 ├── backup-restore-veeam.md
@@ -45,28 +43,13 @@ storage/app/private/knowledge-base/
     └── 3f1c…-….png
 ```
 
-`documentation.md` format (same shape as Laravel's file, without `{{version}}`):
-
-```markdown
-- ## Réseau
-    - [VPN FortiClient](vpn-forticlient)
-    - [Règles firewall](firewall-rules)
-- ## Serveurs
-    - [Sauvegarde & restauration](backup-restore-veeam)
-- ## Développement
-    - [Déployer une application Laravel](deploy-laravel-app)
-    - [Workflow Git](git-workflow)
-```
-
 Canonical rules (use them everywhere: routes, create validation, service):
 
-- **Slug rule:** `^[a-z0-9]+(?:-[a-z0-9]+)*$`, max 100 chars. `documentation` is
+- **Slug rule:** `^[a-z0-9]+(?:-[a-z0-9]+)*$`, max 100 chars. `create` is
   reserved and is not a page slug. Every disk path is built **only** as
   `"{$slug}.md"` after this regex passes. This prevents path traversal.
 - **Title rule:** the first line matching `^# (.+)$` in the file. If there is none,
   use `Str::headline($slug)`.
-- **Section rule:** the `## ` heading under which the slug appears in
-  `documentation.md`. If the slug is not listed, use `null` ("Non classé").
 - **Image filename rule:** `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|gif|webp)$`.
   Every image path on disk is built **only** as `"images/{$filename}"` after this regex passes.
 - The only subfolder is `images/`. `all()` lists root `*.md` files only.
@@ -90,7 +73,6 @@ php artisan make:filament-page ListDocuments --no-interaction
 php artisan make:filament-page ShowDocument --no-interaction
 php artisan make:filament-page CreateDocument --no-interaction
 php artisan make:filament-page EditDocument --no-interaction
-php artisan make:filament-page EditNavigation --no-interaction
 
 # 3. Support classes
 php artisan make:class Documentation/Documentation --no-interaction      # then move into module
@@ -123,12 +105,13 @@ modules/KnowledgeBase/
 │   └── database.php
 ├── resources/views/filament/pages/
 │   ├── show-document.blade.php
-│   └── partials/sidebar.blade.php
+│   └── partials/page-menu.blade.php
 ├── routes/web.php
 ├── src/
 │   ├── Documentation/
 │   │   ├── Documentation.php
 │   │   ├── ImageStore.php
+│   │   ├── PageRenderer.php
 │   │   └── SecretScanner.php
 │   ├── Enums/RolesEnum.php
 │   ├── Http/Controllers/ImageController.php
@@ -137,7 +120,6 @@ modules/KnowledgeBase/
 │   │   ├── ShowDocument.php
 │   │   ├── CreateDocument.php
 │   │   ├── EditDocument.php
-│   │   └── EditNavigation.php
 │   ├── KnowledgeBaseAccess.php
 │   └── Providers/
 │       ├── KnowledgeBaseServiceProvider.php
@@ -249,9 +231,7 @@ All methods validate the slug with the slug rule and throw
 | `lastModified(string $slug): CarbonImmutable` | | from `$disk->lastModified()` |
 | `put(string $slug, string $markdown): void` | | normalise line endings to `\n` and ensure a trailing newline, then write |
 | `delete(string $slug): void` | | delete file |
-| `all(): Collection<int, array{slug:string,title:string,section:?string,updated_at:CarbonImmutable,content:string}>` | | every `*.md` except `documentation.md`, sorted by title |
-| `navigation(): array<int, array{section:string, pages: array<int, array{slug:string,title:string}>}>` | | parse `documentation.md`: a line `- ## X` opens a section, a line `- [Title](slug)` adds a page. Drop slugs that fail the slug rule **or** do not exist |
-| `navigationSource(): string` / `putNavigation(string $markdown): void` | | raw read/write of `documentation.md` (`''` if missing) |
+| `all(): Collection<string, array{slug:string,title:string,updated_at:CarbonImmutable,content:string}>` | | every root `*.md` with a valid slug, sorted by title |
 | `render(string $slug): string` | HTML | `Str::markdown($md, ['html_input' => 'escape', 'allow_unsafe_links' => false], [new PhikiExtension(['light' => Theme::GithubLight, 'dark' => Theme::GithubDark])])`. Raw HTML is escaped, never allowed. Fenced code blocks with a language (` ```bash `, ` ```php `, ` ```nginx `…) are highlighted. A block with no language, or an unknown one, renders as plain `<pre><code>` |
 
 Imports for `render()`: `Phiki\Adapters\CommonMark\PhikiExtension`, `Phiki\Theme\Theme`
@@ -277,6 +257,13 @@ then run `npm run build`:
 }
 .fi-prose pre.phiki { overflow-x: auto; padding: 1rem; border-radius: 0.5rem; }
 ```
+
+### 3.3a PageRenderer — `src/Documentation/PageRenderer.php`
+`render(string $markdown): array{menu, html}`. Each page is standalone and gets its own menu:
+1. If the lines right after the H1 are a list of `[Label](#anchor)` links (laravel/docs format, indented items = children), that list is the menu and is removed from the body.
+2. Otherwise the menu is built from `##` (items) and `###` (children); heading ids are generated by CommonMark's `HeadingPermalinkExtension` (`insert: none`, `apply_id_to_heading: true`, levels 2–3) with the same slug normaliser.
+3. A line that is exactly `<a name="[A-Za-z0-9_-]+"></a>` (outside code fences) becomes `<a id="…"></a>`; all other raw HTML stays escaped.
+`Documentation::render($slug)` caches the result per content hash.
 
 ### 3.3b ImageStore — `src/Documentation/ImageStore.php`
 `final class`, constructor `private Filesystem $disk` (same disk, bound with `scoped()`).
@@ -352,13 +339,11 @@ Pages with a parameter **must** set `protected static bool $shouldRegisterNaviga
   whose `title` or `content` contains it (`Str::contains(..., ignoreCase: true)`). Sort in PHP.
 - Columns:
   - Title. Component: `Filament\Tables\Columns\TextColumn::make('title')`. Docs: https://filamentphp.com/docs/5.x/tables/columns/text. Config: `->label('Titre')->sortable()->weight(FontWeight::SemiBold)`
-  - Section. `Filament\Tables\Columns\TextColumn::make('section')`. Config: `->label('Section')->badge()->placeholder('Non classé')->sortable()`
   - Updated. `Filament\Tables\Columns\TextColumn::make('updated_at')`. Config: `->label('Modifié')->since()->sortable()`
 - Table config: `->searchable()`, `->defaultSort('title')`, `->recordUrl(fn (array $record): string => ShowDocument::getUrl(['document' => $record['slug']]))`.
   Note: the project-wide `deferLoading()` applies, so tests must call `->loadTable()`.
 - Header actions:
   - **create**. Component `Filament\Actions\Action::make('create')`. Docs https://filamentphp.com/docs/5.x/actions/overview. Location: header. Visibility & Authorization: `->visible(fn (): bool => KnowledgeBaseAccess::canWrite(auth()->user()))`. Behavior: `->url(CreateDocument::getUrl())`, label `Nouvelle page`, icon `Heroicon::Plus`.
-  - **navigation**. `Filament\Actions\Action::make('navigation')`. Location: header. Same visibility. Behavior: `->url(EditNavigation::getUrl())`, label `Modifier le sommaire`, color gray.
 
 ### 4.2 ShowDocument
 - Slug `docs/{document}`. No navigation. View `knowledge-base::filament.pages.show-document`.
@@ -367,13 +352,13 @@ Pages with a parameter **must** set `protected static bool $shouldRegisterNaviga
 - `canAccess()`: `canRead`.
 - `getTitle()`: `app(Documentation::class)->title($this->document)`.
 - View layout, like laravel.com/docs: a two-column grid (`lg:grid-cols-[16rem_1fr]`).
-  - Left column: `partials/sidebar.blade.php` loops over `navigation()` and shows section headings with links. The current slug is highlighted with `text-primary-600 font-semibold`.
+  - Left column (only when the menu is not empty): `partials/page-menu.blade.php` shows "Sur cette page", the menu of **the page being read** (§3.3a), as `#anchor` links with children indented. Sticky, scrollable.
   - Right column: `<article class="fi-prose max-w-none">{!! $html !!}</article>`, where `$html = render($this->document)`. Raw HTML is already escaped by CommonMark (§3.3), so the `{!! !!}` output is safe.
   - Under the article: "Modifié {{ diffForHumans }}".
   - If `config('knowledge-base.vault_url')` is set, show a callout: "Les mots de passe ne sont jamais stockés ici : voir le coffre-fort" with a link.
 - Header actions:
   - **edit**. `Filament\Actions\Action::make('edit')`. Visibility: `canWrite`. Behavior: `->url(EditDocument::getUrl(['document' => $this->document]))`.
-  - **delete**. `Filament\Actions\Action::make('delete')`. Visibility: `canWrite`. Authorization: re-check `canWrite` inside `->action()` and `abort_unless(..., 403)` **before** deleting. Behavior: `->requiresConfirmation()->color('danger')`, then `$docs->delete($this->document)`, success notification `Page supprimée`, redirect to `ListDocuments::getUrl()`. The `documentation.md` entry is left as is. `navigation()` drops entries whose file is missing (§3.3), so the dead link disappears from the sidebar.
+  - **delete**. `Filament\Actions\Action::make('delete')`. Visibility: `canWrite`. Authorization: re-check `canWrite` inside `->action()` and `abort_unless(..., 403)` **before** deleting. Behavior: `->requiresConfirmation()->color('danger')`, then `$docs->delete($this->document)`, success notification `Page supprimée`, redirect to `ListDocuments::getUrl()`.
 
 ### 4.3 CreateDocument
 - Slug `create` (URL `/knowledge-base/create`, outside `docs/` so it can never be captured by `docs/{document}`). No navigation. `canAccess()`: `canWrite`.
@@ -423,12 +408,6 @@ Pages with a parameter **must** set `protected static bool $shouldRegisterNaviga
   5. Redirect to ShowDocument.
 - Header action **cancel**: url to ShowDocument, color gray.
 
-### 4.5 EditNavigation
-- Slug `navigation` (URL `/knowledge-base/navigation`), no navigation, `canAccess()`: `canWrite`. `navigation` stays in the reserved slugs.
-- Field **source**. `Filament\Forms\Components\Textarea::make('source')`. Docs https://filamentphp.com/docs/5.x/forms/textarea. Validation `nullable|string|max:100000`. Config: `->label('documentation.md')->rows(25)->extraInputAttributes(['class' => 'font-mono'])->helperText('Format : "- ## Section" puis "    - [Titre](slug)"')`.
-- Placeholder below: `Filament\Infolists\Components\TextEntry::make('available')` (or `Filament\Schemas\Components\Text`) lists the existing slugs that are **not** referenced yet, so editors can add them.
-- **save** action: `canWrite` check, then `putNavigation()`, then notification, then redirect to ListDocuments.
-
 ### 4.6 Secret warning (shared, Create/Edit)
 After a successful `put()`, run `$findings = app(SecretScanner::class)->findings($content)`.
 If it is not empty, send a persistent warning:
@@ -437,15 +416,14 @@ The save is **not** blocked (the user chose warn-only).
 
 **Consistency check:** the slug rule from §0 is the only rule. It is applied in
 create validation (`regex` + `not_in` + exists), in the `mount()` guards (`isValidSlug`), in
-`navigation()` filtering, and in every `Documentation` method. Reserved list: `documentation`,
-`create`, `navigation`. A slug that passes create validation must always reopen
+and in every `Documentation` method. Reserved list: `create`. A slug that passes create validation must always reopen
 through ShowDocument/EditDocument (roundtrip test §6).
 
 ---
 
 ## 5. Authorization summary
 
-| Who                                           | List / Show / images | Create / Edit / Delete / Edit navigation / upload |
+| Who                                           | List / Show / images | Create / Edit / Delete / upload |
 | --------------------------------------------- | -------------------- | ------------------------------------------------- |
 | `ROLE_KNOWLEDGE_BASE_ADMIN`                   | yes                  | yes                                               |
 | `ROLE_KNOWLEDGE_BASE`                         | yes                  | no (actions hidden, pages 403)                    |
@@ -467,13 +445,13 @@ Livewire helper: `Livewire\livewire(...)`. Tables need `->loadTable()` before ro
 **KnowledgeBaseAccessTest**
 - A user without a role gets `assertForbidden()` on ListDocuments and on ShowDocument for an existing slug.
 - A user with `is_administrator = true` and no module role, and a user with only `ROLE_INTRANET_ADMIN`, can both open every page, including the write pages.
-- A reader can see the ListDocuments rows and the ShowDocument content. The `create`, `edit` and `delete` actions are `assertActionHidden`. CreateDocument, EditDocument and EditNavigation are `assertForbidden()`.
+- A reader can see the ListDocuments rows and the ShowDocument content. The `create`, `edit` and `delete` actions are `assertActionHidden`. CreateDocument and EditDocument are `assertForbidden()`.
 - An editor sees the actions and can open every page.
 
 **DocumentationTest** (service, no Livewire)
-- `isValidSlug`: accepts `vpn-forticlient` and rejects `../etc/passwd`, `Vpn`, `a--b`, `documentation`, `create`, `navigation`, `''`.
+- `isValidSlug`: accepts `vpn-forticlient` and rejects `../etc/passwd`, `Vpn`, `a--b`, `create`, `''`.
 - `title()`: uses the first `# ` line. With no heading, it returns `Str::headline($slug)`.
-- `navigation()`: parses sections and order from the sample in §0. It drops a listed slug whose file is missing and an entry with an invalid slug.
+- `PageRenderer` (own test file): a laravel/docs link list under the H1 becomes the menu and is removed from the body; `<a name>` anchors become `<a id>`; without a list the menu comes from `##`/`###` with ids matching CommonMark's; malformed anchors and anchors inside code stay escaped.
 - `render()`: escapes raw `<script>` (the output contains `&lt;script&gt;`) and drops a `javascript:` link.
 - `render()`: a ` ```php ` fenced block produces `<pre class="phiki` with inline `style=` colours and the `--phiki-dark-` variables. A fenced block with no language still renders its code text, escaped.
 - `SecretScanner`: flags `password: Hunter2xyz`, `-----BEGIN RSA PRIVATE KEY-----` and `AKIAABCDEFGHIJKLMNOP`. It does **not** flag `Le mot de passe est dans le coffre-fort.`
@@ -507,5 +485,5 @@ Run with `php artisan test --compact modules/KnowledgeBase/tests`, then `vendor/
 - Page history or versions (explicitly not wanted).
 - Cleanup of orphaned images. Deleting a page or removing `![](…)` leaves the file in `images/`.
 - Non-image attachments (PDF, configs…).
-- Per-section access roles.
+- Per-page access roles.
 - Global search integration.
