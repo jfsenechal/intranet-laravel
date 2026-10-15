@@ -8,7 +8,6 @@ use AcMarche\Mileage\Database\Factories\TripFactory;
 use AcMarche\Mileage\Observers\TripObserver;
 use AcMarche\Security\Models\HasUserAdd;
 use App\Models\User;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -25,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id',
     'distance',
     'departure_date',
-    'arrival_date',
     'start_time',
     'end_time',
     'content',
@@ -64,38 +62,6 @@ final class Trip extends Model
         return $this->declaration_id > 0;
     }
 
-    public function niceDate(): string
-    {
-        if (! $this->arrival_date instanceof DateTimeInterface) {
-            return 'Le '.$this->departure_date->format('d-m-Y');
-        }
-
-        $heureStart = $this->getHeureStart();
-        $heureEnd = $this->getHeureEnd();
-
-        $txt = '';
-        if ($this->departure_date->format('d-m-Y') === $this->arrival_date->format('d-m-Y')) {
-            $txt .= 'Le '.$this->departure_date->format('d-m-Y');
-            if ($heureStart instanceof DateTimeInterface) {
-                $txt .= ' à '.$heureStart->format('H\hi');
-            }
-            if ($heureEnd instanceof DateTimeInterface) {
-                $txt .= ' jusque '.$heureEnd->format('H\hi');
-            }
-        } else {
-            $txt .= 'Du '.$this->departure_date->format('d-m-Y');
-            if ($heureStart instanceof DateTimeInterface) {
-                $txt .= ' à '.$heureStart->format('H\hi');
-            }
-            $txt .= ' au '.$this->arrival_date->format('d-m-Y');
-            if ($heureEnd instanceof DateTimeInterface) {
-                $txt .= ' jusque '.$heureEnd->format('H\hi');
-            }
-        }
-
-        return $txt;
-    }
-
     protected static function booted(): void
     {
         self::bootHasUser();
@@ -106,7 +72,6 @@ final class Trip extends Model
         return [
             'distance' => 'integer',
             'departure_date' => 'datetime',
-            'arrival_date' => 'datetime',
             'rate' => 'decimal:4',
             'omnium' => 'decimal:4',
             'meal_expense' => 'decimal:2',

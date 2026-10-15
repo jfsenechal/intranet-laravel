@@ -47,27 +47,26 @@ describe('handleTrips', function (): void {
         ]);
 
         // Create trips with different type_movement and dates
-        // Note: TripObserver sets type_movement based on arrival_date:
-        // - arrival_date = null -> 'interne'
-        // - arrival_date present -> 'externe'
+        // Note: TripObserver sets type_movement based on the locations:
+        // - arrival_location = null -> 'interne'
+        // - both locations present -> 'externe'
         $trip1 = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2030-02-15',
-            'arrival_date' => null, // This makes it 'interne'
+            'arrival_location' => null, // This makes it 'interne'
             'declaration_id' => null,
         ]);
 
         $trip2 = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2030-03-20',
-            'arrival_date' => null, // This makes it 'interne'
+            'arrival_location' => null, // This makes it 'interne'
             'declaration_id' => null,
         ]);
 
         $trip3 = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2030-08-10',
-            'arrival_date' => '2030-08-11', // This makes it 'externe'
             'declaration_id' => null,
         ]);
 

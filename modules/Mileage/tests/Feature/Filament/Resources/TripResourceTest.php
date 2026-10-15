@@ -137,9 +137,9 @@ it('does not display the departure time inputs for an internal movement', functi
         ->fillForm($data)
         ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => ! $field->hasTime());
 })->with([
-    'nothing filled' => [['departure_location' => null, 'arrival_location' => null, 'arrival_date' => null]],
-    'only arrival_date' => [['departure_location' => null, 'arrival_location' => null, 'arrival_date' => now()]],
-    'missing arrival_date' => [['departure_location' => 'Marche', 'arrival_location' => 'Namur', 'arrival_date' => null]],
+    'nothing filled' => [['departure_location' => null, 'arrival_location' => null]],
+    'only departure_location' => [['departure_location' => 'Marche', 'arrival_location' => null]],
+    'only arrival_location' => [['departure_location' => null, 'arrival_location' => 'Namur']],
 ]);
 
 it('displays the departure time inputs for an external movement', function (): void {
@@ -147,12 +147,11 @@ it('displays the departure time inputs for an external movement', function (): v
         ->fillForm([
             'departure_location' => 'Marche',
             'arrival_location' => 'Namur',
-            'arrival_date' => now(),
         ])
         ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => $field->hasTime());
 });
 
-it('requires the three external movement fields when any one is filled', function (array $data, array $errors): void {
+it('requires both locations when one is filled', function (array $data, array $errors): void {
     $trip = Trip::factory()->make(['user_add' => 'jdupont']);
 
     livewire(CreateTrip::class)
@@ -168,19 +167,15 @@ it('requires the three external movement fields when any one is filled', functio
 })->with([
     'only `departure_location`' => [
         ['departure_location' => 'Marche'],
-        ['arrival_location' => 'required_with', 'arrival_date' => 'required_with'],
+        ['arrival_location' => 'required_with'],
     ],
     'only `arrival_location`' => [
         ['arrival_location' => 'Namur'],
-        ['departure_location' => 'required_with', 'arrival_date' => 'required_with'],
-    ],
-    'only `arrival_date`' => [
-        ['arrival_date' => now()],
-        ['departure_location' => 'required_with', 'arrival_location' => 'required_with'],
+        ['departure_location' => 'required_with'],
     ],
 ]);
 
-it('accepts the trip when all three external movement fields are filled', function (): void {
+it('accepts the trip when both locations are filled', function (): void {
     $trip = Trip::factory()->make(['user_add' => 'jdupont']);
 
     livewire(CreateTrip::class)
@@ -190,48 +185,13 @@ it('accepts the trip when all three external movement fields are filled', functi
             'content' => $trip->content,
             'departure_location' => 'Marche',
             'arrival_location' => 'Namur',
-            'arrival_date' => now(),
         ])
         ->call('create')
         ->assertHasNoFormErrors()
         ->assertNotified();
 });
 
-it('defaults an empty departure date to the arrival day at 08h00', function (): void {
-    livewire(CreateTrip::class)
-        ->fillForm([
-            'departure_date' => null,
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-            'arrival_date' => '2026-09-08 17:30:00',
-        ])
-        // seconds(false) normalises the picker state to the minute.
-        ->assertFormSet(['departure_date' => '2026-09-08 08:00']);
-});
-
-it('keeps a departure date already encoded when the external fields are filled', function (): void {
-    livewire(CreateTrip::class)
-        ->fillForm([
-            'departure_date' => '2026-09-07 06:15:00',
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-            'arrival_date' => '2026-09-08 17:30:00',
-        ])
-        ->assertFormSet(['departure_date' => '2026-09-07 06:15']);
-});
-
-it('leaves the departure date empty while the movement is not external', function (): void {
-    livewire(CreateTrip::class)
-        ->fillForm([
-            'departure_date' => null,
-            'departure_location' => 'Marche',
-            'arrival_location' => null,
-            'arrival_date' => '2026-09-08 17:30:00',
-        ])
-        ->assertFormSet(['departure_date' => null]);
-});
-
-it('stores the departure and arrival of an external movement on the Belgian clock', function (): void {
+it('stores the departure of an external movement on the Belgian clock', function (): void {
     // The dates are a wall clock, not an instant: Filament's display timezone
     // must not turn a departure typed at 00h00 on 08-09 into 07-09 22:00.
     $trip = Trip::factory()->make(['user_add' => 'jdupont']);
@@ -243,7 +203,6 @@ it('stores the departure and arrival of an external movement on the Belgian cloc
             'departure_location' => 'Marche',
             'arrival_location' => 'Namur',
             'departure_date' => '2026-09-08 00:00:00',
-            'arrival_date' => '2026-09-08 08:50:00',
         ])
         ->call('create')
         ->assertHasNoFormErrors()
@@ -252,7 +211,6 @@ it('stores the departure and arrival of an external movement on the Belgian cloc
     assertDatabaseHas(Trip::class, [
         'content' => $trip->content,
         'departure_date' => '2026-09-08 00:00:00',
-        'arrival_date' => '2026-09-08 08:50:00',
     ]);
 });
 

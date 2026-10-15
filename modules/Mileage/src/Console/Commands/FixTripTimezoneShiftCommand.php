@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Mileage\Console\Commands;
 
+use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Service\TripAttributeResolver;
@@ -37,7 +38,7 @@ final class FixTripTimezoneShiftCommand extends Command
     /**
      * Execute the console command.
      *
-     * `departure_date` and `arrival_date` hold a Belgian wall clock, not an
+     * `departure_date` holds a Belgian wall clock, not an
      * instant: ten years of trips are stored as the date and time the
      * beneficiary typed. Between the commit that called
      * `FilamentTimezone::set()` and the fix on `TripForm`, the date-time
@@ -68,21 +69,18 @@ final class FixTripTimezoneShiftCommand extends Command
         $rateChanges = [];
 
         Trip::query()
-            ->whereNotNull('arrival_date')
+            ->where('type_movement', TypeMovementEnum::EXTERNAL->value)
             ->where('created_at', '>=', $since)
             ->when($until instanceof CarbonInterface, fn ($query) => $query->where('created_at', '<', $until))
             ->orderBy('id')
             ->chunkById(200, function ($trips) use ($dryRun, $timezone, &$corrected, &$rateChanges): void {
                 foreach ($trips as $trip) {
                     $departure = $this->onBelgianClock($trip->departure_date, $timezone);
-                    $arrival = $this->onBelgianClock($trip->arrival_date, $timezone);
 
                     $corrected[] = [
                         $trip->id,
                         $trip->departure_date->format('d-m-Y H:i'),
                         $departure->format('d-m-Y H:i'),
-                        $trip->arrival_date->format('d-m-Y H:i'),
-                        $arrival->format('d-m-Y H:i'),
                     ];
 
                     $newRate = $this->rateFor($trip, $departure);
@@ -96,7 +94,6 @@ final class FixTripTimezoneShiftCommand extends Command
                     }
 
                     $trip->departure_date = $departure->format('Y-m-d H:i:s');
-                    $trip->arrival_date = $arrival->format('Y-m-d H:i:s');
 
                     // The rate of a declared trip is a snapshot of what was paid and is
                     // corrected by mileage:verify-trip-rates, never here; an undeclared
@@ -149,7 +146,7 @@ final class FixTripTimezoneShiftCommand extends Command
         }
 
         $this->table(
-            ['Trip', 'Departure (stored)', 'Departure (fixed)', 'Arrival (stored)', 'Arrival (fixed)'],
+            ['Trip', 'Departure (stored)', 'Departure (fixed)'],
             $corrected
         );
 

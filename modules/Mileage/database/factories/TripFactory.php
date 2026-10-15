@@ -29,7 +29,6 @@ final class TripFactory extends Factory
             'user_id' => User::factory(),
             'distance' => fake()->numberBetween(1, 500),
             'departure_date' => fake()->dateTimeBetween('-1 month', 'now'),
-            'arrival_date' => fake()->dateTimeBetween('now', '+1 month'),
             'start_time' => fake()->time(),
             'end_time' => fake()->time(),
             'content' => fake()->sentence(),

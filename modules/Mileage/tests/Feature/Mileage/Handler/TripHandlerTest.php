@@ -233,13 +233,12 @@ describe('recompute on update', function (): void {
             ->and($trip->fresh()->omnium)->toBe('0.0300');
     });
 
-    test('recomputes type of movement when the external fields are completed', function (): void {
+    test('recomputes type of movement when the locations are completed', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
             'departure_location' => null,
             'arrival_location' => null,
-            'arrival_date' => null,
         ]);
 
         expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
@@ -247,7 +246,6 @@ describe('recompute on update', function (): void {
         $trip->update([
             'departure_location' => 'Marche',
             'arrival_location' => 'Namur',
-            'arrival_date' => '2024-06-16',
         ]);
 
         expect($trip->fresh()->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
@@ -255,13 +253,12 @@ describe('recompute on update', function (): void {
 });
 
 describe('setTypeOfMovement', function (): void {
-    test('sets type to EXTERNAL when the three external fields are filled', function (): void {
+    test('sets type to EXTERNAL when both locations are filled', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
             'departure_location' => 'Marche',
             'arrival_location' => 'Namur',
-            'arrival_date' => '2024-06-16',
             'type_movement' => null,
         ]);
 
@@ -270,13 +267,12 @@ describe('setTypeOfMovement', function (): void {
         expect($trip->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
     });
 
-    test('sets type to INTERNAL when any external field is missing', function (?string $departureLocation, ?string $arrivalLocation, ?string $arrivalDate): void {
+    test('sets type to INTERNAL when any location is missing', function (?string $departureLocation, ?string $arrivalLocation): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
             'departure_location' => $departureLocation,
             'arrival_location' => $arrivalLocation,
-            'arrival_date' => $arrivalDate,
             'type_movement' => null,
         ]);
 
@@ -284,22 +280,17 @@ describe('setTypeOfMovement', function (): void {
 
         expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
     })->with([
-        'nothing filled' => [null, null, null],
-        'only departure_location' => ['Marche', null, null],
-        'only arrival_location' => [null, 'Namur', null],
-        'only arrival_date' => [null, null, '2024-06-16'],
-        'missing arrival_date' => ['Marche', 'Namur', null],
-        'missing departure_location' => [null, 'Namur', '2024-06-16'],
-        'missing arrival_location' => ['Marche', null, '2024-06-16'],
+        'nothing filled' => [null, null],
+        'only departure_location' => ['Marche', null],
+        'only arrival_location' => [null, 'Namur'],
     ]);
 
-    test('overwrites existing type_movement when the three external fields are filled', function (): void {
+    test('overwrites existing type_movement when both locations are filled', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
             'departure_location' => 'Marche',
             'arrival_location' => 'Namur',
-            'arrival_date' => '2024-06-16',
             'type_movement' => 'interne',
         ]);
 
@@ -308,13 +299,12 @@ describe('setTypeOfMovement', function (): void {
         expect($trip->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
     });
 
-    test('overwrites existing type_movement when an external field is missing', function (): void {
+    test('overwrites existing type_movement when a location is missing', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
             'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-            'arrival_date' => null,
+            'arrival_location' => null,
             'type_movement' => 'externe',
         ]);
 

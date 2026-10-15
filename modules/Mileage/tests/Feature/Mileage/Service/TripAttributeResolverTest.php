@@ -28,7 +28,6 @@ beforeEach(function (): void {
 test('resolves the June rate for an external trip departing on the last day of the period', function (): void {
     $trip = Trip::factory()->make([
         'departure_date' => '2026-06-30 00:00:00',
-        'arrival_date' => '2026-06-30 00:00:00',
         'departure_location' => 'Marche-en-Famenne',
         'arrival_location' => 'Namur',
     ]);
@@ -39,7 +38,6 @@ test('resolves the June rate for an external trip departing on the last day of t
 test('resolves the June rate for a trip leaving during the last day of the period', function (): void {
     $trip = Trip::factory()->make([
         'departure_date' => '2026-06-30 08:30:00',
-        'arrival_date' => '2026-06-30 17:00:00',
         'departure_location' => 'Marche-en-Famenne',
         'arrival_location' => 'Namur',
     ]);

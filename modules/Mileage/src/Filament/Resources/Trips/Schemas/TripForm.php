@@ -9,9 +9,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Carbon;
 
 final class TripForm
 {
@@ -32,17 +30,28 @@ final class TripForm
                             ->date()
                             ->seconds(false)
                             // The hour and minute are only relevant for external movements,
-                            // so display the time inputs when the three external fields are filled.
+                            // so display the time inputs when both external locations are filled.
                             ->time(fn (Get $get): bool => filled($get('departure_location'))
-                                && filled($get('arrival_location'))
-                                && filled($get('arrival_date')))
+                                && filled($get('arrival_location')))
                             // A trip date is a Belgian wall clock, not an instant: it is stored
                             // and read back verbatim, so the picker must not convert it.
                             ->timezone(config('app.timezone'))
                             ->required(),
+                        TextInput::make('departure_location')
+                            ->label('Lieu de départ')
+                            ->maxLength(255)
+                            ->minLength(2)
+                            ->live(onBlur: true)
+                            ->requiredWith('arrival_location'),
+                        TextInput::make('arrival_location')
+                            ->label('Lieu d\'arrivée')
+                            ->maxLength(255)
+                            ->minLength(2)
+                            ->live(onBlur: true)
+                            ->requiredWith('departure_location'),
                         Textarea::make('content')
-                            ->label('Détail des courses')
-                            ->helperText('Maximum 80 caractères')
+                            ->label('Objet.')
+                            ->helperText(' (Formation, suivi de chantier, autre lieu de prestation, ...),Maximum 80 caractères')
                             ->maxLength(80)
                             ->required()
                             ->rows(3)
@@ -53,20 +62,7 @@ final class TripForm
                     ->icon('heroicon-o-exclamation-triangle')
                     ->iconColor('danger')
                     ->schema([
-                        TextInput::make('departure_location')
-                            ->label('Lieu de départ')
-                            ->maxLength(255)
-                            ->minLength(2)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
-                            ->requiredWith('arrival_location,arrival_date'),
-                        TextInput::make('arrival_location')
-                            ->label('Lieu d\'arrivée')
-                            ->maxLength(255)
-                            ->minLength(2)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(self::defaultDepartureDateToArrivalDay(...))
-                            ->requiredWith('departure_location,arrival_date'),
+
                         TextInput::make('meal_expense')
                             ->label('Frais de repas')
                             ->helperText('Max 12,30 euros')
@@ -84,27 +80,5 @@ final class TripForm
                     ])
                     ->columns(3),
             ]);
-    }
-
-    /**
-     * An external movement is encoded from its arrival, so leaving the
-     * departure empty only makes the beneficiary retype the same day: as soon
-     * as the three external fields are filled, default it to the arrival day
-     * at 08h00. A departure already encoded is never overwritten.
-     */
-    private static function defaultDepartureDateToArrivalDay(Get $get, Set $set): void
-    {
-        if (filled($get('departure_date'))) {
-            return;
-        }
-
-        if (blank($get('departure_location')) || blank($get('arrival_location')) || blank($get('arrival_date'))) {
-            return;
-        }
-
-        $set(
-            'departure_date',
-            Carbon::parse($get('arrival_date'))->setTime(8, 0)->format('Y-m-d H:i:s'),
-        );
     }
 }
