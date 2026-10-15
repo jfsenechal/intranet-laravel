@@ -41,9 +41,13 @@ final class CreateDocument extends Page
         return KnowledgeBaseAccess::canWrite(auth()->user());
     }
 
+    /**
+     * New pages start from resources/stubs/new-page.md, a laravel/docs style
+     * page (title, link list menu, named anchors) that editors adapt.
+     */
     public function mount(): void
     {
-        $this->form->fill(['content' => "# Titre\n\n"]);
+        $this->form->fill(['content' => file_get_contents(dirname(__DIR__, 3).'/resources/stubs/new-page.md')]);
     }
 
     public function getTitle(): string

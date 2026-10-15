@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\KnowledgeBase\Documentation\PageRenderer;
 use AcMarche\KnowledgeBase\Filament\Pages\CreateDocument;
 use AcMarche\KnowledgeBase\Filament\Pages\EditDocument;
 use AcMarche\KnowledgeBase\Filament\Pages\ListDocuments;
@@ -43,6 +44,20 @@ it('shows a page with a menu built only from that page', function (): void {
 it('returns not found for an unknown or invalid page', function (string $slug): void {
     livewire(ShowDocument::class, ['document' => $slug])->assertNotFound();
 })->with(['unknown-page', 'Bad Slug', 'create']);
+
+it('starts a new page from the template whose menu links all resolve', function (): void {
+    $content = livewire(CreateDocument::class)->get('data.content');
+
+    $page = new PageRenderer()->render($content);
+    $anchors = collect($page['menu'])->flatMap(fn (array $item): array => [$item['anchor'], ...array_column($item['children'], 'anchor')]);
+
+    expect($content)->toStartWith('# Titre de la page')
+        ->and($anchors)->not->toBeEmpty();
+
+    foreach ($anchors as $anchor) {
+        expect($page['html'])->toContain('<a id="'.$anchor.'"></a>');
+    }
+});
 
 it('creates a page and reopens it through its slug', function (): void {
     livewire(CreateDocument::class)
