@@ -24,6 +24,19 @@ final class VacationAction
             ->icon(Heroicon::PaperAirplane)
             ->color('info')
             ->modalHeading("Message d'absence de {$record->samaccountname}")
+            ->modalDescription(function (SieveEmploye $sieveEmploye) use ($record): string {
+                try {
+                    $active = $sieveEmploye->getActiveScript($record->samaccountname);
+                } catch (Throwable $e) {
+                    return 'État inconnu : '.$e->getMessage();
+                }
+
+                return match ($active) {
+                    VacationScript::SCRIPT_NAME => "Le message d'absence est actuellement actif.",
+                    null => "Aucun script actif : le message d'absence est désactivé.",
+                    default => "Le message d'absence est désactivé (script actif : {$active}).",
+                };
+            })
             ->modalSubmitActionLabel('Activer')
             ->fillForm(fn (): array => [
                 'subject' => 'Je suis absent',

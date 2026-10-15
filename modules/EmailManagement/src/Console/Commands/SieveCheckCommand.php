@@ -149,7 +149,7 @@ final class SieveCheckCommand extends Command
     private function reportScripts(Client $client): void
     {
         try {
-            $scripts = $client->listScripts();
+            $scripts = SieveEmploye::fromConfig()->listScripts($client);
         } catch (Throwable $e) {
             $this->components->warn('Scripts illisibles : '.$e->getMessage());
 
@@ -158,7 +158,11 @@ final class SieveCheckCommand extends Command
 
         $this->components->twoColumnDetail(
             'Scripts existants',
-            is_array($scripts) && $scripts !== [] ? implode(', ', $scripts) : '<aucun>',
+            $scripts !== [] ? implode(', ', array_keys($scripts)) : '<aucun>',
+        );
+        $this->components->twoColumnDetail(
+            'Script actif',
+            SieveEmploye::findActiveScript($scripts) ?? '<aucun>',
         );
     }
 }

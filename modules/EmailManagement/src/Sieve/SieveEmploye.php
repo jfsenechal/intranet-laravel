@@ -36,6 +36,34 @@ final class SieveEmploye
         );
     }
 
+    /**
+     * Parses a LISTSCRIPTS response, one `"name"` or `"name" ACTIVE` per line (RFC 5804).
+     *
+     * @return array<string, bool>
+     */
+    public static function parseScriptList(string $response): array
+    {
+        $scripts = [];
+
+        foreach (preg_split('/\r?\n/', $response) ?: [] as $line) {
+            if (preg_match('/^"((?:[^"\\\\]|\\\\.)*)"(\s+ACTIVE)?\s*$/i', mb_trim($line), $matches) === 1) {
+                $scripts[stripslashes($matches[1])] = isset($matches[2]);
+            }
+        }
+
+        return $scripts;
+    }
+
+    /**
+     * @param  array<string, bool>  $scripts
+     */
+    public static function findActiveScript(array $scripts): ?string
+    {
+        $active = array_search(true, $scripts, true);
+
+        return is_string($active) ? $active : null;
+    }
+
     public function isConfigured(): bool
     {
         return $this->host !== null && $this->host !== ''
@@ -119,12 +147,64 @@ final class SieveEmploye
     }
 
     /**
+     * The name of the account's active script, or null when none is active.
+     *
+     * @throws Exception
+     */
+    public function getActiveScript(string $user): ?string
+    {
+        try {
+            return self::findActiveScript($this->listScripts($this->login($user)));
+        } finally {
+            $this->close();
+        }
+    }
+
+    /**
+     * Whether the out-of-office script is the one the server currently runs.
+     *
+     * @throws Exception
+     */
+    public function isVacationActive(string $user): bool
+    {
+        return $this->getActiveScript($user) === VacationScript::SCRIPT_NAME;
+    }
+
+    /**
+     * Every script on the account, keyed by name, with whether it is the active one.
+     *
+     * The client's own listScripts() strips the ACTIVE marker, so the raw LISTSCRIPTS
+     * response is read instead.
+     *
+     * @return array<string, bool>
+     *
+     * @throws Exception
+     */
+    public function listScripts(Client $client): array
+    {
+        $payload = $client->sendCommand('LISTSCRIPTS', null, true);
+
+        if ($payload['code'] !== 'OK') {
+            throw new Exception($client->getErrorMessage() ?: 'Impossible de lister les scripts.');
+        }
+
+        return self::parseScriptList((string) $payload['response']);
+    }
+
+    /**
      * @throws Exception
      */
     public function removeVacation(string $user): void
     {
         try {
             $client = $this->login($user);
+
+            // The server refuses to delete the active script (RFC 5804), so it is switched off first.
+            $isActive = self::findActiveScript($this->listScripts($client)) === VacationScript::SCRIPT_NAME;
+
+            if ($isActive && ! $client->activateScript('')) {
+                throw new Exception($client->getErrorMessage() ?: "Le script n'a pas pu être désactivé.");
+            }
 
             if (! $client->removeScripts(VacationScript::SCRIPT_NAME)) {
                 throw new Exception($client->getErrorMessage() ?: "Le script n'a pas pu être supprimé.");
