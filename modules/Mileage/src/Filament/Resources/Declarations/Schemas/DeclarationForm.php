@@ -88,11 +88,6 @@ final class DeclarationForm
                             ->step(0.0001)
                             ->prefix('€'),
 
-                        TextInput::make('type_movement')
-                            ->label('Type de déplacement')
-                            ->required()
-                            ->maxLength(255),
-
                         Select::make('budget_article')
                             ->label('Article budgétaire')
                             ->required()

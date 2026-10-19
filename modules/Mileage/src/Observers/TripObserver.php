@@ -17,7 +17,6 @@ final readonly class TripObserver
     public function creating(Trip $trip): void
     {
         $this->tripAttributeResolver->setRate($trip);
-        $this->tripAttributeResolver->setTypeOfMovement($trip);
     }
 
     /**

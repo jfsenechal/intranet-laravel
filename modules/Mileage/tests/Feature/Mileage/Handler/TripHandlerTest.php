@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
@@ -231,28 +230,6 @@ describe('recompute on update', function (): void {
 
         expect($trip->fresh()->rate)->toBe('0.4000')
             ->and($trip->fresh()->omnium)->toBe('0.0300');
-    });
-
-    test('creates every trip as an internal movement', function (): void {
-        $trip = Trip::factory()->create([
-            'user_id' => $this->user->id,
-            'departure_date' => '2024-06-15',
-            'type_movement' => TypeMovementEnum::EXTERNAL->value,
-        ]);
-
-        expect($trip->fresh()->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
-    });
-});
-
-describe('setTypeOfMovement', function (): void {
-    test('overwrites an existing external type_movement with INTERNAL', function (): void {
-        $trip = Trip::factory()->make([
-            'type_movement' => TypeMovementEnum::EXTERNAL->value,
-        ]);
-
-        $this->handler->setTypeOfMovement($trip);
-
-        expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
     });
 });
 

@@ -62,16 +62,15 @@ final class DeclarationRepository
     }
 
     /**
-     * Get kilometers by year and month for a user with a specific movement type.
+     * Get the declared kilometers of a user by year and month.
      *
      * @return array<int, array<int, int>>
      */
-    public static function getKilometersByYearMonth(string $username, string $typeMovement): array
+    public static function getKilometersByYearMonth(string $username): array
     {
         $declarations = Declaration::query()
             ->with('trips')
             ->where('user_add', $username)
-            ->where('type_movement', $typeMovement)
             ->get();
 
         $result = [];

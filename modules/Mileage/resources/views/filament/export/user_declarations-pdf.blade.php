@@ -47,7 +47,6 @@
         <thead>
         <tr class="bg-gray-100">
             <th class="border border-gray-300 px-2 py-1">Année</th>
-            <th class="border border-gray-300 px-2 py-1">Type</th>
             @foreach($months as $month)
                 <th class="border border-gray-300 px-2 py-1">{{ $month }}</th>
             @endforeach
@@ -56,41 +55,19 @@
         </thead>
         <tbody>
 
-        @php
-            $internes = $deplacements['interne'];
-            $externes = $deplacements['externe'];
-        @endphp
-
         @foreach($years as $year)
-            @php
-                $totalInterne = 0;
-                $totalExterne = 0;
-            @endphp
+            @php $totalKilometers = 0; @endphp
             <tr>
                 <td class="border border-gray-300 px-2 py-1 font-semibold">{{ $year }}</td>
-                <td class="border border-gray-300 px-2 py-1">Interne</td>
                 @foreach(array_keys($months) as $nummonth)
                     <td class="border border-gray-300 px-2 py-1 text-right">
-                        @if(isset($internes[$year][$nummonth]))
-                            {{ $internes[$year][$nummonth] }}
-                            @php $totalInterne += $internes[$year][$nummonth]; @endphp
+                        @if(isset($deplacements[$year][$nummonth]))
+                            {{ $deplacements[$year][$nummonth] }}
+                            @php $totalKilometers += $deplacements[$year][$nummonth]; @endphp
                         @endif
                     </td>
                 @endforeach
-                <td class="border border-gray-300 px-2 py-1 text-right font-semibold">{{ $totalInterne }}</td>
-            </tr>
-            <tr>
-                <td class="border border-gray-300 px-2 py-1"></td>
-                <td class="border border-gray-300 px-2 py-1">Externe</td>
-                @foreach(array_keys($months) as $nummonth)
-                    <td class="border border-gray-300 px-2 py-1 text-right">
-                        @if(isset($externes[$year][$nummonth]))
-                            {{ $externes[$year][$nummonth] }}
-                            @php $totalExterne += $externes[$year][$nummonth]; @endphp
-                        @endif
-                    </td>
-                @endforeach
-                <td class="border border-gray-300 px-2 py-1 text-right font-semibold">{{ $totalExterne }}</td>
+                <td class="border border-gray-300 px-2 py-1 text-right font-semibold">{{ $totalKilometers }}</td>
             </tr>
         @endforeach
         </tbody>

@@ -18,8 +18,8 @@ use Illuminate\Support\Collection;
 final class DeclarationFactory
 {
     /**
-     * Create declarations from trips grouped by type_movement and rate period.
-     * Each declaration will contain trips that have the same type_movement and fall within the same rate period.
+     * Create declarations from trips grouped by rate period.
+     * Each declaration will contain the trips that fall within the same rate period.
      *
      * @param  array<Trip>|Collection<int, Trip>  $trips
      * @return Collection<int, Declaration>
@@ -45,18 +45,14 @@ final class DeclarationFactory
             fn (Trip $trip): array => [$trip->id => $resolver->resolveRate($trip)]
         );
 
-        // Group trips by type_movement and resolved rate
-        $groupedTrips = $trips->groupBy(function (Trip $trip) use ($ratesByTripId): string {
-            $rate = $ratesByTripId->get($trip->id);
-            $rateId = $rate?->id ?? 'no_rate';
-            $typeMovement = $trip->type_movement ?? 'unknown';
-
-            return $typeMovement.'_'.$rateId;
-        });
+        // Group trips by resolved rate
+        $groupedTrips = $trips->groupBy(
+            fn (Trip $trip): string => (string) ($ratesByTripId->get($trip->id)?->id ?? 'no_rate')
+        );
 
         $declarations = collect();
 
-        // Create a declaration for each type_movement + rate combination
+        // Create a declaration for each rate period
         foreach ($groupedTrips as $tripsInGroup) {
             $rate = $ratesByTripId->get($tripsInGroup->first()->id);
 
@@ -65,11 +61,8 @@ final class DeclarationFactory
                 continue;
             }
 
-            $typeMovement = $tripsInGroup->first()->type_movement;
-
             // Create the declaration with user and rate data
             $declaration = Declaration::create([
-                'type_movement' => $typeMovement,
                 'last_name' => $user->last_name,
                 'first_name' => $user->first_name,
                 'postal_code' => $personalInformation->postal_code,

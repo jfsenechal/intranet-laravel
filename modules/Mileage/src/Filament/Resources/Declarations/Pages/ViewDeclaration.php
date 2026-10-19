@@ -24,7 +24,7 @@ final class ViewDeclaration extends ViewRecord
 
     public function getTitle(): string
     {
-        return 'Déclaration num '.$this->record->id.' ('.$this->record->type_movement.')';
+        return 'Déclaration num '.$this->record->id;
     }
 
     public function infolist(Schema $schema): Schema

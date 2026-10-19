@@ -30,6 +30,6 @@ A budget article is always shown as `functional_code - economic_code name` (`Bud
 
 `FilamentTimezone::set(config('app.display_timezone'))` in `AppServiceProvider` would convert them: the `DateTimePicker` in `TripForm` therefore pins `->timezone(config('app.timezone'))`, and the table column uses `->date('d/m/Y')` (not `dateTime()`, which applies the display timezone). Same for any new column, entry or picker on this field.
 
-Only external trips were ever hit: on an internal trip the time inputs are hidden and Filament skips the timezone on a picker that stores no time. `mileage:fix-trip-timezone-shift` repaired the 20 rows written between the `FilamentTimezone` commit (2026-08-04) and the fix; it is one-off, re-running it over the same window shifts them twice.
+The 20 trips shifted between the `FilamentTimezone` commit (2026-08-04) and the fix were repaired by a one-off command, since removed.
 
 `created_at`/`updated_at` are genuine UTC timestamps and keep converting for display.

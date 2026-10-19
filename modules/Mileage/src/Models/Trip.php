@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'rate',
     'omnium',
     'user_add',
-    'type_movement',
     'meal_expense',
     'train_expense',
 ])]

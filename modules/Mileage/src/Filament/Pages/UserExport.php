@@ -37,7 +37,7 @@ final class UserExport extends Page implements HasForms
     /** @var array<int> */
     public array $years = [];
 
-    /** @var array{interne: array<int, array<int, int>>, externe: array<int, array<int, int>>} */
+    /** @var array<int, array<int, int>> Kilometers by year then month. */
     public array $trips = [];
 
     public string $selectedUsername = '';

@@ -36,7 +36,6 @@ final class DeclarationFactory extends Factory
             'rate' => fake()->randomFloat(4, 0.30, 0.50),
             'rate_omnium' => fake()->randomFloat(4, 0.01, 0.05),
             'user_add' => fake()->userName(),
-            'type_movement' => 'service',
             'college_date' => fake()->date(),
             'budget_article' => fake()->jobTitle(),
             'departments' => 'ville',

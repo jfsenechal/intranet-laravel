@@ -54,7 +54,6 @@
                     <thead>
                     <tr class="bg-gray-100 dark:bg-gray-700">
                         <th class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-left">Année</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-left">Type</th>
                         @foreach($months as $month)
                             <th class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center">{{ $month }}</th>
                         @endforeach
@@ -62,44 +61,20 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @php
-                        $internes = $trips['interne'];
-                        $externes = $trips['externe'];
-                    @endphp
-
                     @foreach($years as $year)
-                        @php
-                            $totalInterne = 0;
-                            $totalExterne = 0;
-                            $hasInterneData = isset($internes[$year]) && count($internes[$year]) > 0;
-                            $hasExterneData = isset($externes[$year]) && count($externes[$year]) > 0;
-                        @endphp
-
-                        @if($hasInterneData || $hasExterneData)
+                        @if(isset($trips[$year]) && count($trips[$year]) > 0)
+                            @php $totalKilometers = 0; @endphp
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 font-semibold" rowspan="2">{{ $year }}</td>
-                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1">Interne</td>
+                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 font-semibold">{{ $year }}</td>
                                 @foreach(array_keys($months) as $nummonth)
                                     <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-right">
-                                        @if(isset($internes[$year][$nummonth]))
-                                            {{ $internes[$year][$nummonth] }}
-                                            @php $totalInterne += $internes[$year][$nummonth]; @endphp
+                                        @if(isset($trips[$year][$nummonth]))
+                                            {{ $trips[$year][$nummonth] }}
+                                            @php $totalKilometers += $trips[$year][$nummonth]; @endphp
                                         @endif
                                     </td>
                                 @endforeach
-                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-right font-semibold">{{ $totalInterne }} km</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1">Externe</td>
-                                @foreach(array_keys($months) as $nummonth)
-                                    <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-right">
-                                        @if(isset($externes[$year][$nummonth]))
-                                            {{ $externes[$year][$nummonth] }}
-                                            @php $totalExterne += $externes[$year][$nummonth]; @endphp
-                                        @endif
-                                    </td>
-                                @endforeach
-                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-right font-semibold">{{ $totalExterne }} km</td>
+                                <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-right font-semibold">{{ $totalKilometers }} km</td>
                             </tr>
                         @endif
                     @endforeach

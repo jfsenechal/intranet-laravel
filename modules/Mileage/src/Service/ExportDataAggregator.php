@@ -54,7 +54,7 @@ final class ExportDataAggregator
     /**
      * Get data for user export.
      *
-     * @return array{declaration: Declaration|null, months: array<int, string>, years: array<int>, deplacements: array{interne: array<int, array<int, int>>, externe: array<int, array<int, int>>}}
+     * @return array{declaration: Declaration|null, months: array<int, string>, years: array<int>, deplacements: array<int, array<int, int>>}
      */
     public function byUser(string $username): array
     {
@@ -63,10 +63,7 @@ final class ExportDataAggregator
         $months = $this->getMonths();
         $years = range(2016, (int) date('Y') + 1);
 
-        $deplacements = [
-            'interne' => DeclarationRepository::getKilometersByYearMonth($username, 'interne'),
-            'externe' => DeclarationRepository::getKilometersByYearMonth($username, 'externe'),
-        ];
+        $deplacements = DeclarationRepository::getKilometersByYearMonth($username);
 
         return [
             'declaration' => $declaration,

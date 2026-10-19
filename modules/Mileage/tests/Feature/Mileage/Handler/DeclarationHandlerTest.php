@@ -18,7 +18,7 @@ beforeEach(function (): void {
 });
 
 describe('handleTrips', function (): void {
-    test('creates declarations from trips grouped by type_movement and rate', function (): void {
+    test('creates declarations from trips grouped by rate period', function (): void {
         // Create personal information for the user
         $personalInfo = PersonalInformation::factory()->create([
             'username' => $this->user->username,
@@ -46,9 +46,7 @@ describe('handleTrips', function (): void {
             'end_date' => '2030-12-31',
         ]);
 
-        // Create trips with different type_movement and dates
-        // Note: TripObserver creates every trip as 'interne'; legacy external
-        // trips are simulated by updating type_movement afterwards.
+        // Two trips in the first rate period, one in the second
         $trip1 = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2030-02-15',
@@ -66,33 +64,28 @@ describe('handleTrips', function (): void {
             'departure_date' => '2030-08-10',
             'declaration_id' => null,
         ]);
-        $trip3->update(['type_movement' => 'externe']);
 
         $trips = collect([$trip1, $trip2, $trip3]);
 
         // Call the handler
         $declarations = DeclarationFactory::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
 
-        // Assertions - should create 2 declarations (one per type_movement + rate combination)
+        // Assertions - should create 2 declarations (one per rate period)
         expect($declarations)->toHaveCount(2)
             ->and($declarations->first())->toBeInstanceOf(Declaration::class);
 
-        // Get the type_movements from created declarations
-        $typeMovements = $declarations->pluck('type_movement')->sort()->values()->all();
-        expect($typeMovements)->toBe(['externe', 'interne']);
-
-        // Find the interne declaration (for the first rate period)
-        $interneDeclaration = $declarations->firstWhere('type_movement', 'interne');
+        // Find the declaration of the first rate period
+        $firstPeriodDeclaration = $declarations->firstWhere('rate', '0.4000');
 
         // Verify declaration data
-        expect($interneDeclaration->last_name)->toBe($this->user->last_name)
-            ->and($interneDeclaration->first_name)->toBe($this->user->first_name)
-            ->and($interneDeclaration->postal_code)->toBe('6900')
-            ->and($interneDeclaration->street)->toBe('Rue de test')
-            ->and($interneDeclaration->city)->toBe('Marche')
-            ->and($interneDeclaration->iban)->toBe('BE68539007547034')
-            ->and($interneDeclaration->rate)->toBe('0.4000')
-            ->and($interneDeclaration->budget_article)->toBe($this->budgetArticle->name);
+        expect($firstPeriodDeclaration->last_name)->toBe($this->user->last_name)
+            ->and($firstPeriodDeclaration->first_name)->toBe($this->user->first_name)
+            ->and($firstPeriodDeclaration->postal_code)->toBe('6900')
+            ->and($firstPeriodDeclaration->street)->toBe('Rue de test')
+            ->and($firstPeriodDeclaration->city)->toBe('Marche')
+            ->and($firstPeriodDeclaration->iban)->toBe('BE68539007547034')
+            ->and($firstPeriodDeclaration->rate)->toBe('0.4000')
+            ->and($firstPeriodDeclaration->budget_article)->toBe($this->budgetArticle->name);
 
         // Verify trips are attached to declarations
         $trip1->refresh();
@@ -121,7 +114,6 @@ describe('handleTrips', function (): void {
         // Already declared trip should be skipped
         $declaredTrip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2030-02-15',
             'declaration_id' => $existingDeclaration->id,
         ]);
@@ -129,7 +121,6 @@ describe('handleTrips', function (): void {
         // Fresh trip should be declared
         $freshTrip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2030-03-15',
             'declaration_id' => null,
         ]);
@@ -166,7 +157,6 @@ describe('handleTrips', function (): void {
 
         $declaredTrip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2030-02-15',
             'declaration_id' => $existingDeclaration->id,
         ]);
@@ -204,7 +194,6 @@ describe('handleTrips', function (): void {
         // Trip outside rate period
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2025-12-31',
             'declaration_id' => null,
         ]);
@@ -229,7 +218,6 @@ describe('handleTrips', function (): void {
 
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2024-06-15',
             'declaration_id' => null,
         ]);
@@ -260,7 +248,6 @@ describe('handleTrips', function (): void {
 
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2024-06-15',
             'declaration_id' => null,
         ]);
@@ -289,7 +276,6 @@ describe('handleTrips', function (): void {
 
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2024-06-15',
             'declaration_id' => null,
         ]);
@@ -319,7 +305,6 @@ describe('handleTrips', function (): void {
 
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2024-06-15',
             'declaration_id' => null,
         ]);
@@ -334,7 +319,7 @@ describe('handleTrips', function (): void {
             ->and($departments)->toContain(RolesEnum::ROLE_FINANCE_DEPLACEMENT_CPAS->value);
     });
 
-    test('groups trips by both type_movement and rate period', function (): void {
+    test('creates one declaration per rate period', function (): void {
         $personalInfo = PersonalInformation::factory()->create([
             'username' => $this->user->username,
         ]);
@@ -351,17 +336,15 @@ describe('handleTrips', function (): void {
             'end_date' => '2024-12-31',
         ]);
 
-        // Same type, different rate periods
+        // Different rate periods
         $trip1 = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2024-02-15',
             'declaration_id' => null,
         ]);
 
         $trip2 = Trip::factory()->create([
             'user_id' => $this->user->id,
-            'type_movement' => 'interne',
             'departure_date' => '2024-08-15',
             'declaration_id' => null,
         ]);
@@ -370,7 +353,7 @@ describe('handleTrips', function (): void {
 
         $declarations = DeclarationFactory::handleTrips($trips, $this->user, $personalInfo, $this->budgetArticle);
 
-        // Should create 2 declarations (same type but different rate periods)
+        // Should create 2 declarations (different rate periods)
         expect($declarations)->toHaveCount(2);
 
         $trip1->refresh();

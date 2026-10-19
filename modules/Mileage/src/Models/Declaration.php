@@ -31,7 +31,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'rate',
     'rate_omnium',
     'user_add',
-    'type_movement',
     'college_date',
     'budget_article',
     'departments',

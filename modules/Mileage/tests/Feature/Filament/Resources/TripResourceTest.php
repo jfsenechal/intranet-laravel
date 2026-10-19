@@ -58,7 +58,7 @@ it('can list trips', function (): void {
 it('has table columns', function (string $column): void {
     livewire(ListTrips::class)
         ->assertTableColumnExists($column);
-})->with(['departure_date', 'distance', 'rate', 'amount', 'type_movement']);
+})->with(['departure_date', 'distance', 'rate', 'amount']);
 
 it('displays the trip amount and total summary', function (): void {
     $trips = collect([
@@ -84,17 +84,6 @@ it('can sort column', function (string $column): void {
         ->sortTable($column, 'desc')
         ->assertCanSeeTableRecords($trips->sortByDesc($column), inOrder: true);
 })->with(['departure_date', 'distance']);
-
-it('can search trips', function (): void {
-    $trips = Trip::factory(5)->create(['user_add' => 'jdupont']);
-    $trips->first()->update(['type_movement' => 'externe']);
-
-    livewire(ListTrips::class)
-        ->loadTable()
-        ->searchTable('externe')
-        ->assertCanSeeTableRecords($trips->where('type_movement', 'externe'))
-        ->assertCanNotSeeTableRecords($trips->where('type_movement', '!=', 'externe'));
-});
 
 it('can create a trip', function (): void {
     $trip = Trip::factory()->make(['user_add' => 'jdupont']);

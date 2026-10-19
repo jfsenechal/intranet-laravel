@@ -6,7 +6,6 @@ namespace AcMarche\Mileage\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\Mileage\Console\Commands\FixDeclarationRatesCommand;
-use AcMarche\Mileage\Console\Commands\FixTripTimezoneShiftCommand;
 use AcMarche\Mileage\Console\Commands\FixZeroTripRatesCommand;
 use AcMarche\Mileage\Console\Commands\VerifyTripRatesCommand;
 use Illuminate\Support\ServiceProvider;
@@ -28,7 +27,6 @@ final class MileageServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 FixDeclarationRatesCommand::class,
-                FixTripTimezoneShiftCommand::class,
                 FixZeroTripRatesCommand::class,
                 VerifyTripRatesCommand::class,
             ]);

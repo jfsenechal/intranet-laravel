@@ -6,7 +6,6 @@ namespace AcMarche\Mileage\Filament\Pages;
 
 use AcMarche\Mileage\Calculator\DeclarationCalculator;
 use AcMarche\Mileage\Enums\RolesEnum;
-use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Repository\DeclarationRepository;
@@ -84,10 +83,6 @@ final class AllDeclarations extends ListRecords
                     ->label('Prénom')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('type_movement')
-                    ->label('Type')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
                     ->date('d/m/Y')
@@ -123,9 +118,6 @@ final class AllDeclarations extends ListRecords
                         ->pluck('user_add', 'user_add')
                         ->toArray())
                     ->searchable(),
-                SelectFilter::make('type_movement')
-                    ->label('Type de déplacement')
-                    ->options(TypeMovementEnum::class),
                 Filter::make('created_at')
                     ->schema([
                         DatePicker::make('created_from')

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Filament\Resources\Declarations\Tables;
 
 use AcMarche\Mileage\Calculator\DeclarationCalculator;
-use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Models\Declaration;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -13,7 +12,6 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -44,10 +42,6 @@ final class DeclarationTables
                     ->label('Plaque')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('type_movement')
-                    ->label('Type')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
                     ->date()
@@ -76,9 +70,6 @@ final class DeclarationTables
                     ->money('EUR'),
             ])
             ->filters([
-                SelectFilter::make('type_movement')
-                    ->label('Type de déplacement')
-                    ->options(TypeMovementEnum::class),
                 Filter::make('created_at')
                     ->schema([
                         DatePicker::make('created_from')

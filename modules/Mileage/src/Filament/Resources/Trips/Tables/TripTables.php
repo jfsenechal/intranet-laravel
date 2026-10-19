@@ -15,7 +15,6 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,10 +56,6 @@ final class TripTables
                             ->money('EUR')
                             ->using(fn (QueryBuilder $query): float => app(TripAmountCalculator::class)->forQuery($query)),
                     ),
-                TextColumn::make('type_movement')
-                    ->label('Type')
-                    ->searchable()
-                    ->toggleable(),
                 IconColumn::make('declared')
                     ->label('Déclaré')
                     ->state(fn (Trip $record): bool => $record->isDeclared())
@@ -82,12 +77,6 @@ final class TripTables
                         false: fn ($query) => $query->whereNull('declaration_id'),
                     )
                     ->default(false),
-                SelectFilter::make('type_movement')
-                    ->label('Type')
-                    ->options([
-                        'externe' => 'Externe',
-                        'service' => 'Service',
-                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),

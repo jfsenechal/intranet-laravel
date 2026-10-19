@@ -24,7 +24,7 @@
                 @inlinedImage($logo)
             </td>
             <td class="border border-gray-300 p-3 text-center align-middle">
-                <h3 class="text-xl font-semibold">Frais de déplacements {{ $declaration->type_movement }}s</h3>
+                <h3 class="text-xl font-semibold">Frais de déplacements</h3>
             </td>
         </tr>
     </table>
@@ -92,11 +92,7 @@
     <p class="text-center font-bold mb-4">Le chef de service</p>
     <div class="page-breaker"></div>
 
-    @if($declaration->type_movement === 'interne')
-        @include('mileage::filament.export._internal_trips', ['rate' => $declaration->rate])
-    @elseif($declaration->type_movement === 'externe')
-        @include('mileage::filament.export._external_trips', ['rate' => $declaration->rate])
-    @endif
+    @include('mileage::filament.export._trips', ['rate' => $declaration->rate])
 
     <div class="page-breaker"></div>
 </div>

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\Mileage\Service;
 
-use AcMarche\Mileage\Enums\TypeMovementEnum;
 use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Rate;
 use AcMarche\Mileage\Models\Trip;
@@ -81,14 +80,6 @@ final class TripAttributeResolver
             ]);
 
         return $entitled + $notEntitled;
-    }
-
-    /**
-     * Trips no longer record their locations: every trip is an internal movement.
-     */
-    public function setTypeOfMovement(Trip $trip): void
-    {
-        $trip->type_movement = TypeMovementEnum::INTERNAL->value;
     }
 
     /**
