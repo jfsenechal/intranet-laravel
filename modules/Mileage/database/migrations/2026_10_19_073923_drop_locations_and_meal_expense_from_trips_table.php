@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Trips no longer record their departure and arrival locations nor a meal
-     * expense: every trip is now an internal movement.
+     * Trips no longer record their departure and arrival locations: every trip
+     * is now an internal movement. The meal expense is kept.
      */
     public function up(): void
     {
@@ -21,7 +21,7 @@ return new class extends Migration
         }
 
         $schema->table('trips', function (Blueprint $table): void {
-            //   $table->dropColumn(['departure_location', 'arrival_location', 'meal_expense']);
+            //   $table->dropColumn(['departure_location', 'arrival_location']);
         });
     }
 
@@ -34,7 +34,6 @@ return new class extends Migration
         }
 
         $schema->table('trips', function (Blueprint $table): void {
-            $table->decimal('meal_expense', 10, 2)->nullable();
             $table->string('departure_location')->nullable();
             $table->string('arrival_location')->nullable();
         });

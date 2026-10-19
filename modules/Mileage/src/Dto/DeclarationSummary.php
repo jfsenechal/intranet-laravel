@@ -11,6 +11,7 @@ final readonly class DeclarationSummary
         public float $totalMileageAllowance,
         public float $totalOmnium,
         public float $totalRefund,
+        public float $mealExpense,
         public float $trainExpense,
         public float $totalExpense,
     ) {}
@@ -22,6 +23,7 @@ final readonly class DeclarationSummary
             'total_mileage_allowance' => $this->totalMileageAllowance,
             'total_omnium' => $this->totalOmnium,
             'total_refund' => $this->totalRefund,
+            'meal_expense' => $this->mealExpense,
             'train_expense' => $this->trainExpense,
             'total_expense' => $this->totalExpense,
         ];

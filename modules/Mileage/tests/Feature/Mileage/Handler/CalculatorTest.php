@@ -20,12 +20,14 @@ describe('calculate', function (): void {
         Trip::factory()->create([
             'declaration_id' => $this->declaration->id,
             'distance' => 100,
+            'meal_expense' => 15.00,
             'train_expense' => 25.00,
         ]);
 
         Trip::factory()->create([
             'declaration_id' => $this->declaration->id,
             'distance' => 50,
+            'meal_expense' => 10.00,
             'train_expense' => 0.00,
         ]);
 
@@ -38,9 +40,10 @@ describe('calculate', function (): void {
             ->and($summary->totalKilometers)->toBe(150)
             ->and($summary->totalMileageAllowance)->toBe(60.00)
             ->and($summary->totalOmnium)->toBe(0.00)
-            ->and($summary->totalRefund)->toBe(85.00) // 60 mileage - 0 omnium + 25 expenses
+            ->and($summary->totalRefund)->toBe(110.00) // 60 mileage - 0 omnium + 50 expenses
+            ->and($summary->mealExpense)->toBe(25.00)
             ->and($summary->trainExpense)->toBe(25.00)
-            ->and($summary->totalExpense)->toBe(25.00);
+            ->and($summary->totalExpense)->toBe(50.00);
     });
 });
 
@@ -49,7 +52,6 @@ describe('legacy parity', function (): void {
         // Legacy AcMarche\FinanceFrais DeclarationManager::calculDeclaration():
         // totalARembourser = Σ(distance × tarif) + Σrepas + Σtrain
         //                    − (omnium ? distanceTotale × tarifOmnium : 0)
-        // Meal expenses (repas) are no longer recorded.
         $declaration = Declaration::factory()->create([
             'rate' => 0.4200,
             'rate_omnium' => 0.0300,
@@ -59,12 +61,14 @@ describe('legacy parity', function (): void {
         Trip::factory()->create([
             'declaration_id' => $declaration->id,
             'distance' => 120,
+            'meal_expense' => 15.50,
             'train_expense' => 42.00,
         ]);
 
         Trip::factory()->create([
             'declaration_id' => $declaration->id,
             'distance' => 80,
+            'meal_expense' => 10.00,
             'train_expense' => 0.00,
         ]);
 
@@ -73,16 +77,16 @@ describe('legacy parity', function (): void {
         $totalKilometers = 200;
         $mileage = round($totalKilometers * 0.42, 2);            // 84.00
         $omnium = round($totalKilometers * 0.03, 2);             // 6.00
-        $expenses = round(42.00, 2);                             // 42.00
-        $expectedTotalARembourser = round($mileage - $omnium + $expenses, 2); // 120.00
+        $expenses = round(15.50 + 42.00 + 10.00, 2);             // 67.50
+        $expectedTotalARembourser = round($mileage - $omnium + $expenses, 2); // 145.50
 
         $summary = (new DeclarationCalculator($declaration))->calculate();
 
         expect($summary->totalMileageAllowance)->toBe(84.00)
             ->and($summary->totalOmnium)->toBe(6.00)
-            ->and($summary->totalExpense)->toBe(42.00)
+            ->and($summary->totalExpense)->toBe(67.50)
             ->and($summary->totalRefund)->toBe($expectedTotalARembourser)
-            ->and($summary->totalRefund)->toBe(120.00);
+            ->and($summary->totalRefund)->toBe(145.50);
     });
 });
 
@@ -185,6 +189,39 @@ describe('calculateTotalRefund', function (): void {
     });
 });
 
+describe('calculateMealExpense', function (): void {
+    test('sums all trip meal expenses', function (): void {
+        Trip::factory()->create([
+            'declaration_id' => $this->declaration->id,
+            'meal_expense' => 15.50,
+        ]);
+
+        Trip::factory()->create([
+            'declaration_id' => $this->declaration->id,
+            'meal_expense' => 20.25,
+        ]);
+
+        $this->declaration->load('trips');
+
+        $calculator = new DeclarationCalculator($this->declaration);
+
+        expect($calculator->calculateMealExpense())->toBe(35.75);
+    });
+
+    test('returns zero when no meal expenses', function (): void {
+        Trip::factory()->create([
+            'declaration_id' => $this->declaration->id,
+            'meal_expense' => null,
+        ]);
+
+        $this->declaration->load('trips');
+
+        $calculator = new DeclarationCalculator($this->declaration);
+
+        expect($calculator->calculateMealExpense())->toBe(0.00);
+    });
+});
+
 describe('calculateTrainExpense', function (): void {
     test('sums all trip train expenses', function (): void {
         Trip::factory()->create([
@@ -219,13 +256,14 @@ describe('calculateTrainExpense', function (): void {
 });
 
 describe('calculateTotalExpense', function (): void {
-    test('rounds the train expenses', function (): void {
+    test('sums meal and train expenses', function (): void {
         $this->declaration->load('trips');
 
         $calculator = new DeclarationCalculator($this->declaration);
 
-        expect($calculator->calculateTotalExpense(30.004))->toBe(30.00)
-            ->and($calculator->calculateTotalExpense(0.00))->toBe(0.00);
+        expect($calculator->calculateTotalExpense(25.00, 30.00))->toBe(55.00)
+            ->and($calculator->calculateTotalExpense(0.00, 50.00))->toBe(50.00)
+            ->and($calculator->calculateTotalExpense(50.00, 0.00))->toBe(50.00);
     });
 });
 
@@ -236,6 +274,7 @@ describe('DeclarationSummary toArray', function (): void {
             totalMileageAllowance: 60.00,
             totalOmnium: 3.00,
             totalRefund: 57.00,
+            mealExpense: 25.00,
             trainExpense: 25.00,
             totalExpense: 50.00,
         );
@@ -245,6 +284,7 @@ describe('DeclarationSummary toArray', function (): void {
             'total_mileage_allowance' => 60.00,
             'total_omnium' => 3.00,
             'total_refund' => 57.00,
+            'meal_expense' => 25.00,
             'train_expense' => 25.00,
             'total_expense' => 50.00,
         ]);

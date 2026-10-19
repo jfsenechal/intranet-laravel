@@ -129,18 +129,28 @@ it('can update a trip not attached to a declaration', function (): void {
     ]);
 });
 
-it('cannot edit a trip attached to a declaration', function (): void {
+it('forbids the owner to edit a trip attached to a declaration', function (): void {
+    actingAsTripOwner();
     $declaration = Declaration::factory()->create();
-    $trip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+    $trip = Trip::factory()->create(['declaration_id' => $declaration->id]);
 
     livewire(EditTrip::class, ['record' => $trip->id])
         ->assertForbidden();
 });
 
-it('shows the edit table action only on trips not attached to a declaration', function (): void {
+it('lets an administrator edit a trip attached to a declaration', function (): void {
     $declaration = Declaration::factory()->create();
-    $undeclaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => null]);
-    $declaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+    $trip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+
+    livewire(EditTrip::class, ['record' => $trip->id])
+        ->assertOk();
+});
+
+it('shows the owner the edit table action only on trips not attached to a declaration', function (): void {
+    actingAsTripOwner();
+    $declaration = Declaration::factory()->create();
+    $undeclaredTrip = Trip::factory()->create(['declaration_id' => null]);
+    $declaredTrip = Trip::factory()->create(['declaration_id' => $declaration->id]);
 
     livewire(ListTrips::class)
         ->filterTable('declared', null)
@@ -149,16 +159,35 @@ it('shows the edit table action only on trips not attached to a declaration', fu
         ->assertActionHidden(TestAction::make('edit')->table($declaredTrip));
 });
 
-it('explains on the view page that a declared trip can no longer be changed', function (): void {
+it('explains on the view page that a declared trip is reserved to administrators', function (): void {
     $declaration = Declaration::factory()->create();
     $declaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
     $undeclaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => null]);
 
     livewire(ViewTrip::class, ['record' => $declaredTrip->id])
-        ->assertSee('il ne peut plus être modifié ni supprimé');
+        ->assertSee('seul un administrateur peut encore le modifier ou le supprimer');
 
     livewire(ViewTrip::class, ['record' => $undeclaredTrip->id])
-        ->assertDontSee('il ne peut plus être modifié ni supprimé');
+        ->assertDontSee('seul un administrateur peut encore le modifier ou le supprimer');
+});
+
+it('stores the meal expense entered in the form', function (): void {
+    $trip = Trip::factory()->make(['user_add' => 'jdupont']);
+
+    livewire(CreateTrip::class)
+        ->fillForm([
+            'distance' => $trip->distance,
+            'departure_date' => $trip->departure_date,
+            'content' => $trip->content,
+            'meal_expense' => 12.30,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Trip::class, [
+        'content' => $trip->content,
+        'meal_expense' => 12.30,
+    ]);
 });
 
 it('validates the form data', function (array $data, array $errors): void {
@@ -183,7 +212,7 @@ it('validates the form data', function (array $data, array $errors): void {
 it('prefills the trip details with the departure and arrival template', function (): void {
     livewire(CreateTrip::class)
         ->assertSchemaStateSet([
-            'content' => "Lieu de départ: Marche\nLieu d'arrivée: \nObjet: ",
+            'content' => "Lieu de départ: \nLieu d'arrivée: \nObjet: ",
         ]);
 });
 
@@ -255,3 +284,16 @@ it('can bulk delete trips', function (): void {
 
     $trips->each(fn (Trip $trip) => assertDatabaseMissing($trip));
 });
+
+/**
+ * Act as a beneficiary who is neither a global administrator nor a finance admin.
+ */
+function actingAsTripOwner(): User
+{
+    $owner = User::factory()->create(['username' => 'pmartin', 'is_administrator' => false]);
+    $owner->roles()->attach(Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]));
+    PersonalInformation::factory()->create(['username' => 'pmartin']);
+    test()->actingAs($owner);
+
+    return $owner;
+}

@@ -25,7 +25,7 @@ final class ViewTrip extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Hidden by TripPolicy once the trip is declared; the form explains why.
+            // Hidden by TripPolicy from the owner once the trip is declared; the form explains why.
             EditAction::make()
                 ->icon('tabler-edit'),
             DeleteAction::make()

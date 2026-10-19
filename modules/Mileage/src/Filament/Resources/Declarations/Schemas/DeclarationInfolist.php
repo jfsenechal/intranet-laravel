@@ -109,6 +109,13 @@ final class DeclarationInfolist
                                 ->state(fn (Declaration $record): float => self::getCalculator($record)->totalOmnium)
                                 ->money('EUR')
                                 ->visible(fn ($record): bool => $record->omnium),
+                            TextEntry::make('mealExpense')
+                                ->label('Frais de repas')
+                                ->state(fn (Declaration $record): float => self::getCalculator($record)->mealExpense)
+                                ->money('EUR')
+                                ->visible(
+                                    fn (Declaration $record): bool => self::getCalculator($record)->mealExpense > 0
+                                ),
                             TextEntry::make('trainExpense')
                                 ->label('Frais de train')
                                 ->state(fn (Declaration $record): float => self::getCalculator($record)->trainExpense)
@@ -170,6 +177,7 @@ final class DeclarationInfolist
             TableColumn::make('Date'),
             TableColumn::make('Motif'),
             TableColumn::make('Distance'),
+            TableColumn::make('Repas'),
             TableColumn::make('Train'),
         ];
 
@@ -192,6 +200,9 @@ final class DeclarationInfolist
                 ->limit(40),
             TextEntry::make('distance')
                 ->suffix(' km'),
+            TextEntry::make('meal_expense')
+                ->money('EUR')
+                ->placeholder('-'),
             TextEntry::make('train_expense')
                 ->money('EUR')
                 ->placeholder('-'),

@@ -15,7 +15,7 @@ final class TripPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->isAdministrator()) {
+        if ($this->isAdministrator($user)) {
             return true;
         }
 
@@ -27,10 +27,7 @@ final class TripPolicy
      */
     public function view(User $user, Trip $trip): bool
     {
-        if ($user->isAdministrator()) {
-            return true;
-        }
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+        if ($this->isAdministrator($user)) {
             return true;
         }
 
@@ -42,7 +39,7 @@ final class TripPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->isAdministrator()) {
+        if ($this->isAdministrator($user)) {
             return true;
         }
 
@@ -57,15 +54,12 @@ final class TripPolicy
      */
     public function update(User $user, Trip $trip): bool
     {
-        if ($trip->isDeclared()) {
-            return false;
+        if ($this->isAdministrator($user)) {
+            return true;
         }
 
-        if ($user->isAdministrator()) {
-            return true;
-        }
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
-            return true;
+        if ($trip->isDeclared()) {
+            return false;
         }
 
         return $trip->user_add === $user->username;
@@ -76,10 +70,7 @@ final class TripPolicy
      */
     public function delete(User $user, Trip $trip): bool
     {
-        if ($user->isAdministrator()) {
-            return true;
-        }
-        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+        if ($this->isAdministrator($user)) {
             return true;
         }
 
@@ -103,6 +94,18 @@ final class TripPolicy
      */
     public function forceDelete(): bool
     {
+        return false;
+    }
+
+    private function isAdministrator(User $user): bool
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
         return false;
     }
 }

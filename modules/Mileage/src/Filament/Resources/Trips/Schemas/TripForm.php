@@ -23,7 +23,7 @@ final class TripForm
                 Callout::make('Déplacement lié à une déclaration')
                     ->icon(Heroicon::LockClosed)
                     ->warning()
-                    ->description('Ce déplacement est déjà lié à une déclaration : il ne peut plus être modifié ni supprimé.')
+                    ->description('Ce déplacement est déjà lié à une déclaration : seul un administrateur peut encore le modifier ou le supprimer.')
                     ->visible(fn (?Trip $record): bool => $record?->isDeclared() ?? false)
                     ->columnSpanFull(),
                 Section::make('Informations du déplacement')
@@ -49,18 +49,23 @@ final class TripForm
                             ->required(),
                         Textarea::make('content')
                             ->label('Détail des courses')
-                            ->helperText('Lieu de départ + lieu d\'arrivée et Formation. Objet (suivi de chantier, autre lieu de prestation, ...)')
+                            ->helperText("Lieu de départ + lieu d'arrivée et Objet (Formation, suivi de chantier, autre lieu de prestation)")
                             ->maxLength(150)
-                            ->default("Lieu de départ: Marche\nLieu d'arrivée: \nObjet: ")
+                            ->default("Lieu de départ: \nLieu d'arrivée: \nObjet: ")
                             ->required()
                             ->rows(3)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make('Si vous avez quitté la zone 6900')
-                    ->icon('heroicon-o-exclamation-triangle')
-                    ->iconColor('danger')
+                Section::make('Autres frais')
                     ->schema([
+                        TextInput::make('meal_expense')
+                            ->label('Frais de repas')
+                            ->helperText('Max 12,30 euros')
+                            ->numeric()
+                            ->maxValue(12.3)
+                            ->step(0.01)
+                            ->prefix('€'),
                         TextInput::make('train_expense')
                             ->label('Frais de train ou de parking')
                             ->helperText('<!> Souche')

@@ -143,7 +143,7 @@ describe('create', function (): void {
 });
 
 describe('update', function (): void {
-    test('admin cannot update a declared trip', function (): void {
+    test('admin can update a declared trip', function (): void {
         $user = User::factory()->create(['username' => 'admin']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
         $user->roles()->attach($role);
@@ -156,7 +156,7 @@ describe('update', function (): void {
             'user_add' => 'other_user',
         ]);
 
-        expect($this->policy->update($user, $trip))->toBeFalse();
+        expect($this->policy->update($user, $trip))->toBeTrue();
     });
 
     test('owner cannot update their own declared trip', function (): void {

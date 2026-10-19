@@ -19,8 +19,9 @@ final readonly class DeclarationCalculator
         $totalKilometers = $this->calculateTotalKilometers();
         $totalMileageAllowance = $this->calculateTotalMileageAllowance($totalKilometers);
         $totalOmnium = $this->calculateTotalOmnium($totalKilometers);
+        $mealExpense = $this->calculateMealExpense();
         $trainExpense = $this->calculateTrainExpense();
-        $totalExpense = $this->calculateTotalExpense($trainExpense);
+        $totalExpense = $this->calculateTotalExpense($mealExpense, $trainExpense);
         $totalRefund = $this->calculateTotalRefund($totalMileageAllowance, $totalOmnium, $totalExpense);
 
         return new DeclarationSummary(
@@ -28,6 +29,7 @@ final readonly class DeclarationCalculator
             totalMileageAllowance: $totalMileageAllowance,
             totalOmnium: $totalOmnium,
             totalRefund: $totalRefund,
+            mealExpense: $mealExpense,
             trainExpense: $trainExpense,
             totalExpense: $totalExpense,
         );
@@ -54,7 +56,7 @@ final readonly class DeclarationCalculator
 
     /**
      * The reimbursement certified to the beneficiary: the mileage allowance net
-     * of the omnium retention, plus the train expenses. Mirrors the
+     * of the omnium retention, plus the meal and train expenses. Mirrors the
      * legacy `Declaration::totalARembourser` figure.
      */
     public function calculateTotalRefund(float $totalMileageAllowance, float $totalOmnium, float $totalExpense): float
@@ -62,13 +64,18 @@ final readonly class DeclarationCalculator
         return round($totalMileageAllowance - $totalOmnium + $totalExpense, 2);
     }
 
+    public function calculateMealExpense(): float
+    {
+        return round((float) $this->declaration->trips->sum('meal_expense'), 2);
+    }
+
     public function calculateTrainExpense(): float
     {
         return round((float) $this->declaration->trips->sum('train_expense'), 2);
     }
 
-    public function calculateTotalExpense(float $trainExpense): float
+    public function calculateTotalExpense(float $mealExpense, float $trainExpense): float
     {
-        return round($trainExpense, 2);
+        return round($mealExpense + $trainExpense, 2);
     }
 }

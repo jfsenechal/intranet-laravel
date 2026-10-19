@@ -65,7 +65,7 @@ final class TripTables
                     ->label('Déclaré')
                     ->state(fn (Trip $record): bool => $record->isDeclared())
                     ->tooltip(fn (Trip $record): ?string => $record->isDeclared()
-                        ? 'Lié à une déclaration : ne peut plus être modifié ni supprimé'
+                        ? 'Lié à une déclaration : seul un administrateur peut le modifier ou le supprimer'
                         : null)
                     ->boolean(),
                 TextColumn::make('created_at')
@@ -91,7 +91,7 @@ final class TripTables
             ])
             ->recordActions([
                 ViewAction::make(),
-                // Hidden by TripPolicy::update() once the trip is attached to a declaration.
+                // Hidden by TripPolicy::update() from the owner once the trip is attached to a declaration.
                 EditAction::make(),
             ])
             ->recordAction(ViewAction::class)
