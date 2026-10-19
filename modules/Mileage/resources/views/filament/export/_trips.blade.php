@@ -17,7 +17,7 @@
             <td class="border border-gray-300 p-2">
                 {{ $trip->departure_date?->format('d-m-Y') }}
             </td>
-            <td class="border border-gray-300 p-2">{{ Str::limit($trip->content, 50) }}</td>
+            <td class="border border-gray-300 p-2">{{ Str::limit($trip->content, 80) }}</td>
             <td class="border border-gray-300 p-2">{{ $trip->distance }}</td>
             <td class="border border-gray-300 p-2">{{ number_format($trip->meal_expense ?? 0, 2, ',', '.') }} €</td>
             <td class="border border-gray-300 p-2">{{ number_format($trip->train_expense ?? 0, 2, ',', '.') }} €</td>

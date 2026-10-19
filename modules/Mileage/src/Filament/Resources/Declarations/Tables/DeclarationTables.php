@@ -44,7 +44,7 @@ final class DeclarationTables
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Créé le')
-                    ->date()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 TextColumn::make('trips_count')
                     ->label('Déplacements')
