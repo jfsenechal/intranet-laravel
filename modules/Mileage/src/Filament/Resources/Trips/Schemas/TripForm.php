@@ -51,7 +51,7 @@ final class TripForm
                             ->label('Détail des courses')
                             ->helperText("Lieu de départ + lieu d'arrivée et Objet (Formation, suivi de chantier, autre lieu de prestation)")
                             ->maxLength(150)
-                            ->default("Lieu de départ: \nLieu d'arrivée: \nObjet: ")
+                            ->placeholder("Lieu de départ: \nLieu d'arrivée: \nObjet: ")
                             ->required()
                             ->rows(3)
                             ->columnSpanFull(),
