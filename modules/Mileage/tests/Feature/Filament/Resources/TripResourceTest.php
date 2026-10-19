@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
+use AcMarche\Mileage\Filament\Resources\Declarations\DeclarationResource;
 use AcMarche\Mileage\Filament\Resources\Trips\Pages\CreateTrip;
 use AcMarche\Mileage\Filament\Resources\Trips\Pages\EditTrip;
 use AcMarche\Mileage\Filament\Resources\Trips\Pages\ListTrips;
@@ -177,6 +178,19 @@ it('stores the meal expense entered in the form', function (): void {
         'content' => $trip->content,
         'meal_expense' => 12.30,
     ]);
+});
+
+it('links a declared trip to its declaration on the view page', function (): void {
+    $declaration = Declaration::factory()->create(['user_add' => 'jdupont']);
+    $declaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+    $undeclaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => null]);
+
+    livewire(ViewTrip::class, ['record' => $declaredTrip->id])
+        ->assertActionVisible('viewDeclaration')
+        ->assertActionHasUrl('viewDeclaration', DeclarationResource::getUrl('view', ['record' => $declaration]));
+
+    livewire(ViewTrip::class, ['record' => $undeclaredTrip->id])
+        ->assertActionHidden('viewDeclaration');
 });
 
 it('validates the form data', function (array $data, array $errors): void {
