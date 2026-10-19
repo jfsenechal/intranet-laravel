@@ -423,6 +423,7 @@ describe('export action', function (): void {
 
         $component = Livewire::test(ListTeleworks::class)
             ->loadTable()
+            ->toggleAllTableColumns()
             ->sortTable('manager_validated_at', 'desc')
             ->callAction('export', data: ['columns' => ['manager_validated_at']])
             ->assertHasNoActionErrors();

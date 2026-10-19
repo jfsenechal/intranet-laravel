@@ -12,7 +12,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -244,19 +243,20 @@ it('only lists notes authored by the current user', function (): void {
 });
 
 // Route model binding resolves through NoteResource::getEloquentQuery(), so another
-// user's note is simply not found. Over HTTP that surfaces as a 404; in a Livewire
-// unit test the exception propagates instead of becoming a response.
+// user's note is simply not found and the page answers with a 404.
 it('cannot view a note authored by somebody else', function (): void {
     $theirs = noteAuthoredBySomebodyElse();
 
-    livewire(ViewNote::class, ['record' => $theirs->id]);
-})->throws(ModelNotFoundException::class);
+    livewire(ViewNote::class, ['record' => $theirs->id])
+        ->assertNotFound();
+});
 
 it('cannot edit a note authored by somebody else', function (): void {
     $theirs = noteAuthoredBySomebodyElse();
 
-    livewire(EditNote::class, ['record' => $theirs->id]);
-})->throws(ModelNotFoundException::class);
+    livewire(EditNote::class, ['record' => $theirs->id])
+        ->assertNotFound();
+});
 
 it('lets a plain authenticated user list and create notes', function (): void {
     auth()->user()->update(['is_administrator' => false]);

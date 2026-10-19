@@ -17,6 +17,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Textarea;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -212,10 +213,11 @@ it('validates the form data', function (array $data, array $errors): void {
     '`content` is required' => [['content' => null], ['content' => 'required']],
 ]);
 
-it('prefills the trip details with the departure and arrival template', function (): void {
+it('shows the departure and arrival template as the trip details placeholder', function (): void {
     livewire(CreateTrip::class)
+        ->assertFormFieldExists('content', checkFieldUsing: fn (Textarea $field): bool => $field->getPlaceholder() === "Lieu de départ: \nLieu d'arrivée: \nObjet: ")
         ->assertSchemaStateSet([
-            'content' => "Lieu de départ: \nLieu d'arrivée: \nObjet: ",
+            'content' => null,
         ]);
 });
 
