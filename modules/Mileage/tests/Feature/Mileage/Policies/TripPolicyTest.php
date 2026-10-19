@@ -143,7 +143,7 @@ describe('create', function (): void {
 });
 
 describe('update', function (): void {
-    test('admin cannot update any trip', function (): void {
+    test('admin cannot update a declared trip', function (): void {
         $user = User::factory()->create(['username' => 'admin']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
         $user->roles()->attach($role);
@@ -159,7 +159,7 @@ describe('update', function (): void {
         expect($this->policy->update($user, $trip))->toBeFalse();
     });
 
-    test('owner cannot update their own trip', function (): void {
+    test('owner cannot update their own declared trip', function (): void {
         $user = User::factory()->create(['username' => 'owner']);
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
         $user->roles()->attach($role);
@@ -170,6 +170,42 @@ describe('update', function (): void {
             'user_id' => $user->id,
             'user_add' => 'owner',
         ]);
+
+        expect($this->policy->update($user, $trip))->toBeFalse();
+    });
+
+    test('admin can update a trip not declared', function (): void {
+        $user = User::factory()->create(['username' => 'admin']);
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value]);
+        $user->roles()->attach($role);
+
+        $trip = Trip::factory()->create(['declaration_id' => null]);
+        $trip->user_add = 'other_user';
+
+        expect($this->policy->update($user, $trip))->toBeTrue();
+    });
+
+    test('owner can update their own trip not declared', function (): void {
+        $user = User::factory()->create(['username' => 'owner']);
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
+        $user->roles()->attach($role);
+
+        $trip = Trip::factory()->create([
+            'declaration_id' => null,
+            'user_id' => $user->id,
+        ]);
+        $trip->user_add = $user->username;
+
+        expect($this->policy->update($user, $trip))->toBeTrue();
+    });
+
+    test('non-owner cannot update others trip not declared', function (): void {
+        $user = User::factory()->create(['username' => 'user1']);
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_FINANCE_DEPLACEMENT_VILLE->value]);
+        $user->roles()->attach($role);
+
+        $trip = Trip::factory()->create(['declaration_id' => null]);
+        $trip->user_add = 'user2';
 
         expect($this->policy->update($user, $trip))->toBeFalse();
     });

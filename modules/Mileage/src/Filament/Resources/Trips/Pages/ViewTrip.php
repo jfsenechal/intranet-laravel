@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\Mileage\Filament\Resources\Trips\Pages;
 
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
-use AcMarche\Mileage\Models\Trip;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
@@ -26,12 +25,9 @@ final class ViewTrip extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            // Hidden by TripPolicy once the trip is declared; the form explains why.
             EditAction::make()
-                ->icon('tabler-edit')
-                ->disabled(fn (Trip $trip): bool => $trip->isDeclared())
-                ->tooltip(
-                    fn (Trip $trip): ?string => $trip->isDeclared() ? 'Ce déplacement est déjà lié à une déclaration' : null
-                ),
+                ->icon('tabler-edit'),
             DeleteAction::make()
                 ->icon('tabler-trash'),
             RestoreAction::make(),

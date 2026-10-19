@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use AcMarche\Mileage\Enums\RolesEnum;
 use AcMarche\Mileage\Filament\Resources\Trips\Pages\CreateTrip;
+use AcMarche\Mileage\Filament\Resources\Trips\Pages\EditTrip;
 use AcMarche\Mileage\Filament\Resources\Trips\Pages\ListTrips;
 use AcMarche\Mileage\Filament\Resources\Trips\Pages\ViewTrip;
+use AcMarche\Mileage\Models\Declaration;
 use AcMarche\Mileage\Models\PersonalInformation;
 use AcMarche\Mileage\Models\Trip;
 use AcMarche\Security\Models\Role;
@@ -110,6 +112,53 @@ it('can create a trip', function (): void {
         'distance' => $trip->distance,
         'content' => $trip->content,
     ]);
+});
+
+it('can update a trip not attached to a declaration', function (): void {
+    $trip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => null]);
+
+    livewire(EditTrip::class, ['record' => $trip->id])
+        ->fillForm(['content' => 'Updated content'])
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    assertDatabaseHas(Trip::class, [
+        'id' => $trip->id,
+        'content' => 'Updated content',
+    ]);
+});
+
+it('cannot edit a trip attached to a declaration', function (): void {
+    $declaration = Declaration::factory()->create();
+    $trip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+
+    livewire(EditTrip::class, ['record' => $trip->id])
+        ->assertForbidden();
+});
+
+it('shows the edit table action only on trips not attached to a declaration', function (): void {
+    $declaration = Declaration::factory()->create();
+    $undeclaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => null]);
+    $declaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+
+    livewire(ListTrips::class)
+        ->filterTable('declared', null)
+        ->loadTable()
+        ->assertActionVisible(TestAction::make('edit')->table($undeclaredTrip))
+        ->assertActionHidden(TestAction::make('edit')->table($declaredTrip));
+});
+
+it('explains on the view page that a declared trip can no longer be changed', function (): void {
+    $declaration = Declaration::factory()->create();
+    $declaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => $declaration->id]);
+    $undeclaredTrip = Trip::factory()->create(['user_add' => 'jdupont', 'declaration_id' => null]);
+
+    livewire(ViewTrip::class, ['record' => $declaredTrip->id])
+        ->assertSee('il ne peut plus être modifié ni supprimé');
+
+    livewire(ViewTrip::class, ['record' => $undeclaredTrip->id])
+        ->assertDontSee('il ne peut plus être modifié ni supprimé');
 });
 
 it('validates the form data', function (array $data, array $errors): void {

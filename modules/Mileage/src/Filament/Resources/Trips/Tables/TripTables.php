@@ -10,6 +10,7 @@ use AcMarche\Mileage\Models\Trip;
 use AcMarche\Mileage\Repository\TripRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Summarizer;
@@ -63,6 +64,9 @@ final class TripTables
                 IconColumn::make('declared')
                     ->label('Déclaré')
                     ->state(fn (Trip $record): bool => $record->isDeclared())
+                    ->tooltip(fn (Trip $record): ?string => $record->isDeclared()
+                        ? 'Lié à une déclaration : ne peut plus être modifié ni supprimé'
+                        : null)
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
@@ -87,6 +91,8 @@ final class TripTables
             ])
             ->recordActions([
                 ViewAction::make(),
+                // Hidden by TripPolicy::update() once the trip is attached to a declaration.
+                EditAction::make(),
             ])
             ->recordAction(ViewAction::class)
             ->toolbarActions([

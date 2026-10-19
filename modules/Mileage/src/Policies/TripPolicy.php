@@ -51,10 +51,24 @@ final class TripPolicy
 
     /**
      * Determine whether the user can update the model.
+     *
+     * A trip attached to a declaration is a snapshot of what was declared and
+     * can no longer be modified, not even by an administrator.
      */
-    public function update(): bool
+    public function update(User $user, Trip $trip): bool
     {
-        return false;
+        if ($trip->isDeclared()) {
+            return false;
+        }
+
+        if ($user->isAdministrator()) {
+            return true;
+        }
+        if ($user->hasRole(RolesEnum::ROLE_FINANCE_DEPLACEMENT_ADMIN->value)) {
+            return true;
+        }
+
+        return $trip->user_add === $user->username;
     }
 
     /**

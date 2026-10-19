@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace AcMarche\Mileage\Filament\Resources\Trips\Schemas;
 
+use AcMarche\Mileage\Models\Trip;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Carbon;
 
 final class TripForm
@@ -17,6 +20,12 @@ final class TripForm
     {
         return $schema
             ->schema([
+                Callout::make('Déplacement lié à une déclaration')
+                    ->icon(Heroicon::LockClosed)
+                    ->warning()
+                    ->description('Ce déplacement est déjà lié à une déclaration : il ne peut plus être modifié ni supprimé.')
+                    ->visible(fn (?Trip $record): bool => $record?->isDeclared() ?? false)
+                    ->columnSpanFull(),
                 Section::make('Informations du déplacement')
                     ->schema([
                         TextInput::make('distance')
