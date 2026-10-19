@@ -30,8 +30,6 @@ use AcMarche\Hrm\Enums\RolesEnum as RoleEnumHrm;
 use AcMarche\Hrm\Providers\HrmServiceProvider;
 use AcMarche\Issep\Enums\RolesEnum as RoleEnumIssep;
 use AcMarche\Issep\Providers\IssepServiceProvider;
-use AcMarche\KnowledgeBase\Enums\RolesEnum as RoleEnumKnowledgeBase;
-use AcMarche\KnowledgeBase\Providers\KnowledgeBaseServiceProvider;
 use AcMarche\MealDelivery\Enums\RolesEnum as RoleEnumMealDelivery;
 use AcMarche\MealDelivery\Providers\MealDeliveryServiceProvider;
 use AcMarche\Mediation\Enums\RolesEnum as RoleEnumMediation;
@@ -96,7 +94,6 @@ final class SyncRolesCommand extends Command
             [DocumentServiceProvider::class, RoleEnumDocument::cases()],
             [EmailManagementServiceProvider::class, RoleEnumEmailManagement::cases()],
             [HrmServiceProvider::class, RoleEnumHrm::cases()],
-            [KnowledgeBaseServiceProvider::class, RoleEnumKnowledgeBase::cases()],
             [MealDeliveryServiceProvider::class, RoleEnumMealDelivery::cases()],
             [MediationServiceProvider::class, RoleEnumMediation::cases()],
             [MileageServiceProvider::class, RoleEnumMileage::cases()],

@@ -20,7 +20,6 @@ return [
     AcMarche\GuichetHdv\Providers\Filament\GuichetHdvPanelProvider::class,
     AcMarche\Hrm\Providers\Filament\HrmPanelProvider::class,
     AcMarche\Issep\Providers\Filament\IssepPanelProvider::class,
-    AcMarche\KnowledgeBase\Providers\Filament\KnowledgeBasePanelProvider::class,
     AcMarche\MailingList\Providers\Filament\MailingListPanelProvider::class,
     AcMarche\MealDelivery\Providers\Filament\MealDeliveryPanelProvider::class,
     AcMarche\Mediation\Providers\Filament\MediationPanelProvider::class,
