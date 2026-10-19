@@ -6,17 +6,17 @@ namespace AcMarche\EmailManagement\Console\Commands;
 
 use AcMarche\EmailManagement\Sieve\SieveEmploye;
 use Illuminate\Console\Command;
+use Net_Sieve;
 use Override;
-use PhpSieveManager\ManageSieve\Client;
+use PEAR_Error;
 use Symfony\Component\Console\Command\Command as SfCommand;
 use Throwable;
 
 /**
  * Diagnoses a ManageSieve connection one step at a time.
  *
- * The client reports an authentication refusal as a bare "Error while trying to connect to
- * ManageSieve", which says nothing about why. This walks the same path -- socket, capabilities,
- * mechanisms, authentication -- and reports what the server actually offered and answered.
+ * The vacation action only reports that the login failed. This walks the same path -- socket,
+ * capabilities, mechanisms, authentication -- and reports what the server actually offered and answered.
  */
 final class SieveCheckCommand extends Command
 {
@@ -60,7 +60,7 @@ final class SieveCheckCommand extends Command
             return SfCommand::FAILURE;
         }
 
-        return $this->checkClient((string) $host, $port, (string) $admin, (string) $password, $mechanism, $asUser);
+        return $this->checkClient((string) $admin, (string) $password, $mechanism, $asUser);
     }
 
     private function checkSocket(string $host, int $port): bool
@@ -80,27 +80,33 @@ final class SieveCheckCommand extends Command
         return true;
     }
 
-    private function checkClient(string $host, int $port, string $admin, string $password, ?string $mechanism, ?string $asUser): int
+    private function checkClient(string $admin, string $password, ?string $mechanism, ?string $asUser): int
     {
-        $client = new Client($host, $port);
+        $sieveEmploye = SieveEmploye::fromConfig();
+
+        try {
+            $client = $sieveEmploye->connect();
+        } catch (Throwable $e) {
+            $this->components->error($e->getMessage());
+
+            return SfCommand::FAILURE;
+        }
+
+        $this->reportCapabilities($client);
+        $this->newLine();
 
         // The same username the vacation action authenticates with, so this exercises the real
         // path rather than one the application never takes.
-        $username = $asUser !== null ? SieveEmploye::fromConfig()->proxyUsername($asUser) : $admin;
+        $username = $asUser !== null ? $sieveEmploye->proxyUsername($asUser) : $admin;
 
         $this->components->twoColumnDetail('Authentification', $username);
 
-        try {
-            $client->connect($username, $password, false, '', $mechanism ?: null);
-        } catch (Throwable $e) {
-            $this->reportCapabilities($client);
+        $result = $client->login($username, $password, $mechanism ?: null);
+
+        if ($result instanceof PEAR_Error) {
+            $client->disconnect();
             $this->newLine();
-            $this->components->error('Authentification refusée : '.$e->getMessage());
-
-            if ($client->getErrorMessage()) {
-                $this->line('  Réponse du serveur : '.$client->getErrorMessage());
-            }
-
+            $this->components->error('Authentification refusée : '.mb_trim((string) $result->getMessage(), '" '));
             $this->newLine();
             $this->line('  Pistes :');
 
@@ -115,41 +121,32 @@ final class SieveCheckCommand extends Command
             return SfCommand::FAILURE;
         }
 
-        $this->reportCapabilities($client);
         $this->newLine();
         $this->components->info('Authentification réussie'.($asUser !== null ? " pour {$asUser}." : '.'));
 
         if ($asUser !== null) {
-            $this->reportScripts($client);
+            $this->reportScripts($sieveEmploye, $client);
         }
 
-        $client->close();
+        $client->disconnect();
 
         return SfCommand::SUCCESS;
     }
 
-    private function reportCapabilities(Client $client): void
+    private function reportCapabilities(Net_Sieve $client): void
     {
-        try {
-            $capabilities = $client->getCapabilities();
-        } catch (Throwable $e) {
-            $this->components->warn('Capacités illisibles : '.$e->getMessage());
-
-            return;
-        }
-
-        foreach ((array) $capabilities as $name => $value) {
+        foreach (['SASL' => $client->getAuthMechs(), 'Extensions' => $client->getExtensions()] as $name => $values) {
             $this->components->twoColumnDetail(
-                (string) $name,
-                is_array($value) ? implode(', ', $value) : (string) $value,
+                $name,
+                is_array($values) ? implode(', ', $values) : '<illisible>',
             );
         }
     }
 
-    private function reportScripts(Client $client): void
+    private function reportScripts(SieveEmploye $sieveEmploye, Net_Sieve $client): void
     {
         try {
-            $scripts = SieveEmploye::fromConfig()->listScripts($client);
+            $scripts = $sieveEmploye->listScripts($client);
         } catch (Throwable $e) {
             $this->components->warn('Scripts illisibles : '.$e->getMessage());
 

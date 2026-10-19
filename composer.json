@@ -94,10 +94,6 @@
         },
         {
             "type": "path",
-            "url": "./modules/KnowledgeBase"
-        },
-        {
-            "type": "path",
             "url": "./modules/Offenses"
         },
         {
@@ -160,7 +156,6 @@
         "acmarche/guichet-hdv": "*@dev",
         "acmarche/hrm": "*@dev",
         "acmarche/issep": "*@dev",
-        "acmarche/knowledge-base": "*@dev",
         "acmarche/mailing-list": "*@dev",
         "acmarche/meal-delivery": "*@dev",
         "acmarche/mediation": "*@dev",
@@ -182,7 +177,6 @@
         "directorytree/ldaprecord-laravel": "^v4.0.5",
         "filament/filament": "^v5.9.0",
         "filament/spatie-laravel-media-library-plugin": "^5.0",
-        "henrique-borba/php-sieve-manager": "^1.0",
         "intervention/validation": "^4.7.0",
         "laravel-notification-channels/webpush": "^13.0.0",
         "laravel/ai": "^v1.2.0",
@@ -195,6 +189,7 @@
         "laravel/tinker": "^v3.0.2",
         "meilisearch/meilisearch-php": "^v1.17.0",
         "nunomaduro/essentials": "^v1.2.0",
+        "pear/net_sieve": "^1.4.8",
         "phiki/phiki": "^2.0",
         "psy/psysh": "^0.12.19",
         "secondnetwork/blade-tabler-icons": "^v3.49.0",

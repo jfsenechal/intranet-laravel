@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Sieve;
 
 use Exception;
-use PhpSieveManager\Exceptions\SieveException;
-use PhpSieveManager\ManageSieve\Client;
-use Throwable;
+use Net_Sieve;
+use PEAR_Error;
 
 /**
  * ManageSieve scripts for staff accounts, reached with the admin account.
  *
- * The admin authenticates and then acts on behalf of the account through the
- * authorisation id, the same way ImapEmploye proxies over IMAP.
+ * The admin authenticates and then acts on behalf of the account, the same way
+ * ImapEmploye proxies over IMAP.
  */
 final class SieveEmploye
 {
-    private ?Client $client = null;
+    private ?Net_Sieve $client = null;
 
     public function __construct(
         private readonly ?string $host = null,
@@ -37,18 +36,17 @@ final class SieveEmploye
     }
 
     /**
-     * Parses a LISTSCRIPTS response, one `"name"` or `"name" ACTIVE` per line (RFC 5804).
+     * Every script name, keyed to whether it is the active one.
      *
+     * @param  list<string>  $names
      * @return array<string, bool>
      */
-    public static function parseScriptList(string $response): array
+    public static function indexScripts(array $names, ?string $active): array
     {
         $scripts = [];
 
-        foreach (preg_split('/\r?\n/', $response) ?: [] as $line) {
-            if (preg_match('/^"((?:[^"\\\\]|\\\\.)*)"(\s+ACTIVE)?\s*$/i', mb_trim($line), $matches) === 1) {
-                $scripts[stripslashes($matches[1])] = isset($matches[2]);
-            }
+        foreach ($names as $name) {
+            $scripts[$name] = $name === $active;
         }
 
         return $scripts;
@@ -64,6 +62,26 @@ final class SieveEmploye
         return is_string($active) ? $active : null;
     }
 
+    /**
+     * Net_Sieve reports failures by returning a PEAR_Error rather than throwing;
+     * this turns one into an exception and passes any other result through.
+     *
+     * @template T
+     *
+     * @param  T|PEAR_Error  $result
+     * @return T
+     *
+     * @throws Exception
+     */
+    public static function guard(mixed $result, string $context): mixed
+    {
+        if ($result instanceof PEAR_Error) {
+            throw new Exception($context.' Réponse du serveur : '.mb_trim((string) $result->getMessage(), '" '), (int) $result->getCode());
+        }
+
+        return $result;
+    }
+
     public function isConfigured(): bool
     {
         return $this->host !== null && $this->host !== ''
@@ -72,24 +90,43 @@ final class SieveEmploye
     }
 
     /**
+     * Opens the connection without authenticating, so a diagnosis can read what the
+     * server offers before the login is attempted.
+     *
+     * TLS is left off, as with the previous client: the server is reached on the internal network.
+     *
      * @throws Exception
      */
-    public function login(string $asUser): Client
+    public function connect(): Net_Sieve
     {
         if (! $this->isConfigured()) {
             throw new Exception('Les identifiants Sieve ne sont pas configurés (SIEVE_*).');
         }
 
-        $client = new Client($this->host, $this->port);
+        $client = new Net_Sieve();
 
-        try {
-            if (! $client->connect($this->proxyUsername($asUser), $this->password, false, '', $this->authMechanism())) {
-                throw new Exception($this->describeFailure($client, $asUser));
-            }
-        } catch (SieveException $e) {
-            // connect() throws this rather than returning false when authentication is
-            // refused, which would otherwise lose the server's own response.
-            throw new Exception($this->describeFailure($client, $asUser, $e), $e->getCode(), $e);
+        self::guard(
+            $client->connect($this->host, (string) $this->port, null, false),
+            "Serveur Sieve injoignable ({$this->host}:{$this->port}).",
+        );
+
+        return $client;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function login(string $asUser): Net_Sieve
+    {
+        $client = $this->connect();
+
+        $result = $client->login($this->proxyUsername($asUser), $this->password, $this->authMechanism());
+
+        if ($result instanceof PEAR_Error) {
+            $message = $this->describeFailure($client, $asUser, $result);
+            $client->disconnect();
+
+            throw new Exception($message, (int) $result->getCode());
         }
 
         return $this->client = $client;
@@ -98,10 +135,7 @@ final class SieveEmploye
     /**
      * The account to authenticate as, in Dovecot's master user form.
      *
-     * The library takes an authorisation id but its PLAIN and LOGIN mechanisms drop it on the
-     * floor -- only DIGEST-MD5 sends one, and this server offers neither. So the account being
-     * acted upon has to travel in the username instead, which is the same "user*admin" Dovecot
-     * accepts over IMAP and which ImapEmploye already relies on.
+     * The same "user*admin" Dovecot accepts over IMAP and which ImapEmploye already relies on.
      */
     public function proxyUsername(string $asUser): string
     {
@@ -116,15 +150,10 @@ final class SieveEmploye
     public function setVacation(string $user, string $script): void
     {
         try {
-            $client = $this->login($user);
-
-            if (! $client->putScript(VacationScript::SCRIPT_NAME, $script)) {
-                throw new Exception($client->getErrorMessage() ?: "Le script n'a pas été accepté par le serveur.");
-            }
-
-            if (! $client->activateScript(VacationScript::SCRIPT_NAME)) {
-                throw new Exception($client->getErrorMessage() ?: "Le script n'a pas pu être activé.");
-            }
+            self::guard(
+                $this->login($user)->installScript(VacationScript::SCRIPT_NAME, $script, true),
+                "Le script n'a pas été accepté par le serveur.",
+            );
         } finally {
             $this->close();
         }
@@ -138,9 +167,15 @@ final class SieveEmploye
     public function getVacation(string $user): ?string
     {
         try {
-            $script = $this->login($user)->getScript(VacationScript::SCRIPT_NAME);
+            $client = $this->login($user);
 
-            return is_string($script) && $script !== '' ? $script : null;
+            if (! array_key_exists(VacationScript::SCRIPT_NAME, $this->listScripts($client))) {
+                return null;
+            }
+
+            $script = self::guard($client->getScript(VacationScript::SCRIPT_NAME), 'Impossible de lire le script.');
+
+            return $script !== '' ? $script : null;
         } finally {
             $this->close();
         }
@@ -173,22 +208,16 @@ final class SieveEmploye
     /**
      * Every script on the account, keyed by name, with whether it is the active one.
      *
-     * The client's own listScripts() strips the ACTIVE marker, so the raw LISTSCRIPTS
-     * response is read instead.
-     *
      * @return array<string, bool>
      *
      * @throws Exception
      */
-    public function listScripts(Client $client): array
+    public function listScripts(Net_Sieve $client): array
     {
-        $payload = $client->sendCommand('LISTSCRIPTS', null, true);
+        $active = null;
+        $names = self::guard($client->listScripts($active), 'Impossible de lister les scripts.');
 
-        if ($payload['code'] !== 'OK') {
-            throw new Exception($client->getErrorMessage() ?: 'Impossible de lister les scripts.');
-        }
-
-        return self::parseScriptList((string) $payload['response']);
+        return self::indexScripts(array_values((array) $names), is_string($active) ? $active : null);
     }
 
     /**
@@ -200,15 +229,11 @@ final class SieveEmploye
             $client = $this->login($user);
 
             // The server refuses to delete the active script (RFC 5804), so it is switched off first.
-            $isActive = self::findActiveScript($this->listScripts($client)) === VacationScript::SCRIPT_NAME;
-
-            if ($isActive && ! $client->activateScript('')) {
-                throw new Exception($client->getErrorMessage() ?: "Le script n'a pas pu être désactivé.");
+            if (self::findActiveScript($this->listScripts($client)) === VacationScript::SCRIPT_NAME) {
+                self::guard($client->setActive(''), "Le script n'a pas pu être désactivé.");
             }
 
-            if (! $client->removeScripts(VacationScript::SCRIPT_NAME)) {
-                throw new Exception($client->getErrorMessage() ?: "Le script n'a pas pu être supprimé.");
-            }
+            self::guard($client->removeScript(VacationScript::SCRIPT_NAME), "Le script n'a pas pu être supprimé.");
         } finally {
             $this->close();
         }
@@ -216,16 +241,16 @@ final class SieveEmploye
 
     public function close(): void
     {
-        $this->client?->close();
+        $this->client?->disconnect();
         $this->client = null;
     }
 
     /**
-     * The mechanism to authenticate with, or null to let the client choose.
+     * The mechanism to authenticate with, or null to let the client pick the strongest
+     * one the server offers.
      *
-     * Worth pinning: the client attempts only the first mechanism the server advertises and
-     * gives up rather than trying the rest, so a server offering DIGEST-MD5 never reaches
-     * PLAIN -- which is what admin proxy auth needs.
+     * Worth pinning: admin proxy auth needs PLAIN, and the client would otherwise prefer
+     * DIGEST-MD5 or CRAM-MD5 when the server advertises them.
      */
     private function authMechanism(): ?string
     {
@@ -237,28 +262,19 @@ final class SieveEmploye
     /**
      * Adds what the server said, and what it offered, to an otherwise bare failure.
      */
-    private function describeFailure(Client $client, string $asUser, ?SieveException $e = null): string
+    private function describeFailure(Net_Sieve $client, string $asUser, PEAR_Error $error): string
     {
+        $mechanisms = $client->getAuthMechs();
+
         $parts = array_filter([
-            $e?->getMessage() ?: "Connexion Sieve refusée pour {$asUser}.",
-            $client->getErrorMessage() ? 'Réponse du serveur : '.$client->getErrorMessage() : null,
-            $this->describeMechanisms($client),
+            "Connexion Sieve refusée pour {$asUser}.",
+            'Réponse du serveur : '.mb_trim((string) $error->getMessage(), '" '),
+            is_array($mechanisms) && $mechanisms !== []
+                ? 'Mécanismes proposés : '.implode(', ', $mechanisms).($this->authMechanism() !== null ? ' (demandé : '.$this->authMechanism().')' : '')
+                : null,
             'Compte : '.$this->user.', pour : '.$asUser.', serveur : '.$this->host.':'.$this->port,
         ]);
 
         return implode(' | ', $parts);
-    }
-
-    private function describeMechanisms(Client $client): ?string
-    {
-        try {
-            $mechanisms = $client->getSASLMechanisms();
-        } catch (Throwable) {
-            return null;
-        }
-
-        return is_array($mechanisms) && $mechanisms !== []
-            ? 'Mécanismes proposés : '.implode(', ', $mechanisms).($this->authMechanism() !== null ? ' (demandé : '.$this->authMechanism().')' : '')
-            : null;
     }
 }
