@@ -38,22 +38,11 @@ final class TripForm
                             // and read back verbatim, so the picker must not convert it.
                             ->timezone(config('app.timezone'))
                             ->required(),
-                        TextInput::make('departure_location')
-                            ->label('Lieu de départ')
-                            ->maxLength(255)
-                            ->minLength(2)
-                            ->live(onBlur: true)
-                            ->requiredWith('arrival_location'),
-                        TextInput::make('arrival_location')
-                            ->label('Lieu d\'arrivée')
-                            ->maxLength(255)
-                            ->minLength(2)
-                            ->live(onBlur: true)
-                            ->requiredWith('departure_location'),
                         Textarea::make('content')
-                            ->label('Objet.')
-                            ->helperText(' (Formation, suivi de chantier, autre lieu de prestation, ...),Maximum 80 caractères')
-                            ->maxLength(80)
+                            ->label('Détail des courses')
+                            ->helperText('Lieu de départ + lieu d\'arrivée et Formation. Objet (suivi de chantier, autre lieu de prestation, ...)')
+                            ->maxLength(150)
+                            ->default("Lieu de départ: Marche\nLieu d'arrivée: \nObjet: ")
                             ->required()
                             ->rows(3)
                             ->columnSpanFull(),
@@ -63,23 +52,13 @@ final class TripForm
                     ->icon('heroicon-o-exclamation-triangle')
                     ->iconColor('danger')
                     ->schema([
-
-                        TextInput::make('meal_expense')
-                            ->label('Frais de repas')
-                            ->helperText('Max 12,30 euros')
-                            ->numeric()
-                            ->maxValue(12.3)
-                            ->step(0.01)
-                            ->prefix('€'),
                         TextInput::make('train_expense')
                             ->label('Frais de train ou de parking')
                             ->helperText('<!> Souche')
                             ->numeric()
-                            ->columnSpan(2)
                             ->step(0.01)
                             ->prefix('€'),
-                    ])
-                    ->columns(3),
+                    ]),
             ]);
     }
 }

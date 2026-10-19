@@ -22,7 +22,7 @@
             </li>
             <li>
                 <span class="font-medium">Joignez les justificatifs</span>
-                <p class="ml-6 text-sm text-gray-500 dark:text-gray-400">Agrafez les éventuelles souches de frais (repas, tickets de train, parking) à votre déclaration.</p>
+                <p class="ml-6 text-sm text-gray-500 dark:text-gray-400">Agrafez les éventuelles souches de frais (tickets de train, parking) à votre déclaration.</p>
             </li>
             <li>
                 <span class="font-medium">Déposez votre déclaration</span>

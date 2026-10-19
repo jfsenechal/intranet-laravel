@@ -83,14 +83,12 @@ final class TripAttributeResolver
         return $entitled + $notEntitled;
     }
 
+    /**
+     * Trips no longer record their locations: every trip is an internal movement.
+     */
     public function setTypeOfMovement(Trip $trip): void
     {
-        $isExternal = filled($trip->departure_location)
-            && filled($trip->arrival_location);
-
-        $trip->type_movement = $isExternal
-            ? TypeMovementEnum::EXTERNAL->value
-            : TypeMovementEnum::INTERNAL->value;
+        $trip->type_movement = TypeMovementEnum::INTERNAL->value;
     }
 
     /**

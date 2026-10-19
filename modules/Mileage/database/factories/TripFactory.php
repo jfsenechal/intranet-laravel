@@ -36,9 +36,6 @@ final class TripFactory extends Factory
             'omnium' => fake()->randomFloat(4, 0, 10),
             'user_add' => fake()->userName(),
             'type_movement' => 'service',
-            'departure_location' => fake()->city(),
-            'arrival_location' => fake()->city(),
-            'meal_expense' => fake()->randomFloat(2, 0, 50),
             'train_expense' => fake()->randomFloat(2, 0, 100),
         ];
     }

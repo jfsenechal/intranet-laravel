@@ -35,15 +35,6 @@ final class TripTables
                     // clock, so Filament's display timezone must not shift it.
                     ->date('d/m/Y')
                     ->sortable(),
-                TextColumn::make('departure_location')
-                    ->label('Départ')
-                    ->searchable()
-                    ->limit(30),
-                TextColumn::make('arrival_location')
-                    ->label('Arrivée')
-                    ->searchable()
-                    ->limit(30)
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('distance')
                     ->label('Distance')
                     ->sortable()

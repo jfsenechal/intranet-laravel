@@ -31,9 +31,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'omnium',
     'user_add',
     'type_movement',
-    'departure_location',
-    'arrival_location',
-    'meal_expense',
     'train_expense',
 ])]
 final class Trip extends Model
@@ -74,7 +71,6 @@ final class Trip extends Model
             'departure_date' => 'datetime',
             'rate' => 'decimal:4',
             'omnium' => 'decimal:4',
-            'meal_expense' => 'decimal:2',
             'train_expense' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

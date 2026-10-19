@@ -25,11 +25,9 @@ beforeEach(function (): void {
     ]);
 });
 
-test('resolves the June rate for an external trip departing on the last day of the period', function (): void {
+test('resolves the June rate for a trip departing on the last day of the period', function (): void {
     $trip = Trip::factory()->make([
         'departure_date' => '2026-06-30 00:00:00',
-        'departure_location' => 'Marche-en-Famenne',
-        'arrival_location' => 'Namur',
     ]);
 
     expect($this->resolver->resolveRate($trip)?->id)->toBe($this->june->id);
@@ -38,8 +36,6 @@ test('resolves the June rate for an external trip departing on the last day of t
 test('resolves the June rate for a trip leaving during the last day of the period', function (): void {
     $trip = Trip::factory()->make([
         'departure_date' => '2026-06-30 08:30:00',
-        'departure_location' => 'Marche-en-Famenne',
-        'arrival_location' => 'Namur',
     ]);
 
     expect($this->resolver->resolveRate($trip)?->id)->toBe($this->june->id);

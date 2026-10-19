@@ -233,79 +233,21 @@ describe('recompute on update', function (): void {
             ->and($trip->fresh()->omnium)->toBe('0.0300');
     });
 
-    test('recomputes type of movement when the locations are completed', function (): void {
+    test('creates every trip as an internal movement', function (): void {
         $trip = Trip::factory()->create([
             'user_id' => $this->user->id,
             'departure_date' => '2024-06-15',
-            'departure_location' => null,
-            'arrival_location' => null,
+            'type_movement' => TypeMovementEnum::EXTERNAL->value,
         ]);
 
-        expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
-
-        $trip->update([
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-        ]);
-
-        expect($trip->fresh()->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
+        expect($trip->fresh()->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
     });
 });
 
 describe('setTypeOfMovement', function (): void {
-    test('sets type to EXTERNAL when both locations are filled', function (): void {
-        $trip = Trip::factory()->create([
-            'user_id' => $this->user->id,
-            'departure_date' => '2024-06-15',
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-            'type_movement' => null,
-        ]);
-
-        $this->handler->setTypeOfMovement($trip);
-
-        expect($trip->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
-    });
-
-    test('sets type to INTERNAL when any location is missing', function (?string $departureLocation, ?string $arrivalLocation): void {
-        $trip = Trip::factory()->create([
-            'user_id' => $this->user->id,
-            'departure_date' => '2024-06-15',
-            'departure_location' => $departureLocation,
-            'arrival_location' => $arrivalLocation,
-            'type_movement' => null,
-        ]);
-
-        $this->handler->setTypeOfMovement($trip);
-
-        expect($trip->type_movement)->toBe(TypeMovementEnum::INTERNAL->value);
-    })->with([
-        'nothing filled' => [null, null],
-        'only departure_location' => ['Marche', null],
-        'only arrival_location' => [null, 'Namur'],
-    ]);
-
-    test('overwrites existing type_movement when both locations are filled', function (): void {
-        $trip = Trip::factory()->create([
-            'user_id' => $this->user->id,
-            'departure_date' => '2024-06-15',
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-            'type_movement' => 'interne',
-        ]);
-
-        $this->handler->setTypeOfMovement($trip);
-
-        expect($trip->type_movement)->toBe(TypeMovementEnum::EXTERNAL->value);
-    });
-
-    test('overwrites existing type_movement when a location is missing', function (): void {
-        $trip = Trip::factory()->create([
-            'user_id' => $this->user->id,
-            'departure_date' => '2024-06-15',
-            'departure_location' => 'Marche',
-            'arrival_location' => null,
-            'type_movement' => 'externe',
+    test('overwrites an existing external type_movement with INTERNAL', function (): void {
+        $trip = Trip::factory()->make([
+            'type_movement' => TypeMovementEnum::EXTERNAL->value,
         ]);
 
         $this->handler->setTypeOfMovement($trip);

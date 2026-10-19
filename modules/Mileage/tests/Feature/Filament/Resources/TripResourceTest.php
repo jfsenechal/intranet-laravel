@@ -56,7 +56,7 @@ it('can list trips', function (): void {
 it('has table columns', function (string $column): void {
     livewire(ListTrips::class)
         ->assertTableColumnExists($column);
-})->with(['departure_date', 'departure_location', 'distance', 'rate', 'amount', 'type_movement']);
+})->with(['departure_date', 'distance', 'rate', 'amount', 'type_movement']);
 
 it('displays the trip amount and total summary', function (): void {
     $trips = collect([
@@ -85,14 +85,13 @@ it('can sort column', function (string $column): void {
 
 it('can search trips', function (): void {
     $trips = Trip::factory(5)->create(['user_add' => 'jdupont']);
-
-    $search = $trips->first()->departure_location;
+    $trips->first()->update(['type_movement' => 'externe']);
 
     livewire(ListTrips::class)
         ->loadTable()
-        ->searchTable($search)
-        ->assertCanSeeTableRecords($trips->where('departure_location', $search))
-        ->assertCanNotSeeTableRecords($trips->where('departure_location', '!=', $search));
+        ->searchTable('externe')
+        ->assertCanSeeTableRecords($trips->where('type_movement', 'externe'))
+        ->assertCanNotSeeTableRecords($trips->where('type_movement', '!=', 'externe'));
 });
 
 it('can create a trip', function (): void {
@@ -132,55 +131,16 @@ it('validates the form data', function (array $data, array $errors): void {
     '`content` is required' => [['content' => null], ['content' => 'required']],
 ]);
 
-it('never displays the departure time inputs', function (array $data): void {
+it('prefills the trip details with the departure and arrival template', function (): void {
     livewire(CreateTrip::class)
-        ->fillForm($data)
+        ->assertSchemaStateSet([
+            'content' => "Lieu de départ: Marche\nLieu d'arrivée: \nObjet: ",
+        ]);
+});
+
+it('never displays the departure time inputs', function (): void {
+    livewire(CreateTrip::class)
         ->assertFormFieldExists('departure_date', checkFieldUsing: fn (DateTimePicker $field): bool => ! $field->hasTime());
-})->with([
-    'nothing filled' => [['departure_location' => null, 'arrival_location' => null]],
-    'only departure_location' => [['departure_location' => 'Marche', 'arrival_location' => null]],
-    'only arrival_location' => [['departure_location' => null, 'arrival_location' => 'Namur']],
-    'external movement' => [['departure_location' => 'Marche', 'arrival_location' => 'Namur']],
-]);
-
-it('requires both locations when one is filled', function (array $data, array $errors): void {
-    $trip = Trip::factory()->make(['user_add' => 'jdupont']);
-
-    livewire(CreateTrip::class)
-        ->fillForm([
-            'distance' => $trip->distance,
-            'departure_date' => $trip->departure_date,
-            'content' => $trip->content,
-            ...$data,
-        ])
-        ->call('create')
-        ->assertHasFormErrors($errors)
-        ->assertNotNotified();
-})->with([
-    'only `departure_location`' => [
-        ['departure_location' => 'Marche'],
-        ['arrival_location' => 'required_with'],
-    ],
-    'only `arrival_location`' => [
-        ['arrival_location' => 'Namur'],
-        ['departure_location' => 'required_with'],
-    ],
-]);
-
-it('accepts the trip when both locations are filled', function (): void {
-    $trip = Trip::factory()->make(['user_add' => 'jdupont']);
-
-    livewire(CreateTrip::class)
-        ->fillForm([
-            'distance' => $trip->distance,
-            'departure_date' => $trip->departure_date,
-            'content' => $trip->content,
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
-        ])
-        ->call('create')
-        ->assertHasNoFormErrors()
-        ->assertNotified();
 });
 
 it('stores the departure day at 08h00 on the Belgian clock', function (): void {
@@ -192,8 +152,6 @@ it('stores the departure day at 08h00 on the Belgian clock', function (): void {
         ->fillForm([
             'distance' => $trip->distance,
             'content' => $trip->content,
-            'departure_location' => 'Marche',
-            'arrival_location' => 'Namur',
             'departure_date' => '2026-09-08 00:00:00',
         ])
         ->call('create')

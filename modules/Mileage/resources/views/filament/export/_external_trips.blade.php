@@ -4,10 +4,8 @@
     <thead>
         <tr class="bg-gray-100">
             <th class="border border-gray-300 p-2 text-left">Date</th>
-            <th class="border border-gray-300 p-2 text-left">Voyage accompli</th>
             <th class="border border-gray-300 p-2 text-left">Motif de déplacement</th>
             <th class="border border-gray-300 p-2 text-left">Distance en Km</th>
-            <th class="border border-gray-300 p-2 text-left">Frais de repas</th>
             <th class="border border-gray-300 p-2 text-left">Frais de train</th>
             <th class="border border-gray-300 p-2 text-left w-[11%]">Total</th>
         </tr>
@@ -18,24 +16,18 @@
             <td class="border border-gray-300 p-2">
                 {{ $trip->departure_date?->format('d-m-Y') }}
             </td>
-            <td class="border border-gray-300 p-2">
-                De {{ $trip->departure_location }} à {{ $trip->arrival_location }}
-            </td>
             <td class="border border-gray-300 p-2">{{ Str::limit($trip->content, 50) }}</td>
             <td class="border border-gray-300 p-2">{{ $trip->distance }}</td>
-            <td class="border border-gray-300 p-2">{{ number_format($trip->meal_expense ?? 0, 2, ',', '.') }} €</td>
             <td class="border border-gray-300 p-2">{{ number_format($trip->train_expense ?? 0, 2, ',', '.') }} €</td>
             <td class="border border-gray-300 p-2">
-                {{ number_format(($trip->distance * $rate) + ($trip->meal_expense ?? 0) + ($trip->train_expense ?? 0), 2, ',', '.') }} €
+                {{ number_format(($trip->distance * $rate) + ($trip->train_expense ?? 0), 2, ',', '.') }} €
             </td>
         </tr>
         @endforeach
         <tr class="bg-gray-100 font-semibold">
             <td class="border border-gray-300 p-2">Sous Total</td>
             <td class="border border-gray-300 p-2"></td>
-            <td class="border border-gray-300 p-2"></td>
             <td class="border border-gray-300 p-2">{{ $declarationSummary->totalKilometers }} Km</td>
-            <td class="border border-gray-300 p-2">{{ number_format($declarationSummary->mealExpense, 2, ',', '.') }} €</td>
             <td class="border border-gray-300 p-2">{{ number_format($declarationSummary->trainExpense, 2, ',', '.') }} €</td>
             <td class="border border-gray-300 p-2">{{ number_format($declarationSummary->totalMileageAllowance + $declarationSummary->totalExpense, 2, ',', '.') }} €</td>
         </tr>
@@ -49,27 +41,23 @@
                 @endif
             </td>
             <td class="border border-gray-300 p-2"></td>
-            <td class="border border-gray-300 p-2"></td>
             <td class="border border-gray-300 p-2">
                 @if($declaration->omnium)
                     {{ $declarationSummary->totalKilometers }} Km
                 @endif
             </td>
-            @if($declaration->omnium)
-                <td class="border border-gray-300 p-2" colspan="2">
+            <td class="border border-gray-300 p-2">
+                @if($declaration->omnium)
                     {{ number_format($declaration->rate_omnium, 4, ',', '.') }} €
-                </td>
-            @else
-                <td class="border border-gray-300 p-2"></td>
-                <td class="border border-gray-300 p-2"></td>
-            @endif
+                @endif
+            </td>
             <td class="border border-gray-300 p-2">
                 - {{ number_format($declarationSummary->totalOmnium, 2, ',', '.') }} €
             </td>
         </tr>
         <tr class="bg-gray-100 font-bold">
             <td class="border border-gray-300 p-2">TOTAL A REMBOURSER</td>
-            <td class="border border-gray-300 p-2" colspan="5"></td>
+            <td class="border border-gray-300 p-2" colspan="3"></td>
             <td class="border border-gray-300 p-2 text-green-700">{{ number_format($declarationSummary->totalRefund, 2, ',', '.') }} €</td>
         </tr>
     </tbody>
