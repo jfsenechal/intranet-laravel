@@ -9,3 +9,6 @@ php artisan config:clear --silent
 php artisan optimize:clear --silent
 php artisan filament:optimize-clear --silent
 rm -f storage/logs/*.log
+chown www-data:www-data /var/www/associations/touraline/storage -R
+chown www-data:www-data /var/www/associations/touraline/bootstrap/cache -R
+chown www-data:www-data /var/www/associations/touraline/database/database.sqlite
