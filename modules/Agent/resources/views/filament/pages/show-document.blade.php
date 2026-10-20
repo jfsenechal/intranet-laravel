@@ -5,7 +5,7 @@
     ])>
         @if ($menu !== [])
             <aside class="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
-                @include('knowledge-base::filament.pages.partials.page-menu', ['menu' => $menu])
+                @include('agent::filament.pages.partials.page-menu', ['menu' => $menu])
             </aside>
         @endif
 

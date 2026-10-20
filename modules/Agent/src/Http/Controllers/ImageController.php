@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\Agent\Http\Controllers;
 
-use AcMarche\KnowledgeBase\Documentation\ImageStore;
-use AcMarche\KnowledgeBase\KnowledgeBaseAccess;
+use AcMarche\Agent\Documentation\ImageStore;
+use AcMarche\Agent\KnowledgeBaseAccess;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 

@@ -34,7 +34,7 @@ final class CreateDocument extends Page
     protected static bool $shouldRegisterNavigation = false;
 
     #[Override]
-    protected string $view = 'knowledge-base::filament.pages.document-form';
+    protected string $view = 'agent::filament.pages.document-form';
 
     public static function canAccess(): bool
     {

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    Filament::setCurrentPanel(Filament::getPanel('knowledge-base-panel'));
+    Filament::setCurrentPanel(Filament::getPanel('agent-panel'));
     Storage::fake('knowledge-base');
     $this->disk = Storage::disk('knowledge-base');
     $this->disk->put('vpn-forticlient.md', "# VPN FortiClient\n\nInstaller le client.\n");

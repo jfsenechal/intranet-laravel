@@ -23,7 +23,7 @@ final class ShowDocument extends Page
     protected static bool $shouldRegisterNavigation = false;
 
     #[Override]
-    protected string $view = 'knowledge-base::filament.pages.show-document';
+    protected string $view = 'agent::filament.pages.show-document';
 
     public static function canAccess(): bool
     {
@@ -90,7 +90,7 @@ final class ShowDocument extends Page
             'html' => $page['html'],
             'menu' => $page['menu'],
             'updatedAt' => $documentation->lastModified($this->document),
-            'vaultUrl' => config('knowledge-base.vault_url'),
+            'vaultUrl' => config('agent.vault_url'),
         ];
     }
 }

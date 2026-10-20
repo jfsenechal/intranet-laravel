@@ -41,7 +41,7 @@ final class ListDocuments extends Page implements HasTable
     protected static ?string $slug = 'docs';
 
     #[Override]
-    protected string $view = 'knowledge-base::filament.pages.list-documents';
+    protected string $view = 'agent::filament.pages.list-documents';
 
     public static function canAccess(): bool
     {
