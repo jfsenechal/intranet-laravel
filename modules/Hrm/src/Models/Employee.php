@@ -207,6 +207,16 @@ final class Employee extends Model
     }
 
     /**
+     * Active contracts of the agents currently replacing this employee.
+     *
+     * @return HasMany<Contract>
+     */
+    public function activeReplacementContracts(): HasMany
+    {
+        return $this->hasMany(Contract::class, 'replaces_id')->active();
+    }
+
+    /**
      * @return HasOne<Profile>
      */
     public function profile(): HasOne

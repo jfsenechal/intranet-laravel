@@ -65,6 +65,7 @@ final class EmployeeInfolist
                             ->icon('heroicon-o-briefcase')
                             ->schema([
                                 self::activeContractsFieldset(),
+                                self::replacedByFieldset(),
                                 self::situationFieldset(),
                                 self::datesFieldset(),
                                 self::payScaleFieldset(),
@@ -146,6 +147,25 @@ final class EmployeeInfolist
                             ->icon(Heroicon::OutlinedUser)
                             ->url(fn (Contract $record): ?string => self::employeeUrl($record->replaces))
                             ->color(fn (Contract $record): ?string => self::employeeUrl($record->replaces) === null ? null : 'primary'),
+                    ]),
+            ]);
+    }
+
+    private static function replacedByFieldset(): Fieldset
+    {
+        return Fieldset::make('Remplacé par')
+            ->columns(1)
+            ->visible(fn (Employee $record): bool => $record->activeReplacementContracts->isNotEmpty())
+            ->schema([
+                RepeatableEntry::make('activeReplacementContracts')
+                    ->hiddenLabel()
+                    ->schema([
+                        TextEntry::make('employee')
+                            ->hiddenLabel()
+                            ->state(fn (Contract $record): ?string => $record->employee?->full_name)
+                            ->icon(Heroicon::OutlinedUser)
+                            ->url(fn (Contract $record): ?string => self::employeeUrl($record->employee))
+                            ->color(fn (Contract $record): ?string => self::employeeUrl($record->employee) === null ? null : 'primary'),
                     ]),
             ]);
     }

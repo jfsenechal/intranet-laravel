@@ -665,6 +665,38 @@ describe('emploi tab', function (): void {
             ->assertSee(ViewEmployee::getUrl(['record' => $replaced]), escape: false);
     });
 
+    it('links the agent replacing the employee to their view page', function (): void {
+        $record = Employee::factory()->create();
+        $replacement = Employee::factory()->create(['last_name' => 'Durand', 'first_name' => 'Paul']);
+        Contract::factory()->create([
+            'employee_id' => $replacement->id,
+            'replaces_id' => $record->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertSee('Remplacé par')
+            ->assertSee('Durand Paul')
+            ->assertSee(ViewEmployee::getUrl(['record' => $replacement]), escape: false);
+    });
+
+    it('does not list a replacement whose contract is closed', function (): void {
+        $record = Employee::factory()->create();
+        $replacement = Employee::factory()->create(['last_name' => 'Durand', 'first_name' => 'Paul']);
+        Contract::factory()->create([
+            'employee_id' => $replacement->id,
+            'replaces_id' => $record->id,
+            'is_closed' => true,
+        ]);
+
+        Livewire::test(ViewEmployee::class, ['record' => $record->id])
+            ->assertOk()
+            ->assertDontSee('Remplacé par')
+            ->assertDontSee('Durand Paul');
+    });
+
     it('does not link an active contract the user may not view', function (): void {
         $readRole = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_VILLE_READ->value]);
         $user = User::factory()->create(['is_administrator' => false, 'username' => 'jdoe']);
