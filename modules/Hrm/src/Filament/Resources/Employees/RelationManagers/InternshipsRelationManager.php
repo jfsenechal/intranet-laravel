@@ -35,6 +35,16 @@ final class InternshipsRelationManager extends RelationManager
         return 'Stages';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'stage';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'stages';
+    }
+
     public function form(Schema $schema): Schema
     {
         return InternshipForm::configure($schema);

@@ -31,6 +31,16 @@ final class ContractsRelationManager extends RelationManager
         return 'Contrats';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'contrat';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'contrats';
+    }
+
     public function form(Schema $schema): Schema
     {
         return ContractForm::configure($schema);

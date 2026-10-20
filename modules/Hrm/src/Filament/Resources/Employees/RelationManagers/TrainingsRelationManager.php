@@ -33,6 +33,16 @@ final class TrainingsRelationManager extends RelationManager
         return 'Formations';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'formation';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'formations';
+    }
+
     public function form(Schema $schema): Schema
     {
         return TrainingForm::configure($schema);

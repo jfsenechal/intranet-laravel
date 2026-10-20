@@ -28,6 +28,16 @@ final class EvaluationsRelationManager extends RelationManager
         return 'Evaluations';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'évaluation';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'évaluations';
+    }
+
     public function form(Schema $schema): Schema
     {
         return EvaluationForm::configure($schema);

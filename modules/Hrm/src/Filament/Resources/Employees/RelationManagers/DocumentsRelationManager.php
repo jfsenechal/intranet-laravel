@@ -28,6 +28,16 @@ final class DocumentsRelationManager extends RelationManager
         return 'Documents';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'document';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'documents';
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components(HrDocumentForm::getSchema());

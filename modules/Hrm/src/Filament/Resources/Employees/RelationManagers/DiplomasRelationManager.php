@@ -31,6 +31,16 @@ final class DiplomasRelationManager extends RelationManager
         return 'Diplômes';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'diplôme';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'diplômes';
+    }
+
     public function form(Schema $schema): Schema
     {
         return DiplomaForm::configure($schema);

@@ -34,6 +34,16 @@ final class ApplicationsRelationManager extends RelationManager
         return 'Candidatures';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'candidature';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'candidatures';
+    }
+
     public function form(Schema $schema): Schema
     {
         return ApplicationForm::configure($schema);

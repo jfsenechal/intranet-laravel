@@ -31,6 +31,16 @@ final class DeadlinesRelationManager extends RelationManager
         return 'Echéances';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'échéance';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'échéances';
+    }
+
     public function form(Schema $schema): Schema
     {
         return DeadlineForm::configure($schema);

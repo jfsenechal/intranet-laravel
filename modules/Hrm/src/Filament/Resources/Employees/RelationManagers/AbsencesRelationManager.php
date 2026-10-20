@@ -31,6 +31,16 @@ final class AbsencesRelationManager extends RelationManager
         return 'Absences';
     }
 
+    public static function getModelLabel(): ?string
+    {
+        return 'absence';
+    }
+
+    public static function getPluralModelLabel(): ?string
+    {
+        return 'absences';
+    }
+
     public function form(Schema $schema): Schema
     {
         return AbsenceForm::configure($schema);
