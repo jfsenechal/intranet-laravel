@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Hrm\Filament\Exports\ContactExport;
+use AcMarche\Hrm\Filament\Resources\Contacts\ContactResource;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\EditContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\ListContacts;
@@ -46,6 +47,16 @@ describe('page rendering', function (): void {
             ->assertSee($record->last_name)
             ->assertSee('Rue des Bouleaux 12')
             ->assertSee('Marche-en-Famenne');
+    });
+
+    it('links the view page back to the contact list', function (): void {
+        $record = Contact::factory()->create();
+
+        Livewire::test(ViewContact::class, [
+            'record' => $record->id,
+        ])
+            ->assertActionVisible('backToList')
+            ->assertActionHasUrl('backToList', ContactResource::getUrl('index'));
     });
 
     it('can render the edit page', function (): void {
