@@ -65,6 +65,7 @@ final class DeadlineForm
                 RichEditor::make('note')
                     ->label('Note')
                     ->helperText('Pour un retour à la ligne MAJ + ENTER')
+                    ->maxHeight('24rem')
                     ->columnSpanFull(),
                 Toggle::make('is_closed')
                     ->label('Clôturée'),
