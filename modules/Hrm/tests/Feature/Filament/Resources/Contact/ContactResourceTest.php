@@ -6,6 +6,7 @@ use AcMarche\Hrm\Filament\Exports\ContactExport;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\EditContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\ListContacts;
+use AcMarche\Hrm\Filament\Resources\Contacts\Pages\ViewContact;
 use AcMarche\Hrm\Models\Contact;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -29,6 +30,22 @@ describe('page rendering', function (): void {
     it('can render the create page', function (): void {
         Livewire::test(CreateContact::class)
             ->assertOk();
+    });
+
+    it('can render the view page', function (): void {
+        $record = Contact::factory()->create([
+            'street' => 'Rue des Bouleaux 12',
+            'postal_code' => '6900',
+            'city' => 'Marche-en-Famenne',
+        ]);
+
+        Livewire::test(ViewContact::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee($record->last_name)
+            ->assertSee('Rue des Bouleaux 12')
+            ->assertSee('Marche-en-Famenne');
     });
 
     it('can render the edit page', function (): void {

@@ -7,7 +7,9 @@ namespace AcMarche\Hrm\Filament\Resources\Contacts;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\CreateContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\EditContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Pages\ListContacts;
+use AcMarche\Hrm\Filament\Resources\Contacts\Pages\ViewContact;
 use AcMarche\Hrm\Filament\Resources\Contacts\Schemas\ContactForm;
+use AcMarche\Hrm\Filament\Resources\Contacts\Schemas\ContactInfolist;
 use AcMarche\Hrm\Filament\Resources\Contacts\Tables\ContactsTable;
 use AcMarche\Hrm\Models\Contact;
 use BackedEnum;
@@ -49,6 +51,11 @@ final class ContactResource extends Resource
         return ContactForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return ContactInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return ContactsTable::configure($table);
@@ -66,6 +73,7 @@ final class ContactResource extends Resource
         return [
             'index' => ListContacts::route('/'),
             'create' => CreateContact::route('/create'),
+            'view' => ViewContact::route('/{record}/view'),
             'edit' => EditContact::route('/{record}/edit'),
         ];
     }
