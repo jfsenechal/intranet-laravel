@@ -52,6 +52,8 @@ final class ContactInfolist
                     ->schema([
                         TextEntry::make('description')
                             ->hiddenLabel()
+                            ->formatStateUsing(fn (?string $state): string => nl2br(e($state)))
+                            ->html()
                             ->columnSpanFull(),
                     ]),
             ]);

@@ -49,6 +49,19 @@ describe('page rendering', function (): void {
             ->assertSee('Marche-en-Famenne');
     });
 
+    it('renders the description line breaks and escapes its html on the view page', function (): void {
+        $record = Contact::factory()->create([
+            'description' => "Première ligne\nSeconde <b>ligne</b>",
+        ]);
+
+        Livewire::test(ViewContact::class, [
+            'record' => $record->id,
+        ])
+            ->assertSeeHtml('Première ligne<br />')
+            ->assertSeeHtml('Seconde &lt;b&gt;ligne&lt;/b&gt;')
+            ->assertDontSeeHtml('<b>ligne</b>');
+    });
+
     it('links the view page back to the contact list', function (): void {
         $record = Contact::factory()->create();
 
