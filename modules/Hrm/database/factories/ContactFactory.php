@@ -28,6 +28,9 @@ final class ContactFactory extends Factory
             'phone_1' => '0'.fake()->numerify('## ## ## ##'),
             'email_2' => fake()->unique()->safeEmail(),
             'phone_2' => '0'.fake()->numerify('## ## ## ##'),
+            'street' => fake()->streetAddress(),
+            'postal_code' => fake()->numerify('####'),
+            'city' => fake()->city(),
             'description' => fake()->sentence(),
         ];
     }

@@ -41,6 +41,19 @@ final class ContactsTable
                     ->label('Téléphone 2')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('street')
+                    ->label('Rue')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('postal_code')
+                    ->label('Code postal')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city')
+                    ->label('Ville')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

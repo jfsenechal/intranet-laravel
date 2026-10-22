@@ -55,6 +55,9 @@ describe('crud operations', function (): void {
                 'email_2' => 'john2@example.com',
                 'phone_1' => '0123456789',
                 'phone_2' => '0987654321',
+                'street' => 'Rue des Bouleaux 12',
+                'postal_code' => '6900',
+                'city' => 'Marche-en-Famenne',
             ])
             ->call('create')
             ->assertHasNoFormErrors()
@@ -63,6 +66,9 @@ describe('crud operations', function (): void {
         assertDatabaseHas(Contact::class, [
             'last_name' => 'Doe',
             'first_name' => 'John',
+            'street' => 'Rue des Bouleaux 12',
+            'postal_code' => '6900',
+            'city' => 'Marche-en-Famenne',
         ]);
     });
 

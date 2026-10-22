@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $phone_1
  * @property string $email_2
  * @property string|null $phone_2
+ * @property string|null $street
+ * @property string|null $postal_code
+ * @property string|null $city
  * @property string|null $description
  * @property \Carbon\CarbonImmutable|null $created_at
  * @property \Carbon\CarbonImmutable|null $updated_at
@@ -32,6 +35,9 @@ use Illuminate\Database\Eloquent\Model;
     'phone_1',
     'email_2',
     'phone_2',
+    'street',
+    'postal_code',
+    'city',
     'description',
 ])]
 #[Table(name: 'hrm_contacts')]

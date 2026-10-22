@@ -31,6 +31,9 @@ final readonly class ContactExport
             'email_2' => 'Email 2',
             'phone_1' => 'Téléphone 1',
             'phone_2' => 'Téléphone 2',
+            'street' => 'Rue',
+            'postal_code' => 'Code postal',
+            'city' => 'Ville',
             'created_at' => 'Créé le',
         ];
     }
@@ -113,6 +116,9 @@ final readonly class ContactExport
             'email_2' => $row->email_2,
             'phone_1' => $row->phone_1,
             'phone_2' => $row->phone_2,
+            'street' => $row->street,
+            'postal_code' => $row->postal_code,
+            'city' => $row->city,
             'created_at' => display_datetime($row->created_at),
         ];
     }
