@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Contacts\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 
 final class ContactInfolist
 {
@@ -16,6 +17,7 @@ final class ContactInfolist
             ->columns(1)
             ->components([
                 Section::make('Contact')
+                    ->maxWidth(Width::FourExtraLarge)
                     ->columns(2)
                     ->schema([
                         TextEntry::make('email_1')
@@ -34,6 +36,7 @@ final class ContactInfolist
                             ->icon('heroicon-o-phone'),
                     ]),
                 Section::make('Adresse')
+                    ->maxWidth(Width::FourExtraLarge)
                     ->columns(2)
                     ->schema([
                         TextEntry::make('street')
@@ -45,6 +48,7 @@ final class ContactInfolist
                             ->label('Ville'),
                     ]),
                 Section::make('Description')
+                    ->maxWidth(Width::FourExtraLarge)
                     ->schema([
                         TextEntry::make('description')
                             ->hiddenLabel()
