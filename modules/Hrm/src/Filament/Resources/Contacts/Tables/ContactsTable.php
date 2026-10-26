@@ -35,6 +35,7 @@ final class ContactsTable
                 TextColumn::make('email_2')
                     ->label('Email 2')
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 TextColumn::make('phone_1')
                     ->label('Téléphone 1')
@@ -43,7 +44,7 @@ final class ContactsTable
                 TextColumn::make('phone_2')
                     ->label('Téléphone 2')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('street')
                     ->label('Rue')
                     ->searchable()
