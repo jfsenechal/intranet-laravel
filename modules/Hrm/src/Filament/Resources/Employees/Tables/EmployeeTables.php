@@ -142,4 +142,44 @@ final class EmployeeTables
                 ]),
             ]);
     }
+
+    public static function relation(Table $table): Table
+    {
+        return $table
+            ->defaultSort('last_name')
+            ->defaultPaginationPageOption(25)
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with([
+                'activeContracts.direction',
+                'applications.jobFunction',
+            ]))
+            ->columns([
+                TextColumn::make('last_name')
+                    ->label('Nom')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(70),
+                TextColumn::make('first_name')
+                    ->label('Prénom')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(70),
+                TextColumn::make('active_functions')
+                    ->label('Fonctions')
+                    ->state(fn (Employee $record): string => $record->displayedFunctions())
+                    ->wrap(),
+                TextColumn::make('active_directions')
+                    ->label('Directions')
+                    ->state(fn (Employee $record): string => $record->activeContracts
+                        ->pluck('direction.name')
+                        ->filter()
+                        ->unique()
+                        ->implode(', '))
+                    ->wrap()
+                    ->toggleable(),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+            ])
+            ->recordAction(ViewAction::class);
+    }
 }

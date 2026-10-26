@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Filament\Resources\Employers\EmployerResource;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\CreateEmployer;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\EditEmployer;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\ListEmployers;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\ViewEmployer;
+use AcMarche\Hrm\Filament\Resources\Employers\RelationManagers\EmployeesRelationManager;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Employer;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -115,5 +119,56 @@ describe('parent/child relationship', function (): void {
 
         expect($child->parent->id)->toBe($parent->id)
             ->and($parent->children->pluck('id')->all())->toContain($child->id);
+    });
+
+    it('displays all children on the view page', function (): void {
+        $parent = Employer::factory()->create();
+        $children = Employer::factory()->count(2)->create(['parent_id' => $parent->id]);
+        $unrelated = Employer::factory()->create();
+
+        Livewire::test(ViewEmployer::class, [
+            'record' => $parent->id,
+        ])
+            ->assertOk()
+            ->assertSee($children[0]->name)
+            ->assertSee($children[1]->name)
+            ->assertSee(EmployerResource::getUrl('view', ['record' => $children[0]]))
+            ->assertSee(EmployerResource::getUrl('view', ['record' => $children[1]]))
+            ->assertDontSee($unrelated->name);
+    });
+});
+
+describe('employees relation manager', function (): void {
+    it('lists employees with a running contract directly at the employer, once each', function (): void {
+        $employer = Employer::factory()->create(['parent_id' => null]);
+        $child = Employer::factory()->create(['parent_id' => $employer->id]);
+        $otherEmployer = Employer::factory()->create(['parent_id' => null]);
+        $running = ['is_closed' => false, 'is_suspended' => false, 'start_date' => now()->subMonth(), 'end_date' => null];
+
+        $twoContracts = Employee::factory()->create();
+        Contract::factory()->for($twoContracts)->count(2)->create(['employer_id' => $employer->id, ...$running]);
+
+        $atChild = Employee::factory()->create();
+        Contract::factory()->for($atChild)->create(['employer_id' => $child->id, ...$running]);
+
+        $movedAway = Employee::factory()->create();
+        Contract::factory()->for($movedAway)->create([
+            'employer_id' => $employer->id,
+            'is_closed' => true,
+            'start_date' => now()->subYears(2),
+            'end_date' => now()->subYear(),
+        ]);
+
+        $elsewhere = Employee::factory()->create();
+        Contract::factory()->for($elsewhere)->create(['employer_id' => $otherEmployer->id, ...$running]);
+
+        Livewire::test(EmployeesRelationManager::class, [
+            'ownerRecord' => $employer,
+            'pageClass' => ViewEmployer::class,
+        ])
+            ->loadTable()
+            ->assertCanSeeTableRecords([$twoContracts])
+            ->assertCanNotSeeTableRecords([$atChild, $movedAway, $elsewhere])
+            ->assertCountTableRecords(1);
     });
 });

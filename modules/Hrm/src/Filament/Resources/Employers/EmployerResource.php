@@ -8,6 +8,7 @@ use AcMarche\Hrm\Filament\Resources\Employers\Pages\CreateEmployer;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\EditEmployer;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\ListEmployers;
 use AcMarche\Hrm\Filament\Resources\Employers\Pages\ViewEmployer;
+use AcMarche\Hrm\Filament\Resources\Employers\RelationManagers\EmployeesRelationManager;
 use AcMarche\Hrm\Filament\Resources\Employers\Schemas\EmployerForm;
 use AcMarche\Hrm\Filament\Resources\Employers\Schemas\EmployerInfolist;
 use AcMarche\Hrm\Filament\Resources\Employers\Tables\EmployerTables;
@@ -62,6 +63,13 @@ final class EmployerResource extends Resource
     public static function table(Table $table): Table
     {
         return EmployerTables::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            EmployeesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

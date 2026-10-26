@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property int $id
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Employer|null $parent
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Employer> $children
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Direction> $directions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Employee> $employees
  */
 #[Connection('maria-hrm')]
 #[Fillable([
@@ -89,5 +91,16 @@ final class Employer extends Model
     public function directions(): HasMany
     {
         return $this->hasMany(Direction::class, 'employer_id');
+    }
+
+    /**
+     * Employees holding a contract with this employer, past or present. An
+     * employee with several contracts appears once per contract.
+     *
+     * @return HasManyThrough<Employee, Contract>
+     */
+    public function employees(): HasManyThrough
+    {
+        return $this->hasManyThrough(Employee::class, Contract::class, 'employer_id', 'id', 'id', 'employee_id');
     }
 }
