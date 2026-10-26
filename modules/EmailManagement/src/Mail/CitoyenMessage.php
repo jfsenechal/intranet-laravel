@@ -10,7 +10,10 @@ use Illuminate\Mail\Mailables\Envelope;
 
 final class CitoyenMessage extends Mailable
 {
-    public function __construct(public $subject = 'Information importante - Ville de Marche-en-Famenne') {}
+    public function __construct(
+        public string $body,
+        public $subject = 'Information importante - Ville de Marche-en-Famenne',
+    ) {}
 
     public function envelope(): Envelope
     {
@@ -22,8 +25,7 @@ final class CitoyenMessage extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.html',
-            text: 'mail.txt',
+            html: 'email-management::mail.citoyen',
         );
     }
 
