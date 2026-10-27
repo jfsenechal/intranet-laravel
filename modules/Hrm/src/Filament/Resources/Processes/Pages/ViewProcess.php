@@ -31,7 +31,7 @@ final class ViewProcess extends ViewRecord
 
     public function getTitle(): string|Htmlable
     {
-        return 'Procédure '.$this->record?->name;
+        return $this->record?->name;
     }
 
     protected function getHeaderActions(): array

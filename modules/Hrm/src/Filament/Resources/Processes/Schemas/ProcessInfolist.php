@@ -18,10 +18,9 @@ final class ProcessInfolist
                 Section::make('Procédure')
                     ->columnSpan(2)
                     ->schema([
-                        TextEntry::make('name')
-                            ->label('Nom'),
                         TextEntry::make('description')
                             ->label('Description')
+                            ->hiddenLabel()
                             ->extraAttributes(['class' => 'whitespace-pre-line'])
                             ->placeholder('—'),
                     ]),
