@@ -23,7 +23,7 @@ final class ProcessForm
                     ->label('Description')
                     ->helperText('Pour un retour à la ligne MAJ + ENTER')
                     ->extraInputAttributes(['style' => 'min-height: 24rem'])
-                    ->formatStateUsing(fn (?string $state): ?string => ProcessInfolist::plainTextToHtml($state)),
+                ,
             ]);
     }
 }
