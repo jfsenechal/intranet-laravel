@@ -60,6 +60,19 @@ describe('relation manager', function (): void {
             ->loadTable()
             ->assertCanNotSeeTableRecords($otherEvaluations);
     });
+
+    it('opens an evaluation on its view page', function (): void {
+        $evaluation = Evaluation::factory()->create([
+            'employee_id' => $this->employee->id,
+        ]);
+
+        Livewire::test(EvaluationsRelationManager::class, [
+            'ownerRecord' => $this->employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertSee(ViewEvaluation::getUrl(['record' => $evaluation], panel: 'hrm-panel'));
+    });
 });
 
 describe('view page', function (): void {
@@ -122,6 +135,53 @@ describe('view page', function (): void {
 
         $this->get(ViewEvaluation::getUrl(['record' => $evaluation]))
             ->assertForbidden();
+    });
+
+    it('deletes the evaluation and returns to the employee', function (): void {
+        $evaluation = Evaluation::factory()->create([
+            'employee_id' => $this->employee->id,
+        ]);
+
+        Livewire::test(ViewEvaluation::class, [
+            'record' => $evaluation->id,
+        ])
+            ->callAction('delete')
+            ->assertRedirect(EmployeeResource::getUrl('view', ['record' => $this->employee->id]));
+
+        expect(Evaluation::query()->find($evaluation->id))->toBeNull();
+    });
+
+    it('replicates the evaluation to another employee without its documents', function (): void {
+        $evaluation = Evaluation::factory()->create([
+            'employee_id' => $this->employee->id,
+            'result' => EvaluationResultEnum::POSITIVE->value,
+            'file1_name' => 'evaluations/original.pdf',
+        ]);
+        $targetEmployee = Employee::factory()->create();
+
+        Livewire::test(ViewEvaluation::class, [
+            'record' => $evaluation->id,
+        ])
+            ->callAction('replicate', ['employee_id' => $targetEmployee->id])
+            ->assertHasNoActionErrors();
+
+        $replica = Evaluation::query()->where('employee_id', $targetEmployee->id)->sole();
+
+        expect($replica->result)->toBe(EvaluationResultEnum::POSITIVE)
+            ->and($replica->file1_name)->toBeNull();
+    });
+
+    it('only lets administrators replicate or delete an evaluation', function (): void {
+        $evaluation = Evaluation::factory()->create([
+            'employee_id' => $this->employee->id,
+        ]);
+
+        expect(auth()->user()->can('replicate', $evaluation))->toBeTrue();
+
+        $this->actingAs(User::factory()->create());
+
+        expect(auth()->user()->can('replicate', $evaluation))->toBeFalse()
+            ->and(auth()->user()->can('delete', $evaluation))->toBeFalse();
     });
 });
 

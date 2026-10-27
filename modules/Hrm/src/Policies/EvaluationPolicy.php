@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Policies;
 
 use AcMarche\Hrm\Models\Evaluation;
+use AcMarche\Hrm\Policies\Concerns\AdminOnlyImplicitAbilities;
 use AcMarche\Hrm\Policies\Concerns\HrmAuthorization;
 use App\Models\User;
 
 final class EvaluationPolicy
 {
+    use AdminOnlyImplicitAbilities;
     use HrmAuthorization;
 
     public function viewAny(User $user): bool

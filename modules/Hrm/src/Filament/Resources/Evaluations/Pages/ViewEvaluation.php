@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Hrm\Filament\Resources\Evaluations\Pages;
 
 use AcMarche\Hrm\Filament\Actions\BackToEmployeeAction;
+use AcMarche\Hrm\Filament\Actions\ReplicateEvaluationAction;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Filament\Resources\Evaluations\EvaluationResource;
 use AcMarche\Hrm\Models\Evaluation;
@@ -39,6 +40,7 @@ final class ViewEvaluation extends ViewRecord
             BackToEmployeeAction::make(),
             EditAction::make()
                 ->icon(Heroicon::Pencil),
+            ReplicateEvaluationAction::make(),
             DeleteAction::make()
                 ->icon(Heroicon::Trash)
                 ->successRedirectUrl(fn (): string => EmployeeResource::getUrl('view', ['record' => $evaluation->employee_id])),
