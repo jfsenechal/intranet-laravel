@@ -12,7 +12,7 @@ namespace AcMarche\EmailManagement\Sieve;
  */
 final class VacationScript
 {
-    public const string SCRIPT_NAME = 'vacation';
+    public const string SCRIPT_NAME = 'sogo';
 
     /**
      * @param  array<int, string>  $addresses  the account's own addresses, so that mail sent
