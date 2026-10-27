@@ -17,6 +17,8 @@ final class ProcessesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
+            ->defaultPaginationPageOption(50)
             ->columns([
                 TextColumn::make('name')
                     ->label('Nom')
