@@ -49,4 +49,14 @@ return [
      * legacy GestEmail ImapController used.
      */
     'default_quota_mb' => env('EMAIL_MANAGEMENT_DEFAULT_QUOTA_MB', 1024),
+
+    /*
+     * Sender of the messages sent to the citizens from SendCitoyenMessagePage.
+     */
+    'citoyen_message' => [
+        'from' => [
+            'address' => env('EMAIL_MANAGEMENT_CITOYEN_FROM_ADDRESS', 'info@marche.be'),
+            'name' => env('EMAIL_MANAGEMENT_CITOYEN_FROM_NAME', 'Ville de Marche-en-Famenne'),
+        ],
+    ],
 ];
