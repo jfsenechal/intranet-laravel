@@ -22,7 +22,7 @@ final class ListProcesses extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Nouveau processus')
+                ->label('Nouvelle procédure')
                 ->icon(Heroicon::Plus),
             Action::make('export')
                 ->label('Exporter en XLSX')

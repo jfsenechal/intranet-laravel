@@ -14,5 +14,5 @@ final class CreateProcess extends CreateRecord
     protected static string $resource = ProcessResource::class;
 
     #[Override]
-    protected static ?string $title = 'Nouveau processus';
+    protected static ?string $title = 'Nouvelle procédure';
 }
