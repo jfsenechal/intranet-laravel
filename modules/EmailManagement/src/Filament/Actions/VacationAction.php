@@ -51,7 +51,7 @@ final class VacationAction
                 return match ($status['active']) {
                     VacationScript::SCRIPT_NAME => "Le message d'absence est actuellement actif.",
                     null => "Aucun script actif : le message d'absence est désactivé.",
-                    default => "Le message d'absence est désactivé (script actif : {$active}).",
+                    default => "Le message d'absence est désactivé (script actif : {$status['active']}).",
                 };
             })
             ->modalSubmitActionLabel('Activer')
