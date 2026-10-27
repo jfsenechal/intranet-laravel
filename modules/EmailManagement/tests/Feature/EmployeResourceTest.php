@@ -300,7 +300,7 @@ describe('ldap header actions', function (): void {
             ->mountAction($action)
             ->assertSuccessful()
             ->assertActionMounted($action);
-    })->with(['createEmail', 'changeQuota', 'changeAlias', 'vacation']);
+    })->with(['createEmail', 'changeQuota', 'vacation']);
 });
 
 describe('authorization', function (): void {
