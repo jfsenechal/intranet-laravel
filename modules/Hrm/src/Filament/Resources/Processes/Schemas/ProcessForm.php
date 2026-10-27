@@ -20,7 +20,8 @@ final class ProcessForm
                     ->maxLength(255)
                     ->required(),
                 Textarea::make('description')
-                    ->rows(3),
+                    ->rows(12)
+                    ->autosize(),
 
             ]);
     }

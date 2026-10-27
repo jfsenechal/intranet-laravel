@@ -6,6 +6,8 @@ use AcMarche\Hrm\Filament\Exports\ProcessExport;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\CreateProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\EditProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\ListProcesses;
+use AcMarche\Hrm\Filament\Resources\Processes\Pages\ViewProcess;
+use AcMarche\Hrm\Filament\Resources\Processes\ProcessResource;
 use AcMarche\Hrm\Models\Process;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -44,6 +46,37 @@ describe('page rendering', function (): void {
     });
 });
 
+describe('view page', function (): void {
+    it('shows the saved process with its actions', function (): void {
+        $record = Process::factory()->create();
+
+        Livewire::test(ViewProcess::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee($record->name)
+            ->assertActionVisible('backToList')
+            ->assertActionVisible('edit')
+            ->assertActionVisible('replicate')
+            ->assertActionVisible('delete');
+    });
+
+    it('duplicates a process and opens the copy for editing', function (): void {
+        $record = Process::factory()->create(['name' => 'Recrutement']);
+
+        Livewire::test(ViewProcess::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate')
+            ->assertHasNoActionErrors();
+
+        $replica = Process::query()->where('name', 'Recrutement (copie)')->sole();
+
+        expect($replica->description)->toBe($record->description)
+            ->and($replica->id)->not->toBe($record->id);
+    });
+});
+
 describe('crud operations', function (): void {
     it('can create a process', function (): void {
         $newData = Process::factory()->make();
@@ -55,11 +88,10 @@ describe('crud operations', function (): void {
             ])
             ->call('create')
             ->assertNotified()
-            ->assertHasNoFormErrors();
-
-        assertDatabaseHas(Process::class, [
-            'name' => $newData->name,
-        ]);
+            ->assertHasNoFormErrors()
+            ->assertRedirect(ProcessResource::getUrl('view', [
+                'record' => Process::query()->where('name', $newData->name)->sole(),
+            ]));
     });
 
     it('can update a process', function (): void {
@@ -74,7 +106,8 @@ describe('crud operations', function (): void {
             ])
             ->call('save')
             ->assertNotified()
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertRedirect(ProcessResource::getUrl('view', ['record' => $record]));
 
         assertDatabaseHas(Process::class, [
             'id' => $record->id,

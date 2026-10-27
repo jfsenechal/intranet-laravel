@@ -7,7 +7,9 @@ namespace AcMarche\Hrm\Filament\Resources\Processes;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\CreateProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\EditProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Pages\ListProcesses;
+use AcMarche\Hrm\Filament\Resources\Processes\Pages\ViewProcess;
 use AcMarche\Hrm\Filament\Resources\Processes\Schemas\ProcessForm;
+use AcMarche\Hrm\Filament\Resources\Processes\Schemas\ProcessInfolist;
 use AcMarche\Hrm\Filament\Resources\Processes\Tables\ProcessesTable;
 use AcMarche\Hrm\Models\Process;
 use BackedEnum;
@@ -49,6 +51,11 @@ final class ProcessResource extends Resource
         return ProcessForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return ProcessInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return ProcessesTable::configure($table);
@@ -66,6 +73,7 @@ final class ProcessResource extends Resource
         return [
             'index' => ListProcesses::route('/'),
             'create' => CreateProcess::route('/create'),
+            'view' => ViewProcess::route('/{record}/view'),
             'edit' => EditProcess::route('/{record}/edit'),
         ];
     }

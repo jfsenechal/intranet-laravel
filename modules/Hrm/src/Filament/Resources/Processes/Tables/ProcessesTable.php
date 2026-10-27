@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Processes\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -34,10 +35,14 @@ final class ProcessesTable
                 //
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Voir')
+                    ->icon(Heroicon::Eye),
                 EditAction::make()
                     ->label('Modifier')
                     ->icon(Heroicon::PencilSquare),
             ])
+            ->recordAction(ViewAction::class)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
