@@ -77,6 +77,54 @@ describe('view page', function (): void {
     });
 });
 
+describe('description', function (): void {
+    it('saves the html written in the rich editor', function (): void {
+        $record = Process::factory()->create();
+
+        Livewire::test(EditProcess::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'description' => '<p>Étape <strong>une</strong></p>',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($record->refresh()->description)->toContain('<strong>une</strong>');
+    });
+
+    it('renders the html description on the view page', function (): void {
+        $record = Process::factory()->create(['description' => '<p>Étape <strong>une</strong></p>']);
+
+        Livewire::test(ViewProcess::class, [
+            'record' => $record->id,
+        ])
+            ->assertSeeHtml('<strong>une</strong>');
+    });
+
+    it('keeps the line breaks of a description saved as plain text', function (): void {
+        $record = Process::factory()->create(['description' => "Ligne un\nR & D"]);
+
+        Livewire::test(ViewProcess::class, [
+            'record' => $record->id,
+        ])
+            ->assertSeeHtml('Ligne un<br />')
+            ->assertSeeHtml('R &amp; D');
+    });
+
+    it('exports the description without its html tags', function (): void {
+        Process::factory()->create(['name' => 'Recrutement', 'description' => '<p>Étape <strong>une</strong> &amp; deux</p>']);
+
+        $component = Livewire::test(ListProcesses::class)
+            ->loadTable()
+            ->callAction('export', data: ['columns' => ['description']]);
+
+        $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
+
+        expect($rows[1])->toBe(['Étape une & deux']);
+    });
+});
+
 describe('crud operations', function (): void {
     it('can create a process', function (): void {
         $newData = Process::factory()->make();

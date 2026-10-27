@@ -105,7 +105,9 @@ final readonly class ProcessExport
     {
         return [
             'name' => $row->name,
-            'description' => $row->description,
+            'description' => $row->description !== null
+                ? mb_trim(html_entity_decode(strip_tags(str_replace(['</p>', '<br>', '<br />'], "\n", $row->description)), ENT_QUOTES | ENT_HTML5))
+                : null,
             'created_at' => display_datetime($row->created_at),
             'updated_at' => display_datetime($row->updated_at),
         ];

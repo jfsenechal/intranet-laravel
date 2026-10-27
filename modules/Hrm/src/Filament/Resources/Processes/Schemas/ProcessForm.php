@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Processes\Schemas;
 
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -19,10 +19,11 @@ final class ProcessForm
                     ->label('Nom')
                     ->maxLength(255)
                     ->required(),
-                Textarea::make('description')
-                    ->rows(15)
-                    ->autosize(),
-
+                RichEditor::make('description')
+                    ->label('Description')
+                    ->helperText('Pour un retour à la ligne MAJ + ENTER')
+                    ->extraInputAttributes(['style' => 'min-height: 24rem'])
+                    ->formatStateUsing(fn (?string $state): ?string => ProcessInfolist::plainTextToHtml($state)),
             ]);
     }
 }

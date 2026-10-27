@@ -21,7 +21,9 @@ final class ProcessInfolist
                         TextEntry::make('description')
                             ->label('Description')
                             ->hiddenLabel()
-                            ->extraAttributes(['class' => 'whitespace-pre-line'])
+                            ->formatStateUsing(fn (?string $state): ?string => self::plainTextToHtml($state))
+                            ->html()
+                            ->prose()
                             ->placeholder('—'),
                     ]),
                 Section::make('Métadonnées')
@@ -37,5 +39,17 @@ final class ProcessInfolist
                             ->placeholder('—'),
                     ]),
             ]);
+    }
+
+    /**
+     * Descriptions saved before the rich editor are plain text: keep their line breaks.
+     */
+    public static function plainTextToHtml(?string $state): ?string
+    {
+        if ($state === null || $state === '' || $state !== strip_tags($state)) {
+            return $state;
+        }
+
+        return nl2br(e($state));
     }
 }
