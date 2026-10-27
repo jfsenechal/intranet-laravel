@@ -160,49 +160,26 @@ final class SieveEmploye
     }
 
     /**
-     * The account's current out-of-office script, or null when it has none.
+     * The name of the active script and the out-of-office script, read over a single
+     * connection.
+     *
+     * @return array{active: ?string, vacation: ?string}
      *
      * @throws Exception
      */
-    public function getVacation(string $user): ?string
+    public function getVacationStatus(string $user): array
     {
         try {
             $client = $this->login($user);
+            $scripts = $this->listScripts($client);
 
-            if (! array_key_exists(VacationScript::SCRIPT_NAME, $this->listScripts($client))) {
-                return null;
-            }
-
-            $script = self::guard($client->getScript(VacationScript::SCRIPT_NAME), 'Impossible de lire le script.');
-
-            return $script !== '' ? $script : null;
+            return [
+                'active' => self::findActiveScript($scripts),
+                'vacation' => $this->readVacation($client, $scripts),
+            ];
         } finally {
             $this->close();
         }
-    }
-
-    /**
-     * The name of the account's active script, or null when none is active.
-     *
-     * @throws Exception
-     */
-    public function getActiveScript(string $user): ?string
-    {
-        try {
-            return self::findActiveScript($this->listScripts($this->login($user)));
-        } finally {
-            $this->close();
-        }
-    }
-
-    /**
-     * Whether the out-of-office script is the one the server currently runs.
-     *
-     * @throws Exception
-     */
-    public function isVacationActive(string $user): bool
-    {
-        return $this->getActiveScript($user) === VacationScript::SCRIPT_NAME;
     }
 
     /**
@@ -243,6 +220,22 @@ final class SieveEmploye
     {
         $this->client?->disconnect();
         $this->client = null;
+    }
+
+    /**
+     * @param  array<string, bool>  $scripts
+     *
+     * @throws Exception
+     */
+    private function readVacation(Net_Sieve $client, array $scripts): ?string
+    {
+        if (! array_key_exists(VacationScript::SCRIPT_NAME, $scripts)) {
+            return null;
+        }
+
+        $script = self::guard($client->getScript(VacationScript::SCRIPT_NAME), 'Impossible de lire le script.');
+
+        return $script !== '' ? $script : null;
     }
 
     /**

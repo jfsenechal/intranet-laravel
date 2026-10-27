@@ -47,3 +47,27 @@ it('normalises windows line endings in the message', function (): void {
     expect($script)->toContain("text:\nune\ndeux\n.\n;")
         ->and($script)->not->toContain("\r");
 });
+
+it('reads back the values of a script it built', function (): void {
+    $script = VacationScript::build('Absent "vraiment" \\ ici', ".point\nA partir du 1er.\n\nMerci.", 3, ['alice@ac.marche.be']);
+
+    expect(VacationScript::parse($script))->toBe([
+        'subject' => 'Absent "vraiment" \\ ici',
+        'message' => ".point\nA partir du 1er.\n\nMerci.",
+        'days' => 3,
+    ]);
+});
+
+it('reads a vacation message written as a quoted string', function (): void {
+    $script = "require \"vacation\";\nvacation :subject \"Absent\" \"Je suis \\\"absent\\\"\";\n";
+
+    expect(VacationScript::parse($script))->toBe([
+        'subject' => 'Absent',
+        'message' => 'Je suis "absent"',
+        'days' => 1,
+    ]);
+});
+
+it('returns null for a script without a vacation action', function (): void {
+    expect(VacationScript::parse("require \"fileinto\";\nfileinto \"Spam\";\n"))->toBeNull();
+});

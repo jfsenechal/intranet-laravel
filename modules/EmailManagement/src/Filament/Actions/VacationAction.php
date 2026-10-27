@@ -19,30 +19,52 @@ final class VacationAction
 {
     public static function make(Model|Employe $record): Action
     {
+        /** @var array{active: ?string, vacation: ?string}|string|null $status */
+        $status = null;
+
+        // The status line and the form both need the server state: read it once, so opening
+        // the modal costs a single ManageSieve connection. A string holds the failure message.
+        $loadStatus = function (SieveEmploye $sieveEmploye) use (&$status, $record): array|string {
+            if ($status === null) {
+                try {
+                    $status = $sieveEmploye->getVacationStatus($record->samaccountname);
+                } catch (Throwable $e) {
+                    $status = $e->getMessage();
+                }
+            }
+
+            return $status;
+        };
+
         return Action::make('vacation')
             ->label("Message d'absence")
             ->icon(Heroicon::PaperAirplane)
             ->color('info')
             ->modalHeading("Message d'absence de {$record->samaccountname}")
-            ->modalDescription(function (SieveEmploye $sieveEmploye) use ($record): string {
-                try {
-                    $active = $sieveEmploye->getActiveScript($record->samaccountname);
-                } catch (Throwable $e) {
-                    return 'État inconnu : '.$e->getMessage();
+            ->modalDescription(function (SieveEmploye $sieveEmploye) use ($loadStatus): string {
+                $status = $loadStatus($sieveEmploye);
+
+                if (is_string($status)) {
+                    return 'État inconnu : '.$status;
                 }
 
-                return match ($active) {
+                return match ($status['active']) {
                     VacationScript::SCRIPT_NAME => "Le message d'absence est actuellement actif.",
                     null => "Aucun script actif : le message d'absence est désactivé.",
                     default => "Le message d'absence est désactivé (script actif : {$active}).",
                 };
             })
             ->modalSubmitActionLabel('Activer')
-            ->fillForm(fn (): array => [
-                'subject' => 'Je suis absent',
-                'message' => "Je répondrai à vos mails à partir du ...\n\nVous pouvez joindre mes collègues à ...",
-                'days' => 1,
-            ])
+            ->fillForm(function (SieveEmploye $sieveEmploye) use ($loadStatus): array {
+                $status = $loadStatus($sieveEmploye);
+                $script = is_array($status) ? $status['vacation'] : null;
+
+                return ($script !== null ? VacationScript::parse($script) : null) ?? [
+                    'subject' => 'Je suis absent',
+                    'message' => "Je répondrai à vos mails à partir du ...\n\nVous pouvez joindre mes collègues à ...",
+                    'days' => 1,
+                ];
+            })
             ->schema([
                 TextInput::make('subject')
                     ->label('Sujet')
