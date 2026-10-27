@@ -40,12 +40,11 @@ final class ViewEmploye extends ViewRecord
                     VacationAction::make($this->record),
                 ])->dropdown(false),
             ])
-                ->label('Actions...')
-                ->button()
+                ->label('Ajouter...')
+                ->color('success')
                 ->icon('tabler-plus')
                 ->dropdownWidth(Width::FitContent)
-                ->size(Size::Large)
-                ->color('secondary'),
+                ->button(),
         ];
     }
 }
