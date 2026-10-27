@@ -303,6 +303,25 @@ describe('table', function (): void {
             ->assertCanNotSeeTableRecords([$nonMatching]);
     });
 
+    it('filters employees by a parent employer alone or together with its children', function (): void {
+        $ville = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
+        $villeChild = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => $ville->id]);
+
+        $atVille = Employee::factory()->create();
+        Contract::factory()->create(['employee_id' => $atVille->id, 'employer_id' => $ville->id]);
+
+        $atChild = Employee::factory()->create();
+        Contract::factory()->create(['employee_id' => $atChild->id, 'employer_id' => $villeChild->id]);
+
+        Livewire::test(ListEmployees::class)
+            ->loadTable()
+            ->filterTable('employer_id', $ville->id)
+            ->assertCanSeeTableRecords([$atVille])
+            ->assertCanNotSeeTableRecords([$atChild])
+            ->filterTable('employer_id', $ville->id.'-children')
+            ->assertCanSeeTableRecords([$atVille, $atChild]);
+    });
+
     it('ignores contracts that are no longer running when filtering by employer', function (): void {
         $employer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
         $otherEmployer = AcMarche\Hrm\Models\Employer::factory()->create(['parent_id' => null]);
