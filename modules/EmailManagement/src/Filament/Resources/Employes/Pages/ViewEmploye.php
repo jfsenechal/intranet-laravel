@@ -34,9 +34,11 @@ final class ViewEmploye extends ViewRecord
                 ->icon(Heroicon::Pencil),
             QuotaAction::make($this->record),
             ActionGroup::make([
-                CreateEmailAction::make($this->record),
-             //   AliasAction::make($this->record),
-                VacationAction::make($this->record),
+                ActionGroup::make([
+                    CreateEmailAction::make($this->record),
+                    //   AliasAction::make($this->record),
+                    VacationAction::make($this->record),
+                ])->dropdown(false),
             ])
                 ->label('Actions...')
                 ->button()

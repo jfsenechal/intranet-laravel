@@ -45,7 +45,8 @@ final class VacationScript
     {
         $script = str_replace(["\r\n", "\r"], "\n", $script);
 
-        if (preg_match('/\bvacation\b(?<args>.*?)(?:text:[ \t]*\n(?<multi>.*?)\n\.\n|"(?<quoted>(?:[^"\\\\]|\\\\.)*)")\s*;/s', $script, $matches) !== 1) {
+        // The command, not the "vacation" capability named in the require list before it.
+        if (preg_match('/(?<![\w"-])vacation(?![\w"-])(?<args>.*?)(?:text:[ \t]*\n(?<multi>.*?)\n\.\n|"(?<quoted>(?:[^"\\\\]|\\\\.)*)")\s*;/s', $script, $matches) !== 1) {
             return null;
         }
 

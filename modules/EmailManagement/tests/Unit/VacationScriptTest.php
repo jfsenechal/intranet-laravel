@@ -71,3 +71,20 @@ it('reads a vacation message written as a quoted string', function (): void {
 it('returns null for a script without a vacation action', function (): void {
     expect(VacationScript::parse("require \"fileinto\";\nfileinto \"Spam\";\n"))->toBeNull();
 });
+
+it('reads a vacation command nested in a condition, with a quoted message', function (): void {
+    $script = <<<'SIEVE'
+        require ["vacation","envelope","fileinto"];
+        if allof (not header :contains "x-spam-flag" "yes") {
+        vacation :days 7 :addresses ["jf@marche.be","jean-francois@marche.be"] :subject "Absent du bureau" "Bonjour,
+
+        Je suis \"absent\" jusqu'au 5.";
+        }
+        SIEVE;
+
+    expect(VacationScript::parse($script))->toBe([
+        'subject' => 'Absent du bureau',
+        'message' => "Bonjour,\n\nJe suis \"absent\" jusqu'au 5.",
+        'days' => 7,
+    ]);
+});
