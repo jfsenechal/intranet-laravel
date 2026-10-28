@@ -27,12 +27,6 @@ final class ProcessInfolist
                             ->html()
                             ->prose()
                             ->placeholder('—'),
-                        TextEntry::make('attachments')
-                            ->label('Pièces jointes')
-                            ->formatStateUsing(fn (string $state, Process $record): string => self::attachmentLink($state, $record))
-                            ->html()
-                            ->listWithLineBreaks()
-                            ->placeholder('—'),
                     ]),
                 Section::make('Métadonnées')
                     ->columnSpan(1)
@@ -44,6 +38,17 @@ final class ProcessInfolist
                         TextEntry::make('updated_at')
                             ->label('Modifié le')
                             ->dateTime('d/m/Y H:i')
+                            ->placeholder('—'),
+                    ]),
+                Section::make('Pièces jointes')
+                    ->columnSpan(2)
+                    ->schema([
+                        TextEntry::make('attachments')
+                            ->label('Pièces jointes')
+                            ->hiddenLabel()
+                            ->formatStateUsing(fn (string $state, Process $record): string => self::attachmentLink($state, $record))
+                            ->html()
+                            ->listWithLineBreaks()
                             ->placeholder('—'),
                     ]),
             ]);
