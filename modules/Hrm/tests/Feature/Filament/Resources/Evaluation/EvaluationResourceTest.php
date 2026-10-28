@@ -3,13 +3,17 @@
 declare(strict_types=1);
 
 use AcMarche\Hrm\Enums\EvaluationResultEnum;
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Filament\Resources\Employees\EmployeeResource;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\EvaluationsRelationManager;
 use AcMarche\Hrm\Filament\Resources\Evaluations\EvaluationResource;
 use AcMarche\Hrm\Filament\Resources\Evaluations\Pages\ViewEvaluation;
+use AcMarche\Hrm\Models\Contract;
+use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Evaluation;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -126,15 +130,44 @@ describe('view page', function (): void {
         expect(EvaluationResource::getIndexUrl())->toBe(EmployeeResource::getUrl('index'));
     });
 
-    it('forbids an evaluation of an employee the user cannot view', function (): void {
+    it('hides an evaluation of an employee the user cannot view', function (): void {
         $evaluation = Evaluation::factory()->create([
             'employee_id' => $this->employee->id,
         ]);
 
         $this->actingAs(User::factory()->create());
 
+        // The scoped resource query never resolves the record, so its existence
+        // is not disclosed by a 403.
         $this->get(ViewEvaluation::getUrl(['record' => $evaluation]))
-            ->assertForbidden();
+            ->assertNotFound();
+    });
+
+    it('opens an evaluation of one of their agents to a direction head', function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $director->roles()->attach($role);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+        Contract::factory()->create([
+            'employee_id' => $this->employee->id,
+            'direction_id' => $direction->id,
+            'is_closed' => false,
+            'is_suspended' => false,
+            'end_date' => null,
+        ]);
+        $evaluation = Evaluation::factory()->create([
+            'employee_id' => $this->employee->id,
+        ]);
+        $foreignEvaluation = Evaluation::factory()->create([
+            'employee_id' => Employee::factory()->create()->id,
+        ]);
+
+        $this->actingAs($director);
+
+        $this->get(ViewEvaluation::getUrl(['record' => $evaluation]))
+            ->assertOk();
+        $this->get(ViewEvaluation::getUrl(['record' => $foreignEvaluation]))
+            ->assertNotFound();
     });
 
     it('deletes the evaluation and returns to the employee', function (): void {

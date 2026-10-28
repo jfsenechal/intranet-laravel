@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Filament\Exports\DiplomaExport;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\EditDiploma;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Pages\ListDiplomas;
@@ -12,6 +13,7 @@ use AcMarche\Hrm\Models\Diploma;
 use AcMarche\Hrm\Models\Direction;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Service;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
@@ -25,6 +27,56 @@ beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('hrm-panel'));
     $this->adminUser = User::factory()->create(['is_administrator' => true]);
     $this->actingAs($this->adminUser);
+});
+
+describe('direction head access', function (): void {
+    beforeEach(function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $this->director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $this->director->roles()->attach($role);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+
+        $this->ownAgent = function () use ($direction): Employee {
+            $employee = Employee::factory()->create();
+            Contract::factory()->create([
+                'employee_id' => $employee->id,
+                'direction_id' => $direction->id,
+                'is_closed' => false,
+                'is_suspended' => false,
+                'end_date' => null,
+            ]);
+
+            return $employee;
+        };
+
+        $this->actingAs($this->director);
+    });
+
+    it('can render the view page of a diploma of one of their own agents', function (): void {
+        $record = Diploma::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+
+        Livewire::test(ViewDiploma::class, ['record' => $record->getKey()])
+            ->assertOk();
+    });
+
+    it('returns 404 on the view page of a diploma of an agent outside their direction', function (): void {
+        $record = Diploma::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        // The scoped resource query never resolves the record, so its existence
+        // is not disclosed by a 403.
+        Livewire::test(ViewDiploma::class, ['record' => $record->getKey()])
+            ->assertNotFound();
+    });
+
+    it('lists only the diplomas of their own agents', function (): void {
+        $own = Diploma::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+        $foreign = Diploma::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        Livewire::test(ListDiplomas::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$own])
+            ->assertCanNotSeeTableRecords([$foreign]);
+    });
 });
 
 describe('page rendering', function (): void {

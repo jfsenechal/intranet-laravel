@@ -8,9 +8,13 @@ use AcMarche\Hrm\Filament\Resources\Deadlines\Schemas\DeadlineForm;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Schemas\DeadlineInfolist;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Tables\DeadlineTables;
 use AcMarche\Hrm\Models\Deadline;
+use AcMarche\Hrm\Policies\DeadlinePolicy;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
@@ -58,6 +62,22 @@ final class DeadlineResource extends Resource
     public static function table(Table $table): Table
     {
         return DeadlineTables::configure($table);
+    }
+
+    /**
+     * @return Builder<Deadline>
+     */
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user instanceof User) {
+            return app(DeadlinePolicy::class)->scopeVisibleTo($query, $user);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array

@@ -11,9 +11,13 @@ use AcMarche\Hrm\Filament\Resources\Diplomas\Schemas\DiplomaForm;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Schemas\DiplomaInfolist;
 use AcMarche\Hrm\Filament\Resources\Diplomas\Tables\DiplomaTables;
 use AcMarche\Hrm\Models\Diploma;
+use AcMarche\Hrm\Policies\DiplomaPolicy;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
@@ -61,6 +65,22 @@ final class DiplomaResource extends Resource
     public static function table(Table $table): Table
     {
         return DiplomaTables::configure($table);
+    }
+
+    /**
+     * @return Builder<Diploma>
+     */
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user instanceof User) {
+            return app(DiplomaPolicy::class)->scopeVisibleTo($query, $user);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array

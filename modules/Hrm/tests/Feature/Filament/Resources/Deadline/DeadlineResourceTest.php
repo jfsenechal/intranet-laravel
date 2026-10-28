@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Hrm\Enums\RolesEnum;
 use AcMarche\Hrm\Filament\Exports\DeadlineExport;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\CreateDeadline;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\EditDeadline;
@@ -9,7 +10,11 @@ use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ListDeadlines;
 use AcMarche\Hrm\Filament\Resources\Deadlines\Pages\ViewDeadline;
 use AcMarche\Hrm\Filament\Resources\Employees\Pages\ViewEmployee;
 use AcMarche\Hrm\Filament\Resources\Employees\RelationManagers\DeadlinesRelationManager;
+use AcMarche\Hrm\Models\Contract;
 use AcMarche\Hrm\Models\Deadline;
+use AcMarche\Hrm\Models\Direction;
+use AcMarche\Hrm\Models\Employee;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
@@ -23,6 +28,56 @@ beforeEach(function (): void {
     Filament::setCurrentPanel(Filament::getPanel('hrm-panel'));
     $this->adminUser = User::factory()->create(['is_administrator' => true]);
     $this->actingAs($this->adminUser);
+});
+
+describe('direction head access', function (): void {
+    beforeEach(function (): void {
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_GRH_DIRECTION->value]);
+        $this->director = User::factory()->create(['is_administrator' => false, 'username' => 'director1']);
+        $this->director->roles()->attach($role);
+        $direction = Direction::factory()->create(['director' => 'director1']);
+
+        $this->ownAgent = function () use ($direction): Employee {
+            $employee = Employee::factory()->create();
+            Contract::factory()->create([
+                'employee_id' => $employee->id,
+                'direction_id' => $direction->id,
+                'is_closed' => false,
+                'is_suspended' => false,
+                'end_date' => null,
+            ]);
+
+            return $employee;
+        };
+
+        $this->actingAs($this->director);
+    });
+
+    it('can render the view page of a deadline of one of their own agents', function (): void {
+        $record = Deadline::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+
+        Livewire::test(ViewDeadline::class, ['record' => $record->getKey()])
+            ->assertOk();
+    });
+
+    it('returns 404 on the view page of a deadline of an agent outside their direction', function (): void {
+        $record = Deadline::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        // The scoped resource query never resolves the record, so its existence
+        // is not disclosed by a 403.
+        Livewire::test(ViewDeadline::class, ['record' => $record->getKey()])
+            ->assertNotFound();
+    });
+
+    it('lists only the deadlines of their own agents', function (): void {
+        $own = Deadline::factory()->create(['employee_id' => ($this->ownAgent)()->id]);
+        $foreign = Deadline::factory()->create(['employee_id' => Employee::factory()->create()->id]);
+
+        Livewire::test(ListDeadlines::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords([$own])
+            ->assertCanNotSeeTableRecords([$foreign]);
+    });
 });
 
 describe('page rendering', function (): void {
@@ -158,7 +213,7 @@ describe('crud operations', function (): void {
             'closed_date' => now(),
         ]);
 
-        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $targetEmployee = Employee::factory()->create();
 
         Livewire::test(ViewDeadline::class, [
             'record' => $record->id,
@@ -179,12 +234,12 @@ describe('crud operations', function (): void {
     });
 
     it('can replicate a deadline to another employee from the employee relation manager', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $employee = Employee::factory()->create();
         $record = Deadline::factory()->create([
             'employee_id' => $employee->id,
             'name' => 'Relation Deadline',
         ]);
-        $targetEmployee = AcMarche\Hrm\Models\Employee::factory()->create();
+        $targetEmployee = Employee::factory()->create();
 
         Livewire::test(DeadlinesRelationManager::class, [
             'ownerRecord' => $employee,
@@ -250,8 +305,8 @@ describe('date range filters', function (): void {
      */
     function deadlineWithActiveContract(array $attributes = []): Deadline
     {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->create([
+        $employee = Employee::factory()->create();
+        Contract::factory()->create([
             'employee_id' => $employee->id,
             'is_closed' => false,
             'is_suspended' => false,
@@ -310,8 +365,8 @@ describe('date range filters', function (): void {
 
 describe('export action', function (): void {
     it('exports the rows in the order the table is sorted', function (): void {
-        $employee = AcMarche\Hrm\Models\Employee::factory()->create();
-        AcMarche\Hrm\Models\Contract::factory()->for($employee)->create(['is_closed' => false, 'end_date' => null]);
+        $employee = Employee::factory()->create();
+        Contract::factory()->for($employee)->create(['is_closed' => false, 'end_date' => null]);
 
         foreach (['Bernard', 'Albert', 'Colin'] as $name) {
             Deadline::factory()->for($employee)->create(['name' => $name, 'is_closed' => false]);
