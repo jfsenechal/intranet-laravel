@@ -50,6 +50,8 @@ final class ViewProcess extends ViewRecord
                     'id',
                     'created_at',
                     'updated_at',
+                    'attachments',
+                    'attachment_names',
                 ])
                 ->beforeReplicaSaved(function (Process $replica): void {
                     $replica->name = $replica->name.' (copie)';

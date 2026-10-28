@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $name
  * @property string|null $description
+ * @property array<int, string>|null $attachments
+ * @property array<string, string>|null $attachment_names
  * @property \Carbon\CarbonImmutable|null $created_at
  * @property \Carbon\CarbonImmutable|null $updated_at
  */
@@ -22,9 +24,19 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable([
     'name',
     'description',
+    'attachments',
+    'attachment_names',
 ])]
 #[UseFactory(ProcessFactory::class)]
 final class Process extends Model
 {
     use HasFactory;
+
+    protected function casts(): array
+    {
+        return [
+            'attachments' => 'array',
+            'attachment_names' => 'array',
+        ];
+    }
 }

@@ -11,6 +11,8 @@ use AcMarche\Hrm\Filament\Resources\Processes\ProcessResource;
 use AcMarche\Hrm\Models\Process;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -75,6 +77,26 @@ describe('view page', function (): void {
         expect($replica->description)->toBe($record->description)
             ->and($replica->id)->not->toBe($record->id);
     });
+
+    it('does not copy the attachments to the duplicate', function (): void {
+        $record = Process::factory()->create([
+            'name' => 'Recrutement',
+            'attachments' => ['hrm/processes/abc123.pdf'],
+            'attachment_names' => ['hrm/processes/abc123.pdf' => 'organigramme.pdf'],
+        ]);
+
+        Livewire::test(ViewProcess::class, [
+            'record' => $record->id,
+        ])
+            ->callAction('replicate')
+            ->assertHasNoActionErrors();
+
+        $replica = Process::query()->where('name', 'Recrutement (copie)')->sole();
+
+        expect($replica->attachments)->toBeNull()
+            ->and($replica->attachment_names)->toBeNull()
+            ->and($record->refresh()->attachments)->toBe(['hrm/processes/abc123.pdf']);
+    });
 });
 
 describe('description', function (): void {
@@ -122,6 +144,45 @@ describe('description', function (): void {
         $rows = xlsxRows(base64_decode((string) data_get($component->effects, 'download.content')));
 
         expect($rows[1])->toBe(['Étape une & deux']);
+    });
+});
+
+describe('attachments', function (): void {
+    it('stores the uploaded files with their original names', function (): void {
+        Storage::fake('local');
+        $record = Process::factory()->create();
+
+        Livewire::test(EditProcess::class, [
+            'record' => $record->id,
+        ])
+            ->fillForm([
+                'attachments' => [UploadedFile::fake()->create('organigramme.pdf', 100, 'application/pdf')],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $record->refresh();
+        $path = $record->attachments[0];
+
+        expect($record->attachments)->toHaveCount(1)
+            ->and($path)->toStartWith(config('hrm.uploads.processes').'/')
+            ->and($record->attachment_names[$path])->toBe('organigramme.pdf');
+
+        Storage::disk('local')->assertExists($path);
+    });
+
+    it('lists the attachments under their original names on the view page', function (): void {
+        Storage::fake('local');
+        $record = Process::factory()->create([
+            'attachments' => ['hrm/processes/abc123.pdf'],
+            'attachment_names' => ['hrm/processes/abc123.pdf' => 'organigramme.pdf'],
+        ]);
+
+        Livewire::test(ViewProcess::class, [
+            'record' => $record->id,
+        ])
+            ->assertOk()
+            ->assertSee('organigramme.pdf');
     });
 });
 

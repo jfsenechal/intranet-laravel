@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AcMarche\Hrm\Filament\Resources\Processes\Schemas;
 
+use AcMarche\Hrm\Models\Process;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 final class ProcessInfolist
 {
@@ -24,6 +26,12 @@ final class ProcessInfolist
                             ->formatStateUsing(fn (?string $state): ?string => self::plainTextToHtml($state))
                             ->html()
                             ->prose()
+                            ->placeholder('—'),
+                        TextEntry::make('attachments')
+                            ->label('Pièces jointes')
+                            ->formatStateUsing(fn (string $state, Process $record): string => self::attachmentLink($state, $record))
+                            ->html()
+                            ->listWithLineBreaks()
                             ->placeholder('—'),
                     ]),
                 Section::make('Métadonnées')
@@ -51,5 +59,17 @@ final class ProcessInfolist
         }
 
         return nl2br(e($state));
+    }
+
+    /**
+     * Temporary download link to an attachment, labelled with the name it was uploaded with.
+     */
+    public static function attachmentLink(string $path, Process $record): string
+    {
+        return sprintf(
+            '<a href="%s" target="_blank" class="text-primary-600 hover:underline">%s</a>',
+            e(Storage::disk('local')->temporaryUrl($path, now()->addMinutes(5))),
+            e($record->attachment_names[$path] ?? basename($path)),
+        );
     }
 }

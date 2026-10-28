@@ -28,6 +28,7 @@ return [
         'valorizations' => 'hrm/valorizations',
         'candidates' => 'hrm/candidates',
         'students' => 'hrm/students',
+        'processes' => 'hrm/processes',
     ],
     /*
     |--------------------------------------------------------------------------
