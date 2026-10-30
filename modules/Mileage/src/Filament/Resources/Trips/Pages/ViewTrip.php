@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewTrip extends ViewRecord
@@ -40,7 +41,7 @@ final class ViewTrip extends ViewRecord
             EditAction::make()
                 ->icon('tabler-edit'),
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

@@ -7,6 +7,7 @@ namespace AcMarche\Mileage\Filament\Resources\Trips\Pages;
 use AcMarche\Mileage\Filament\Resources\Trips\TripResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditTrip extends EditRecord
@@ -23,7 +24,7 @@ final class EditTrip extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

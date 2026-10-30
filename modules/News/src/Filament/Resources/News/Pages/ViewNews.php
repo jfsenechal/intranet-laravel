@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Override;
 
@@ -56,7 +57,7 @@ final class ViewNews extends ViewRecord
                         ->send();
                 }),
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
             RestoreAction::make(),
             ForceDeleteAction::make(),
         ];

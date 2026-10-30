@@ -7,6 +7,7 @@ namespace AcMarche\Courrier\Filament\Resources\Senders\Pages;
 use AcMarche\Courrier\Filament\Resources\Senders\SenderResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Override;
 
@@ -24,7 +25,7 @@ final class EditSender extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

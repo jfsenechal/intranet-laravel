@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\Clients\Pages;
 use AcMarche\MealDelivery\Filament\Resources\Clients\ClientResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditClient extends EditRecord
@@ -23,7 +24,7 @@ final class EditClient extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

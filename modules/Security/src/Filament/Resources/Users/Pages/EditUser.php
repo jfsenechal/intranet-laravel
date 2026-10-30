@@ -7,6 +7,7 @@ namespace AcMarche\Security\Filament\Resources\Users\Pages;
 use AcMarche\Security\Filament\Resources\Users\UserResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditUser extends EditRecord
@@ -22,7 +23,8 @@ final class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make()->icon('tabler-eye'),
+            ViewAction::make()
+                ->icon(Heroicon::Eye),
         ];
     }
 

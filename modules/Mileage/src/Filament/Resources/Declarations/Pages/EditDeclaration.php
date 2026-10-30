@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditDeclaration extends EditRecord
@@ -25,8 +26,10 @@ final class EditDeclaration extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            ViewAction::make()
+                ->icon(Heroicon::Eye),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 }

@@ -17,6 +17,7 @@ use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Override;
 
@@ -91,8 +92,10 @@ final class EditIncomingMail extends EditRecord
     {
         return [
             ViewAction::make()
+                ->icon(Heroicon::Eye)
                 ->visible(fn (): bool => ! $this->record->is_draft),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 

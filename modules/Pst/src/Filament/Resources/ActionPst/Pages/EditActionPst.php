@@ -10,6 +10,7 @@ use AcMarche\Pst\Models\TracksHistoryTrait;
 use App\Models\User;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditActionPst extends EditRecord
@@ -44,7 +45,7 @@ final class EditActionPst extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 

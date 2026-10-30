@@ -7,6 +7,7 @@ namespace AcMarche\MealDelivery\Filament\Resources\GuestReservations\Pages;
 use AcMarche\MealDelivery\Filament\Resources\GuestReservations\GuestReservationResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditGuestReservation extends EditRecord
@@ -23,7 +24,7 @@ final class EditGuestReservation extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

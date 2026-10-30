@@ -7,6 +7,7 @@ namespace AcMarche\GuichetHdv\Filament\Resources\Office\Pages;
 use AcMarche\GuichetHdv\Filament\Resources\Office\OfficeResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditOffice extends EditRecord
@@ -23,7 +24,7 @@ final class EditOffice extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

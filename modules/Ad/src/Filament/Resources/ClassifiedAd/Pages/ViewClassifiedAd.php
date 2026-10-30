@@ -15,6 +15,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewClassifiedAd extends ViewRecord
@@ -43,7 +44,7 @@ final class ViewClassifiedAd extends ViewRecord
                 ->color(Color::Slate)
                 ->action(fn (ClassifiedAd $classifiedAd): true => $classifiedAd->archive = true),
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
             RestoreAction::make(),
             ForceDeleteAction::make(),
         ];

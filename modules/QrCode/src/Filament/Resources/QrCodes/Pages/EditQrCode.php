@@ -8,6 +8,7 @@ use AcMarche\QrCode\Filament\Resources\QrCodes\QrCodeResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditQrCode extends EditRecord
@@ -23,8 +24,10 @@ final class EditQrCode extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make()->icon('tabler-eye'),
-            DeleteAction::make()->icon('tabler-trash'),
+            ViewAction::make()
+                ->icon(Heroicon::Eye),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 }

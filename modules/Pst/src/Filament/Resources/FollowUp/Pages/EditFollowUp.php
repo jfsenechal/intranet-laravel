@@ -7,6 +7,7 @@ namespace AcMarche\Pst\Filament\Resources\FollowUp\Pages;
 use AcMarche\Pst\Filament\Resources\FollowUp\FollowUpResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditFollowUp extends EditRecord
@@ -18,7 +19,7 @@ final class EditFollowUp extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

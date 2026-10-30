@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Mail;
 use Override;
 
@@ -100,7 +101,7 @@ final class ViewEvent extends ViewRecord
             EditAction::make()
                 ->icon('tabler-edit'),
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

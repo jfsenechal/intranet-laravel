@@ -9,6 +9,7 @@ use AcMarche\AldermenAgenda\Filament\Resources\Archive\Schemas\ArchiveInfolist;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewArchive extends ViewRecord
@@ -30,7 +31,7 @@ final class ViewArchive extends ViewRecord
     {
         return [
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

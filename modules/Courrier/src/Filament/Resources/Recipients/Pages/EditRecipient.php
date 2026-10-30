@@ -7,6 +7,7 @@ namespace AcMarche\Courrier\Filament\Resources\Recipients\Pages;
 use AcMarche\Courrier\Filament\Resources\Recipients\RecipientResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditRecipient extends EditRecord
@@ -23,7 +24,7 @@ final class EditRecipient extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Employers\Pages;
 use AcMarche\Hrm\Filament\Resources\Employers\EmployerResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditEmployer extends EditRecord
@@ -17,7 +18,8 @@ final class EditEmployer extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 }

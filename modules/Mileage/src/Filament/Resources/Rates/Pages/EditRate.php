@@ -7,6 +7,7 @@ namespace AcMarche\Mileage\Filament\Resources\Rates\Pages;
 use AcMarche\Mileage\Filament\Resources\Rates\RateResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditRate extends EditRecord
@@ -23,7 +24,7 @@ final class EditRate extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

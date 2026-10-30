@@ -10,6 +10,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\RelationManagers\RelationManagerConfiguration;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditWeek extends EditRecord
@@ -38,7 +39,7 @@ final class EditWeek extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

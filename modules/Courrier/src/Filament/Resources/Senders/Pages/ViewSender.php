@@ -8,6 +8,7 @@ use AcMarche\Courrier\Filament\Resources\Senders\SenderResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewSender extends ViewRecord
@@ -26,7 +27,7 @@ final class ViewSender extends ViewRecord
             EditAction::make()
                 ->icon('tabler-edit'),
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

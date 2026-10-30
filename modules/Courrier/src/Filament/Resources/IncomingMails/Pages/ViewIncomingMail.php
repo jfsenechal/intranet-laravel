@@ -14,6 +14,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewIncomingMail extends ViewRecord
@@ -46,7 +47,7 @@ final class ViewIncomingMail extends ViewRecord
                 ->icon('tabler-edit')
                 ->color('warning'),
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

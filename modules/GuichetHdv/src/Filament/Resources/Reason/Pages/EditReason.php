@@ -7,6 +7,7 @@ namespace AcMarche\GuichetHdv\Filament\Resources\Reason\Pages;
 use AcMarche\GuichetHdv\Filament\Resources\Reason\ReasonResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditReason extends EditRecord
@@ -23,7 +24,7 @@ final class EditReason extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash),
         ];
     }
 }

@@ -8,6 +8,7 @@ use AcMarche\Offenses\Filament\Resources\Offenses\OffenseResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditOffense extends EditRecord
@@ -26,8 +27,10 @@ final class EditOffense extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            ViewAction::make()
+                ->icon(Heroicon::Eye),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 }

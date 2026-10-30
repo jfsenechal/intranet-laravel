@@ -9,6 +9,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Override;
@@ -45,8 +46,8 @@ final class ViewDeliveryRoute extends ViewRecord
             EditAction::make()
                 ->icon('tabler-edit'),
             DeleteAction::make()
-                ->label('Supprimer la tournée')
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash)
+                ->label('Supprimer la tournée'),
         ];
     }
 }

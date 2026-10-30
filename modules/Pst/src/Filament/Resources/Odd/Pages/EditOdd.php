@@ -7,6 +7,7 @@ namespace AcMarche\Pst\Filament\Resources\Odd\Pages;
 use AcMarche\Pst\Filament\Resources\Odd\OddResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class EditOdd extends EditRecord
@@ -18,7 +19,7 @@ final class EditOdd extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

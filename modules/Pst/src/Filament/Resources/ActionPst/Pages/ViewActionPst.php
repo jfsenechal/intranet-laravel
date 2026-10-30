@@ -19,6 +19,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Size;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 final class ViewActionPst extends ViewRecord
@@ -72,8 +73,8 @@ final class ViewActionPst extends ViewRecord
                     }),
                 ReminderAction::createAction($this->record),
                 DeleteAction::make()
-                    ->label('Supprimer l\'action')
-                    ->icon('tabler-trash'),
+                    ->icon(Heroicon::Trash)
+                    ->label('Supprimer l\'action'),
             ]
             )
                 ->label('Autres actions')

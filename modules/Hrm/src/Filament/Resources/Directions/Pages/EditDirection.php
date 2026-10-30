@@ -7,6 +7,7 @@ namespace AcMarche\Hrm\Filament\Resources\Directions\Pages;
 use AcMarche\Hrm\Filament\Resources\Directions\DirectionResource;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Override;
 
@@ -24,7 +25,7 @@ final class EditDirection extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('heroicon-o-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 }

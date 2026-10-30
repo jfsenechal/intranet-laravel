@@ -11,6 +11,7 @@ use AcMarche\MealDelivery\Models\Order;
 use Carbon\CarbonImmutable;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Override;
@@ -50,7 +51,7 @@ final class EditOrder extends EditRecord
     {
         return [
             ViewAction::make()
-                ->icon('tabler-eye'),
+                ->icon(Heroicon::Eye),
         ];
     }
 

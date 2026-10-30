@@ -23,6 +23,7 @@ use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Override;
 
@@ -130,8 +131,8 @@ final class ViewClient extends ViewRecord
                 ->button(),
 
             DeleteAction::make()
-                ->label('Supprimer le client')
-                ->icon('tabler-trash'),
+                ->icon(Heroicon::Trash)
+                ->label('Supprimer le client'),
         ];
     }
 
