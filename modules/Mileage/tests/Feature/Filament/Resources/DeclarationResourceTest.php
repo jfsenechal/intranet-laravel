@@ -233,6 +233,25 @@ it('can update a declaration', function (): void {
     ]);
 });
 
+it('lets an admin toggle the omnium of a declaration', function (bool $omnium): void {
+    $declaration = Declaration::factory()->create([
+        'user_add' => 'jdupont',
+        'budget_article' => BudgetArticle::factory()->create()->name,
+        'omnium' => ! $omnium,
+    ]);
+
+    livewire(EditDeclaration::class, ['record' => $declaration->id])
+        ->fillForm(['omnium' => $omnium])
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    expect($declaration->refresh()->omnium)->toBe($omnium);
+})->with([
+    'enable' => [true],
+    'disable' => [false],
+]);
+
 it('can delete a declaration', function (): void {
     $declaration = Declaration::factory()->create(['user_add' => 'jdupont']);
 

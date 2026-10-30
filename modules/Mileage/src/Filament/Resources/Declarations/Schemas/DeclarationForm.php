@@ -130,6 +130,8 @@ final class DeclarationForm
                     TextInput::make('car_license_plate2')
                         ->label('Plaque 2')
                         ->maxLength(255),
+                    Toggle::make('omnium')
+                        ->label('Omnium'),
                 ])->columnSpanFull(),
             ]);
     }
