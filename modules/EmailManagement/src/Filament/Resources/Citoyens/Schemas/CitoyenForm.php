@@ -10,7 +10,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 /**
- * Only the fillable columns are fields here: the mailbox identity (mail, uid, dn, home
+ * Only the fillable columns are fields here: the mailbox identity (mail, uid, home
  * directory) and the token hashes are left out of the schema entirely, so a save can never
  * submit them.
  */
@@ -29,10 +29,6 @@ final class CitoyenForm
                         TextInput::make('sn')
                             ->label('Nom')
                             ->maxLength(255),
-                        TextInput::make('cn')
-                            ->label('Nom complet')
-                            ->maxLength(255)
-                            ->columnSpanFull(),
                     ]),
                 Section::make('Adresse')
                     ->columns()

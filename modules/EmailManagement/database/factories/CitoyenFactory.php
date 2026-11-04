@@ -25,17 +25,14 @@ final class CitoyenFactory extends Factory
 
         return [
             'uid' => $uid.fake()->unique()->numberBetween(1, 9999),
-            'dn' => fn (array $attributes): string => "uid={$attributes['uid']},ou=Users,ou=Citoyens,dc=marche,dc=be",
             'mail' => fn (array $attributes): string => "{$attributes['uid']}@marche.be",
             'givenName' => $givenName,
             'sn' => $sn,
-            'cn' => $sn.' '.$givenName,
             'l' => 'Marche-en-Famenne',
             'postalAddress' => fake()->optional()->streetAddress(),
             'employeeNumber' => fake()->numerify('###########'),
             'postalCode' => '6900',
             'homeDirectory' => fn (array $attributes): string => '/var/spool/dovecot/mail/'.$attributes['uid'][0].'/'.$attributes['uid'],
-            'gosaMailForwardingAddress' => fn (array $attributes): string => "{$attributes['uid']}@citoyen.marche.be",
             'last_connection' => fake()->optional()->dateTimeBetween('-2 years'),
             'auth_token' => Str::random(64),
             'recovery_email' => null,

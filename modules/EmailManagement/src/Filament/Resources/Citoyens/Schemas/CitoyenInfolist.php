@@ -27,11 +27,6 @@ final class CitoyenInfolist
                         TextEntry::make('sn')
                             ->label('Nom')
                             ->placeholder('-'),
-                        TextEntry::make('cn')
-                            ->label('Nom complet')
-                            ->placeholder('-'),
-                        TextEntry::make('uid')
-                            ->label('Identifiant'),
                         TextEntry::make('employeeNumber')
                             ->label('Numéro national')
                             ->placeholder('-'),
@@ -42,12 +37,6 @@ final class CitoyenInfolist
                         TextEntry::make('mail')
                             ->label('Email')
                             ->copyable(),
-                        TextEntry::make('gosaMailForwardingAddress')
-                            ->label('Adresse de transfert')
-                            ->copyable(),
-                        TextEntry::make('gosaMailAlternateAddress')
-                            ->label('Adresse alternative')
-                            ->placeholder('-'),
                         TextEntry::make('virtualUser.quota_bytes')
                             ->label('Quota')
                             ->numeric()
@@ -89,10 +78,6 @@ final class CitoyenInfolist
                             ->label('Dernière connexion')
                             ->date()
                             ->placeholder('Jamais'),
-                        TextEntry::make('password_changed_at')
-                            ->label('Mot de passe changé le')
-                            ->dateTime()
-                            ->placeholder('Jamais'),
                         TextEntry::make('charter_accepted_at')
                             ->label('Charte acceptée le')
                             ->dateTime()
@@ -100,9 +85,6 @@ final class CitoyenInfolist
                     ]),
                 Section::make('Divers')
                     ->components([
-                        TextEntry::make('dn')
-                            ->label('DN')
-                            ->columnSpanFull(),
                         TextEntry::make('description')
                             ->label('Description')
                             ->placeholder('-')
