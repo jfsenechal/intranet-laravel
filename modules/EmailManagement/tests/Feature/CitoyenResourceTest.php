@@ -50,16 +50,14 @@ describe('pages render', function (): void {
 });
 
 describe('sensitive data', function (): void {
-    it('never renders the password or token hashes but shows the national number', function (): void {
+    it('never renders the token hash but shows the national number', function (): void {
         $citoyen = Citoyen::factory()->create([
-            'userPassword' => '{SSHA}secretHashValue123',
             'auth_token' => 'secretAuthTokenValue456',
             'employeeNumber' => '62011108917',
         ]);
 
         livewire(ViewCitoyen::class, ['record' => $citoyen->id])
             ->assertSee('62011108917')
-            ->assertDontSee('secretHashValue123')
             ->assertDontSee('secretAuthTokenValue456');
     });
 
@@ -71,11 +69,11 @@ describe('sensitive data', function (): void {
     });
 
     it('hides the hashes when serialized', function (): void {
-        $citoyen = Citoyen::factory()->create(['legacy_password' => '{SHA}legacy']);
+        $citoyen = Citoyen::factory()->create();
         $citoyen->forceFill(['remember_token' => 'remember'])->save();
 
         expect($citoyen->refresh()->toArray())
-            ->not->toHaveKeys(['userPassword', 'legacy_password', 'auth_token', 'remember_token']);
+            ->not->toHaveKeys(['auth_token', 'remember_token']);
     });
 });
 
@@ -156,7 +154,6 @@ describe('edit form', function (): void {
             'mail' => 'alice.martin@marche.be',
             'uid' => 'alice.martin',
             'gosaMailQuota' => 250,
-            'userPassword' => '{SSHA}original',
         ]);
 
         livewire(EditCitoyen::class, ['record' => $citoyen->id])
@@ -175,8 +172,7 @@ describe('edit form', function (): void {
             ->sn->toBe('Nouveau')
             ->mail->toBe('alice.martin@marche.be')
             ->uid->toBe('alice.martin')
-            ->gosaMailQuota->toBe(250.0)
-            ->and($citoyen->getAttributes()['userPassword'])->toBe('{SSHA}original');
+            ->gosaMailQuota->toBe(250.0);
     });
 
     it('saves an unchanged record without touching it', function (): void {

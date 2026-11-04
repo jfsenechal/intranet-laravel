@@ -11,7 +11,7 @@ return [
             'driver' => env('DB_EMAIL_MANAGEMENT_DRIVER', 'mariadb'),
             'host' => env('DB_EMAIL_MANAGEMENT_HOST', '127.0.0.1'),
             'port' => env('DB_EMAIL_MANAGEMENT_PORT', '3306'),
-            'database' => env('DB_EMAIL_MANAGEMENT_DATABASE', 'telephone'),
+            'database' => env('DB_EMAIL_MANAGEMENT_DATABASE', 'dovecot_auth'),
             'username' => env('DB_EMAIL_MANAGEMENT_USERNAME', 'root'),
             'password' => env('DB_EMAIL_MANAGEMENT_PASSWORD', ''),
             'unix_socket' => env('DB_EMAIL_MANAGEMENT_SOCKET', ''),

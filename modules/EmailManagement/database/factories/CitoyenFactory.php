@@ -37,8 +37,6 @@ final class CitoyenFactory extends Factory
             'gosaMailQuota' => 150,
             'homeDirectory' => fn (array $attributes): string => '/var/spool/dovecot/mail/'.$attributes['uid'][0].'/'.$attributes['uid'],
             'gosaMailForwardingAddress' => fn (array $attributes): string => "{$attributes['uid']}@citoyen.marche.be",
-            'userPassword' => '{SSHA}'.Str::random(32),
-            'legacy_password' => null,
             'last_connection' => fake()->optional()->dateTimeBetween('-2 years'),
             'auth_token' => Str::random(64),
             'recovery_email' => null,

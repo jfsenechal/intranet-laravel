@@ -9,8 +9,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 /**
- * The password and token hashes (userPassword, legacy_password, auth_token, remember_token)
- * are deliberately absent: they are hidden on the model and must never be rendered.
+ * The token hashes (auth_token, remember_token) are deliberately absent: they are hidden on
+ * the model and must never be rendered.
  */
 final class CitoyenInfolist
 {

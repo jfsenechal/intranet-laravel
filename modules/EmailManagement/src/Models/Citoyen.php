@@ -11,13 +11,15 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * A citizen mailbox account, whose directory source of truth is the LDAP ou=Citoyens.
  *
  * Edits made here change the database row only: they are not pushed to LDAP or to the
  * mail server, which is why the mailbox identity (mail, uid, dn, quota, home directory)
- * is not fillable. The password and token hashes are hidden and never rendered.
+ * is not fillable. The token hashes are hidden and never rendered. The password hashes
+ * live on {@see VirtualUser}.
  */
 #[Connection('maria-email-management')]
 #[Fillable([
@@ -32,8 +34,6 @@ use Illuminate\Database\Eloquent\Model;
     'recovery_phone',
 ])]
 #[Hidden([
-    'userPassword',
-    'legacy_password',
     'auth_token',
     'remember_token',
 ])]
@@ -45,6 +45,17 @@ final class Citoyen extends Model
     public function getFullName(): string
     {
         return mb_trim($this->givenName.' '.$this->sn);
+    }
+
+    /**
+     * The Dovecot login of this mailbox, matched on the address because the two tables
+     * share no key.
+     *
+     * @return HasOne<VirtualUser, $this>
+     */
+    public function virtualUser(): HasOne
+    {
+        return $this->hasOne(VirtualUser::class, 'username', 'mail');
     }
 
     protected function casts(): array
