@@ -10,9 +10,9 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 /**
- * Only the fillable columns are fields here: the mailbox identity (mail, uid, dn, quota,
- * home directory) and the password and token hashes are left out of the schema entirely,
- * so a save can never submit them.
+ * Only the fillable columns are fields here: the mailbox identity (mail, uid, dn, home
+ * directory) and the token hashes are left out of the schema entirely, so a save can never
+ * submit them.
  */
 final class CitoyenForm
 {

@@ -45,9 +45,10 @@ final class CitoyensTable
                     ->label('Localité')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('gosaMailQuota')
+                TextColumn::make('virtualUser.quota_bytes')
                     ->label('Quota (Mo)')
                     ->numeric()
+                    ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_connection')

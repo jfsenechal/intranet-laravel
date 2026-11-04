@@ -48,10 +48,11 @@ final class CitoyenInfolist
                         TextEntry::make('gosaMailAlternateAddress')
                             ->label('Adresse alternative')
                             ->placeholder('-'),
-                        TextEntry::make('gosaMailQuota')
+                        TextEntry::make('virtualUser.quota_bytes')
                             ->label('Quota')
                             ->numeric()
-                            ->suffix(' Mo'),
+                            ->suffix(' Mo')
+                            ->placeholder('-'),
                         TextEntry::make('homeDirectory')
                             ->label('Répertoire')
                             ->columnSpanFull(),

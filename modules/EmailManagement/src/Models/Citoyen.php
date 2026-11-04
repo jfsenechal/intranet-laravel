@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * A citizen mailbox account, whose directory source of truth is the LDAP ou=Citoyens.
  *
  * Edits made here change the database row only: they are not pushed to LDAP or to the
- * mail server, which is why the mailbox identity (mail, uid, dn, quota, home directory)
+ * mail server, which is why the mailbox identity (mail, uid, dn, home directory)
  * is not fillable. The token hashes are hidden and never rendered. The password hashes
  * live on {@see VirtualUser}.
  */
@@ -61,7 +61,6 @@ final class Citoyen extends Model
     protected function casts(): array
     {
         return [
-            'gosaMailQuota' => 'float',
             'last_connection' => 'date',
             'charter_accepted_at' => 'datetime',
             'password_changed_at' => 'datetime',

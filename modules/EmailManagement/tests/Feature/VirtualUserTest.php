@@ -21,8 +21,9 @@ it('links a citoyen to its login by mail address', function (): void {
     expect($citoyen->virtualUser->is($virtualUser))->toBeTrue();
 });
 
-it('no longer stores the password hashes on citoyens', function (): void {
+it('no longer stores the password hashes or the quota on citoyens', function (): void {
     expect(Schema::connection('maria-email-management')->getColumnListing('citoyens'))
         ->not->toContain('userPassword')
-        ->not->toContain('legacy_password');
+        ->not->toContain('legacy_password')
+        ->not->toContain('gosaMailQuota');
 });

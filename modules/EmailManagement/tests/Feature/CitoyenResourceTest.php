@@ -8,6 +8,7 @@ use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\EditCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ListCitoyens;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ViewCitoyen;
 use AcMarche\EmailManagement\Models\Citoyen;
+use AcMarche\EmailManagement\Models\VirtualUser;
 use AcMarche\EmailManagement\Policies\CitoyenPolicy;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -46,6 +47,27 @@ describe('pages render', function (): void {
         $citoyen = Citoyen::factory()->create();
 
         livewire(EditCitoyen::class, ['record' => $citoyen->id])->assertSuccessful();
+    });
+});
+
+describe('quota', function (): void {
+    it('shows the quota of the login on the view page', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        VirtualUser::factory()->create(['username' => $citoyen->mail, 'quota_bytes' => 777]);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertSee('777');
+    });
+
+    it('sorts the table by the quota of the login', function (): void {
+        $small = Citoyen::factory()->create();
+        $large = Citoyen::factory()->create();
+        VirtualUser::factory()->create(['username' => $small->mail, 'quota_bytes' => 100]);
+        VirtualUser::factory()->create(['username' => $large->mail, 'quota_bytes' => 900]);
+
+        livewire(ListCitoyens::class)
+            ->loadTable()
+            ->sortTable('virtualUser.quota_bytes', 'desc')
+            ->assertCanSeeTableRecords([$large, $small], inOrder: true);
     });
 });
 
@@ -153,7 +175,6 @@ describe('edit form', function (): void {
         $citoyen = Citoyen::factory()->create([
             'mail' => 'alice.martin@marche.be',
             'uid' => 'alice.martin',
-            'gosaMailQuota' => 250,
         ]);
 
         livewire(EditCitoyen::class, ['record' => $citoyen->id])
@@ -161,7 +182,6 @@ describe('edit form', function (): void {
                 'sn' => 'Nouveau',
                 'mail' => 'hack@example.be',
                 'uid' => 'hack',
-                'gosaMailQuota' => 9999,
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -171,8 +191,7 @@ describe('edit form', function (): void {
         expect($citoyen)
             ->sn->toBe('Nouveau')
             ->mail->toBe('alice.martin@marche.be')
-            ->uid->toBe('alice.martin')
-            ->gosaMailQuota->toBe(250.0);
+            ->uid->toBe('alice.martin');
     });
 
     it('saves an unchanged record without touching it', function (): void {

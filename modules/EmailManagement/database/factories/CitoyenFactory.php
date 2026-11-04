@@ -34,7 +34,6 @@ final class CitoyenFactory extends Factory
             'postalAddress' => fake()->optional()->streetAddress(),
             'employeeNumber' => fake()->numerify('###########'),
             'postalCode' => '6900',
-            'gosaMailQuota' => 150,
             'homeDirectory' => fn (array $attributes): string => '/var/spool/dovecot/mail/'.$attributes['uid'][0].'/'.$attributes['uid'],
             'gosaMailForwardingAddress' => fn (array $attributes): string => "{$attributes['uid']}@citoyen.marche.be",
             'last_connection' => fake()->optional()->dateTimeBetween('-2 years'),
