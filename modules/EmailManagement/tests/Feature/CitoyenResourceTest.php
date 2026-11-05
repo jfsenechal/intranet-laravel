@@ -59,12 +59,13 @@ describe('quota', function (): void {
     });
 
     it('sorts the table by the quota of the login', function (): void {
-        $small = Citoyen::factory()->create();
-        $large = Citoyen::factory()->create();
+        $small = Citoyen::factory()->create(['sn' => 'Adam']);
+        $large = Citoyen::factory()->create(['sn' => 'Zimmer']);
         VirtualUser::factory()->create(['username' => $small->mail, 'quota_bytes' => 100]);
         VirtualUser::factory()->create(['username' => $large->mail, 'quota_bytes' => 900]);
 
         livewire(ListCitoyens::class)
+            ->toggleAllTableColumns()
             ->loadTable()
             ->sortTable('virtualUser.quota_bytes', 'desc')
             ->assertCanSeeTableRecords([$large, $small], inOrder: true);

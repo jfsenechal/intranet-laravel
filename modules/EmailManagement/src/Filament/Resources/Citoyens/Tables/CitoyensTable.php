@@ -57,7 +57,7 @@ final class CitoyensTable
                     ->boolean()
                     ->placeholder('-')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_connection')
                     ->label('Dernière connexion')
                     ->date()
