@@ -16,6 +16,7 @@ use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Cache;
 
 use function Pest\Livewire\livewire;
 
@@ -58,6 +59,31 @@ describe('quota', function (): void {
         $citoyen->virtualUser->update(['quota_bytes' => 777]);
 
         livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertSee('777');
+    });
+
+    it('degrades the usage when the mail server is not configured', function (): void {
+        $citoyen = Citoyen::factory()->create();
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->assertSuccessful()
+            ->assertSee('Utilisation boîte mail')
+            ->assertSee('Quota indisponible');
+    });
+
+    it('degrades the usage when the mail server is unreachable and remembers the failure', function (): void {
+        config()->set('email-management.imap.citoyen', [
+            'host' => '127.0.0.1',
+            'user' => 'admin',
+            'password' => 'secret',
+        ]);
+        $citoyen = Citoyen::factory()->create();
+        $key = 'citoyen-quota:'.$citoyen->mail;
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->assertSuccessful()
+            ->assertSee('Quota indisponible');
+
+        expect(Cache::store('array')->get($key))->toBeFalse();
     });
 
     it('changes the quota of the login', function (): void {
