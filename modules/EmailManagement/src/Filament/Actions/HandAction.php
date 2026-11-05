@@ -18,7 +18,7 @@ final class HandAction
         return Action::make('hand')
             ->label('Prendre la main')
             ->icon(Heroicon::HandRaised)
-            ->color('danger')
+            ->color('warning')
             ->authorize('update', $record)
             ->visible(fn (): bool => ! $record->isTakenOver())
             ->modalHeading("Prendre la main sur {$record->mail}")

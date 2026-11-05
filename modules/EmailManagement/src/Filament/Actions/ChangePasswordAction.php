@@ -18,7 +18,7 @@ final class ChangePasswordAction
         return Action::make('changePassword')
             ->label('Changer le mot de passe')
             ->icon(Heroicon::Key)
-            ->color('warning')
+            ->color('success')
             ->authorize('update', $record)
             ->modalHeading("Mot de passe de {$record->mail}")
             ->modalSubmitActionLabel('Enregistrer')
