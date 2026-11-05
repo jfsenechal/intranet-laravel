@@ -29,12 +29,8 @@ final class EmployeInfolist
                             ->label('Prénom'),
                         TextEntry::make('sn')
                             ->label('Nom'),
-                        TextEntry::make('cn')
-                            ->label('Nom complet'),
                         TextEntry::make('samaccountname')
-                            ->label('Identifiant'),
-                        TextEntry::make('displayName')
-                            ->label("Nom d'affichage"),
+                            ->label('Identifiant')
                     ]),
                 Section::make('Coordonnées')
                     ->columns()
@@ -45,6 +41,9 @@ final class EmployeInfolist
                         TextEntry::make('telephoneNumber')
                             ->label('Téléphone')
                             ->placeholder('-'),
+                        TextEntry::make('dn')
+                            ->label('DN')
+                            ->columnSpanFull(),
                     ]),
                 Section::make('Membre de')
                     ->description("Les groupes de l'annuaire qui délivrent vers cette adresse")
@@ -101,20 +100,6 @@ final class EmployeInfolist
                                     default => 'success',
                                 };
                             }),
-                    ]),
-                Section::make('Divers')
-                    ->components([
-                        TextEntry::make('dn')
-                            ->label('DN')
-                            ->columnSpanFull(),
-                        TextEntry::make('description')
-                            ->label('Description')
-                            ->placeholder('-')
-                            ->columnSpanFull(),
-                        TextEntry::make('sync_at')
-                            ->label('Synchronisé le')
-                            ->dateTime()
-                            ->placeholder('Jamais'),
                     ]),
             ]);
     }
