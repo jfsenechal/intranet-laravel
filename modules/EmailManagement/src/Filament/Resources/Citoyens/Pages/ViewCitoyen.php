@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages;
 
 use AcMarche\EmailManagement\Filament\Actions\ChangePasswordAction;
+use AcMarche\EmailManagement\Filament\Actions\HandAction;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\CitoyenResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -25,6 +26,8 @@ final class ViewCitoyen extends ViewRecord
             EditAction::make()
                 ->icon(Heroicon::Pencil),
             ChangePasswordAction::make($this->record),
+            HandAction::takeOver($this->record),
+            HandAction::restore($this->record),
         ];
     }
 }

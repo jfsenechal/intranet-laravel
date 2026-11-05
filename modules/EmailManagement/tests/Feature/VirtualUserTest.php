@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AcMarche\EmailManagement\Models\Citoyen;
 use AcMarche\EmailManagement\Models\VirtualUser;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 it('hides the password hashes when serialized', function (): void {
@@ -39,6 +40,24 @@ it('links citoyens.mail to virtual_users.username with a foreign key', function 
         ->foreign_columns->toBe(['username'])
         ->on_update->toBe('cascade')
         ->on_delete->toBe('restrict');
+});
+
+it('no longer has the hands table', function (): void {
+    expect(Schema::connection('maria-email-management')->hasTable('hands'))->toBeFalse();
+});
+
+it('refuses to drop a hands table that still holds a password', function (): void {
+    $schema = Schema::connection('maria-email-management');
+    $migration = require __DIR__.'/../../database/migrations/2026_11_05_000002_drop_hands_table.php';
+    $migration->down();
+    DB::connection('maria-email-management')->table('hands')->insert([
+        'uid' => 'alice.martin',
+        'email' => 'alice.martin@marche.be',
+        'password' => '{SSHA}original',
+    ]);
+
+    expect(fn () => $migration->up())->toThrow(RuntimeException::class)
+        ->and($schema->hasTable('hands'))->toBeTrue();
 });
 
 it('no longer stores the deprecated columns on citoyens', function (): void {

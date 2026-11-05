@@ -171,6 +171,92 @@ describe('change password', function (): void {
     ]);
 });
 
+describe('hand', function (): void {
+    it('keeps the legacy hash while an admin has the hand', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $virtualUser = $citoyen->virtualUser;
+        $virtualUser->update(['userPassword' => null, 'legacy_password' => '{SSHA}original']);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('hand', ['password' => 'Temporary-Pass-1'])
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+
+        expect($citoyen->refresh()->hand_password)->toBe('{SSHA}original')
+            ->and(password_verify('Temporary-Pass-1', mb_substr($virtualUser->refresh()->userPassword, 10)))->toBeTrue()
+            ->and($virtualUser->legacy_password)->toBeNull();
+    });
+
+    it('gives back the original password', function (?string $userPassword, ?string $legacyPassword, string $effective): void {
+        $citoyen = Citoyen::factory()->create();
+        $virtualUser = $citoyen->virtualUser;
+        $virtualUser->update(['userPassword' => $userPassword, 'legacy_password' => $legacyPassword]);
+
+        $citoyen->takeOver('Temporary-Pass-1');
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('restoreHand')
+            ->assertNotified();
+
+        expect($citoyen->refresh()->hand_password)->toBeNull()
+            ->and($virtualUser->refresh()->userPassword)->toBe($effective)
+            ->and($virtualUser->legacy_password)->toBeNull();
+    })->with([
+        'legacy hash' => [null, '{SSHA}original', '{SSHA}original'],
+        'argon2id hash' => ['{ARGON2ID}original', null, '{ARGON2ID}original'],
+        'both set, as Dovecot prefers userPassword' => ['{ARGON2ID}original', '{SSHA}old', '{ARGON2ID}original'],
+    ]);
+
+    it('offers only the action matching the state', function (): void {
+        $citoyen = Citoyen::factory()->create();
+
+        $component = livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->assertActionVisible('hand')
+            ->assertActionHidden('restoreHand')
+            ->callAction('hand', ['password' => 'Temporary-Pass-1'])
+            ->assertActionHidden('hand')
+            ->assertActionVisible('restoreHand');
+
+        $component->callAction('restoreHand')
+            ->assertActionVisible('hand')
+            ->assertActionHidden('restoreHand');
+    });
+
+    it('never overwrites the kept hash with the temporary password', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $citoyen->virtualUser->update(['userPassword' => null, 'legacy_password' => '{SSHA}original']);
+        $citoyen->takeOver('Temporary-Pass-1');
+
+        $citoyen->takeOver('Second-Temporary-2');
+
+        expect($citoyen->refresh()->hand_password)->toBe('{SSHA}original')
+            ->and(password_verify('Second-Temporary-2', mb_substr($citoyen->virtualUser->refresh()->userPassword, 10)))->toBeTrue();
+    });
+
+    it('rejects a temporary password outside the policy', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $citoyen->virtualUser->update(['userPassword' => null, 'legacy_password' => '{SSHA}original']);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('hand', ['password' => 'too-weak'])
+            ->assertHasActionErrors(['password']);
+
+        expect($citoyen->refresh()->hand_password)->toBeNull()
+            ->and($citoyen->virtualUser->refresh()->legacy_password)->toBe('{SSHA}original');
+    });
+
+    it('never exposes the kept hash', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $citoyen->virtualUser->update(['userPassword' => null, 'legacy_password' => '{SSHA}keptHashValue']);
+        $citoyen->takeOver('Temporary-Pass-1');
+
+        expect($citoyen->refresh()->toArray())->not->toHaveKey('hand_password');
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertDontSee('keptHashValue');
+        livewire(EditCitoyen::class, ['record' => $citoyen->id])->assertDontSee('keptHashValue');
+    });
+});
+
 describe('create page', function (): void {
     beforeEach(function (): void {
         $this->validData = [

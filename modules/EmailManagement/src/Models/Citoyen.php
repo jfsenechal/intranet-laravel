@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 /**
  * A citizen mailbox account. The database is the source of truth: citoyens are not in LDAP.
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 ])]
 #[Hidden([
     'auth_token',
+    'hand_password',
     'remember_token',
 ])]
 #[UseFactory(CitoyenFactory::class)]
@@ -55,6 +57,49 @@ final class Citoyen extends Model
     public function virtualUser(): HasOne
     {
         return $this->hasOne(VirtualUser::class, 'username', 'mail');
+    }
+
+    public function isTakenOver(): bool
+    {
+        return filled($this->hand_password);
+    }
+
+    /**
+     * Replaces the password with a temporary one, keeping the hash Dovecot currently uses.
+     * Most logins still rely on legacy_password, which changing the password clears. A second
+     * call only replaces the temporary password, so the kept hash is never overwritten.
+     */
+    public function takeOver(string $temporaryPassword): void
+    {
+        $virtualUser = $this->virtualUser;
+
+        DB::connection('maria-email-management')->transaction(function () use ($virtualUser, $temporaryPassword): void {
+            if (! $this->isTakenOver()) {
+                $this->forceFill([
+                    'hand_password' => $virtualUser->userPassword ?? $virtualUser->legacy_password,
+                ])->save();
+            }
+
+            $virtualUser->changePassword($temporaryPassword);
+        });
+    }
+
+    /**
+     * Puts the kept hash back. It may be an {SSHA} one: Dovecot reads the scheme from the
+     * prefix, whichever column the hash is in.
+     */
+    public function restorePassword(): void
+    {
+        $virtualUser = $this->virtualUser;
+
+        DB::connection('maria-email-management')->transaction(function () use ($virtualUser): void {
+            $virtualUser->forceFill([
+                'userPassword' => $this->hand_password,
+                'legacy_password' => null,
+            ])->save();
+
+            $this->forceFill(['hand_password' => null])->save();
+        });
     }
 
     protected function casts(): array
