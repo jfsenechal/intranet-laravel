@@ -36,5 +36,3 @@ find "${WRITABLE_DIRS[@]}" -type f -exec chmod 664 {} +
 
 # .env readable by the web server only
 [[ -f .env ]] && chown root:www-data .env && chmod 640 .env
-
-echo "Done."
