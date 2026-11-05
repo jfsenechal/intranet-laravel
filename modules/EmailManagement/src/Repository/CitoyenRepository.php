@@ -31,9 +31,8 @@ final class CitoyenRepository
     public function create(array $data): Citoyen
     {
         $mail = mb_strtolower($data['mail']);
-        $uid = Str::before($mail, '@');
 
-        return DB::connection('maria-email-management')->transaction(function () use ($data, $mail, $uid): Citoyen {
+        return DB::connection('maria-email-management')->transaction(function () use ($data, $mail): Citoyen {
             $virtualUser = new VirtualUser([
                 'username' => $mail,
                 'quota_bytes' => self::DEFAULT_QUOTA,
@@ -42,7 +41,6 @@ final class CitoyenRepository
             $virtualUser->changePassword($data['password']);
 
             return Citoyen::forceCreate([
-                'uid' => $uid,
                 'mail' => $mail,
                 'givenName' => $data['givenName'] ?? null,
                 'sn' => $data['sn'],

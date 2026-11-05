@@ -38,25 +38,25 @@ it('stops when the mail store cannot be read', function (): void {
 });
 
 it('lists the unread mail, the longest waiting first', function (): void {
-    $recent = Citoyen::factory()->create(['uid' => 'recent', 'mail' => 'recent@marche.be']);
-    $old = Citoyen::factory()->create(['uid' => 'old', 'mail' => 'old@marche.be']);
+    $recent = Citoyen::factory()->create(['mail' => 'recent@marche.be']);
+    $old = Citoyen::factory()->create(['mail' => 'old@marche.be']);
     ($this->deliverMail)($recent, 2);
     ($this->deliverMail)($old, 40);
     ($this->deliverMail)($old, 10);
 
     $this->artisan('email-management:citoyen-new-mail')
-        ->expectsTable(['uid', 'mail', 'non lus', 'plus ancien', 'en attente depuis'], [
-            ['old', 'old@marche.be', 2, now()->subDays(40)->format('d/m/Y'), '40 j'],
-            ['recent', 'recent@marche.be', 1, now()->subDays(2)->format('d/m/Y'), '2 j'],
+        ->expectsTable(['mail', 'non lus', 'plus ancien', 'en attente depuis'], [
+            ['old@marche.be', 2, now()->subDays(40)->format('d/m/Y'), '40 j'],
+            ['recent@marche.be', 1, now()->subDays(2)->format('d/m/Y'), '2 j'],
         ])
         ->expectsOutputToContain('2 compte(s), 3 message(s) non lu(s).')
         ->assertSuccessful();
 });
 
 it('filters on the keyword, the unread mail and its age', function (): void {
-    $old = Citoyen::factory()->create(['uid' => 'old', 'mail' => 'old@marche.be']);
-    $recent = Citoyen::factory()->create(['uid' => 'recent', 'mail' => 'recent@marche.be']);
-    Citoyen::factory()->create(['uid' => 'empty', 'mail' => 'empty@marche.be']);
+    $old = Citoyen::factory()->create(['mail' => 'old@marche.be']);
+    $recent = Citoyen::factory()->create(['mail' => 'recent@marche.be']);
+    Citoyen::factory()->create(['mail' => 'empty@marche.be']);
     ($this->deliverMail)($old, 40);
     ($this->deliverMail)($recent, 2);
 
@@ -88,11 +88,11 @@ it('refuses to delete without a minimum age', function (array $options): void {
 ]);
 
 it('deletes the citoyen and its login once confirmed, leaving the mailbox on disk', function (): void {
-    $citoyen = Citoyen::factory()->create(['uid' => 'old', 'mail' => 'old@marche.be']);
+    $citoyen = Citoyen::factory()->create(['mail' => 'old@marche.be']);
     ($this->deliverMail)($citoyen, 40);
 
     $this->artisan('email-management:citoyen-new-mail', ['--min-days' => 30, '--delete' => true])
-        ->expectsConfirmation('Supprimer le compte old ?', 'yes')
+        ->expectsConfirmation('Supprimer le compte old@marche.be ?', 'yes')
         ->expectsOutputToContain('1 supprimé(s)')
         ->assertSuccessful();
 
@@ -102,11 +102,11 @@ it('deletes the citoyen and its login once confirmed, leaving the mailbox on dis
 });
 
 it('keeps the account without confirmation, even without a Sieve script', function (): void {
-    $citoyen = Citoyen::factory()->create(['uid' => 'old', 'mail' => 'old@marche.be']);
+    $citoyen = Citoyen::factory()->create(['mail' => 'old@marche.be']);
     ($this->deliverMail)($citoyen, 40);
 
     $this->artisan('email-management:citoyen-new-mail', ['--min-days' => 30, '--delete' => true])
-        ->expectsConfirmation('Supprimer le compte old ?', 'no')
+        ->expectsConfirmation('Supprimer le compte old@marche.be ?', 'no')
         ->expectsOutputToContain('1 conservé(s)')
         ->assertSuccessful();
 
@@ -124,7 +124,7 @@ it('keeps the account when it cannot ask', function (): void {
 });
 
 it('skips an account that forwards its mail', function (): void {
-    $citoyen = Citoyen::factory()->create(['uid' => 'old', 'mail' => 'old@marche.be']);
+    $citoyen = Citoyen::factory()->create(['mail' => 'old@marche.be']);
     ($this->deliverMail)($citoyen, 40);
     ($this->writeSieve)($citoyen, 'redirect "ailleurs@example.be";');
 
@@ -137,11 +137,11 @@ it('skips an account that forwards its mail', function (): void {
 });
 
 it('does not treat a commented redirect as a forward', function (): void {
-    $citoyen = Citoyen::factory()->create(['uid' => 'old', 'mail' => 'old@marche.be']);
+    $citoyen = Citoyen::factory()->create(['mail' => 'old@marche.be']);
     ($this->deliverMail)($citoyen, 40);
     ($this->writeSieve)($citoyen, "# redirect \"ailleurs@example.be\";\n/* redirect \"autre@example.be\"; */\nkeep;");
 
     $this->artisan('email-management:citoyen-new-mail', ['--min-days' => 30, '--delete' => true])
-        ->expectsConfirmation('Supprimer le compte old ?', 'no')
+        ->expectsConfirmation('Supprimer le compte old@marche.be ?', 'no')
         ->assertSuccessful();
 });

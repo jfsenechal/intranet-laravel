@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 /**
  * A citizen mailbox account. The database is the source of truth: citoyens are not in LDAP.
  *
- * The mailbox identity (mail, uid, home directory) is not fillable: it is only set on
+ * The mailbox identity (mail, home directory) is not fillable: it is only set on
  * creation, see {@see CitoyenRepository::create()}. The token hashes are hidden and never
  * rendered. The password hashes live on {@see VirtualUser}, which Dovecot reads.
  */

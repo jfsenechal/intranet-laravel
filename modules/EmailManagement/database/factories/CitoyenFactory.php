@@ -22,11 +22,10 @@ final class CitoyenFactory extends Factory
     {
         $givenName = fake()->firstName();
         $sn = fake()->lastName();
-        $uid = preg_replace('/[^a-z0-9.]/', '', Str::lower(Str::ascii($givenName).'.'.Str::ascii($sn)));
+        $localPart = preg_replace('/[^a-z0-9.]/', '', Str::lower(Str::ascii($givenName).'.'.Str::ascii($sn)));
 
         return [
-            'uid' => $uid.fake()->unique()->numberBetween(1, 9999),
-            'mail' => fn (array $attributes): string => "{$attributes['uid']}@marche.be",
+            'mail' => $localPart.fake()->unique()->numberBetween(1, 9999).'@marche.be',
             'givenName' => $givenName,
             'sn' => $sn,
             'l' => 'Marche-en-Famenne',

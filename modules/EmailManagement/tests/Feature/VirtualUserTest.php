@@ -68,6 +68,7 @@ it('no longer stores the deprecated columns on citoyens', function (): void {
         ->not->toContain('cn')
         ->not->toContain('dn')
         ->not->toContain('gosaMailForwardingAddress')
+        ->not->toContain('uid')
         ->not->toContain('gosaMailAlternateAddress')
         ->not->toContain('password_changed_at');
 });

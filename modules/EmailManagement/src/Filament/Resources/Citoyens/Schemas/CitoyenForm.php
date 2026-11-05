@@ -19,9 +19,9 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\Rule;
 
 /**
- * Only the fillable columns are fields here: the mailbox identity (mail, uid, home
- * directory) and the token hashes are left out of the schema entirely, so a save can never
- * submit them. Only {@see self::forCreating()} asks for the mailbox, which cannot change
+ * Only the fillable columns are fields here: the mailbox identity (mail, home directory)
+ * and the token hashes are left out of the schema entirely, so a save can never submit
+ * them. Only {@see self::forCreating()} asks for the mailbox, which cannot change
  * afterwards.
  */
 final class CitoyenForm

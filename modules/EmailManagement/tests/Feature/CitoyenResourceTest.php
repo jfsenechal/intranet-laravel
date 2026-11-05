@@ -346,7 +346,6 @@ describe('create page', function (): void {
         $citoyen = Citoyen::query()->where('mail', 'alice.martin@marche.be')->sole();
 
         expect($citoyen)
-            ->uid->toBe('alice.martin')
             ->sn->toBe('Martin')
             ->givenName->toBe('Alice')
             ->employeeNumber->toBe('62011108917')
@@ -490,16 +489,6 @@ describe('table', function (): void {
             ->assertCanNotSeeTableRecords($citoyens->skip(1));
     });
 
-    it('searches by uid', function (): void {
-        $citoyens = Citoyen::factory(3)->create();
-
-        livewire(ListCitoyens::class)
-            ->loadTable()
-            ->searchTable($citoyens->last()->uid)
-            ->assertCanSeeTableRecords($citoyens->take(-1))
-            ->assertCanNotSeeTableRecords($citoyens->take(2));
-    });
-
     it('filters on the last connection before a date', function (): void {
         $old = Citoyen::factory()->create(['last_connection' => '2026-01-10']);
         $recent = Citoyen::factory()->create(['last_connection' => '2026-06-01']);
@@ -554,14 +543,12 @@ describe('edit form', function (): void {
     it('never writes the read-only mailbox columns', function (): void {
         $citoyen = Citoyen::factory()->create([
             'mail' => 'alice.martin@marche.be',
-            'uid' => 'alice.martin',
         ]);
 
         livewire(EditCitoyen::class, ['record' => $citoyen->id])
             ->fillForm([
                 'sn' => 'Nouveau',
                 'mail' => 'hack@example.be',
-                'uid' => 'hack',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -570,8 +557,7 @@ describe('edit form', function (): void {
 
         expect($citoyen)
             ->sn->toBe('Nouveau')
-            ->mail->toBe('alice.martin@marche.be')
-            ->uid->toBe('alice.martin');
+            ->mail->toBe('alice.martin@marche.be');
     });
 
     it('saves an unchanged record without touching it', function (): void {

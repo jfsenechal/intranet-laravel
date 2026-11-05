@@ -28,7 +28,7 @@ final class CitoyenNewMailCommand extends Command
      */
     #[Override]
     protected $signature = 'email-management:citoyen-new-mail
-                            {keyword? : uid or mail address to filter on, every account when omitted}
+                            {keyword? : mail address to filter on, every account when omitted}
                             {--only-with-mail : only list accounts with at least one unread message}
                             {--min-days= : only list accounts whose oldest unread message exceeds this number of days}
                             {--delete : offer to delete the listed accounts from the database, requires --min-days}';
@@ -58,11 +58,7 @@ final class CitoyenNewMailCommand extends Command
         }
 
         $citoyens = Citoyen::query()
-            ->when($keyword, fn (Builder $query, string $keyword): Builder => $query->where(
-                fn (Builder $query): Builder => $query
-                    ->where('uid', 'like', "%{$keyword}%")
-                    ->orWhere('mail', 'like', "%{$keyword}%")
-            ))
+            ->when($keyword, fn (Builder $query, string $keyword): Builder => $query->where('mail', 'like', "%{$keyword}%"))
             ->get();
 
         if ($citoyens->isEmpty()) {
@@ -80,7 +76,7 @@ final class CitoyenNewMailCommand extends Command
         }
 
         $this->table(
-            ['uid', 'mail', 'non lus', 'plus ancien', 'en attente depuis'],
+            ['mail', 'non lus', 'plus ancien', 'en attente depuis'],
             array_column($rows, 'cells')
         );
         $this->components->info(count($rows).' compte(s), '.array_sum(array_column($rows, 'count')).' message(s) non lu(s).');
@@ -121,7 +117,6 @@ final class CitoyenNewMailCommand extends Command
                 'count' => $count ?? 0,
                 'citoyen' => $citoyen,
                 'cells' => [
-                    $citoyen->uid,
                     $citoyen->mail,
                     $count ?? 'pas de Maildir/new',
                     $oldestAt?->format('d/m/Y') ?? '—',
@@ -143,17 +138,17 @@ final class CitoyenNewMailCommand extends Command
      */
     private function deleteCitoyens(array $citoyens): void
     {
-        /** @var array<int, array{0: string, 1: string, 2: string, 3: string}> $results */
+        /** @var array<int, array{0: string, 1: string, 2: string}> $results */
         $results = [];
 
         foreach ($citoyens as $citoyen) {
-            $results[] = [$citoyen->uid, $citoyen->mail, ...$this->deleteCitoyen($citoyen)];
+            $results[] = [$citoyen->mail, ...$this->deleteCitoyen($citoyen)];
         }
 
         $this->newLine();
-        $this->table(['uid', 'mail', 'statut', 'détail'], $results);
+        $this->table(['mail', 'statut', 'détail'], $results);
 
-        $statuses = array_count_values(array_column($results, 2));
+        $statuses = array_count_values(array_column($results, 1));
 
         $this->components->info(sprintf(
             '%d supprimé(s), %d conservé(s), %d ignoré(s) pour cause de redirection, %d en erreur.',
@@ -173,7 +168,7 @@ final class CitoyenNewMailCommand extends Command
         $mailbox = new CitoyenMailbox($homeDirectory);
 
         $this->newLine();
-        $this->line("{$citoyen->uid} ({$citoyen->mail})");
+        $this->line($citoyen->mail);
 
         $redirects = $mailbox->sieveRedirects();
 
@@ -183,14 +178,14 @@ final class CitoyenNewMailCommand extends Command
             return ['Ignoré', 'Redirection vers '.implode(', ', $redirects)];
         }
 
-        if (! $this->confirm("Supprimer le compte {$citoyen->uid} ?")) {
+        if (! $this->confirm("Supprimer le compte {$citoyen->mail} ?")) {
             return ['Conservé', 'Suppression refusée'];
         }
 
         try {
             $citoyen->deleteWithLogin();
         } catch (Throwable $exception) {
-            $this->components->error("Erreur lors de la suppression de {$citoyen->uid} : {$exception->getMessage()}");
+            $this->components->error("Erreur lors de la suppression de {$citoyen->mail} : {$exception->getMessage()}");
 
             return ['Erreur', $exception->getMessage()];
         }

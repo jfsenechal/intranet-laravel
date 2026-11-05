@@ -37,11 +37,6 @@ final class CitoyensTable
                     ->sortable()
                     ->searchable()
                     ->copyable(),
-                TextColumn::make('uid')
-                    ->label('Identifiant')
-                    ->sortable()
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('l')
                     ->label('Localité')
                     ->sortable()

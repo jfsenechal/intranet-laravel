@@ -14,6 +14,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Js;
+use Illuminate\Support\Str;
 
 final class CreateCitoyen extends CreateRecord
 {
@@ -92,7 +93,7 @@ final class CreateCitoyen extends CreateRecord
             'Bonjour,',
             "L'adresse **{$this->getRecord()->mail}** a bien été créée.",
             'Vous pouvez la consulter sur https://citoyen.marche.be',
-            "Le nom d'utilisateur est : **{$this->getRecord()->uid}**",
+            "Le nom d'utilisateur est : **".Str::before($this->getRecord()->mail, '@').'**',
             "Le mot de passe est : **{$this->data['password']}**",
             'Vous pouvez configurer votre mail marche.be dans un logiciel de messagerie en vous aidant du tutoriel sur la page :',
             'https://www.marche.be/email/',
