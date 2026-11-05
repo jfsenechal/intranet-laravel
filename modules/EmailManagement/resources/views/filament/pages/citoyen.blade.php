@@ -3,7 +3,7 @@
         <x-slot name="heading">Serveur citoyen</x-slot>
 
         <p class="text-sm text-gray-600 dark:text-gray-400">
-            Tout se gère depuis le serveur citoyen.
+            Dans le dossier /var/www/gestmail, quelques commandes
         </p>
 
         <x-filament::link

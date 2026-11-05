@@ -43,11 +43,11 @@ final class CitoyenPage extends Page
             ],
             [
                 'command' => 'php artisan citoyen:orphan-mailboxes',
-                'description' => 'Liste des dossiers imap sans compte utilisateur',
+                'description' => 'Liste des dossiers IMAP sans compte utilisateur',
             ],
             [
                 'command' => 'php artisan citoyen:orphan-mailboxes --delete',
-                'description' => "Supprime les dossiers imap sans compte utilisateur, attention pas de confirmation !",
+                'description' => "Supprime les dossiers IMAP sans compte utilisateur, attention pas de confirmation !",
             ],
             [
                 'command' => 'php artisan citoyen:unread-mail --only-with-mail --min-days=90',
