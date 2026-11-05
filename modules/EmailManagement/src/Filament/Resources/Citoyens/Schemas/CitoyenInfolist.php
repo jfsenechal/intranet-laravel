@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Citoyens\Schemas;
 
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -41,6 +42,10 @@ final class CitoyenInfolist
                             ->label('Quota')
                             ->numeric()
                             ->suffix(' Mo')
+                            ->placeholder('-'),
+                        IconEntry::make('virtualUser.active')
+                            ->label('Actif')
+                            ->boolean()
                             ->placeholder('-'),
                         TextEntry::make('homeDirectory')
                             ->label('Répertoire')

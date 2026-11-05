@@ -1863,16 +1863,16 @@
         },
         {
             "name": "chrome-php/chrome",
-            "version": "v1.16.1",
+            "version": "v1.16.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrome-php/chrome.git",
-                "reference": "2618fbcd0530e917433675b507eca25ad4c52376"
+                "reference": "f539f4dc9d141f1a3dc30f0e92f0c3003469a55b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrome-php/chrome/zipball/2618fbcd0530e917433675b507eca25ad4c52376",
-                "reference": "2618fbcd0530e917433675b507eca25ad4c52376",
+                "url": "https://api.github.com/repos/chrome-php/chrome/zipball/f539f4dc9d141f1a3dc30f0e92f0c3003469a55b",
+                "reference": "f539f4dc9d141f1a3dc30f0e92f0c3003469a55b",
                 "shasum": ""
             },
             "require": {
@@ -1931,9 +1931,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrome-php/chrome/issues",
-                "source": "https://github.com/chrome-php/chrome/tree/v1.16.1"
+                "source": "https://github.com/chrome-php/chrome/tree/v1.16.2"
             },
-            "time": "2026-07-06T19:06:52+00:00"
+            "time": "2026-11-04T16:35:36+00:00"
         },
         {
             "name": "chrome-php/wrench",
@@ -2581,16 +2581,16 @@
         },
         {
             "name": "directorytree/imapengine",
-            "version": "v1.25.8",
+            "version": "v1.25.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/ImapEngine.git",
-                "reference": "137be54924da919f5e0a18af1ef0928ee6614308"
+                "reference": "19618d414c096e509342aab4f5114e83db0c21a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/ImapEngine/zipball/137be54924da919f5e0a18af1ef0928ee6614308",
-                "reference": "137be54924da919f5e0a18af1ef0928ee6614308",
+                "url": "https://api.github.com/repos/DirectoryTree/ImapEngine/zipball/19618d414c096e509342aab4f5114e83db0c21a9",
+                "reference": "19618d414c096e509342aab4f5114e83db0c21a9",
                 "shasum": ""
             },
             "require": {
@@ -2631,7 +2631,7 @@
             ],
             "support": {
                 "issues": "https://github.com/DirectoryTree/ImapEngine/issues",
-                "source": "https://github.com/DirectoryTree/ImapEngine/tree/v1.25.8"
+                "source": "https://github.com/DirectoryTree/ImapEngine/tree/v1.25.9"
             },
             "funding": [
                 {
@@ -2639,7 +2639,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-02T20:59:02+00:00"
+            "time": "2026-11-04T21:29:36+00:00"
         },
         {
             "name": "directorytree/imapengine-laravel",

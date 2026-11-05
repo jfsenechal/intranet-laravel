@@ -71,6 +71,58 @@ describe('quota', function (): void {
     });
 });
 
+describe('active', function (): void {
+    it('shows whether the login is active in the table', function (): void {
+        $inactive = Citoyen::factory()->create();
+        VirtualUser::factory()->create(['username' => $inactive->mail, 'active' => false]);
+
+        livewire(ListCitoyens::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('virtualUser.active', false, $inactive);
+    });
+
+    it('renders the view page for an inactive login', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        VirtualUser::factory()->create(['username' => $citoyen->mail, 'active' => false]);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertSuccessful();
+    });
+
+    it('deactivates the login and leaves the rest of it untouched', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $virtualUser = VirtualUser::factory()->create([
+            'username' => $citoyen->mail,
+            'userPassword' => '{SSHA}secret',
+            'quota_bytes' => 777,
+        ]);
+
+        livewire(EditCitoyen::class, ['record' => $citoyen->id])
+            ->assertSchemaStateSet(['virtualUser.active' => true])
+            ->fillForm(['virtualUser' => ['active' => false]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $virtualUser->refresh();
+
+        expect($virtualUser)
+            ->active->toBeFalse()
+            ->quota_bytes->toBe(777)
+            ->username->toBe($citoyen->mail)
+            ->and($virtualUser->userPassword)->toBe('{SSHA}secret');
+    });
+
+    it('does not create a login when saving a citoyen without one', function (): void {
+        $citoyen = Citoyen::factory()->create();
+
+        livewire(EditCitoyen::class, ['record' => $citoyen->id])
+            ->fillForm(['sn' => 'Dupont'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect(VirtualUser::query()->where('username', $citoyen->mail)->exists())->toBeFalse();
+    });
+});
+
 describe('sensitive data', function (): void {
     it('never renders the token hash but shows the national number', function (): void {
         $citoyen = Citoyen::factory()->create([

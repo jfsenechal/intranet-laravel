@@ -7,6 +7,7 @@ namespace AcMarche\EmailManagement\Filament\Resources\Citoyens\Tables;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -40,7 +41,7 @@ final class CitoyensTable
                     ->label('Identifiant')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('l')
                     ->label('Localité')
                     ->sortable()
@@ -51,11 +52,17 @@ final class CitoyensTable
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('virtualUser.active')
+                    ->label('Actif')
+                    ->boolean()
+                    ->placeholder('-')
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('last_connection')
                     ->label('Dernière connexion')
                     ->date()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Filter::make('last_connection')
