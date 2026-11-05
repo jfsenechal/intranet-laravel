@@ -206,7 +206,7 @@ describe('description', function (): void {
 describe('view', function (): void {
     /**
      * The modal body is rendered client-side, so this asserts the action mounts against the
-     * right record rather than the text it will show, as the viewLdap test does.
+     * right record rather than the text it will show.
      */
     it('opens on the list', function (): void {
         makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be'], 'Le conseil');

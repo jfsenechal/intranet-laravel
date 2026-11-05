@@ -8,7 +8,6 @@ use AcMarche\EmailManagement\Filament\Actions\AliasAction;
 use AcMarche\EmailManagement\Filament\Actions\CreateEmailAction;
 use AcMarche\EmailManagement\Filament\Actions\QuotaAction;
 use AcMarche\EmailManagement\Filament\Actions\VacationAction;
-use AcMarche\EmailManagement\Filament\Actions\ViewLdapAction;
 use AcMarche\EmailManagement\Filament\Resources\Employes\EmployeResource;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ViewRecord;
@@ -26,7 +25,6 @@ final class ViewEmploye extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewLdapAction::make($this->record),
             QuotaAction::make($this->record),
             ActionGroup::make([
                 ActionGroup::make([

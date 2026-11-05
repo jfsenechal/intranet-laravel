@@ -142,32 +142,6 @@ describe('ldap header actions', function (): void {
         DirectoryEmulator::tearDown();
     });
 
-    it('shows the directory attributes of the employe', function (): void {
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
-
-        $ldapEntry = new EmployeLdap;
-        $ldapEntry->cn = 'Alice Martin';
-        $ldapEntry->samaccountname = 'amartin';
-        $ldapEntry->givenName = 'Alice';
-        $ldapEntry->sn = 'Martin';
-        $ldapEntry->mail = 'alice.martin@ac.marche.be';
-        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
-
-        livewire(ViewEmploye::class, ['record' => $employe->id])
-            ->mountAction('viewLdap')
-            ->assertSuccessful()
-            ->assertActionMounted('viewLdap');
-    });
-
-    it('reports an employe that is absent from the directory', function (): void {
-        $employe = Employe::factory()->create(['samaccountname' => 'inconnu']);
-
-        livewire(ViewEmploye::class, ['record' => $employe->id])
-            ->mountAction('viewLdap')
-            ->assertSuccessful()
-            ->assertActionMounted('viewLdap');
-    });
-
     it('joins the local part to the chosen domain', function (): void {
         $employe = Employe::factory()->create(['samaccountname' => 'amartin', 'mail' => null]);
 
