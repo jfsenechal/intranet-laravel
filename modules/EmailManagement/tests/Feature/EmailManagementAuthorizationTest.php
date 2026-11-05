@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use AcMarche\EmailManagement\Enums\RolesEnum;
 use AcMarche\EmailManagement\Http\Middleware\EnsureEmailAdmin;
-use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -59,45 +58,5 @@ describe('panel access', function (): void {
         $user->roles()->attach(Role::factory()->create(['name' => 'ROLE_GRH_ADMIN']));
 
         expect(passesEmailAdminMiddleware($user))->toBeFalse();
-    });
-});
-
-describe('EmployePolicy', function (): void {
-    beforeEach(function (): void {
-        $this->employe = new Employe;
-    });
-
-    it('grants every ability to a ROLE_EMAIL_ADMIN user', function (): void {
-        $user = emailAdmin();
-
-        expect($user->can('viewAny', Employe::class))->toBeTrue()
-            ->and($user->can('view', $this->employe))->toBeTrue()
-            ->and($user->can('create', Employe::class))->toBeTrue()
-            ->and($user->can('update', $this->employe))->toBeTrue()
-            ->and($user->can('delete', $this->employe))->toBeTrue();
-    });
-
-    it('grants every ability to a super administrator', function (): void {
-        $user = User::factory()->create(['is_administrator' => true]);
-
-        expect($user->can('viewAny', Employe::class))->toBeTrue()
-            ->and($user->can('delete', $this->employe))->toBeTrue();
-    });
-
-    it('denies every ability to a user without the role', function (): void {
-        $user = User::factory()->create(['is_administrator' => false]);
-
-        expect($user->can('viewAny', Employe::class))->toBeFalse()
-            ->and($user->can('view', $this->employe))->toBeFalse()
-            ->and($user->can('create', Employe::class))->toBeFalse()
-            ->and($user->can('update', $this->employe))->toBeFalse()
-            ->and($user->can('delete', $this->employe))->toBeFalse();
-    });
-
-    it('never allows restore or forceDelete, even for a super administrator', function (): void {
-        $user = User::factory()->create(['is_administrator' => true]);
-
-        expect($user->can('restore', $this->employe))->toBeFalse()
-            ->and($user->can('forceDelete', $this->employe))->toBeFalse();
     });
 });

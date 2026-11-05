@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Actions;
 
-use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\EmailManagement\Sieve\SieveEmploye;
 use AcMarche\EmailManagement\Sieve\VacationScript;
 use Filament\Actions\Action;
@@ -12,12 +11,14 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
 final class VacationAction
 {
-    public static function make(Model|Employe $record): Action
+    /**
+     * @param  array{samaccountname: string, mail: ?string}  $record
+     */
+    public static function make(array $record): Action
     {
         /** @var array{active: ?string, vacation: ?string}|string|null $status */
         $status = null;
@@ -27,7 +28,7 @@ final class VacationAction
         $loadStatus = function (SieveEmploye $sieveEmploye) use (&$status, $record): array|string {
             if ($status === null) {
                 try {
-                    $status = $sieveEmploye->getVacationStatus($record->samaccountname);
+                    $status = $sieveEmploye->getVacationStatus($record['samaccountname']);
                 } catch (Throwable $e) {
                     $status = $e->getMessage();
                 }
@@ -40,7 +41,7 @@ final class VacationAction
             ->label("Message d'absence")
             ->icon(Heroicon::PaperAirplane)
             ->color('success')
-            ->modalHeading("Message d'absence de {$record->samaccountname}")
+            ->modalHeading("Message d'absence de {$record['samaccountname']}")
             ->modalDescription(function (SieveEmploye $sieveEmploye) use ($loadStatus): string {
                 $status = $loadStatus($sieveEmploye);
 
@@ -91,7 +92,7 @@ final class VacationAction
                     ->modalHeading("Désactiver le message d'absence")
                     ->action(function (SieveEmploye $sieveEmploye) use ($record): void {
                         try {
-                            $sieveEmploye->removeVacation($record->samaccountname);
+                            $sieveEmploye->removeVacation($record['samaccountname']);
 
                             Notification::make()
                                 ->title("Le message d'absence a bien été désactivé")
@@ -112,11 +113,11 @@ final class VacationAction
                     $data['subject'],
                     $data['message'],
                     (int) $data['days'],
-                    array_filter([$record->mail]),
+                    array_filter([$record['mail']]),
                 );
 
                 try {
-                    $sieveEmploye->setVacation($record->samaccountname, $script);
+                    $sieveEmploye->setVacation($record['samaccountname'], $script);
 
                     Notification::make()
                         ->title("Le message d'absence a bien été activé")

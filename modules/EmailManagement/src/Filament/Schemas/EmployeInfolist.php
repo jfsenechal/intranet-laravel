@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AcMarche\EmailManagement\Filament\Resources\Employes\Schemas;
+namespace AcMarche\EmailManagement\Filament\Schemas;
 
 use AcMarche\EmailManagement\Enums\ListOuEnum;
 use AcMarche\EmailManagement\Imap\ImapEmploye;
 use AcMarche\EmailManagement\Ldap\ListAliasLdap;
-use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\EmailManagement\Repository\ListLdapRepository;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -18,7 +17,10 @@ use Throwable;
 
 final class EmployeInfolist
 {
-    public static function configure(Schema $schema): Schema
+    /**
+     * @param  array{samaccountname: ?string, mail: ?string}  $employe  also the schema's state
+     */
+    public static function configure(Schema $schema, array $employe): Schema
     {
         return $schema
             ->components([
@@ -51,13 +53,13 @@ final class EmployeInfolist
                     ->components([
                         TextEntry::make('member_of_lists')
                             ->label(ListOuEnum::LISTS->getLabel())
-                            ->state(fn (Employe $record): array => self::memberOfLists($record->mail, ListOuEnum::LISTS))
+                            ->state(fn (): array => self::memberOfLists($employe['mail'], ListOuEnum::LISTS))
                             ->badge()
                             ->color('gray')
                             ->placeholder('Aucune'),
                         TextEntry::make('member_of_services')
                             ->label(ListOuEnum::SERVICES->getLabel())
-                            ->state(fn (Employe $record): array => self::memberOfLists($record->mail, ListOuEnum::SERVICES))
+                            ->state(fn (): array => self::memberOfLists($employe['mail'], ListOuEnum::SERVICES))
                             ->badge()
                             ->color('gray')
                             ->placeholder('Aucun'),
@@ -67,8 +69,8 @@ final class EmployeInfolist
                     ->components([
                         TextEntry::make('quota_usage')
                             ->label('Utilisation')
-                            ->state(function (Employe $record): string {
-                                $quotaInfo = self::getQuotaInfo($record->samaccountname);
+                            ->state(function () use ($employe): string {
+                                $quotaInfo = self::getQuotaInfo($employe['samaccountname']);
 
                                 if ($quotaInfo === null) {
                                     return 'Quota indisponible';
@@ -81,14 +83,14 @@ final class EmployeInfolist
                             }),
                         TextEntry::make('quota_percentage')
                             ->label('Pourcentage utilisé')
-                            ->state(function (Employe $record): string {
-                                $quotaInfo = self::getQuotaInfo($record->samaccountname);
+                            ->state(function () use ($employe): string {
+                                $quotaInfo = self::getQuotaInfo($employe['samaccountname']);
 
                                 return $quotaInfo !== null ? $quotaInfo['pourcentage'].'%' : '-';
                             })
                             ->badge()
-                            ->color(function (Employe $record): string {
-                                $quotaInfo = self::getQuotaInfo($record->samaccountname);
+                            ->color(function () use ($employe): string {
+                                $quotaInfo = self::getQuotaInfo($employe['samaccountname']);
 
                                 if ($quotaInfo === null) {
                                     return 'gray';

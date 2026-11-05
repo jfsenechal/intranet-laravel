@@ -75,28 +75,6 @@ final class EmployeLdapRepository
     }
 
     /**
-     * Replaces the entry's alias addresses wholesale.
-     *
-     * @param  array<int, string>  $aliases
-     *
-     * @throws LdapRecordException
-     * @throws ModelDoesNotExistException
-     */
-    public function updateAliases(EmployeLdap $ldapEntry, array $aliases): void
-    {
-        $ldapEntry->setAttribute('proxyAddresses', array_values($aliases));
-        $ldapEntry->update();
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function getAliases(EmployeLdap $ldapEntry): array
-    {
-        return array_values(array_filter((array) $ldapEntry->getAttribute('proxyaddresses')));
-    }
-
-    /**
      * Writes the address to 'mail' only.
      *
      * userPrincipalName is deliberately left alone: the bind account is delegated just
@@ -140,8 +118,8 @@ final class EmployeLdapRepository
     /**
      * sAMAccountName is selected by name on top of '*' because all() sorts by it: orderBy() asks
      * the directory for a server-side sort, and Active Directory returns the sort key stripped
-     * from every entry unless it is named in the selection. It is the key the local mirror is
-     * built on, so it cannot be allowed to come back empty.
+     * from every entry unless it is named in the selection. It is the key the employe pages
+     * read an entry by, so it cannot be allowed to come back empty.
      */
     private function query(): \LdapRecord\Query\Model\Builder
     {

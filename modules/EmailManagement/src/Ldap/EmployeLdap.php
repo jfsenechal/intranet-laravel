@@ -30,4 +30,21 @@ final class EmployeLdap extends User
 
         return $error;
     }
+
+    /**
+     * What the employe pages show of this entry, as a plain array Livewire can hold.
+     *
+     * @return array{samaccountname: ?string, givenName: ?string, sn: ?string, mail: ?string, telephoneNumber: ?string, dn: ?string}
+     */
+    public function toRecord(): array
+    {
+        return [
+            'samaccountname' => $this->getFirstAttribute('samaccountname'),
+            'givenName' => $this->getFirstAttribute('givenName'),
+            'sn' => $this->getFirstAttribute('sn'),
+            'mail' => $this->getFirstAttribute('mail'),
+            'telephoneNumber' => $this->getFirstAttribute('telephoneNumber'),
+            'dn' => $this->getDn(),
+        ];
+    }
 }

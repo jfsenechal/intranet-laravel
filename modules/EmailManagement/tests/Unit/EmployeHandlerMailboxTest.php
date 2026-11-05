@@ -5,7 +5,6 @@ declare(strict_types=1);
 use AcMarche\EmailManagement\Imap\ImapEmploye;
 use AcMarche\EmailManagement\Ldap\EmployeHandler;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
-use AcMarche\EmailManagement\Models\Employe;
 use AcMarche\EmailManagement\Repository\EmployeLdapRepository;
 use LdapRecord\Laravel\Testing\DirectoryEmulator;
 
@@ -44,120 +43,71 @@ function employeLdapRepository(): EmployeLdapRepository
 describe('setQuota', function (): void {
     it('writes the quota to otherPager', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
 
-        app(EmployeHandler::class)->setQuota($employe, 2048);
+        app(EmployeHandler::class)->setQuota('amartin', 2048);
 
         expect(employeLdapRepository()->getQuota(employeLdapRepository()->getEntry('amartin')))->toBe(2048.0);
     });
 
     it('refuses a quota of zero or less', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
 
-        expect(fn () => app(EmployeHandler::class)->setQuota($employe, 0))
+        expect(fn () => app(EmployeHandler::class)->setQuota('amartin', 0))
             ->toThrow(Exception::class, 'plus grand que 0');
     });
 
     it('reports an employe missing from the directory', function (): void {
-        $employe = Employe::factory()->create(['samaccountname' => 'fantome']);
-
-        expect(fn () => app(EmployeHandler::class)->setQuota($employe, 1024))
+        expect(fn () => app(EmployeHandler::class)->setQuota('fantome', 1024))
             ->toThrow(Exception::class, 'introuvable');
-    });
-});
-
-describe('updateAliases', function (): void {
-    it('replaces the alias list', function (): void {
-        ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin', 'proxyAddresses' => ['vieux@ac.marche.be']]);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
-
-        app(EmployeHandler::class)->updateAliases($employe, ['a.martin@ac.marche.be', 'alice@ac.marche.be']);
-
-        expect(employeLdapRepository()->getAliases(employeLdapRepository()->getEntry('amartin')))
-            ->toBe(['a.martin@ac.marche.be', 'alice@ac.marche.be']);
-    });
-
-    it('clears every alias when given an empty list', function (): void {
-        ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin', 'proxyAddresses' => ['vieux@ac.marche.be']]);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
-
-        app(EmployeHandler::class)->updateAliases($employe, []);
-
-        expect(employeLdapRepository()->getAliases(employeLdapRepository()->getEntry('amartin')))->toBe([]);
-    });
-
-    it('rejects a malformed alias', function (): void {
-        ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
-
-        expect(fn () => app(EmployeHandler::class)->updateAliases($employe, ['pas-une-adresse']))
-            ->toThrow(Exception::class, 'format valide');
-    });
-
-    it('refuses an alias already held by another account', function (): void {
-        ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        ldapEmploye(['cn' => 'Bea Gathy', 'samaccountname' => 'bgathy', 'sn' => 'Gathy', 'mail' => 'occupe@ac.marche.be']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
-
-        expect(fn () => app(EmployeHandler::class)->updateAliases($employe, ['occupe@ac.marche.be']))
-            ->toThrow(Exception::class, 'déjà utilisée');
     });
 });
 
 describe('createEmail', function (): void {
     it('writes the address and the default quota to the directory', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin', 'mail' => null]);
 
-        app(EmployeHandler::class)->createEmail($employe, 'alice.martin@ac.marche.be');
+        app(EmployeHandler::class)->createEmail('amartin', 'alice.martin@ac.marche.be');
 
         $entry = employeLdapRepository()->getEntry('amartin');
 
         expect($entry->getFirstAttribute('mail'))->toBe('alice.martin@ac.marche.be')
-            ->and(employeLdapRepository()->getQuota($entry))->toBe((float) config('email-management.default_quota_mb'))
-            ->and($employe->refresh()->mail)->toBe('alice.martin@ac.marche.be');
+            ->and(employeLdapRepository()->getQuota($entry))->toBe((float) config('email-management.default_quota_mb'));
     });
 
     it('reports that the mailbox was not created when imap is unconfigured', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin', 'mail' => null]);
 
-        expect(app(EmployeHandler::class)->createEmail($employe, 'alice.martin@ac.marche.be'))->toBeFalse();
+        expect(app(EmployeHandler::class)->createEmail('amartin', 'alice.martin@ac.marche.be'))->toBeFalse();
     });
 
     it('rejects a malformed address', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
 
-        expect(fn () => app(EmployeHandler::class)->createEmail($employe, 'pas-une-adresse'))
+        expect(fn () => app(EmployeHandler::class)->createEmail('amartin', 'pas-une-adresse'))
             ->toThrow(Exception::class, 'format valide');
     });
 
     it('refuses an address already held by another account', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
         ldapEmploye(['cn' => 'Bea Gathy', 'samaccountname' => 'bgathy', 'sn' => 'Gathy', 'mail' => 'occupe@ac.marche.be']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin', 'mail' => null]);
 
-        expect(fn () => app(EmployeHandler::class)->createEmail($employe, 'occupe@ac.marche.be'))
+        expect(fn () => app(EmployeHandler::class)->createEmail('amartin', 'occupe@ac.marche.be'))
             ->toThrow(Exception::class, 'déjà utilisée');
     });
 
     it('takes an address held by another account when forced', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin']);
         ldapEmploye(['cn' => 'Bea Gathy', 'samaccountname' => 'bgathy', 'sn' => 'Gathy', 'mail' => 'occupe@ac.marche.be']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin', 'mail' => null]);
 
-        app(EmployeHandler::class)->createEmail($employe, 'occupe@ac.marche.be', force: true);
+        app(EmployeHandler::class)->createEmail('amartin', 'occupe@ac.marche.be', force: true);
 
         expect(employeLdapRepository()->getEntry('amartin')->getFirstAttribute('mail'))->toBe('occupe@ac.marche.be');
     });
 
     it('lets an account keep its own address', function (): void {
         ldapEmploye(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Martin', 'mail' => 'alice.martin@ac.marche.be']);
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin', 'mail' => 'alice.martin@ac.marche.be']);
 
-        app(EmployeHandler::class)->createEmail($employe, 'alice.martin@ac.marche.be');
+        app(EmployeHandler::class)->createEmail('amartin', 'alice.martin@ac.marche.be');
 
         expect(employeLdapRepository()->getEntry('amartin')->getFirstAttribute('mail'))->toBe('alice.martin@ac.marche.be');
     });

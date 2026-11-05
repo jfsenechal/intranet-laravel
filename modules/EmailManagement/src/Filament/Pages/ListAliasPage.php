@@ -32,9 +32,8 @@ use Override;
 /**
  * The mail groups of OU=LISTS and OU=SERVICES, read live from Active Directory.
  *
- * A Page rather than a Resource: there is no Eloquent model behind these groups, and no
- * local mirror the way Employe has one, so the table is fed by the custom-data records()
- * function instead of a query builder.
+ * A Page rather than a Resource: there is no Eloquent model behind these groups, so the
+ * table is fed by the custom-data records() function instead of a query builder.
  */
 final class ListAliasPage extends Page implements HasTable
 {
