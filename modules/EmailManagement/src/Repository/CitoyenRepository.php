@@ -6,12 +6,25 @@ namespace AcMarche\EmailManagement\Repository;
 
 use AcMarche\EmailManagement\Models\Citoyen;
 use AcMarche\EmailManagement\Models\VirtualUser;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 final class CitoyenRepository
 {
     private const int DEFAULT_QUOTA = 350;
+
+    public static function getExpiredQuery(): Builder
+    {
+        $twoYearsAgo = Carbon::now()->subYears(2);
+
+        return Citoyen::query()
+            ->where(function (Builder $query) use ($twoYearsAgo): void {
+                $query->whereNull('last_connection')
+                    ->orWhere('last_connection', '<', $twoYearsAgo);
+            });
+    }
 
     /**
      * Creates the Dovecot login, then the citoyen that references it.
