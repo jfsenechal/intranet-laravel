@@ -51,6 +51,11 @@ return [
     'default_quota_mb' => env('EMAIL_MANAGEMENT_DEFAULT_QUOTA_MB', 1024),
 
     /*
+     * Where Dovecot stores the citizens' mailboxes, see mail_path in 10-mail.conf.
+     */
+    'mail_root' => env('EMAIL_MANAGEMENT_MAIL_ROOT', '/home/vmail'),
+
+    /*
      * Sender of the messages sent to the citizens from SendCitoyenMessagePage.
      */
     'citoyen_message' => [

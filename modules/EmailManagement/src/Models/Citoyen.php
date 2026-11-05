@@ -49,7 +49,7 @@ final class Citoyen extends Model
      */
     public static function homeDirectoryFor(string $mail): string
     {
-        return '/home/vmail/'.Str::afterLast($mail, '@').'/'.mb_strtolower(mb_substr($mail, 0, 1)).'/'.$mail;
+        return config('email-management.mail_root').'/'.Str::afterLast($mail, '@').'/'.mb_strtolower(mb_substr($mail, 0, 1)).'/'.$mail;
     }
 
     public function getFullName(): string
@@ -108,6 +108,19 @@ final class Citoyen extends Model
             ])->save();
 
             $this->forceFill(['hand_password' => null])->save();
+        });
+    }
+
+    /**
+     * The citoyen goes first: its mail is a foreign key on the login.
+     */
+    public function deleteWithLogin(): void
+    {
+        $virtualUser = $this->virtualUser;
+
+        DB::connection('maria-email-management')->transaction(function () use ($virtualUser): void {
+            $this->delete();
+            $virtualUser->delete();
         });
     }
 

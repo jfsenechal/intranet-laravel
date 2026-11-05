@@ -48,7 +48,11 @@ final class CitoyenPage extends Page
             ],
             [
                 'command' => 'php artisan citoyen:new-mail --only-with-mail --min-days=90',
-                'description' => 'Vérifie si le compte a des mails dans sont dossier Maildir/new',
+                'description' => 'Vérifie si les comptes ont toujours des mails non-lus depuis 90 jours dans sont dossier Maildir/new',
+            ],
+            [
+                'command' => 'php artisan citoyen:new-mail --only-with-mail --min-days=365 --delete',
+                'description' => 'Supprime les comptes dont le plus récent mail dans les non-lus est plus vieux que 365 jours',
             ],
             [
                 'command' => 'php artisan citoyen:send-message',
