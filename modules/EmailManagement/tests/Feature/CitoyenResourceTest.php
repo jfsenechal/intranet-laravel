@@ -12,6 +12,7 @@ use AcMarche\EmailManagement\Policies\CitoyenPolicy;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
@@ -118,7 +119,6 @@ describe('change password', function (): void {
         livewire(ViewCitoyen::class, ['record' => $citoyen->id])
             ->callAction('changePassword', [
                 'password' => 'Correct-Horse-Battery-1',
-                'password_confirmation' => 'Correct-Horse-Battery-1',
             ])
             ->assertHasNoActionErrors()
             ->assertNotified();
@@ -129,6 +129,24 @@ describe('change password', function (): void {
             ->and(password_verify('Correct-Horse-Battery-1', mb_substr($virtualUser->userPassword, 10)))->toBeTrue()
             ->and($virtualUser->legacy_password)->toBeNull()
             ->and($virtualUser->quota_bytes)->toBe(777);
+    });
+
+    it('generates a password that passes validation', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $generated = null;
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->mountAction('changePassword')
+            ->callAction(TestAction::make('generatePassword')->schemaComponent('password', schema: 'mountedActionSchema0'))
+            ->assertActionDataSet(function (array $data) use (&$generated): bool {
+                $generated = $data['password'];
+
+                return filled($generated);
+            })
+            ->callMountedAction()
+            ->assertHasNoActionErrors();
+
+        expect(password_verify($generated, mb_substr($citoyen->virtualUser->refresh()->userPassword, 10)))->toBeTrue();
     });
 
     it('rejects an invalid password and keeps the current one', function (array $data): void {
@@ -144,11 +162,10 @@ describe('change password', function (): void {
         expect($virtualUser->userPassword)->toBeNull()
             ->and($virtualUser->legacy_password)->toBe('{SSHA}legacy');
     })->with([
-        'shorter than 12 characters' => [['password' => 'Eleven-Char', 'password_confirmation' => 'Eleven-Char']],
-        'no mixed case' => [['password' => 'lowercase-only-1', 'password_confirmation' => 'lowercase-only-1']],
-        'no number' => [['password' => 'No-Digits-In-Here', 'password_confirmation' => 'No-Digits-In-Here']],
-        'confirmation mismatch' => [['password' => 'Correct-Horse-Battery-1', 'password_confirmation' => 'Wrong-Horse-Battery-1']],
-        'empty' => [['password' => '', 'password_confirmation' => '']],
+        'shorter than 12 characters' => [['password' => 'Eleven-Char']],
+        'no mixed case' => [['password' => 'lowercase-only-1']],
+        'no number' => [['password' => 'No-Digits-In-Here']],
+        'empty' => [['password' => '']],
     ]);
 });
 

@@ -8,8 +8,10 @@ use AcMarche\EmailManagement\Models\Citoyen;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 final class ChangePasswordAction
@@ -31,13 +33,15 @@ final class ChangePasswordAction
                     ->autocomplete('new-password')
                     ->required()
                     ->rule(Password::defaults())
-                    ->same('password_confirmation'),
-                TextInput::make('password_confirmation')
-                    ->label('Confirmer le mot de passe')
-                    ->password()
-                    ->revealable()
-                    ->autocomplete('new-password')
-                    ->required(),
+                    ->afterContent(
+                        Action::make('generatePassword')
+                            ->label('Générer')
+                            ->icon(Heroicon::Sparkles)
+                            ->color('gray')
+                            ->action(function (Set $schemaSet): void {
+                                $schemaSet('password', self::generatePassword());
+                            }),
+                    ),
             ])
             ->action(function (array $data) use ($record): void {
                 $record->virtualUser->changePassword($data['password']);
@@ -47,5 +51,18 @@ final class ChangePasswordAction
                     ->success()
                     ->send();
             });
+    }
+
+    /**
+     * Str::password() guarantees a letter and a number but not both cases, which
+     * Password::defaults() requires.
+     */
+    private static function generatePassword(): string
+    {
+        do {
+            $password = Str::password(12, symbols: false);
+        } while (mb_strtolower($password) === $password || mb_strtoupper($password) === $password);
+
+        return $password;
     }
 }
