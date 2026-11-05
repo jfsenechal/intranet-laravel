@@ -85,8 +85,8 @@ final class CitoyenInfolist
                                             }
 
                                             return match (true) {
-                                                (float) $quotaInfo['pourcentage'] >= 90 => 'danger',
-                                                (float) $quotaInfo['pourcentage'] >= 70 => 'warning',
+                                                (float)$quotaInfo['pourcentage'] >= 90 => 'danger',
+                                                (float)$quotaInfo['pourcentage'] >= 70 => 'warning',
                                                 default => 'success',
                                             };
                                         }),
@@ -114,20 +114,11 @@ final class CitoyenInfolist
                                     TextEntry::make('recovery_phone')
                                         ->label('Téléphone de récupération')
                                         ->placeholder('-'),
-                                ]),
-                            Section::make('Connexion')
-                                ->columns()
-                                ->components([
-                                    TextEntry::make('last_connection')
-                                        ->label('Dernière connexion')
-                                        ->date()
-                                        ->placeholder('Jamais'),
                                     TextEntry::make('charter_accepted_at')
                                         ->label('Charte acceptée le')
                                         ->dateTime()
                                         ->placeholder('Non acceptée'),
                                 ]),
-
                             TextEntry::make('description')
                                 ->label('Description')
                                 ->placeholder('-')
@@ -140,6 +131,10 @@ final class CitoyenInfolist
                                 ->label('Actif')
                                 ->boolean()
                                 ->placeholder('-'),
+                            TextEntry::make('last_connection')
+                                ->label('Dernière connexion')
+                                ->date()
+                                ->placeholder('Jamais'),
                             TextEntry::make('created_at')
                                 ->label('Créé le')
                                 ->dateTime(),
@@ -167,7 +162,7 @@ final class CitoyenInfolist
     {
         $imap = ImapCitoyen::fromConfig();
 
-        if (! $imap->isConfigured()) {
+        if (!$imap->isConfigured()) {
             return null;
         }
 
