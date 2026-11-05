@@ -610,14 +610,27 @@ describe('authorization', function (): void {
             ->assertActionDoesNotExist(DeleteAction::class);
     });
 
-    it('denies delete even to a super administrator', function (): void {
+    it('deletes the citoyen and its login from the view page, then returns to the list', function (): void {
+        $citoyen = Citoyen::factory()->create();
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction(DeleteAction::class)
+            ->assertNotified()
+            ->assertRedirect(CitoyenResource::getUrl('index'));
+
+        expect(Citoyen::query()->find($citoyen->id))->toBeNull()
+            ->and(VirtualUser::query()->where('username', $citoyen->mail)->exists())->toBeFalse();
+    });
+
+    it('allows an email admin to delete one citoyen, never in bulk', function (): void {
         $admin = User::factory()->create(['is_administrator' => true]);
+        $withoutRole = User::factory()->create(['is_administrator' => false]);
         $citoyen = Citoyen::factory()->create();
         $policy = new CitoyenPolicy;
 
-        expect($policy->create($admin))->toBeTrue()
-            ->and($policy->delete($admin, $citoyen))->toBeFalse()
-            ->and($policy->viewAny($admin))->toBeTrue()
-            ->and($policy->update($admin, $citoyen))->toBeTrue();
+        expect($policy->delete($admin, $citoyen))->toBeTrue()
+            ->and($policy->delete($withoutRole, $citoyen))->toBeFalse()
+            ->and($policy->deleteAny($admin))->toBeFalse()
+            ->and($policy->forceDelete($admin, $citoyen))->toBeFalse();
     });
 });

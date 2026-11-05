@@ -23,10 +23,12 @@ beforeEach(function (): void {
 it('renders the citoyen page with the gestmail link and the useful commands', function (): void {
     livewire(CitoyenPage::class)
         ->assertSuccessful()
-        ->assertSee('Tout se gère depuis le serveur citoyen.')
+        ->assertSee('Dans le dossier /var/www/gestmail, quelques commandes')
         ->assertSee('https://citoyen.marche.be/gestmail')
-        ->assertSee('php artisan citoyen:purge')
-        ->assertSee('php artisan citoyen:change-password')
-        ->assertSee('php artisan citoyen:send-message')
+        ->assertSee('php artisan citoyen:update-last-login')
+        ->assertSee('php artisan citoyen:orphan-mailboxes')
+        ->assertSee('php artisan citoyen:orphan-mailboxes --delete')
+        ->assertSee('php artisan citoyen:unread-mail --only-with-mail --min-days=90')
+        ->assertSee('php artisan citoyen:unread-mail --only-with-mail --min-days=365 --delete')
         ->assertSee('Webmail citoyen');
 });

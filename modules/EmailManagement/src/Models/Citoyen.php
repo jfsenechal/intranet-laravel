@@ -111,6 +111,19 @@ final class Citoyen extends Model
         });
     }
 
+    /**
+     * The citoyen goes first: its mail is a foreign key on the login.
+     */
+    public function deleteWithLogin(): void
+    {
+        $virtualUser = $this->virtualUser;
+
+        DB::connection('maria-email-management')->transaction(function () use ($virtualUser): void {
+            $this->delete();
+            $virtualUser->delete();
+        });
+    }
+
     protected function casts(): array
     {
         return [

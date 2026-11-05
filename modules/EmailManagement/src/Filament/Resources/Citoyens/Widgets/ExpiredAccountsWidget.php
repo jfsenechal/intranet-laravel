@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Citoyens\Widgets;
 
+use AcMarche\EmailManagement\Filament\Actions\DeleteCitoyenAction;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\CitoyenResource;
 use AcMarche\EmailManagement\Models\Citoyen;
 use AcMarche\EmailManagement\Repository\CitoyenRepository;
@@ -38,6 +39,9 @@ final class ExpiredAccountsWidget extends TableWidget
                     ->label('Dernière connexion')
                     ->date()
                     ->placeholder('Jamais'),
+            ])
+            ->recordActions([
+                DeleteCitoyenAction::make(),
             ]);
     }
 }

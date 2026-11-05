@@ -9,8 +9,8 @@ use AcMarche\EmailManagement\Policies\Concerns\EmailManagementAuthorization;
 use App\Models\User;
 
 /**
- * Email admins may read, create and correct citoyens. Citoyens are removed by the citizen
- * application, never from this panel.
+ * Email admins may read, create, correct and delete citoyens, one at a time: a deletion
+ * also removes the Dovecot login and cannot be undone, so there is no bulk delete.
  */
 final class CitoyenPolicy
 {
@@ -38,7 +38,7 @@ final class CitoyenPolicy
 
     public function delete(User $user, Citoyen $citoyen): bool
     {
-        return false;
+        return $this->isEmailAdmin($user);
     }
 
     public function deleteAny(User $user): bool
