@@ -38,28 +38,24 @@ final class CitoyenPage extends Page
     {
         return [
             [
-                'command' => 'php artisan citoyen:purge --min-days=360',
-                'description' => 'Nettoyage des adresses mails basé sur les mails dans Maildir/new',
+                'command' => 'php artisan citoyen:update-last-login',
+                'description' => 'Mets à jour la dernière date de connexion des mails basé sur les mails dans Maildir/new',
             ],
             [
-                'command' => 'php artisan citoyen:change-password',
-                'description' => "Changer le mot de passe d'un compte administrateur",
+                'command' => 'php artisan citoyen:orphan-mailboxes',
+                'description' => 'Liste des dossiers imap sans compte utilisateur',
             ],
             [
-                'command' => 'php artisan citoyen:password',
-                'description' => "Changer le mot de passe d'un citoyen",
+                'command' => 'php artisan citoyen:orphan-mailboxes --delete',
+                'description' => "Supprime les dossiers imap sans compte utilisateur, attention pas de confirmation !",
             ],
             [
-                'command' => 'php artisan citoyen:new-mail --only-with-mail --min-days=90',
+                'command' => 'php artisan citoyen:unread-mail --only-with-mail --min-days=90',
                 'description' => 'Vérifie si les comptes ont toujours des mails non-lus depuis 90 jours dans sont dossier Maildir/new',
             ],
             [
-                'command' => 'php artisan citoyen:new-mail --only-with-mail --min-days=365 --delete',
+                'command' => 'php artisan citoyen:unread-mail --only-with-mail --min-days=365 --delete',
                 'description' => 'Supprime les comptes dont le plus récent mail dans les non-lus est plus vieux que 365 jours',
-            ],
-            [
-                'command' => 'php artisan citoyen:send-message',
-                'description' => 'Envoi d\'un message à tous les citoyens. Le texte est dans resources/views/mail',
             ],
         ];
     }
