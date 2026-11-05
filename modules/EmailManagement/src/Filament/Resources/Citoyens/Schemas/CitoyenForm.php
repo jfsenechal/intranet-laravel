@@ -44,7 +44,8 @@ final class CitoyenForm
                     ->relationship('virtualUser')
                     ->components([
                         Toggle::make('active')
-                            ->label('Actif'),
+                            ->label('Actif')
+                            ->helperText('Si la case est décochée, l\'adresse mail sera considérée comme inexistante'),
                     ]),
                 Section::make('Adresse')
                     ->columns()
@@ -62,13 +63,14 @@ final class CitoyenForm
                     ]),
                 Section::make('Récupération du compte')
                     ->columns()
+                    ->description('Champs optionnels pour la récupération du mot de passe')
                     ->components([
                         TextInput::make('recovery_email')
                             ->label('Email de récupération')
                             ->email()
                             ->maxLength(255),
                         TextInput::make('recovery_phone')
-                            ->label('Téléphone de récupération')
+                            ->label('Téléphone')
                             ->tel()
                             ->maxLength(255),
                     ]),
@@ -122,7 +124,9 @@ final class CitoyenForm
 
                                         $schemaSet(
                                             'mail',
-                                            EmailService::sanitizeForEmail($givenName).'.'.EmailService::sanitizeForEmail($sn).'@marche.be'
+                                            EmailService::sanitizeForEmail(
+                                                $givenName
+                                            ).'.'.EmailService::sanitizeForEmail($sn).'@marche.be'
                                         );
                                     }),
                             ),

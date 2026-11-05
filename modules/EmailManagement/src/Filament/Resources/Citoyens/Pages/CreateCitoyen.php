@@ -20,6 +20,8 @@ final class CreateCitoyen extends CreateRecord
 {
     protected static string $resource = CitoyenResource::class;
 
+    protected static ?string $title = 'Ajouter un citoyen';
+
     public function form(Schema $schema): Schema
     {
         return CitoyenForm::forCreating($schema);
