@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\EmailManagement\Enums\RolesEnum;
+use AcMarche\EmailManagement\Filament\Resources\Citoyens\CitoyenResource;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\CreateCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\EditCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ListCitoyens;
@@ -194,9 +195,7 @@ describe('create page', function (): void {
         livewire(CreateCitoyen::class)
             ->fillForm($this->validData)
             ->call('create')
-            ->assertHasNoFormErrors()
-            ->assertNotified()
-            ->assertRedirect();
+            ->assertHasNoFormErrors();
 
         $citoyen = Citoyen::query()->where('mail', 'alice.martin@marche.be')->sole();
 
@@ -218,6 +217,29 @@ describe('create page', function (): void {
             ->legacy_password->toBeNull()
             ->and($virtualUser->userPassword)->toStartWith('{ARGON2ID}$argon2id$')
             ->and(password_verify('Correct-Horse-Battery-1', mb_substr($virtualUser->userPassword, 10)))->toBeTrue();
+    });
+
+    it('shows the credentials to copy, then opens the citoyen', function (): void {
+        $component = livewire(CreateCitoyen::class)
+            ->fillForm($this->validData)
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertActionMounted('credentials')
+            ->assertNoRedirect()
+            ->assertActionDataSet(function (array $data): bool {
+                return str_contains($data['message'], 'alice.martin@marche.be')
+                    && str_contains($data['message'], "d'utilisateur est : alice.martin")
+                    && str_contains($data['message'], 'mot de passe est : Correct-Horse-Battery-1');
+            })
+            ->assertMountedActionModalSee('Copier');
+
+        expect(serialize(session()->all()))->not->toContain('Correct-Horse-Battery-1');
+
+        $citoyen = Citoyen::query()->where('mail', 'alice.martin@marche.be')->sole();
+
+        $component
+            ->callMountedAction()
+            ->assertRedirect(CitoyenResource::getUrl('view', ['record' => $citoyen]));
     });
 
     it('prefills the postal code and the quota', function (): void {
