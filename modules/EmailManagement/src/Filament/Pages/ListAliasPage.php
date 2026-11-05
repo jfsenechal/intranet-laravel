@@ -6,16 +6,12 @@ namespace AcMarche\EmailManagement\Filament\Pages;
 
 use AcMarche\EmailManagement\Enums\ListOuEnum;
 use AcMarche\EmailManagement\Enums\RolesEnum;
-use AcMarche\EmailManagement\Ldap\EmployeLdap;
 use AcMarche\EmailManagement\Ldap\ListAliasLdap;
 use AcMarche\EmailManagement\Repository\ListLdapRepository;
 use App\Models\User;
 use BackedEnum;
-use Exception;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
@@ -25,7 +21,6 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Pagination\LengthAwarePaginator;
-use LdapRecord\LdapRecordException;
 use Override;
 
 /**
@@ -106,14 +101,13 @@ final class ListAliasPage extends Page implements HasTable
             ])
             ->recordActions([
                 $this->viewAction(),
-                $this->editDescriptionAction(),
             ]);
     }
 
     /**
-     * Keyed by cn: it is unique within an OU and is what every action re-reads the entry by.
-     * Filament tracks custom-data rows by these keys across Livewire updates, so a positional
-     * key would send an action to the wrong group once the table is searched or filtered.
+     * Keyed by cn, which is unique within an OU. Filament tracks custom-data rows by these keys
+     * across Livewire updates, so a positional key would send an action to the wrong group once
+     * the table is searched or filtered.
      */
     private function loadRecords(?string $search, array $filters, int $page, int $recordsPerPage): LengthAwarePaginator
     {
@@ -158,7 +152,7 @@ final class ListAliasPage extends Page implements HasTable
             ->modalHeading(fn (array $record): string => $record['mail'] ?? $record['cn'])
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Fermer')
-            ->infolist([
+            ->schema([
                 TextEntry::make('cn')
                     ->label('Nom (cn)'),
                 TextEntry::make('mail')
@@ -177,73 +171,5 @@ final class ListAliasPage extends Page implements HasTable
                     ->badge()
                     ->placeholder('Aucun'),
             ]);
-    }
-
-    private function editDescriptionAction(): Action
-    {
-        return Action::make('editDescription')
-            ->label('Modifier la description')
-            ->icon(Heroicon::PencilSquare)
-            ->color('primary')
-            ->modalHeading(fn (array $record): string => "Description de {$record['cn']}")
-            ->modalSubmitActionLabel('Enregistrer')
-            ->fillForm(fn (array $record): array => ['description' => $record['description']])
-            ->schema([
-                Textarea::make('description')
-                    ->label('Description')
-                    ->helperText("Peut être lu par l'utilisateur")
-                    ->rows(2)
-                    ->nullable()
-                    ->maxLength(1024)
-                    ->columnSpanFull(),
-            ])
-            ->action(function (array $data, array $record): void {
-                $this->writeToDirectory(
-                    $record,
-                    fn (ListLdapRepository $repository, ListAliasLdap $entry) => $repository->updateDescription($entry, $data['description'] ?? null),
-                    'La liste a bien été modifiée',
-                    'Impossible de modifier la liste',
-                );
-            });
-    }
-
-    /**
-     * The record is a plain array, not a live model, so the entry has to be read back from the
-     * directory before it can be written to.
-     *
-     * @param  array<string, mixed>  $record
-     */
-    private function writeToDirectory(array $record, callable $write, string $successTitle, string $failureTitle): void
-    {
-        $repository = app(ListLdapRepository::class);
-        $entry = $repository->getEntry(ListOuEnum::from($record['ou']), $record['cn']);
-
-        if (! $entry instanceof ListAliasLdap) {
-            Notification::make()
-                ->title("Cette liste est introuvable dans l'annuaire")
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        try {
-            $write($repository, $entry);
-
-            Notification::make()
-                ->title($successTitle)
-                ->success()
-                ->send();
-
-            // Filament does not refresh a custom-data table after an action, so without this
-            // the row keeps showing the value the directory no longer holds.
-            $this->resetTable();
-        } catch (Exception|LdapRecordException $e) {
-            Notification::make()
-                ->title($failureTitle)
-                ->body(EmployeLdap::describe($e))
-                ->danger()
-                ->send();
-        }
     }
 }

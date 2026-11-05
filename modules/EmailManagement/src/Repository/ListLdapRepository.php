@@ -6,12 +6,10 @@ namespace AcMarche\EmailManagement\Repository;
 
 use AcMarche\EmailManagement\Enums\ListOuEnum;
 use AcMarche\EmailManagement\Ldap\ListAliasLdap;
-use LdapRecord\LdapRecordException;
-use LdapRecord\Models\ModelDoesNotExistException;
 use LdapRecord\Query\Collection;
 
 /**
- * Reads and writes the mail groups of OU=LISTS and OU=SERVICES.
+ * Reads the mail groups of OU=LISTS and OU=SERVICES.
  *
  * Kept beside EmployeLdapRepository and shaped like it: the two read different OUs with
  * different attributes, and merging them would widen both.
@@ -41,15 +39,6 @@ final class ListLdapRepository
             ->get();
     }
 
-    public function getEntry(ListOuEnum $ou, ?string $cn): ?ListAliasLdap
-    {
-        if ($cn === null || $cn === '') {
-            return null;
-        }
-
-        return $this->query($ou)->findBy('cn', $cn);
-    }
-
     /**
      * The groups a mail address is a member of.
      *
@@ -66,16 +55,6 @@ final class ListLdapRepository
     public function getMembers(ListAliasLdap $entry): array
     {
         return array_values(array_filter((array) $entry->getAttribute('proxyaddresses')));
-    }
-
-    /**
-     * @throws LdapRecordException
-     * @throws ModelDoesNotExistException
-     */
-    public function updateDescription(ListAliasLdap $entry, ?string $description): void
-    {
-        $entry->setAttribute('description', $description);
-        $entry->update();
     }
 
     /**

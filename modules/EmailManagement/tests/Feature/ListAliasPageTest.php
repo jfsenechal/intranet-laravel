@@ -117,33 +117,6 @@ describe('table', function (): void {
     });
 });
 
-describe('description', function (): void {
-    it('writes the new description to the directory', function (): void {
-        makeList('conseil', 'conseil@marche.be', description: 'Ancienne description');
-
-        livewire(ListAliasPage::class)
-            ->loadTable()
-            ->callAction(TestAction::make('editDescription')->table('conseil'), [
-                'description' => 'Les membres du conseil communal',
-            ])
-            ->assertHasNoActionErrors()
-            ->assertNotified();
-
-        $entry = ListAliasLdap::query()->in(LISTS_DN)->findBy('cn', 'conseil');
-
-        expect($entry->getFirstAttribute('description'))->toBe('Les membres du conseil communal');
-    });
-
-    it('fills the form with the current description', function (): void {
-        makeList('conseil', 'conseil@marche.be', description: 'Ancienne description');
-
-        livewire(ListAliasPage::class)
-            ->loadTable()
-            ->mountAction(TestAction::make('editDescription')->table('conseil'))
-            ->assertActionDataSet(['description' => 'Ancienne description']);
-    });
-});
-
 describe('view', function (): void {
     /**
      * The modal body is rendered client-side, so this asserts the action mounts against the
