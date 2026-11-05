@@ -63,21 +63,6 @@ final class EmployeInfolist
                             ->color('gray')
                             ->placeholder('Aucun'),
                     ]),
-                Section::make('Connexion')
-                    ->columns()
-                    ->components([
-                        TextEntry::make('last_connection')
-                            ->label('Dernière connexion')
-                            ->date(),
-                        TextEntry::make('protocol_connection')
-                            ->label('Protocole'),
-                        TextEntry::make('port_connection')
-                            ->label('Port')
-                            ->numeric(),
-                        IconEntry::make('secure_connection')
-                            ->label('Sécurisé')
-                            ->boolean(),
-                    ]),
                 Section::make('Utilisation boîte mail')
                     ->columns()
                     ->components([
