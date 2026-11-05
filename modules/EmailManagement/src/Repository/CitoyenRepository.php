@@ -16,8 +16,6 @@ final class CitoyenRepository
     /**
      * Creates the Dovecot login, then the citoyen that references it.
      *
-     * Database only: nothing is written to the LDAP ou=Citoyens.
-     *
      * @param  array{
      *     mail: string,
      *     password: string,

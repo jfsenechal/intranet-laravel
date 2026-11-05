@@ -15,13 +15,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * A citizen mailbox account, whose directory source of truth is the LDAP ou=Citoyens.
+ * A citizen mailbox account. The database is the source of truth: citoyens are not in LDAP.
  *
- * Edits made here change the database row only: they are not pushed to LDAP or to the
- * mail server, which is why the mailbox identity (mail, uid, home directory)
- * is not fillable: it is only set on creation, see {@see CitoyenRepository::create()}.
- * The token hashes are hidden and never rendered. The password hashes
- * live on {@see VirtualUser}.
+ * The mailbox identity (mail, uid, home directory) is not fillable: it is only set on
+ * creation, see {@see CitoyenRepository::create()}. The token hashes are hidden and never
+ * rendered. The password hashes live on {@see VirtualUser}, which Dovecot reads.
  */
 #[Connection('maria-email-management')]
 #[Fillable([

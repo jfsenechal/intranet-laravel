@@ -12,10 +12,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 
-/**
- * Creates the account in the database Dovecot reads: nothing is pushed to the LDAP
- * ou=Citoyens.
- */
 final class CreateCitoyen extends CreateRecord
 {
     protected static string $resource = CitoyenResource::class;
