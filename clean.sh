@@ -11,7 +11,7 @@ fi
 cd "$(dirname "$(readlink -f "$0")")"
 
 OWNER="root:root"
-WEB_USER="www-data:www-data"
+WEB_USER="frankenphp:frankenphp"
 WRITABLE_DIRS=(storage bootstrap/cache)
 
 # Caches & logs (removed before artisan boots so stale manifests can't break it)
