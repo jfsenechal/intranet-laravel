@@ -31,6 +31,9 @@ final class EmployeResource extends Resource
     #[Override]
     protected static ?string $pluralModelLabel = 'Employés';
 
+    #[Override]
+    protected static ?int $navigationSort = 1;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

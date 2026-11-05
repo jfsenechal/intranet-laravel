@@ -47,7 +47,7 @@ final class ListAliasPage extends Page implements HasTable
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     #[Override]
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 3;
 
     #[Override]
     protected static ?string $navigationLabel = 'Listes de diffusion';

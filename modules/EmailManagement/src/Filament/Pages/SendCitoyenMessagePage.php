@@ -39,7 +39,7 @@ final class SendCitoyenMessagePage extends Page implements HasForms
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPaperAirplane;
 
     #[Override]
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 5;
 
     #[Override]
     protected static ?string $navigationLabel = 'Envoyer un message';

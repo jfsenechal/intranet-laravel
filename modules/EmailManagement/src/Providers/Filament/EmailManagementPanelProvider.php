@@ -11,9 +11,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -48,6 +50,13 @@ final class EmailManagementPanelProvider extends PanelProvider
             ->discoverPages(in: $path.'Filament/Pages', for: 'AcMarche\\EmailManagement\\Filament\\Pages')
             ->pages([
 
+            ])
+            ->navigationItems([
+                NavigationItem::make('Webmail Citoyen')
+                    ->url('https://citoyen.marche.be', shouldOpenInNewTab: true)
+                    ->icon(Heroicon::OutlinedGlobeAlt)
+                    ->group('Informations')
+                    ->sort(1),
             ])
             ->discoverWidgets(in: $path.'Filament/Widgets', for: 'AcMarche\\EmailManagement\\Filament\\Widgets')
             ->widgets([

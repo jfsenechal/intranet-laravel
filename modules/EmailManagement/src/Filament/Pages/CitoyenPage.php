@@ -8,6 +8,7 @@ use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Override;
+use UnitEnum;
 
 final class CitoyenPage extends Page
 {
@@ -18,10 +19,12 @@ final class CitoyenPage extends Page
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAtSymbol;
 
     #[Override]
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 4;
+
+    protected static string | UnitEnum | null $navigationGroup = 'Informations';
 
     #[Override]
-    protected static ?string $navigationLabel = 'Adresses mails citoyennes';
+    protected static ?string $navigationLabel = 'Informations';
 
     public function getTitle(): string
     {
