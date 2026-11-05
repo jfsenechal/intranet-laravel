@@ -117,65 +117,6 @@ describe('table', function (): void {
     });
 });
 
-describe('members', function (): void {
-    it('writes the new members to the directory', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
-
-        livewire(ListAliasPage::class)
-            ->loadTable()
-            ->callAction(TestAction::make('editMembers')->table('conseil'), [
-                'members' => ['jean.dupont@marche.be', 'luc.martin@marche.be'],
-            ])
-            ->assertHasNoActionErrors()
-            ->assertNotified();
-
-        $entry = ListAliasLdap::query()->in(LISTS_DN)->findBy('cn', 'conseil');
-
-        expect($entry->getAttribute('proxyaddresses'))
-            ->toBe(['jean.dupont@marche.be', 'luc.martin@marche.be']);
-    });
-
-    it('fills the form with the current members', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
-
-        livewire(ListAliasPage::class)
-            ->loadTable()
-            ->mountAction(TestAction::make('editMembers')->table('conseil'))
-            ->assertActionDataSet(['members' => ['alice.martin@marche.be']]);
-    });
-
-    it('refuses a member that is not an email address', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
-
-        livewire(ListAliasPage::class)
-            ->loadTable()
-            ->callAction(TestAction::make('editMembers')->table('conseil'), [
-                'members' => ['pas-une-adresse'],
-            ])
-            ->assertHasActionErrors();
-
-        $entry = ListAliasLdap::query()->in(LISTS_DN)->findBy('cn', 'conseil');
-
-        expect($entry->getAttribute('proxyaddresses'))->toBe(['alice.martin@marche.be']);
-    });
-
-    /**
-     * Destructive, and the helper text promises it, so it is pinned rather than left to chance.
-     */
-    it('clears every member when saved empty', function (): void {
-        makeList('conseil', 'conseil@marche.be', ['alice.martin@marche.be']);
-
-        livewire(ListAliasPage::class)
-            ->loadTable()
-            ->callAction(TestAction::make('editMembers')->table('conseil'), ['members' => []])
-            ->assertHasNoActionErrors();
-
-        $entry = ListAliasLdap::query()->in(LISTS_DN)->findBy('cn', 'conseil');
-
-        expect($entry->getAttribute('proxyaddresses'))->toBeNull();
-    });
-});
-
 describe('description', function (): void {
     it('writes the new description to the directory', function (): void {
         makeList('conseil', 'conseil@marche.be', description: 'Ancienne description');

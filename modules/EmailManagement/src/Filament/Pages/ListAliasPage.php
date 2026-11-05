@@ -13,7 +13,6 @@ use App\Models\User;
 use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -108,7 +107,6 @@ final class ListAliasPage extends Page implements HasTable
             ->recordActions([
                 $this->viewAction(),
                 $this->editDescriptionAction(),
-                $this->editMembersAction(),
             ]);
     }
 
@@ -205,33 +203,6 @@ final class ListAliasPage extends Page implements HasTable
                     fn (ListLdapRepository $repository, ListAliasLdap $entry) => $repository->updateDescription($entry, $data['description'] ?? null),
                     'La liste a bien été modifiée',
                     'Impossible de modifier la liste',
-                );
-            });
-    }
-
-    private function editMembersAction(): Action
-    {
-        return Action::make('editMembers')
-            ->label('Gérer les destinataires')
-            ->icon(Heroicon::AtSymbol)
-            ->color('info')
-            ->modalHeading(fn (array $record): string => "Destinataires de {$record['cn']}")
-            ->modalSubmitActionLabel('Enregistrer')
-            ->fillForm(fn (array $record): array => ['members' => $record['members']])
-            ->schema([
-                TagsInput::make('members')
-                    ->label('Destinataires')
-                    ->placeholder('prenom.nom@marche.be')
-                    ->nestedRecursiveRules(['email'])
-                    ->helperText('Enregistrer avec la liste vide retire tous les destinataires.')
-                    ->columnSpanFull(),
-            ])
-            ->action(function (array $data, array $record): void {
-                $this->writeToDirectory(
-                    $record,
-                    fn (ListLdapRepository $repository, ListAliasLdap $entry) => $repository->updateMembers($entry, $data['members'] ?? []),
-                    'Les destinataires ont bien été modifiés',
-                    'Impossible de modifier les destinataires',
                 );
             });
     }

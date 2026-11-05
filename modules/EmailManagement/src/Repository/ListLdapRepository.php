@@ -69,20 +69,6 @@ final class ListLdapRepository
     }
 
     /**
-     * Replaces the members wholesale, so an empty array clears the list.
-     *
-     * @param  array<int, string>  $members
-     *
-     * @throws LdapRecordException
-     * @throws ModelDoesNotExistException
-     */
-    public function updateMembers(ListAliasLdap $entry, array $members): void
-    {
-        $entry->setAttribute('proxyAddresses', array_values($members));
-        $entry->update();
-    }
-
-    /**
      * @throws LdapRecordException
      * @throws ModelDoesNotExistException
      */
