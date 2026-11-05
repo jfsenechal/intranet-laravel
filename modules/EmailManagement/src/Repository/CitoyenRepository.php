@@ -11,13 +11,14 @@ use Illuminate\Support\Str;
 
 final class CitoyenRepository
 {
+    private const int DEFAULT_QUOTA = 350;
+
     /**
      * Creates the Dovecot login, then the citoyen that references it.
      *
      * @param  array{
      *     mail: string,
      *     password: string,
-     *     quota_bytes: int|string,
      *     sn: string,
      *     givenName?: ?string,
      *     employeeNumber?: ?string,
@@ -35,7 +36,7 @@ final class CitoyenRepository
         return DB::connection('maria-email-management')->transaction(function () use ($data, $mail, $uid): Citoyen {
             $virtualUser = new VirtualUser([
                 'username' => $mail,
-                'quota_bytes' => (int) $data['quota_bytes'],
+                'quota_bytes' => self::DEFAULT_QUOTA,
                 'active' => true,
             ]);
             $virtualUser->changePassword($data['password']);

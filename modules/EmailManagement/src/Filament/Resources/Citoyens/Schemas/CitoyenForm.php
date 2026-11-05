@@ -149,17 +149,8 @@ final class CitoyenForm
                             ->maxLength(255),
                     ]),
                 Section::make('Compte')
-                    ->columns()
                     ->components([
                         PasswordInput::make(),
-                        TextInput::make('quota_bytes')
-                            ->label('Quota')
-                            ->numeric()
-                            ->required()
-                            ->minValue(150)
-                            ->maxValue(4000)
-                            ->default(350)
-                            ->suffix('Mo'),
                     ]),
                 Section::make('Divers')
                     ->components([

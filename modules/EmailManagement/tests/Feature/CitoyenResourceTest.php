@@ -60,6 +60,41 @@ describe('quota', function (): void {
         livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertSee('777');
     });
 
+    it('changes the quota of the login', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $citoyen->virtualUser->update(['quota_bytes' => 250, 'legacy_password' => '{SSHA}original']);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->mountAction('changeQuota')
+            ->assertActionDataSet(['quota_bytes' => 250]);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('changeQuota', ['quota_bytes' => 4096])
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+
+        $virtualUser = $citoyen->virtualUser->refresh();
+
+        expect($virtualUser->quota_bytes)->toBe(4096)
+            ->and($virtualUser->legacy_password)->toBe('{SSHA}original');
+    });
+
+    it('rejects a quota outside the limits', function (mixed $quota): void {
+        $citoyen = Citoyen::factory()->create();
+        $citoyen->virtualUser->update(['quota_bytes' => 250]);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('changeQuota', ['quota_bytes' => $quota])
+            ->assertHasActionErrors(['quota_bytes']);
+
+        expect($citoyen->virtualUser->refresh()->quota_bytes)->toBe(250);
+    })->with([
+        'too small' => 149,
+        'too large' => 4097,
+        'not a whole number' => 150.5,
+        'empty' => null,
+    ]);
+
     it('sorts the table by the quota of the login', function (): void {
         $small = Citoyen::factory()->create(['sn' => 'Adam']);
         $large = Citoyen::factory()->create(['sn' => 'Zimmer']);
@@ -268,7 +303,6 @@ describe('create page', function (): void {
             'postalCode' => '6900',
             'l' => 'Marche-en-Famenne',
             'password' => 'Correct-Horse-Battery-1',
-            'quota_bytes' => 500,
             'description' => 'Compte de test',
         ];
     });
@@ -298,7 +332,7 @@ describe('create page', function (): void {
         $virtualUser = $citoyen->virtualUser;
 
         expect($virtualUser)
-            ->quota_bytes->toBe(500)
+            ->quota_bytes->toBe(350)
             ->active->toBeTrue()
             ->legacy_password->toBeNull()
             ->and($virtualUser->userPassword)->toStartWith('{ARGON2ID}$argon2id$')
@@ -328,8 +362,8 @@ describe('create page', function (): void {
             ->assertRedirect(CitoyenResource::getUrl('view', ['record' => $citoyen]));
     });
 
-    it('prefills the postal code and the quota', function (): void {
-        livewire(CreateCitoyen::class)->assertSchemaStateSet(['postalCode' => '6900', 'quota_bytes' => 350]);
+    it('prefills the postal code', function (): void {
+        livewire(CreateCitoyen::class)->assertSchemaStateSet(['postalCode' => '6900']);
     });
 
     it('rejects an address already used by a citoyen or a login', function (string $username): void {
@@ -371,7 +405,7 @@ describe('create page', function (): void {
             ->fillForm([...$this->validData, $field => null])
             ->call('create')
             ->assertHasFormErrors([$field => 'required']);
-    })->with(['sn', 'mail', 'employeeNumber', 'postalAddress', 'postalCode', 'l', 'password', 'quota_bytes']);
+    })->with(['sn', 'mail', 'employeeNumber', 'postalAddress', 'postalCode', 'l', 'password']);
 
     it('generates the address from the name', function (): void {
         livewire(CreateCitoyen::class)
