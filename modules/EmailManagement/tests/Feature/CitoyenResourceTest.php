@@ -109,6 +109,49 @@ describe('active', function (): void {
     });
 });
 
+describe('change password', function (): void {
+    it('stores the password as argon2id and clears the legacy hash', function (): void {
+        $citoyen = Citoyen::factory()->create();
+        $virtualUser = $citoyen->virtualUser;
+        $virtualUser->update(['legacy_password' => '{SSHA}legacy', 'quota_bytes' => 777]);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('changePassword', [
+                'password' => 'Correct-Horse-Battery-1',
+                'password_confirmation' => 'Correct-Horse-Battery-1',
+            ])
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+
+        $virtualUser->refresh();
+
+        expect($virtualUser->userPassword)->toStartWith('{ARGON2ID}$argon2id$v=19$m=32768,t=4,p=1$')
+            ->and(password_verify('Correct-Horse-Battery-1', mb_substr($virtualUser->userPassword, 10)))->toBeTrue()
+            ->and($virtualUser->legacy_password)->toBeNull()
+            ->and($virtualUser->quota_bytes)->toBe(777);
+    });
+
+    it('rejects an invalid password and keeps the current one', function (array $data): void {
+        $citoyen = Citoyen::factory()->create();
+        $citoyen->virtualUser->update(['legacy_password' => '{SSHA}legacy']);
+
+        livewire(ViewCitoyen::class, ['record' => $citoyen->id])
+            ->callAction('changePassword', $data)
+            ->assertHasActionErrors();
+
+        $virtualUser = $citoyen->virtualUser->refresh();
+
+        expect($virtualUser->userPassword)->toBeNull()
+            ->and($virtualUser->legacy_password)->toBe('{SSHA}legacy');
+    })->with([
+        'shorter than 12 characters' => [['password' => 'Eleven-Char', 'password_confirmation' => 'Eleven-Char']],
+        'no mixed case' => [['password' => 'lowercase-only-1', 'password_confirmation' => 'lowercase-only-1']],
+        'no number' => [['password' => 'No-Digits-In-Here', 'password_confirmation' => 'No-Digits-In-Here']],
+        'confirmation mismatch' => [['password' => 'Correct-Horse-Battery-1', 'password_confirmation' => 'Wrong-Horse-Battery-1']],
+        'empty' => [['password' => '', 'password_confirmation' => '']],
+    ]);
+});
+
 describe('sensitive data', function (): void {
     it('never renders the token hash but shows the national number', function (): void {
         $citoyen = Citoyen::factory()->create([

@@ -33,7 +33,7 @@ final class SendWelcomeMailAction
                     ->label('Mot de passe')
                     ->helperText('Le mot de passe de l\'utilisateur, communiqué dans le courrier de bienvenue.')
                     ->required()
-                    ->rule(Password::min(12)),
+                    ->rule(Password::defaults()),
                 Textarea::make('notes')
                     ->label('Remarques')
                     ->rows(5),

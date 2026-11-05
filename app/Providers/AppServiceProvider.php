@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,7 @@ final class AppServiceProvider extends ServiceProvider
         }
         $this->configureRichEditor();
         $this->configureDeleteBulkAction();
+        Password::defaults(fn (): Password => Password::min(12)->letters()->mixedCase()->numbers());
         FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
             fn (): View => view('filament.login_form'),
