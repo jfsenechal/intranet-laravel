@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Employes;
 
-use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
-use AcMarche\EmailManagement\Filament\Resources\Employes\Schemas\EmployeForm;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Schemas\EmployeInfolist;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Tables\EmployesTable;
 use AcMarche\EmailManagement\Models\Employe;
@@ -36,11 +34,6 @@ final class EmployeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    public static function form(Schema $schema): Schema
-    {
-        return EmployeForm::configure($schema);
-    }
-
     public static function infolist(Schema $schema): Schema
     {
         return EmployeInfolist::configure($schema);
@@ -63,7 +56,6 @@ final class EmployeResource extends Resource
         return [
             'index' => ListEmployes::route('/'),
             'view' => ViewEmploye::route('/{record}'),
-            'edit' => EditEmploye::route('/{record}/edit'),
         ];
     }
 }

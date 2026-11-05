@@ -5,7 +5,6 @@ declare(strict_types=1);
 use AcMarche\EmailManagement\Ldap\EmployeHandler;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
 use AcMarche\EmailManagement\Models\Employe;
-use AcMarche\EmailManagement\Repository\EmployeLdapRepository;
 use LdapRecord\Laravel\Testing\DirectoryEmulator;
 
 beforeEach(function (): void {
@@ -66,53 +65,4 @@ it('pulls every identity attribute out of the directory', function (): void {
     foreach (identityAttributes() as $attribute => $expected) {
         expect($employe->{$attribute})->toBe($expected, "attribute {$attribute}");
     }
-});
-
-it('pushes every identity attribute back to the directory', function (): void {
-    saveLdapEntry(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Ancien']);
-
-    $employe = Employe::factory()->create([...identityAttributes(), 'samaccountname' => 'amartin', 'mail' => 'alice@ac.marche.be']);
-    $ldapEntry = app(EmployeLdapRepository::class)->getEntry('amartin');
-
-    app(EmployeHandler::class)->updateEmploye($employe, $ldapEntry);
-
-    $saved = app(EmployeLdapRepository::class)->getEntry('amartin');
-
-    foreach (identityAttributes() as $attribute => $expected) {
-        expect($saved->getFirstAttribute($attribute))->toBe($expected, "attribute {$attribute}");
-    }
-});
-
-it('removes an attribute from the directory when the field is cleared', function (): void {
-    saveLdapEntry([...identityAttributes(), 'cn' => 'Alice Martin', 'samaccountname' => 'amartin']);
-
-    $employe = Employe::factory()->create([
-        ...identityAttributes(),
-        'samaccountname' => 'amartin',
-        'mobile' => null,
-        'title' => null,
-    ]);
-
-    app(EmployeHandler::class)->updateEmploye($employe, app(EmployeLdapRepository::class)->getEntry('amartin'));
-
-    $saved = app(EmployeLdapRepository::class)->getEntry('amartin');
-
-    expect($saved->getFirstAttribute('mobile'))->toBeNull()
-        ->and($saved->getFirstAttribute('title'))->toBeNull()
-        ->and($saved->getFirstAttribute('company'))->toBe('AC Marche');
-});
-
-it('derives displayName from the name fields rather than mirroring it', function (): void {
-    saveLdapEntry(['cn' => 'Alice Martin', 'samaccountname' => 'amartin', 'sn' => 'Ancien', 'displayName' => 'Ancien']);
-
-    $employe = Employe::factory()->create([
-        'samaccountname' => 'amartin',
-        'givenName' => 'Alice',
-        'sn' => 'Martin',
-    ]);
-
-    app(EmployeHandler::class)->updateEmploye($employe, app(EmployeLdapRepository::class)->getEntry('amartin'));
-
-    expect(app(EmployeLdapRepository::class)->getEntry('amartin')->getFirstAttribute('displayName'))
-        ->toBe('Alice Martin');
 });

@@ -11,11 +11,8 @@ use AcMarche\EmailManagement\Filament\Actions\VacationAction;
 use AcMarche\EmailManagement\Filament\Actions\ViewLdapAction;
 use AcMarche\EmailManagement\Filament\Resources\Employes\EmployeResource;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Support\Enums\Size;
 use Filament\Support\Enums\Width;
-use Filament\Support\Icons\Heroicon;
 
 final class ViewEmploye extends ViewRecord
 {
@@ -30,8 +27,6 @@ final class ViewEmploye extends ViewRecord
     {
         return [
             ViewLdapAction::make($this->record),
-            EditAction::make()
-                ->icon(Heroicon::Pencil),
             QuotaAction::make($this->record),
             ActionGroup::make([
                 ActionGroup::make([

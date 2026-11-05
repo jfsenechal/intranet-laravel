@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use AcMarche\EmailManagement\Enums\EmailExtensionEnum;
 use AcMarche\EmailManagement\Enums\RolesEnum;
-use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\EditEmploye;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ListEmployes;
 use AcMarche\EmailManagement\Filament\Resources\Employes\Pages\ViewEmploye;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
@@ -54,12 +53,6 @@ describe('pages render', function (): void {
 
         livewire(ViewEmploye::class, ['record' => $employe->id])->assertSuccessful();
     });
-
-    it('renders the edit page', function (): void {
-        $employe = Employe::factory()->create();
-
-        livewire(EditEmploye::class, ['record' => $employe->id])->assertSuccessful();
-    });
 });
 
 describe('table', function (): void {
@@ -80,71 +73,6 @@ describe('table', function (): void {
             ->loadTable()
             ->searchTable($employes->first()->samaccountname)
             ->assertCanSeeTableRecords($employes->take(1));
-    });
-});
-
-describe('edit form', function (): void {
-    /**
-     * The mirror and the form carry the same identity attributes: everything the form edits is
-     * pushed by EmployeHandler::updateEmploye, and nothing is mirrored that cannot be edited.
-     * A field on one side but not the other would save to the mirror and silently never reach
-     * the directory, so this holds the two lists together.
-     */
-    it('exposes every identity field the mirror carries', function (): void {
-        $component = livewire(EditEmploye::class, ['record' => Employe::factory()->create()->id]);
-
-        foreach (Employe::LDAP_IDENTITY_ATTRIBUTES as $attribute) {
-            $component->assertFormFieldExists($attribute);
-        }
-    });
-
-    /**
-     * A factory-made employe has to be saveable through its own form. It was not: the phone
-     * numbers faker produces sometimes carry an extension, which the ->tel() rule rejects, and
-     * the save test below failed at random depending on the number drawn. Enough samples are
-     * drawn here that a factory generating rejected numbers again fails every run.
-     */
-    it('generates a phone number the form accepts', function (): void {
-        $numbers = Employe::factory()
-            ->count(50)
-            ->make()
-            ->pluck('telephoneNumber')
-            ->filter();
-
-        // Filament's default rule behind TextInput::tel().
-        expect($numbers)->each->toMatch('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/');
-    });
-
-    it('saves the new identity fields to the mirror', function (): void {
-        DirectoryEmulator::setup('default');
-
-        $employe = Employe::factory()->create(['samaccountname' => 'amartin']);
-
-        $ldapEntry = new EmployeLdap;
-        $ldapEntry->cn = 'Alice Martin';
-        $ldapEntry->samaccountname = 'amartin';
-        $ldapEntry->sn = 'Martin';
-        $ldapEntry->inside(config('email-management.ldap.bases.employes'))->save();
-
-        livewire(EditEmploye::class, ['record' => $employe->id])
-            ->fillForm([
-                'title' => 'Attachée',
-                'company' => 'AC Marche',
-                'l' => 'Marche-en-Famenne',
-                'postalCode' => '6900',
-                'mobile' => '+32477320320',
-            ])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        expect($employe->refresh())
-            ->title->toBe('Attachée')
-            ->company->toBe('AC Marche')
-            ->l->toBe('Marche-en-Famenne')
-            ->postalCode->toBe('6900')
-            ->mobile->toBe('+32477320320');
-
-        DirectoryEmulator::tearDown();
     });
 });
 

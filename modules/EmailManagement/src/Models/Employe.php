@@ -58,9 +58,8 @@ final class Employe extends Model
     /**
      * The directory attributes the mirror carries, in the casing the directory uses.
      *
-     * Everything here is round-tripped: pulled by generateDataFromLdap and pushed back by
-     * EmployeHandler::updateEmploye. Identity attributes only -- mail, quota and aliases are
-     * handled by their own actions, and cn/displayName are derived rather than edited.
+     * Everything here is pulled by generateDataFromLdap. Identity attributes only -- mail,
+     * quota and aliases are handled by their own actions.
      *
      * @var array<int, string>
      */
