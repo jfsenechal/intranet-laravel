@@ -24,7 +24,7 @@ final class CreateEmailAction
         return Action::make('createEmail')
             ->label($record->mail ? "Changer l'adresse" : 'Créer une adresse')
             ->icon(Heroicon::Envelope)
-            ->color('info')
+            ->color('warning')
             ->modalHeading("Adresse mail de {$record->samaccountname}")
             ->modalDescription(
                 "Si il s'agit d'une adresse mail déjà existante, vous pouvez forcer la création du dossier Imap"

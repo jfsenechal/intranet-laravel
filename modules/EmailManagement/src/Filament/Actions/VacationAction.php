@@ -39,7 +39,7 @@ final class VacationAction
         return Action::make('vacation')
             ->label("Message d'absence")
             ->icon(Heroicon::PaperAirplane)
-            ->color('info')
+            ->color('success')
             ->modalHeading("Message d'absence de {$record->samaccountname}")
             ->modalDescription(function (SieveEmploye $sieveEmploye) use ($loadStatus): string {
                 $status = $loadStatus($sieveEmploye);
