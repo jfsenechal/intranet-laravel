@@ -224,10 +224,7 @@ final class ActionForm
                         ->relationship(
                             name: 'mandataries',
                             modifyQueryUsing: fn (Builder $query) => $query
-                                ->whereHas(
-                                    'roles',
-                                    fn (Builder $query) => $query->where('name', RolesEnum::MANDATAIRE->value)
-                                )
+                                ->withRole(RolesEnum::MANDATAIRE->value)
                                 ->orderBy('last_name')
                                 ->orderBy('first_name'),
                         )

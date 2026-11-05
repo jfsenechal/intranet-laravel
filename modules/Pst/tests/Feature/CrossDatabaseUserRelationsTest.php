@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Tests\Feature;
 
+use AcMarche\Pst\Enums\RolesEnum;
 use AcMarche\Pst\Models\Action;
 use AcMarche\Pst\Models\OperationalObjective;
 use AcMarche\Pst\Models\Service;
 use AcMarche\Pst\Models\StrategicObjective;
 use AcMarche\Pst\Policies\ActionPolicy;
+use AcMarche\Security\Models\Role;
 use App\Models\User;
 
 function createActionForRelations(): Action
@@ -75,6 +77,25 @@ it('resolves an existence subquery on the users of a service', function (): void
 
     expect($linked)->toBeTrue()
         ->and(ActionPolicy::isUserLinkedToAction($user, $action))->toBeTrue();
+});
+
+/**
+ * The pst database has no roles tables, and a whereHas('roles') on these relations would
+ * reach them. Every connection shares one sqlite database in tests, which is why the
+ * generated sql is asserted as well as the result.
+ */
+it('filters the users of a relation by role without querying the roles tables', function (): void {
+    $mandatary = User::factory()->create();
+    $mandatary->addRole(Role::factory()->create(['name' => RolesEnum::MANDATAIRE->value]));
+    $otherUser = User::factory()->create();
+    $action = createActionForRelations();
+
+    $action->mandataries()->attach([$mandatary->username, $otherUser->username]);
+
+    $query = $action->mandataries()->withRole(RolesEnum::MANDATAIRE->value);
+
+    expect($query->pluck('users.username')->all())->toBe([$mandatary->username])
+        ->and($query->toSql())->not->toContain('role');
 });
 
 it('qualifies the users table only when the databases differ', function (): void {

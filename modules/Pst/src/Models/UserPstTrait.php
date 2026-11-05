@@ -91,9 +91,21 @@ trait UserPstTrait
     protected function forSelectedDepartment(Builder $query): void
     {
         $department = DepartmentEnum::tryFrom(UserRepository::departmentSelected()) ?? DepartmentEnum::VILLE;
-        $query->whereHas(
-            'roles',
-            fn (Builder $query): Builder => $query->where('name', RolesEnum::forDepartment($department)->value),
-        );
+        $query->withRole(RolesEnum::forDepartment($department)->value);
+    }
+
+    /**
+     * Users reached through a Pst relation are queried on maria-pst, where the roles tables
+     * do not exist, so whereHas('roles') would fail there. The matching users are resolved
+     * first on the intranet connection, and only their ids reach the query.
+     */
+    #[Scope]
+    protected function withRole(Builder $query, string $roleName): void
+    {
+        $userIds = self::query()
+            ->whereHas('roles', fn (Builder $query): Builder => $query->where('name', $roleName))
+            ->pluck('id');
+
+        $query->whereIn($query->qualifyColumn('id'), $userIds);
     }
 }
