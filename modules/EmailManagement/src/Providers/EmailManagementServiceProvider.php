@@ -6,6 +6,7 @@ namespace AcMarche\EmailManagement\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use AcMarche\EmailManagement\Console\Commands\SieveCheckCommand;
+use AcMarche\EmailManagement\Console\Commands\UpdateCitoyenHomeDirectoriesCommand;
 use AcMarche\EmailManagement\Imap\ImapEmploye;
 use AcMarche\EmailManagement\Sieve\SieveEmploye;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +33,7 @@ final class EmailManagementServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 SieveCheckCommand::class,
+                UpdateCitoyenHomeDirectoriesCommand::class,
             ]);
         }
         $this->bootModule();

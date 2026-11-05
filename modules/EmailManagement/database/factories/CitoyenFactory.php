@@ -33,7 +33,7 @@ final class CitoyenFactory extends Factory
             'postalAddress' => fake()->optional()->streetAddress(),
             'employeeNumber' => fake()->numerify('###########'),
             'postalCode' => '6900',
-            'homeDirectory' => fn (array $attributes): string => '/var/spool/dovecot/mail/'.$attributes['uid'][0].'/'.$attributes['uid'],
+            'homeDirectory' => fn (array $attributes): string => Citoyen::homeDirectoryFor($attributes['mail']),
             'last_connection' => fake()->optional()->dateTimeBetween('-2 years'),
             'auth_token' => Str::random(64),
             'recovery_email' => null,

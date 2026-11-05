@@ -11,8 +11,6 @@ use Illuminate\Support\Str;
 
 final class CitoyenRepository
 {
-    private const string HOME_ROOT = '/var/spool/dovecot/mail/';
-
     /**
      * Creates the Dovecot login, then the citoyen that references it.
      *
@@ -52,7 +50,7 @@ final class CitoyenRepository
                 'postalCode' => $data['postalCode'] ?? null,
                 'l' => $data['l'] ?? null,
                 'description' => $data['description'] ?? null,
-                'homeDirectory' => self::HOME_ROOT.mb_substr($uid, 0, 1).'/'.$uid,
+                'homeDirectory' => Citoyen::homeDirectoryFor($mail),
                 'auth_token' => Str::random(64),
             ]);
         });

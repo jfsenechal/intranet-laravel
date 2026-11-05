@@ -291,7 +291,7 @@ describe('create page', function (): void {
             ->givenName->toBe('Alice')
             ->employeeNumber->toBe('62011108917')
             ->postalAddress->toBe('Rue du Parc 1')
-            ->homeDirectory->toBe('/var/spool/dovecot/mail/a/alice.martin')
+            ->homeDirectory->toBe('/home/vmail/marche.be/a/alice.martin@marche.be')
             ->description->toBe('Compte de test')
             ->and(mb_strlen($citoyen->auth_token))->toBe(64);
 

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * A citizen mailbox account. The database is the source of truth: citoyens are not in LDAP.
@@ -42,6 +43,14 @@ use Illuminate\Support\Facades\DB;
 final class Citoyen extends Model
 {
     use HasFactory;
+
+    /**
+     * The mailbox path, built like the home of the Dovecot userdb query.
+     */
+    public static function homeDirectoryFor(string $mail): string
+    {
+        return '/home/vmail/'.Str::afterLast($mail, '@').'/'.mb_strtolower(mb_substr($mail, 0, 1)).'/'.$mail;
+    }
 
     public function getFullName(): string
     {
