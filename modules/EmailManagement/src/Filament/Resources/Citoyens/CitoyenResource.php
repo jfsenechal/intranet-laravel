@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Citoyens;
 
+use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\CreateCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\EditCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ListCitoyens;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ViewCitoyen;
@@ -64,6 +65,7 @@ final class CitoyenResource extends Resource
     {
         return [
             'index' => ListCitoyens::route('/'),
+            'create' => CreateCitoyen::route('/create'),
             'view' => ViewCitoyen::route('/{record}'),
             'edit' => EditCitoyen::route('/{record}/edit'),
         ];

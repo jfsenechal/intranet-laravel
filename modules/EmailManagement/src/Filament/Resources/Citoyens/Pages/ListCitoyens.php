@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages;
 
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\CitoyenResource;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 
 final class ListCitoyens extends ListRecords
@@ -19,6 +21,10 @@ final class ListCitoyens extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            CreateAction::make()
+                ->label('Ajouter un citoyen')
+                ->icon(Heroicon::Plus),
+        ];
     }
 }

@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 use AcMarche\EmailManagement\Enums\RolesEnum;
-use AcMarche\EmailManagement\Filament\Resources\Citoyens\CitoyenResource;
+use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\CreateCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\EditCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ListCitoyens;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ViewCitoyen;
 use AcMarche\EmailManagement\Models\Citoyen;
+use AcMarche\EmailManagement\Models\VirtualUser;
 use AcMarche\EmailManagement\Policies\CitoyenPolicy;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -167,6 +168,119 @@ describe('change password', function (): void {
         'no number' => [['password' => 'No-Digits-In-Here']],
         'empty' => [['password' => '']],
     ]);
+});
+
+describe('create page', function (): void {
+    beforeEach(function (): void {
+        $this->validData = [
+            'sn' => 'Martin',
+            'givenName' => 'Alice',
+            'mail' => 'Alice.Martin@marche.be',
+            'employeeNumber' => '62011108917',
+            'postalAddress' => 'Rue du Parc 1',
+            'postalCode' => '6900',
+            'l' => 'Marche-en-Famenne',
+            'password' => 'Correct-Horse-Battery-1',
+            'quota_bytes' => 500,
+            'description' => 'Compte de test',
+        ];
+    });
+
+    it('links to the create page from the list', function (): void {
+        livewire(ListCitoyens::class)->assertActionExists('create');
+    });
+
+    it('creates the citoyen and its login', function (): void {
+        livewire(CreateCitoyen::class)
+            ->fillForm($this->validData)
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertNotified()
+            ->assertRedirect();
+
+        $citoyen = Citoyen::query()->where('mail', 'alice.martin@marche.be')->sole();
+
+        expect($citoyen)
+            ->uid->toBe('alice.martin')
+            ->sn->toBe('Martin')
+            ->givenName->toBe('Alice')
+            ->employeeNumber->toBe('62011108917')
+            ->postalAddress->toBe('Rue du Parc 1')
+            ->homeDirectory->toBe('/var/spool/dovecot/mail/a/alice.martin')
+            ->description->toBe('Compte de test')
+            ->and(mb_strlen($citoyen->auth_token))->toBe(64);
+
+        $virtualUser = $citoyen->virtualUser;
+
+        expect($virtualUser)
+            ->quota_bytes->toBe(500)
+            ->active->toBeTrue()
+            ->legacy_password->toBeNull()
+            ->and($virtualUser->userPassword)->toStartWith('{ARGON2ID}$argon2id$')
+            ->and(password_verify('Correct-Horse-Battery-1', mb_substr($virtualUser->userPassword, 10)))->toBeTrue();
+    });
+
+    it('prefills the postal code and the quota', function (): void {
+        livewire(CreateCitoyen::class)->assertSchemaStateSet(['postalCode' => '6900', 'quota_bytes' => 350]);
+    });
+
+    it('rejects an address already used by a citoyen or a login', function (string $username): void {
+        Citoyen::factory()->create(['mail' => 'taken@marche.be']);
+        VirtualUser::factory()->create(['username' => 'login.only@marche.be']);
+        $total = Citoyen::query()->count();
+
+        livewire(CreateCitoyen::class)
+            ->fillForm([...$this->validData, 'mail' => $username])
+            ->call('create')
+            ->assertHasFormErrors(['mail' => 'unique']);
+
+        expect(Citoyen::query()->count())->toBe($total);
+    })->with(['taken@marche.be', 'login.only@marche.be']);
+
+    it('rejects an address it cannot store', function (string $mail): void {
+        livewire(CreateCitoyen::class)
+            ->fillForm([...$this->validData, 'mail' => $mail])
+            ->call('create')
+            ->assertHasFormErrors(['mail']);
+
+        expect(Citoyen::query()->count())->toBe(0)
+            ->and(VirtualUser::query()->count())->toBe(0);
+    })->with([
+        'other domain' => 'alice@example.be',
+        'path traversal' => '../alice@marche.be',
+        'too long for virtual_users' => str_repeat('a', 56).'@marche.be',
+    ]);
+
+    it('rejects a password outside the policy', function (): void {
+        livewire(CreateCitoyen::class)
+            ->fillForm([...$this->validData, 'password' => 'too-weak'])
+            ->call('create')
+            ->assertHasFormErrors(['password']);
+    });
+
+    it('requires the mandatory fields', function (string $field): void {
+        livewire(CreateCitoyen::class)
+            ->fillForm([...$this->validData, $field => null])
+            ->call('create')
+            ->assertHasFormErrors([$field => 'required']);
+    })->with(['sn', 'mail', 'employeeNumber', 'postalAddress', 'postalCode', 'l', 'password', 'quota_bytes']);
+
+    it('generates the address from the name', function (): void {
+        livewire(CreateCitoyen::class)
+            ->fillForm(['givenName' => 'Élodie', 'sn' => "D'Hoore"])
+            ->callAction(TestAction::make('generateEmail')->schemaComponent('mail', schema: 'form'))
+            ->assertSchemaStateSet(['mail' => 'elodie.dhoore@marche.be']);
+    });
+
+    it('generates a password', function (): void {
+        livewire(CreateCitoyen::class)
+            ->callAction(TestAction::make('generatePassword')->schemaComponent('password', schema: 'form'))
+            ->assertSchemaStateSet(function (array $state): array {
+                expect($state['password'])->toHaveLength(12);
+
+                return [];
+            });
+    });
 });
 
 describe('sensitive data', function (): void {
@@ -331,8 +445,10 @@ describe('authorization', function (): void {
         livewire(ListCitoyens::class)->assertForbidden();
     });
 
-    it('has no create page', function (): void {
-        expect(CitoyenResource::hasPage('create'))->toBeFalse();
+    it('forbids the create page to a user without the role', function (): void {
+        $this->actingAs(User::factory()->create(['is_administrator' => false]));
+
+        livewire(CreateCitoyen::class)->assertForbidden();
     });
 
     it('offers no delete action on the edit page', function (): void {
@@ -340,12 +456,12 @@ describe('authorization', function (): void {
             ->assertActionDoesNotExist(DeleteAction::class);
     });
 
-    it('denies create and delete even to a super administrator', function (): void {
+    it('denies delete even to a super administrator', function (): void {
         $admin = User::factory()->create(['is_administrator' => true]);
         $citoyen = Citoyen::factory()->create();
         $policy = new CitoyenPolicy;
 
-        expect($policy->create($admin))->toBeFalse()
+        expect($policy->create($admin))->toBeTrue()
             ->and($policy->delete($admin, $citoyen))->toBeFalse()
             ->and($policy->viewAny($admin))->toBeTrue()
             ->and($policy->update($admin, $citoyen))->toBeTrue();

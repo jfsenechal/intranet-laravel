@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Models;
 
 use AcMarche\EmailManagement\Database\Factories\CitoyenFactory;
+use AcMarche\EmailManagement\Repository\CitoyenRepository;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -18,7 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  *
  * Edits made here change the database row only: they are not pushed to LDAP or to the
  * mail server, which is why the mailbox identity (mail, uid, home directory)
- * is not fillable. The token hashes are hidden and never rendered. The password hashes
+ * is not fillable: it is only set on creation, see {@see CitoyenRepository::create()}.
+ * The token hashes are hidden and never rendered. The password hashes
  * live on {@see VirtualUser}.
  */
 #[Connection('maria-email-management')]

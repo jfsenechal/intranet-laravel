@@ -9,8 +9,8 @@ use AcMarche\EmailManagement\Policies\Concerns\EmailManagementAuthorization;
 use App\Models\User;
 
 /**
- * Citoyens are created and removed by the citizen application, never from this panel:
- * email admins may only read and correct them.
+ * Email admins may read, create and correct citoyens. Citoyens are removed by the citizen
+ * application, never from this panel.
  */
 final class CitoyenPolicy
 {
@@ -28,7 +28,7 @@ final class CitoyenPolicy
 
     public function create(User $user): bool
     {
-        return false;
+        return $this->isEmailAdmin($user);
     }
 
     public function update(User $user, Citoyen $citoyen): bool
