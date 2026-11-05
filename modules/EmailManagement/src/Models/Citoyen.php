@@ -47,8 +47,8 @@ final class Citoyen extends Model
     }
 
     /**
-     * The Dovecot login of this mailbox, matched on the address because the two tables
-     * share no key.
+     * The Dovecot login of this mailbox. citoyens.mail is a foreign key on
+     * virtual_users.username, so every citoyen has one.
      *
      * @return HasOne<VirtualUser, $this>
      */

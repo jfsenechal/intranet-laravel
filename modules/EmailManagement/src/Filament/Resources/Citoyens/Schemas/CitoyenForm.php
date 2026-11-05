@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Filament\Resources\Citoyens\Schemas;
 
-use AcMarche\EmailManagement\Models\Citoyen;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,8 +13,7 @@ use Filament\Schemas\Schema;
 /**
  * Only the fillable columns are fields here: the mailbox identity (mail, uid, home
  * directory) and the token hashes are left out of the schema entirely, so a save can never
- * submit them. The login section is hidden for a citoyen without a login, otherwise saving
- * would create a virtual_users row with no password.
+ * submit them.
  */
 final class CitoyenForm
 {
@@ -35,7 +33,6 @@ final class CitoyenForm
                     ]),
                 Section::make('Messagerie')
                     ->relationship('virtualUser')
-                    ->visible(fn (?Citoyen $record): bool => $record?->virtualUser !== null)
                     ->components([
                         Toggle::make('active')
                             ->label('Actif'),

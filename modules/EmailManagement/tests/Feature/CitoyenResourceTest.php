@@ -8,7 +8,6 @@ use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\EditCitoyen;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ListCitoyens;
 use AcMarche\EmailManagement\Filament\Resources\Citoyens\Pages\ViewCitoyen;
 use AcMarche\EmailManagement\Models\Citoyen;
-use AcMarche\EmailManagement\Models\VirtualUser;
 use AcMarche\EmailManagement\Policies\CitoyenPolicy;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
@@ -53,7 +52,7 @@ describe('pages render', function (): void {
 describe('quota', function (): void {
     it('shows the quota of the login on the view page', function (): void {
         $citoyen = Citoyen::factory()->create();
-        VirtualUser::factory()->create(['username' => $citoyen->mail, 'quota_bytes' => 777]);
+        $citoyen->virtualUser->update(['quota_bytes' => 777]);
 
         livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertSee('777');
     });
@@ -61,8 +60,8 @@ describe('quota', function (): void {
     it('sorts the table by the quota of the login', function (): void {
         $small = Citoyen::factory()->create(['sn' => 'Adam']);
         $large = Citoyen::factory()->create(['sn' => 'Zimmer']);
-        VirtualUser::factory()->create(['username' => $small->mail, 'quota_bytes' => 100]);
-        VirtualUser::factory()->create(['username' => $large->mail, 'quota_bytes' => 900]);
+        $small->virtualUser->update(['quota_bytes' => 100]);
+        $large->virtualUser->update(['quota_bytes' => 900]);
 
         livewire(ListCitoyens::class)
             ->toggleAllTableColumns()
@@ -75,7 +74,7 @@ describe('quota', function (): void {
 describe('active', function (): void {
     it('shows whether the login is active in the table', function (): void {
         $inactive = Citoyen::factory()->create();
-        VirtualUser::factory()->create(['username' => $inactive->mail, 'active' => false]);
+        $inactive->virtualUser->update(['active' => false]);
 
         livewire(ListCitoyens::class)
             ->loadTable()
@@ -84,18 +83,15 @@ describe('active', function (): void {
 
     it('renders the view page for an inactive login', function (): void {
         $citoyen = Citoyen::factory()->create();
-        VirtualUser::factory()->create(['username' => $citoyen->mail, 'active' => false]);
+        $citoyen->virtualUser->update(['active' => false]);
 
         livewire(ViewCitoyen::class, ['record' => $citoyen->id])->assertSuccessful();
     });
 
     it('deactivates the login and leaves the rest of it untouched', function (): void {
         $citoyen = Citoyen::factory()->create();
-        $virtualUser = VirtualUser::factory()->create([
-            'username' => $citoyen->mail,
-            'userPassword' => '{SSHA}secret',
-            'quota_bytes' => 777,
-        ]);
+        $virtualUser = $citoyen->virtualUser;
+        $virtualUser->update(['userPassword' => '{SSHA}secret', 'quota_bytes' => 777]);
 
         livewire(EditCitoyen::class, ['record' => $citoyen->id])
             ->assertSchemaStateSet(['virtualUser.active' => true])
@@ -110,17 +106,6 @@ describe('active', function (): void {
             ->quota_bytes->toBe(777)
             ->username->toBe($citoyen->mail)
             ->and($virtualUser->userPassword)->toBe('{SSHA}secret');
-    });
-
-    it('does not create a login when saving a citoyen without one', function (): void {
-        $citoyen = Citoyen::factory()->create();
-
-        livewire(EditCitoyen::class, ['record' => $citoyen->id])
-            ->fillForm(['sn' => 'Dupont'])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        expect(VirtualUser::query()->where('username', $citoyen->mail)->exists())->toBeFalse();
     });
 });
 

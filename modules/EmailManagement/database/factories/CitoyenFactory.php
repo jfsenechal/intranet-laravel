@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Database\Factories;
 
 use AcMarche\EmailManagement\Models\Citoyen;
+use AcMarche\EmailManagement\Models\VirtualUser;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -38,5 +39,18 @@ final class CitoyenFactory extends Factory
             'recovery_email' => null,
             'recovery_phone' => null,
         ];
+    }
+
+    /**
+     * citoyens.mail is a foreign key on virtual_users.username, so the login has to exist
+     * before the citoyen is inserted.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Citoyen $citoyen): void {
+            if (! VirtualUser::query()->where('username', $citoyen->mail)->exists()) {
+                VirtualUser::factory()->create(['username' => $citoyen->mail]);
+            }
+        });
     }
 }

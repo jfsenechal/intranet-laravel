@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AcMarche\EmailManagement\Models\Citoyen;
 use AcMarche\EmailManagement\Models\VirtualUser;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Schema;
 
 it('hides the password hashes when serialized', function (): void {
@@ -14,11 +15,30 @@ it('hides the password hashes when serialized', function (): void {
 });
 
 it('links a citoyen to its login by mail address', function (): void {
-    $citoyen = Citoyen::factory()->create(['mail' => 'alice.martin@marche.be']);
     $virtualUser = VirtualUser::factory()->create(['username' => 'alice.martin@marche.be']);
+    $citoyen = Citoyen::factory()->create(['mail' => 'alice.martin@marche.be']);
     VirtualUser::factory()->create();
 
     expect($citoyen->virtualUser->is($virtualUser))->toBeTrue();
+});
+
+it('refuses a login without a username', function (): void {
+    expect(fn () => VirtualUser::factory()->create(['username' => null]))
+        ->toThrow(QueryException::class);
+});
+
+/**
+ * Asserted on the definition because the in-memory test connection runs with foreign_keys
+ * off, so sqlite stores the key without enforcing it.
+ */
+it('links citoyens.mail to virtual_users.username with a foreign key', function (): void {
+    $foreignKeys = collect(Schema::connection('maria-email-management')->getForeignKeys('citoyens'));
+
+    expect($foreignKeys->firstWhere('columns', ['mail']))
+        ->foreign_table->toBe('virtual_users')
+        ->foreign_columns->toBe(['username'])
+        ->on_update->toBe('cascade')
+        ->on_delete->toBe('restrict');
 });
 
 it('no longer stores the deprecated columns on citoyens', function (): void {
