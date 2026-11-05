@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AcMarche\EmailManagement\Providers;
 
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
-use AcMarche\EmailManagement\Console\Commands\CitoyenNewMailCommand;
 use AcMarche\EmailManagement\Console\Commands\SieveCheckCommand;
 use AcMarche\EmailManagement\Imap\ImapEmploye;
 use AcMarche\EmailManagement\Sieve\SieveEmploye;
@@ -32,7 +31,6 @@ final class EmailManagementServiceProvider extends ServiceProvider
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
-                CitoyenNewMailCommand::class,
                 SieveCheckCommand::class,
             ]);
         }
