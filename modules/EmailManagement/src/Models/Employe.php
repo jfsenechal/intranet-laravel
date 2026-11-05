@@ -6,7 +6,6 @@ namespace AcMarche\EmailManagement\Models;
 
 use AcMarche\EmailManagement\Database\Factories\EmployeFactory;
 use AcMarche\EmailManagement\Ldap\EmployeLdap;
-use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,8 +18,10 @@ use Illuminate\Database\Eloquent\Model;
  * Active Directory is the source of truth: this table is a read mirror kept in step
  * by write-through on create/update and by the sync command. Passwords are never
  * mirrored -- they live in AD and are checked there.
+ *
+ * Stored in the intranet database, not on maria-email-management: that MariaDB runs on the
+ * mail server, and a compromise of that host must not expose the staff directory.
  */
-#[Connection('maria-email-management')]
 #[Fillable([
     'samaccountname',
     'givenName',
