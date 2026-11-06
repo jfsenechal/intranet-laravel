@@ -63,5 +63,7 @@ return [
             'address' => env('EMAIL_MANAGEMENT_CITOYEN_FROM_ADDRESS', 'info@marche.be'),
             'name' => env('EMAIL_MANAGEMENT_CITOYEN_FROM_NAME', 'Ville de Marche-en-Famenne'),
         ],
+        // Matches smtp_destination_rate_delay on the Postfix server.
+        'seconds_between_mails' => (int) env('EMAIL_MANAGEMENT_CITOYEN_SECONDS_BETWEEN_MAILS', 1),
     ],
 ];

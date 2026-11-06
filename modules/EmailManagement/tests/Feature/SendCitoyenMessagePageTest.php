@@ -5,10 +5,14 @@ declare(strict_types=1);
 use AcMarche\EmailManagement\Enums\RolesEnum;
 use AcMarche\EmailManagement\Filament\Pages\SendCitoyenMessagePage;
 use AcMarche\EmailManagement\Mail\CitoyenMessage;
+use AcMarche\EmailManagement\Models\Citoyen;
 use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Mail\MailManager;
+use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 
 use function Pest\Livewire\livewire;
 
@@ -24,10 +28,14 @@ beforeEach(function (): void {
     Mail::fake();
 });
 
-it('queues the message once for each distinct recipient', function (): void {
+it('queues the message once for each active citoyen', function (): void {
+    $alice = Citoyen::factory()->create(['mail' => 'alice@marche.be']);
+    Citoyen::factory()->create(['mail' => 'bob@marche.be']);
+    $inactive = Citoyen::factory()->create(['mail' => 'carol@marche.be']);
+    $inactive->virtualUser->update(['active' => false]);
+
     livewire(SendCitoyenMessagePage::class)
         ->fillForm([
-            'recipients' => ['alice@marche.be', 'bob@marche.be', 'alice@marche.be'],
             'subject' => 'Coupure du webmail',
             'body' => '<p>Le webmail sera indisponible lundi.</p>',
         ])
@@ -36,10 +44,36 @@ it('queues the message once for each distinct recipient', function (): void {
         ->assertNotified('Message mis en file d\'attente');
 
     Mail::assertQueuedCount(2);
-    Mail::assertQueued(CitoyenMessage::class, fn (CitoyenMessage $mail): bool => $mail->hasTo('alice@marche.be')
+    Mail::assertQueued(CitoyenMessage::class, fn (CitoyenMessage $mail): bool => $mail->hasTo($alice->mail)
         && $mail->subject === 'Coupure du webmail'
         && $mail->body === '<p>Le webmail sera indisponible lundi.</p>');
     Mail::assertQueued(CitoyenMessage::class, fn (CitoyenMessage $mail): bool => $mail->hasTo('bob@marche.be'));
+});
+
+it('spaces the mails by the configured delay', function (): void {
+    config()->set('email-management.citoyen_message.seconds_between_mails', 2);
+    $this->freezeTime();
+    Citoyen::factory()->count(3)->create();
+
+    // MailFake::later() drops the delay, so the real mailer has to reach a faked queue.
+    Queue::fake();
+    Mail::swap(new MailManager(app()));
+
+    livewire(SendCitoyenMessagePage::class)
+        ->fillForm([
+            'subject' => 'Coupure du webmail',
+            'body' => '<p>Texte</p>',
+        ])
+        ->call('send')
+        ->assertHasNoFormErrors();
+
+    $delays = Queue::pushed(SendQueuedMailable::class)
+        ->map(fn (SendQueuedMailable $job): int => (int) now()->diffInSeconds($job->delay))
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($delays)->toBe([0, 2, 4]);
 });
 
 it('sends the message from the configured citoyen sender address', function (): void {
@@ -50,28 +84,23 @@ it('sends the message from the configured citoyen sender address', function (): 
     $mail->assertFrom('info@marche.be');
 });
 
-it('rejects an invalid recipient address and queues nothing', function (): void {
-    livewire(SendCitoyenMessagePage::class)
-        ->fillForm([
-            'recipients' => ['not-an-email'],
-            'subject' => 'Coupure du webmail',
-            'body' => '<p>Texte</p>',
-        ])
-        ->call('send')
-        ->assertHasFormErrors(['recipients.0' => 'email']);
+it('renders the message inside the Ville de Marche-en-Famenne template', function (): void {
+    $mail = new CitoyenMessage('<p>Le webmail sera indisponible lundi.</p>', 'Objet');
 
-    Mail::assertNothingOutgoing();
+    $mail->assertSeeInHtml('<p>Le webmail sera indisponible lundi.</p>', false);
+    $mail->assertSeeInHtml('L\'équipe informatique de la Ville de Marche-en-Famenne.', false);
 });
 
-it('requires recipients, a subject and a body', function (): void {
+it('requires a subject and a body', function (): void {
+    Citoyen::factory()->create();
+
     livewire(SendCitoyenMessagePage::class)
         ->fillForm([
-            'recipients' => [],
             'subject' => '',
             'body' => '',
         ])
         ->call('send')
-        ->assertHasFormErrors(['recipients' => 'required', 'subject' => 'required', 'body']);
+        ->assertHasFormErrors(['subject' => 'required', 'body']);
 
     Mail::assertNothingOutgoing();
 });

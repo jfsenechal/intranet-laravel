@@ -6,11 +6,11 @@ namespace AcMarche\EmailManagement\Filament\Pages;
 
 use AcMarche\EmailManagement\Enums\RolesEnum;
 use AcMarche\EmailManagement\Mail\CitoyenMessage;
+use AcMarche\EmailManagement\Repository\CitoyenRepository;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Mail;
 use Override;
 
 /**
- * Compose a message and queue it, one mail per address, through the CitoyenMessage mailable.
+ * Compose a message and queue it, one mail per active citoyen, through the CitoyenMessage mailable.
  */
 final class SendCitoyenMessagePage extends Page implements HasForms
 {
@@ -73,13 +73,8 @@ final class SendCitoyenMessagePage extends Page implements HasForms
             ->statePath('data')
             ->components([
                 Section::make('Message')
+                    ->description(fn (): string => sprintf('Envoyé à tous les citoyens actifs (%d).', CitoyenRepository::getActiveQuery()->count()))
                     ->schema([
-                        TagsInput::make('recipients')
-                            ->label('Destinataires')
-                            ->helperText('Une adresse par étiquette. Validez avec Entrée, une virgule ou un espace.')
-                            ->splitKeys(['Enter', ',', ' '])
-                            ->required()
-                            ->nestedRecursiveRules(['email']),
                         TextInput::make('subject')
                             ->label('Objet')
                             ->required()
@@ -96,10 +91,15 @@ final class SendCitoyenMessagePage extends Page implements HasForms
         $data = $this->form->getState();
 
         /** @var array<int, string> $recipients */
-        $recipients = array_values(array_unique($data['recipients']));
+        $recipients = CitoyenRepository::getActiveQuery()->pluck('mail')->all();
 
-        foreach ($recipients as $recipient) {
-            Mail::to($recipient)->queue(new CitoyenMessage($data['body'], $data['subject']));
+        $secondsBetweenMails = (int) config('email-management.citoyen_message.seconds_between_mails');
+
+        foreach ($recipients as $index => $recipient) {
+            Mail::to($recipient)->later(
+                now()->addSeconds($index * $secondsBetweenMails),
+                new CitoyenMessage($data['body'], $data['subject']),
+            );
         }
 
         Notification::make()
@@ -125,7 +125,19 @@ final class SendCitoyenMessagePage extends Page implements HasForms
                 ->submit('send')
                 ->requiresConfirmation()
                 ->modalHeading('Confirmer l\'envoi')
-                ->modalDescription('Un e-mail sera envoyé à chaque destinataire.'),
+                ->modalDescription(fn (): string => $this->getConfirmationDescription()),
         ];
+    }
+
+    private function getConfirmationDescription(): string
+    {
+        $recipientsCount = CitoyenRepository::getActiveQuery()->count();
+        $secondsBetweenMails = (int) config('email-management.citoyen_message.seconds_between_mails');
+
+        return sprintf(
+            'Un e-mail sera envoyé à chacun des %d citoyens actifs. Durée estimée de l\'envoi : %d minute(s).',
+            $recipientsCount,
+            (int) ceil($recipientsCount * $secondsBetweenMails / 60),
+        );
     }
 }

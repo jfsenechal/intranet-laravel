@@ -27,6 +27,15 @@ final class CitoyenRepository
     }
 
     /**
+     * Citoyens whose Dovecot login is active.
+     */
+    public static function getActiveQuery(): Builder
+    {
+        return Citoyen::query()
+            ->whereHas('virtualUser', fn (Builder $query): Builder => $query->where('active', true));
+    }
+
+    /**
      * Creates the Dovecot login, then the citoyen that references it.
      *
      * @param  array{
