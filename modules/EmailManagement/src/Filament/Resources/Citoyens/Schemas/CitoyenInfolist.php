@@ -85,8 +85,8 @@ final class CitoyenInfolist
                                             }
 
                                             return match (true) {
-                                                (float)$quotaInfo['pourcentage'] >= 90 => 'danger',
-                                                (float)$quotaInfo['pourcentage'] >= 70 => 'warning',
+                                                (float) $quotaInfo['pourcentage'] >= 90 => 'danger',
+                                                (float) $quotaInfo['pourcentage'] >= 70 => 'warning',
                                                 default => 'success',
                                             };
                                         }),
@@ -162,7 +162,7 @@ final class CitoyenInfolist
     {
         $imap = ImapCitoyen::fromConfig();
 
-        if (!$imap->isConfigured()) {
+        if (! $imap->isConfigured()) {
             return null;
         }
 
@@ -172,7 +172,9 @@ final class CitoyenInfolist
             function () use ($imap, $mail): array|false {
                 try {
                     return $imap->getQuota($mail) ?: false;
-                } catch (Throwable) {
+                } catch (Throwable $e) {
+                    report($e);
+
                     return false;
                 }
             },
