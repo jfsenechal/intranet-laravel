@@ -56,6 +56,13 @@ return [
     'mail_root' => env('EMAIL_MANAGEMENT_MAIL_ROOT', '/home/vmail'),
 
     /*
+     * Key of the citoyens personal data columns, see EncryptedPersonalDataCast. The gestmail
+     * application reads and writes the same columns: both must use the same key. It is
+     * not APP_KEY, which differs between the two applications.
+     */
+    'personal_data_key' => env('CITOYEN_DATA_KEY'),
+
+    /*
      * Sender of the messages sent to the citizens from SendCitoyenMessagePage.
      */
     'citoyen_message' => [

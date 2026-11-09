@@ -39,7 +39,6 @@ final class CitoyensTable
                     ->copyable(),
                 TextColumn::make('l')
                     ->label('Localité')
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('virtualUser.quota_bytes')
                     ->label('Quota (Mo)')

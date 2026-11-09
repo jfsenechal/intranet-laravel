@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\EmailManagement\Models;
 
+use AcMarche\EmailManagement\Casts\EncryptedPersonalDataCast;
 use AcMarche\EmailManagement\Database\Factories\CitoyenFactory;
 use AcMarche\EmailManagement\Repository\CitoyenRepository;
 use Illuminate\Database\Eloquent\Attributes\Connection;
@@ -22,6 +23,10 @@ use Illuminate\Support\Str;
  * The mailbox identity (mail, home directory) is not fillable: it is only set on
  * creation, see {@see CitoyenRepository::create()}. The token hashes are hidden and never
  * rendered. The password hashes live on {@see VirtualUser}, which Dovecot reads.
+ *
+ * The personal data (employeeNumber, postalAddress, l, recovery_*) is encrypted with the key
+ * shared with gestmail, see {@see EncryptedPersonalDataCast}: those columns cannot be searched,
+ * sorted or filtered in SQL.
  */
 #[Connection('maria-email-management')]
 #[Fillable([
@@ -129,6 +134,11 @@ final class Citoyen extends Model
         return [
             'last_connection' => 'date',
             'charter_accepted_at' => 'datetime',
+            'employeeNumber' => EncryptedPersonalDataCast::class,
+            'postalAddress' => EncryptedPersonalDataCast::class,
+            'l' => EncryptedPersonalDataCast::class,
+            'recovery_email' => EncryptedPersonalDataCast::class,
+            'recovery_phone' => EncryptedPersonalDataCast::class,
         ];
     }
 }

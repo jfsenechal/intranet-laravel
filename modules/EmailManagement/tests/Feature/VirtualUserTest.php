@@ -72,3 +72,28 @@ it('no longer stores the deprecated columns on citoyens', function (): void {
         ->not->toContain('gosaMailAlternateAddress')
         ->not->toContain('password_changed_at');
 });
+
+it('stores the personal data of a citoyen encrypted', function (): void {
+    $citoyen = Citoyen::factory()->create([
+        'employeeNumber' => '62011108917',
+        'postalAddress' => 'Rue du Parc 1',
+        'l' => 'Marche-en-Famenne',
+        'recovery_email' => 'jean@example.be',
+        'recovery_phone' => '0470123456',
+    ]);
+
+    $stored = DB::connection('maria-email-management')->table('citoyens')->where('id', $citoyen->id)->sole();
+
+    expect($stored)
+        ->employeeNumber->not->toContain('62011108917')
+        ->postalAddress->not->toContain('Rue du Parc')
+        ->l->not->toContain('Marche')
+        ->recovery_email->not->toContain('jean@example.be')
+        ->recovery_phone->not->toContain('0470123456')
+        ->and($citoyen->refresh())
+        ->employeeNumber->toBe('62011108917')
+        ->postalAddress->toBe('Rue du Parc 1')
+        ->l->toBe('Marche-en-Famenne')
+        ->recovery_email->toBe('jean@example.be')
+        ->recovery_phone->toBe('0470123456');
+});
