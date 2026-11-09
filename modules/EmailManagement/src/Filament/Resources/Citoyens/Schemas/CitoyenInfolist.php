@@ -121,6 +121,7 @@ final class CitoyenInfolist
                                 ]),
                             TextEntry::make('description')
                                 ->label('Description')
+                                ->hiddenLabel()
                                 ->placeholder('-')
                                 ->columnSpanFull(),
 
