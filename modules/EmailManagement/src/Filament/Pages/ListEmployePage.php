@@ -46,7 +46,7 @@ final class ListEmployePage extends Page implements HasTable
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     #[Override]
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected static ?string $navigationLabel = 'Employés';
