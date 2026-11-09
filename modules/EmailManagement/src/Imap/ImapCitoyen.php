@@ -84,7 +84,7 @@ final class ImapCitoyen
     private function connect(string $user): void
     {
         if (! $this->isConfigured()) {
-            throw new Exception('Les identifiants IMAP ne sont pas configurés (IMAP_CITOYEN_*).');
+            throw new Exception('Les identifiants IMAP ne sont pas configurés (IMAP_CITOYEN_URL, EMAIL_MANAGEMENT_CITOYEN_DOVECOT_ADMIN_*).');
         }
 
         $this->mailbox = new Mailbox([

@@ -19,8 +19,8 @@ return [
     'imap' => [
         'citoyen' => [
             'host' => env('IMAP_CITOYEN_URL'),
-            'user' => env('IMAP_CITOYEN_ADMIN'),
-            'password' => env('IMAP_CITOYEN_PWD'),
+            'user' => env('EMAIL_MANAGEMENT_CITOYEN_DOVECOT_ADMIN_USERNAME'),
+            'password' => env('EMAIL_MANAGEMENT_CITOYEN_DOVECOT_ADMIN_PASSWORD'),
         ],
         'employe' => [
             'host' => env('IMAP_EMPLOYE_URL'),
