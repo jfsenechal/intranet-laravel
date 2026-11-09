@@ -31,7 +31,7 @@ final class ReplicateDeadlineAction
                     )
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->helperText('Laisser vide pour dupliquer l\'échéance sans la lier à un agent.'),
             ])
             ->excludeAttributes([
                 'id',

@@ -267,16 +267,27 @@ describe('crud operations', function (): void {
             ->assertSchemaStateSet(['employee_id' => null]);
     });
 
-    it('requires an agent when replicating a deadline', function (): void {
-        $record = Deadline::factory()->create(['name' => 'Unreplicated Deadline']);
+    it('can replicate a deadline without linking it to an agent', function (): void {
+        $employee = Employee::factory()->create();
+        $record = Deadline::factory()->create([
+            'employee_id' => $employee->id,
+            'name' => 'Unassigned Deadline',
+        ]);
 
         Livewire::test(ViewDeadline::class, [
             'record' => $record->id,
         ])
             ->callAction('replicate', ['employee_id' => null])
-            ->assertHasActionErrors(['employee_id' => 'required']);
+            ->assertHasNoActionErrors();
 
-        expect(Deadline::query()->where('name', 'Unreplicated Deadline')->count())->toBe(1);
+        $replica = Deadline::query()
+            ->where('name', 'Unassigned Deadline')
+            ->whereKeyNot($record->id)
+            ->first();
+
+        expect($replica)->not->toBeNull()
+            ->and($replica->employee_id)->toBeNull()
+            ->and($record->refresh()->employee_id)->toBe($employee->id);
     });
 });
 
