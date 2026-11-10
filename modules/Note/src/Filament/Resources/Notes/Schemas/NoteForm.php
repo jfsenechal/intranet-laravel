@@ -27,6 +27,7 @@ final class NoteForm
                     ->columnSpanFull(),
                 RichEditor::make('content')
                     ->label('Contenu')
+                    ->helperText('Pour un retour à la ligne MAJ + ENTER')
                     ->required()
                     ->columnSpanFull(),
             ]);
