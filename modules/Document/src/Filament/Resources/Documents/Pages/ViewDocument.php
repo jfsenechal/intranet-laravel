@@ -44,6 +44,7 @@ final class ViewDocument extends ViewRecord
             Action::make('back')
                 ->label('Retour à la liste')
                 ->icon('tabler-list')
+                ->color(Color::Blue)
                 ->url(DocumentResource::getUrl('index')),
             EditAction::make()
                 ->icon('tabler-edit'),
