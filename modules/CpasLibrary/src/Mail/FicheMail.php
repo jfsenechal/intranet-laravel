@@ -8,9 +8,7 @@ use AcMarche\CpasLibrary\Enums\RolesEnum;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ViewFiche;
 use AcMarche\CpasLibrary\Models\Fiche;
 use App\Mail\Concerns\ResolvesSenderAddress;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -42,13 +40,7 @@ final class FicheMail extends Mailable
      */
     public static function sendToLibraryUsers(Fiche $fiche): int
     {
-        $recipients = User::query()
-            ->whereHas('roles', fn (Builder $query) => $query->whereIn('name', [
-                RolesEnum::ROLE_LIBRARY->value,
-                RolesEnum::ROLE_LIBRARY_ADMIN->value,
-            ]))
-            ->whereNotNull('email')
-            ->get();
+        $recipients = RolesEnum::libraryUsers();
 
         $url = ViewFiche::getUrl(['record' => $fiche]);
 

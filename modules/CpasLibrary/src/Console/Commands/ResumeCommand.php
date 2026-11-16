@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace AcMarche\CpasLibrary\Console\Commands;
 
+use AcMarche\CpasLibrary\Enums\RolesEnum;
 use AcMarche\CpasLibrary\Filament\Resources\Fiches\Pages\ViewFiche;
 use AcMarche\CpasLibrary\Mail\ResumeMail;
 use AcMarche\CpasLibrary\Models\Fiche;
 use Filament\Facades\Filament;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Override;
@@ -31,10 +33,10 @@ final class ResumeCommand extends Command
 
     public function handle(): int
     {
-        $recipients = (array) config('cpas-library.reminders.recipients', []);
+        $recipients = RolesEnum::libraryUsers();
 
-        if ($recipients === []) {
-            $this->warn('No reminder recipients configured (cpas-library.reminders.recipients).');
+        if ($recipients->isEmpty()) {
+            $this->warn('No user holds a library role (ROLE_LIBRARY or ROLE_LIBRARY_ADMIN).');
 
             return SfCommand::SUCCESS;
         }
@@ -51,9 +53,14 @@ final class ResumeCommand extends Command
             return SfCommand::SUCCESS;
         }
 
-        Mail::to($recipients)->send(new ResumeMail($fiches, $this->buildUrls($fiches)));
+        $urls = $this->buildUrls($fiches);
 
-        $this->info("Sent a weekly digest of {$fiches->count()} fiche(s) to ".implode(', ', $recipients).'.');
+        foreach ($recipients as $recipient) {
+            Mail::to(new Address($recipient->email, $recipient->fullNameAsString()))
+                ->send(new ResumeMail($fiches, $urls));
+        }
+
+        $this->info("Sent a weekly digest of {$fiches->count()} fiche(s) to {$recipients->count()} library user(s).");
 
         return SfCommand::SUCCESS;
     }
