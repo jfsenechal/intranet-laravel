@@ -67,6 +67,35 @@ describe('page rendering', function (): void {
             ->assertTableColumnStateSet('payScale.name', $payScale->name, $record);
     });
 
+    it('shows and filters suspended contracts', function (): void {
+        $suspended = Contract::factory()->create(['is_closed' => false, 'is_suspended' => true]);
+        $running = Contract::factory()->create(['is_closed' => false, 'is_suspended' => false]);
+
+        Livewire::test(ListContracts::class)
+            ->loadTable()
+            ->assertTableColumnExists('is_suspended')
+            ->assertTableColumnStateSet('is_suspended', true, $suspended)
+            ->filterTable('is_suspended', true)
+            ->assertCanSeeTableRecords([$suspended])
+            ->assertCanNotSeeTableRecords([$running]);
+    });
+
+    it('filters suspended contracts in the employee relation manager', function (): void {
+        $employee = Employee::factory()->create();
+        $suspended = Contract::factory()->create(['employee_id' => $employee->id, 'is_closed' => false, 'is_suspended' => true]);
+        $running = Contract::factory()->create(['employee_id' => $employee->id, 'is_closed' => false, 'is_suspended' => false]);
+
+        Livewire::test(ContractsRelationManager::class, [
+            'ownerRecord' => $employee,
+            'pageClass' => ViewEmployee::class,
+        ])
+            ->loadTable()
+            ->assertTableColumnExists('is_suspended')
+            ->filterTable('is_suspended', true)
+            ->assertCanSeeTableRecords([$suspended])
+            ->assertCanNotSeeTableRecords([$running]);
+    });
+
     it('shows the regime as weekly hours', function (): void {
         $record = Contract::factory()->create(['hourly_regime' => '19/38', 'work_regime' => 0.5]);
 

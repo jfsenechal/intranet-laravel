@@ -135,7 +135,9 @@ final class ContractInfolist
                                     ->boolean(),
                                 IconEntry::make('is_suspended')
                                     ->label('Suspension')
-                                    ->boolean(),
+                                    ->boolean()
+                                    ->trueIcon('tabler-hourglass')
+                                    ->trueColor('warning'),
                             ]),
                         Section::make('Métadonnées')
                             ->columns(2)

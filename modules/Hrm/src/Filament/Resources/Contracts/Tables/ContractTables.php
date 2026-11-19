@@ -90,6 +90,7 @@ final class ContractTables
                     ->label('Clôturé')
                     ->boolean()
                     ->toggleable(),
+                self::suspendedColumn(),
             ])
             ->filtersFormColumns(2)
             ->persistFiltersInSession()
@@ -128,11 +129,7 @@ final class ContractTables
                     ->placeholder('Tous')
                     ->trueLabel('Avenants')
                     ->falseLabel('Non avenants'),
-                TernaryFilter::make('is_suspended')
-                    ->label('Suspendu')
-                    ->placeholder('Tous')
-                    ->trueLabel('Suspendus')
-                    ->falseLabel('Non suspendus'),
+                self::suspendedFilter(),
                 TernaryFilter::make('is_replacement')
                     ->label('Remplacement')
                     ->placeholder('Tous')
@@ -213,6 +210,7 @@ final class ContractTables
                     ->label('Clôturé')
                     ->boolean()
                     ->toggleable(),
+                self::suspendedColumn(),
             ])
             ->filters([
                 TernaryFilter::make('is_closed')
@@ -221,6 +219,7 @@ final class ContractTables
                     ->trueLabel('Clôturés')
                     ->falseLabel('En cours')
                     ->default(false),
+                self::suspendedFilter(),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -228,6 +227,25 @@ final class ContractTables
                 ReplicateContractAction::make(),
             ])
             ->recordAction(ViewAction::class);
+    }
+
+    private static function suspendedColumn(): IconColumn
+    {
+        return IconColumn::make('is_suspended')
+            ->label('Suspendu')
+            ->boolean()
+            ->trueIcon('tabler-hourglass')
+            ->trueColor('warning')
+            ->toggleable();
+    }
+
+    private static function suspendedFilter(): TernaryFilter
+    {
+        return TernaryFilter::make('is_suspended')
+            ->label('Suspendu')
+            ->placeholder('Tous')
+            ->trueLabel('Suspendus')
+            ->falseLabel('Non suspendus');
     }
 
     private static function weeklyHoursColumn(): TextColumn
