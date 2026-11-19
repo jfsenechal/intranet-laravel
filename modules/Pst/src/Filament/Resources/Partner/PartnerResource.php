@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Pst\Filament\Resources\Partner;
 
 use AcMarche\Pst\Enums\NavigationGroupEnum;
+use AcMarche\Pst\Filament\Concerns\InteractsWithScoutGlobalSearch;
 use AcMarche\Pst\Filament\Resources\Partner\Pages\CreatePartner;
 use AcMarche\Pst\Filament\Resources\Partner\Pages\EditPartner;
 use AcMarche\Pst\Filament\Resources\Partner\Pages\ListPartners;
@@ -13,18 +14,17 @@ use AcMarche\Pst\Filament\Resources\Partner\Schemas\PartnerForm;
 use AcMarche\Pst\Filament\Resources\Partner\Tables\PartnerTables;
 use AcMarche\Pst\Models\Partner;
 use BackedEnum;
-use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Override;
 use UnitEnum;
 
 final class PartnerResource extends Resource
 {
+    use InteractsWithScoutGlobalSearch;
+
     #[Override]
     protected static ?string $model = Partner::class;
 
@@ -72,28 +72,5 @@ final class PartnerResource extends Resource
             'view' => ViewPartner::route('/{record}'),
             'edit' => EditPartner::route('/{record}/edit'),
         ];
-    }
-
-    public static function getGlobalSearchResults(string $search): Collection
-    {
-        return self::getGlobalSearchEloquentQuery()
-            ->whereKey(Partner::search($search)->keys())
-            ->limit(self::$globalSearchResultsLimit)
-            ->get()
-            ->map(function (Model $record): ?GlobalSearchResult {
-                $url = self::getGlobalSearchResultUrl($record);
-
-                if (blank($url)) {
-                    return null;
-                }
-
-                return new GlobalSearchResult(
-                    title: self::getGlobalSearchResultTitle($record),
-                    url: $url,
-                    details: self::getGlobalSearchResultDetails($record),
-                    actions: self::getGlobalSearchResultActions($record),
-                );
-            })
-            ->filter();
     }
 }

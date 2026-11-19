@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AcMarche\Pst\Enums\RolesEnum;
+use AcMarche\Pst\Filament\Resources\Odd\OddResource;
 use AcMarche\Pst\Filament\Resources\Odd\Pages\CreateOdd;
 use AcMarche\Pst\Filament\Resources\Odd\Pages\EditOdd;
 use AcMarche\Pst\Filament\Resources\Odd\Pages\ListOdds;
@@ -16,8 +17,12 @@ use AcMarche\Security\Models\Role;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Str;
+use Laravel\Scout\EngineManager;
+use Laravel\Scout\Engines\Engine;
 use Livewire\Livewire;
+use Meilisearch\Exceptions\ApiException;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -180,3 +185,34 @@ describe('relation manager', function (): void {
             ->assertCanSeeTableRecords($actions);
     });
 });
+
+/**
+ * Swaps the Scout engine for one whose keys() throws the given Meilisearch error code.
+ */
+function useScoutEngineThrowing(string $errorCode, int $status): void
+{
+    $engine = Mockery::mock(Engine::class);
+    $engine->shouldReceive('keys')
+        ->andThrow(new ApiException(new Response($status), ['message' => 'Meilisearch error', 'code' => $errorCode]));
+
+    app(EngineManager::class)->extend('failing', fn (): Engine => $engine);
+    config(['scout.driver' => 'failing']);
+}
+
+it('falls back to database global search when the scout index is missing', function (): void {
+    $odd = Odd::factory()->create(['name' => 'Climate action']);
+    Odd::factory()->create(['name' => 'Clean water']);
+
+    useScoutEngineThrowing('index_not_found', 404);
+
+    $results = OddResource::getGlobalSearchResults('Climate');
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->title)->toBe($odd->name);
+});
+
+it('rethrows other scout errors from global search', function (): void {
+    useScoutEngineThrowing('invalid_api_key', 403);
+
+    OddResource::getGlobalSearchResults('Climate');
+})->throws(ApiException::class);

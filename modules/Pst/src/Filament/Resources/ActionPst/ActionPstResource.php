@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Filament\Resources\ActionPst;
 
+use AcMarche\Pst\Filament\Concerns\InteractsWithScoutGlobalSearch;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\CreateActionPst;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\EditActionPst;
 use AcMarche\Pst\Filament\Resources\ActionPst\Pages\ListActionsAsGoogleSheet;
@@ -16,20 +17,20 @@ use AcMarche\Pst\Filament\Resources\ActionPst\Schemas\ActionForm;
 use AcMarche\Pst\Filament\Resources\ActionPst\Tables\ActionTables;
 use AcMarche\Pst\Models\Action;
 use BackedEnum;
-use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Override;
 
 // https://www.youtube.com/watch?v=85uRvsUvwJQ&list=PLqDySLfPKRn6fgrrdg4_SmsSxWzVlUQJo&index=23
 // https://filamentphp.com/content/leandrocfe-navigating-filament-pages-with-previous-and-next-buttons
 final class ActionPstResource extends Resource
 {
+    use InteractsWithScoutGlobalSearch;
+
     #[Override]
     protected static ?string $model = Action::class;
 
@@ -105,28 +106,5 @@ final class ActionPstResource extends Resource
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()->with(['operationalObjective']);
-    }
-
-    public static function getGlobalSearchResults(string $search): Collection
-    {
-        return self::getGlobalSearchEloquentQuery()
-            ->whereKey(Action::search($search)->keys())
-            ->limit(self::$globalSearchResultsLimit)
-            ->get()
-            ->map(function (Model $record): ?GlobalSearchResult {
-                $url = self::getGlobalSearchResultUrl($record);
-
-                if (blank($url)) {
-                    return null;
-                }
-
-                return new GlobalSearchResult(
-                    title: self::getGlobalSearchResultTitle($record),
-                    url: $url,
-                    details: self::getGlobalSearchResultDetails($record),
-                    actions: self::getGlobalSearchResultActions($record),
-                );
-            })
-            ->filter();
     }
 }

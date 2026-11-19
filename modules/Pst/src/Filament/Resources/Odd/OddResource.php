@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Filament\Resources\Odd;
 
+use AcMarche\Pst\Filament\Concerns\InteractsWithScoutGlobalSearch;
 use AcMarche\Pst\Filament\Resources\Odd\Pages\CreateOdd;
 use AcMarche\Pst\Filament\Resources\Odd\Pages\EditOdd;
 use AcMarche\Pst\Filament\Resources\Odd\Pages\ListOdds;
@@ -12,17 +13,16 @@ use AcMarche\Pst\Filament\Resources\Odd\Schemas\OddForm;
 use AcMarche\Pst\Filament\Resources\Odd\Tables\OddTables;
 use AcMarche\Pst\Models\Odd;
 use BackedEnum;
-use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Override;
 
 // todo try https://github.com/LaravelDaily/FilamentExamples-Projects/tree/main/tables/table-reorderable-position
 final class OddResource extends Resource
 {
+    use InteractsWithScoutGlobalSearch;
+
     #[Override]
     protected static ?string $model = Odd::class;
 
@@ -61,28 +61,5 @@ final class OddResource extends Resource
             'view' => ViewOdd::route('/{record}'),
             'edit' => EditOdd::route('/{record}/edit'),
         ];
-    }
-
-    public static function getGlobalSearchResults(string $search): Collection
-    {
-        return self::getGlobalSearchEloquentQuery()
-            ->whereKey(Odd::search($search)->keys())
-            ->limit(self::$globalSearchResultsLimit)
-            ->get()
-            ->map(function (Model $record): ?GlobalSearchResult {
-                $url = self::getGlobalSearchResultUrl($record);
-
-                if (blank($url)) {
-                    return null;
-                }
-
-                return new GlobalSearchResult(
-                    title: self::getGlobalSearchResultTitle($record),
-                    url: $url,
-                    details: self::getGlobalSearchResultDetails($record),
-                    actions: self::getGlobalSearchResultActions($record),
-                );
-            })
-            ->filter();
     }
 }

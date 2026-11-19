@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Pst\Filament\Resources\Users;
 
 use AcMarche\Pst\Enums\NavigationGroupEnum;
+use AcMarche\Pst\Filament\Concerns\InteractsWithScoutGlobalSearch;
 use AcMarche\Pst\Filament\Resources\Users\Pages\EditUser;
 use AcMarche\Pst\Filament\Resources\Users\Pages\ListUsers;
 use AcMarche\Pst\Filament\Resources\Users\Pages\ViewUser;
@@ -12,17 +13,16 @@ use AcMarche\Pst\Filament\Resources\Users\Schemas\UserForm;
 use AcMarche\Pst\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
-use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Override;
 use UnitEnum;
 
 final class UserResource extends Resource
 {
+    use InteractsWithScoutGlobalSearch;
+
     #[Override]
     protected static ?string $model = User::class;
 
@@ -57,28 +57,5 @@ final class UserResource extends Resource
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
-    }
-
-    public static function getGlobalSearchResults(string $search): Collection
-    {
-        return self::getGlobalSearchEloquentQuery()
-            ->whereKey(User::search($search)->keys())
-            ->limit(self::$globalSearchResultsLimit)
-            ->get()
-            ->map(function (Model $record): ?GlobalSearchResult {
-                $url = self::getGlobalSearchResultUrl($record);
-
-                if (blank($url)) {
-                    return null;
-                }
-
-                return new GlobalSearchResult(
-                    title: self::getGlobalSearchResultTitle($record),
-                    url: $url,
-                    details: self::getGlobalSearchResultDetails($record),
-                    actions: self::getGlobalSearchResultActions($record),
-                );
-            })
-            ->filter();
     }
 }

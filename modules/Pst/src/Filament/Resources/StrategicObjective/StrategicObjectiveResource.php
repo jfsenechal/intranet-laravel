@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Pst\Filament\Resources\StrategicObjective;
 
+use AcMarche\Pst\Filament\Concerns\InteractsWithScoutGlobalSearch;
 use AcMarche\Pst\Filament\Resources\StrategicObjective\Pages\CreateStrategicObjective;
 use AcMarche\Pst\Filament\Resources\StrategicObjective\Pages\EditStrategicObjective;
 use AcMarche\Pst\Filament\Resources\StrategicObjective\Pages\ListStrategicObjectives;
@@ -13,16 +14,15 @@ use AcMarche\Pst\Filament\Resources\StrategicObjective\Schemas\StrategicObjectiv
 use AcMarche\Pst\Filament\Resources\StrategicObjective\Tables\StrategicObjectiveTables;
 use AcMarche\Pst\Models\StrategicObjective;
 use BackedEnum;
-use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Override;
 
 final class StrategicObjectiveResource extends Resource
 {
+    use InteractsWithScoutGlobalSearch;
+
     #[Override]
     protected static ?string $model = StrategicObjective::class;
 
@@ -65,28 +65,5 @@ final class StrategicObjectiveResource extends Resource
             'view' => ViewStrategicObjective::route('/{record}'),
             'edit' => EditStrategicObjective::route('/{record}/edit'),
         ];
-    }
-
-    public static function getGlobalSearchResults(string $search): Collection
-    {
-        return self::getGlobalSearchEloquentQuery()
-            ->whereKey(StrategicObjective::search($search)->keys())
-            ->limit(self::$globalSearchResultsLimit)
-            ->get()
-            ->map(function (Model $record): ?GlobalSearchResult {
-                $url = self::getGlobalSearchResultUrl($record);
-
-                if (blank($url)) {
-                    return null;
-                }
-
-                return new GlobalSearchResult(
-                    title: self::getGlobalSearchResultTitle($record),
-                    url: $url,
-                    details: self::getGlobalSearchResultDetails($record),
-                    actions: self::getGlobalSearchResultActions($record),
-                );
-            })
-            ->filter();
     }
 }

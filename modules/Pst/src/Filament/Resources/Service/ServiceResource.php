@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcMarche\Pst\Filament\Resources\Service;
 
 use AcMarche\Pst\Enums\NavigationGroupEnum;
+use AcMarche\Pst\Filament\Concerns\InteractsWithScoutGlobalSearch;
 use AcMarche\Pst\Filament\Resources\Service\Pages\CreateService;
 use AcMarche\Pst\Filament\Resources\Service\Pages\EditService;
 use AcMarche\Pst\Filament\Resources\Service\Pages\ListServices;
@@ -13,17 +14,17 @@ use AcMarche\Pst\Filament\Resources\Service\Schemas\ServiceForm;
 use AcMarche\Pst\Filament\Resources\Service\Tables\ServiceTables;
 use AcMarche\Pst\Models\Service;
 use BackedEnum;
-use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Override;
 use UnitEnum;
 
 final class ServiceResource extends Resource
 {
+    use InteractsWithScoutGlobalSearch;
+
     #[Override]
     protected static ?string $model = Service::class;
 
@@ -67,28 +68,5 @@ final class ServiceResource extends Resource
         return [
             'Initiales' => $record->initials,
         ];
-    }
-
-    public static function getGlobalSearchResults(string $search): Collection
-    {
-        return self::getGlobalSearchEloquentQuery()
-            ->whereKey(Service::search($search)->keys())
-            ->limit(self::$globalSearchResultsLimit)
-            ->get()
-            ->map(function (Model $record): ?GlobalSearchResult {
-                $url = self::getGlobalSearchResultUrl($record);
-
-                if (blank($url)) {
-                    return null;
-                }
-
-                return new GlobalSearchResult(
-                    title: self::getGlobalSearchResultTitle($record),
-                    url: $url,
-                    details: self::getGlobalSearchResultDetails($record),
-                    actions: self::getGlobalSearchResultActions($record),
-                );
-            })
-            ->filter();
     }
 }
