@@ -383,6 +383,47 @@ describe('SendIncomingMailNotificationJob', function (): void {
         );
     });
 
+    test('index recipient also receives the mail of another department sent to their service', function (): void {
+        Mail::fake();
+
+        $user = User::factory()->create(['username' => 'villeindex']);
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->addRole($role);
+
+        $recipient = Recipient::factory()->create([
+            'email' => 'ville-index@example.com',
+            'username' => 'villeindex',
+        ]);
+        $cpasService = Service::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+        $recipient->services()->attach($cpasService);
+
+        $villeMail = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::VILLE->value,
+        ]);
+        $cpasMailForService = IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+        $cpasMailForService->services()->attach($cpasService);
+
+        IncomingMail::factory()->create([
+            'mail_date' => now(),
+            'is_notified' => false,
+            'department' => DepartmentCourrierEnum::CPAS->value,
+        ]);
+
+        (new SendIncomingMailNotificationJob(Date::now()))->handle();
+
+        Mail::assertSent(
+            IncomingMailNotification::class,
+            fn ($mail): bool => $mail->hasTo($recipient->email)
+                && $mail->incomingMails->pluck('id')->sort()->values()->all() === collect([$villeMail->id, $cpasMailForService->id])->sort()->values()->all()
+        );
+    });
+
     test('regular recipient only receives mails where they are assigned', function (): void {
         Mail::fake();
 

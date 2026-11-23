@@ -25,7 +25,9 @@ trait ChecksMailAccess
      */
     private function isMemberOfLinkedService(User $user, IncomingMail $incomingMail): bool
     {
-        $serviceIds = $incomingMail->services()->pluck('courrier_services.id');
+        // Read the links unscoped: a service of another department is still the
+        // user's service, and the department scope must not hide it here.
+        $serviceIds = $incomingMail->services()->withoutGlobalScopes()->pluck('courrier_services.id');
 
         if ($serviceIds->isEmpty()) {
             return false;
@@ -33,7 +35,7 @@ trait ChecksMailAccess
 
         return Recipient::query()
             ->where('recipients.username', $user->username)
-            ->whereHas('services', fn ($query) => $query->whereIn('courrier_services.id', $serviceIds))
+            ->whereHas('services', fn ($query) => $query->withoutGlobalScopes()->whereIn('courrier_services.id', $serviceIds))
             ->exists();
     }
 }

@@ -14,13 +14,18 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait HasDepartmentScope
 {
+    /**
+     * Only the department administrators — the clerks who encode the mail —
+     * are limited to their department, so their forms offer only the services
+     * they route to. Everyone else sees every row: an index or read user who
+     * belongs to another department's service must still be matched to it.
+     */
     public static function bootHasDepartmentScope(): void
     {
         static::addGlobalScope('department', function (Builder $query): void {
-            $departments = DepartmentScope::getViewableDepartments();
-            if (count($departments) > 0) {
-                $values = array_map(fn (DepartmentCourrierEnum $d) => $d->value, $departments);
-                $query->whereIn($query->getModel()->getTable().'.department', $values);
+            $department = DepartmentScope::getCurrentAdminUserDepartment();
+            if ($department instanceof DepartmentCourrierEnum) {
+                $query->where($query->getModel()->getTable().'.department', $department->value);
             }
         });
 

@@ -170,6 +170,19 @@ describe('Department Global Scope on Service', function (): void {
         expect($services)->toHaveCount(1)
             ->and($services->first()->id)->toBe($cpasService->id);
     });
+
+    test('does not filter services for an index user', function (): void {
+        $user = User::factory()->create();
+        $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+        $user->roles()->attach($role);
+
+        Service::factory()->create(['department' => DepartmentCourrierEnum::VILLE->value]);
+        Service::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+
+        $this->actingAs($user);
+
+        expect(Service::all())->toHaveCount(2);
+    });
 });
 
 describe('Department Auto-Assignment on IncomingMail', function (): void {

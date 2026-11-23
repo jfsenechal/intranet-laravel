@@ -100,7 +100,8 @@ final class MeiliSearcher
      * Build the policy clause for the given user.
      *
      * Mirrors the listing tiers: administrators may see everything (empty
-     * string), index/admin users are scoped to their department(s), and every
+     * string), index/admin users are scoped to their department(s) plus the
+     * mail they receive themselves, and every
      * other user only sees mail they receive or that targets one of their
      * services. Returns `null` when the user may see nothing.
      */
@@ -117,7 +118,14 @@ final class MeiliSearcher
                 $departments,
             );
 
-            return sprintf('department IN [%s]', implode(', ', $values));
+            $departmentClause = sprintf('department IN [%s]', implode(', ', $values));
+            $recipientClause = $this->recipientClause($user);
+
+            // A department role widens the search, it never hides the mail the
+            // user receives from another department.
+            return $recipientClause === null
+                ? $departmentClause
+                : sprintf('(%s OR %s)', $departmentClause, $recipientClause);
         }
 
         return $this->recipientClause($user);
@@ -170,7 +178,7 @@ final class MeiliSearcher
             return null;
         }
 
-        $serviceIds = $recipient->services()->pluck('courrier_services.id')->all();
+        $serviceIds = $recipient->services()->withoutGlobalScopes()->pluck('courrier_services.id')->all();
         if ($serviceIds === []) {
             return sprintf('recipients IN [%d]', $recipient->id);
         }

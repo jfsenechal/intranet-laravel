@@ -128,14 +128,21 @@ describe('MeiliSearcher policy filter', function (): void {
             ->toBe(sprintf('department IN ["%s"]', DepartmentCourrierEnum::VILLE->value));
     });
 
-    it('scopes an index user by department even when they are also a recipient', function (): void {
+    it('lets an index user who is also a recipient find their mail of another department', function (): void {
         $user = User::factory()->create();
         $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
         $user->roles()->attach($role);
-        Recipient::factory()->create(['username' => $user->username]);
+        $recipient = Recipient::factory()->create(['username' => $user->username]);
+        $cpasService = Service::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+        $recipient->services()->attach($cpasService);
 
         expect(app(MeiliSearcher::class)->policyFilter($user))
-            ->toBe(sprintf('department IN ["%s"]', DepartmentCourrierEnum::VILLE->value));
+            ->toBe(sprintf(
+                '(department IN ["%s"] OR (recipients IN [%d] OR services IN [%d]))',
+                DepartmentCourrierEnum::VILLE->value,
+                $recipient->id,
+                $cpasService->id,
+            ));
     });
 
     it('denies a user that is not a known recipient', function (): void {

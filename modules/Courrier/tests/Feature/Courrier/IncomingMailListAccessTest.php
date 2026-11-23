@@ -56,6 +56,26 @@ it('limits an index user to the mail of their department', function (): void {
         ->assertCanNotSeeTableRecords([$cpas]);
 });
 
+it('shows an index user the mail of another department sent to their service', function (): void {
+    $user = User::factory()->create();
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+    $user->roles()->attach($role);
+    $this->actingAs($user);
+
+    $recipient = Recipient::factory()->create(['username' => $user->username]);
+    $cpasService = Service::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+    $recipient->services()->attach($cpasService);
+
+    $mine = IncomingMail::factory()->create(['mail_date' => today(), 'department' => DepartmentCourrierEnum::CPAS->value]);
+    $mine->services()->attach($cpasService);
+    $other = IncomingMail::factory()->create(['mail_date' => today(), 'department' => DepartmentCourrierEnum::CPAS->value]);
+
+    livewire(ListIncomingMails::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords([$mine])
+        ->assertCanNotSeeTableRecords([$other]);
+});
+
 it('limits a regular user to the mail they receive', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);

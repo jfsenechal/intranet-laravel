@@ -47,6 +47,22 @@ it('allows a linked-service member to download the attachment', function (): voi
     expect($user->can('download', $attachment))->toBeTrue();
 });
 
+it('allows an index user to download an attachment of another department sent to their service', function (): void {
+    $user = auth()->user();
+    $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_INDEX->value]);
+    $user->roles()->attach($role);
+
+    $attachment = createCourrierAttachment(DepartmentCourrierEnum::CPAS->value);
+    $cpasService = Service::factory()->create(['department' => DepartmentCourrierEnum::CPAS->value]);
+    $recipient = Recipient::factory()->create(['username' => $user->username]);
+    $recipient->services()->attach($cpasService->id);
+    $incomingMail = IncomingMail::withoutGlobalScopes()->findOrFail($attachment->incoming_mail_id);
+    $incomingMail->services()->attach($cpasService->id);
+
+    expect($user->can('view', $incomingMail))->toBeTrue()
+        ->and($user->can('download', $attachment))->toBeTrue();
+});
+
 it('allows a department administrator to download an attachment of their department', function (): void {
     $role = Role::factory()->create(['name' => RolesEnum::ROLE_INDICATEUR_VILLE_ADMIN->value]);
     auth()->user()->roles()->attach($role);

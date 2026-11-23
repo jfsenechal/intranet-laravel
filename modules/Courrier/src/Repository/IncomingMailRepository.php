@@ -88,7 +88,8 @@ final class IncomingMailRepository
      * Limit the listing to the current day's mail the user is allowed to see.
      *
      * The model's global DepartmentScope already restricts administrators (all
-     * mail) and index/admin users (their departments). Regular users without a
+     * mail) and index/admin users (their departments, plus the mail they
+     * receive themselves). Regular users without a
      * viewable department are further limited to mail they receive or that
      * targets one of their services.
      */
@@ -113,13 +114,13 @@ final class IncomingMailRepository
             return $query->whereRaw('1 = 0');
         }
 
-        $serviceIds = $recipient->services()->pluck('courrier_services.id')->all();
+        $serviceIds = $recipient->services()->withoutGlobalScopes()->pluck('courrier_services.id')->all();
 
         return $query->where(function (Builder $inner) use ($recipient, $serviceIds): void {
             $inner->whereHas('recipients', fn (Builder $relation): Builder => $relation->whereKey($recipient->id));
 
             if ($serviceIds !== []) {
-                $inner->orWhereHas('services', fn (Builder $relation): Builder => $relation->whereIn('courrier_services.id', $serviceIds));
+                $inner->orWhereHas('services', fn (Builder $relation): Builder => $relation->withoutGlobalScopes()->whereIn('courrier_services.id', $serviceIds));
             }
         });
     }
@@ -127,8 +128,9 @@ final class IncomingMailRepository
     /**
      * Mail the recipient should be notified about for the given date.
      *
-     * Index-role recipients receive every unnotified mail, but only within the
-     * department(s) they may view. The department filter is derived from the
+     * Index-role recipients receive every unnotified mail of the department(s)
+     * they may view, plus the mail addressed to them or to one of their
+     * services whatever its department. The department filter is derived from the
      * recipient's own user (not the request-scoped global scope), so it is
      * correct whether the caller is an authenticated admin previewing or the
      * queued notification job running without an authenticated user.
@@ -164,7 +166,10 @@ final class IncomingMailRepository
                 ->withoutGlobalScope(DepartmentScope::class)
                 ->when(
                     $departments !== [],
-                    fn (Builder $query): Builder => $query->whereIn('incoming_mails.department', $departments),
+                    fn (Builder $query): Builder => $query->where(function (Builder $inner) use ($departments, $recipient): void {
+                        $inner->whereIn('incoming_mails.department', $departments);
+                        DepartmentScope::orWhereReceivedBy($inner, $recipient->username);
+                    }),
                 )
                 ->get();
         }
@@ -175,8 +180,8 @@ final class IncomingMailRepository
                     $q->where('recipients.id', $recipient->id);
                 })
                     ->orWhereHas('services', function ($q) use ($recipient): void {
-                        $serviceIds = $recipient->services()->pluck('courrier_services.id');
-                        $q->whereIn('courrier_services.id', $serviceIds);
+                        $serviceIds = $recipient->services()->withoutGlobalScopes()->pluck('courrier_services.id');
+                        $q->withoutGlobalScopes()->whereIn('courrier_services.id', $serviceIds);
                     });
             })
             ->get();
