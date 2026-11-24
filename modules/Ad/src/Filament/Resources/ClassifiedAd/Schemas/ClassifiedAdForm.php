@@ -9,9 +9,11 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Date;
 use TangoDevIt\FilamentEmojiPicker\EmojiPickerAction;
 
@@ -22,6 +24,11 @@ final class ClassifiedAdForm
         return $schema
             ->columns(1)
             ->schema([
+                Callout::make('Règles de bonne conduite')
+                    ->description('Votre annonce sera lue par l\'ensemble du personnel. Rédigez-la dans le respect de chacun : les insultes, propos discriminants ou injurieux et tout contenu à caractère sexuel sont interdits.')
+                    ->icon(Heroicon::ExclamationTriangle)
+                    ->warning()
+                    ->visibleOn('create'),
                 Flex::make([
                     Section::make([
                         TextInput::make('name')

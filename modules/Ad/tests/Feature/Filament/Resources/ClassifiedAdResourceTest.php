@@ -95,7 +95,8 @@ it('can load the create form', function (): void {
     livewire(CreateClassifiedAd::class)
         ->assertSchemaComponentExists('name')
         ->assertSchemaComponentExists('content')
-        ->assertSchemaComponentExists('category_id');
+        ->assertSchemaComponentExists('category_id')
+        ->assertSee('Règles de bonne conduite');
 });
 
 it('can load the edit form with data', function (): void {
