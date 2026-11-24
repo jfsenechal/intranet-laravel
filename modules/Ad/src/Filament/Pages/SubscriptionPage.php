@@ -32,7 +32,7 @@ final class SubscriptionPage extends Page implements HasForms
     protected static ?string $navigationLabel = 'Je m\'abonne';
 
     #[Override]
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected string $view = 'ad::filament.pages.subscription';

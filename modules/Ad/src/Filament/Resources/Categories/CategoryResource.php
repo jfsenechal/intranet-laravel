@@ -24,7 +24,7 @@ final class CategoryResource extends Resource
     protected static ?string $model = Category::class;
 
     #[Override]
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     #[Override]
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
