@@ -78,6 +78,38 @@ final class SubscriptionService
         );
     }
 
+    /**
+     * Remove every subscriber whose email no longer matches an eligible employee
+     * (left the administration, contract ended, or status changed).
+     *
+     * Subscribers and employees live on different connections, so eligible
+     * emails are collected first and compared in memory.
+     *
+     * @return list<string> the removed emails
+     */
+    public function removeIneligibleSubscribers(): array
+    {
+        $eligibleEmails = $this->eligibleEmployeesQuery()
+            ->get(['professional_email', 'private_email'])
+            ->flatMap(fn (Employee $employee): array => [$employee->professional_email, $employee->private_email])
+            ->filter()
+            ->map(fn (string $email): string => mb_strtolower(mb_trim($email)))
+            ->flip();
+
+        $removedEmails = [];
+
+        Subscriber::query()->each(function (Subscriber $subscriber) use ($eligibleEmails, &$removedEmails): void {
+            if ($eligibleEmails->has(mb_strtolower($subscriber->email))) {
+                return;
+            }
+
+            $subscriber->delete();
+            $removedEmails[] = $subscriber->email;
+        });
+
+        return $removedEmails;
+    }
+
     public function unsubscribe(string $email): bool
     {
         $email = mb_strtolower(mb_trim($email));

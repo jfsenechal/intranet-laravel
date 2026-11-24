@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AcMarche\Ad\Providers;
 
+use AcMarche\Ad\Console\Commands\RemoveIneligibleSubscribersCommand;
 use AcMarche\App\Traits\ModuleServiceProviderTrait;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,6 +21,11 @@ final class AdServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                RemoveIneligibleSubscribersCommand::class,
+            ]);
+        }
         $this->bootModule();
     }
 
