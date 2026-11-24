@@ -30,6 +30,16 @@ final readonly class ClassifiedAdModerator
     private const string PDF_MIME_TYPE = 'application/pdf';
 
     /**
+     * The ad's text as the model reads it: no markup, whitespace collapsed.
+     */
+    public static function plainText(string $htmlContent): string
+    {
+        $text = html_entity_decode(strip_tags(str_replace('<', ' <', $htmlContent)));
+
+        return mb_trim((string) preg_replace('/\s+/u', ' ', $text));
+    }
+
+    /**
      * @param  list<string>  $mediaPaths  attachment paths on the public disk
      */
     public function moderate(string $title, string $htmlContent, array $mediaPaths = []): ModerationVerdict
@@ -72,7 +82,7 @@ final readonly class ClassifiedAdModerator
      */
     private function prompt(string $title, string $htmlContent, array $mediaPaths): string
     {
-        $text = mb_trim(html_entity_decode(strip_tags($htmlContent)));
+        $text = self::plainText($htmlContent);
         $fileNames = implode(', ', array_map(basename(...), $mediaPaths));
 
         return "Vérifie cette petite annonce.\n\n"

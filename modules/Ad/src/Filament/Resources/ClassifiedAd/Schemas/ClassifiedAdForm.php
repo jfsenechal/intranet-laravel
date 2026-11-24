@@ -29,7 +29,7 @@ final class ClassifiedAdForm
                     ->description('Votre annonce sera lue par l\'ensemble du personnel. Rédigez-la dans le respect de chacun : les insultes, propos discriminants ou injurieux et tout contenu à caractère sexuel sont interdits.')
                     ->icon(Heroicon::ExclamationTriangle)
                     ->warning()
-                    ->visibleOn(Operation::Create),
+                    ->visibleOn([Operation::Create, Operation::Edit]),
                 Flex::make([
                     Section::make([
                         TextInput::make('name')
@@ -45,7 +45,6 @@ final class ClassifiedAdForm
                             ->columnSpanFull(),
                         FileUpload::make('medias')
                             ->label('Pièces jointes')
-                            ->required()
                             ->maxFiles(5)
                             ->disk('public')
                             ->directory(config('ad.uploads.medias'))
@@ -69,6 +68,15 @@ final class ClassifiedAdForm
 
                     ])->grow(false),
                 ])->from('md'),
+                Callout::make('Vérification de votre annonce en cours…')
+                    ->description('Nous vérifions que le texte et les pièces jointes respectent les règles de bonne conduite. Cela peut prendre quelques secondes, merci de patienter.')
+                    ->icon(Heroicon::ArrowPath)
+                    ->info()
+                    ->extraAttributes([
+                        'wire:loading.flex' => true,
+                        'wire:target' => 'create, save',
+                    ])
+                    ->visibleOn([Operation::Create, Operation::Edit]),
             ]);
     }
 }
