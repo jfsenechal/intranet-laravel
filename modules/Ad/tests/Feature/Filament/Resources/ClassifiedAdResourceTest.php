@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AcMarche\Ad\Ai\ClassifiedAdModerationAgent;
 use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\CreateClassifiedAd;
 use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\EditClassifiedAd;
 use AcMarche\Ad\Filament\Resources\ClassifiedAd\Pages\ListClassifiedAd;
@@ -20,6 +21,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     Mail::fake();
+    ClassifiedAdModerationAgent::fake();
     Filament::setCurrentPanel(Filament::getPanel('ad-panel'));
     auth()->user()->update(['is_administrator' => true]);
     $this->category = Category::factory()->create();

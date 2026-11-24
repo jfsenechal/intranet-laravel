@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Date;
 use TangoDevIt\FilamentEmojiPicker\EmojiPickerAction;
@@ -28,7 +29,7 @@ final class ClassifiedAdForm
                     ->description('Votre annonce sera lue par l\'ensemble du personnel. Rédigez-la dans le respect de chacun : les insultes, propos discriminants ou injurieux et tout contenu à caractère sexuel sont interdits.')
                     ->icon(Heroicon::ExclamationTriangle)
                     ->warning()
-                    ->visibleOn('create'),
+                    ->visibleOn(Operation::Create),
                 Flex::make([
                     Section::make([
                         TextInput::make('name')
