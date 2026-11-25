@@ -23,6 +23,7 @@ use AcMarche\Hrm\Models\Diploma;
 use AcMarche\Hrm\Models\Employee;
 use AcMarche\Hrm\Models\Evaluation;
 use AcMarche\Hrm\Models\Internship;
+use AcMarche\Hrm\Models\Valorization;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -52,7 +53,9 @@ final class ViewEmployee extends ViewRecord
             return [];
         }
 
-        $employeeId = ['employee_id' => $this->record->id];
+        /** @var Employee $employee */
+        $employee = $this->record;
+        $employeeId = ['employee_id' => $employee->id];
 
         return [
             EditAction::make()
@@ -94,16 +97,18 @@ final class ViewEmployee extends ViewRecord
                         ->label('Ajouter un diplôme')
                         ->icon('tabler-plus')
                         ->modal()
-                        ->schema(fn (Schema $schema) => DiplomaForm::configure($schema)->model(Diploma::class))
-                        ->action(function (array $data, Employee $record): void {
-                            $record->diplomas()->create($data);
+                        ->model(Diploma::class)
+                        ->schema(fn (Schema $schema) => DiplomaForm::configure($schema))
+                        ->action(function (array $data) use ($employee): void {
+                            $employee->diplomas()->create($data);
                         }),
                     CreateAction::make('addEvaluation')
                         ->label('Ajouter une évaluation')
                         ->icon('tabler-plus')->modal()
-                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema)->model(Evaluation::class))
-                        ->action(function (array $data, Employee $record): void {
-                            $record->evaluations()->create($data);
+                        ->model(Evaluation::class)
+                        ->schema(fn (Schema $schema) => EvaluationForm::configure($schema))
+                        ->action(function (array $data) use ($employee): void {
+                            $employee->evaluations()->create($data);
                         }),
 
                 ])->dropdown(false),
@@ -111,37 +116,40 @@ final class ViewEmployee extends ViewRecord
                     ->label('Ajouter une valorisation')
                     ->icon('tabler-plus')
                     ->modal()
+                    ->model(Valorization::class)
                     ->schema(fn (Schema $schema) => ValorizationForm::configure($schema))
-                    ->modalHeading(function (Employee $employee): string {
+                    ->modalHeading(function () use ($employee): string {
                         return 'Ajouter une valorisation pour '.$employee->last_name.' '.$employee->first_name;
                     })
-                    ->action(function (array $data, Employee $record): void {
-                        $record->valorizations()->create($data);
+                    ->action(function (array $data) use ($employee): void {
+                        $employee->valorizations()->create($data);
                     }),
                 CreateAction::make('addInternship')
                     ->label('Ajouter un stage')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn (Schema $schema) => InternshipForm::configure($schema)->model(Internship::class))
-                    ->modalHeading(function (Employee $employee): string {
+                    ->model(Internship::class)
+                    ->schema(fn (Schema $schema) => InternshipForm::configure($schema))
+                    ->modalHeading(function () use ($employee): string {
                         return 'Ajouter un stage pour '.$employee->last_name.' '.$employee->first_name;
                     })
-                    ->action(function (array $data, Employee $record): void {
-                        $record->internships()->create($data);
+                    ->action(function (array $data) use ($employee): void {
+                        $employee->internships()->create($data);
                     }),
                 CreateAction::make('addApplication')
                     ->label('Ajouter une candidature')
                     ->icon('tabler-plus')
                     ->modal()
-                    ->schema(fn (Schema $schema) => ApplicationForm::configure($schema)->model(Application::class))
-                    ->mountUsing(function (Schema $schema, Employee $employee): void {
+                    ->model(Application::class)
+                    ->schema(fn (Schema $schema) => ApplicationForm::configure($schema))
+                    ->mountUsing(function (Schema $schema) use ($employee): void {
                         $schema->fill(['employee_id' => $employee->id]);
                     })
-                    ->modalHeading(function (Employee $employee): string {
+                    ->modalHeading(function () use ($employee): string {
                         return 'Ajouter une candidature pour '.$employee->last_name.' '.$employee->first_name;
                     })
-                    ->action(function (array $data, Employee $record): void {
-                        $record->applications()->create($data);
+                    ->action(function (array $data) use ($employee): void {
+                        $employee->applications()->create($data);
                     }),
             ])
                 ->label('Ajouter...')
