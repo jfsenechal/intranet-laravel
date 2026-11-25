@@ -4629,16 +4629,16 @@
         },
         {
             "name": "laravel/ai",
-            "version": "v1.4.1",
+            "version": "v1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/ai.git",
-                "reference": "a2cb93a2f11febf89da202b63ee254f960de318c"
+                "reference": "d7098eceb1aa7311669d36898c43cc450f08a928"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/ai/zipball/a2cb93a2f11febf89da202b63ee254f960de318c",
-                "reference": "a2cb93a2f11febf89da202b63ee254f960de318c",
+                "url": "https://api.github.com/repos/laravel/ai/zipball/d7098eceb1aa7311669d36898c43cc450f08a928",
+                "reference": "d7098eceb1aa7311669d36898c43cc450f08a928",
                 "shasum": ""
             },
             "require": {
@@ -4707,20 +4707,20 @@
                 "issues": "https://github.com/laravel/ai/issues",
                 "source": "https://github.com/laravel/ai"
             },
-            "time": "2026-11-13T16:39:32+00:00"
+            "time": "2026-11-23T13:39:29+00:00"
         },
         {
             "name": "laravel/framework",
-            "version": "v13.43.0",
+            "version": "v13.44.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "72aa7e151062e218704d8660f407e6070040d8bc"
+                "reference": "8a8c4a84852869e13190d89f9da873cd9a70f14c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/72aa7e151062e218704d8660f407e6070040d8bc",
-                "reference": "72aa7e151062e218704d8660f407e6070040d8bc",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/8a8c4a84852869e13190d89f9da873cd9a70f14c",
+                "reference": "8a8c4a84852869e13190d89f9da873cd9a70f14c",
                 "shasum": ""
             },
             "require": {
@@ -4829,7 +4829,7 @@
                 "ext-gmp": "*",
                 "fakerphp/faker": "^1.24",
                 "intervention/image": "^4.2",
-                "jasonmccreary/double": "^1.1",
+                "jasonmccreary/double": "^1.2.1",
                 "laravel/pint": "^1.18",
                 "league/flysystem-aws-s3-v3": "^3.25.1",
                 "league/flysystem-ftp": "^3.25.1",
@@ -4940,7 +4940,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-11-17T14:58:33+00:00"
+            "time": "2026-11-24T16:10:06+00:00"
         },
         {
             "name": "laravel/nightwatch",
@@ -5038,16 +5038,16 @@
         },
         {
             "name": "laravel/octane",
-            "version": "v2.25.0",
+            "version": "v2.26.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/octane.git",
-                "reference": "011378678beb71729a773668fda74dba78f44aec"
+                "reference": "68f6941c4499ddf3cff48b8e5e94d46e57ca3601"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/octane/zipball/011378678beb71729a773668fda74dba78f44aec",
-                "reference": "011378678beb71729a773668fda74dba78f44aec",
+                "url": "https://api.github.com/repos/laravel/octane/zipball/68f6941c4499ddf3cff48b8e5e94d46e57ca3601",
+                "reference": "68f6941c4499ddf3cff48b8e5e94d46e57ca3601",
                 "shasum": ""
             },
             "require": {
@@ -5123,20 +5123,20 @@
                 "issues": "https://github.com/laravel/octane/issues",
                 "source": "https://github.com/laravel/octane"
             },
-            "time": "2026-11-17T14:41:32+00:00"
+            "time": "2026-11-18T13:22:02+00:00"
         },
         {
             "name": "laravel/prompts",
-            "version": "v0.3.27",
+            "version": "v0.3.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/prompts.git",
-                "reference": "abdfc75a1ae6c6f21522daed50da7124cbff09d2"
+                "reference": "72247703c4d4ac1d6122955c90433aa9429bd236"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/prompts/zipball/abdfc75a1ae6c6f21522daed50da7124cbff09d2",
-                "reference": "abdfc75a1ae6c6f21522daed50da7124cbff09d2",
+                "url": "https://api.github.com/repos/laravel/prompts/zipball/72247703c4d4ac1d6122955c90433aa9429bd236",
+                "reference": "72247703c4d4ac1d6122955c90433aa9429bd236",
                 "shasum": ""
             },
             "require": {
@@ -5179,9 +5179,9 @@
             ],
             "description": "Add beautiful and user-friendly forms to your command-line applications.",
             "support": {
-                "source": "https://github.com/laravel/prompts/tree/v0.3.27"
+                "source": "https://github.com/laravel/prompts/tree/v0.3.28"
             },
-            "time": "2026-11-09T16:07:10+00:00"
+            "time": "2026-11-23T14:41:10+00:00"
         },
         {
             "name": "laravel/reverb",
@@ -5539,16 +5539,16 @@
         },
         {
             "name": "league/commonmark",
-            "version": "2.10.7",
+            "version": "2.10.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/commonmark.git",
-                "reference": "8eb53e906fd60c67038d22f1f1cab420ed58b8be"
+                "reference": "681e662a40c805c567f52d603b64d55282ea356c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/8eb53e906fd60c67038d22f1f1cab420ed58b8be",
-                "reference": "8eb53e906fd60c67038d22f1f1cab420ed58b8be",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/681e662a40c805c567f52d603b64d55282ea356c",
+                "reference": "681e662a40c805c567f52d603b64d55282ea356c",
                 "shasum": ""
             },
             "require": {
@@ -5642,7 +5642,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-31T13:35:37+00:00"
+            "time": "2026-11-24T15:44:47+00:00"
         },
         {
             "name": "league/config",
@@ -6279,16 +6279,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v4.4.9",
+            "version": "v4.4.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "4daad339bc7a572946d48efaf2955030c94daf80"
+                "reference": "33bd7d18b52d787b107bb7da9911be3c392b88c3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/4daad339bc7a572946d48efaf2955030c94daf80",
-                "reference": "4daad339bc7a572946d48efaf2955030c94daf80",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/33bd7d18b52d787b107bb7da9911be3c392b88c3",
+                "reference": "33bd7d18b52d787b107bb7da9911be3c392b88c3",
                 "shasum": ""
             },
             "require": {
@@ -6343,7 +6343,7 @@
             "description": "A front-end framework for Laravel.",
             "support": {
                 "issues": "https://github.com/livewire/livewire/issues",
-                "source": "https://github.com/livewire/livewire/tree/v4.4.9"
+                "source": "https://github.com/livewire/livewire/tree/v4.4.10"
             },
             "funding": [
                 {
@@ -6351,7 +6351,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-21T01:02:00+00:00"
+            "time": "2026-11-24T13:59:35+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -10207,16 +10207,16 @@
         },
         {
             "name": "spatie/browsershot",
-            "version": "5.5.0",
+            "version": "5.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/browsershot.git",
-                "reference": "eba71ab7f4aba23d9321d653ccd19d4e94432516"
+                "reference": "90a4dbabc71406a6f41f21d8ec9c5aa53969efc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/browsershot/zipball/eba71ab7f4aba23d9321d653ccd19d4e94432516",
-                "reference": "eba71ab7f4aba23d9321d653ccd19d4e94432516",
+                "url": "https://api.github.com/repos/spatie/browsershot/zipball/90a4dbabc71406a6f41f21d8ec9c5aa53969efc4",
+                "reference": "90a4dbabc71406a6f41f21d8ec9c5aa53969efc4",
                 "shasum": ""
             },
             "require": {
@@ -10263,7 +10263,7 @@
                 "webpage"
             ],
             "support": {
-                "source": "https://github.com/spatie/browsershot/tree/5.5.0"
+                "source": "https://github.com/spatie/browsershot/tree/5.5.1"
             },
             "funding": [
                 {
@@ -10271,7 +10271,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-06T09:42:13+00:00"
+            "time": "2026-11-23T14:34:09+00:00"
         },
         {
             "name": "spatie/image",
@@ -10472,16 +10472,16 @@
         },
         {
             "name": "spatie/laravel-medialibrary",
-            "version": "11.23.13",
+            "version": "11.23.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-medialibrary.git",
-                "reference": "3b6ae80ef5b2b42b71fa57fc0de7848d3defe91a"
+                "reference": "d6b2817c1c52fb2442f9623aeb9d50418906693c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-medialibrary/zipball/3b6ae80ef5b2b42b71fa57fc0de7848d3defe91a",
-                "reference": "3b6ae80ef5b2b42b71fa57fc0de7848d3defe91a",
+                "url": "https://api.github.com/repos/spatie/laravel-medialibrary/zipball/d6b2817c1c52fb2442f9623aeb9d50418906693c",
+                "reference": "d6b2817c1c52fb2442f9623aeb9d50418906693c",
                 "shasum": ""
             },
             "require": {
@@ -10566,7 +10566,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-medialibrary/issues",
-                "source": "https://github.com/spatie/laravel-medialibrary/tree/11.23.13"
+                "source": "https://github.com/spatie/laravel-medialibrary/tree/11.23.14"
             },
             "funding": [
                 {
@@ -10578,7 +10578,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-13T09:09:46+00:00"
+            "time": "2026-11-23T14:45:56+00:00"
         },
         {
             "name": "spatie/laravel-package-tools",
@@ -15466,16 +15466,16 @@
         },
         {
             "name": "web-token/jwt-library",
-            "version": "4.2.7",
+            "version": "4.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/web-token/jwt-library.git",
-                "reference": "62643a2f31274c546a7d158ceab6dd5c052db911"
+                "reference": "a1909b6b7c9171529f65e6bb6ecae615cd8a92ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/web-token/jwt-library/zipball/62643a2f31274c546a7d158ceab6dd5c052db911",
-                "reference": "62643a2f31274c546a7d158ceab6dd5c052db911",
+                "url": "https://api.github.com/repos/web-token/jwt-library/zipball/a1909b6b7c9171529f65e6bb6ecae615cd8a92ed",
+                "reference": "a1909b6b7c9171529f65e6bb6ecae615cd8a92ed",
                 "shasum": ""
             },
             "require": {
@@ -15539,7 +15539,7 @@
                 "symfony"
             ],
             "support": {
-                "source": "https://github.com/web-token/jwt-library/tree/4.2.7"
+                "source": "https://github.com/web-token/jwt-library/tree/4.2.8"
             },
             "funding": [
                 {
@@ -15551,7 +15551,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2026-11-08T14:44:36+00:00"
+            "time": "2026-11-23T18:54:04+00:00"
         },
         {
             "name": "zbateson/mail-mime-parser",
@@ -18068,16 +18068,16 @@
         },
         {
             "name": "laravel/mcp",
-            "version": "v1.2.1",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/mcp.git",
-                "reference": "a8057f222549e42384d49482042d762a547aaf2a"
+                "reference": "f63967363cd6a41b50036cb9250beab21ee8b1c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/mcp/zipball/a8057f222549e42384d49482042d762a547aaf2a",
-                "reference": "a8057f222549e42384d49482042d762a547aaf2a",
+                "url": "https://api.github.com/repos/laravel/mcp/zipball/f63967363cd6a41b50036cb9250beab21ee8b1c4",
+                "reference": "f63967363cd6a41b50036cb9250beab21ee8b1c4",
                 "shasum": ""
             },
             "require": {
@@ -18092,7 +18092,9 @@
                 "illuminate/support": "^12.41.1|^13.0",
                 "illuminate/validation": "^12.41.1|^13.0",
                 "php": "^8.2",
-                "symfony/process": "^7.4.5|^8.0.5"
+                "symfony/mime": "^7.4|^8.0",
+                "symfony/process": "^7.4.5|^8.0.5",
+                "symfony/yaml": "^7.4|^8.0"
             },
             "require-dev": {
                 "jasonmccreary/double": "^1.0",
@@ -18139,7 +18141,7 @@
                 "issues": "https://github.com/laravel/mcp/issues",
                 "source": "https://github.com/laravel/mcp"
             },
-            "time": "2026-11-17T16:36:18+00:00"
+            "time": "2026-11-23T11:10:06+00:00"
         },
         {
             "name": "laravel/pail",
@@ -20381,16 +20383,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "2.8.5",
+            "version": "2.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "bf2982e3e2b8dfbcb43e5589fa301431cb1e479e"
+                "reference": "8a06053cae42915224f9357566162ccb1076001a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/bf2982e3e2b8dfbcb43e5589fa301431cb1e479e",
-                "reference": "bf2982e3e2b8dfbcb43e5589fa301431cb1e479e",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/8a06053cae42915224f9357566162ccb1076001a",
+                "reference": "8a06053cae42915224f9357566162ccb1076001a",
                 "shasum": ""
             },
             "require": {
@@ -20426,7 +20428,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/2.8.5"
+                "source": "https://github.com/rectorphp/rector/tree/2.9.2"
             },
             "funding": [
                 {
@@ -20434,7 +20436,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-14T23:24:35+00:00"
+            "time": "2026-11-24T23:34:02+00:00"
         },
         {
             "name": "revolt/event-loop",
